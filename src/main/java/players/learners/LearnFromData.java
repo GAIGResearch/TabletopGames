@@ -149,6 +149,9 @@ public class LearnFromData {
             List<String> excludedBucketFeatures = new ArrayList<>();
             List<String> excludedInteractionFeatures = new ArrayList<>();
             int iteration = 0;
+            String dataDirectory = dataFiles[0].substring(0, dataFiles[0].lastIndexOf(File.separator));
+            String outputFile = dataDirectory + File.separator + "ImproveModel_tmp.txt";
+
             String[] rawData = dataFiles;
             AutomatedFeatures bestFeatures;
 
@@ -189,10 +192,10 @@ public class LearnFromData {
                         int underlyingIndex = asf.getUnderlyingIndex(i);
                         adjustedASF.setBuckets(underlyingIndex, asf.getBuckets(underlyingIndex) + BUCKET_INCREMENT);
 
-                        adjustedASF.processData("ImproveModel_tmp.txt", rawData);
+                        adjustedASF.processData(outputFile, rawData);
                         learner.setStateFeatureVector(adjustedASF);
 
-                        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
+                        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(outputFile);
                         // then find BIC
                         double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
                         //                  System.out.printf("Feature: %20s, Buckets: %d, BIC: %.2f%n",
@@ -240,11 +243,11 @@ public class LearnFromData {
                         AutomatedFeatures adjustedASF = asf.copy();
                         adjustedASF.addInteraction(i, j);
                         // providing the previous ASF means we will just calculate the new interaction
-                        adjustedASF.processData("ImproveModel_tmp.txt", dataFiles);
+                        adjustedASF.processData(outputFile, dataFiles);
                         learner.setStateFeatureVector(adjustedASF);
 
                         // TODO: Refactor to remove code repetition
-                        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
+                        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(outputFile);
                         // then find AIC
                         double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
                         //           System.out.printf("Interaction: %20s, %20s, BIC: %.2f%n",
@@ -266,7 +269,7 @@ public class LearnFromData {
                 }
                 // We then also need to set up the data file to be used as the baseline for the next iteration
                 if (bestFeatures != null) {
-                    String newFileName = "ImproveModel_Iter_" + iteration + ".txt";
+                    String newFileName = dataDirectory + File.separator + "ImproveModel_Iter_" + iteration + ".txt";
                     bestFeatures.processData(newFileName, rawData);
                     iteration++;
                     rawData = new String[]{newFileName};
@@ -308,8 +311,9 @@ public class LearnFromData {
                     learner.setStateFeatureVector(adjustedASF);
 
                     // we always use the data file from the last iteration of building the model (as this has all the data)
-                    String newFileName = iteration > 0 ? "ImproveModel_Iter_" + (iteration - 1) + ".txt" :
-                            "ImproveModel_tmp.txt";
+                    String newFileName = dataDirectory + File.separator +
+                            (iteration > 0 ? "ImproveModel_Iter_" + (iteration - 1) + ".txt" :
+                                    "ImproveModel_tmp.txt");
                     GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(newFileName);
                     double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
                     //              System.out.printf("Considering Feature: %20s, BIC: %.2f (%d/%d)%n", featureToRemove, newBIC, adjustedASF.names().length, asf.names().length);
