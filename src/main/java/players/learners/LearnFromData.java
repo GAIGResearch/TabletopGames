@@ -195,8 +195,8 @@ public class LearnFromData {
                         GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
                         // then find BIC
                         double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-      //                  System.out.printf("Feature: %20s, Buckets: %d, BIC: %.2f%n",
-      //                          firstFeature, adjustedASF.getBuckets(underlyingIndex), newBIC);
+                        //                  System.out.printf("Feature: %20s, Buckets: %d, BIC: %.2f%n",
+                        //                          firstFeature, adjustedASF.getBuckets(underlyingIndex), newBIC);
                         if (newBIC < bestBIC) {
                             bestBIC = newBIC;
                             bestFeatures = adjustedASF;
@@ -247,8 +247,8 @@ public class LearnFromData {
                         GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
                         // then find AIC
                         double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-             //           System.out.printf("Interaction: %20s, %20s, BIC: %.2f%n",
-             //                   firstFeature, secondFeature, newBIC);
+                        //           System.out.printf("Interaction: %20s, %20s, BIC: %.2f%n",
+                        //                   firstFeature, secondFeature, newBIC);
 
                         if (newBIC < bestBIC) {
                             bestBIC = newBIC;
@@ -308,7 +308,9 @@ public class LearnFromData {
                     learner.setStateFeatureVector(adjustedASF);
 
                     // we always use the data file from the last iteration of building the model (as this has all the data)
-                    GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_Iter_" + (iteration - 1) + ".txt");
+                    String newFileName = iteration > 0 ? "ImproveModel_Iter_" + (iteration - 1) + ".txt" :
+                            "ImproveModel_tmp.txt";
+                    GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(newFileName);
                     double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
                     //              System.out.printf("Considering Feature: %20s, BIC: %.2f (%d/%d)%n", featureToRemove, newBIC, adjustedASF.names().length, asf.names().length);
 

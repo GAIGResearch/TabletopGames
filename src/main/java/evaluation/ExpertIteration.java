@@ -118,7 +118,7 @@ public class ExpertIteration {
                             "\tprefix=        Name to use as output directory.\n" +
                             "\tdir=           The directory containing agent JSON files for learned heuristics and raw data\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
-                            "\tmatchups=      The number of games to play before the learning process is called.\n" +
+                            "\tmatchups=      The number of games to play to gather data before the learning process is called.\n" +
                             "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
                             "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n");
             return;
@@ -138,6 +138,7 @@ public class ExpertIteration {
 
         // initial data using only the base player
         gatherDataAndCheckConvergence();
+       // stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%d.txt", prefix, iter);
 
         do {
             // learn the heuristics from the data
@@ -273,7 +274,6 @@ public class ExpertIteration {
             actionHeuristic = (IActionHeuristic) learnFromData.learn();
         }
         return Pair.of(stateHeuristic, actionHeuristic);
-
     }
 
     private void tuneAgents(IStateHeuristic stateHeuristic, IActionHeuristic actionHeuristic) {
@@ -282,7 +282,7 @@ public class ExpertIteration {
 
         if (!getArg(originalArgs, "valueSS", "").isEmpty()) {
             config.put(RunArg.searchSpace, getArg(originalArgs, "valueSS", ""));
-            config.put(RunArg.opponent, "random");
+            config.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
             config.put(RunArg.destDir, dataDir + File.separator + String.format("NTBEA_%2d", iter));
             NTBEAParameters ntbeaParams = new NTBEAParameters(config);
 

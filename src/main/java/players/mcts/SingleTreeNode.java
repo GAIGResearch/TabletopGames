@@ -868,7 +868,6 @@ public class SingleTreeNode {
         return Math.max(0.0, regret);
     }
 
-
     private double getActionValue(AbstractAction action) {
         int actionVisits = actionVisits(action);
         // if we are at 'expansion' phase, then we break ties by expansion policy (which is the same actionHeuristic as progressive bias)
