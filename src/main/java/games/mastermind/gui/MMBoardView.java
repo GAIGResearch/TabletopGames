@@ -87,7 +87,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
         if (element != null) {
             Font f = g.getFont();
             g.setFont(new Font(f.getName(), Font.BOLD, scaledDefaultItemSize));
-            g.drawString(element.toString(), x + scaledDefaultItemSize / 16, y + scaledDefaultItemSize - scaledDefaultItemSize / 16);
+            g.drawString(element.getComponentName(), x + scaledDefaultItemSize / 16, y + scaledDefaultItemSize - scaledDefaultItemSize / 16);
             g.setFont(f);
         }
     }
