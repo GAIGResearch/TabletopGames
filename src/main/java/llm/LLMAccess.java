@@ -28,10 +28,10 @@ import java.util.Collections;
 
 public class LLMAccess {
 
-    static VertexAiGeminiChatModel[] geminiModel = new VertexAiGeminiChatModel[2];
-    static MistralAiChatModel[] mistralModel = new MistralAiChatModel[2];
-    static OpenAiChatModel[] openaiModel = new OpenAiChatModel[2];
-    static AnthropicChatModel[] anthropicModel = new AnthropicChatModel[2];
+    static VertexAiGeminiChatModel[] geminiModel = new VertexAiGeminiChatModel[3];
+    static MistralAiChatModel[] mistralModel = new MistralAiChatModel[3];
+    static OpenAiChatModel[] openaiModel = new OpenAiChatModel[3];
+    static AnthropicChatModel[] anthropicModel = new AnthropicChatModel[3];
 
     static OpenAiTokenCountEstimator tokenizer = new OpenAiTokenCountEstimator("o200k_base");
 
@@ -64,7 +64,8 @@ public class LLMAccess {
 
     public enum LLM_SIZE {
         SMALL,
-        LARGE
+        LARGE,
+        REASONING
     }
 
 
@@ -103,6 +104,11 @@ public class LLMAccess {
                         .location(geminiLocation)
                         .modelName("gemini-2.0-flash-lite")
                         .build();
+                geminiModel[2] = VertexAiGeminiChatModel.builder()
+                        .project(geminiProject)
+                        .location(geminiLocation)
+                        .modelName("gemini-2.5-flash-preview-05-20")
+                        .build();
             } catch (Error e) {
                 System.out.println("Error creating Gemini model: " + e.getMessage());
             }
@@ -127,6 +133,10 @@ public class LLMAccess {
                     .build();
             openaiModel[1] = OpenAiChatModel.builder()
                     .modelName(OpenAiChatModelName.GPT_4_O) // $5 per million input tokens, $15 per million output tokens
+                    .apiKey(openaiToken)
+                    .build();
+            openaiModel[2] = OpenAiChatModel.builder()
+                    .modelName(OpenAiChatModelName.O1_MINI) // $6 per million input tokens, $18 per million output tokens
                     .apiKey(openaiToken)
                     .build();
         }
@@ -168,6 +178,14 @@ public class LLMAccess {
                 case ANTHROPIC -> modelSize == LLM_SIZE.SMALL ? anthropicModel[0] : anthropicModel[1];
                 default -> throw new IllegalArgumentException("Unknown model type: " + modelType);
             };
+            if (modelSize == LLM_SIZE.REASONING) {
+                if (modelType == LLM_MODEL.OPENAI)
+                    modelToUse = openaiModel[2];
+                else if (modelType == LLM_MODEL.GEMINI)
+                    modelToUse = geminiModel[2];
+                else
+                    throw new IllegalArgumentException("Reasoning model not available for " + modelType);
+            }
             if (modelToUse != null) {
                 try {
                     response = modelToUse.chat(query);
@@ -239,7 +257,7 @@ public class LLMAccess {
                 System.out.println("Error in response:");
                 System.out.println(rawStringResponse);
             } else {
-                JSONObject json  = JSONUtils.fromString(rawStringResponse);
+                JSONObject json = JSONUtils.fromString(rawStringResponse);
                 JSONArray choices = (JSONArray) json.get("choices");
                 JSONObject choice = (JSONObject) choices.get(0);
                 JSONObject message = (JSONObject) choice.get("message");
