@@ -2,6 +2,7 @@ package games.wonders7.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.actions.OneShotExtendedAction;
 import games.wonders7.Wonders7ForwardModel;
 import games.wonders7.Wonders7GameState;
@@ -24,7 +25,11 @@ public class BuildFromDiscard extends OneShotExtendedAction {
                             .map(c -> c.cardType)
                             .distinct().toList();
                     available.removeAll(hasBuilt);
-                    return available.stream().map(c -> new PlayCard(player, c, true, true)).collect(toList());
+                    List<AbstractAction> actions = available.stream().map(c -> new PlayCard(player, c, true, true)).collect(toList());
+                    if (actions.isEmpty()) {
+                        actions.add(new DoNothing());
+                    }
+                    return actions;
                 }
         );
     }
