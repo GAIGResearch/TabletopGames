@@ -31,4 +31,12 @@ public class LeaderHeuristic implements IStateHeuristic {
     public int hashCode() {
         return 8;
     }
+    @Override
+    public double minValue() {
+        return Double.NEGATIVE_INFINITY;
+    }
+    @Override
+    public double maxValue() {
+        return Double.POSITIVE_INFINITY;
+    }
 }

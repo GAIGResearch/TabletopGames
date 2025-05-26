@@ -20,7 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestStateHeuristics {
+public class TestHeuristics {
 
     DomStateFeaturesReduced dominionFeaturedReduced = new DomStateFeaturesReduced();
     DominionGameState domState = new DominionGameState(new DominionFGParameters(), 4);

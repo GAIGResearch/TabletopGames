@@ -3,9 +3,12 @@ package players.heuristics;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.*;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -83,9 +86,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
                 ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson);
                 if (features instanceof AutomatedFeatures af) {
                     // now remove the action-specific features
-                    for (String actionFeatureName : af.underlyingAction.names()) {
-                        featuresJson.remove(actionFeatureName);
-                    }
+                    featuresJson = filterFeatures(featuresJson, Arrays.asList(af.underlyingAction.names()));
                 }
                 json.put("features", featuresJson);
             } else {
@@ -97,15 +98,31 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
             ICoefficients.removeUnusedFeatures(coefficientsAsJSON, actionFeaturesJson);
             if (actionFeatures instanceof AutomatedFeatures af) {
                 // now remove the state-specific features
-                for (String stateFeatureName : af.underlyingState.names()) {
-                    actionFeaturesJson.remove(stateFeatureName);
-                }
+                actionFeaturesJson = filterFeatures(actionFeaturesJson, Arrays.asList(af.underlyingState.names()));
             }
             json.put("actionFeatures", actionFeaturesJson);
         } else {
             json.put("actionFeatures", actionFeatures.getClass().getName());
         }
         return json;
+    }
+
+    private JSONObject filterFeatures(JSONObject startingFeatures, List<String> featureNames) {
+        JSONObject filteredFeatures = new JSONObject();
+        JSONArray featuresArray = (JSONArray) startingFeatures.get("features");
+        JSONArray filteredArray = new JSONArray();
+        for (Object o : featuresArray) {
+            if (o instanceof JSONObject feature) {
+                String nameStem = ((String) feature.get("name")).split("\\_")[0];
+                if (!featureNames.contains(nameStem)) {
+                    filteredArray.add(feature);
+                }
+            } else {
+                throw new AssertionError("Expected a JSONObject in the features array, but got: " + o.getClass().getName());
+            }
+        }
+        filteredFeatures.put("features", filteredArray);
+        return filteredFeatures;
     }
 
     @Override
