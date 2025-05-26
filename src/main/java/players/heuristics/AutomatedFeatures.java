@@ -128,16 +128,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     enumValues.add(null);
                     interactions.add(null);
                 }
-                case "INTERACTION" -> {
-                    featureTypes.add(featureType.INTERACTION);
-                    String interactionString = featureObject.get("interaction").toString();
-                    String[] interactionParts = interactionString.replaceAll("[\\[\\]]", "").split(",");
-                    int first = Integer.parseInt(interactionParts[0].trim());
-                    int second = Integer.parseInt(interactionParts[1].trim());
-                    interactions.add(Pair.of(first, second));
-                    enumValues.add(null);
-                    featureRanges.add(null);
-                }
                 default -> throw new IllegalArgumentException("Unsupported type: " + type);
             }
         }
