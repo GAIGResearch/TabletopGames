@@ -7,8 +7,6 @@ import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
 import games.dominion.actions.*;
 import games.dominion.cards.CardType;
-import games.dominion.metrics.DomActionFeatures;
-import games.dominion.metrics.DomStateFeaturesReduced;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -28,7 +26,7 @@ public class TestAutomatedFeatures {
     LinearStateHeuristic linearStateHeuristic = new LinearStateHeuristic(
             JSONUtils.loadJSONFile("src/test/java/players/heuristics/stateHeuristicWithAutomatedFeatures.json")
     );
-    LinearActionHeuristic linearActionHeuristic = new LinearActionHeuristic(
+    LogisticActionHeuristic logisticActionHeuristic = new LogisticActionHeuristic(
             JSONUtils.loadJSONFile("src/test/java/players/heuristics/actionHeuristicWithAutomatedFeatures.json")
     );
 
@@ -44,6 +42,21 @@ public class TestAutomatedFeatures {
     double totalCards = -0.7260896152706188; // totalCards
     double treasureTotal = -0.012495109115765733; // treasureValue:totalCards
     double duchyEstate = 0.5056753891584228; // duchyCount:estateCount
+
+    double a_treasureInHand = -0.03438062348507604;
+    double a_BIAS = -0.1399298593458686;
+    double a_actionSize = -0.20518405783018512;
+    double a_BUY = 0.018926434863914956;
+    double a_PLAY = 0.17258252525450438;
+    double a_COPPER = 0.07922675611960366;
+    double a_treasureInHand_PLAY = 0.2483752153406519;
+    double a_ESTATE = 0.2983223198425243;
+    double a_SILVER = -0.05206605840583842;
+    double a_MOAT = -0.16732454886123663;
+    double a_actionSize_SILVER = 0.10607014877168938;
+    double a_MILITIA = 0.005195586347419078;
+    double a_MERCHANT = 0.08252076625148476;
+    double a_SMITHY = -0.006656491964319801;
 
     @Test
     public void testAutomatedStateFeatures() {
@@ -71,17 +84,29 @@ public class TestAutomatedFeatures {
         // now check values of the actions
 
         List<AbstractAction> actions = fm.computeAvailableActions(domState);
-        double[] values = linearActionHeuristic.evaluateAllActions(actions, domState);
+        double[] values = logisticActionHeuristic.evaluateAllActions(actions, domState);
 
         for (int i = 0; i < actions.size(); i++) {
             AbstractAction action = actions.get(i);
+            int money = domState.getAvailableSpend(0);
             if (action instanceof BuyCard bc) {
-                switch (bc.cardType) {
-                    // TODO:
+                double expectedValue = switch (bc.cardType) {
+                    case COPPER -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_COPPER +
+                            a_BIAS + a_treasureInHand * money + a_actionSize * actions.size() + a_BUY);
+                    case ESTATE -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_ESTATE +
+                            a_BIAS + a_treasureInHand * money + a_actionSize * actions.size() + a_BUY);
+                    case SILVER -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_SILVER +
+                            a_BIAS + a_treasureInHand * money + (a_actionSize_SILVER + a_actionSize) * actions.size() + a_BUY);
+                    case MOAT -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_MOAT +
+                            a_BIAS + a_treasureInHand * money + a_actionSize * actions.size() + a_BUY);
+                    default -> -1.0;
+                };
+                System.out.println("Action: " + action + " expected value: " + expectedValue + " actual value: " + values[i]);
+                if (expectedValue > -1.0) {
+                    assertEquals(expectedValue, values[i], 0.0001);
                 }
             }
         }
-        fail("Not implemented yet for BuyCard actions");
     }
 
     @Test
@@ -95,21 +120,31 @@ public class TestAutomatedFeatures {
         // now check values of the actions
 
         List<AbstractAction> actions = fm.computeAvailableActions(domState);
-        double[] values = linearActionHeuristic.evaluateAllActions(actions, domState);
+        int money = domState.getDeck(DominionConstants.DeckType.HAND, 0).stream()
+                .mapToInt(c -> c.treasureValue()).sum();
+        double[] values = logisticActionHeuristic.evaluateAllActions(actions, domState);
 
         for (int i = 0; i < actions.size(); i++) {
             AbstractAction action = actions.get(i);
+            double expectedValue = -1.0;
             if (action instanceof Militia) {
-                // TODO:
+                expectedValue = logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_MILITIA +
+                        a_BIAS + (a_treasureInHand + a_treasureInHand_PLAY) * money + a_actionSize * actions.size() + a_PLAY);
             } else if (action instanceof Merchant) {
-                // tODO:
-            } else if (action instanceof DominionAction) {
-                // TODO: Smithy
+                expectedValue = logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_MERCHANT +
+                        a_BIAS + (a_treasureInHand + a_treasureInHand_PLAY) * money + a_actionSize * actions.size() + a_PLAY);
+            } else if (action instanceof DominionAction && ((DominionAction) action).type == CardType.SMITHY) {
+                expectedValue = logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_SMITHY +
+                        a_BIAS + (a_treasureInHand + a_treasureInHand_PLAY) * money + a_actionSize * actions.size() + a_PLAY);
             } else if (action instanceof EndPhase) {
-                // TODO:
+                expectedValue = logisticActionHeuristic.inverseLinkFunction.applyAsDouble(
+                        a_BIAS + a_treasureInHand * money + a_actionSize * actions.size());
+            }
+            System.out.println("Action: " + action + " expected value: " + expectedValue + " actual value: " + values[i]);
+            if (expectedValue > -1.0) {
+                assertEquals(expectedValue, values[i], 0.0001);
             }
         }
-        fail("Not implemented yet for PlayCard actions");
     }
 
     @Test
@@ -119,7 +154,7 @@ public class TestAutomatedFeatures {
         );
         JSONObject json = actionHeuristic.toJSON();
         assertEquals("players.heuristics.LogisticActionHeuristic", json.get("class"));
-        assertEquals(2, ((JSONArray)((JSONObject) json.get("features")).get("features")).size());
-        assertEquals(21, ((JSONArray)((JSONObject) json.get("actionFeatures")).get("features")).size());
+        assertEquals(2, ((JSONArray) ((JSONObject) json.get("features")).get("features")).size());
+        assertEquals(21, ((JSONArray) ((JSONObject) json.get("actionFeatures")).get("features")).size());
     }
 }
