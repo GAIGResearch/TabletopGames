@@ -15,7 +15,6 @@ import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.IAnyTimePlayer;
 import players.PlayerFactory;
-import players.decorators.EpsilonRandom;
 import players.learners.AbstractLearner;
 import players.learners.LearnFromData;
 import utilities.Pair;
@@ -47,6 +46,11 @@ public class ExpertIteration {
     boolean verbose;
     AbstractPlayer bestAgent = null;
     int consecutiveTournamentWins = 0;
+
+    int[] valueSearchSettings;
+    int[] actionSearchSettings;
+    ITPSearchSpace<?> valueSearchSpace = null;
+    ITPSearchSpace<?> actionSearchSpace = null;
 
     public ExpertIteration(String[] args) {
 
@@ -138,14 +142,15 @@ public class ExpertIteration {
 
         // initial data using only the base player
         gatherDataAndCheckConvergence();
-        // stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%d.txt", prefix, iter);
+        //stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%d.txt", prefix, iter);
+        //actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%d.txt", prefix, iter);
 
         do {
             // learn the heuristics from the data
             Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
 
-            //                IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
-            //                IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");
+            //IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
+            //IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");
 
             IActionHeuristic actionHeuristic = learnedHeuristics.b;
             IStateHeuristic stateHeuristic = learnedHeuristics.a;
@@ -201,7 +206,7 @@ public class ExpertIteration {
             actionListener = new ActionFeatureListener(actionFeatureVector, stateFeatureVector,
                     Event.GameEvent.ACTION_CHOSEN,
                     true, "dummy.txt");
-            actionListener.setNth(7);
+            actionListener.setNth(17);
             String fileName = String.format("Action_%s_%d.txt", prefix, iter);
             actionListener.setLogger(new FileStatsLogger(fileName, "\t", false));
             actionListener.setOutputDirectory(dataDir);
@@ -283,39 +288,69 @@ public class ExpertIteration {
         if (!getArg(originalArgs, "valueSS", "").isEmpty()) {
             config.put(RunArg.searchSpace, getArg(originalArgs, "valueSS", ""));
             config.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
-            config.put(RunArg.destDir, dataDir + File.separator + String.format("NTBEA_%2d", iter));
+            config.put(RunArg.destDir, dataDir + File.separator + String.format("ValueNTBEA_%2d", iter));
             NTBEAParameters ntbeaParams = new NTBEAParameters(config);
 
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
             ntbea.setOpponents(Collections.singletonList(bestAgent));
             ntbea.fixTunableParameter("heuristic", stateHeuristic);  // so this is used when tuning
 
+            if (actionSearchSettings != null && actionSearchSpace != null) {
+                // we can use the action search settings to initialise the value search settings
+                List<String> valueNames = valueSearchSpace.getDimensions();
+                for (int i = 0; i < actionSearchSettings.length; i++) {
+                    if (!valueNames.contains(actionSearchSpace.name(i))) {
+                        // usually we will have different parameters in the two searches, but if there is overlap we
+                        // 'forget' the previous value
+                        // otherwise we fix the non-optimised settings to the action search settings
+                        ntbea.fixTunableParameter(actionSearchSpace.name(i), actionSearchSpace.value(i, actionSearchSettings[i]));
+                    }
+                }
+            }
+
             ntbeaParams.printSearchSpaceDetails();
             Pair<Object, int[]> results = ntbea.run();
+            valueSearchSettings = results.b;
             AbstractPlayer bestPlayer = (AbstractPlayer) results.a;
             String agentName = String.format("ValueNTBEA_%02d.json", iter);
             bestPlayer.setName(agentName);
-            ITPSearchSpace<?> searchSpace = (ITPSearchSpace<?>) ntbeaParams.searchSpace;
-            searchSpace.writeAgentJSON(results.b, dataDir + File.separator + agentName);
+            valueSearchSpace = (ITPSearchSpace<?>) ntbeaParams.searchSpace;
+            valueSearchSpace.writeAgentJSON(valueSearchSettings, dataDir + File.separator + agentName);
             agents.add(bestPlayer);
         }
         if (!getArg(originalArgs, "actionSS", "").isEmpty()) {
-            // TODO: Fix the parameters that were learned from the value tuning above (if relevant)
+
             config.put(RunArg.searchSpace, getArg(originalArgs, "actionSS", ""));
             config.put(RunArg.opponent, "random");
+            config.put(RunArg.destDir, dataDir + File.separator + String.format("ActionNTBEA_%2d", iter));
             NTBEAParameters ntbeaParams = new NTBEAParameters(config);
+            actionSearchSpace = (ITPSearchSpace<?>) ntbeaParams.searchSpace;
 
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
             ntbea.setOpponents(Collections.singletonList(bestAgent));
             ntbea.fixTunableParameter("actionHeuristic", actionHeuristic);  // so this is used when tuning
+            ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);  // TODO: check if this is a parameter
+
+            if (valueSearchSettings != null && valueSearchSpace != null) {
+                // we can use the value search settings to initialise the action search settings
+                List<String> actionNames = actionSearchSpace.getDimensions();
+                for (int i = 0; i < valueSearchSettings.length; i++) {
+                    if (!actionNames.contains(valueSearchSpace.name(i))) {
+                        // usually we will have different parameters in the two searches, but if there is overlap we
+                        // 'forget' the previous value
+                        // otherwise we fix the non-optimised settings to the value search settings
+                        ntbea.fixTunableParameter(valueSearchSpace.name(i), valueSearchSpace.value(i, valueSearchSettings[i]));
+                    }
+                }
+            }
 
             ntbeaParams.printSearchSpaceDetails();
             Pair<Object, int[]> results = ntbea.run();
+            actionSearchSettings = results.b;
             AbstractPlayer bestPlayer = (AbstractPlayer) results.a;
             String agentName = String.format("ActionNTBEA_%02d.json", iter);
             bestPlayer.setName(agentName);
-            ITPSearchSpace<?> searchSpace = (ITPSearchSpace<?>) ntbeaParams.searchSpace;
-            searchSpace.writeAgentJSON(results.b, dataDir + File.separator + agentName);
+            actionSearchSpace.writeAgentJSON(actionSearchSettings, dataDir + File.separator + agentName);
             agents.add(bestPlayer);
         }
 

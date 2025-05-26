@@ -214,6 +214,9 @@ public class SingleTreeNode {
                 if (params.actionHeuristic != IActionHeuristic.nullReturn) {
                     if (actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                         // in this case we initialise all action values
+                        if (params.actionHeuristic == null) {
+                            throw new AssertionError("actionHeuristic is null");
+                        }
                         double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
                         for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
                             actionValueEstimates.put(actionsFromOpenLoopState.get(i), actionValues[i]);

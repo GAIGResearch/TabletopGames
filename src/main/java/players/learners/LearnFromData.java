@@ -346,5 +346,7 @@ public class LearnFromData {
     private static double bicFromAic(double aic, int k, int n) {
         double nll = aic / 2.0 - k;
         return 2 * nll + BIC_MULTIPLIER * k * Math.log(n);
+        // TODO: Based on how long this is taking, we can increase the BIC_MULTIPLIER to reduce the number of iterations
+        // and speed up the overall process. Perhaps after an initial B budget, we increase it...and so on.
     }
 }

@@ -120,10 +120,6 @@ public class NTBEA {
         elites.add(settings);
     }
 
-    public void fixSearchDimension() {
-        // TODO:
-    }
-
     // Only works if the search space is an instance of ITPSearchSpace
     // This sets a tunable parameter that is *NOT* in the search space itself to the specified value
     // This will ensure that all agents in the run use this parameter
