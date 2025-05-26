@@ -141,19 +141,19 @@ public class ExpertIteration {
         bestAgent = agents.get(0);
 
         // initial data using only the base player
-        //gatherDataAndCheckConvergence();
-        stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%d.txt", prefix, iter);
-        actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%d.txt", prefix, iter);
+        gatherDataAndCheckConvergence();
+        //stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%d.txt", prefix, iter);
+        //actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%d.txt", prefix, iter);
 
         do {
             // learn the heuristics from the data
-            //Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
+            Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
 
-            IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
-            IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");
+            //IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
+            //IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");
 
-            //IActionHeuristic actionHeuristic = learnedHeuristics.b;
-            //IStateHeuristic stateHeuristic = learnedHeuristics.a;
+            IActionHeuristic actionHeuristic = learnedHeuristics.b;
+            IStateHeuristic stateHeuristic = learnedHeuristics.a;
 
             tuneAgents(stateHeuristic, actionHeuristic);
 
