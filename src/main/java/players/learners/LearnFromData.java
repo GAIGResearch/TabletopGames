@@ -262,9 +262,6 @@ public class LearnFromData {
                             excludedInteractionFeatures.add(firstFeature + ":" + secondFeature);
                             //                  System.out.println("Interaction " + firstFeature + ":" + secondFeature + " excluded");
                         }
-                        // TODO: (Low priority) We can also pass the raw data directly to the learner without going through
-                        // a file on disk (which may save some time). Although only with OLS will this really be noticeable
-                        // given the performance bottleneck is the model fitting
                     }
                 }
                 // We then also need to set up the data file to be used as the baseline for the next iteration

@@ -212,7 +212,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 Pair<Number, Number> range = featureRanges.get(i);
                 featureObject.put("range", "[" + range.a + ", " + range.b + "]");
             } else if (featureTypes.get(i) == featureType.INTERACTION) {
-                featureObject.put("interaction", "[" + interactions.get(i).a + ", " + interactions.get(i).b + "]");
+                continue; // we do not consider Interactions as features...a coefficient can just be a : delimited list of the underlying components
+                // featureObject.put("interaction", "[" + interactions.get(i).a + ", " + interactions.get(i).b + "]");
             }
             featureObject.put("index", featureIndices.get(i));
             featureObjects.add(featureObject);
