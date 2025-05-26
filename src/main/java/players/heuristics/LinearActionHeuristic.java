@@ -75,10 +75,18 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         json.put("class", "players.heuristics.LinearActionHeuristic");
         JSONObject coefficientsAsJSON = coefficientsAsJSON();
         json.put("coefficients", coefficientsAsJSON);
+        // Special case. While learning the coefficients, we have a single AutomatedFeatures across both
+        // the state and action features. However, when we save the coefficients, we need to separate them.
         if (features != null) {
             if (features instanceof IToJSON toJSON) {
                 JSONObject featuresJson = toJSON.toJSON();
                 ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson);
+                if (features instanceof AutomatedFeatures af) {
+                    // now remove the action-specific features
+                    for (String actionFeatureName : af.underlyingAction.names()) {
+                        featuresJson.remove(actionFeatureName);
+                    }
+                }
                 json.put("features", featuresJson);
             } else {
                 json.put("features", features.getClass().getName());
@@ -87,6 +95,12 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         if (actionFeatures instanceof IToJSON toJSON) {
             JSONObject actionFeaturesJson = toJSON.toJSON();
             ICoefficients.removeUnusedFeatures(coefficientsAsJSON, actionFeaturesJson);
+            if (actionFeatures instanceof AutomatedFeatures af) {
+                // now remove the state-specific features
+                for (String stateFeatureName : af.underlyingState.names()) {
+                    actionFeaturesJson.remove(stateFeatureName);
+                }
+            }
             json.put("actionFeatures", actionFeaturesJson);
         } else {
             json.put("actionFeatures", actionFeatures.getClass().getName());
