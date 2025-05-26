@@ -7,6 +7,7 @@ import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
 import games.dominion.actions.*;
 import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -65,7 +66,8 @@ public class TestAutomatedFeatures {
 
         // then buy a card
         fm.next(domState, new EndPhase(DominionGameState.DominionGamePhase.Play));
-        fm.next(domState, new BuyCard(CardType.SILVER, 0));
+        fm.next(domState, new EndPhase(DominionGameState.DominionGamePhase.Buy));
+        domState.addCard(CardType.SILVER, 0, DominionConstants.DeckType.DISCARD);
         assertEquals(1, domState.getCurrentPlayer());
         assertEquals(BIAS + treasure * 9 + estate * 3 + totalCards * 11 + treasureTotal * 99,
                 linearStateHeuristic.evaluateState(domState, 0), 0.001);
@@ -120,8 +122,8 @@ public class TestAutomatedFeatures {
         // now check values of the actions
 
         List<AbstractAction> actions = fm.computeAvailableActions(domState);
-        int money = domState.getDeck(DominionConstants.DeckType.HAND, 0).stream()
-                .mapToInt(c -> c.treasureValue()).sum();
+        int money = domState.getDeck(DominionConstants.DeckType.HAND, 1).stream()
+                .mapToInt(DominionCard::treasureValue).sum();
         double[] values = logisticActionHeuristic.evaluateAllActions(actions, domState);
 
         for (int i = 0; i < actions.size(); i++) {
@@ -156,5 +158,7 @@ public class TestAutomatedFeatures {
         assertEquals("players.heuristics.LogisticActionHeuristic", json.get("class"));
         assertEquals(2, ((JSONArray) ((JSONObject) json.get("features")).get("features")).size());
         assertEquals(21, ((JSONArray) ((JSONObject) json.get("actionFeatures")).get("features")).size());
+
+        assertEquals("players.heuristics.LogisticActionHeuristic", json.get("class"));
     }
 }

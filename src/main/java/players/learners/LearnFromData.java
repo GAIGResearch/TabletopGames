@@ -94,8 +94,6 @@ public class LearnFromData {
 
         // this will have created the raw data from which we now learn
 
-        // TODO: Ideally we want to split ASF into distinct state and action features
-        // to reduce inefficiencies in recalculating all the state features for every action
         if (learner.targetType == ACTION_ADV || learner.targetType == ACTION_CHOSEN ||
                 learner.targetType == ACTION_SCORE || learner.targetType == ACTION_VISITS) {
             learner.setActionFeatureVector(asf);
@@ -111,6 +109,8 @@ public class LearnFromData {
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
             JSONUtils.writeJSON(json, outputFileName);
+            // this next line is to ensure that the filtering of INTERACTIVE features is taken account of in the returned heuristic
+            learnedThing = JSONUtils.loadClassFromJSON(json);
         }
         // write the coefficients to a file
         if (learnedThing instanceof ICoefficients coefficients) {
