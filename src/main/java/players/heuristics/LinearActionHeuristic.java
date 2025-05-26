@@ -86,7 +86,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
                 ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson);
                 if (features instanceof AutomatedFeatures af) {
                     // now remove the action-specific features
-                    featuresJson = filterFeatures(featuresJson, Arrays.asList(af.underlyingAction.names()));
+                    filterFeatures(featuresJson, Arrays.asList(af.underlyingAction.names()));
                 }
                 json.put("features", featuresJson);
             } else {
@@ -98,7 +98,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
             ICoefficients.removeUnusedFeatures(coefficientsAsJSON, actionFeaturesJson);
             if (actionFeatures instanceof AutomatedFeatures af) {
                 // now remove the state-specific features
-                actionFeaturesJson = filterFeatures(actionFeaturesJson, Arrays.asList(af.underlyingState.names()));
+                filterFeatures(actionFeaturesJson, Arrays.asList(af.underlyingState.names()));
             }
             json.put("actionFeatures", actionFeaturesJson);
         } else {
@@ -107,8 +107,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         return json;
     }
 
-    private JSONObject filterFeatures(JSONObject startingFeatures, List<String> featureNames) {
-        JSONObject filteredFeatures = new JSONObject();
+    private void filterFeatures(JSONObject startingFeatures, List<String> featureNames) {
         JSONArray featuresArray = (JSONArray) startingFeatures.get("features");
         JSONArray filteredArray = new JSONArray();
         for (Object o : featuresArray) {
@@ -121,8 +120,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
                 throw new AssertionError("Expected a JSONObject in the features array, but got: " + o.getClass().getName());
             }
         }
-        filteredFeatures.put("features", filteredArray);
-        return filteredFeatures;
+        startingFeatures.put("features", filteredArray);
     }
 
     @Override

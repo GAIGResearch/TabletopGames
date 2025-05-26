@@ -158,7 +158,5 @@ public class TestAutomatedFeatures {
         assertEquals("players.heuristics.LogisticActionHeuristic", json.get("class"));
         assertEquals(2, ((JSONArray) ((JSONObject) json.get("features")).get("features")).size());
         assertEquals(21, ((JSONArray) ((JSONObject) json.get("actionFeatures")).get("features")).size());
-
-        assertEquals("players.heuristics.LogisticActionHeuristic", json.get("class"));
     }
 }
