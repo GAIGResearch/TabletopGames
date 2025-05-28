@@ -47,7 +47,7 @@ public class Wonder7Board extends Card {
         TheMausoleumOfHalicarnassus(Textile,
                 List.of(Map.of(Ore, 2), Map.of(Glass, 1, Papyrus, 1), Map.of(Stone, 3)),
                 List.of(Map.of(Victory, 3), emptyMap(), Map.of(Victory, 7)),
-                List.of(Map.of(Ore, 2), Map.of(Glass, 1, Papyrus, 1), Map.of(Stone, 3)),
+                List.of(Map.of(Clay, 2), Map.of(Glass, 1, Papyrus, 1), Map.of(Wood, 3)),
                 List.of(Map.of(Victory, 2), Map.of(Victory, 1), emptyMap())
         ),
         ThePyramidsOfGiza(Clay,
