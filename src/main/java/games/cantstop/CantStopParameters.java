@@ -32,7 +32,7 @@ public class CantStopParameters extends TunableParameters {
     public int TWELVE_MAX = 2;
 
     public int DICE_NUMBER = 4; // If you change this, then you'll need to also update code in ForwardModel._computeAvailableActions()
-    public int DICE_SIDES = 6;
+    public int DICE_SIDES = 6; // Same here (but with scoring)
     public int COLUMNS_TO_WIN = 3;
     public int MARKERS = 3; // number of temporary markers
 
@@ -50,8 +50,6 @@ public class CantStopParameters extends TunableParameters {
         addTunableParameter("ELEVEN_MAX", 4, Arrays.asList(2,3,4,5,6));
         addTunableParameter("TWELVE_MAX", 2, Arrays.asList(1,2,3,4,5));
 
-        addTunableParameter("DICE_NUMBER", 4);
-        addTunableParameter("DICE_SIDES", 6);
         addTunableParameter("COLUMNS_TO_WIN", 3, Arrays.asList(2, 3, 4, 5, 6));
         addTunableParameter("MARKERS", 3, Arrays.asList(2, 3, 4, 5, 6));
 
@@ -72,8 +70,6 @@ public class CantStopParameters extends TunableParameters {
         ELEVEN_MAX = (int) getParameterValue("ELEVEN_MAX");
         TWELVE_MAX = (int) getParameterValue("TWELVE_MAX");
 
-        DICE_NUMBER = (int) getParameterValue("DICE_NUMBER");
-        DICE_SIDES = (int) getParameterValue("DICE_SIDES");
         COLUMNS_TO_WIN = (int) getParameterValue("COLUMNS_TO_WIN");
         MARKERS = (int) getParameterValue("MARKERS");
     }
