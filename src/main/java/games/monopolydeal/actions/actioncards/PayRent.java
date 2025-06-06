@@ -107,11 +107,12 @@ public class PayRent extends AbstractAction implements IExtendedSequence, IActio
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PayRent payRent = (PayRent) o;
-        return payer == payRent.payer && payee == payRent.payee;
+        return payer == payRent.payer && payee == payRent.payee && amtToPay == payRent.amtToPay &&
+                boardEmpty == payRent.boardEmpty && cardToPay == payRent.cardToPay && boardType == payRent.boardType;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(payer, payee);
+        return Objects.hash(payer, payee, amtToPay, boardEmpty, cardToPay, boardType);
     }
     @Override
     public String toString() { return "PayRent action"; }

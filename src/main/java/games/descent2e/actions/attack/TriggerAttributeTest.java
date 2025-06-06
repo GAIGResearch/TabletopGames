@@ -33,13 +33,13 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
 
         public final Triggers interrupt;
         public final Interrupters interrupters;
-        GetAttributeTests(Triggers interruptType, Interrupters who)
-        {
+
+        GetAttributeTests(Triggers interruptType, Interrupters who) {
             interrupt = interruptType;
             interrupters = who;
         }
-        GetAttributeTests()
-        {
+
+        GetAttributeTests() {
             interrupt = null;
             interrupters = null;
         }
@@ -75,12 +75,15 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         return true;
     }
 
-    void movePhaseForward(DescentGameState state) {
+    protected void movePhaseForward(DescentGameState state) {
         // The goal here is to work out which player may have an interrupt for the phase we are in
         // If none do, then we can move forward to the next phase directly.
         // If one (or more) does, then we stop, and go back to the main game loop for this
         // decision to be made
         boolean foundInterrupt = false;
+        if (phase == ALL_DONE) {
+            return;
+        }
         do {
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
@@ -112,14 +115,13 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         return !_computeAvailableActions(state).isEmpty();
     }
 
-    void executePhase(DescentGameState state) {
-        // System.out.println("Executing phase " + phase);
+    protected void executePhase(DescentGameState state) {
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
                 // TODO Fix this temporary solution: it should not keep looping back to ALL_DONE, put the error back in
-                break;
-            //throw new AssertionError("Should never be executed");
+                //   break;
+                throw new AssertionError("Should never be executed");
             case PRE_TEST:
                 phase = INDEX_CHECK;
                 break;
@@ -130,7 +132,6 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
                 phase = ALL_DONE;
                 break;
         }
-        // and reset interrupts
     }
 
     public String toString() {
@@ -149,8 +150,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         // TODO: This feels incredibly hacky, but for whatever reason, it just works.
         if (state.getHistory().isEmpty()) return null;
         AbstractAction lastAction = state.getHistory().get(state.getHistory().size() - 1).b;
-        if (lastAction instanceof RerollAttributeTest || lastAction instanceof EndCurrentPhase)
-        {
+        if (lastAction instanceof RerollAttributeTest || lastAction instanceof EndCurrentPhase) {
             // If the Reroll option is available, even if the player chooses not to take it, the Game is expecting
             // there to be at least something within the retVal list of possible actions for the next player.
             // This seems to be more of an issue with how the TAG Framework handles multiple IExtendedSequences on top of each other,
@@ -184,8 +184,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         return retVal;
     }
 
-    public void copyComponentTo(TriggerAttributeTest retVal)
-    {
+    public void copyComponentTo(TriggerAttributeTest retVal) {
         retVal.defendingFigure = defendingFigure;
         retVal.attackingPlayer = attackingPlayer;
         retVal.defendingPlayer = defendingPlayer;

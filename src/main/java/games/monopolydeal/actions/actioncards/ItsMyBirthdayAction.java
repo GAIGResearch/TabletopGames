@@ -9,6 +9,7 @@ import games.monopolydeal.actions.ActionState;
 import games.monopolydeal.cards.CardType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,41 +40,44 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
         this.playerID = playerID;
         actionState = ActionState.GetReaction;
     }
+
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         List<AbstractAction> availableActions = new ArrayList<>();
 
-        switch (actionState){
+        switch (actionState) {
             case GetReaction:
                 availableActions.add(new DoNothing());
-                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
+                if (MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
                 break;
             case ReactToReaction:
                 availableActions.add(new DoNothing());
-                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
+                if (MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
-                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
-                else availableActions.add(new PayRent(target,playerID,2));
+                if (MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
+                else availableActions.add(new PayRent(target, playerID, 2));
                 break;
         }
         return availableActions;
     }
+
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        if(actionState == ActionState.GetReaction) return target;
+        if (actionState == ActionState.GetReaction) return target;
         else return playerID;
     }
+
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        switch (actionState){
+        switch (actionState) {
             case GetReaction:
-                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
+                if (action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
                 else actionState = ActionState.CollectRent;
                 break;
             case ReactToReaction:
-                if(!(action instanceof JustSayNoAction)) {
+                if (!(action instanceof JustSayNoAction)) {
                     collectedRent[target] = true;
                     getNextTarget();
                 }
@@ -86,12 +90,14 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
                 break;
         }
     }
+
     public boolean collectedAllRent() {
         for (boolean b : collectedRent) if (!b) return false;
         return true;
     }
-    public void getNextTarget(){
-        if(!collectedAllRent()) {
+
+    public void getNextTarget() {
+        if (!collectedAllRent()) {
             for (int i = 0; i < collectedRent.length; i++) {
                 if (!collectedRent[i]) {
                     target = i;
@@ -100,47 +106,58 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
             }
         }
     }
+
     @Override
     public boolean executionComplete(AbstractGameState state) {
         return collectedAllRent();
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         collectedRent = new boolean[gs.getNPlayers()];
         collectedRent[playerID] = true;
         // Discard card used
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(CardType.ItsMyBirthday,playerID);
+        MDGS.discardCard(CardType.ItsMyBirthday, playerID);
         MDGS.useAction(1);
         // Set first target
         getNextTarget();
         gs.setActionInProgress(this);
         return true;
     }
+
     @Override
     public ItsMyBirthdayAction copy() {
         ItsMyBirthdayAction action = new ItsMyBirthdayAction(playerID);
         action.target = target;
         action.actionState = actionState;
-        if(collectedRent != null) action.collectedRent = collectedRent.clone();
+        if (collectedRent != null) action.collectedRent = collectedRent.clone();
         else action.collectedRent = null;
         action.reaction = reaction;
 
         return action;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ItsMyBirthdayAction that = (ItsMyBirthdayAction) o;
-        return playerID == that.playerID ;
+        return playerID == that.playerID &&
+                target == that.target && actionState == that.actionState &&
+                reaction == that.reaction && Arrays.equals(collectedRent, that.collectedRent);
     }
+
     @Override
     public int hashCode() {
-        return Objects.hash(playerID);
+        return Objects.hash(playerID, target, actionState, reaction) + 31 * Arrays.hashCode(collectedRent);
     }
+
     @Override
-    public String toString() { return "It's my Birthday action"; }
+    public String toString() {
+        return "It's my Birthday action";
+    }
+
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();

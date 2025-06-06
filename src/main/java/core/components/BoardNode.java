@@ -5,6 +5,7 @@ import core.properties.Property;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+
 import java.util.HashMap;
 
 public class BoardNode extends Component {
