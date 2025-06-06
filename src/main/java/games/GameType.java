@@ -27,6 +27,10 @@ import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
 import games.chinesecheckers.gui.CCGUIManager;
+import games.chess.ChessForwardModel;
+import games.chess.ChessGameState;
+import games.chess.ChessParameters;
+import games.chess.ChessGUIManager;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -218,6 +222,10 @@ public enum GameType {
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
+            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+    DominionFG(2, 4,
+            Arrays.asList(Cards, Strategy),
+            Collections.singletonList(DeckManagement),
             DominionGameState.class, DominionForwardModel.class, DominionFGParameters.class, DominionGUIManager.class),
     DominionSizeDistortion(2, 4,
             Arrays.asList(Cards, Strategy),
@@ -299,7 +307,12 @@ public enum GameType {
     Saboteur(3, 10,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(TakeThat, VariablePlayerPowers),
-            SaboteurGameState.class, SaboteurForwardModel.class, SaboteurGameParameters.class, SaboteurGUIManager.class);
+            SaboteurGameState.class, SaboteurForwardModel.class, SaboteurGameParameters.class, SaboteurGUIManager.class),
+    Chess(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement),
+            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),;
+
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;

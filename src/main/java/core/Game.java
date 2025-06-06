@@ -845,34 +845,34 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Descent2e");
-        boolean useGUI = Utils.getArg(args, "gui", true);
+        String gameType = Utils.getArg(args, "game", "Chess");
+        boolean useGUI = Utils.getArg(args, "gui", false);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new BasicMCTSPlayer());
+        players.add(new RandomPlayer());
+    //    players.add(new RandomPlayer());
+    //    players.add(new BasicMCTSPlayer());
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 
-        RMHCParams params = new RMHCParams();
-        params.horizon = 15;
-        params.discountFactor = 0.99;
-        params.heuristic = AbstractGameState::getHeuristicScore;
+        // RMHCParams params = new RMHCParams();
+        // params.horizon = 15;
+        // params.discountFactor = 0.99;
+        // params.heuristic = AbstractGameState::getHeuristicScore;
 //        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
 //        players.add(rmhcPlayer);
 
-//        MCTSParams mcts_params = new MCTSParams();
-//        players.add(new MCTSPlayer(mcts_params));
+       MCTSParams mcts_params = new MCTSParams();
+       players.add(new MCTSPlayer(mcts_params));
 
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
+        // players.add(new HumanGUIPlayer(ac));
+        // players.add(new HumanGUIPlayer(ac));
+        // players.add(new HumanGUIPlayer(ac));
+    //    players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */

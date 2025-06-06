@@ -88,12 +88,12 @@ public class MovePiece extends AbstractAction {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         MovePiece movePiece = (MovePiece) obj;
-        return from == movePiece.from && to == movePiece.to;
+        return from == movePiece.from && to == movePiece.to && diceOverride == movePiece.diceOverride;
     }
 
     @Override
     public int hashCode() {
-        return 31 * from + to - 320;
+        return 31 * from + to - 320 * (diceOverride ? 1 : 0);
     }
 
     @Override
