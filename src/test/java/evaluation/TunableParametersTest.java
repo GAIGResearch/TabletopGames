@@ -179,7 +179,7 @@ public class TunableParametersTest {
         assertEquals(67, json.get("maxTreeDepth"));
         assertEquals(0.56, params.getParameterValue("rolloutPolicyParams.temperature"));
         assertEquals(0.56, ((JSONObject) json.get("rolloutPolicyParams")).get("temperature"));
-        assertEquals(Math.sqrt(2), (Double) json.get("K"), 0.002);
+        assertEquals(1.0, (Double) json.get("K"), 0.002);
         assertEquals(false, json.get("useMASTAsActionHeuristic"));
         assertEquals("BUDGET_FM_CALLS", json.get("budgetType"));
 
