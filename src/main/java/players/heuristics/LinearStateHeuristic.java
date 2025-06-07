@@ -77,4 +77,8 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
         return json;
     }
 
+    public IStateHeuristic getDefaultHeuristic() {
+        return defaultHeuristic;
+    }
+
 }

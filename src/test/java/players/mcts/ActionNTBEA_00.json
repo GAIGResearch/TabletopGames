@@ -446,6 +446,7 @@
 			"class" : "players.heuristics.LogisticActionHeuristic"
 		},
 		"temperature" : 0.1,
+		"epsilon"  : 0.3,
 		"class" : "players.simple.BoltzmannActionParams"
 	},
 	"FPU" : 1.0,
