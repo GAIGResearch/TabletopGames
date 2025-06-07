@@ -250,32 +250,22 @@ public class ExpertIteration {
         bestAgent = tournament.getWinner();
         System.out.println("Best agent is " + bestAgent);
 
-        if (agents.size() > nPlayers) {
-            // we now categorise the agents into Pareto shells
-            // The first Pareto front consists of the agents that are not dominated by any other agent
-            List<Integer> firstParetoFront = tournament.getParetoFront(1);
-            List<Integer> secondParetoFront = tournament.getParetoFront(2);
-            List<Integer> remainder = IntStream.range(0, agents.size())
-                    .boxed().
-                    filter(i -> !firstParetoFront.contains(i) && !secondParetoFront.contains(i))
-                    .collect(Collectors.toList());
-
-            System.out.println("First Pareto front: " + firstParetoFront);
-            System.out.println("Second Pareto front: " + secondParetoFront);
-            System.out.println("Remainder: " + remainder);
-
-            // we want to keep at least nPlayer agents
-            if (remainder.size() < agents.size() - nPlayers && firstParetoFront.size() >= nPlayers) {
-                remainder.addAll(secondParetoFront);
-            }
-
-            List<AbstractPlayer> removedAgents = new ArrayList<>();
-            for (int i : remainder) {
-                AbstractPlayer agent = agents.get(i);
-                removedAgents.add(agent);
-                System.out.println("Removing agent " + agent);
-            }
-            agents.removeAll(removedAgents);
+        if (agents.size() > nPlayers * 2) {
+            // We then remove additional agents to get within 2 x nPlayers
+            int toRemove = agents.size() - 2 * nPlayers;
+            System.out.println("Removing " + toRemove + " additional agents to get within 2 x nPlayers");
+            // we remove the worst performing agents
+            List<Integer> sortedAgents = IntStream.range(0, agents.size())
+                    .boxed()
+                    .sorted(Comparator.comparingDouble(tournament::getWinRateAlphaRank))
+                    .toList();
+            // This sorts them in ascending order, so the first ones are the worst performing
+            List<AbstractPlayer> toRemoveAgents = sortedAgents.stream()
+                    .limit(toRemove)
+                    .map(agents::get)
+                    .peek(a -> System.out.println("Removing agent " + a))
+                    .toList();
+            agents.removeAll(toRemoveAgents);
         }
         if (consecutiveTournamentWins >= 3) {
             System.out.println("Converged after " + iter + " iterations");

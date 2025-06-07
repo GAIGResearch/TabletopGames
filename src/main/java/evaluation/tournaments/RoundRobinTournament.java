@@ -761,44 +761,27 @@ public class RoundRobinTournament extends AbstractTournament {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).a;
     }
 
-    // 1 is the first Pareto Front
-    public List<Integer> getParetoFront(int count) {
-        if (count < 1 || count > agents.size()) {
-            throw new IllegalArgumentException("Count must be between 1 and " + agents.size());
-        }
-        if (count == 1) {
-            return getParetoFront(allAgentIds);
-        }
-        List<Integer> previousParetoFront = getParetoFront(count -1);
-        return getParetoFront(previousParetoFront);
-    }
-
-    protected List<Integer> getParetoFront(List<Integer> population) {
-        // population is a list of agent IDs to be considered
-        List<Integer> paretoFront = new ArrayList<>();
-        for (int i : population) {
-            if (getDominatedAgents(i).stream().filter(population::contains).toList().isEmpty()) {
-                paretoFront.add(i);
-            }
-        }
-        return paretoFront;
-    }
-
-    // Returns a list of agents that are clearly dominated by the given agent
-    public List<Integer> getDominatedAgents(int agentID) {
+    // Returns a list of agents that are clearly dominated by all other agents
+    public List<Integer> getDominatedAgents() {
         List<Integer> dominated = new ArrayList<>();
         double significanceLevel = Utils.standardZScore(0.10, agents.size() * (agents.size() - 1) / 2);
 
         for (int i = 0; i < agents.size(); i++) {
-            if (i != agentID && winsPerPlayerPerOpponent[agentID][i] > winsPerPlayerPerOpponent[i][agentID]) {
-                // Now check for significance (very approximately... the idea is to avoid discarding agents based on a low sample size
-                double winRate = (double) winsPerPlayerPerOpponent[agentID][i] / nGamesPlayedPerOpponent[agentID][i];
-                double winRateOpponent = (double) winsPerPlayerPerOpponent[i][agentID] / nGamesPlayedPerOpponent[i][agentID];
-                double stdErr = sqrt((winRate * (1 - winRate)) / nGamesPlayedPerOpponent[agentID][i]);
-                if (winRate - winRateOpponent > significanceLevel * stdErr) {
-                    dominated.add(i);
+            // for each agent, i, we see if it is dominated but the other agents
+            for (int j = 0; j < agents.size(); j++) {
+                if (i != j && winsPerPlayerPerOpponent[j][i] > winsPerPlayerPerOpponent[i][j]) {
+                    // Now check for significance (very approximately... the idea is to avoid discarding agents based on a low sample size
+                    double winRateJ = (double) winsPerPlayerPerOpponent[j][i] / nGamesPlayedPerOpponent[j][i];
+                    double winRateI = (double) winsPerPlayerPerOpponent[i][j] / nGamesPlayedPerOpponent[i][j];
+                    double stdErr = sqrt((winRateJ * (1 - winRateJ)) / nGamesPlayedPerOpponent[j][i]);
+                    if (winRateJ - winRateI < significanceLevel * stdErr) {
+                        // not dominated
+                        break;
+                    }
                 }
             }
+            // all other agents have been checked and i is dominated by all of them
+            dominated.add(i);
         }
         return dominated;
     }

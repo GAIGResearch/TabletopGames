@@ -4,14 +4,10 @@ import core.AbstractPlayer;
 import core.interfaces.IStateHeuristic;
 import org.junit.Test;
 import players.PlayerFactory;
-import players.heuristics.AutomatedFeatures;
 import players.heuristics.LeaderHeuristic;
 import players.heuristics.LinearStateHeuristic;
 import players.heuristics.LogisticActionHeuristic;
 import players.simple.BoltzmannActionPlayer;
-import utilities.JSONUtils;
-
-import static evaluation.optimisation.TunableParameters.loadFromJSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static players.mcts.MCTSEnums.RolloutTermination.END_ROUND;
