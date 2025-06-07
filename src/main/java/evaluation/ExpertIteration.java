@@ -15,7 +15,6 @@ import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.IAnyTimePlayer;
 import players.PlayerFactory;
-import players.learners.AbstractLearner;
 import players.learners.LearnFromData;
 import utilities.Pair;
 
@@ -34,11 +33,11 @@ public class ExpertIteration {
     String dataDir, player;
     AbstractParameters params;
     List<AbstractPlayer> agents;
-    AbstractLearner stateLearner, actionLearner;
+    String stateLearnerFile, actionLearnerFile;
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
     FeatureListener stateListener, actionListener;
-    int nPlayers, matchups, iterations, iter, finalMatchups;
+    int nPlayers, matchups, iterations, iter;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     boolean useRounds, useStateInAction;
@@ -51,6 +50,7 @@ public class ExpertIteration {
     int[] actionSearchSettings;
     ITPSearchSpace<?> valueSearchSpace = null;
     ITPSearchSpace<?> actionSearchSpace = null;
+    int restartAtIteration = 0; // if we want to restart the process at a later iteration
 
     public ExpertIteration(String[] args) {
 
@@ -65,11 +65,11 @@ public class ExpertIteration {
         originalArgs = args;
         nPlayers = getArg(args, "nPlayers", 2);
         matchups = getArg(args, "matchups", 1);
-        finalMatchups = getArg(args, "finalMatchups", 1000);
         iterations = getArg(args, "iterations", 100);
         verbose = getArg(args, "verbose", false);
         actionDataFilesByIteration = new String[iterations];
         stateDataFilesByIteration = new String[iterations];
+        restartAtIteration = getArg(args, "restartAtIteration", 0);
 
         useRounds = getArg(args, "useRounds", false);
         useStateInAction = getArg(args, "stateForAction", true);
@@ -77,20 +77,20 @@ public class ExpertIteration {
             String featureDefinition = getArg(args, "stateFeatures", "");
             if (featureDefinition.isEmpty())
                 throw new IllegalArgumentException("Must specify stateFeatures for a stateLearner");
-            stateLearner = loadClass(getArg(args, "stateLearner", ""));
+            stateLearnerFile = getArg(args, "stateLearner", "");
         }
         if (!getArg(args, "actionFeatures", "").isEmpty()) {
             String featureDefinition = getArg(args, "actionFeatures", "");
             if (featureDefinition.isEmpty())
                 throw new IllegalArgumentException("Must specify actionFeatures for an actionLearner");
-            actionLearner = loadClass(getArg(args, "actionLearner", ""));
+            actionLearnerFile = getArg(args, "actionLearner", "");
         }
         if (!getArg(args, "stateFeatures", "").isEmpty()) {
             stateFeatureVector = loadClass(getArg(args, "stateFeatures", ""));
         }
         if (!getArg(args, "actionFeatures", "").isEmpty())
             actionFeatureVector = loadClass(getArg(args, "actionFeatures", ""));
-        else if (actionLearner == null && stateLearner == null) {
+        else if (actionLearnerFile == null && stateLearnerFile == null) {
             throw new IllegalArgumentException("Must specify at least one learner");
         }
 
@@ -123,8 +123,7 @@ public class ExpertIteration {
                             "\tdir=           The directory containing agent JSON files for learned heuristics and raw data\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tmatchups=      The number of games to play to gather data before the learning process is called.\n" +
-                            "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
-                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n");
+                            "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n");
             return;
         }
 
@@ -140,17 +139,44 @@ public class ExpertIteration {
         agents = new ArrayList<>(PlayerFactory.createPlayers(player));
         bestAgent = agents.get(0);
 
-        // initial data using only the base player
-        gatherDataAndCheckConvergence();
-        //stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%d.txt", prefix, iter);
-        //actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%d.txt", prefix, iter);
+        if (restartAtIteration > 0) {
+            // we are restarting the process, so we need to load the data files from the previous iteration
+            iter = restartAtIteration;
+            if (stateLearnerFile != null) {
+                stateDataFilesByIteration[iter - 1] = dataDir + File.separator + String.format("State_%s_%02d.txt", prefix, iter - 1);
+            }
+            if (actionLearnerFile != null) {
+                actionDataFilesByIteration[iter - 1] = dataDir + File.separator + String.format("Action_%s_%02d.txt", prefix, iter - 1);
+            }
+
+            // then load in the agents from the previous iterations
+            for (int previousIter = 0; previousIter < restartAtIteration; previousIter++) {
+                if (stateLearnerFile != null) {
+                    // Full player json is in NTBEA output directory
+                    String agentFileName = dataDir + File.separator + String.format("ValueNTBEA_%02d.json", previousIter);
+                    AbstractPlayer newPlayer = PlayerFactory.createPlayer(agentFileName);
+                    newPlayer.setName(String.format("ValueNTBEA_%02d.json", previousIter));
+                    agents.add(newPlayer);
+                }
+                if (actionLearnerFile != null) {
+                    String agentFileName = dataDir + File.separator + String.format("ActionNTBEA_%02d.json", previousIter);
+                    AbstractPlayer newPlayer = PlayerFactory.createPlayer(agentFileName);
+                    newPlayer.setName(String.format("ActionNTBEA_%02d.json", previousIter));
+                    agents.add(newPlayer);
+                }
+            }
+        }
 
         do {
             // learn the heuristics from the data
-            Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
+            finished = gatherDataAndCheckConvergence();
+            //  stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%02d.txt", prefix, 0);
+            //   actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%02d.txt", prefix, 0);
 
-            //IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
-            //IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");
+            if (finished)
+                break; // we are done, so we don't need to learn heuristics
+
+            Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
 
             IActionHeuristic actionHeuristic = learnedHeuristics.b;
             IStateHeuristic stateHeuristic = learnedHeuristics.a;
@@ -158,8 +184,7 @@ public class ExpertIteration {
             tuneAgents(stateHeuristic, actionHeuristic);
 
             iter++;
-            finished = gatherDataAndCheckConvergence();
-        } while (!finished);
+        } while (true);
     }
 
     // A tournament of all current agents to gather data for the next training run
@@ -189,25 +214,25 @@ public class ExpertIteration {
         }
 
         RoundRobinTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayers, params, config);
-        tournament.setResultsFile(dataDir + File.separator + String.format("TournamentResults_%s_%d.txt", prefix, iter));
-        if (stateLearner != null) {
+        tournament.setResultsFile(dataDir + File.separator + String.format("TournamentResults_%s_%02d.txt", prefix, iter));
+        if (stateLearnerFile != null) {
             stateListener = new StateFeatureListener(stateFeatureVector,
                     useRounds ? Event.GameEvent.ROUND_OVER : Event.GameEvent.TURN_OVER,
                     false, "dummy.txt");
             stateListener.setNth(13);
-            String fileName = String.format("State_%s_%d.txt", prefix, iter);
+            String fileName = String.format("State_%s_%02d.txt", prefix, iter);
             stateListener.setLogger(new FileStatsLogger(fileName, "\t", false));
             stateListener.setOutputDirectory(dataDir);
 
             tournament.addListener(stateListener);
             stateDataFilesByIteration[iter] = dataDir + File.separator + fileName;
         }
-        if (actionLearner != null) {
+        if (actionLearnerFile != null) {
             actionListener = new ActionFeatureListener(actionFeatureVector, stateFeatureVector,
                     Event.GameEvent.ACTION_CHOSEN,
                     true, "dummy.txt");
             actionListener.setNth(17);
-            String fileName = String.format("Action_%s_%d.txt", prefix, iter);
+            String fileName = String.format("Action_%s_%02d.txt", prefix, iter);
             actionListener.setLogger(new FileStatsLogger(fileName, "\t", false));
             actionListener.setOutputDirectory(dataDir);
 
@@ -266,16 +291,24 @@ public class ExpertIteration {
         // for the moment we will just supply the most recent file
         IStateHeuristic stateHeuristic = null;
         IActionHeuristic actionHeuristic = null;
-        if (stateLearner != null) {
-            String fileName = prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json";
-            LearnFromData learnFromData = new LearnFromData(stateDataFilesByIteration[iter], stateFeatureVector, null,
-                    dataDir + File.separator + fileName, stateLearner);
+        if (stateLearnerFile != null) {
+            String fileName = prefix + "_ValueHeuristic_" + String.format("%02d", iter) + ".json";
+            LearnFromData learnFromData = new LearnFromData(
+                    stateDataFilesByIteration[iter],
+                    stateFeatureVector,
+                    null,
+                    dataDir + File.separator + fileName,
+                    loadClass(stateLearnerFile));
             stateHeuristic = (IStateHeuristic) learnFromData.learn();
         }
-        if (actionLearner != null) {
-            String fileName = prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json";
-            LearnFromData learnFromData = new LearnFromData(actionDataFilesByIteration[iter], useStateInAction ? stateFeatureVector : null, actionFeatureVector,
-                    dataDir + File.separator + fileName, actionLearner);
+        if (actionLearnerFile != null) {
+            String fileName = prefix + "_ActionHeuristic_" + String.format("%02d", iter) + ".json";
+            LearnFromData learnFromData = new LearnFromData(
+                    actionDataFilesByIteration[iter],
+                    useStateInAction ? stateFeatureVector : null,
+                    actionFeatureVector,
+                    dataDir + File.separator + fileName,
+                    loadClass(actionLearnerFile));
             actionHeuristic = (IActionHeuristic) learnFromData.learn();
         }
         return Pair.of(stateHeuristic, actionHeuristic);
@@ -288,7 +321,7 @@ public class ExpertIteration {
         if (!getArg(originalArgs, "valueSS", "").isEmpty()) {
             config.put(RunArg.searchSpace, getArg(originalArgs, "valueSS", ""));
             config.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
-            config.put(RunArg.destDir, dataDir + File.separator + String.format("ValueNTBEA_%2d", iter));
+            config.put(RunArg.destDir, dataDir + File.separator + String.format("ValueNTBEA_%02d", iter));
             NTBEAParameters ntbeaParams = new NTBEAParameters(config);
 
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
@@ -306,6 +339,8 @@ public class ExpertIteration {
                         ntbea.fixTunableParameter(actionSearchSpace.name(i), actionSearchSpace.value(i, actionSearchSettings[i]));
                     }
                 }
+                ntbea.fixTunableParameter("actionHeuristic", actionHeuristic);  // so this is used when tuning
+                ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);
             }
 
             ntbeaParams.printSearchSpaceDetails();
@@ -322,7 +357,7 @@ public class ExpertIteration {
 
             config.put(RunArg.searchSpace, getArg(originalArgs, "actionSS", ""));
             config.put(RunArg.opponent, "random");
-            config.put(RunArg.destDir, dataDir + File.separator + String.format("ActionNTBEA_%2d", iter));
+            config.put(RunArg.destDir, dataDir + File.separator + String.format("ActionNTBEA_%02d", iter));
             NTBEAParameters ntbeaParams = new NTBEAParameters(config);
             actionSearchSpace = (ITPSearchSpace<?>) ntbeaParams.searchSpace;
 
@@ -342,6 +377,9 @@ public class ExpertIteration {
                         ntbea.fixTunableParameter(valueSearchSpace.name(i), valueSearchSpace.value(i, valueSearchSettings[i]));
                     }
                 }
+
+                // and also make sure we include the state heuristic in the action search
+                ntbea.fixTunableParameter("heuristic", stateHeuristic);
             }
 
             ntbeaParams.printSearchSpaceDetails();

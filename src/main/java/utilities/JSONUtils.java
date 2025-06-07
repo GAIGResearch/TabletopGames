@@ -33,13 +33,6 @@ public class JSONUtils {
         }
     }
 
-    public static String readJSONFile(String fileName, Function<String, String> preprocessor) {
-        JSONObject json = loadJSONFile(fileName);
-        if (preprocessor != null)
-            return preprocessor.apply(json.toJSONString());
-        return json.toJSONString();
-    }
-
     /**
      * Given a JSONObject, this will load the instance of the class.
      * this assumes that the JSON object has:
