@@ -242,7 +242,8 @@ public class MCTSParams extends PlayerParameters {
         };
     }
 
-    public IStateHeuristic getHeuristic() {
+    @Override
+    public IStateHeuristic getStateHeuristic() {
         return heuristic;
     }
 

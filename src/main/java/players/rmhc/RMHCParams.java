@@ -33,7 +33,8 @@ public class RMHCParams extends PlayerParameters {
         return copy;
     }
 
-    public IStateHeuristic getHeuristic() {
+    @Override
+    public IStateHeuristic getStateHeuristic() {
         return heuristic;
     }
 
