@@ -152,8 +152,8 @@ public interface ICoefficients {
             for (int i = 0; i < interactions().length; i++) {
                 if (Math.abs(interactionCoefficients()[i]) > 0.0001) {
                     StringBuilder key = new StringBuilder();
-                    for (int j = 0; j < interactions()[i].length; j++) {
-                        if (j > 0)
+                    for (int j : interactions()[i]) {
+                        if (!key.isEmpty())
                             key.append(":");
                         key.append(names()[j]);
                     }

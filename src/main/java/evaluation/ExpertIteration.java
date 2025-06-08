@@ -195,9 +195,7 @@ public class ExpertIteration {
         config.put(RunArg.matchups, matchups);
         config.put(RunArg.seed, System.currentTimeMillis());
         config.put(RunArg.byTeam, false);
-        config.put(RunArg.mode, "exhaustive");
-        if (agents.size() < nPlayers) // unless we don't have enough players
-            config.put(RunArg.mode, "exhaustiveSP");
+        config.put(RunArg.mode, "random");  // we are most interested in a wide range of data, so do not want to reuse random seeds
         config.put(RunArg.verbose, false);
         config.put(RunArg.destDir, dataDir);
 

@@ -282,7 +282,6 @@ public class LearnFromData {
                 }
             } while (bestFeatures != null);
 
-            List<String> excludedReductionFeatures = new ArrayList<>();
             List<AutomatedFeatures.ColumnDetails> interactionColumns = asf.getColumnDetails().stream()
                     .filter(r -> r.type() == INTERACTION).toList();
             List<String> columnsWithInteraction = interactionColumns.stream()
@@ -296,10 +295,8 @@ public class LearnFromData {
                 baseBIC = bestBIC; // reset baseline
                 for (int i = 0; i < asf.names().length; i++) {
                     String featureToRemove = asf.names()[i];
-                    if (excludedReductionFeatures.contains(featureToRemove))
+                    if (excludedFeatures.contains(featureToRemove))
                         continue;
-                    if (asf.getFeatureType(i) != RAW || asf.getBuckets(asf.getUnderlyingIndex(i)) > 1)
-                        continue;  // for the moment, we only consider RAW features with no buckets
                     if (columnsWithInteraction.contains(featureToRemove))
                         continue; // we don't want to remove a feature that is part of an interaction
 
@@ -321,7 +318,7 @@ public class LearnFromData {
                         startingHeuristic = newHeuristic;
                         bestFeatureDescription = String.format("Removed Feature: %20s, BIC: %.2f", featureToRemove, newBIC);
                     } else if (newBIC > baseBIC) {
-                        excludedReductionFeatures.add(featureToRemove);
+                        excludedFeatures.add(featureToRemove);
                     }
                 }
 
