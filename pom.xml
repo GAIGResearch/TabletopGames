@@ -255,17 +255,17 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>MetaNTBEA</id>
+                        <id>ExpertIteration</id>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass> evaluation.optimisation.ntbea.functions.MetaNTBEA</mainClass>
+                                    <mainClass> evaluation.ExpertIteration</mainClass>
                                 </manifest>
                             </archive>
-                            <finalName>MetaNTBEA</finalName>
+                            <finalName>ExpertIteration</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
