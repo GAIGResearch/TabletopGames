@@ -187,21 +187,20 @@ public class ExpertIteration {
     // any very poorly performing agents are removed from the list (dominated by all other agents)
     // This also checks for convergence; meaning that the best agent has not changed for 3 iterations
     private boolean gatherDataAndCheckConvergence() {
-        Map<RunArg, Object> config = RunArg.parseConfig(new String[]{}, Collections.singletonList(RunArg.Usage.RunGames), false);
-        config.put(RunArg.matchups, matchups);
-        config.put(RunArg.seed, System.currentTimeMillis());
-        config.put(RunArg.byTeam, config.get(RunArg.byTeam));
-        config.put(RunArg.mode, "random");  // we are most interested in a wide range of data, so do not want to reuse random seeds
-        config.put(RunArg.verbose, false);
-        config.put(RunArg.destDir, dataDir);
-        config.put(RunArg.repeats, 1);
-        config.put(RunArg.evalGames, 0);
+        Map<RunArg, Object> RGConfig = new HashMap<>();
+        for (RunArg key : config.keySet()) {
+            if (key.isUsedIn(RunArg.Usage.RunGames)) {
+                RGConfig.put(key, config.get(key));
+            }
+        }
+        RGConfig.put(RunArg.mode, "random");  // we are most interested in a wide range of data, so do not want to reuse random seeds
+        RGConfig.put(RunArg.verbose, false);
 
         // we need to set the listener to record the required data for the Learner processes
-        config.put(RunArg.listener, new ArrayList<String>());
+        RGConfig.put(RunArg.listener, new ArrayList<String>());
 
         // and set the budget on the agents
-        int budget = (int) config.get(RunArg.budget);
+        int budget = (int) RGConfig.get(RunArg.budget);
         if (budget > 0) {
             for (AbstractPlayer player : agents) {
                 if (player instanceof IAnyTimePlayer anyTime)
@@ -209,7 +208,7 @@ public class ExpertIteration {
             }
         }
 
-        RoundRobinTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayers, params, config);
+        RoundRobinTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayers, params, RGConfig);
         tournament.setResultsFile(dataDir + File.separator + String.format("TournamentResults_%s_%02d.txt", prefix, iter));
         if (stateLearnerFile != null) {
             stateListener = new StateFeatureListener(stateFeatureVector,
@@ -308,10 +307,12 @@ public class ExpertIteration {
                 NTBEAConfig.put(key, config.get(key));
             }
         }
+        NTBEAConfig.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
+        NTBEAConfig.put(RunArg.repeats, 1);
+        NTBEAConfig.put(RunArg.evalGames, 0);
 
         if (!config.get(RunArg.valueSS).equals("")) {
             NTBEAConfig.put(RunArg.searchSpace, config.get(RunArg.valueSS));
-            NTBEAConfig.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
             NTBEAConfig.put(RunArg.destDir, dataDir + File.separator + String.format("ValueNTBEA_%02d", iter));
             NTBEAParameters ntbeaParams = new NTBEAParameters(NTBEAConfig);
 
@@ -346,7 +347,6 @@ public class ExpertIteration {
         }
         if (!config.get(RunArg.actionSS).equals("")) {
             NTBEAConfig.put(RunArg.searchSpace, config.get(RunArg.actionSS));
-            NTBEAConfig.put(RunArg.opponent, "random");
             NTBEAConfig.put(RunArg.destDir, dataDir + File.separator + String.format("ActionNTBEA_%02d", iter));
             NTBEAParameters ntbeaParams = new NTBEAParameters(NTBEAConfig);
             actionSearchSpace = (ITPSearchSpace<?>) ntbeaParams.searchSpace;
