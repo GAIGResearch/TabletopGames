@@ -20,15 +20,14 @@ import utilities.Pair;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static evaluation.RunArg.parseConfig;
 import static utilities.JSONUtils.loadClass;
 import static utilities.Utils.getArg;
 
 public class ExpertIteration {
 
-    String[] originalArgs;
     GameType gameToPlay;
     String dataDir, player;
     AbstractParameters params;
@@ -41,89 +40,61 @@ public class ExpertIteration {
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     boolean useRounds, useStateInAction;
-    String prefix;
-    boolean verbose;
+    String prefix = "EI";
     AbstractPlayer bestAgent = null;
     int consecutiveTournamentWins = 0;
+    Map<RunArg, Object> config;
 
     int[] valueSearchSettings;
     int[] actionSearchSettings;
     ITPSearchSpace<?> valueSearchSpace = null;
     ITPSearchSpace<?> actionSearchSpace = null;
-    int restartAtIteration = 0; // if we want to restart the process at a later iteration
 
     public ExpertIteration(String[] args) {
 
-        /* 1. Settings for the tournament */
+        config = parseConfig(args, Collections.singletonList(RunArg.Usage.ExpertIteration));
+        nPlayers = (int) config.get(RunArg.nPlayers);
+        matchups = (int) config.get(RunArg.matchups);
+        iterations = (int) config.get(RunArg.iterations);
+        useRounds = (boolean) config.get(RunArg.useRounds);
+        useStateInAction = (boolean) config.get(RunArg.stateForAction);
+        player = (String) config.get(RunArg.playerDirectory);
+        dataDir = (String) config.get(RunArg.destDir);
+        gameToPlay = GameType.valueOf((String) config.get(RunArg.game));
 
-        try {
-            gameToPlay = GameType.valueOf(getArg(args, "game", ""));
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("A Game must be specified");
-        }
+        params = AbstractParameters.createFromFile(gameToPlay, (String) config.get(RunArg.gameParams));
 
-        originalArgs = args;
-        nPlayers = getArg(args, "nPlayers", 2);
-        matchups = getArg(args, "matchups", 1);
-        iterations = getArg(args, "iterations", 100);
-        verbose = getArg(args, "verbose", false);
         actionDataFilesByIteration = new String[iterations];
         stateDataFilesByIteration = new String[iterations];
-        restartAtIteration = getArg(args, "restartAtIteration", 0);
 
-        useRounds = getArg(args, "useRounds", false);
-        useStateInAction = getArg(args, "stateForAction", true);
-        if (!getArg(args, "stateLearner", "").isEmpty()) {
-            String featureDefinition = getArg(args, "stateFeatures", "");
+        if (!config.get(RunArg.stateLearner).equals("")) {
+            String featureDefinition = (String) config.get(RunArg.stateFeatures);
             if (featureDefinition.isEmpty())
                 throw new IllegalArgumentException("Must specify stateFeatures for a stateLearner");
-            stateLearnerFile = getArg(args, "stateLearner", "");
+            stateLearnerFile = (String) config.get(RunArg.stateLearner);
         }
-        if (!getArg(args, "actionFeatures", "").isEmpty()) {
-            String featureDefinition = getArg(args, "actionFeatures", "");
+        if (!config.get(RunArg.actionLearner).equals("")) {
+            String featureDefinition = (String) config.get(RunArg.actionFeatures);
             if (featureDefinition.isEmpty())
                 throw new IllegalArgumentException("Must specify actionFeatures for an actionLearner");
-            actionLearnerFile = getArg(args, "actionLearner", "");
+            actionLearnerFile = (String) config.get(RunArg.actionLearner);
         }
-        if (!getArg(args, "stateFeatures", "").isEmpty()) {
-            stateFeatureVector = loadClass(getArg(args, "stateFeatures", ""));
+        if (!config.get(RunArg.stateFeatures).equals("")) {
+            String featureDefinition = (String) config.get(RunArg.stateFeatures);
+            stateFeatureVector = loadClass(featureDefinition);
         }
-        if (!getArg(args, "actionFeatures", "").isEmpty())
-            actionFeatureVector = loadClass(getArg(args, "actionFeatures", ""));
-        else if (actionLearnerFile == null && stateLearnerFile == null) {
+        if (!config.get(RunArg.actionFeatures).equals("")) {
+            String featureDefinition = (String) config.get(RunArg.actionFeatures);
+            actionFeatureVector = loadClass(featureDefinition);
+        } else if (actionLearnerFile == null && stateLearnerFile == null) {
             throw new IllegalArgumentException("Must specify at least one learner");
         }
-
-        prefix = getArg(args, "prefix", "EI");
-
-        player = getArg(args, "player", "");
-        String gameParams = getArg(args, "gameParams", "");
-        dataDir = getArg(args, "dir", "");
-
-        params = AbstractParameters.createFromFile(gameToPlay, gameParams);
     }
 
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
-        if (argsList.contains("--help") || argsList.contains("-h") || argsList.isEmpty()) {
-            System.out.println(
-                    "There are a number of possible arguments:\n" +
-                            "\tgame=          The name of the game to play.\n" +
-                            "\tnPlayers=      The number of players in each game. Defaults to the minimum for the game.\n" +
-                            "\tplayer=        The agent (or agents if a directory) that will kickstart the process. \n" +
-                            "\tstateLearner=  The JSON file that specifies an ILearner implementation for an IStateFeatureVector implementation.\n" +
-                            "\tactionLearner= The JSON file that specifies an ILearner implementation for an IActionFeatureVector implementation.\n" +
-                            "\tuseRounds=     Whether to use rounds (true) or turns (false). Defaults to false.\n" +
-                            "\tstateFeatures  The name of a class that implements IStateFeatureVector.\n" +
-                            "\tactionFeatures The name of a class that implements IActionFeatureVector.\n" +
-                            "\tstateForAction Whether to use the state features when learning the action heuristic. Defaults to true.\n" +
-                            "\tvalueSS=       File that contains the Search space to use with a value heuristic.\n" +
-                            "\tactionSS=      File that contains the Search space to use with an action heuristic.\n" +
-                            "\tprefix=        Name to use as output directory.\n" +
-                            "\tdir=           The directory containing agent JSON files for learned heuristics and raw data\n" +
-                            "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
-                            "\tmatchups=      The number of games to play to gather data before the learning process is called.\n" +
-                            "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n");
+        if (argsList.contains("--help") || argsList.contains("-h")) {
+            RunArg.printHelp(RunArg.Usage.ExpertIteration);
             return;
         }
 
@@ -132,12 +103,37 @@ public class ExpertIteration {
         pl.run();
     }
 
+    private int restartIteration() {
+        // Automatically determine restart iteration by checking for existing ValueNTBEA and ActionNTBEA json files
+        int restartAtIteration = 0;
+        while (true) {
+            boolean valueExists = false, actionExists = false;
+            if (stateLearnerFile != null) {
+                String valueFile = dataDir + File.separator + String.format("ValueNTBEA_%02d.json", restartAtIteration);
+                valueExists = new File(valueFile).exists();
+            }
+            if (actionLearnerFile != null) {
+                String actionFile = dataDir + File.separator + String.format("ActionNTBEA_%02d.json", restartAtIteration);
+                actionExists = new File(actionFile).exists();
+            }
+            if ((stateLearnerFile != null && !valueExists) && (actionLearnerFile != null && !actionExists)) {
+                break;
+            }
+            if (stateLearnerFile != null && !valueExists) break;
+            if (actionLearnerFile != null && !actionExists) break;
+            restartAtIteration++;
+        }
+        return restartAtIteration;
+    }
+
     public void run() {
         iter = 0;
         boolean finished = false;
         // load in the initial agent(s)
         agents = new ArrayList<>(PlayerFactory.createPlayers(player));
         bestAgent = agents.get(0);
+
+        int restartAtIteration = restartIteration();
 
         if (restartAtIteration > 0) {
             // we are restarting the process, so we need to load the data files from the previous iteration
@@ -194,16 +190,18 @@ public class ExpertIteration {
         Map<RunArg, Object> config = RunArg.parseConfig(new String[]{}, Collections.singletonList(RunArg.Usage.RunGames), false);
         config.put(RunArg.matchups, matchups);
         config.put(RunArg.seed, System.currentTimeMillis());
-        config.put(RunArg.byTeam, false);
+        config.put(RunArg.byTeam, config.get(RunArg.byTeam));
         config.put(RunArg.mode, "random");  // we are most interested in a wide range of data, so do not want to reuse random seeds
         config.put(RunArg.verbose, false);
         config.put(RunArg.destDir, dataDir);
+        config.put(RunArg.repeats, 1);
+        config.put(RunArg.evalGames, 0);
 
         // we need to set the listener to record the required data for the Learner processes
         config.put(RunArg.listener, new ArrayList<String>());
 
         // and set the budget on the agents
-        int budget = getArg(originalArgs, "budget", 0);
+        int budget = (int) config.get(RunArg.budget);
         if (budget > 0) {
             for (AbstractPlayer player : agents) {
                 if (player instanceof IAnyTimePlayer anyTime)
@@ -304,13 +302,18 @@ public class ExpertIteration {
 
     private void tuneAgents(IStateHeuristic stateHeuristic, IActionHeuristic actionHeuristic) {
         // we now consider the value heuristic search space, and run NTBEA over this
-        Map<RunArg, Object> config = RunArg.parseConfig(originalArgs, Collections.singletonList(RunArg.Usage.ParameterSearch), false);
+        Map<RunArg, Object> NTBEAConfig = new HashMap<>();
+        for (RunArg key : config.keySet()) {
+            if (key.isUsedIn(RunArg.Usage.ParameterSearch)) {
+                NTBEAConfig.put(key, config.get(key));
+            }
+        }
 
-        if (!getArg(originalArgs, "valueSS", "").isEmpty()) {
-            config.put(RunArg.searchSpace, getArg(originalArgs, "valueSS", ""));
-            config.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
-            config.put(RunArg.destDir, dataDir + File.separator + String.format("ValueNTBEA_%02d", iter));
-            NTBEAParameters ntbeaParams = new NTBEAParameters(config);
+        if (!config.get(RunArg.valueSS).equals("")) {
+            NTBEAConfig.put(RunArg.searchSpace, config.get(RunArg.valueSS));
+            NTBEAConfig.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
+            NTBEAConfig.put(RunArg.destDir, dataDir + File.separator + String.format("ValueNTBEA_%02d", iter));
+            NTBEAParameters ntbeaParams = new NTBEAParameters(NTBEAConfig);
 
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
             ntbea.setOpponents(Collections.singletonList(bestAgent));
@@ -341,12 +344,11 @@ public class ExpertIteration {
             valueSearchSpace.writeAgentJSON(valueSearchSettings, dataDir + File.separator + agentName);
             agents.add(bestPlayer);
         }
-        if (!getArg(originalArgs, "actionSS", "").isEmpty()) {
-
-            config.put(RunArg.searchSpace, getArg(originalArgs, "actionSS", ""));
-            config.put(RunArg.opponent, "random");
-            config.put(RunArg.destDir, dataDir + File.separator + String.format("ActionNTBEA_%02d", iter));
-            NTBEAParameters ntbeaParams = new NTBEAParameters(config);
+        if (!config.get(RunArg.actionSS).equals("")) {
+            NTBEAConfig.put(RunArg.searchSpace, config.get(RunArg.actionSS));
+            NTBEAConfig.put(RunArg.opponent, "random");
+            NTBEAConfig.put(RunArg.destDir, dataDir + File.separator + String.format("ActionNTBEA_%02d", iter));
+            NTBEAParameters ntbeaParams = new NTBEAParameters(NTBEAConfig);
             actionSearchSpace = (ITPSearchSpace<?>) ntbeaParams.searchSpace;
 
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
