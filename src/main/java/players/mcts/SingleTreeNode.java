@@ -1168,9 +1168,8 @@ public class SingleTreeNode {
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching) {
             // RM uses a special policy as the average of all previous root policies
-            List<AbstractAction> actionsToConsider = actionsToConsider(actionsFromOpenLoopState);
-            if (regretMatchingAverage.isEmpty())  // in case we have a very low number of visits
-                updateRegretMatchingAverage(actionsToConsider);
+            if (regretMatchingAverage.isEmpty()) // in case we have not yet updated the regret matching average
+                updateRegretMatchingAverage(actionsToConsider(actionsFromOpenLoopState));
             bestAction = regretMatchingAverage();
         } else {
             // We iterate through all actions valid in the original root state
@@ -1226,20 +1225,16 @@ public class SingleTreeNode {
     }
 
     protected AbstractAction regretMatchingAverage() {
-        double[] potentials = new double[regretMatchingAverage.size()];
+        List<AbstractAction> actionsToConsider = actionsToConsider(actionsFromOpenLoopState);
+        double[] potentials = new double[actionsToConsider.size()];
         int count = 0;
-        for (AbstractAction action : regretMatchingAverage.keySet()) {
-            if (actionsFromOpenLoopState.contains(action)) {
-                potentials[count] = regretMatchingAverage.get(action);
-            } else {
-                potentials[count] = 0.0;
-            }
+        for (AbstractAction action : actionsToConsider) {
+            potentials[count] = regretMatchingAverage.getOrDefault(action, 0.0);
             count++;
         }
         double[] pdf = pdf(potentials);
         int index = sampleFrom(pdf, rnd.nextDouble());
-        return regretMatchingAverage.keySet().stream()
-                .skip(index).findFirst().orElseThrow(() -> new AssertionError("No action found"));
+        return actionsToConsider.get(index);
     }
 
     public int getVisits() {
