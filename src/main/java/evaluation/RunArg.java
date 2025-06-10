@@ -312,7 +312,7 @@ public enum RunArg {
                 FileReader reader = new FileReader(setupFile);
                 JSONParser parser = new JSONParser();
                 JSONObject json = (JSONObject) parser.parse(reader);
-                Map<RunArg, Object> configFileArgs = parseConfig(json, usages);
+                Map<RunArg, Object> configFileArgs = parseConfig(json, usages, checkUnknownArgs);
                 for (RunArg key : configFileArgs.keySet()) {
                     // we check if the key is already in the command line arguments (we check args directly as
                     // parseConfig populates all the Map with the default value if not present in the array)
@@ -343,18 +343,20 @@ public enum RunArg {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<RunArg, Object> parseConfig(JSONObject json, Usage usage) {
+    public static Map<RunArg, Object> parseConfig(JSONObject json, Usage usage, boolean checkUnknownArgs) {
         String[] keyNames = (String[]) json.keySet().stream().map(Object::toString).toArray(String[]::new);
-        checkUnknownArgs(keyNames, Collections.singletonList(usage));
+        if (checkUnknownArgs)
+            checkUnknownArgs(keyNames, Collections.singletonList(usage));
         return Arrays.stream(RunArg.values())
                 .filter(arg -> arg.isUsedIn(usage))
                 .collect(toMap(arg -> arg, arg -> arg.parse(json)));
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<RunArg, Object> parseConfig(JSONObject json, List<Usage> usages) {
+    public static Map<RunArg, Object> parseConfig(JSONObject json, List<Usage> usages, boolean checkUnknownArgs) {
         String[] keyNames = (String[]) json.keySet().stream().map(Object::toString).toArray(String[]::new);
-        checkUnknownArgs(keyNames, usages);
+        if (checkUnknownArgs)
+            checkUnknownArgs(keyNames, usages);
         return Arrays.stream(RunArg.values())
                 .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .collect(toMap(arg -> arg, arg -> arg.parse(json)));

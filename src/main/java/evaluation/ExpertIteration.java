@@ -24,7 +24,6 @@ import java.util.stream.IntStream;
 
 import static evaluation.RunArg.parseConfig;
 import static utilities.JSONUtils.loadClass;
-import static utilities.Utils.getArg;
 
 public class ExpertIteration {
 
@@ -44,6 +43,8 @@ public class ExpertIteration {
     AbstractPlayer bestAgent = null;
     int consecutiveTournamentWins = 0;
     Map<RunArg, Object> config;
+    Map<RunArg, Object> NTBEAConfig;
+    Map<RunArg, Object> RGConfig;
 
     int[] valueSearchSettings;
     int[] actionSearchSettings;
@@ -53,6 +54,8 @@ public class ExpertIteration {
     public ExpertIteration(String[] args) {
 
         config = parseConfig(args, Collections.singletonList(RunArg.Usage.ExpertIteration));
+        NTBEAConfig = parseConfig(args, Collections.singletonList(RunArg.Usage.ParameterSearch), false);
+        RGConfig = parseConfig(args, Collections.singletonList(RunArg.Usage.RunGames), false);
         nPlayers = (int) config.get(RunArg.nPlayers);
         matchups = (int) config.get(RunArg.matchups);
         iterations = (int) config.get(RunArg.iterations);
@@ -187,12 +190,6 @@ public class ExpertIteration {
     // any very poorly performing agents are removed from the list (dominated by all other agents)
     // This also checks for convergence; meaning that the best agent has not changed for 3 iterations
     private boolean gatherDataAndCheckConvergence() {
-        Map<RunArg, Object> RGConfig = new HashMap<>();
-        for (RunArg key : config.keySet()) {
-            if (key.isUsedIn(RunArg.Usage.RunGames)) {
-                RGConfig.put(key, config.get(key));
-            }
-        }
         RGConfig.put(RunArg.mode, "random");  // we are most interested in a wide range of data, so do not want to reuse random seeds
         RGConfig.put(RunArg.verbose, false);
 
@@ -301,12 +298,6 @@ public class ExpertIteration {
 
     private void tuneAgents(IStateHeuristic stateHeuristic, IActionHeuristic actionHeuristic) {
         // we now consider the value heuristic search space, and run NTBEA over this
-        Map<RunArg, Object> NTBEAConfig = new HashMap<>();
-        for (RunArg key : config.keySet()) {
-            if (key.isUsedIn(RunArg.Usage.ParameterSearch)) {
-                NTBEAConfig.put(key, config.get(key));
-            }
-        }
         NTBEAConfig.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
         NTBEAConfig.put(RunArg.repeats, 1);
         NTBEAConfig.put(RunArg.evalGames, 0);
