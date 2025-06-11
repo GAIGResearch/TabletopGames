@@ -213,6 +213,7 @@ public class LearnFromData {
                             continue;
 
                         String secondFeature = asf.names()[j];
+                        String interactionName = firstFeature + ":" + secondFeature;
                         AutomatedFeatures.featureType type2 = asf.getFeatureType(j);
 
                         if (type2 == RANGE)
@@ -221,13 +222,12 @@ public class LearnFromData {
                             continue;  // skip as it has a zero coefficient
 
 
-                        if (excludedInteractionFeatures.contains(firstFeature + ":" + secondFeature))
-                            continue;
+                        if (excludedInteractionFeatures.contains(interactionName))
+                            continue;  // we've already checked this one and it failed to help
 
                         // check that this is not already an interaction
-                        Pair<Integer, Integer> interaction = Pair.of(i, j);
                         if (asf.getColumnDetails().stream().anyMatch(r -> r.type() == INTERACTION &&
-                                r.interaction().equals(interaction))) {
+                                r.name().equals(interactionName))) {
                             //  System.out.println("Already an interaction: " + firstFeature + " : " + secondFeature);
                             continue;
                         }
@@ -250,9 +250,9 @@ public class LearnFromData {
                             bestBIC = newBIC;
                             bestFeatures = adjustedASF;
                             startingHeuristic = newHeuristic;
-                            bestFeatureDescription = firstFeature + " : " + secondFeature;
+                            bestFeatureDescription = interactionName;
                         } else if (newBIC > baseBIC) {
-                            excludedInteractionFeatures.add(firstFeature + ":" + secondFeature);
+                            excludedInteractionFeatures.add(interactionName);
                             //                  System.out.println("Interaction " + firstFeature + ":" + secondFeature + " excluded");
                         }
                     }
