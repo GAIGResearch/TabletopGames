@@ -179,11 +179,7 @@ public class LearnFromData {
                     // TODO: RANGE features are currently not considered for interactions
                     // TODO: If interactions are on RANGE features, then do we need to freeze this bucket level?
                     // TODO: Or, somehow map the new buckets to the old buckets? [messy]
-
-                    // TODO: INTERACTION features are not considered for interactions either
-                    // TODO: Removing the limit on simple 2-way interactions is a good later enhancement
-                    // TODO: as any arbitrary level interaction can be built up from a progressive series of 2-way interactions
-                    if (type1 == RANGE || type1 == INTERACTION)
+                    if (type1 == RANGE)
                         continue;
 
                     if (type1 == AutomatedFeatures.featureType.RAW && !excludedBucketFeatures.contains(firstFeature)) {
@@ -220,9 +216,6 @@ public class LearnFromData {
                         AutomatedFeatures.featureType type2 = asf.getFeatureType(j);
 
                         if (type2 == RANGE)
-                            continue;
-                        // currently we only support 2-way interactions between two original features
-                        if (type2 == INTERACTION)
                             continue;
                         if (excludedFeatures.contains(secondFeature))
                             continue;  // skip as it has a zero coefficient

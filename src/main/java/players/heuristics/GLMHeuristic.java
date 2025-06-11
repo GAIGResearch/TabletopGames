@@ -65,7 +65,7 @@ public abstract class GLMHeuristic implements ICoefficients {
         this.coefficients = x.a;
         if (x.b.isEmpty())
             return;
-        this.interactions = new int[x.b.size()][x.b.get(0).a.length];
+        this.interactions = new int[x.b.size()][];
         this.interactionCoefficients = new double[x.b.size()];
         for (int i = 0; i < interactions.length; i++) {
             interactions[i] = x.b.get(i).a;

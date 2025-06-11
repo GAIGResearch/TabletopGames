@@ -32,7 +32,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     List<Object> enumValues = new ArrayList<>();
     List<Pair<Number, Number>> featureRanges = new ArrayList<>();
     List<Integer> featureIndices = new ArrayList<>();
-    List<Pair<Integer, Integer>> interactions = new ArrayList<>();
+    List<List<Integer>> interactions = new ArrayList<>();
     int[] buckets;
 
     public AutomatedFeatures(IStateFeatureVector underlyingStateVector, IActionFeatureVector underlyingActionVector) {
@@ -138,7 +138,18 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             throw new IllegalArgumentException("Invalid feature indices for interaction: " + first + ", " + second);
         }
         featureNames.add(featureNames.get(first) + ":" + featureNames.get(second));
-        interactions.add(Pair.of(first, second));
+        List<Integer> interactionIndices = new ArrayList<>();
+        if (interactions.get(first) != null) {
+            interactionIndices.addAll(interactions.get(first));
+        } else {
+            interactionIndices.add(first);
+        }
+        if (interactions.get(second) != null) {
+            interactionIndices.addAll(interactions.get(second));
+        } else {
+            interactionIndices.add(second);
+        }
+        interactions.add(interactionIndices);
         featureTypes.add(featureType.INTERACTION);
         enumValues.add(null);
         featureRanges.add(null);
@@ -159,16 +170,18 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
         // we now need to rework interactions to account for the removed feature
         for (int j = 0; j < interactions.size(); j++) {
-            Pair<Integer, Integer> interaction = interactions.get(j);
+            List<Integer> interaction = interactions.get(j);
             if (interaction == null) continue; // this is not an interaction
-            if (interaction.a == i || interaction.b == i) {
+            if (interaction.contains(i)) {
                 throw new IllegalArgumentException("Cannot remove feature involved in interaction: " + i);
             }
-            if (interaction.a > i)
-                interaction = Pair.of(interaction.a - 1, interaction.b);
-            if (interaction.b > i)
-                interaction = Pair.of(interaction.a, interaction.b - 1);
-            interactions.set(j, interaction);
+            // Update all indices in the interaction list that are greater than i
+            for (int k = 0; k < interaction.size(); k++) {
+                int idx = interaction.get(k);
+                if (idx > i) {
+                    interaction.set(k, idx - 1);
+                }
+            }
         }
     }
 
@@ -293,10 +306,11 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         // second pass for interactions now that we have the raw data
         for (int i = 0; i < featureNames.size(); i++) {
             if (Objects.requireNonNull(featureTypes.get(i)) == featureType.INTERACTION) {
-                Pair<Integer, Integer> interaction = interactions.get(i);
-                double firstValue = featureVector[interaction.a];
-                double secondValue = featureVector[interaction.b];
-                featureVector[i] = firstValue * secondValue;
+                List<Integer> interaction = interactions.get(i);
+                featureVector[i] = 1.0;
+                for (int index : interaction) {
+                    featureVector[i] *= featureVector[index];
+                }
             }
         }
         return featureVector;
@@ -339,7 +353,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     }
 
     public record ColumnDetails(String name, featureType type, Object enumValue, Pair<Number, Number> range,
-                                int underlyingIndex, Class<?> clazz, Pair<Integer, Integer> interaction) {
+                                int underlyingIndex, Class<?> clazz, List<Integer> interaction) {
     }
 
     public List<ColumnDetails> getColumnDetails() {
@@ -503,25 +517,26 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         // if not, then we need to calculate them
         for (int i = 0; i < featureNames.size(); i++) {
             if (featureTypes.get(i) == featureType.INTERACTION) {
-                Pair<Integer, Integer> interaction = interactions.get(i);
-                String firstName = featureNames.get(interaction.a);
-                String secondName = featureNames.get(interaction.b);
-                String interactionName = firstName + ":" + secondName;
-                int firstIndex = -1;
-                int secondIndex = -1;
+                List<Integer> interaction = interactions.get(i);
+                List<String> componentNames = interaction.stream()
+                        .map(featureNames::get)
+                        .toList();
+                String interactionName = String.join(":", componentNames);
 
                 // We now need to find the indices for the interaction in the new data.
+                List<Integer> newIndices = new ArrayList<>(interaction);
                 for (int loop = 0; loop < newColumnDetails.size(); loop++) {
                     ColumnDetails columnDetails = newColumnDetails.get(loop);
-                    if (columnDetails.name.equals(firstName)) {
-                        firstIndex = loop;
-                    }
-                    if (columnDetails.name.equals(secondName)) {
-                        secondIndex = loop;
+                    // we now check if the columnDetails.name matches any of the interaction component names
+                    // if it does, then loop is the corresponding entry in newIndices
+                    for (int f = 0; f < interaction.size(); f++) {
+                        if (columnDetails.name.equals(componentNames.get(f))) {
+                            newIndices.set(f, loop);
+                        }
                     }
                 }
                 newColumnDetails.add(new ColumnDetails(
-                        interactionName, featureType.INTERACTION, null, null, -1, Double.class, Pair.of(firstIndex, secondIndex)
+                        interactionName, featureType.INTERACTION, null, null, -1, Double.class, newIndices
                 ));
                 if (headers.contains(interactionName)) {
                     // just copy over
@@ -531,13 +546,15 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     // need to calculate this
                     List<Double> interactionData = new ArrayList<>();
                     for (int j = 0; j < newDataColumns.get(0).size(); j++) {
-                        Object firstValueObj = newDataColumns.get(firstIndex).get(j);
-                        Object secondValueObj = newDataColumns.get(secondIndex).get(j);
-                        double firstValue = firstValueObj instanceof Number ? ((Number) firstValueObj).doubleValue() :
-                                firstValueObj instanceof String ? Double.parseDouble((String) firstValueObj) : 0;
-                        double secondValue = secondValueObj instanceof Number ? ((Number) secondValueObj).doubleValue() :
-                                secondValueObj instanceof String ? Double.parseDouble((String) secondValueObj) : 0;
-                        interactionData.add(firstValue * secondValue);
+                        double interactionValue = 1.0;
+                        for (int k = 0; k < newIndices.size(); k++) {
+                            int index = newIndices.get(k);
+                            Object valueObj = newDataColumns.get(index).get(j);
+                            double value = valueObj instanceof Number ? ((Number) valueObj).doubleValue() :
+                                    valueObj instanceof String ? Double.parseDouble((String) valueObj) : 0;
+                            interactionValue *= value;
+                        }
+                        interactionData.add(interactionValue);
                     }
                     newDataColumns.add(interactionData);
                 }
@@ -591,17 +608,13 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         }
         // update interactions here given changes to indices, as removing the TARGET columns will have changed the indices
         for (int i = 0; i < interactions.size(); i++) {
-            Pair<Integer, Integer> interaction = interactions.get(i);
+            List<Integer> interaction = interactions.get(i);
             if (interaction != null) {
                 String interactionName = featureNames.get(i);
                 // split this by :, then look up each component in featureNames
                 String[] components = interactionName.split(":");
                 List<Integer> indices = Arrays.stream(components).map(s -> featureNames.indexOf(s)).toList();
-                if (indices.size() == 2) {
-                    interactions.set(i, Pair.of(indices.get(0), indices.get(1)));
-                } else {
-                    throw new IllegalArgumentException("Unsupported interaction: " + interactionName);
-                }
+                interactions.set(i, indices);
             }
         }
 
