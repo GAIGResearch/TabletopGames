@@ -176,12 +176,15 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 throw new IllegalArgumentException("Cannot remove feature involved in interaction: " + i);
             }
             // Update all indices in the interaction list that are greater than i
+            List<Integer> updatedInteraction = new ArrayList<>();
             for (int k = 0; k < interaction.size(); k++) {
                 int idx = interaction.get(k);
-                if (idx > i) {
-                    interaction.set(k, idx - 1);
-                }
+                if (idx > i)
+                    updatedInteraction.add(idx - 1);
+                else
+                    updatedInteraction.add(idx);
             }
+            interactions.set(j, updatedInteraction);
         }
     }
 
