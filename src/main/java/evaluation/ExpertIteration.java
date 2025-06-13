@@ -150,19 +150,19 @@ public class ExpertIteration {
 
             // then load in the agents from the previous iterations
             for (int previousIter = 0; previousIter < restartAtIteration; previousIter++) {
+                AbstractPlayer newPlayer = null;
                 if (stateLearnerFile != null) {
                     // Full player json is in NTBEA output directory
                     String agentFileName = dataDir + File.separator + String.format("ValueNTBEA_%02d.json", previousIter);
-                    AbstractPlayer newPlayer = PlayerFactory.createPlayer(agentFileName);
-                    newPlayer.setName(String.format("ValueNTBEA_%02d.json", previousIter));
-                    agents.add(newPlayer);
+                    newPlayer = PlayerFactory.createPlayer(agentFileName);
+
                 }
                 if (actionLearnerFile != null) {
                     String agentFileName = dataDir + File.separator + String.format("ActionNTBEA_%02d.json", previousIter);
-                    AbstractPlayer newPlayer = PlayerFactory.createPlayer(agentFileName);
-                    newPlayer.setName(String.format("ActionNTBEA_%02d.json", previousIter));
-                    agents.add(newPlayer);
+                    newPlayer = PlayerFactory.createPlayer(agentFileName);
                 }
+                newPlayer.setName(String.format("NTBEA_%02d.json", previousIter));
+                agents.add(newPlayer);
             }
         }
 
@@ -234,12 +234,15 @@ public class ExpertIteration {
         tournament.run();
 
         // Are we done?
-        if (tournament.getWinner().equals(bestAgent)) {
+        if (tournament.getWinner().toString().equals(bestAgent.toString())) {
             consecutiveTournamentWins++;
         } else {
             consecutiveTournamentWins = 0;
         }
-        bestAgent = tournament.getWinner();
+        bestAgent = tournament.getWinner().copy();
+        if (bestAgent instanceof IAnyTimePlayer anyTime) {
+            anyTime.setBudget(budget); // make sure the budget is set on the best agent
+        }
         System.out.println("Best agent is " + bestAgent);
 
         if (agents.size() > nPlayers * 2) {
@@ -302,6 +305,7 @@ public class ExpertIteration {
         NTBEAConfig.put(RunArg.repeats, 1);
         NTBEAConfig.put(RunArg.evalGames, 0);
 
+        AbstractPlayer newTunedPlayer = null;
         if (!config.get(RunArg.valueSS).equals("")) {
             NTBEAConfig.put(RunArg.searchSpace, config.get(RunArg.valueSS));
             NTBEAConfig.put(RunArg.destDir, dataDir + File.separator + String.format("ValueNTBEA_%02d", iter));
@@ -311,15 +315,17 @@ public class ExpertIteration {
             ntbea.setOpponents(Collections.singletonList(bestAgent));
             ntbea.fixTunableParameter("heuristic", stateHeuristic);  // so this is used when tuning
 
-            if (actionSearchSettings != null && actionSearchSpace != null) {
-                // we can use the action search settings to initialise the value search settings
-                List<String> valueNames = valueSearchSpace.getDimensions();
-                for (int i = 0; i < actionSearchSettings.length; i++) {
-                    if (!valueNames.contains(actionSearchSpace.name(i))) {
-                        // usually we will have different parameters in the two searches, but if there is overlap we
-                        // 'forget' the previous value
-                        // otherwise we fix the non-optimised settings to the action search settings
-                        ntbea.fixTunableParameter(actionSearchSpace.name(i), actionSearchSpace.value(i, actionSearchSettings[i]));
+            if (actionSearchSettings != null) {
+                if (actionSearchSpace != null) {   // on first iteration we have results of action search
+                    // we can use the action search settings to initialise the value search settings
+                    List<String> valueNames = valueSearchSpace.getDimensions();
+                    for (int i = 0; i < actionSearchSettings.length; i++) {
+                        if (!valueNames.contains(actionSearchSpace.name(i))) {
+                            // usually we will have different parameters in the two searches, but if there is overlap we
+                            // 'forget' the previous value
+                            // otherwise we fix the non-optimised settings to the action search settings
+                            ntbea.fixTunableParameter(actionSearchSpace.name(i), actionSearchSpace.value(i, actionSearchSettings[i]));
+                        }
                     }
                 }
                 ntbea.fixTunableParameter("actionHeuristic", actionHeuristic);  // so this is used when tuning
@@ -329,12 +335,9 @@ public class ExpertIteration {
             ntbeaParams.printSearchSpaceDetails();
             Pair<Object, int[]> results = ntbea.run();
             valueSearchSettings = results.b;
-            AbstractPlayer bestPlayer = (AbstractPlayer) results.a;
-            String agentName = String.format("ValueNTBEA_%02d.json", iter);
-            bestPlayer.setName(agentName);
+            newTunedPlayer = (AbstractPlayer) results.a;
             valueSearchSpace = (ITPSearchSpace<?>) ntbeaParams.searchSpace;
-            valueSearchSpace.writeAgentJSON(valueSearchSettings, dataDir + File.separator + agentName);
-            agents.add(bestPlayer);
+            valueSearchSpace.writeAgentJSON(valueSearchSettings, dataDir + File.separator + String.format("ValueNTBEA_%02d.json", iter));
         }
         if (!config.get(RunArg.actionSS).equals("")) {
             NTBEAConfig.put(RunArg.searchSpace, config.get(RunArg.actionSS));
@@ -366,12 +369,11 @@ public class ExpertIteration {
             ntbeaParams.printSearchSpaceDetails();
             Pair<Object, int[]> results = ntbea.run();
             actionSearchSettings = results.b;
-            AbstractPlayer bestPlayer = (AbstractPlayer) results.a;
-            String agentName = String.format("ActionNTBEA_%02d.json", iter);
-            bestPlayer.setName(agentName);
-            actionSearchSpace.writeAgentJSON(actionSearchSettings, dataDir + File.separator + agentName);
-            agents.add(bestPlayer);
+            newTunedPlayer = (AbstractPlayer) results.a;
+            actionSearchSpace.writeAgentJSON(actionSearchSettings, dataDir + File.separator + String.format("ActionNTBEA_%02d.json", iter));
         }
-
+        String agentName = String.format("NTBEA_%02d.json", iter);
+        newTunedPlayer.setName(agentName);
+        agents.add(newTunedPlayer);
     }
 }

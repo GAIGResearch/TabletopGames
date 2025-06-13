@@ -207,7 +207,7 @@ public class LearnFromData {
                         }
                     }
 
-                    for (int j = i + 1; j < asf.names().length; j++) {
+                    for (int j = i ; j < asf.names().length; j++) {
                         // If the columns have the same underlying column, then skip
                         if (asf.getUnderlyingIndex(i) != -1 && asf.getUnderlyingIndex(i) == asf.getUnderlyingIndex(j))
                             continue;
