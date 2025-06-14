@@ -197,7 +197,7 @@ public enum RunArg {
             true,
             new Usage[]{Usage.ExpertIteration}),
     bicMultiplier("The multiplier for the BIC regulariser when selecting features. Default is 3.0.",
-            3.0,
+            3,
             new Usage[]{Usage.ExpertIteration}),
     seed("(Optional) Random seed to use for process. This is not the seed used for games, but the seed of \n" +
             "\t the random number generator used to generate these.",
