@@ -71,11 +71,14 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
         deck.add(newCard);
     }
 
+    public int getEmptyDeckCount() {
+        return Math.toIntExact(cardsIncludedInGame.values().stream().filter(i -> i == 0).count());
+    }
 
     public boolean gameOver() {
         DominionParameters params = (DominionParameters) gameParameters;
         return cardsIncludedInGame.get(CardType.PROVINCE) == 0 ||
-                cardsIncludedInGame.values().stream().filter(i -> i == 0).count() >= params.PILES_EXHAUSTED_FOR_GAME_END;
+                getEmptyDeckCount() >= params.PILES_EXHAUSTED_FOR_GAME_END;
     }
 
     public boolean drawCard(int playerId) {
