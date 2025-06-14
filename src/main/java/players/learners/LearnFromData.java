@@ -176,12 +176,12 @@ public class LearnFromData {
                     String firstFeature = asf.names()[i];
                     AutomatedFeatures.featureType type1 = asf.getFeatureType(i);
 
-                    // TODO: RANGE features are currently not considered for interactions
-                    // TODO: If interactions are on RANGE features, then do we need to freeze this bucket level?
-                    // TODO: Or, somehow map the new buckets to the old buckets? [messy]
-                    if (type1 == RANGE)
-                        continue;
-
+                    if (type1 == RANGE) {
+                        int underlyingIndex = asf.getUnderlyingIndex(i);
+                        String underlyingFeature = asf.names()[underlyingIndex];
+                        if (!excludedBucketFeatures.contains(underlyingFeature))
+                            continue;  // we only consider RANGE features for interactions once the bucketing is fixed
+                    }
                     if (type1 == AutomatedFeatures.featureType.RAW && !excludedBucketFeatures.contains(firstFeature)) {
                         // once a feature is below the base AIC, we save time by not checking it again
                         AutomatedFeatures adjustedASF = asf.copy();
@@ -207,7 +207,7 @@ public class LearnFromData {
                         }
                     }
 
-                    for (int j = i ; j < asf.names().length; j++) {
+                    for (int j = i; j < asf.names().length; j++) {
                         // If the columns have the same underlying column, then skip
                         if (asf.getUnderlyingIndex(i) != -1 && asf.getUnderlyingIndex(i) == asf.getUnderlyingIndex(j))
                             continue;
@@ -216,8 +216,12 @@ public class LearnFromData {
                         String interactionName = firstFeature + ":" + secondFeature;
                         AutomatedFeatures.featureType type2 = asf.getFeatureType(j);
 
-                        if (type2 == RANGE)
-                            continue;
+                        if (type2 == RANGE) {
+                            int underlyingIndex = asf.getUnderlyingIndex(j);
+                            String underlyingFeature = asf.names()[underlyingIndex];
+                            if (!excludedBucketFeatures.contains(underlyingFeature))
+                                continue;  // we only consider RANGE features for interactions once the bucketing is fixed
+                        }
                         if (excludedFeatures.contains(secondFeature))
                             continue;  // skip as it has a zero coefficient
 
