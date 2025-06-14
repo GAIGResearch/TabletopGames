@@ -21,7 +21,7 @@ import static players.learners.AbstractLearner.Target.*;
 public class LearnFromData {
 
     static int BUCKET_INCREMENT = 2;
-    static int BIC_MULTIPLIER = 3;
+    int bicMultiplier = 3;
 
     AbstractLearner learner;
     String outputFileName;
@@ -65,18 +65,19 @@ public class LearnFromData {
         String outputFileName = Utils.getArg(args, "output", "LearnedHeuristic.json");
 
         LearnFromData learnFromData = new LearnFromData(data, stateFeatures, actionFeatures,
-                outputFileName, learner);
+                outputFileName, learner, 3);
         learnFromData.learn();
     }
 
 
     public LearnFromData(String data, IStateFeatureVector stateFeatures, IActionFeatureVector actionFeatures,
-                         String outputFileName, AbstractLearner learner) {
+                         String outputFileName, AbstractLearner learner, int bicMultiplier) {
         this.stateFeatures = stateFeatures;
         this.actionFeatures = actionFeatures;
         this.outputFileName = outputFileName;
         this.learner = learner;
         this.data = data;
+        this.bicMultiplier = bicMultiplier;
     }
 
     public Object learn() {
@@ -128,7 +129,7 @@ public class LearnFromData {
         return learnedThing;
     }
 
-    private static Object improveModel(Object startingHeuristic,
+    private Object improveModel(Object startingHeuristic,
                                        AbstractLearner learner,
                                        int n,
                                        String... dataFiles) {
@@ -334,10 +335,8 @@ public class LearnFromData {
         return startingHeuristic;
     }
 
-    private static double bicFromAic(double aic, int k, int n) {
+    private double bicFromAic(double aic, int k, int n) {
         double nll = aic / 2.0 - k;
-        return 2 * nll + BIC_MULTIPLIER * k * Math.log(n);
-        // TODO: Based on how long this is taking, we can increase the BIC_MULTIPLIER to reduce the number of iterations
-        // and speed up the overall process. Perhaps after an initial B budget, we increase it...and so on.
+        return 2 * nll + bicMultiplier * k * Math.log(n);
     }
 }

@@ -35,7 +35,7 @@ public class ExpertIteration {
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
     FeatureListener stateListener, actionListener;
-    int nPlayers, matchups, iterations, iter;
+    int nPlayers, matchups, iterations, iter, bicMultiplier;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     boolean useRounds, useStateInAction;
@@ -64,6 +64,7 @@ public class ExpertIteration {
         player = (String) config.get(RunArg.playerDirectory);
         dataDir = (String) config.get(RunArg.destDir);
         gameToPlay = GameType.valueOf((String) config.get(RunArg.game));
+        bicMultiplier = (int) config.get(RunArg.bicMultiplier);
 
         params = AbstractParameters.createFromFile(gameToPlay, (String) config.get(RunArg.gameParams));
 
@@ -283,7 +284,8 @@ public class ExpertIteration {
                     stateFeatureVector,
                     null,
                     dataDir + File.separator + fileName,
-                    loadClass(stateLearnerFile));
+                    loadClass(stateLearnerFile),
+                    bicMultiplier);
             stateHeuristic = (IStateHeuristic) learnFromData.learn();
         }
         if (actionLearnerFile != null) {
@@ -293,7 +295,8 @@ public class ExpertIteration {
                     useStateInAction ? stateFeatureVector : null,
                     actionFeatureVector,
                     dataDir + File.separator + fileName,
-                    loadClass(actionLearnerFile));
+                    loadClass(actionLearnerFile),
+                    bicMultiplier);
             actionHeuristic = (IActionHeuristic) learnFromData.learn();
         }
         return Pair.of(stateHeuristic, actionHeuristic);
