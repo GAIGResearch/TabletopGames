@@ -23,8 +23,8 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
         // victoryPoints - simply the current score
         retValue[0] = state.getGameScore(playerId);
 
-        // treasureValue - total treasure in hand
-        retValue[1] = state.getTotal(playerId, DominionCard::treasureValue);
+        // treasureValue - mean treasure value per card
+        retValue[1] = (double) state.getTotal(playerId, DominionCard::treasureValue) / state.getTotalCards(playerId);
 
         // actionCards - percentage of deck made of action cards
         retValue[2] = state.getTotal(playerId, c -> c.isActionCard() ? 1 : 0) /
@@ -42,7 +42,7 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
 
         // buysLeft
         if (state.getCurrentPlayer() == playerId)
-            retValue[6] = state.getBuysLeft() / 5.0;
+            retValue[6] = state.getBuysLeft();
 
         retValue[7] = state.getTotal(playerId, c -> c.cardType() == CardType.PROVINCE ? 1 : 0);
 
