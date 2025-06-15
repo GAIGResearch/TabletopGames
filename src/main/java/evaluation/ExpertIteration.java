@@ -24,7 +24,6 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static evaluation.RunArg.everyN;
 import static evaluation.RunArg.parseConfig;
 import static utilities.JSONUtils.loadClass;
 
