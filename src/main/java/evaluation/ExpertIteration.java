@@ -16,12 +16,15 @@ import games.GameType;
 import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.learners.LearnFromData;
+import players.mcts.MCTSExpertIterationListener;
+import players.mcts.MCTSPlayer;
 import utilities.Pair;
 
 import java.io.File;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static evaluation.RunArg.everyN;
 import static evaluation.RunArg.parseConfig;
 import static utilities.JSONUtils.loadClass;
 
@@ -35,7 +38,7 @@ public class ExpertIteration {
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
     FeatureListener stateListener, actionListener;
-    int nPlayers, matchups, iterations, iter, bicMultiplier;
+    int nPlayers, matchups, iterations, iter, bicMultiplier, everyN;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     boolean useRounds, useStateInAction;
@@ -65,6 +68,7 @@ public class ExpertIteration {
         dataDir = (String) config.get(RunArg.destDir);
         gameToPlay = GameType.valueOf((String) config.get(RunArg.game));
         bicMultiplier = (int) config.get(RunArg.bicMultiplier);
+        everyN = (int) config.get(RunArg.everyN);
 
         params = AbstractParameters.createFromFile(gameToPlay, (String) config.get(RunArg.gameParams));
 
@@ -212,7 +216,7 @@ public class ExpertIteration {
             stateListener = new StateFeatureListener(stateFeatureVector,
                     useRounds ? Event.GameEvent.ROUND_OVER : Event.GameEvent.TURN_OVER,
                     false, "dummy.txt");
-            stateListener.setNth(13);
+            stateListener.setNth(everyN);
             String fileName = String.format("State_%s_%02d.txt", prefix, iter);
             stateListener.setLogger(new FileStatsLogger(fileName, "\t", false));
             stateListener.setOutputDirectory(dataDir);
@@ -221,10 +225,28 @@ public class ExpertIteration {
             stateDataFilesByIteration[iter] = dataDir + File.separator + fileName;
         }
         if (actionLearnerFile != null) {
-            actionListener = new ActionFeatureListener(actionFeatureVector, stateFeatureVector,
-                    Event.GameEvent.ACTION_CHOSEN,
-                    true, "dummy.txt");
-            actionListener.setNth(17);
+            String expert = (String) config.get(RunArg.expert);
+            MCTSPlayer oracle = (MCTSPlayer) bestAgent.copy();
+            // For the oracle we set a high budget, and tweak parameters to ensure some exploration
+            oracle.setName("Oracle");
+            oracle.setBudget(budget * 10);
+            oracle.getParameters().setParameterValue("rolloutLength", 10);
+            oracle.getParameters().setParameterValue("reuseTree", false);
+            oracle.getParameters().setParameterValue("maxTreeDepth", 1000);
+            if (((double) oracle.getParameters().getParameterValue("FPU")) < 1000.0)
+                oracle.getParameters().setParameterValue("FPU", 1000.0);
+            if (((double) oracle.getParameters().getParameterValue("K")) < 1.0)
+                oracle.getParameters().setParameterValue("K", 1.0);
+            actionListener = switch (expert) {
+                case "BASE" -> new ActionFeatureListener(actionFeatureVector, stateFeatureVector,
+                        Event.GameEvent.ACTION_CHOSEN,
+                        true, "dummy.txt");
+                case "MCTS" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
+                        100, 0,
+                        "dummy.txt");
+                default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
+            };
+            actionListener.setNth(everyN);
             String fileName = String.format("Action_%s_%02d.txt", prefix, iter);
             actionListener.setLogger(new FileStatsLogger(fileName, "\t", false));
             actionListener.setOutputDirectory(dataDir);

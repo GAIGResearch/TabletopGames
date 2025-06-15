@@ -199,6 +199,12 @@ public enum RunArg {
     bicMultiplier("The multiplier for the BIC regulariser when selecting features. Default is 3.0.",
             3,
             new Usage[]{Usage.ExpertIteration}),
+    everyN("We only record data every Nth tick to reduce correlation in training data generated.",
+            17,
+            new Usage[]{Usage.ExpertIteration}),
+    expert("An expert player to use for the ExpertIteration process. Either MCTS or BASE.",
+            "BASE",
+            new Usage[]{Usage.ExpertIteration}),
     seed("(Optional) Random seed to use for process. This is not the seed used for games, but the seed of \n" +
             "\t the random number generator used to generate these.",
             System.currentTimeMillis(),

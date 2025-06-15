@@ -17,13 +17,13 @@ import java.util.stream.IntStream;
  */
 public abstract class FeatureListener implements IGameListener {
 
-    List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
-    Event.GameEvent frequency;
+    protected List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
+    protected Event.GameEvent frequency;
     boolean currentPlayerOnly;
-    IStatisticLogger logger;
-    Game game;
-    int everyN = 1;
-    int currentRecordCount = 0;
+    protected IStatisticLogger logger;
+    protected Game game;
+    protected int everyN = 1;
+    protected int currentRecordCount = 0;
 
     protected FeatureListener(Event.GameEvent frequency, boolean currentPlayerOnly) {
         this.currentPlayerOnly = currentPlayerOnly;
@@ -111,14 +111,29 @@ public abstract class FeatureListener implements IGameListener {
             for (int i = 0; i < record.actionScores.length; i++) {
                 data.put(record.actionScoreNames[i], record.actionScores[i]);
             }
-            data.put("Win", winLoss[record.player]);
-            data.put("Ordinal", ordinal[record.player]);
-            data.put("FinalScore", finalScores[record.player]);
+            // We record the actual results of the game. If the sub-class Listener has not
+            // set the corresponding Target fields (Win, Ordinal, FinalScore, FinalScoreAdv), then
+            // we set these to default to the actual end game values.
+            data.put("ActualWin", winLoss[record.player]);
+            if (!data.containsKey("Win")) {
+                data.put("Win", winLoss[record.player]);
+            }
+            data.put("ActualOrdinal", ordinal[record.player]);
+            if (!data.containsKey("Ordinal")) {
+                data.put("Ordinal", ordinal[record.player]);
+            }
+            data.put("ActualScore", finalScores[record.player]);
+            if (!data.containsKey("FinalScore")) {
+                data.put("FinalScore", finalScores[record.player]);
+            }
             double bestOtherScore = IntStream.range(0, totP)
                     .filter(p -> p != record.player)
                     .mapToDouble(i -> finalScores[i])
                     .max().orElse(0);
-            data.put("FinalScoreAdv", finalScores[record.player] - bestOtherScore);
+            data.put("ActualScoreAdv", finalScores[record.player] - bestOtherScore);
+            if (!data.containsKey("FinalScoreAdv")) {
+                data.put("FinalScoreAdv", finalScores[record.player] - bestOtherScore);
+            }
             logger.record(data);
         }
         logger.processDataAndNotFinish();
@@ -181,7 +196,7 @@ public abstract class FeatureListener implements IGameListener {
     }
 
     // To avoid incessant boxing / unboxing if we were to use Double
-    static class LocalDataWrapper {
+    protected static class LocalDataWrapper {
         final int player;
         final int gameTurn;
         final int gameRound;
@@ -207,10 +222,10 @@ public abstract class FeatureListener implements IGameListener {
                 i++;
             }
         }
-        LocalDataWrapper(int player, Object[] contents, AbstractGameState state, Map<String, Double> actionScore) {
+        public LocalDataWrapper(int player, Object[] contents, AbstractGameState state, Map<String, Double> actionScore) {
             this(player, new double[0], contents, state, actionScore);
         }
-        LocalDataWrapper(int player, double[] contents, AbstractGameState state, Map<String, Double> actionScore) {
+        public LocalDataWrapper(int player, double[] contents, AbstractGameState state, Map<String, Double> actionScore) {
             this(player, contents, new Object[0], state, actionScore);
         }
 

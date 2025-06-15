@@ -2,6 +2,7 @@ package games.dominion.metrics;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IActionFeatureVector;
 import games.dominion.actions.*;
 import games.dominion.cards.CardType;
@@ -21,7 +22,8 @@ public class DomActionFeatures implements IActionFeatureVector {
         BUY,
         TRASH,
         GAIN,
-        DISCARD
+        DISCARD,
+        PASS
     }
 
     @Override
@@ -47,6 +49,9 @@ public class DomActionFeatures implements IActionFeatureVector {
         } else if (action instanceof DominionAction play) {
             retValue[0] = ActionType.PLAY;
             retValue[1] = play.type;
+        } else if (action instanceof DoNothing || action instanceof EndPhase) {
+            retValue[0] = ActionType.PASS;
+            retValue[1] = null; // No card type for DoNothing or EndPhase
         }
         return retValue;
     }

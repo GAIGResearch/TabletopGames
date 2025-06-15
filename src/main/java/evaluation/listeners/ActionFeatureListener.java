@@ -28,7 +28,7 @@ public class ActionFeatureListener extends FeatureListener {
     protected IStateFeatureVector phiFn;
     protected double[] cachedPhi;
     protected Object[] cachedObjectPhi;
-    private Map<String, Map<AbstractAction, Double>> actionValues = new HashMap<>();
+    protected Map<String, Map<AbstractAction, Double>> actionValues = new HashMap<>();
 
     public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken, String fileName) {
         super(frequency, true);
@@ -87,11 +87,6 @@ public class ActionFeatureListener extends FeatureListener {
         return retValue;
     }
 
-    protected void processStateWithTargets(AbstractGameState state, AbstractAction action, Map<String, Map<AbstractAction, Double>> targets) {
-        actionValues = targets;
-        processState(state, action);
-    }
-
     @Override
     public void processState(AbstractGameState state, AbstractAction action) {
         // we override this from FeatureListener, because we want to record the feature vector for each action
@@ -139,7 +134,7 @@ public class ActionFeatureListener extends FeatureListener {
         actionValues.clear();
     }
 
-    private Map<String, Double> getActionScores(AbstractAction action) {
+    protected Map<String, Double> getActionScores(AbstractAction action) {
         Map<String, Double> retValue = new HashMap<>();
         for (String key : actionValues.keySet()) {
             retValue.put(key, actionValues.get(key).get(action));
