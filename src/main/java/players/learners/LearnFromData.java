@@ -209,10 +209,6 @@ public class LearnFromData {
                     }
 
                     for (int j = i; j < asf.names().length; j++) {
-                        // If the columns have the same underlying column, then skip
-                        if (asf.getUnderlyingIndex(i) != -1 && asf.getUnderlyingIndex(i) == asf.getUnderlyingIndex(j))
-                            continue;
-
                         String secondFeature = asf.names()[j];
                         String interactionName = firstFeature + ":" + secondFeature;
                         AutomatedFeatures.featureType type2 = asf.getFeatureType(j);
