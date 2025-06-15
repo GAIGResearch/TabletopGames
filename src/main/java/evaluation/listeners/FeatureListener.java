@@ -149,17 +149,6 @@ public abstract class FeatureListener implements IGameListener {
      */
     public abstract Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
-    /**
-     * this takes in the raw JSON string of an agent definition, and applies appropriate
-     * string replacements to inject the relevant features to use. The two standards are:
-     * *PHI* for an IStateFeatureVector implementation
-     * *PSI* for an IActionFeatureVector implementation
-     *
-     * @param raw
-     * @return
-     */
-    public abstract String injectAgentAttributes(String raw);
-
     public void processState(AbstractGameState state, AbstractAction action) {
         // we record one state for each player after each relevant event occurs
         // we first determine if the data is double[] or Object[]

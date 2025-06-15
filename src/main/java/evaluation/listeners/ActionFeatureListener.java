@@ -148,12 +148,4 @@ public class ActionFeatureListener extends FeatureListener {
             throw new AssertionError("Action " + action.toString() + " not found in action values map");
         return retValue;
     }
-
-
-    @Override
-    public String injectAgentAttributes(String raw) {
-        return raw.replaceAll(Pattern.quote("*PSI*"), psiFn.getClass().getCanonicalName())
-                .replaceAll(Pattern.quote("*PHI*"), phiFn != null ? phiFn.getClass().getCanonicalName() : "NONE");
-    }
-
 }

@@ -36,9 +36,4 @@ public class StateFeatureListener extends FeatureListener {
     public Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         return phiFn.featureVector(state, perspectivePlayer);
     }
-
-    @Override
-    public String injectAgentAttributes(String raw) {
-        return raw.replaceAll(Pattern.quote("*PHI*"), phiFn.getClass().getCanonicalName());
-    }
 }
