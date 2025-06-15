@@ -229,7 +229,7 @@ public class ExpertIteration {
             // For the oracle we set a high budget, and tweak parameters to ensure some exploration
             oracle.setName("Oracle");
             oracle.setBudget(budget * 10);
-            oracle.getParameters().setParameterValue("rolloutLength", 10);
+ //           oracle.getParameters().setParameterValue("rolloutLength", 10);
             oracle.getParameters().setParameterValue("reuseTree", false);
             oracle.getParameters().setParameterValue("maxTreeDepth", 1000);
             if (((double) oracle.getParameters().getParameterValue("FPU")) < 1000.0)
