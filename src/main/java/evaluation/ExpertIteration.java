@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static evaluation.RunArg.bicTimer;
 import static evaluation.RunArg.parseConfig;
 import static utilities.JSONUtils.loadClass;
 
@@ -37,7 +38,7 @@ public class ExpertIteration {
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
     FeatureListener stateListener, actionListener;
-    int nPlayers, matchups, iterations, iter, bicMultiplier, everyN;
+    int nPlayers, matchups, iterations, iter, bicMultiplier, bicTimer, everyN, expertTime;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     boolean useRounds, useStateInAction;
@@ -67,7 +68,9 @@ public class ExpertIteration {
         dataDir = (String) config.get(RunArg.destDir);
         gameToPlay = GameType.valueOf((String) config.get(RunArg.game));
         bicMultiplier = (int) config.get(RunArg.bicMultiplier);
+        bicTimer = (int) config.get(RunArg.bicTimer);
         everyN = (int) config.get(RunArg.everyN);
+        expertTime = (int) config.get(RunArg.expertTime);
 
         params = AbstractParameters.createFromFile(gameToPlay, (String) config.get(RunArg.gameParams));
 
@@ -228,7 +231,7 @@ public class ExpertIteration {
             MCTSPlayer oracle = (MCTSPlayer) bestAgent.copy();
             // For the oracle we set a high budget, and tweak parameters to ensure some exploration
             oracle.setName("Oracle");
-            oracle.setBudget(budget * 10);
+            oracle.setBudget(budget * expertTime);
  //           oracle.getParameters().setParameterValue("rolloutLength", 10);
             oracle.getParameters().setParameterValue("reuseTree", false); // we only look at occasional actions
             oracle.getParameters().setParameterValue("maxTreeDepth", 1000);
@@ -306,7 +309,8 @@ public class ExpertIteration {
                     null,
                     dataDir + File.separator + fileName,
                     loadClass(stateLearnerFile),
-                    bicMultiplier);
+                    bicMultiplier,
+                    bicTimer);
             stateHeuristic = (IStateHeuristic) learnFromData.learn();
         }
         if (actionLearnerFile != null) {
@@ -317,7 +321,8 @@ public class ExpertIteration {
                     actionFeatureVector,
                     dataDir + File.separator + fileName,
                     loadClass(actionLearnerFile),
-                    bicMultiplier);
+                    bicMultiplier,
+                    bicTimer);
             actionHeuristic = (IActionHeuristic) learnFromData.learn();
         }
         return Pair.of(stateHeuristic, actionHeuristic);

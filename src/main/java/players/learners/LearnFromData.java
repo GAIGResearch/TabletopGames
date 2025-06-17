@@ -21,7 +21,9 @@ import static players.learners.AbstractLearner.Target.*;
 public class LearnFromData {
 
     static int BUCKET_INCREMENT = 2;
-    int bicMultiplier = 3;
+    final int baseBicMultiplier;
+    int bicMultiplier;
+    int bicTimer;
 
     AbstractLearner learner;
     String outputFileName;
@@ -65,19 +67,21 @@ public class LearnFromData {
         String outputFileName = Utils.getArg(args, "output", "LearnedHeuristic.json");
 
         LearnFromData learnFromData = new LearnFromData(data, stateFeatures, actionFeatures,
-                outputFileName, learner, 3);
+                outputFileName, learner, 3, 30);
         learnFromData.learn();
     }
 
 
     public LearnFromData(String data, IStateFeatureVector stateFeatures, IActionFeatureVector actionFeatures,
-                         String outputFileName, AbstractLearner learner, int bicMultiplier) {
+                         String outputFileName, AbstractLearner learner, int bicMultiplier, int bicTimer) {
         this.stateFeatures = stateFeatures;
         this.actionFeatures = actionFeatures;
         this.outputFileName = outputFileName;
         this.learner = learner;
         this.data = data;
+        this.baseBicMultiplier = bicMultiplier;
         this.bicMultiplier = bicMultiplier;
+        this.bicTimer = bicTimer;
     }
 
     public Object learn() {
@@ -134,6 +138,7 @@ public class LearnFromData {
                                        int n,
                                        String... dataFiles) {
 
+        long startTime = System.currentTimeMillis();
         if (startingHeuristic instanceof GLMHeuristic glm) {
             AutomatedFeatures asf;
             if (learner.targetType == ACTION_SCORE || learner.targetType == ACTION_VISITS ||
@@ -274,6 +279,10 @@ public class LearnFromData {
                     System.out.println("New BIC: " + bestBIC);
                     asf = bestFeatures;
                 }
+
+                // increment bicMultiplier if time is getting on
+                int minutesElapsed = (int) ((System.currentTimeMillis() - startTime) / 60000);
+                bicMultiplier = (minutesElapsed / bicTimer + 1) * baseBicMultiplier;
             } while (bestFeatures != null);
 
             List<AutomatedFeatures.ColumnDetails> interactionColumns = asf.getColumnDetails().stream()
