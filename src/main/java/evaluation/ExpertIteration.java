@@ -143,6 +143,9 @@ public class ExpertIteration {
         agents = new ArrayList<>(PlayerFactory.createPlayers(player));
         bestAgent = agents.get(0);
 
+        IStateHeuristic currentStateHeuristic = null;
+        IActionHeuristic currentActionHeuristic = null;
+
         int restartAtIteration = restartIteration();
 
         if (restartAtIteration > 0) {
@@ -184,10 +187,13 @@ public class ExpertIteration {
 
             Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
 
-            IActionHeuristic actionHeuristic = learnedHeuristics.b;
-            IStateHeuristic stateHeuristic = learnedHeuristics.a;
+            IActionHeuristic newActionHeuristic = learnedHeuristics.b;
+            IStateHeuristic newStateHeuristic = learnedHeuristics.a;
 
-            tuneAgents(stateHeuristic, actionHeuristic);
+            tuneAgents(newStateHeuristic, newActionHeuristic, currentActionHeuristic);
+
+            currentStateHeuristic = newStateHeuristic;
+            currentActionHeuristic = newActionHeuristic;
 
             iter++;
         } while (true);
@@ -328,7 +334,7 @@ public class ExpertIteration {
         return Pair.of(stateHeuristic, actionHeuristic);
     }
 
-    private void tuneAgents(IStateHeuristic stateHeuristic, IActionHeuristic actionHeuristic) {
+    private void tuneAgents(IStateHeuristic stateHeuristic, IActionHeuristic actionHeuristic, IActionHeuristic oldActionHeuristic) {
         // we now consider the value heuristic search space, and run NTBEA over this
         NTBEAConfig.put(RunArg.opponent, "random"); // this is overridden by bestAgent later...but is mandatory
         NTBEAConfig.put(RunArg.repeats, 1);
@@ -357,8 +363,11 @@ public class ExpertIteration {
                         }
                     }
                 }
-                ntbea.fixTunableParameter("actionHeuristic", actionHeuristic);  // so this is used when tuning
-                ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);
+                // as well as the old action-tuned settings, we also use the old action heuristic for which they were tuned
+                if (oldActionHeuristic != null) {
+                    ntbea.fixTunableParameter("actionHeuristic", oldActionHeuristic);
+                    ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", oldActionHeuristic);
+                }
             }
 
             ntbeaParams.printSearchSpaceDetails();
