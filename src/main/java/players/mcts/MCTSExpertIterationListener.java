@@ -88,6 +88,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             actionValues.put("VISIT_PROPORTION", new HashMap<>());
             actionValues.put("ADVANTAGE", new HashMap<>());
             actionValues.put("ACTION_VALUE", new HashMap<>());
+            actionValues.put("STATE_VALUE", new HashMap<>());
             actionValues.put("DEPTH", new HashMap<>());
             actionValues.put("NODE_VISITS", new HashMap<>());
             actionValues.put("ACTION_VISITS", new HashMap<>());
@@ -110,6 +111,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                     continue;
                 }
                 double actionValue = node.actionTotValue(action, player) / node.actionVisits(action);
+                actionValues.get("STATE_VALUE").put(action, stateValue);
                 actionValues.get("ACTION_VALUE").put(action, actionValue);
                 if (actionValue > bestValue) {
                     bestValue = actionValue;
