@@ -30,13 +30,12 @@ public class ActionFeatureListener extends FeatureListener {
     protected Object[] cachedObjectPhi;
     protected Map<String, Map<AbstractAction, Double>> actionValues = new HashMap<>();
 
-    public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken, String fileName) {
+    public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken) {
         super(frequency, true);
         if (psi == null) throw new AssertionError("Action Features must be provided and cannot be null");
         this.psiFn = psi;
         this.phiFn = phi;
         this.includeActionsNotTaken = includeActionsNotTaken;
-        logger = new FileStatsLogger(fileName);
     }
 
     @Override
@@ -143,4 +142,14 @@ public class ActionFeatureListener extends FeatureListener {
             throw new AssertionError("Action " + action.toString() + " not found in action values map");
         return retValue;
     }
+
+
+    public IStateFeatureVector getPhiFn() {
+        return phiFn;
+    }
+
+    public IActionFeatureVector getPsiFn() {
+        return psiFn;
+    }
+
 }

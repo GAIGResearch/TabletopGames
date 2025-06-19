@@ -223,7 +223,7 @@ public class ExpertIteration {
         if (stateLearnerFile != null) {
             stateListener = new StateFeatureListener(stateFeatureVector,
                     useRounds ? Event.GameEvent.ROUND_OVER : Event.GameEvent.TURN_OVER,
-                    false, "dummy.txt");
+                    false);
             stateListener.setNth(everyN);
             String fileName = String.format("State_%s_%02d.txt", prefix, iter);
             stateListener.setLogger(new FileStatsLogger(fileName, "\t", false));
@@ -248,10 +248,9 @@ public class ExpertIteration {
             actionListener = switch (expert) {
                 case "BASE" -> new ActionFeatureListener(actionFeatureVector, stateFeatureVector,
                         Event.GameEvent.ACTION_CHOSEN,
-                        true, "dummy.txt");
+                        true);
                 case "MCTS" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
-                        100, 0,
-                        "dummy.txt");
+                        100, 0);
                 default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
             };
             actionListener.setNth(everyN);

@@ -69,7 +69,6 @@ public abstract class FeatureListener implements IGameListener {
 
     @Override
     public boolean setOutputDirectory(String... nestedDirectories) {
-
         if (logger instanceof FileStatsLogger fileLogger) {
             fileLogger.setOutPutDirectory(nestedDirectories);
         }

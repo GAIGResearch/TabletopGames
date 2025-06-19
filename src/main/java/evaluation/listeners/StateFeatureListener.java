@@ -18,10 +18,9 @@ public class StateFeatureListener extends FeatureListener {
 
     IStateFeatureVector phiFn;
 
-    public StateFeatureListener(IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly, String fileName) {
+    public StateFeatureListener(IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly) {
         super(frequency, currentPlayerOnly);
         this.phiFn = phi;
-        logger = new FileStatsLogger(fileName);
     }
 
     @Override

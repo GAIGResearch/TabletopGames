@@ -1,19 +1,14 @@
 package players.mcts;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
-import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
 import evaluation.listeners.ActionFeatureListener;
-import evaluation.listeners.FeatureListener;
 import evaluation.listeners.StateFeatureListener;
 import evaluation.metrics.Event;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.toMap;
 
 public class MCTSExpertIterationListener extends ActionFeatureListener {
 
@@ -28,8 +23,8 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
      * according to the oracle agent.
      */
     public MCTSExpertIterationListener(MCTSPlayer oracle, IActionFeatureVector actionFeatures, IStateFeatureVector stateFeatures,
-                                       int visitThreshold, int maxDepth, String fileName) {
-        super(actionFeatures, stateFeatures, Event.GameEvent.ACTION_CHOSEN, true, fileName);
+                                       int visitThreshold, int maxDepth) {
+        super(actionFeatures, stateFeatures, Event.GameEvent.ACTION_CHOSEN, true);
         this.visitThreshold = visitThreshold;
         this.oracle = oracle;
         this.maxDepth = maxDepth;
@@ -50,13 +45,13 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
         oracle.setForwardModel(game.getForwardModel());
         oracle.getAction(state, availableActions);
         recordData(oracle.root);
-//        System.out.println("Recorded data for Tick " + state.getGameTick() + " in Game " + state.getGameID() +
-//                " for Player " + state.getCurrentPlayer() + " with " + oracle.root.getVisits() + " visits");
 
-        // TODO: What about the state value? Add a linked StateFeatureListener that takes in the state value
-
+        // TODO: then we also record the state features
     }
 
+    public MCTSPlayer getOracle() {
+        return oracle;
+    }
 
     public void recordData(SingleTreeNode root) {
 
@@ -111,7 +106,6 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                     continue;
                 }
                 double actionValue = node.actionTotValue(action, player) / node.actionVisits(action);
-                actionValues.get("STATE_VALUE").put(action, stateValue);
                 actionValues.get("ACTION_VALUE").put(action, actionValue);
                 if (actionValue > bestValue) {
                     bestValue = actionValue;
@@ -128,7 +122,10 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             actionValues.get("CHOSEN").put(bestAction, 1.0);
 
             if (actionsFromState.size() > 1) {
+                // the super class will then pull in the feature vectors for state and all actions
+                // and populate the main currentData map (then held until the end of the game so it can be updated with final scores)
                 super.processState(node.state, bestAction);
+                // TODO: having done that, we can now record *just* the state value
             }
 
             // add children of current node to queue if they meet the criteria
