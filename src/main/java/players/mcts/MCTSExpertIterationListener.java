@@ -14,6 +14,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
 
     public int visitThreshold, maxDepth;
     MCTSPlayer oracle;
+    MCTSExpertIterationStateRecorder stateRecorder;
 
     /**
      * This Listener is used to record the statistics of the MCTS tree during expert iteration.
@@ -28,6 +29,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
         this.visitThreshold = visitThreshold;
         this.oracle = oracle;
         this.maxDepth = maxDepth;
+        this.stateRecorder = new MCTSExpertIterationStateRecorder(this);
     }
 
     @Override
@@ -44,9 +46,11 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
 
         oracle.setForwardModel(game.getForwardModel());
         oracle.getAction(state, availableActions);
+        // recordData will call the super.processState() method, which will then record the feature vectors
         recordData(oracle.root);
 
-        // TODO: then we also record the state features
+        // then we also record the state (this only works for the root node currently)
+        stateRecorder.processState(state, action);
     }
 
     public MCTSPlayer getOracle() {
@@ -83,7 +87,6 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             actionValues.put("VISIT_PROPORTION", new HashMap<>());
             actionValues.put("ADVANTAGE", new HashMap<>());
             actionValues.put("ACTION_VALUE", new HashMap<>());
-            actionValues.put("STATE_VALUE", new HashMap<>());
             actionValues.put("DEPTH", new HashMap<>());
             actionValues.put("NODE_VISITS", new HashMap<>());
             actionValues.put("ACTION_VISITS", new HashMap<>());
@@ -115,7 +118,6 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                 double visitProportion = (double) node.actionVisits(action) / node.getVisits();
                 actionValues.get("VISIT_PROPORTION").put(action, visitProportion);
                 actionValues.get("ADVANTAGE").put(action, actionValue - stateValue);
-
             }
 
             // the best action is the highest scoring one in the available set (which may not be the best one overall away from the root)
@@ -125,7 +127,6 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                 // the super class will then pull in the feature vectors for state and all actions
                 // and populate the main currentData map (then held until the end of the game so it can be updated with final scores)
                 super.processState(node.state, bestAction);
-                // TODO: having done that, we can now record *just* the state value
             }
 
             // add children of current node to queue if they meet the criteria

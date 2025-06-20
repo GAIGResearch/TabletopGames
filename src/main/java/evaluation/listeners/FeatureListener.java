@@ -17,7 +17,12 @@ import java.util.stream.IntStream;
  */
 public abstract class FeatureListener implements IGameListener {
 
+    // currentData is the data specified by the feature vector
+    // overrideData is then used to override the final values recorded at the end of the game
     protected List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
+    protected List<Map<String, Object>> overrideData = new ArrayList<>();
+    // TODO: use this if it is non-empty (and it must be same size as currentData)
+    // TODO: then provide option to override this for MCTS State values
     protected Event.GameEvent frequency;
     boolean currentPlayerOnly;
     protected IStatisticLogger logger;
@@ -85,9 +90,15 @@ public abstract class FeatureListener implements IGameListener {
         }).toArray();
         double[] ordinal = IntStream.range(0, totP).mapToDouble(state::getOrdinalPosition).toArray();
         double finalRound = state.getRoundCounter();
+        if (!overrideData.isEmpty() && overrideData.size() != currentData.size()) {
+            throw new IllegalStateException("Override data size does not match current data size. ");
+        }
+
+        int count = 0;
         for (StateFeatureListener.LocalDataWrapper record : currentData) {
             // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
             // data is written to file in a sensible order for human viewing
+            Map<String, Object> override = overrideData.isEmpty() ? Collections.emptyMap() : overrideData.get(count);
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("GameID", state.getGameID());
             data.put("Player", record.player);
@@ -113,6 +124,10 @@ public abstract class FeatureListener implements IGameListener {
             // We record the actual results of the game. If the sub-class Listener has not
             // set the corresponding Target fields (Win, Ordinal, FinalScore, FinalScoreAdv), then
             // we set these to default to the actual end game values.
+
+            // first the override data, if any
+            data.putAll(override);
+
             data.put("ActualWin", winLoss[record.player]);
             if (!data.containsKey("Win")) {
                 data.put("Win", winLoss[record.player]);
@@ -134,9 +149,11 @@ public abstract class FeatureListener implements IGameListener {
                 data.put("FinalScoreAdv", finalScores[record.player] - bestOtherScore);
             }
             logger.record(data);
+            count++;
         }
         logger.processDataAndNotFinish();
         currentData = new ArrayList<>();
+        overrideData = new ArrayList<>();
     }
 
     @Override
