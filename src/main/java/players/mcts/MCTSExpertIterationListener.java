@@ -1,11 +1,15 @@
 package players.mcts;
 
+import com.google.apps.card.v1.Card;
 import core.AbstractGameState;
+import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStatisticLogger;
 import evaluation.listeners.ActionFeatureListener;
 import evaluation.listeners.StateFeatureListener;
+import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
 
 import java.util.*;
@@ -14,7 +18,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
 
     public int visitThreshold, maxDepth;
     MCTSPlayer oracle;
-    MCTSExpertIterationStateRecorder stateRecorder;
+    StateFeatureListener stateRecorder;
 
     /**
      * This Listener is used to record the statistics of the MCTS tree during expert iteration.
@@ -24,12 +28,13 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
      * according to the oracle agent.
      */
     public MCTSExpertIterationListener(MCTSPlayer oracle, IActionFeatureVector actionFeatures, IStateFeatureVector stateFeatures,
-                                       int visitThreshold, int maxDepth) {
+                                       int visitThreshold, int maxDepth, boolean includeStateListener) {
         super(actionFeatures, stateFeatures, Event.GameEvent.ACTION_CHOSEN, true);
         this.visitThreshold = visitThreshold;
         this.oracle = oracle;
         this.maxDepth = maxDepth;
-        this.stateRecorder = new MCTSExpertIterationStateRecorder(this);
+        if (includeStateListener)
+            this.stateRecorder = new StateFeatureListener(stateFeatures, Event.GameEvent.ACTION_CHOSEN, true);
     }
 
     @Override
@@ -48,13 +53,40 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
         oracle.getAction(state, availableActions);
         // recordData will call the super.processState() method, which will then record the feature vectors
         recordData(oracle.root);
-
-        // then we also record the state (this only works for the root node currently)
-        stateRecorder.processState(state, action);
     }
 
-    public MCTSPlayer getOracle() {
-        return oracle;
+    @Override
+    public void setLogger(IStatisticLogger logger) {
+        super.setLogger(logger);
+        // we also need to set the logger for the state recorder
+        FileStatsLogger fileLogger = (FileStatsLogger) logger;
+        String loggerName = fileLogger.getFileName().replace("Action", "State");
+        FileStatsLogger stateLogger = new FileStatsLogger(loggerName, fileLogger.getDelimiter(), fileLogger.isAppend());
+        if (stateRecorder != null)
+            stateRecorder.setLogger(stateLogger);
+    }
+
+    @Override
+    public void setGame(Game game) {
+        super.setGame(game);
+        stateRecorder.setGame(game);
+    }
+
+    @Override
+    public boolean setOutputDirectory(String... nestedDirectories) {
+        super.setOutputDirectory(nestedDirectories);
+        // we also need to set the output directory for the state recorder
+        if (stateRecorder != null)
+            stateRecorder.setOutputDirectory(nestedDirectories);
+        return true;
+    }
+
+    @Override
+    public void writeDataWithStandardHeaders(AbstractGameState state) {
+        // we also need to trigger this for the state recorder, so that it can write the state features
+        super.writeDataWithStandardHeaders(state);
+        if (stateRecorder != null)
+            stateRecorder.writeDataWithStandardHeaders(state);
     }
 
     public void recordData(SingleTreeNode root) {
@@ -127,6 +159,15 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                 // the super class will then pull in the feature vectors for state and all actions
                 // and populate the main currentData map (then held until the end of the game so it can be updated with final scores)
                 super.processState(node.state, bestAction);
+
+                // then we also record the state
+                if (stateRecorder != null) {
+                    stateRecorder.processState(node.state, bestAction);
+                    // and then add in the final score and win/loss information based on the state value estimate
+                    stateRecorder.addValueToLastRecord("FinalScore", node.nodeValue(player));
+                    stateRecorder.addValueToLastRecord("Win", node.nodeValue(player));
+                    stateRecorder.addValueToLastRecord("FinalScoreAdv", node.nodeValue(player));
+                }
             }
 
             // add children of current node to queue if they meet the criteria

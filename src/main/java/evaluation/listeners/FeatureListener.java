@@ -20,9 +20,6 @@ public abstract class FeatureListener implements IGameListener {
     // currentData is the data specified by the feature vector
     // overrideData is then used to override the final values recorded at the end of the game
     protected List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
-    protected List<Map<String, Object>> overrideData = new ArrayList<>();
-    // TODO: use this if it is non-empty (and it must be same size as currentData)
-    // TODO: then provide option to override this for MCTS State values
     protected Event.GameEvent frequency;
     boolean currentPlayerOnly;
     protected IStatisticLogger logger;
@@ -80,7 +77,7 @@ public abstract class FeatureListener implements IGameListener {
         return true;
     }
 
-    protected void writeDataWithStandardHeaders(AbstractGameState state) {
+    public void writeDataWithStandardHeaders(AbstractGameState state) {
         int totP = state.getNPlayers();
         double[] finalScores = IntStream.range(0, totP).mapToDouble(state::getGameScore).toArray();
         double[] winLoss = Arrays.stream(state.getPlayerResults()).mapToDouble(r -> switch (r) {
@@ -90,43 +87,29 @@ public abstract class FeatureListener implements IGameListener {
         }).toArray();
         double[] ordinal = IntStream.range(0, totP).mapToDouble(state::getOrdinalPosition).toArray();
         double finalRound = state.getRoundCounter();
-        if (!overrideData.isEmpty() && overrideData.size() != currentData.size()) {
-            throw new IllegalStateException("Override data size does not match current data size. ");
-        }
 
-        int count = 0;
         for (StateFeatureListener.LocalDataWrapper record : currentData) {
             // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
             // data is written to file in a sensible order for human viewing
-            Map<String, Object> override = overrideData.isEmpty() ? Collections.emptyMap() : overrideData.get(count);
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("GameID", state.getGameID());
             data.put("Player", record.player);
             data.put("Round", record.gameRound);
             data.put("Turn", record.gameTurn);
             data.put("CurrentScore", record.currentScore);
-            if (record.array.length > 0) {
-                for (int i = 0; i < record.array.length; i++) {
-                    data.put(names()[i], record.array[i]);
-                }
-            } else {
-                for (int i = 0; i < record.objArray.length; i++) {
-                    data.put(names()[i], record.objArray[i]);
-                }
+            for (String key : record.values.keySet()) {
+                data.put(key, record.values.get(key));
             }
             data.put("PlayerCount", getGame().getPlayers().size());
             data.put("TotalRounds", finalRound);
             data.put("TotalTurns", state.getTurnCounter());
             data.put("TotalTicks", state.getGameTick());
-            for (int i = 0; i < record.actionScores.length; i++) {
-                data.put(record.actionScoreNames[i], record.actionScores[i]);
+            for (String actionKey : record.actionValues.keySet()) {
+                data.put(actionKey, record.actionValues.get(actionKey));
             }
             // We record the actual results of the game. If the sub-class Listener has not
             // set the corresponding Target fields (Win, Ordinal, FinalScore, FinalScoreAdv), then
             // we set these to default to the actual end game values.
-
-            // first the override data, if any
-            data.putAll(override);
 
             data.put("ActualWin", winLoss[record.player]);
             if (!data.containsKey("Win")) {
@@ -149,11 +132,9 @@ public abstract class FeatureListener implements IGameListener {
                 data.put("FinalScoreAdv", finalScores[record.player] - bestOtherScore);
             }
             logger.record(data);
-            count++;
         }
         logger.processDataAndNotFinish();
         currentData = new ArrayList<>();
-        overrideData = new ArrayList<>();
     }
 
     @Override
@@ -171,14 +152,14 @@ public abstract class FeatureListener implements IGameListener {
         return game;
     }
 
-    public abstract String[] names();
-
     public abstract double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
     /*
      * Override this if the feature vector is not all numeric
      */
     public abstract Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
+
+    public abstract String[] names();
 
     public void processState(AbstractGameState state, AbstractAction action) {
         // we record one state for each player after each relevant event occurs
@@ -193,22 +174,30 @@ public abstract class FeatureListener implements IGameListener {
         }
         if (currentPlayerOnly && state.isNotTerminal()) {
             if (isDouble) {
-                currentData.add(new StateFeatureListener.LocalDataWrapper(currentPlayer, doubleData, state, new HashMap<>()));
+                currentData.add(LocalDataWrapper.factory(currentPlayer, doubleData, names(), state, new HashMap<>()));
             } else {
                 Object[] phi = extractFeatureVector(action, state, currentPlayer);
-                currentData.add(new StateFeatureListener.LocalDataWrapper(currentPlayer, phi, state, new HashMap<>()));
+                currentData.add(LocalDataWrapper.factory(currentPlayer, phi, names(), state, new HashMap<>()));
             }
         } else {
             for (int p = 0; p < state.getNPlayers(); p++) {
                 if (isDouble) {
                     double[] phi = p == currentPlayer ? doubleData : extractDoubleVector(action, state, p);
-                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, new HashMap<>()));
+                    currentData.add(LocalDataWrapper.factory(p, phi, names(), state, new HashMap<>()));
                 } else {
                     Object[] phi = extractFeatureVector(action, state, p);
-                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, new HashMap<>()));
+                    currentData.add(LocalDataWrapper.factory(p, phi, names(), state, new HashMap<>()));
                 }
             }
         }
+    }
+
+    public void addValueToLastRecord(String key, Object value) {
+        if (currentData.isEmpty()) {
+            throw new IllegalStateException("No records available to add value to. Ensure processState has been called before adding values.");
+        }
+        StateFeatureListener.LocalDataWrapper lastRecord = currentData.get(currentData.size() - 1);
+        lastRecord.addValue(key, value);
     }
 
     // To avoid incessant boxing / unboxing if we were to use Double
@@ -217,32 +206,42 @@ public abstract class FeatureListener implements IGameListener {
         final int gameTurn;
         final int gameRound;
         final double currentScore;
-        final double[] actionScores;
-        final String[] actionScoreNames;
-        final double[] array;
-        final Object[] objArray;
+        private final Map<String, Object> values;
+        private final Map<String, Double> actionValues = new HashMap<>();
 
-        LocalDataWrapper(int player, double[] contents, Object[] contentsObj, AbstractGameState state, Map<String, Double> actionScore) {
-            array = contents;
-            objArray = contentsObj;
+        LocalDataWrapper(int player, Map<String, Object> data, AbstractGameState state, Map<String, Double> actionScore) {
+            values = new HashMap<>(data);
             this.gameTurn = state.getTurnCounter();
             this.gameRound = state.getRoundCounter();
             this.player = player;
             this.currentScore = state.getGameScore(player);
-            this.actionScores = new double[actionScore.size()];
-            this.actionScoreNames = new String[actionScore.size()];
-            int i = 0;
-            for (String key : actionScore.keySet()) {
-                actionScoreNames[i] = key;
-                actionScores[i] = actionScore.get(key);
-                i++;
+            if (actionScore != null) {
+                this.actionValues.putAll(actionScore);
             }
         }
-        public LocalDataWrapper(int player, Object[] contents, AbstractGameState state, Map<String, Double> actionScore) {
-            this(player, new double[0], contents, state, actionScore);
+
+        public void addValue(String key, Object value) {
+            values.put(key, value);
         }
-        public LocalDataWrapper(int player, double[] contents, AbstractGameState state, Map<String, Double> actionScore) {
-            this(player, contents, new Object[0], state, actionScore);
+
+        public void getValue(String key) {
+            values.get(key);
+        }
+
+        public static LocalDataWrapper factory(int player, double[] contents, String[] names, AbstractGameState state, Map<String, Double> actionScore) {
+            Object[] values = new Object[contents.length];
+            for (int i = 0; i < contents.length; i++) {
+                values[i] = contents[i];
+            }
+            return factory(player, values, names, state, actionScore);
+        }
+
+        public static LocalDataWrapper factory(int player, Object[] contents, String[] names, AbstractGameState state, Map<String, Double> actionScore) {
+            Map<String, Object> values = new HashMap<>();
+            for (int i = 0; i < contents.length; i++) {
+                values.put(names[i], contents[i]);
+            }
+            return new LocalDataWrapper(player, values, state, actionScore);
         }
 
     }

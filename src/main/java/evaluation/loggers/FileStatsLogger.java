@@ -194,4 +194,21 @@ public class FileStatsLogger implements IStatisticLogger {
         retValue.actionName = id;
         return retValue;
     }
+
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getActionName() {
+        return actionName;
+    }
+
+    public boolean isAppend() {
+        return append;
+    }
+
+    public String getDelimiter() {
+        return delimiter;
+    }
 }

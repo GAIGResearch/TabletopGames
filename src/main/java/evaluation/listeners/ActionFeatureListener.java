@@ -113,9 +113,9 @@ public class ActionFeatureListener extends FeatureListener {
             objectData = extractFeatureVector(action, state, p);
         }
         if (objectData.length == 0) {
-            currentData.add(new StateFeatureListener.LocalDataWrapper(p, doubleData, state, getActionScores(action)));  // chosen
+            currentData.add(LocalDataWrapper.factory(p, doubleData, names(), state, getActionScores(action)));  // chosen
         } else {
-            currentData.add(new StateFeatureListener.LocalDataWrapper(p, objectData, state, getActionScores(action)));  // chosen
+            currentData.add(LocalDataWrapper.factory(p, objectData, names(), state, getActionScores(action)));  // chosen
         }
         if (includeActionsNotTaken) {
             // State data will not be recalculated for each other action
@@ -123,10 +123,10 @@ public class ActionFeatureListener extends FeatureListener {
                 if (alternativeAction.equals(action)) continue;
                 if (objectData.length == 0) {
                     double[] f = extractDoubleVector(alternativeAction, state, p);
-                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, f, state, getActionScores(alternativeAction))); // not chosen
+                    currentData.add(LocalDataWrapper.factory(p, f, names(), state, getActionScores(alternativeAction))); // not chosen
                 } else {
                     Object[] f = extractFeatureVector(alternativeAction, state, p);
-                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, f, state, getActionScores(alternativeAction))); // not chosen
+                    currentData.add(LocalDataWrapper.factory(p, f, names(), state, getActionScores(alternativeAction))); // not chosen
                 }
             }
         }
