@@ -28,7 +28,7 @@ public class ActionFeatureListener extends FeatureListener {
     protected IStateFeatureVector phiFn;
     protected double[] cachedPhi;
     protected Object[] cachedObjectPhi;
-    protected Map<String, Map<AbstractAction, Double>> actionValues = new HashMap<>();
+    protected Map<String, Map<AbstractAction, Number>> actionValues = new HashMap<>();
 
     public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken) {
         super(frequency, true);
@@ -100,7 +100,7 @@ public class ActionFeatureListener extends FeatureListener {
         }
         if (actionValues.isEmpty()) {
             // the default if not provided
-            Map<AbstractAction, Double> av = availableActions.stream().collect(toMap(a -> a, a -> 0.0));
+            Map<AbstractAction, Number> av = availableActions.stream().collect(toMap(a -> a, a -> 0.0));
             av.put(action, 1.0);
             actionValues.put("CHOSEN", av);
         }
@@ -133,8 +133,8 @@ public class ActionFeatureListener extends FeatureListener {
         actionValues.clear();
     }
 
-    protected Map<String, Double> getActionScores(AbstractAction action) {
-        Map<String, Double> retValue = new HashMap<>();
+    protected Map<String, Number> getActionScores(AbstractAction action) {
+        Map<String, Number> retValue = new HashMap<>();
         for (String key : actionValues.keySet()) {
             retValue.put(key, actionValues.get(key).get(action));
         }

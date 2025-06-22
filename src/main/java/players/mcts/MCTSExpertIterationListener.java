@@ -128,13 +128,13 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             AbstractAction bestAction = null;
             double bestValue = Double.NEGATIVE_INFINITY;
             for (AbstractAction action : actionsFromState) {
-                actionValues.get("DEPTH").put(action, (double) node.depth);
-                actionValues.get("NODE_VISITS").put(action, (double) node.getVisits());
-                actionValues.get("ACTION_VISITS").put(action, (double) node.actionVisits(action));
-                actionValues.get("ACTIONS_TOTAL").put(action, (double) actionsFromState.size());
-                actionValues.get("PLAYER").put(action, (double) player);
+                actionValues.get("DEPTH").put(action, node.depth);
+                actionValues.get("NODE_VISITS").put(action, node.getVisits());
+                actionValues.get("ACTION_VISITS").put(action, node.actionVisits(action));
+                actionValues.get("ACTIONS_TOTAL").put(action, actionsFromState.size());
+                actionValues.get("PLAYER").put(action, player);
                 if (node.actionValues.get(action) == null) {
-                    actionValues.get("CHOSEN").put(action, 0.0);  // we have no data for this action
+                    actionValues.get("CHOSEN").put(action, 0);  // we have no data for this action
                     actionValues.get("VISIT_PROPORTION").put(action, 0.0);  // we have no data for this action
                     actionValues.get("ADVANTAGE").put(action, 0.0);  // we have no data for this action
                     actionValues.get("ACTION_VALUE").put(action, 0.0);  // we have no data for this action
@@ -146,14 +146,14 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                     bestValue = actionValue;
                     bestAction = action;
                 }
-                actionValues.get("CHOSEN").put(action, 0.0);
+                actionValues.get("CHOSEN").put(action, 1);
                 double visitProportion = (double) node.actionVisits(action) / node.getVisits();
                 actionValues.get("VISIT_PROPORTION").put(action, visitProportion);
                 actionValues.get("ADVANTAGE").put(action, actionValue - stateValue);
             }
 
             // the best action is the highest scoring one in the available set (which may not be the best one overall away from the root)
-            actionValues.get("CHOSEN").put(bestAction, 1.0);
+            actionValues.get("CHOSEN").put(bestAction, 1);
 
             if (actionsFromState.size() > 1) {
                 // the super class will then pull in the feature vectors for state and all actions

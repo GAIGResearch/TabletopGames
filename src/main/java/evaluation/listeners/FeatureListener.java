@@ -207,10 +207,10 @@ public abstract class FeatureListener implements IGameListener {
         final int gameRound;
         final double currentScore;
         private final Map<String, Object> values;
-        private final Map<String, Double> actionValues = new HashMap<>();
+        private final Map<String, Number> actionValues = new HashMap<>();
 
-        LocalDataWrapper(int player, Map<String, Object> data, AbstractGameState state, Map<String, Double> actionScore) {
-            values = new HashMap<>(data);
+        LocalDataWrapper(int player, Map<String, Object> data, AbstractGameState state, Map<String, Number> actionScore) {
+            values = new LinkedHashMap<>(data);
             this.gameTurn = state.getTurnCounter();
             this.gameRound = state.getRoundCounter();
             this.player = player;
@@ -228,7 +228,7 @@ public abstract class FeatureListener implements IGameListener {
             values.get(key);
         }
 
-        public static LocalDataWrapper factory(int player, double[] contents, String[] names, AbstractGameState state, Map<String, Double> actionScore) {
+        public static LocalDataWrapper factory(int player, double[] contents, String[] names, AbstractGameState state, Map<String, Number> actionScore) {
             Object[] values = new Object[contents.length];
             for (int i = 0; i < contents.length; i++) {
                 values[i] = contents[i];
@@ -236,8 +236,8 @@ public abstract class FeatureListener implements IGameListener {
             return factory(player, values, names, state, actionScore);
         }
 
-        public static LocalDataWrapper factory(int player, Object[] contents, String[] names, AbstractGameState state, Map<String, Double> actionScore) {
-            Map<String, Object> values = new HashMap<>();
+        public static LocalDataWrapper factory(int player, Object[] contents, String[] names, AbstractGameState state, Map<String, Number> actionScore) {
+            Map<String, Object> values = new LinkedHashMap<>();
             for (int i = 0; i < contents.length; i++) {
                 values.put(names[i], contents[i]);
             }
