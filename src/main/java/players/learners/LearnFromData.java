@@ -133,9 +133,9 @@ public class LearnFromData {
     }
 
     private Object improveModel(Object startingHeuristic,
-                                       AbstractLearner learner,
-                                       int n,
-                                       String... dataFiles) {
+                                AbstractLearner learner,
+                                int n,
+                                String... dataFiles) {
 
         long startTime = System.currentTimeMillis();
         if (startingHeuristic instanceof GLMHeuristic glm) {
@@ -229,6 +229,12 @@ public class LearnFromData {
 
                         if (excludedInteractionFeatures.contains(interactionName))
                             continue;  // we've already checked this one and it failed to help
+
+                        // check that this is not an interaction between two mutually exclusive ENUM/RANGE features
+                        if ((asf.getFeatureType(j) == ENUM || asf.getFeatureType(j) == RANGE) &&
+                                asf.getUnderlyingIndex(i) == asf.getUnderlyingIndex(j)) {
+                            continue;
+                        }
 
                         // check that this is not already an interaction
                         if (asf.getColumnDetails().stream().anyMatch(r -> r.type() == INTERACTION &&

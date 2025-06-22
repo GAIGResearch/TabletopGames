@@ -69,7 +69,8 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
     @Override
     public void setGame(Game game) {
         super.setGame(game);
-        stateRecorder.setGame(game);
+        if (stateRecorder != null)
+            stateRecorder.setGame(game);
     }
 
     @Override

@@ -222,21 +222,20 @@ public class ExpertIteration {
         RoundRobinTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayers, params, RGConfig);
         tournament.setResultsFile(dataDir + File.separator + String.format("TournamentResults_%s_%02d.txt", prefix, iter));
         if (stateLearnerFile != null) {
-            stateListener = switch (expert) {
-                case "BASE", "MCTSAction" -> new StateFeatureListener(stateFeatureVector,
+            stateListener = switch (expert.toUpperCase(Locale.ROOT)) {
+                case "BASE", "MCTSACTION" -> new StateFeatureListener(stateFeatureVector,
                         useRounds ? Event.GameEvent.ROUND_OVER : Event.GameEvent.TURN_OVER,
                         false);
                 case "MCTS" -> null; // covered by ActionListener
                 default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
             };
+            String fileName = String.format("State_%s_%02d.txt", prefix, iter);
+            stateDataFilesByIteration[iter] = dataDir + File.separator + fileName;
             if (stateListener !=null) {
                 stateListener.setNth(everyN);
-                String fileName = String.format("State_%s_%02d.txt", prefix, iter);
                 stateListener.setLogger(new FileStatsLogger(fileName, "\t", false));
                 stateListener.setOutputDirectory(dataDir);
-
                 tournament.addListener(stateListener);
-                stateDataFilesByIteration[iter] = dataDir + File.separator + fileName;
             }
         }
         if (actionLearnerFile != null) {
