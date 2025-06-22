@@ -147,7 +147,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                     bestValue = actionValue;
                     bestAction = action;
                 }
-                actionValues.get("CHOSEN").put(action, 1);
+                actionValues.get("CHOSEN").put(bestAction, 0);
                 double visitProportion = (double) node.actionVisits(action) / node.getVisits();
                 actionValues.get("VISIT_PROPORTION").put(action, visitProportion);
                 actionValues.get("ADVANTAGE").put(action, actionValue - stateValue);
