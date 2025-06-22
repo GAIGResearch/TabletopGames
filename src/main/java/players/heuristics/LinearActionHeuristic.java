@@ -3,12 +3,12 @@ package players.heuristics;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.*;
+import evaluation.features.AutomatedFeatures;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**

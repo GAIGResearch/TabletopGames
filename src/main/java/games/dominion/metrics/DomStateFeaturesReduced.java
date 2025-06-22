@@ -9,7 +9,7 @@ import games.dominion.cards.DominionCard;
 public class DomStateFeaturesReduced implements IStateFeatureVector {
 
     String[] names = new String[]{"victoryPoints", "treasureValue", "actionCards", "treasureInHand",
-            "actionsLeft", "buysLeft", "actionCardsInHand",
+            "actionCardsInHand", "actionsLeft", "buysLeft",
             "provinceCount", "duchyCount", "estateCount", "totalCards", "actionSize",
             "currentLead", "provincesLeft", "emptyDecks"};
     DominionForwardModel fm = new DominionForwardModel();

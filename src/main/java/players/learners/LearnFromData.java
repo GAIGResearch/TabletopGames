@@ -5,17 +5,16 @@ import core.interfaces.ICoefficients;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IToJSON;
 import org.json.simple.JSONObject;
-import players.heuristics.AutomatedFeatures;
+import evaluation.features.AutomatedFeatures;
 import players.heuristics.GLMHeuristic;
 import utilities.JSONUtils;
-import utilities.Pair;
 import utilities.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
 
-import static players.heuristics.AutomatedFeatures.featureType.*;
+import static evaluation.features.AutomatedFeatures.featureType.*;
 import static players.learners.AbstractLearner.Target.*;
 
 public class LearnFromData {

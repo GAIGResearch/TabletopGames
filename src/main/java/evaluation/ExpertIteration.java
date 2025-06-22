@@ -256,9 +256,9 @@ public class ExpertIteration {
                         Event.GameEvent.ACTION_CHOSEN,
                         true);
                 case "MCTS" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
-                        100, 0);
+                        100, 0, true);
                 case "MCTSAction" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
-                        100, 0);
+                        100, 0, false);
                 default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
             };
             actionListener.setNth(everyN);

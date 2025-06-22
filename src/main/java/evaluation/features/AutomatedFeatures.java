@@ -1,4 +1,4 @@
-package players.heuristics;
+package evaluation.features;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -12,7 +12,6 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVector, IToJSON {
@@ -22,8 +21,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     }
 
     int defaultBuckets = 1;
-    IStateFeatureVector underlyingState;
-    IActionFeatureVector underlyingAction;
+    public final IStateFeatureVector underlyingState;
+    public final IActionFeatureVector underlyingAction;
     String[] underlyingNames;
     Class<?>[] underlyingTypes;
 
@@ -36,35 +35,39 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     int[] buckets;
 
     public AutomatedFeatures(IStateFeatureVector underlyingStateVector, IActionFeatureVector underlyingActionVector) {
-        validateUnderlyingVector(underlyingStateVector, underlyingActionVector);
+        this.underlyingState = underlyingStateVector;
+        this.underlyingAction = underlyingActionVector;
+        validateUnderlyingVector();
     }
 
     public AutomatedFeatures(IStateFeatureVector underlyingStateVector) {
-        validateUnderlyingVector(underlyingStateVector, null);
+        this.underlyingState = underlyingStateVector;
+        this.underlyingAction = null;
+        validateUnderlyingVector();
     }
 
     public AutomatedFeatures(IActionFeatureVector underlyingActionVector) {
-        validateUnderlyingVector(null, underlyingActionVector);
+        this.underlyingState = null;
+        this.underlyingAction = underlyingActionVector;
+        validateUnderlyingVector();
     }
 
-    private void validateUnderlyingVector(IStateFeatureVector state, IActionFeatureVector action) {
-        this.underlyingState = state;
-        this.underlyingAction = action;
+    private void validateUnderlyingVector() {
         if (underlyingState != null) {
-            underlyingNames = state.names();
-            underlyingTypes = state.types();
+            underlyingNames = underlyingState.names();
+            underlyingTypes = underlyingState.types();
         } else {
             underlyingNames = new String[0];
             underlyingTypes = new Class<?>[0];
         }
         if (underlyingAction != null) {
-            String[] tempNames = new String[underlyingNames.length + action.names().length];
+            String[] tempNames = new String[underlyingNames.length + underlyingAction.names().length];
             System.arraycopy(underlyingNames, 0, tempNames, 0, underlyingNames.length);
-            System.arraycopy(action.names(), 0, tempNames, underlyingNames.length, action.names().length);
+            System.arraycopy(underlyingAction.names(), 0, tempNames, underlyingNames.length, underlyingAction.names().length);
             underlyingNames = tempNames;
-            Class[] tempTypes = new Class<?>[underlyingTypes.length + action.types().length];
+            Class[] tempTypes = new Class<?>[underlyingTypes.length + underlyingAction.types().length];
             System.arraycopy(underlyingTypes, 0, tempTypes, 0, underlyingTypes.length);
-            System.arraycopy(action.types(), 0, tempTypes, underlyingTypes.length, action.types().length);
+            System.arraycopy(underlyingAction.types(), 0, tempTypes, underlyingTypes.length, underlyingAction.types().length);
             underlyingTypes = tempTypes;
         }
         buckets = new int[underlyingNames.length];
@@ -86,7 +89,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         underlyingAction = json.containsKey("underlyingAction") ?
                 JSONUtils.loadClassFromJSON((JSONObject) json.get("underlyingAction"))
                 : null;
-        validateUnderlyingVector(underlyingState, underlyingAction);
+        validateUnderlyingVector();
         JSONArray features = (JSONArray) json.get("features");
         for (Object feature : features) {
             JSONObject featureObject = (JSONObject) feature;
@@ -804,32 +807,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             return calculateFeatureRanges(integerValues, buckets, Collections.emptyList());
         } else {
             throw new IllegalArgumentException("Unsupported class type: " + clazz);
-        }
-    }
-
-    private Class<?> calculateClass(List<String> columnData, boolean checkAll) {
-        // Check if all values are numeric
-        boolean allNumeric = true;
-        List<String> dataToCheck = checkAll ? columnData : columnData.subList(0, Math.min(columnData.size(), 20));
-        for (String value : dataToCheck) {
-            try {
-                Double.parseDouble(value);
-            } catch (NumberFormatException e) {
-                allNumeric = false;
-                break;
-            }
-        }
-
-        // Determine the class based on the data type
-        if (allNumeric) {
-            if (dataToCheck.stream().allMatch(value -> value.contains("."))) {
-                return Double.class;
-            } else {
-                return Integer.class;
-            }
-        } else {
-            // If not all values are numeric, we can assume it's a String or Enum
-            return String.class; // or Enum.class if you want to handle enums
         }
     }
 
