@@ -69,6 +69,6 @@ public class BasicMCTSPlayer extends AbstractPlayer {
 
     @Override
     public BasicMCTSPlayer copy() {
-        return this;
+        return new BasicMCTSPlayer((BasicMCTSParams) parameters.copy());
     }
 }
