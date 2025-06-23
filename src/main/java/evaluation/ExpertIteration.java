@@ -44,7 +44,7 @@ public class ExpertIteration {
     boolean useRounds, useStateInAction;
     String prefix = "EI";
     AbstractPlayer bestAgent = null;
-    int consecutiveTournamentWins = 0;
+    Map<String, Integer> tournamentWinsByAgent = new HashMap<>();
     Map<RunArg, Object> config;
     Map<RunArg, Object> NTBEAConfig;
     Map<RunArg, Object> RGConfig;
@@ -271,12 +271,9 @@ public class ExpertIteration {
         tournament.run();
 
         // Are we done?
-        if (tournament.getWinner().toString().equals(bestAgent.toString())) {
-            consecutiveTournamentWins++;
-        } else {
-            consecutiveTournamentWins = 0;
-        }
         bestAgent = tournament.getWinner().copy();
+        tournamentWinsByAgent.merge(bestAgent.toString(), 1, Integer::sum);
+
         if (bestAgent instanceof IAnyTimePlayer anyTime) {
             anyTime.setBudget(budget); // make sure the budget is set on the best agent
         }
@@ -299,7 +296,8 @@ public class ExpertIteration {
                     .toList();
             agents.removeAll(toRemoveAgents);
         }
-        if (consecutiveTournamentWins >= 3) {
+        // we end if any agent has won 3 tournaments (not necessarily consecutively)
+        if (tournamentWinsByAgent.values().stream().mapToInt(Integer::intValue).max().orElse(0) >= 3) {
             System.out.println("Converged after " + iter + " iterations");
             return true;
         }
