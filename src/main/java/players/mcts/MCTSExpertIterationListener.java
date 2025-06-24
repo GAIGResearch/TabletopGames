@@ -134,7 +134,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                 actionValues.get("ACTION_VISITS").put(action, node.actionVisits(action));
                 actionValues.get("ACTIONS_TOTAL").put(action, actionsFromState.size());
                 actionValues.get("PLAYER").put(action, player);
-                if (node.actionValues.get(action) == null) {
+                if (node.actionValues.get(action) == null || node.actionVisits(action) == 0) {
                     actionValues.get("ACTION_VALUE").put(action, 0.0);  // we have no data for this action
                     actionValues.get("CHOSEN").put(action, 0);  // we have no data for this action
                     actionValues.get("VISIT_PROPORTION").put(action, 0.0);  // we have no data for this action

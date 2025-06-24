@@ -158,8 +158,8 @@ public class JSONUtils {
             } catch (NoSuchMethodException e) {
                 // continue to the next step
             } catch (Exception e) {
-                System.out.println(e.getMessage());
-                throw new AssertionError("Error constructing " + outputClass.getName() + " using JSON constructor.");
+                throw new AssertionError("Error constructing " + outputClass.getName() + " using JSON constructor.\n" +
+                        "JSON: " + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
             }
 
             // 4. And finally look for a constructor that takes no arguments
@@ -167,14 +167,17 @@ public class JSONUtils {
             return (T) constructor.newInstance();
 
         } catch (ClassNotFoundException e) {
-            throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
+            throw new AssertionError("Unknown class in JSON:\n" + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
         } catch (InvocationTargetException e) {
             System.out.println(e.getTargetException().getMessage());
-            throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
+            throw new AssertionError("Error constructing class using " +
+                    "\nJSON: " + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
         } catch (ReflectiveOperationException e) {
-            throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
+            throw new AssertionError("Reflections Error when constructing class using " +
+                    json.toJSONString() + " : " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
+            throw new AssertionError("Unknown argument in JSON:\n" +
+                    JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
         }
     }
 
