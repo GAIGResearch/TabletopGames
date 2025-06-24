@@ -135,22 +135,22 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
                 actionValues.get("ACTIONS_TOTAL").put(action, actionsFromState.size());
                 actionValues.get("PLAYER").put(action, player);
                 if (node.actionValues.get(action) == null) {
+                    actionValues.get("ACTION_VALUE").put(action, 0.0);  // we have no data for this action
                     actionValues.get("CHOSEN").put(action, 0);  // we have no data for this action
                     actionValues.get("VISIT_PROPORTION").put(action, 0.0);  // we have no data for this action
                     actionValues.get("ADVANTAGE").put(action, 0.0);  // we have no data for this action
-                    actionValues.get("ACTION_VALUE").put(action, 0.0);  // we have no data for this action
-                    continue;
+                } else {
+                    double actionValue = node.actionTotValue(action, player) / node.actionVisits(action);
+                    actionValues.get("ACTION_VALUE").put(action, actionValue);
+                    if (actionValue > bestValue) {
+                        bestValue = actionValue;
+                        bestAction = action;
+                    }
+                    actionValues.get("CHOSEN").put(action, 0);
+                    double visitProportion = (double) node.actionVisits(action) / node.getVisits();
+                    actionValues.get("VISIT_PROPORTION").put(action, visitProportion);
+                    actionValues.get("ADVANTAGE").put(action, actionValue - stateValue);
                 }
-                double actionValue = node.actionTotValue(action, player) / node.actionVisits(action);
-                actionValues.get("ACTION_VALUE").put(action, actionValue);
-                if (actionValue > bestValue) {
-                    bestValue = actionValue;
-                    bestAction = action;
-                }
-                actionValues.get("CHOSEN").put(bestAction, 0);
-                double visitProportion = (double) node.actionVisits(action) / node.getVisits();
-                actionValues.get("VISIT_PROPORTION").put(action, visitProportion);
-                actionValues.get("ADVANTAGE").put(action, actionValue - stateValue);
             }
 
             // the best action is the highest scoring one in the available set (which may not be the best one overall away from the root)
