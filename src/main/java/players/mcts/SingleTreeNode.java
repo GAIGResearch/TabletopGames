@@ -336,18 +336,11 @@ public class SingleTreeNode {
                     copyCount++;
                     break;
             }
-
-            // New timer for this iteration
-            //      ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
-
-            //   System.out.println("Starting MCTS Search iteration " + numIters);
-
             // Selection + expansion: navigate tree until a node not fully expanded is found, add a new node to the tree
             oneSearchIteration();
 
             // Finished iteration
             numIters++;
-            //       System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
             // Check stopping condition
             PlayerConstants budgetType = params.budgetType;
             if (budgetType == BUDGET_TIME) {
