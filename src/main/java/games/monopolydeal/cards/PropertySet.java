@@ -62,7 +62,7 @@ public class PropertySet extends Deck<MonopolyDealCard> {
         return super.add(c);
     }
     @Override
-    public boolean remove(MonopolyDealCard c) {
+    public void remove(MonopolyDealCard c) {
         if(c.type == CardType.House ) hasHouse = false;
         else if (c.type == CardType.Hotel ) hasHotel = false;
         if(c.isPropertyCard() && getPropertySetSize() <= getSetType().setSize) isComplete = false;
@@ -73,7 +73,7 @@ public class PropertySet extends Deck<MonopolyDealCard> {
             }
             if(wildCount==1)hasWild = false;
         }
-        return super.remove(c);
+        super.remove(c);
     }
 
     @Override

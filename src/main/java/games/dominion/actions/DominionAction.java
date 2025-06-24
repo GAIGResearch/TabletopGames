@@ -42,12 +42,10 @@ public abstract class DominionAction extends AbstractAction {
             System.out.println(gs);
             throw new AssertionError("Should not be able to play Action Cards unless it is the Play Phase : " + this);
         }
-        if (!dummyAction && !state.moveCard(type, player, DeckType.HAND, player, DeckType.TABLE)) {
-            System.out.println(gs);
-            throw new AssertionError(String.format("Moving %s card from HAND to TABLE failed for player %d", type, player));
-        }
-        if (!dummyAction)
+        if (!dummyAction) {
+            state.moveCard(type, player, DeckType.HAND, player, DeckType.TABLE);
             state.changeActions(-1);  // use up one action from playing this card
+        }
         executeCoreCardTypeFunctionality(state);
         return _execute(state);
     }
