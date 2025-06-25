@@ -48,6 +48,7 @@ public interface IStateFeatureVector extends IStateKey {
     }
 
     String[] names();
+
     default Class<?>[] types() {
         // the default is all double
         Class<?>[] retValue = new Class[names().length];

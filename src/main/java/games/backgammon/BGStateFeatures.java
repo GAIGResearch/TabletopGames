@@ -66,11 +66,7 @@ public class BGStateFeatures implements IStateFeatureVector {
 
     @Override
     public String[] names() {
-        return new String[0];
+        return names;
     }
 
-    @Override
-    public Class<?>[] types() {
-        return IStateFeatureVector.super.types();
-    }
 }
