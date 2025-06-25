@@ -386,7 +386,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
         // The point of processData is to also add in new columns for features that do not yet have columns
         // 1. Bucketing of numeric features (range features).
-        //          For the moment we always recalculate bucket features from scratch. (TODO: improve this?)
+        //          For the moment we always recalculate bucket features from scratch.
         //          As the data distribution may have changed.
         // 2. One-hot encoding of enum features
         //          We check the enum, and check to see if all of the expected columns are present.
@@ -452,7 +452,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                         .mapToObj(b -> columnName + "_B" + b)
                         .toList();
                 boolean copiedColumns = false;
-                if (headers.contains(columnName) && headers.containsAll(expectedBucketColumns)) {
+                if (headers.contains(columnName) && new HashSet<>(headers).containsAll(expectedBucketColumns)) {
                     // then we can pull over the RAW and RANGE columns from the starting features
                     int finalI = i;
                     List<ColumnDetails> original = startingFeatures.stream().filter(r -> r.underlyingIndex == finalI).toList();

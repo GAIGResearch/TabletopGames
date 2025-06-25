@@ -193,22 +193,15 @@ public class LearnFromData {
                         int underlyingIndex = asf.getUnderlyingIndex(i);
                         adjustedASF.setBuckets(underlyingIndex, asf.getBuckets(underlyingIndex) + BUCKET_INCREMENT);
 
-                        adjustedASF.processData(outputFile, rawData);
-                        learner.setStateFeatureVector(adjustedASF);
+                        FeatureAnalysisResult result = processNewFeature(adjustedASF, outputFile, rawData, learner, n);
 
-                        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(outputFile);
-                        // then find BIC
-                        double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-                        //                  System.out.printf("Feature: %20s, Buckets: %d, BIC: %.2f%n",
-                        //                          firstFeature, adjustedASF.getBuckets(underlyingIndex), newBIC);
-                        if (newBIC < bestBIC) {
-                            bestBIC = newBIC;
+                        if (result.newBIC < bestBIC) {
+                            bestBIC = result.newBIC;
                             bestFeatures = adjustedASF;
-                            startingHeuristic = newHeuristic;
+                            startingHeuristic = result.newHeuristic;
                             bestFeatureDescription = firstFeature + " (Buckets: " + adjustedASF.getBuckets(underlyingIndex) + ")";
-                        } else if (newBIC > baseBIC) {
+                        } else if (result.newBIC > baseBIC) {
                             excludedBucketFeatures.add(firstFeature);
-                            //            System.out.println("Feature " + firstFeature + " excluded");
                         }
                     }
 
@@ -246,25 +239,15 @@ public class LearnFromData {
                         // Consider the interaction of features
                         AutomatedFeatures adjustedASF = asf.copy();
                         adjustedASF.addInteraction(i, j);
-                        // providing the previous ASF means we will just calculate the new interaction
-                        adjustedASF.processData(outputFile, dataFiles);
-                        learner.setStateFeatureVector(adjustedASF);
+                        FeatureAnalysisResult result = processNewFeature(adjustedASF, outputFile, rawData, learner, n);
 
-                        // TODO: Refactor to remove code repetition
-                        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(outputFile);
-                        // then find AIC
-                        double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-                        //           System.out.printf("Interaction: %20s, %20s, BIC: %.2f%n",
-                        //                   firstFeature, secondFeature, newBIC);
-
-                        if (newBIC < bestBIC) {
-                            bestBIC = newBIC;
+                        if (result.newBIC < bestBIC) {
+                            bestBIC = result.newBIC;
                             bestFeatures = adjustedASF;
-                            startingHeuristic = newHeuristic;
+                            startingHeuristic = result.newHeuristic;
                             bestFeatureDescription = interactionName;
-                        } else if (newBIC > baseBIC) {
+                        } else if (result.newBIC > baseBIC) {
                             excludedInteractionFeatures.add(interactionName);
-                            //                  System.out.println("Interaction " + firstFeature + ":" + secondFeature + " excluded");
                         }
                     }
                 }
@@ -297,7 +280,8 @@ public class LearnFromData {
                             cd -> Arrays.stream(cd.name().split(":")))
                     .distinct()
                     .toList();
-            //      System.out.println("Columns with interactions: " + columnsWithInteraction);
+            if (!columnsWithInteraction.isEmpty())
+                System.out.println("Columns with interactions: " + columnsWithInteraction);
             do {
                 bestFeatures = null;
                 baseBIC = bestBIC; // reset baseline
@@ -310,22 +294,19 @@ public class LearnFromData {
 
                     AutomatedFeatures adjustedASF = asf.copy();
                     adjustedASF.removeFeature(i);
-                    learner.setStateFeatureVector(adjustedASF);
 
                     // we always use the data file from the last iteration of building the model (as this has all the data)
                     String newFileName = dataDirectory + File.separator +
                             (iteration > 0 ? "ImproveModel_Iter_" + (iteration - 1) + ".txt" :
                                     "ImproveModel_tmp.txt");
-                    GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(newFileName);
-                    double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-                    //              System.out.printf("Considering Feature: %20s, BIC: %.2f (%d/%d)%n", featureToRemove, newBIC, adjustedASF.names().length, asf.names().length);
+                    FeatureAnalysisResult result = processNewFeature(adjustedASF, newFileName, new String[0], learner, n);
 
-                    if (newBIC < bestBIC) {
-                        bestBIC = newBIC;
+                    if (result.newBIC < bestBIC) {
+                        bestBIC = result.newBIC;
                         bestFeatures = adjustedASF;
-                        startingHeuristic = newHeuristic;
-                        bestFeatureDescription = String.format("Removed Feature: %20s, BIC: %.2f", featureToRemove, newBIC);
-                    } else if (newBIC > baseBIC) {
+                        startingHeuristic = result.newHeuristic;
+                        bestFeatureDescription = String.format("Removed Feature: %20s, BIC: %.2f", featureToRemove, bestBIC);
+                    } else if (result.newBIC > baseBIC) {
                         excludedFeatures.add(featureToRemove);
                     }
                 }
@@ -343,6 +324,28 @@ public class LearnFromData {
             throw new RuntimeException("Invalid starting Model " + startingHeuristic.getClass());
         }
         return startingHeuristic;
+    }
+
+    private record FeatureAnalysisResult(
+            AutomatedFeatures adjustedASF,
+            GLMHeuristic newHeuristic,
+            double newBIC) {
+    }
+
+    FeatureAnalysisResult processNewFeature(AutomatedFeatures asf,
+                                                      String outputFile,
+                                                      String[] rawData,
+                                                      AbstractLearner learner,
+                                                      int n) {
+
+        if (rawData != null && rawData.length > 0)
+            asf.processData(outputFile, rawData);
+
+        learner.setStateFeatureVector(asf);
+
+        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(outputFile);
+        double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), asf.names().length, n);
+        return new FeatureAnalysisResult(asf, newHeuristic, newBIC);
     }
 
     private double bicFromAic(double aic, int k, int n) {
