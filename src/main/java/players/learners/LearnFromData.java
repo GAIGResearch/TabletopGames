@@ -97,13 +97,8 @@ public class LearnFromData {
         List<List<Object>> convertedData = asf.processData(convertedDataFile, dataFiles);
 
         // this will have created the raw data from which we now learn
-
-        if (learner.targetType == ACTION_ADV || learner.targetType == ACTION_CHOSEN ||
-                learner.targetType == ACTION_SCORE || learner.targetType == ACTION_VISITS) {
-            learner.setActionFeatureVector(asf);
-        } else {
-            learner.setStateFeatureVector(asf);
-        }
+        // since we're using AutomatedFeatures, we can just set the state feature vector
+        learner.setStateFeatureVector(asf);
         // this creates the extended AutomatedFeatures, and fits to this; before considering any interactions, bucketing or pruning
         Object learnedThing = learner.learnFrom(convertedDataFile);
 
@@ -280,6 +275,7 @@ public class LearnFromData {
                             cd -> Arrays.stream(cd.name().split(":")))
                     .distinct()
                     .toList();
+            // TODO: Add columns with bucketed ranges
             if (!columnsWithInteraction.isEmpty())
                 System.out.println("Columns with interactions: " + columnsWithInteraction);
             do {
@@ -333,10 +329,10 @@ public class LearnFromData {
     }
 
     FeatureAnalysisResult processNewFeature(AutomatedFeatures asf,
-                                                      String outputFile,
-                                                      String[] rawData,
-                                                      AbstractLearner learner,
-                                                      int n) {
+                                            String outputFile,
+                                            String[] rawData,
+                                            AbstractLearner learner,
+                                            int n) {
 
         if (rawData != null && rawData.length > 0)
             asf.processData(outputFile, rawData);

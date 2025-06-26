@@ -18,7 +18,7 @@
 		"underlyingState" : {
 			"class" : "games.dominion.metrics.DomStateFeaturesReduced"
 		},
-		"class" : "players.heuristics.AutomatedFeatures",
+		"class" : "evaluation.features.AutomatedFeatures",
 		"underlyingAction" : {
 			"class" : "games.dominion.metrics.DomActionFeatures"
 		}
@@ -186,7 +186,7 @@
 		"underlyingState" : {
 			"class" : "games.dominion.metrics.DomStateFeaturesReduced"
 		},
-		"class" : "players.heuristics.AutomatedFeatures",
+		"class" : "evaluation.features.AutomatedFeatures",
 		"underlyingAction" : {
 			"class" : "games.dominion.metrics.DomActionFeatures"
 		}

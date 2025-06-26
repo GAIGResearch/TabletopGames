@@ -35,7 +35,7 @@
 		"underlyingState" : {
 			"class" : "games.dominion.metrics.DomStateFeaturesReduced"
 		},
-		"class" : "players.heuristics.AutomatedFeatures"
+		"class" : "evaluation.features.AutomatedFeatures"
 	},
 	"coefficients" : {
 		"provinceCount" : 6.110112681411764,

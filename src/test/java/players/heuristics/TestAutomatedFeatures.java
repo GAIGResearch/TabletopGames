@@ -1,6 +1,9 @@
 package players.heuristics;
 
 import core.actions.AbstractAction;
+import evaluation.features.AutomatedFeatures;
+import games.backgammon.BGActionFeatures;
+import games.backgammon.BGStateFeatures;
 import games.dominion.DominionConstants;
 import games.dominion.DominionFGParameters;
 import games.dominion.DominionForwardModel;
@@ -8,6 +11,7 @@ import games.dominion.DominionGameState;
 import games.dominion.actions.*;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
+import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -158,5 +162,29 @@ public class TestAutomatedFeatures {
         assertEquals("players.heuristics.LogisticActionHeuristic", json.get("class"));
         assertEquals(2, ((JSONArray) ((JSONObject) json.get("features")).get("features")).size());
         assertEquals(21, ((JSONArray) ((JSONObject) json.get("actionFeatures")).get("features")).size());
+    }
+
+    @Test
+    public void JSONGeneration() {
+        // we create automated features, and then we check that the JSON generation works correctly
+
+        AutomatedFeatures asf = new AutomatedFeatures(new BGStateFeatures(), new BGActionFeatures());
+        int startingFeatures = asf.names().length;
+        assertEquals(startingFeatures, asf.underlyingAction.names().length + asf.underlyingState.names().length);
+
+        // Then construct JSON with coefficients to load
+        JSONObject coefficients = new JSONObject();
+        coefficients.put("BIAS", 0.5);
+        coefficients.put(asf.names()[0] + ":" + asf.names()[10], 0.1);
+        coefficients.put(asf.names()[12] + ":" + asf.names()[11], -0.2);
+        coefficients.put(asf.names()[4], 1.0);
+
+        JSONObject wrapper = new JSONObject();
+        wrapper.put("coefficients", coefficients);
+
+        LinearActionHeuristic heuristic = new LinearActionHeuristic(null, asf, new double[0]);
+        heuristic.loadCoefficientsFromJSON(wrapper);
+
+
     }
 }
