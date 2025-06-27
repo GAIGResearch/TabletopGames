@@ -266,6 +266,9 @@ public class TestAutomatedFeatures {
         // Then reconstruct the heuristic from the JSON and check that it has the expected coefficients and features
         LinearActionHeuristic reconstruction = new LinearActionHeuristic(json);
         checkEquivalent(heuristic, reconstruction, new int[]{2, 2, 0});
+
+        // Check that the RANGE feature is correctly reconstructed (this takes the last position)
+        assertEquals("treasureValue_B1", reconstruction.names()[range0Index]);
     }
 
     private void checkEquivalent(LinearActionHeuristic heuristic, LinearActionHeuristic reconstruction, int[] reconstructionDifferences) {
