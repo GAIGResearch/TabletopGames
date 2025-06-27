@@ -1,28 +1,4 @@
 {
-	"features" : {
-		"features" : [
-			{
-				"buckets" : 1,
-				"name" : "treasureInHand",
-				"index" : 3,
-				"type" : "RAW"
-			},
-			{
-				"buckets" : 1,
-				"name" : "actionSize",
-				"index" : 11,
-				"type" : "RAW"
-			}
-		],
-		"defaultBuckets" : 1,
-		"underlyingState" : {
-			"class" : "games.dominion.metrics.DomStateFeaturesReduced"
-		},
-		"class" : "evaluation.features.AutomatedFeatures",
-		"underlyingAction" : {
-			"class" : "games.dominion.metrics.DomActionFeatures"
-		}
-	},
 	"coefficients" : {
 		"cardType_GOLD" : -0.07765427490387194,
 		"actionSize:cardType_SILVER" : 0.10607014877168938,

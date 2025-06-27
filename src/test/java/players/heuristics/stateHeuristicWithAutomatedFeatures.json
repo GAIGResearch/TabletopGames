@@ -1,36 +1,5 @@
 {
 	"features" : {
-		"features" : [
-			{
-				"buckets" : 1,
-				"name" : "treasureValue",
-				"index" : 1,
-				"type" : "RAW"
-			},
-			{
-				"buckets" : 1,
-				"name" : "provinceCount",
-				"index" : 7,
-				"type" : "RAW"
-			},
-			{
-				"buckets" : 1,
-				"name" : "duchyCount",
-				"index" : 8,
-				"type" : "RAW"
-			},
-			{
-				"buckets" : 1,
-				"name" : "estateCount",
-				"index" : 9,
-				"type" : "RAW"
-			},
-			{
-				"buckets" : 1,
-				"name" : "totalCards",
-				"index" : 10,
-				"type" : "RAW"
-			}		],
 		"defaultBuckets" : 1,
 		"underlyingState" : {
 			"class" : "games.dominion.metrics.DomStateFeaturesReduced"

@@ -11,17 +11,19 @@ import games.dominion.DominionGameState;
 import games.dominion.actions.*;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
+import games.dominion.metrics.DomActionFeatures;
+import games.dominion.metrics.DomStateFeaturesReduced;
 import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import utilities.JSONUtils;
+import utilities.Pair;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class TestAutomatedFeatures {
 
@@ -64,6 +66,17 @@ public class TestAutomatedFeatures {
     double a_SMITHY = -0.006656491964319801;
 
     @Test
+    public void heuristicInitialisation() {
+        // check that the heuristic initialises correctly
+        int expectedStateFeatures = (new DomStateFeaturesReduced()).names().length;
+        assertEquals(expectedStateFeatures, linearStateHeuristic.names().length);
+        int additionalFeaturesInJSON = 21;
+        assertEquals(expectedStateFeatures +
+                        additionalFeaturesInJSON,
+                logisticActionHeuristic.names().length);
+    }
+
+    @Test
     public void testAutomatedStateFeatures() {
         assertEquals(BIAS + treasure * 0.7 + estate * 3 + totalCards * 10 + treasureTotal * 7.0,
                 linearStateHeuristic.evaluateState(domState, 0), 0.00001);
@@ -73,13 +86,13 @@ public class TestAutomatedFeatures {
         fm.next(domState, new EndPhase(DominionGameState.DominionGamePhase.Buy));
         domState.addCard(CardType.SILVER, 0, DominionConstants.DeckType.DISCARD);
         assertEquals(1, domState.getCurrentPlayer());
-        assertEquals(BIAS + treasure * 9.0/11.0 + estate * 3 + totalCards * 11 + treasureTotal * 9.0,
+        assertEquals(BIAS + treasure * 9.0 / 11.0 + estate * 3 + totalCards * 11 + treasureTotal * 9.0,
                 linearStateHeuristic.evaluateState(domState, 0), 0.00001);
         assertEquals(BIAS + treasure * 0.7 + estate * 3 + totalCards * 10 + treasureTotal * 7.0,
                 linearStateHeuristic.evaluateState(domState, 1), 0.00001);
 
         domState.addCard(CardType.DUCHY, 1, DominionConstants.DeckType.DISCARD);
-        assertEquals(BIAS + treasure * 7.0/11.0 + estate * 3 + totalCards * 11 + treasureTotal * 7.0 +
+        assertEquals(BIAS + treasure * 7.0 / 11.0 + estate * 3 + totalCards * 11 + treasureTotal * 7.0 +
                         duchy + duchyEstate * 3,
                 linearStateHeuristic.evaluateState(domState, 1), 0.00001);
     }
@@ -154,18 +167,20 @@ public class TestAutomatedFeatures {
     }
 
     @Test
-    public void featureFiltering() {
+    public void JSONLoadingI() {
         LogisticActionHeuristic actionHeuristic = new LogisticActionHeuristic(
                 JSONUtils.loadJSONFile("src/test/java/players/heuristics/NonFilteredHeuristic.json")
         );
         JSONObject json = actionHeuristic.toJSON();
         assertEquals("players.heuristics.LogisticActionHeuristic", json.get("class"));
-        assertEquals(2, ((JSONArray) ((JSONObject) json.get("features")).get("features")).size());
+        assertFalse(json.containsKey("features"));
         assertEquals(21, ((JSONArray) ((JSONObject) json.get("actionFeatures")).get("features")).size());
+
+        assertEquals(21 + (new DomStateFeaturesReduced()).names().length, actionHeuristic.names().length);
     }
 
     @Test
-    public void JSONGeneration() {
+    public void JSONGenerationI() {
         // we create automated features, and then we check that the JSON generation works correctly
 
         AutomatedFeatures asf = new AutomatedFeatures(new BGStateFeatures(), new BGActionFeatures());
@@ -182,9 +197,92 @@ public class TestAutomatedFeatures {
         JSONObject wrapper = new JSONObject();
         wrapper.put("coefficients", coefficients);
 
-        LinearActionHeuristic heuristic = new LinearActionHeuristic(null, asf, new double[0]);
+        LinearActionHeuristic heuristic = new LinearActionHeuristic(asf, null, new double[0]);
         heuristic.loadCoefficientsFromJSON(wrapper);
 
 
+        // Now when we generate the JSON, we should only have features for which we have coefficients
+        // NOT including the baseline raw ones - so in this case just the two interactions
+
+        JSONObject json = heuristic.toJSON();
+        assertEquals("players.heuristics.LinearActionHeuristic", json.get("class"));
+        assertFalse(json.containsKey("features"));
+        assertTrue(json.containsKey("actionFeatures"));
+        JSONArray features = (JSONArray) ((JSONObject) json.get("actionFeatures")).get("features");
+        assertEquals(0, features.size()); // only RAW and interaction
+
+        // Then reconstruct the heuristic from the JSON and check that it has the expected coefficients and features
+        LinearActionHeuristic reconstruction = new LinearActionHeuristic(json);
+        checkEquivalent(heuristic, reconstruction, new int[]{0, 0, 0});
+    }
+
+    @Test
+    public void JSONGenerationII() {
+        AutomatedFeatures asf = new AutomatedFeatures(new BGStateFeatures(), new BGActionFeatures());
+
+        int treasureIndex = 0;
+        for (int i = 0; i < asf.names().length; i++) {
+            if (asf.names()[i].equals("treasureValue")) {
+                treasureIndex = i;
+                break;
+            }
+        }
+
+        int range0Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
+                "treasureValue_B0", AutomatedFeatures.featureType.RANGE, null,
+                new Pair<>(0.0, 0.5), treasureIndex, Double.class, new ArrayList<>())
+        );
+        int range1Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
+                "treasureValue_B1", AutomatedFeatures.featureType.RANGE, null,
+                new Pair<>(0.5, 1.0), treasureIndex, Double.class, new ArrayList<>())
+        );
+        asf.addInteraction(2, 4);
+
+        // Then construct JSON with coefficients to load
+        JSONObject coefficients = new JSONObject();
+        coefficients.put("BIAS", 0.5);
+        coefficients.put(asf.names()[0] + ":" + asf.names()[10], 0.1);
+        coefficients.put(asf.names()[12] + ":" + asf.names()[11], -0.2);
+        coefficients.put(asf.names()[4], 1.0);
+        coefficients.put("treasureValue_B1", 0.4);
+        coefficients.put("treasureValue_B0", 0.000000001); // should be ignored
+
+        JSONObject wrapper = new JSONObject();
+        wrapper.put("coefficients", coefficients);
+
+        LinearActionHeuristic heuristic = new LinearActionHeuristic(asf, null, new double[0]);
+        heuristic.loadCoefficientsFromJSON(wrapper);
+
+        // Now when we generate the JSON, we should only have features for which we have coefficients
+        // NOT including the baseline raw ones - so in this case just the two interactions
+
+        JSONObject json = heuristic.toJSON();
+        assertEquals("players.heuristics.LinearActionHeuristic", json.get("class"));
+        assertFalse(json.containsKey("features"));
+        assertTrue(json.containsKey("actionFeatures"));
+        JSONArray features = (JSONArray) ((JSONObject) json.get("actionFeatures")).get("features");
+        assertEquals(1, features.size()); // only one of the RANGE features should be included
+
+        // Then reconstruct the heuristic from the JSON and check that it has the expected coefficients and features
+        LinearActionHeuristic reconstruction = new LinearActionHeuristic(json);
+        checkEquivalent(heuristic, reconstruction, new int[]{2, 2, 0});
+    }
+
+    private void checkEquivalent(LinearActionHeuristic heuristic, LinearActionHeuristic reconstruction, int[] reconstructionDifferences) {
+        assertEquals(heuristic.names().length, reconstruction.names().length + reconstructionDifferences[0]);
+        if (reconstructionDifferences[0] == 0)
+            for (int i = 0; i < heuristic.names().length; i++) {
+                assertEquals(heuristic.names()[i], reconstruction.names()[i]);
+            }
+        assertEquals(heuristic.coefficients.length, reconstruction.coefficients.length + reconstructionDifferences[1]);
+        if (reconstructionDifferences[1] == 0)
+            for (int i = 0; i < heuristic.coefficients.length; i++) {
+                assertEquals(heuristic.coefficients[i], reconstruction.coefficients[i], 0.00001);
+            }
+        assertEquals(heuristic.interactionCoefficients.length, reconstruction.interactionCoefficients.length + reconstructionDifferences[2]);
+        if (reconstructionDifferences[2] == 0)
+            for (int i = 0; i < heuristic.interactionCoefficients.length; i++) {
+                assertEquals(heuristic.interactionCoefficients[i], reconstruction.interactionCoefficients[i], 0.00001);
+            }
     }
 }
