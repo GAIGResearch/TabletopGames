@@ -66,7 +66,8 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         // except that the state features are optional
         if (json.get("features") != null)
             this.features = JSONUtils.loadClassFromJSON((JSONObject) json.get("features"));
-        this.actionFeatures = JSONUtils.loadClassFromJSON((JSONObject) json.get("actionFeatures"));
+        if (json.get("actionFeatures") != null)
+            this.actionFeatures = JSONUtils.loadClassFromJSON((JSONObject) json.get("actionFeatures"));
         setUpNames();
         loadCoefficientsFromJSON(json);
     }

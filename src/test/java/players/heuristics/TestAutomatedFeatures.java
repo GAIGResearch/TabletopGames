@@ -65,23 +65,23 @@ public class TestAutomatedFeatures {
 
     @Test
     public void testAutomatedStateFeatures() {
-        assertEquals(BIAS + treasure * 7 + estate * 3 + totalCards * 10 + treasureTotal * 70,
-                linearStateHeuristic.evaluateState(domState, 0), 0.001);
+        assertEquals(BIAS + treasure * 0.7 + estate * 3 + totalCards * 10 + treasureTotal * 7.0,
+                linearStateHeuristic.evaluateState(domState, 0), 0.00001);
 
         // then buy a card
         fm.next(domState, new EndPhase(DominionGameState.DominionGamePhase.Play));
         fm.next(domState, new EndPhase(DominionGameState.DominionGamePhase.Buy));
         domState.addCard(CardType.SILVER, 0, DominionConstants.DeckType.DISCARD);
         assertEquals(1, domState.getCurrentPlayer());
-        assertEquals(BIAS + treasure * 9 + estate * 3 + totalCards * 11 + treasureTotal * 99,
-                linearStateHeuristic.evaluateState(domState, 0), 0.001);
-        assertEquals(BIAS + treasure * 7 + estate * 3 + totalCards * 10 + treasureTotal * 70,
-                linearStateHeuristic.evaluateState(domState, 1), 0.001);
+        assertEquals(BIAS + treasure * 9.0/11.0 + estate * 3 + totalCards * 11 + treasureTotal * 9.0,
+                linearStateHeuristic.evaluateState(domState, 0), 0.00001);
+        assertEquals(BIAS + treasure * 0.7 + estate * 3 + totalCards * 10 + treasureTotal * 7.0,
+                linearStateHeuristic.evaluateState(domState, 1), 0.00001);
 
         domState.addCard(CardType.DUCHY, 1, DominionConstants.DeckType.DISCARD);
-        assertEquals(BIAS + treasure * 7 + estate * 3 + totalCards * 11 + treasureTotal * 77 +
+        assertEquals(BIAS + treasure * 7.0/11.0 + estate * 3 + totalCards * 11 + treasureTotal * 7.0 +
                         duchy + duchyEstate * 3,
-                linearStateHeuristic.evaluateState(domState, 1), 0.001);
+                linearStateHeuristic.evaluateState(domState, 1), 0.00001);
     }
 
     @Test
@@ -148,7 +148,7 @@ public class TestAutomatedFeatures {
             }
             System.out.println("Action: " + action + " expected value: " + expectedValue + " actual value: " + values[i]);
             if (expectedValue > -1.0) {
-                assertEquals(expectedValue, values[i], 0.0001);
+                assertEquals(expectedValue, values[i], 0.00001);
             }
         }
     }
