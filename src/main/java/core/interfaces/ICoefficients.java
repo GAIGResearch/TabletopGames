@@ -20,6 +20,13 @@ public interface ICoefficients {
                 String name = (String) f.get("name");
                 if (coefficientsAsJSON.containsKey(name))
                     newFeaturesObject.add(f);
+                else if (!name.contains(":")) {
+                    // then check if there is an interaction that uses this feature (in which case we also want to keep it)
+                    if (coefficientsAsJSON.keySet().stream()
+                            .anyMatch(key -> key.toString().contains(name + ":") || key.toString().contains(":" + name))) {
+                        newFeaturesObject.add(f);
+                    }
+                }
             }
             featuresJson.put("features", newFeaturesObject);
         }
@@ -144,13 +151,13 @@ public interface ICoefficients {
         JSONObject json = new JSONObject();
         json.put("BIAS", coefficients()[0]);
         for (int i = 0; i < coefficients().length - 1; i++) {
-            if (Math.abs(coefficients()[i + 1]) > 0.0001) {
+            if (Math.abs(coefficients()[i + 1]) > 0.00001) {
                 json.put(names()[i], coefficients()[i + 1]);
             }
         }
         if (interactions() != null) {
             for (int i = 0; i < interactions().length; i++) {
-                if (Math.abs(interactionCoefficients()[i]) > 0.0001) {
+                if (Math.abs(interactionCoefficients()[i]) > 0.00001) {
                     StringBuilder key = new StringBuilder();
                     for (int j : interactions()[i]) {
                         if (!key.isEmpty())

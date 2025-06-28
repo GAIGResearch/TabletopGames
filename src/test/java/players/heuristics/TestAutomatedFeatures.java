@@ -1,5 +1,6 @@
 package players.heuristics;
 
+import com.ibm.icu.impl.number.parse.PaddingMatcher;
 import core.actions.AbstractAction;
 import evaluation.features.AutomatedFeatures;
 import games.backgammon.BGActionFeatures;
@@ -23,12 +24,15 @@ import utilities.Pair;
 
 import java.util.*;
 
+import static games.dominion.cards.CardType.MARKET;
+import static games.dominion.cards.CardType.PROVINCE;
 import static org.junit.Assert.*;
 
 public class TestAutomatedFeatures {
 
     DominionGameState domState = new DominionGameState(new DominionFGParameters(), 4);
     DominionForwardModel fm = new DominionForwardModel();
+    JSONObject coefficients;
 
     LinearStateHeuristic linearStateHeuristic = new LinearStateHeuristic(
             JSONUtils.loadJSONFile("src/test/java/players/heuristics/stateHeuristicWithAutomatedFeatures.json")
@@ -179,6 +183,19 @@ public class TestAutomatedFeatures {
         assertEquals(21 + (new DomStateFeaturesReduced()).names().length, actionHeuristic.names().length);
     }
 
+    private JSONObject initialiseBackgammonCoefficients(AutomatedFeatures asf) {
+        // Then construct JSON with coefficients to load
+        coefficients = new JSONObject();
+        coefficients.put("BIAS", 0.5);
+        coefficients.put(asf.names()[0] + ":" + asf.names()[10], 0.1);
+        coefficients.put(asf.names()[12] + ":" + asf.names()[11], -0.2);
+        coefficients.put(asf.names()[4], 1.0);
+
+        JSONObject wrapper = new JSONObject();
+        wrapper.put("coefficients", coefficients);
+        return wrapper;
+    }
+
     @Test
     public void JSONGenerationI() {
         // we create automated features, and then we check that the JSON generation works correctly
@@ -187,19 +204,8 @@ public class TestAutomatedFeatures {
         int startingFeatures = asf.names().length;
         assertEquals(startingFeatures, asf.underlyingAction.names().length + asf.underlyingState.names().length);
 
-        // Then construct JSON with coefficients to load
-        JSONObject coefficients = new JSONObject();
-        coefficients.put("BIAS", 0.5);
-        coefficients.put(asf.names()[0] + ":" + asf.names()[10], 0.1);
-        coefficients.put(asf.names()[12] + ":" + asf.names()[11], -0.2);
-        coefficients.put(asf.names()[4], 1.0);
-
-        JSONObject wrapper = new JSONObject();
-        wrapper.put("coefficients", coefficients);
-
         LinearActionHeuristic heuristic = new LinearActionHeuristic(asf, null, new double[0]);
-        heuristic.loadCoefficientsFromJSON(wrapper);
-
+        heuristic.loadCoefficientsFromJSON(initialiseBackgammonCoefficients(asf));
 
         // Now when we generate the JSON, we should only have features for which we have coefficients
         // NOT including the baseline raw ones - so in this case just the two interactions
@@ -220,35 +226,28 @@ public class TestAutomatedFeatures {
     public void JSONGenerationII() {
         AutomatedFeatures asf = new AutomatedFeatures(new BGStateFeatures(), new BGActionFeatures());
 
-        int treasureIndex = 0;
+        int barIndex = 0;
         for (int i = 0; i < asf.names().length; i++) {
-            if (asf.names()[i].equals("treasureValue")) {
-                treasureIndex = i;
+            if (asf.names()[i].equals("Bar")) {
+                barIndex = i;
                 break;
             }
         }
 
         int range0Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
-                "treasureValue_B0", AutomatedFeatures.featureType.RANGE, null,
-                new Pair<>(0.0, 0.5), treasureIndex, Double.class, new ArrayList<>())
+                "Bar_B0", AutomatedFeatures.featureType.RANGE, null,
+                new Pair<>(0.0, 0.5), barIndex, Double.class, new ArrayList<>())
         );
         int range1Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
-                "treasureValue_B1", AutomatedFeatures.featureType.RANGE, null,
-                new Pair<>(0.5, 1.0), treasureIndex, Double.class, new ArrayList<>())
+                "Bar_B1", AutomatedFeatures.featureType.RANGE, null,
+                new Pair<>(0.5, 1.0), barIndex, Double.class, new ArrayList<>())
         );
         asf.addInteraction(2, 4);
 
         // Then construct JSON with coefficients to load
-        JSONObject coefficients = new JSONObject();
-        coefficients.put("BIAS", 0.5);
-        coefficients.put(asf.names()[0] + ":" + asf.names()[10], 0.1);
-        coefficients.put(asf.names()[12] + ":" + asf.names()[11], -0.2);
-        coefficients.put(asf.names()[4], 1.0);
-        coefficients.put("treasureValue_B1", 0.4);
-        coefficients.put("treasureValue_B0", 0.000000001); // should be ignored
-
-        JSONObject wrapper = new JSONObject();
-        wrapper.put("coefficients", coefficients);
+        JSONObject wrapper = initialiseBackgammonCoefficients(asf);
+        coefficients.put("Bar_B1", 0.4);
+        coefficients.put("Bar_B0", 0.000000001); // should be ignored
 
         LinearActionHeuristic heuristic = new LinearActionHeuristic(asf, null, new double[0]);
         heuristic.loadCoefficientsFromJSON(wrapper);
@@ -268,7 +267,108 @@ public class TestAutomatedFeatures {
         checkEquivalent(heuristic, reconstruction, new int[]{2, 2, 0});
 
         // Check that the RANGE feature is correctly reconstructed (this takes the last position)
-        assertEquals("treasureValue_B1", reconstruction.names()[range0Index]);
+        assertEquals("Bar_B1", reconstruction.names()[range0Index]);
+    }
+
+    @Test
+    public void JSONGenerationIII() {
+        // this is to test that if we have a generated feature with a zero coefficient, it is not excluded
+        // *if* is it used in some other interaction
+        AutomatedFeatures asf = new AutomatedFeatures(new BGStateFeatures(), new BGActionFeatures());
+
+        int barIndex = 0;
+        for (int i = 0; i < asf.names().length; i++) {
+            if (asf.names()[i].equals("Bar")) {
+                barIndex = i;
+                break;
+            }
+        }
+        assertTrue(barIndex > 0); // Bar should be present
+
+        int range0Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
+                "Bar_B0", AutomatedFeatures.featureType.RANGE, null,
+                new Pair<>(0.0, 0.5), barIndex, Double.class, new ArrayList<>())
+        );
+        int range1Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
+                "Bar_B1", AutomatedFeatures.featureType.RANGE, null,
+                new Pair<>(0.5, 1.0), barIndex, Double.class, new ArrayList<>())
+        );
+        asf.addInteraction(2, range1Index);  // include treasureValue_B1 in an interaction
+
+        // Then construct JSON with coefficients to load
+        JSONObject wrapper = initialiseBackgammonCoefficients(asf);
+        coefficients.put("Bar_B1", 0.4);
+        coefficients.put("Bar_B0", 0.000000001); // should be ignored
+        coefficients.put(asf.names()[2] + ":Bar_B0", -0.674);
+
+        LinearActionHeuristic heuristic = new LinearActionHeuristic(asf, null, new double[0]);
+        heuristic.loadCoefficientsFromJSON(wrapper);
+
+        // Now when we generate the JSON, we should only have features for which we have coefficients
+        // NOT including the baseline raw ones - so in this case just the two interactions
+
+        JSONObject json = heuristic.toJSON();
+        JSONArray features = (JSONArray) ((JSONObject) json.get("actionFeatures")).get("features");
+        assertEquals(2, features.size()); // both RANGE features should be included
+
+        // Then reconstruct the heuristic from the JSON and check that it has the expected coefficients and features
+        LinearActionHeuristic reconstruction = new LinearActionHeuristic(json);
+        checkEquivalent(heuristic, reconstruction, new int[]{1, 1, 0});
+
+        // Check that the RANGE features are correctly reconstructed (this takes the last position)
+        assertEquals("Bar_B0", reconstruction.names()[range0Index]);
+        assertEquals("Bar_B1", reconstruction.names()[range1Index]);
+    }
+
+    @Test
+    public void JSONGenerationIV() {
+        // we now check with Dominion ASF, which included ENUM features (not covered in I to III above with backgammon)
+
+        AutomatedFeatures asf = new AutomatedFeatures(new DomStateFeaturesReduced(), new DomActionFeatures());
+
+        int cardTypeIndex = asf.underlyingState.names().length + 1; // cardType is the second action feature
+        int enum0Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
+                "cardType_PROVINCE", AutomatedFeatures.featureType.ENUM, PROVINCE,
+                null, cardTypeIndex, CardType.class, new ArrayList<>())
+        );
+        int enum1Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
+                "cardType_MARKET", AutomatedFeatures.featureType.ENUM, MARKET,
+                null, cardTypeIndex, CardType.class, new ArrayList<>())
+        );
+        int enum2Index = asf.addFeature(new AutomatedFeatures.ColumnDetails(
+                "cardType_VILLAGE", AutomatedFeatures.featureType.ENUM, MARKET,
+                null, cardTypeIndex, CardType.class, new ArrayList<>())
+        );
+
+        asf.addInteraction(2, enum0Index);  // include treasureValue_PROVINCE in an interaction
+
+        coefficients = new JSONObject();
+        coefficients.put("BIAS", 0.5);
+        coefficients.put(asf.names()[2] + ":" + asf.names()[10], 0.1);
+        coefficients.put(asf.names()[12] + ":" + asf.names()[11], -0.2);
+        coefficients.put(asf.names()[4], 1.0);
+        coefficients.put("cardType_MARKET", 0.3);
+        coefficients.put("cardType_VILLAGE", 0.000000001); // should be ignored
+        coefficients.put(asf.names()[2] + ":cardType_PROVINCE", -0.674);
+
+        JSONObject wrapper = new JSONObject();
+        wrapper.put("coefficients", coefficients);
+
+        LinearActionHeuristic heuristic = new LinearActionHeuristic(asf, null, new double[0]);
+        heuristic.loadCoefficientsFromJSON(wrapper);
+
+        JSONObject json = heuristic.toJSON();
+        JSONArray features = (JSONArray) ((JSONObject) json.get("actionFeatures")).get("features");
+        assertEquals(2, features.size()); // 2 of 3 ENUM features should be included
+
+        // Then reconstruct the heuristic from the JSON and check that it has the expected coefficients and features
+        LinearActionHeuristic reconstruction = new LinearActionHeuristic(json);
+        checkEquivalent(heuristic, reconstruction, new int[]{2, 2, 0});  // 2 are dropped (VILLAGE, plus the interactionFeature added)
+
+        // Check that the ENUM features are correctly reconstructed (this takes the last position)
+        assertEquals("cardType_MARKET", reconstruction.names()[enum1Index]);
+        assertEquals("cardType_PROVINCE", reconstruction.names()[enum0Index]);
+        assertEquals(enum2Index, reconstruction.names().length);
     }
 
     private void checkEquivalent(LinearActionHeuristic heuristic, LinearActionHeuristic reconstruction, int[] reconstructionDifferences) {

@@ -1,9 +1,6 @@
 package players.learners;
 
-import core.interfaces.IActionFeatureVector;
-import core.interfaces.ICoefficients;
-import core.interfaces.IStateFeatureVector;
-import core.interfaces.IToJSON;
+import core.interfaces.*;
 import org.json.simple.JSONObject;
 import evaluation.features.AutomatedFeatures;
 import players.heuristics.GLMHeuristic;
@@ -97,18 +94,26 @@ public class LearnFromData {
         List<List<Object>> convertedData = asf.processData(convertedDataFile, dataFiles);
 
         // this will have created the raw data from which we now learn
-        // since we're using AutomatedFeatures, we can just set the state feature vector
-        learner.setStateFeatureVector(asf);
+        // whichever of state/action features is not null will prompt the type of Heuristic learned
+        if (actionFeatures != null)
+            learner.setActionFeatureVector(asf);
+        else
+            learner.setStateFeatureVector(asf);
         // this creates the extended AutomatedFeatures, and fits to this; before considering any interactions, bucketing or pruning
         Object learnedThing = learner.learnFrom(convertedDataFile);
 
         // we are now in a position to modify the features in a loop
         learnedThing = improveModel(learnedThing, learner, convertedData.size(), convertedDataFile);
 
+        if (actionFeatures != null && learnedThing instanceof ApacheLearner apache) {
+            apache.setStateFeatureVector(null);
+            // a bit of a hack - ASF actually contains both state and action features, but we only want to call it once
+        }
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
             JSONUtils.writeJSON(json, outputFileName);
             // this next line is to ensure that the filtering of INTERACTIVE features is taken account of in the returned heuristic
+            // toJSON has also filtered the ASF into two components, one for the state values and one for action values
             learnedThing = JSONUtils.loadClassFromJSON(json);
         }
         // write the coefficients to a file
@@ -134,13 +139,7 @@ public class LearnFromData {
 
         long startTime = System.currentTimeMillis();
         if (startingHeuristic instanceof GLMHeuristic glm) {
-            AutomatedFeatures asf;
-            if (learner.targetType == ACTION_SCORE || learner.targetType == ACTION_VISITS ||
-                    learner.targetType == ACTION_ADV || learner.targetType == ACTION_CHOSEN) {
-                asf = (AutomatedFeatures) learner.getActionFeatureVector();
-            } else {
-                asf = (AutomatedFeatures) learner.getStateFeatureVector();
-            }
+            AutomatedFeatures asf = (AutomatedFeatures) (learner.getActionFeatureVector() != null ? learner.getActionFeatureVector() : learner.getStateFeatureVector());
             String bestFeatureDescription = "";
             double baseBIC = bicFromAic(glm.getModel().summary().aic(), asf.names().length, n);
             double bestBIC = baseBIC;
@@ -337,7 +336,10 @@ public class LearnFromData {
         if (rawData != null && rawData.length > 0)
             asf.processData(outputFile, rawData);
 
-        learner.setStateFeatureVector(asf);
+        if (learner.actionFeatureVector != null)
+            learner.setActionFeatureVector(asf);
+        else
+            learner.setStateFeatureVector(asf);
 
         GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom(outputFile);
         double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), asf.names().length, n);
