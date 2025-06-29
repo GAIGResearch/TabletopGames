@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import static core.CoreConstants.imgHash;
 import static utilities.Utils.getNeighbourhood;
@@ -303,15 +304,15 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
 
     @Override
     public String toString() {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
                 BoardNode t = getElement(x, y);
-                if (t != null) s += t + " ";
+                if (t != null) s.append(t.getComponentName()).append(" ");
             }
-            s += "\n";
+            s.append("\n");
         }
-        return s;
+        return s.toString();
     }
 
     /**
@@ -407,9 +408,9 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         // Add all cells as board nodes connected to each other
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                BoardNode bn = new BoardNode(-1, getElement(j, i).toString());
+                BoardNode bn = new BoardNode(-1, getElement(j, i).getComponentName());
                 bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
-                bn.setProperty(new PropertyString("terrain", getElement(j, i).toString()));
+                bn.setProperty(new PropertyString("terrain", getElement(j, i).getComponentName()));
                 gb.addBoardNode(bn);
                 bnMapping.put(new Vector2D(j, i), bn);
             }
@@ -445,9 +446,9 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 if (getElement(j, i) != null) {
-                    BoardNode bn = new BoardNode(-1, getElement(j, i).toString());
+                    BoardNode bn = new BoardNode(-1, getElement(j, i).getComponentName());
                     bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
-                    bn.setProperty(new PropertyString("terrain", getElement(j, i).toString()));
+                    bn.setProperty(new PropertyString("terrain", getElement(j, i).getComponentName()));
                     gb.addBoardNode(bn);
                     bnMapping.put(new Vector2D(j, i), bn);
                 }

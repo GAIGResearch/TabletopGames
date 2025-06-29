@@ -54,4 +54,8 @@ public abstract class AbstractTournament implements IGameRunner {
 
         this.nPlayers = nPlayerPerGame;
     }
+
+    public Game getGame() {
+        return game;
+    }
 }

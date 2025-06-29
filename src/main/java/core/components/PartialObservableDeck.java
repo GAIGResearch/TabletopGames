@@ -122,6 +122,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
                         " but at least one entry is of length " + b.length);
         this.elementVisibility = visibility;
     }
+
     private void applyVisibilityMode() {
         if (getVisibilityMode() == VisibilityMode.TOP_VISIBLE_TO_ALL)
             for (int j = 0; j < deckVisibility.length; j++)
@@ -268,12 +269,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     @Override
-    public boolean remove(int idx) {
-        if (super.remove(idx)) {
-            elementVisibility.remove(idx);
-            return true;
-        }
-        return false;
+    public void remove(int idx) {
+        super.remove(idx);
+        elementVisibility.remove(idx);
     }
 
     @Override
@@ -286,6 +284,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * Shuffles the deck, and updates the visibility of the components accordingly.
      * After a shuffle players will no longer know the position of the cards they could see before the shuffle
      * (this resets the visibility of all components to the default deck visibility).
+     *
      * @param rnd
      */
     @Override

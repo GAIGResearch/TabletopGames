@@ -62,7 +62,7 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
         ekgs.discardPile = new Deck<>("Discard Pile", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
         // Add remaining defuse cards and exploding kitten cards to the deck and shuffle again
-        for (int i = ekgs.getNPlayers(); i < ekp.nDefuseCards; i++) {
+        for (int i = ekgs.getNPlayers(); i < ekp.cardCounts.get(DEFUSE); i++) {
             ExplodingKittensCard defuse = new ExplodingKittensCard(DEFUSE);
             drawPile.add(defuse);
         }

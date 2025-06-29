@@ -200,7 +200,10 @@ public abstract class AbstractMetric {
      * @param reportTypes        - list of report types to produce
      * @param reportDestinations - list of report destinations to produce
      */
-    public void report(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations)
+    public void report(String folderName,
+                       List<IDataLogger.ReportType> reportTypes,
+                       List<IDataLogger.ReportDestination> reportDestinations,
+                       boolean append)
     {
         //DataProcessor with compatibility assertion:
         IDataProcessor dataProcessor = getDataProcessor();
@@ -217,7 +220,7 @@ public abstract class AbstractMetric {
 
             if (reportType == IDataLogger.ReportType.RawData) {
                 if (reportDestination == IDataLogger.ReportDestination.ToFile || reportDestination == IDataLogger.ReportDestination.ToBoth) {
-                    dataProcessor.processRawDataToFile(dataLogger, folderName);
+                    dataProcessor.processRawDataToFile(dataLogger, folderName, append);
                 }
                 if (reportDestination == IDataLogger.ReportDestination.ToConsole || reportDestination == IDataLogger.ReportDestination.ToBoth) {
                     dataProcessor.processRawDataToConsole(dataLogger);
