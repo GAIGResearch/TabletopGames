@@ -65,7 +65,7 @@ public class TestAutomatedFeatures {
     double a_SILVER = -0.05206605840583842;
     double a_MOAT = -0.16732454886123663;
     double a_actionSize_SILVER = 0.10607014877168938;
-    double a_MILITIA = 0.005195586347419078;
+    double a_MILITIA = 0.5195586347419078;
     double a_MERCHANT = 0.08252076625148476;
     double a_SMITHY = -0.006656491964319801;
 
@@ -121,6 +121,12 @@ public class TestAutomatedFeatures {
                     case SILVER -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_SILVER +
                             a_BIAS + a_treasureInHand * money + (a_actionSize_SILVER + a_actionSize) * actions.size() + a_BUY);
                     case MOAT -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_MOAT +
+                            a_BIAS + a_treasureInHand * money + a_actionSize * actions.size() + a_BUY);
+                    case SMITHY -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_SMITHY +
+                            a_BIAS + a_treasureInHand * money + a_actionSize * actions.size() + a_BUY);
+                    case MILITIA -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_MILITIA +
+                            a_BIAS + a_treasureInHand * money + a_actionSize * actions.size() + a_BUY);
+                    case MERCHANT -> logisticActionHeuristic.inverseLinkFunction.applyAsDouble(a_MERCHANT +
                             a_BIAS + a_treasureInHand * money + a_actionSize * actions.size() + a_BUY);
                     default -> -1.0;
                 };

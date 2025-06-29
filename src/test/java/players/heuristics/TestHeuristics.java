@@ -98,7 +98,7 @@ public class TestHeuristics {
     }
 
     @Test
-    public void testActionHeuristic() {
+    public void testActionHeuristicNonASF() {
         llState.getPlayerHandCards().get(0).clear();
         llState.getPlayerHandCards().get(0).add(new LoveLetterCard(games.loveletter.cards.CardType.Handmaid));
         llState.getPlayerHandCards().get(0).add(new LoveLetterCard(games.loveletter.cards.CardType.Guard));
@@ -138,6 +138,5 @@ public class TestHeuristics {
             else
                 throw new AssertionError("Unexpected action: " + action);
         }
-
     }
 }

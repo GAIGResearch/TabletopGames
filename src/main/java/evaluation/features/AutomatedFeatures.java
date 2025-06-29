@@ -108,13 +108,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 int index = Integer.parseInt(featureObject.get("index").toString());
                 featureIndices.add(index);
                 switch (type) {
-//                case "RAW" -> {
-//                    featureTypes.add(featureType.RAW);
-//                    enumValues.add(null);
-//                    featureRanges.add(null);
-//                    interactions.add(null);
-//                    buckets[index] = Integer.parseInt(featureObject.get("buckets").toString());
-//                }
                     case "ENUM" -> {
                         featureTypes.add(featureType.ENUM);
                         String enumString = (String) featureObject.get("enumValue");

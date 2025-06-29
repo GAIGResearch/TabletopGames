@@ -76,6 +76,7 @@ public abstract class GLMHeuristic implements ICoefficients {
     public GeneralizedLinearRegressionModel getModel() {
         return underlyingModel;
     }
+
     public GLMHeuristic setModel(GeneralizedLinearRegressionModel model) {
         this.underlyingModel = model;
         double[] coeffs = model.coefficients().toArray();
