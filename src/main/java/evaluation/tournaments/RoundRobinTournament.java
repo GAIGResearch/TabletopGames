@@ -792,6 +792,30 @@ public class RoundRobinTournament extends AbstractTournament {
         return alphaRankByWin[agentID];
     }
 
+    public int getAlphaRankWinnerByWinRate() {
+        if (alphaRankByWin == null)
+            return -1;
+        return getBestAgentInArray(alphaRankByWin);
+    }
+
+    public int getAlphaRankWinnerByOrdinal() {
+        if (alphaRankByOrdinal == null)
+            return -1;
+        return getBestAgentInArray(alphaRankByOrdinal);
+    }
+
+    private int getBestAgentInArray(double[] arrayIndexedByAgent) {
+        int winnerIndex = 0;
+        double max = arrayIndexedByAgent[0];
+        for (int i = 1; i < arrayIndexedByAgent.length; i++) {
+            if (arrayIndexedByAgent[i] > max) {
+                max = arrayIndexedByAgent[i];
+                winnerIndex = i;
+            }
+        }
+        return winnerIndex;
+    }
+
     public double getWinStdErr(int agentID) {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).b;
     }

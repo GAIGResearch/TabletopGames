@@ -273,8 +273,10 @@ public class ExpertIteration {
 
         // Are we done?
         if (iter > 0) {
-            tournamentWinsByAgent.merge(tournament.getWinner().toString(), 1, Integer::sum);
-            if (tournament.getWinner().toString().equals(bestAgent.toString())) {
+            int alphaWinner = tournament.getAlphaRankWinnerByWinRate();
+            String winner = alphaWinner > -1 ? agents.get(alphaWinner).toString() : tournament.getWinner().toString();
+            tournamentWinsByAgent.merge(winner, 1, Integer::sum);
+            if (winner.equals(bestAgent.toString())) {
                 consecutiveWins++;
             } else {
                 consecutiveWins = 0; // reset the counter
