@@ -275,7 +275,7 @@ public class JSONUtils {
         } catch (IOException e) {
             throw new AssertionError("Problem reading file " + filename + " : " + e);
         } catch (ParseException e) {
-            throw new AssertionError("Problem parsing JSON in " + filename);
+            throw new AssertionError("Problem parsing JSON in " + filename + "\n: " + e.getMessage());
         }
     }
 
