@@ -274,7 +274,7 @@ public class LearnFromData {
                             cd -> Arrays.stream(cd.name().split(":")))
                     .distinct()
                     .toList();
-            // TODO: Add columns with bucketed ranges
+
             if (!columnsWithInteraction.isEmpty())
                 System.out.println("Columns with interactions: " + columnsWithInteraction);
             do {

@@ -205,7 +205,7 @@ public enum RunArg {
     everyN("We only record data every Nth tick to reduce correlation in training data generated.",
             17,
             new Usage[]{Usage.ExpertIteration}),
-    expert("An expert player to use for the ExpertIteration process. Either MCTS or BASE.",
+    expert("An expert player to use for the ExpertIteration process. Either BASE, MCTS or MCTSAction.",
             "BASE",
             new Usage[]{Usage.ExpertIteration}),
     expertTime("The multiplier to use for the expert's budget (if MCTS). Default is 10.",

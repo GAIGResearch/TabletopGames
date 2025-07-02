@@ -144,7 +144,6 @@ public class ExpertIteration {
         agents = new ArrayList<>(PlayerFactory.createPlayers(player));
         bestAgent = agents.get(0);
 
-        IStateHeuristic currentStateHeuristic = null;
         IActionHeuristic currentActionHeuristic = null;
 
         int restartAtIteration = restartIteration();
@@ -193,7 +192,6 @@ public class ExpertIteration {
 
             tuneAgents(newStateHeuristic, newActionHeuristic, currentActionHeuristic);
 
-            currentStateHeuristic = newStateHeuristic;
             currentActionHeuristic = newActionHeuristic;
 
             iter++;
@@ -279,7 +277,7 @@ public class ExpertIteration {
             if (winner.equals(bestAgent.toString())) {
                 consecutiveWins++;
             } else {
-                consecutiveWins = 0; // reset the counter
+                consecutiveWins = 1; // reset the counter
             }
         }
         bestAgent = tournament.getWinner().copy();
@@ -306,8 +304,8 @@ public class ExpertIteration {
                     .toList();
             agents.removeAll(toRemoveAgents);
         }
-        // we end if any agent has won 5 tournaments in total, or 3 consecutive tournaments
-        if (consecutiveWins >= 3 || tournamentWinsByAgent.values().stream().mapToInt(Integer::intValue).max().orElse(0) >= 5) {
+        // we end if any agent has won 7 tournaments in total, or 4 consecutive tournaments
+        if (consecutiveWins >= 4 || tournamentWinsByAgent.values().stream().mapToInt(Integer::intValue).max().orElse(0) >= 7) {
             System.out.println("Converged after " + iter + " iterations");
             return true;
         }
