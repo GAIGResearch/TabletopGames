@@ -195,6 +195,8 @@ public class LearnFromData {
                             startingHeuristic = result.newHeuristic;
                             bestFeatureDescription = firstFeature + " (Buckets: " + adjustedASF.getBuckets(underlyingIndex) + ")";
                         } else if (result.newBIC > baseBIC) {
+                            System.out.println("Excluding feature " + firstFeature + " with buckets " +
+                                    adjustedASF.getBuckets(underlyingIndex) + " as it did not improve BIC");
                             excludedBucketFeatures.add(firstFeature);
                         }
                     }
@@ -302,6 +304,7 @@ public class LearnFromData {
                         startingHeuristic = result.newHeuristic;
                         bestFeatureDescription = String.format("Removed Feature: %20s, BIC: %.2f", featureToRemove, bestBIC);
                     } else if (result.newBIC > baseBIC) {
+                        System.out.println("Excluding feature " + featureToRemove + " as it did not improve BIC");
                         excludedFeatures.add(featureToRemove);
                     }
                 }
