@@ -10,8 +10,10 @@ import utilities.Utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static evaluation.features.AutomatedFeatures.featureType.*;
+import static java.util.stream.Collectors.joining;
 import static players.learners.AbstractLearner.Target.*;
 
 public class LearnFromData {
@@ -195,8 +197,8 @@ public class LearnFromData {
                             startingHeuristic = result.newHeuristic;
                             bestFeatureDescription = firstFeature + " (Buckets: " + adjustedASF.getBuckets(underlyingIndex) + ")";
                         } else if (result.newBIC > baseBIC) {
-                            System.out.println("Excluding feature " + firstFeature + " with buckets " +
-                                    adjustedASF.getBuckets(underlyingIndex) + " as it did not improve BIC");
+//                            System.out.println("Excluding feature " + firstFeature + " with buckets " +
+//                                    adjustedASF.getBuckets(underlyingIndex) + " as it did not improve BIC");
                             excludedBucketFeatures.add(firstFeature);
                         }
                     }
@@ -259,14 +261,24 @@ public class LearnFromData {
                 if (bestFeatures == null) {
                     System.out.println("No features improved AIC");
                 } else {
-                    System.out.println("Best feature: " + bestFeatureDescription);
-                    System.out.println("New BIC: " + bestBIC);
+                    System.out.printf("Best feature with BIC: %.2f is %s%n", bestBIC, bestFeatureDescription);
+//                    System.out.printf("\tCoefficients: %s%n",
+//                            glm.coefficients() != null ?
+//                                    Arrays.stream(glm.coefficients()).mapToObj(d -> String.format("%.2f", d)).collect(joining("|")) : "[]");
+
                     asf = bestFeatures;
                 }
 
                 // increment bicMultiplier if time is getting on
                 int minutesElapsed = (int) ((System.currentTimeMillis() - startTime) / 60000);
-                bicMultiplier = (minutesElapsed / bicTimer + 1) * baseBicMultiplier;
+                if (minutesElapsed > bicTimer) {
+                    System.out.printf("Time elapsed: %d minutes, increasing BIC multiplier from %d to %d%n",
+                            minutesElapsed, bicMultiplier, bicMultiplier + baseBicMultiplier);
+                    startTime = System.currentTimeMillis();
+                    bicMultiplier = bicMultiplier + baseBicMultiplier;
+                    // then adjust current bestBIC to reflect the new multiplier
+                    bestBIC = bicFromAic(glm.getModel().summary().aic(), asf.names().length, n);
+                }
             } while (bestFeatures != null);
 
             List<AutomatedFeatures.ColumnDetails> interactionColumns = asf.getColumnDetails().stream()
@@ -298,21 +310,25 @@ public class LearnFromData {
                                     "ImproveModel_tmp.txt");
                     FeatureAnalysisResult result = processNewFeature(adjustedASF, newFileName, new String[0], learner, n);
 
+//                    System.out.printf("\tConsidered feature removal: %s, new BIC: %.2f%n", featureToRemove, result.newBIC);
+//                    System.out.printf("\tCoefficients: %s%n",
+//                            result.newHeuristic.coefficients() != null ?
+//                                    Arrays.stream(result.newHeuristic.coefficients()).mapToObj(d -> String.format("%.2f", d)).collect(joining("|")) : "[]");
                     if (result.newBIC < bestBIC) {
                         bestBIC = result.newBIC;
                         bestFeatures = adjustedASF;
                         startingHeuristic = result.newHeuristic;
-                        bestFeatureDescription = String.format("Removed Feature: %20s, BIC: %.2f", featureToRemove, bestBIC);
+                        bestFeatureDescription = String.format("Removed Feature with best BIC: %.2f is %s", bestBIC, featureToRemove);
                     } else if (result.newBIC > baseBIC) {
-                        System.out.println("Excluding feature " + featureToRemove + " as it did not improve BIC");
+//                        System.out.printf("Keeping feature %s as removing worsened BIC above baseline: %.2f > %.2f%n",
+//                                featureToRemove, result.newBIC, baseBIC);
                         excludedFeatures.add(featureToRemove);
                     }
                 }
 
                 if (bestFeatures != null) {
                     asf = bestFeatures;
-                    System.out.println("Best feature modification: " + bestFeatureDescription);
-                    System.out.println("New BIC: " + bestBIC);
+                    System.out.println(bestFeatureDescription);
                 } else {
                     System.out.println("No features improved BIC when removed");
                 }
