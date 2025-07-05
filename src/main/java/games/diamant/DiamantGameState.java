@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 public class DiamantGameState extends AbstractGameState implements IPrintable {
@@ -25,6 +26,13 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     List<Counter> treasureChests;
     List<Counter> hands;
     List<Boolean> playerInCave;
+
+    public List<Integer> getPlayersInCave() {
+        return IntStream.range(0, getNPlayers())
+                .filter(i -> playerInCave.get(i))
+                .boxed()
+                .collect(Collectors.toList());
+    }
 
     // helper data class to store interesting information
     static class PlayerTurnRecord {

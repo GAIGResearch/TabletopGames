@@ -160,6 +160,8 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     private void prepareNewCave(DiamantGameState dgs) {
         DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
 
+        endRound(dgs);
+
         dgs.nCave++;
 
         // No more caves ?
