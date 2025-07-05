@@ -26,7 +26,7 @@ public class DiamantSimpleFeatures extends TunableStateFeatures {
         // hazards on path - we only care about if we have seen a type or not
         int hazards = 0;
         hazards += gs.nHazardExplosionsOnPath;
-        hazards += gs.nHazardPoissonGasOnPath;
+        hazards += gs.nHazardPoisonGasOnPath;
         hazards += gs.nHazardRockfallsOnPath;
         hazards += gs.nHazardScorpionsOnPath;
         hazards += gs.nHazardSnakesOnPath;

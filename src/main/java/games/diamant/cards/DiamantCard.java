@@ -13,7 +13,7 @@ public class DiamantCard extends Card {
     public enum HazardType {
         Scorpions,
         Snakes,
-        PoissonGas,
+        PoisonGas,
         Explosions,
         Rockfalls,
         None

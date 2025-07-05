@@ -7,18 +7,14 @@ import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.interfaces.IStateFeatureJSON;
-import core.interfaces.IStateFeatureNormVector;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import org.apache.spark.internal.config.R;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
+import java.util.stream.Collectors;
 
 
 public class DiamantGameState extends AbstractGameState implements IPrintable {
@@ -45,8 +41,9 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
     List<PlayerTurnRecord> recordOfPlayerActions = new ArrayList<>();
 
-    int nGemsOnPath             = 0;
-    int nHazardPoissonGasOnPath = 0;
+    // List of gems on each card in the path (same length as path)
+    List<Integer> gemsOnPath = new ArrayList<>();
+    int nHazardPoisonGasOnPath = 0;
     int nHazardScorpionsOnPath  = 0;
     int nHazardSnakesOnPath     = 0;
     int nHazardRockfallsOnPath  = 0;
@@ -95,8 +92,9 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.path        = path.copy();
         dgs.actionsPlayed  = (ActionsPlayed) actionsPlayed.copy();
 
-        dgs.nGemsOnPath             = nGemsOnPath;
-        dgs.nHazardPoissonGasOnPath = nHazardPoissonGasOnPath;
+        dgs.gemsOnPath = new ArrayList<>(gemsOnPath);
+
+        dgs.nHazardPoisonGasOnPath = nHazardPoisonGasOnPath;
         dgs.nHazardScorpionsOnPath  = nHazardScorpionsOnPath;
         dgs.nHazardSnakesOnPath     = nHazardSnakesOnPath;
         dgs.nHazardRockfallsOnPath  = nHazardRockfallsOnPath;
@@ -172,8 +170,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         hands          = new ArrayList<>();
         playerInCave   = new ArrayList<>();
 
-        nGemsOnPath             = 0;
-        nHazardPoissonGasOnPath = 0;
+        gemsOnPath = new ArrayList<>();
+        nHazardPoisonGasOnPath = 0;
         nHazardScorpionsOnPath  = 0;
         nHazardSnakesOnPath     = 0;
         nHazardRockfallsOnPath  = 0;
@@ -181,6 +179,26 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
         nCave = 0;
 
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                mainDeck,
+                discardDeck,
+                path,
+                treasureChests,
+                hands,
+                playerInCave,
+                nHazardExplosionsOnPath,
+                nHazardPoisonGasOnPath,
+                nHazardRockfallsOnPath,
+                nHazardScorpionsOnPath,
+                nHazardSnakesOnPath,
+                nCave,
+                actionsPlayed,
+                gemsOnPath
+        );
     }
 
     @Override
@@ -192,9 +210,9 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
         DiamantGameState that = (DiamantGameState) o;
 
-        return nGemsOnPath             == that.nGemsOnPath             &&
+        return
                nHazardExplosionsOnPath == that.nHazardExplosionsOnPath &&
-               nHazardPoissonGasOnPath == that.nHazardPoissonGasOnPath &&
+               nHazardPoisonGasOnPath == that.nHazardPoisonGasOnPath &&
                nHazardRockfallsOnPath  == that.nHazardRockfallsOnPath  &&
                nHazardScorpionsOnPath  == that.nHazardScorpionsOnPath  &&
                nHazardSnakesOnPath     == that.nHazardSnakesOnPath     &&
@@ -205,7 +223,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                Objects.equals(treasureChests, that.treasureChests)     &&
                Objects.equals(path,           that.path)               &&
                Objects.equals(playerInCave,   that.playerInCave)       &&
-               Objects.equals(actionsPlayed,  that.actionsPlayed);
+               Objects.equals(actionsPlayed,  that.actionsPlayed) &&
+               Objects.equals(gemsOnPath, that.gemsOnPath);
     }
 
     /**
@@ -241,15 +260,15 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
         strings[0]  = "----------------------------------------------------";
         strings[1]  = "Cave:                       " + nCave;
-        strings[2]  = "Players on Cave:            " + str_playersOnCave.toString();
+        strings[2]  = "Players on Cave:            " + str_playersOnCave;
         strings[3]  = "Path:                       " + path.toString();
-        strings[4]  = "Gems on Path:               " + nGemsOnPath;
-        strings[5]  = "Gems on hand:               " + str_gemsOnHand.toString();
-        strings[6]  = "Gems on treasure chest:     " + str_gemsOnTreasureChest.toString();
+        strings[4]  = "Gems on Path:               " + gemsOnPath.stream().map(String::valueOf).collect(Collectors.joining());
+        strings[5]  = "Gems on hand:               " + str_gemsOnHand;
+        strings[6]  = "Gems on treasure chest:     " + str_gemsOnTreasureChest;
         strings[7]  = "Hazard scorpions in Path:   " + nHazardScorpionsOnPath  + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Scorpions);
         strings[8]  = "Hazard snakes in Path:      " + nHazardSnakesOnPath     + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Snakes);
         strings[9]  = "Hazard rockfalls in Path:   " + nHazardRockfallsOnPath  + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Rockfalls);
-        strings[10] = "Hazard poisson gas in Path: " + nHazardPoissonGasOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.PoissonGas);
+        strings[10] = "Hazard poison gas in Path: " + nHazardPoisonGasOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.PoisonGas);
         strings[11] = "Hazard explosions in Path:  " + nHazardExplosionsOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Explosions);
         strings[12] = "----------------------------------------------------";
 
@@ -277,5 +296,29 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     public ActionsPlayed     getActionsPlayed()  { return actionsPlayed;  }
     public void setActionPlayed(int player, AbstractAction action) {
         actionsPlayed.put(player, action);
+    }
+
+    // Helper: get total gems on path
+    public int getTotalGemsOnPath() {
+        return gemsOnPath.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    // Helper: get gems on a specific path index
+    public int getGemsOnPathIndex(int idx) {
+        return gemsOnPath.get(idx);
+    }
+
+    // Helper: set gems on a specific path index
+    public void setGemsOnPathIndex(int idx, int value) {
+        gemsOnPath.set(idx, value);
+    }
+
+    // Helper: clear gems on path
+    public void clearGemsOnPath() {
+        gemsOnPath.clear();
+    }
+
+    public List<Integer> getGemsOnPathList() {
+        return gemsOnPath;
     }
 }
