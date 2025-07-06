@@ -62,6 +62,11 @@ public class DiamantRelicTest {
         // After first move, 3 players have left, 1 remains
         assertEquals(1, state.getNPlayersInCave());
 
+        // check relic is in path
+        assertEquals(1, state.getPath().stream().
+                filter(c -> c.getCardType() == DiamantCardType.Relic)
+                .count());
+
         // Next move: last player exits
         int currentScore = state.hands.get(3).getValue(); // Player 3 is the last one in the cave
         int expectedScoreIncrease = 5 + state.gemsOnPath.stream().mapToInt(i -> i).sum(); // 5 from relic, plus gems on path
@@ -99,6 +104,11 @@ public class DiamantRelicTest {
         for (int i = 0; i < 4; i++) {
             currentScores[i] = state.hands.get(i).getValue();
         }
+
+        // check relic is still in path
+        assertEquals(1, state.getPath().stream().
+                filter(c -> c.getCardType() == DiamantCardType.Relic)
+                .count());
 
         // Next move: both remaining players exit
         executePlayerActions(game, state, new boolean[]{false, false, false, false});

@@ -107,7 +107,11 @@ public class DiamantExitTest {
         Game game = new Game(GameType.Diamant, fm, new DiamantGameState(params, 4));
         DiamantGameState state = (DiamantGameState) game.getGameState();
 
-        Map<HazardType, Long> initialHazardCounts = hazardCount(state);
+        Map<HazardType, Long> initialHazardCounts = state.getNHazardCardsInMainDeck();
+        DiamantCard cardOnPath = state.getPath().peek();
+        if (cardOnPath.getCardType() == Hazard) {
+            initialHazardCounts.merge(cardOnPath.getHazardType(), 1L, Long::sum);
+        }
         int currentCave = state.nCave;
 
         while (state.isNotTerminal()) {
@@ -124,17 +128,20 @@ public class DiamantExitTest {
             if (state.isNotTerminal()) {
                 System.out.println(currentCave + " : " + lastCard.getHazardType());
                 assertEquals(Hazard, lastCard.getCardType());
-                Map<HazardType, Long> hazardCounts = hazardCount(state);
-                assertEquals(1, initialHazardCounts.get(lastCard.getHazardType()) - hazardCounts.get(lastCard.getHazardType()));
+                Map<HazardType, Long> hazardCounts = state.getNHazardCardsInMainDeck();
+                if (cardOnPath.getCardType() == Hazard) {
+                    hazardCounts.merge(cardOnPath.getHazardType(), 1L, Long::sum);
+                }
+                for (HazardType hazardType : HazardType.values()) {
+                    if (hazardType == lastCard.getHazardType()) {
+                        assertEquals(1, initialHazardCounts.get(lastCard.getHazardType()) - hazardCounts.get(lastCard.getHazardType()));                    }
+                    else if (hazardType != HazardType.None) {
+                        assertEquals(initialHazardCounts.get(hazardType), hazardCounts.get(hazardType));
+                    }
+                }
                 currentCave++;
                 initialHazardCounts = hazardCounts;
             }
         }
-    }
-
-
-    private Map<HazardType, Long> hazardCount(DiamantGameState state) {
-        return state.mainDeck.stream().filter(c -> c.getCardType() == Hazard)
-                .collect(Collectors.groupingBy(DiamantCard::getHazardType, Collectors.counting()));
     }
 }

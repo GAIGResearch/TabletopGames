@@ -136,21 +136,36 @@ public class DiamantBoardView extends JComponent {
 
     private void drawCard(Graphics2D g, DiamantCard card, int x, int y, int gemsOnCard) {
         // Card background
-        g.setColor(Color.WHITE);
+        if (card.getCardType() == DiamantCard.DiamantCardType.Relic) {
+            g.setColor(new Color(255, 215, 0)); // gold
+        } else if (card.getCardType() == DiamantCard.DiamantCardType.Hazard) {
+            g.setColor(new Color(255, 180, 180)); // light red for hazards
+        } else {
+            g.setColor(Color.WHITE);
+        }
         g.fillRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 12, 12);
         g.setColor(Color.BLACK);
         g.drawRoundRect(x, y, CARD_WIDTH, CARD_HEIGHT, 12, 12);
 
-        // Card type
-        String label;
+        // Card type and value
         if (card.getCardType() == DiamantCard.DiamantCardType.Treasure) {
-            label = "Treasure";
             g.setColor(new Color(220, 180, 60));
             g.fillOval(x + 10, y + 10, 20, 20);
             g.setColor(Color.BLACK);
             g.drawString("" + card.getValue(), x + 14, y + 25);
-        } else {
-            label = card.getHazardType().name();
+        } else if (card.getCardType() == DiamantCard.DiamantCardType.Relic) {
+            String label = "Relic";
+            g.setColor(Color.BLACK);
+            // Draw "Relic" label at the top, centered
+            FontMetrics fm = g.getFontMetrics();
+            int labelWidth = fm.stringWidth(label);
+            g.drawString(label, x + (CARD_WIDTH - labelWidth) / 2, y + 30);
+            // Draw value centered in the card
+            String valueStr = String.valueOf(card.getValue());
+            int valueWidth = fm.stringWidth(valueStr);
+            g.drawString(valueStr, x + (CARD_WIDTH - valueWidth) / 2, y + CARD_HEIGHT / 2 + fm.getAscent() / 2);
+        } else if (card.getCardType() == DiamantCard.DiamantCardType.Hazard) {
+            String label = card.getHazardType().name();
             g.setColor(Color.RED.darker());
             g.drawString(label, x + 10, y + 25);
         }

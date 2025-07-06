@@ -44,10 +44,11 @@ public class DiamantCard extends Card {
 
     @Override
     public String toString() {
-        String str = "";
-        if      (cardType == DiamantCardType.Treasure) str = "DiamantCard { Treasure : " + value + "}";
-        else if (cardType == DiamantCardType.Hazard)   str = "DiamantCard { Hazard : " + hazardType.toString() + "}";
-        return str;
+        return switch(cardType) {
+            case Treasure -> "Treasure " + value;
+            case Hazard -> hazardType.toString();
+            case Relic -> "Relic " + value;
+        };
     }
 
     @Override
