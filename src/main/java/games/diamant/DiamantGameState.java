@@ -13,9 +13,13 @@ import games.diamant.components.ActionsPlayed;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 
 public class DiamantGameState extends AbstractGameState implements IPrintable {
@@ -52,11 +56,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
     // List of gems on each card in the path (same length as path)
     List<Integer> gemsOnPath = new ArrayList<>();
-    int nHazardPoisonGasOnPath = 0;
-    int nHazardScorpionsOnPath  = 0;
-    int nHazardSnakesOnPath     = 0;
-    int nHazardRockfallsOnPath  = 0;
-    int nHazardExplosionsOnPath = 0;
 
     int nCave = 0;
 
@@ -104,12 +103,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.actionsPlayed  = (ActionsPlayed) actionsPlayed.copy();
 
         dgs.gemsOnPath = new ArrayList<>(gemsOnPath);
-
-        dgs.nHazardPoisonGasOnPath = nHazardPoisonGasOnPath;
-        dgs.nHazardScorpionsOnPath  = nHazardScorpionsOnPath;
-        dgs.nHazardSnakesOnPath     = nHazardSnakesOnPath;
-        dgs.nHazardRockfallsOnPath  = nHazardRockfallsOnPath;
-        dgs.nHazardExplosionsOnPath = nHazardExplosionsOnPath;
 
         dgs.nCave          = nCave;
         dgs.hands          = new ArrayList<>();
@@ -182,14 +175,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         playerInCave   = new ArrayList<>();
 
         gemsOnPath = new ArrayList<>();
-        nHazardPoisonGasOnPath = 0;
-        nHazardScorpionsOnPath  = 0;
-        nHazardSnakesOnPath     = 0;
-        nHazardRockfallsOnPath  = 0;
-        nHazardExplosionsOnPath = 0;
-
         nCave = 0;
-
     }
 
     @Override
@@ -201,11 +187,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                 treasureChests,
                 hands,
                 playerInCave,
-                nHazardExplosionsOnPath,
-                nHazardPoisonGasOnPath,
-                nHazardRockfallsOnPath,
-                nHazardScorpionsOnPath,
-                nHazardSnakesOnPath,
                 nCave,
                 actionsPlayed,
                 gemsOnPath
@@ -222,11 +203,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         DiamantGameState that = (DiamantGameState) o;
 
         return
-               nHazardExplosionsOnPath == that.nHazardExplosionsOnPath &&
-               nHazardPoisonGasOnPath == that.nHazardPoisonGasOnPath &&
-               nHazardRockfallsOnPath  == that.nHazardRockfallsOnPath  &&
-               nHazardScorpionsOnPath  == that.nHazardScorpionsOnPath  &&
-               nHazardSnakesOnPath     == that.nHazardSnakesOnPath     &&
                nCave                   == that.nCave                   &&
                Objects.equals(mainDeck,       that.mainDeck)           &&
                Objects.equals(discardDeck,    that.discardDeck)        &&
@@ -269,6 +245,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
             else   str_playersOnCave.append("F");
         }
 
+        Map<DiamantCard.HazardType, Long> hazardsOnPath = getHazardsOnPath();
+        Map<DiamantCard.HazardType, Long> hazardsInDeck = getNHazardCardsInMainDeck();
         strings[0]  = "----------------------------------------------------";
         strings[1]  = "Cave:                       " + nCave;
         strings[2]  = "Players on Cave:            " + str_playersOnCave;
@@ -276,27 +254,32 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         strings[4]  = "Gems on Path:               " + gemsOnPath.stream().map(String::valueOf).collect(Collectors.joining());
         strings[5]  = "Gems on hand:               " + str_gemsOnHand;
         strings[6]  = "Gems on treasure chest:     " + str_gemsOnTreasureChest;
-        strings[7]  = "Hazard scorpions in Path:   " + nHazardScorpionsOnPath  + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Scorpions);
-        strings[8]  = "Hazard snakes in Path:      " + nHazardSnakesOnPath     + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Snakes);
-        strings[9]  = "Hazard rockfalls in Path:   " + nHazardRockfallsOnPath  + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Rockfalls);
-        strings[10] = "Hazard poison gas in Path: " + nHazardPoisonGasOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.PoisonGas);
-        strings[11] = "Hazard explosions in Path:  " + nHazardExplosionsOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Explosions);
-        strings[12] = "----------------------------------------------------";
+        // then iterate over the possivble hazard values, and show the number in path and deck
+        int count = 0;
+        for (DiamantCard.HazardType hazardType : DiamantCard.HazardType.values()) {
+            long pathCount = hazardsOnPath.getOrDefault(hazardType, 0L);
+            long deckCount = hazardsInDeck.getOrDefault(hazardType, 0L);
+            strings[7 + count] = "Hazard " + hazardType + " on path: " + pathCount + ", in deck: " + deckCount;
+            count++;
+        }
+
+        strings[7 + count] = "----------------------------------------------------";
 
         for (String s : strings){
             System.out.println(s);
         }
     }
 
-    public int getNHazardCardsInMainDeck(DiamantCard.HazardType ht)
-    {
-        int n = 0;
-        for (int i=0; i<mainDeck.getSize(); i++)
-        {
-            if (mainDeck.get(i).getHazardType() == ht)
-                n ++;
-        }
-        return n;
+    public Map<DiamantCard.HazardType, Long> getHazardsOnPath() {
+        return path.stream()
+                .filter(c -> c.getCardType() == DiamantCard.DiamantCardType.Hazard)
+                .collect(groupingBy(DiamantCard::getHazardType, counting()));
+    }
+
+    public Map<DiamantCard.HazardType, Long> getNHazardCardsInMainDeck() {
+        return mainDeck.stream()
+                .filter(c -> c.getCardType() == DiamantCard.DiamantCardType.Hazard)
+                .collect(groupingBy(DiamantCard::getHazardType, counting()));
     }
 
     public Deck<DiamantCard> getMainDeck()       { return mainDeck;       }
