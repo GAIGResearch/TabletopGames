@@ -153,8 +153,7 @@ public class DiamantBoardView extends JComponent {
         } else {
             label = card.getHazardType().name();
             g.setColor(Color.RED.darker());
-            g.drawString("Hazard", x + 10, y + 25);
-            g.drawString(label, x + 10, y + 45);
+            g.drawString(label, x + 10, y + 25);
         }
         // Gems on path (not card value, but gems left on this card)
         g.setColor(Color.BLUE);
