@@ -420,7 +420,7 @@ public class JSONUtils {
                         sb.append("\"").append(v).append("\"");
                     } else if (v instanceof Long || v instanceof Integer || v instanceof Boolean) {
                         sb.append(v);
-                    } else if (v instanceof Double) {
+                    } else if (v instanceof Double || v instanceof Float) {
                         sb.append(String.format("%.3g", v));
                     }
                     if (index < array.size() - 1)
