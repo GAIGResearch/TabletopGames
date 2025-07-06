@@ -9,7 +9,6 @@ import games.diamant.cards.DiamantCard;
 import games.diamant.cards.DiamantCard.HazardType;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -53,7 +52,7 @@ public class DiamantExitTest {
                 fm.next(state, actions[i]);
             }
             assertEquals(0, state.getCurrentPlayer());
-            assertEquals(5, state.getPath().get(0).getNumberOfGems());
+            assertEquals(5, state.getPath().get(0).getValue());
 
             // After the move, 2 players should have left the cave, 2 remain
             assertEquals(2, state.playerInCave.stream().filter(b -> b).count());
@@ -85,7 +84,7 @@ public class DiamantExitTest {
             System.out.println(state.getPath().get(0));
 
             DiamantCard firstCard = state.getPath().peek();
-            int value = firstCard.getNumberOfGems();
+            int value = firstCard.getValue();
 
             if (firstCard.getCardType() == DiamantCard.DiamantCardType.Treasure) {
                 int expectedPerPlayer = value / 4;

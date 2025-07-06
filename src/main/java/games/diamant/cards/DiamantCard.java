@@ -7,7 +7,8 @@ public class DiamantCard extends Card {
 
     public enum DiamantCardType {
         Treasure,
-        Hazard
+        Hazard,
+        Relic
     }
 
     public enum HazardType {
@@ -21,30 +22,30 @@ public class DiamantCard extends Card {
 
     private final DiamantCardType cardType;
     private final HazardType      hazardType;
-    private final int             NumberOfGems;
+    private final int value;
 
     public DiamantCard(DiamantCardType cardType, HazardType hazardType, int NumberOfGems) {
         super(cardType.toString());
         this.cardType     = cardType;
         this.hazardType   = hazardType;
-        this.NumberOfGems = NumberOfGems;
+        this.value = NumberOfGems;
     }
 
     public DiamantCard(DiamantCardType cardType, HazardType hazardType, int NumberOfGems, int ID) {
         super(cardType.toString(), ID);
         this.cardType     = cardType;
         this.hazardType   = hazardType;
-        this.NumberOfGems = NumberOfGems;
+        this.value = NumberOfGems;
     }
 
     public DiamantCardType getCardType()     { return cardType;     }
     public HazardType      getHazardType()   { return hazardType;   }
-    public int             getNumberOfGems() { return NumberOfGems; }
+    public int getValue() { return value; }
 
     @Override
     public String toString() {
         String str = "";
-        if      (cardType == DiamantCardType.Treasure) str = "DiamantCard { Treasure : " + NumberOfGems + "}";
+        if      (cardType == DiamantCardType.Treasure) str = "DiamantCard { Treasure : " + value + "}";
         else if (cardType == DiamantCardType.Hazard)   str = "DiamantCard { Hazard : " + hazardType.toString() + "}";
         return str;
     }

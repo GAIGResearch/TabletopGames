@@ -3,7 +3,6 @@ package games.diamant;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureJSON;
 import core.interfaces.IStateFeatureVector;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class DiamantFeatures implements IStateFeatureVector, IStateFeatureJSON {
@@ -34,7 +33,7 @@ public class DiamantFeatures implements IStateFeatureVector, IStateFeatureJSON {
         DiamantGameState gs = (DiamantGameState) gameState;
         double[] retVal = new double[getObservationSpace()];
         retVal[0] = gs.getTreasureChests().get(playerId).getValue();
-        retVal[1] = gs.path.getComponents().get(gs.path.getSize()-1).getNumberOfGems(); // nGemsOnPath;
+        retVal[1] = gs.path.getComponents().get(gs.path.getSize()-1).getValue(); // nGemsOnPath;
         retVal[2] = gs.playerInCave.size();
         retVal[3] = gs.nCave;
         retVal[4] = gs.nHazardExplosionsOnPath;

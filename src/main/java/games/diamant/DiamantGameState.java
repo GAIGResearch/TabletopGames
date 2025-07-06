@@ -22,6 +22,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     Deck<DiamantCard>          mainDeck;
     Deck<DiamantCard>          discardDeck;
     Deck<DiamantCard>          path;
+    Deck<DiamantCard>          relicDeck;
 
     List<Counter> treasureChests;
     List<Counter> hands;
@@ -84,6 +85,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
             add(mainDeck);
             add(discardDeck);
             add(path);
+            if (relicDeck != null) add(relicDeck);
             addAll(treasureChests);
             addAll(hands);
             add(actionsPlayed);
@@ -98,6 +100,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.mainDeck    = mainDeck.copy();
         dgs.discardDeck = discardDeck.copy();
         dgs.path        = path.copy();
+        if (relicDeck != null) dgs.relicDeck = relicDeck.copy();
         dgs.actionsPlayed  = (ActionsPlayed) actionsPlayed.copy();
 
         dgs.gemsOnPath = new ArrayList<>(gemsOnPath);
@@ -302,6 +305,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     public List<Counter>     getTreasureChests() { return treasureChests; }
     public Deck<DiamantCard> getPath()           { return path;           }
     public ActionsPlayed     getActionsPlayed()  { return actionsPlayed;  }
+    public Deck<DiamantCard> getRelicDeck()      { return relicDeck;      }
     public void setActionPlayed(int player, AbstractAction action) {
         actionsPlayed.put(player, action);
     }

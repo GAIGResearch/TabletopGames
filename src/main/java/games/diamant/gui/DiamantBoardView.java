@@ -7,7 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DiamantBoardView extends JComponent {
 
@@ -149,7 +148,7 @@ public class DiamantBoardView extends JComponent {
             g.setColor(new Color(220, 180, 60));
             g.fillOval(x + 10, y + 10, 20, 20);
             g.setColor(Color.BLACK);
-            g.drawString("" + card.getNumberOfGems(), x + 14, y + 25);
+            g.drawString("" + card.getValue(), x + 14, y + 25);
         } else {
             label = card.getHazardType().name();
             g.setColor(Color.RED.darker());

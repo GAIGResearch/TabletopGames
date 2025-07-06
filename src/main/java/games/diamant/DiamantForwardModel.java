@@ -39,7 +39,19 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         dgs.actionsPlayed = new ActionsPlayed();
         dgs.recordOfPlayerActions = new ArrayList<>();
 
+        // Relic deck initialization if relicVariant is true
+        DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
+        if (dp.relicVariant) {
+            dgs.relicDeck = new Deck<>("RelicDeck", VISIBLE_TO_ALL);
+        }
+
         createCards(dgs);
+
+        // If relic variant, add top relic to main deck before shuffling
+        if (dp.relicVariant && dgs.relicDeck != null && dgs.relicDeck.getSize() > 0) {
+            dgs.mainDeck.add(dgs.relicDeck.draw());
+        }
+
         dgs.mainDeck.shuffle(dgs.getRnd());
 
         // Draw first card and play it
@@ -73,6 +85,15 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         // Add treasures
         for (int t : dp.treasures)
             dgs.mainDeck.add(new DiamantCard(DiamantCard.DiamantCardType.Treasure, DiamantCard.HazardType.None, t));
+
+        // Add relics if relicVariant is enabled (we add these in reverse order so
+        // that the first relic drawn is the last one added
+        if (dp.relicVariant && dgs.relicDeck != null) {
+            for (int i = dp.relics.length - 1; i >= 0; i--) {
+                DiamantCard relicCard = new DiamantCard(DiamantCard.DiamantCardType.Relic, DiamantCard.HazardType.None, dp.relics[i]);
+                dgs.relicDeck.add(relicCard); // rest in relic deck
+            }
+        }
     }
 
     /**
@@ -171,6 +192,12 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
             // Move path cards to maindeck and shuffle
             dgs.mainDeck.add(dgs.path);
             dgs.path.clear();
+
+            // If relic variant, add top relic to main deck before shuffling
+            if (dp.relicVariant && dgs.relicDeck != null && dgs.relicDeck.getSize() > 0) {
+                dgs.mainDeck.add(dgs.relicDeck.draw());
+            }
+
             dgs.mainDeck.shuffle(dgs.getRnd());
 
             // Initialize game state
@@ -223,8 +250,8 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         // Add gems for this card to gemsOnPath (0 if not treasure)
         if (card.getCardType() == DiamantCard.DiamantCardType.Treasure) {
             int nInCave = dgs.getNPlayersInCave();
-            int gems_to_players = nInCave > 0 ? (int) Math.floor(card.getNumberOfGems() / (double) nInCave) : 0;
-            int gems_to_path = nInCave > 0 ? card.getNumberOfGems() % nInCave : card.getNumberOfGems();
+            int gems_to_players = nInCave > 0 ? (int) Math.floor(card.getValue() / (double) nInCave) : 0;
+            int gems_to_path = nInCave > 0 ? card.getValue() % nInCave : card.getValue();
 
             for (int p = 0; p < dgs.getNPlayers(); p++)
                 if (dgs.playerInCave.get(p))
