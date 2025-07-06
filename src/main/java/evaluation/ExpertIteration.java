@@ -269,18 +269,18 @@ public class ExpertIteration {
         }
         tournament.run();
 
+        int alphaWinner = tournament.getAlphaRankWinnerByWinRate();
+        AbstractPlayer winner = alphaWinner > -1 ? agents.get(alphaWinner) : tournament.getWinner();
         // Are we done?
         if (iter > 0) {
-            int alphaWinner = tournament.getAlphaRankWinnerByWinRate();
-            String winner = alphaWinner > -1 ? agents.get(alphaWinner).toString() : tournament.getWinner().toString();
-            tournamentWinsByAgent.merge(winner, 1, Integer::sum);
-            if (winner.equals(bestAgent.toString())) {
+            tournamentWinsByAgent.merge(winner.toString(), 1, Integer::sum);
+            if (winner.toString().equals(bestAgent.toString())) {
                 consecutiveWins++;
             } else {
                 consecutiveWins = 1; // reset the counter
             }
         }
-        bestAgent = tournament.getWinner().copy();
+        bestAgent = winner.copy();
 
         if (bestAgent instanceof IAnyTimePlayer anyTime) {
             anyTime.setBudget(budget); // make sure the budget is set on the best agent
