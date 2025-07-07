@@ -15,7 +15,7 @@ import static games.descent2e.DescentHelper.hasLineOfSight;
 import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
 
-public class FreeAttack extends RangedAttack{
+public class FreeAttack extends RangedAttack {
 
     protected boolean isMelee;
     public FreeAttack(int attackingFigure, int defendingFigure, boolean isMelee) {
