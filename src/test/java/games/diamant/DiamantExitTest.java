@@ -108,10 +108,11 @@ public class DiamantExitTest {
         DiamantGameState state = (DiamantGameState) game.getGameState();
 
         Map<HazardType, Long> initialHazardCounts = state.getNHazardCardsInMainDeck();
-        DiamantCard cardOnPath = state.getPath().peek();
-        if (cardOnPath.getCardType() == Hazard) {
-            initialHazardCounts.merge(cardOnPath.getHazardType(), 1L, Long::sum);
-        }
+        Map<HazardType, Long> onPath = state.getHazardsOnPath();
+        // combine these two maps
+        initialHazardCounts = initialHazardCounts.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + onPath.getOrDefault(e.getKey(), 0L)));
+
         int currentCave = state.nCave;
 
         while (state.isNotTerminal()) {
@@ -129,9 +130,10 @@ public class DiamantExitTest {
                 System.out.println(currentCave + " : " + lastCard.getHazardType());
                 assertEquals(Hazard, lastCard.getCardType());
                 Map<HazardType, Long> hazardCounts = state.getNHazardCardsInMainDeck();
-                if (cardOnPath.getCardType() == Hazard) {
-                    hazardCounts.merge(cardOnPath.getHazardType(), 1L, Long::sum);
-                }
+                Map<HazardType, Long> onPath2 = state.getHazardsOnPath();
+                // combine these two maps
+                hazardCounts = hazardCounts.entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue() + onPath2.getOrDefault(e.getKey(), 0L)));
                 for (HazardType hazardType : HazardType.values()) {
                     if (hazardType == lastCard.getHazardType()) {
                         assertEquals(1, initialHazardCounts.get(lastCard.getHazardType()) - hazardCounts.get(lastCard.getHazardType()));                    }
