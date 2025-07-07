@@ -100,23 +100,30 @@ public class DescentForwardModel extends StandardForwardModel {
         // Players choose heroes & class
 
         List<Vector2D> heroStartingPositions = firstQuest.getStartingLocations().get(firstBoard);
-        List<Integer> archetypes = new ArrayList<>();
-        for (int i = 0; i < Archetype.values().length; i++) {
-            archetypes.add(i);
-        }
+        List<Archetype> archetypes = new ArrayList<>(List.of(Archetype.values()));
         Random rnd = dgs.getRnd();
         dgs.heroes = new ArrayList<>();
         for (int i = 1; i < Math.max(3, dgs.getNPlayers()); i++) {
-            // Choose random archetype from those remaining
-            int choice = archetypes.get(rnd.nextInt(archetypes.size()));
-            archetypes.remove(Integer.valueOf(choice));  // TODO this should be commented in, but kept out for testing until it's guaranteed that archetypes >= nHeroes
-            Archetype archetype = Archetype.values()[choice];
 
-            // Choose random hero from that archetype
-            List<Hero> heroes = _data.findHeroes(archetype);
-            Hero figure = heroes.get(rnd.nextInt(heroes.size())).copyNewID();
+            Hero figure;
+            if (descentParameters.heroesToBePlayed.size() >= i) {
+                // in this case we do not do anything randomly
+                String heroName = descentParameters.heroesToBePlayed.get(i - 1);
+                figure = _data.findHero(heroName);
+            } else {
+                // Choose random archetype from those remaining
+                Archetype archetype = archetypes.get(rnd.nextInt(archetypes.size()));
+
+                // Choose random hero from that archetype
+                List<Hero> heroes = _data.findHeroes(archetype);
+                figure = heroes.get(rnd.nextInt(heroes.size())).copyNewID();
+            }
             figure.getNActionsExecuted().setMaximum(nActionsPerFigure);
             figure.setComponentName("Hero: " + figure.getComponentName());  // For reference in rules
+
+            String archetypeName = figure.getProperty("archetype").toString();
+            Archetype archetype = Archetype.valueOf(archetypeName);
+            archetypes.remove(archetype);
 
             if (dgs.getNPlayers() == 2) {
                 // In 2-player games, 1 player controls overlord, the other 2 heroes
@@ -127,8 +134,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
             // Choose random class from that archetype
             HeroClass[] options = HeroClass.getClassesForArchetype(archetype);
-            choice = rnd.nextInt(options.length);
-            HeroClass heroClass = options[choice];
+            HeroClass heroClass = options[rnd.nextInt(options.length)];
 
             // Inform figure of chosen class
             figure.setProperty(new PropertyString("class", heroClass.name()));
@@ -158,8 +164,7 @@ public class DescentForwardModel extends StandardForwardModel {
             figure.setFeatAvailable(true);
 
             // Place hero on the board in random starting position out of those available
-            choice = rnd.nextInt(heroStartingPositions.size());
-            Vector2D position = heroStartingPositions.get(choice);
+            Vector2D position = heroStartingPositions.get(rnd.nextInt(heroStartingPositions.size()));
             figure.setPosition(position);
 
             // Tell the board there's a hero there
@@ -167,7 +172,7 @@ public class DescentForwardModel extends StandardForwardModel {
             dgs.masterBoard.getElement(position.getX(), position.getY()).setProperty(prop);
 
             // This starting position no longer an option (one hero per space)
-            heroStartingPositions.remove(choice);
+            heroStartingPositions.remove(position);
 
             // Inform game of this hero figure
             dgs.heroes.add(figure);

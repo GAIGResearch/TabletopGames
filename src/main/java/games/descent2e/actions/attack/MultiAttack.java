@@ -8,6 +8,7 @@ import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ public class MultiAttack extends RangedAttack {
 
     public MultiAttack(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures.get(0));
-        this.defendingFigures = defendingFigures;
+        this.defendingFigures = new ArrayList<>(defendingFigures);
     }
 
     @Override

@@ -2,7 +2,10 @@ package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import games.catan.CatanParameters;
+import games.descent2e.DescentParameters;
 import org.junit.Test;
+
+import java.util.List;
 
 public class ForwardModelTestsWithMCTS {
 
@@ -28,7 +31,15 @@ public class ForwardModelTestsWithMCTS {
 
     @Test
     public void testDescent2e() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Descent2e", "nGames=2", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
+        DescentParameters params = new DescentParameters();
+        params.heroesToBePlayed = List.of("Widow Tarha", "Avric Albright");
+        ForwardModelTester fmt = new ForwardModelTester(params, "game=Descent2e", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
+        params.heroesToBePlayed = List.of("Leoric of the Book", "Ashrian");
+        fmt = new ForwardModelTester(params, "game=Descent2e", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
+        params.heroesToBePlayed = List.of("Syndrael", "Jain Fairwood");
+        fmt = new ForwardModelTester(params, "game=Descent2e", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
+        params.heroesToBePlayed = List.of("Tomble Burrowell", "Grisban the Thirsty");
+        fmt = new ForwardModelTester(params, "game=Descent2e", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
     }
 
     @Test
