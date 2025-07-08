@@ -455,9 +455,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-//        return longString(gameState);
         return shortString(gameState);
-        //return toString();
     }
 
     public String shortString(AbstractGameState gameState) {

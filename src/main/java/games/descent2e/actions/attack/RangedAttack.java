@@ -14,8 +14,8 @@ import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
- *   This works in exactly the same way as a Melee Attack
- *   Except that there is a different definition of 'missed' that takes into account the range rolled on the dice
+ * This works in exactly the same way as a Melee Attack
+ * Except that there is a different definition of 'missed' that takes into account the range rolled on the dice
  */
 public class RangedAttack extends MeleeAttack {
 
@@ -28,40 +28,14 @@ public class RangedAttack extends MeleeAttack {
 
     @Override
     public boolean execute(DescentGameState state) {
-        state.setActionInProgress(this);
-        attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
-        defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();
-
-        phase = PRE_ATTACK_ROLL;
-        interruptPlayer = attackingPlayer;
-        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        super.execute(state);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
-        DicePool attackPool = attacker.getAttackDice();
-        DicePool defencePool = defender.getDefenceDice();
-
-        state.setAttackDicePool(attackPool);
-        state.setDefenceDicePool(defencePool);
-
-        result = "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
-
         if (defender instanceof Monster) {
-            if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
-            {
+            if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)) {
                 NightStalker.addNightStalker(state, attackingFigure, defendingFigure);
             }
         }
-
-        super.movePhaseForward(state);
-
-        attacker.getNActionsExecuted().increment();
-        attacker.setHasAttacked(true);
-
         return true;
-    }
-
-    @Override
-    void executePhase(DescentGameState state) {
-        super.executePhase(state);
     }
 
     @Override
@@ -150,6 +124,7 @@ public class RangedAttack extends MeleeAttack {
         }
         return false;
     }
+
     @Override
     public int hashCode() {
         return super.hashCode();
