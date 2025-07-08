@@ -24,42 +24,6 @@ public class FreeAttack extends RangedAttack {
     }
 
     @Override
-    public boolean execute(DescentGameState state) {
-        state.setActionInProgress(this);
-        attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
-        defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();
-
-        phase = PRE_ATTACK_ROLL;
-        interruptPlayer = attackingPlayer;
-        Figure attacker = (Figure) state.getComponentById(attackingFigure);
-        Figure defender = (Figure) state.getComponentById(defendingFigure);
-        DicePool attackPool = attacker.getAttackDice();
-        DicePool defencePool = defender.getDefenceDice();
-
-        state.setAttackDicePool(attackPool);
-        state.setDefenceDicePool(defencePool);
-
-        result = "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
-
-        // This is only applicable for Ranged Attacks
-        if (!isMelee) {
-            if (defender instanceof Monster) {
-                if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)) {
-                    NightStalker.addNightStalker(state, attackingFigure, defendingFigure);
-                }
-            }
-        }
-
-        super.movePhaseForward(state);
-
-        // Remove the ability to use the Extra Action this turn
-        attacker.setUsedExtraAction(true);
-        attacker.setHasAttacked(true);
-
-        return true;
-    }
-
-    @Override
     public boolean canExecute(DescentGameState dgs) {
 
         Figure f = dgs.getActingFigure();
