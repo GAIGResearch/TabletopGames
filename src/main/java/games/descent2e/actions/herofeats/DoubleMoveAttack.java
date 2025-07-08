@@ -27,9 +27,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     int oldMovePoints;
     boolean oldFreeAttack;
     boolean oldHasMoved;
-
-    boolean hasAttacked = false;
-    int movesTaken = 0;
+    boolean completed = false;
 
     public DoubleMoveAttack() {
         super(Triggers.ACTION_POINT_SPEND);
@@ -53,7 +51,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
 
         Figure hero = dgs.getActingFigure();
 
-        if (!hasAttacked) {
+        if (!hero.hasUsedExtraAction()) {
             List<Integer> targets = DescentHelper.getRangedTargets(dgs, hero);
             if (!targets.isEmpty())
                 for (Integer target : targets)
@@ -86,15 +84,8 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         DescentGameState dgs = (DescentGameState) state;
         Hero hero = (Hero) dgs.getActingFigure();
-        if (action instanceof FreeAttack) {
-            hasAttacked = true;
-        } else if (action instanceof Move) {
-            movesTaken++;
-        } else if (action instanceof StopMove || action instanceof EndCurrentPhase) {
-            hasAttacked = true;
-            movesTaken = 2;
-        } else {
-            throw new IllegalArgumentException("Unexpected action type: " + action.getClass().getSimpleName());
+        if (action instanceof EndCurrentPhase) {
+            completed = true;
         }
 
         if (executionComplete(state)) {
@@ -108,7 +99,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return hasAttacked && movesTaken >= 2;
+        return completed;
     }
 
     @Override
@@ -136,6 +127,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         retValue.oldMovePoints = oldMovePoints;
         retValue.oldFreeAttack = oldFreeAttack;
         retValue.oldHasMoved = oldHasMoved;
+        retValue.completed = completed;
         return retValue;
     }
 
@@ -152,13 +144,13 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DoubleMoveAttack that = (DoubleMoveAttack) o;
-        return heroPlayer == that.heroPlayer &&
+        return heroPlayer == that.heroPlayer && completed == that.completed &&
                 oldMovePoints == that.oldMovePoints && oldFreeAttack == that.oldFreeAttack &&
                 oldHasMoved == that.oldHasMoved;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), heroPlayer, oldMovePoints, oldFreeAttack, oldHasMoved);
+        return Objects.hash(super.hashCode(), heroPlayer, oldMovePoints, oldFreeAttack, oldHasMoved, completed);
     }
 }

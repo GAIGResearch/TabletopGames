@@ -24,6 +24,14 @@ public class FreeAttack extends RangedAttack {
     }
 
     @Override
+    public boolean execute(DescentGameState state) {
+        super.execute(state);
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        attacker.setUsedExtraAction(true);
+        return true;
+    }
+
+    @Override
     public boolean canExecute(DescentGameState dgs) {
 
         Figure f = dgs.getActingFigure();
