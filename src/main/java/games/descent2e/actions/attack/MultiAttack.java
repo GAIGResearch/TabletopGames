@@ -32,42 +32,16 @@ public class MultiAttack extends RangedAttack {
 
     @Override
     public boolean execute(DescentGameState state) {
-        state.setActionInProgress(this);
-
         defendingFigure = defendingFigures.get(0);
-
         index = 0;
+        super.execute(state);
 
-        attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
-        defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();
-
-        phase = PRE_ATTACK_ROLL;
-        interruptPlayer = attackingPlayer;
-        Figure attacker = (Figure) state.getComponentById(attackingFigure);
-        Figure defender = (Figure) state.getComponentById(defendingFigure);
-        DicePool attackPool = attacker.getAttackDice();
-        DicePool defencePool = defender.getDefenceDice();
-
-        state.setAttackDicePool(attackPool);
-        state.setDefenceDicePool(defencePool);
-
-        result = "Targets: " + defender.getComponentName().replace("Hero: ", "");
+        // remove final "; Result: " from result
+        result = result.substring(0, result.length() - 12);
         for (int i = 1; i < defendingFigures.size(); i++) {
             result += " & " + (state.getComponentById(defendingFigures.get(i)).getComponentName().replace("Hero: ", ""));
         }
         result += "; Result: ";
-
-        if (defender instanceof Monster) {
-            if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
-            {
-                NightStalker.addNightStalker(state, attackingFigure, defendingFigure);
-            }
-        }
-
-        super.movePhaseForward(state);
-
-        attacker.getNActionsExecuted().increment();
-        attacker.setHasAttacked(true);
 
         return true;
     }

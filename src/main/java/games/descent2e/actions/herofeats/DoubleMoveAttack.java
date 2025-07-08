@@ -90,9 +90,11 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
             hasAttacked = true;
         } else if (action instanceof Move) {
             movesTaken++;
-        } else if (action instanceof StopMove) {
+        } else if (action instanceof StopMove || action instanceof EndCurrentPhase) {
             hasAttacked = true;
             movesTaken = 2;
+        } else {
+            throw new IllegalArgumentException("Unexpected action type: " + action.getClass().getSimpleName());
         }
 
         if (executionComplete(state)) {
