@@ -177,6 +177,7 @@ public class MultiAttack extends RangedAttack {
 
     public void copyComponentTo(MultiAttack target) {
         target.index = index;
+        target.defendingFigure = defendingFigure;  // we also need to set this, as the constructor overrides it
         super.copyComponentTo(target);
     }
 }
