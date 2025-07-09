@@ -420,8 +420,8 @@ public class JSONUtils {
                         sb.append("\"").append(v).append("\"");
                     } else if (v instanceof Long || v instanceof Integer || v instanceof Boolean) {
                         sb.append(v);
-                    } else if (v instanceof Double || v instanceof Float) {
-                        sb.append(String.format("%.3g", v));
+                    } else if (v instanceof Number n) {
+                        sb.append(String.format("%.3g", n.doubleValue()));
                     }
                     if (index < array.size() - 1)
                         sb.append(",").append("\n");
@@ -434,8 +434,10 @@ public class JSONUtils {
             } else if (value instanceof String) {
                 sb.append("\"").append(value).append("\"");
             } else if (value instanceof Long || value instanceof Integer ||
-                    value instanceof Double || value instanceof Boolean) {
+                     value instanceof Boolean) {
                 sb.append(value);
+            } else if (value instanceof Number n) {
+                sb.append(String.format("%.3g", n.doubleValue()));
             } else {
                 // In this case we just output the full class name
                 System.out.println("Unexpected value type in prettyPrint : " + value);
