@@ -24,7 +24,7 @@ public class MTNRollout extends MultiTreeNode {
             return; // don't test terminal states
 
         switch (params.rolloutTermination) {
-            case DEFAULT:
+            case EXACT:
                 // in this case we just check that we have 10 actions in the rollout
                 assertEquals(params.rolloutLength, actionsInRollout.size());
                 break;
