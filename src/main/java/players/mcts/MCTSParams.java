@@ -85,7 +85,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100, 1000));
         addTunableParameter("rolloutIncrementType", TICK, Arrays.asList(MCTSEnums.RolloutIncrement.values()));
         addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
-        addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
+        addTunableParameter("oppModelType", DEFAULT, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("rolloutClass", "");
         addTunableParameter("oppModelClass", "");
         addTunableParameter("rolloutPolicyParams", ITunableParameters.class);
