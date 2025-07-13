@@ -429,9 +429,18 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             // Loop over all underlyingNames/Types to determine if the current features match with the data
             // if they do match then we can pull over the relevant details from the current set up
             // if they do not match, then we need to calculate from scratch
+
             for (int i = 0; i < underlyingNames.length; i++) {
                 String columnName = underlyingNames[i];
                 Class<?> columnType = underlyingTypes[i];
+
+                if (featureNames != null && !featureNames.isEmpty()) {
+                    // in this case we only consider the features that are in featureNames
+                    if (!featureNames.contains(columnName)) {
+                   //     System.out.println("Skipping column not in featureNames: " + columnName);
+                        continue; // skip columns not in featureNames
+                    }
+                }
 
                 if (!headers.contains(columnName)) {
                     System.out.println("Missing column: " + columnName);

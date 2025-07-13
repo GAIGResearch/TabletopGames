@@ -228,7 +228,7 @@ public class ExpertIteration {
     private boolean gatherDataAndCheckConvergence() {
         RGConfig.put(RunArg.mode, "random");  // we are most interested in a wide range of data, so do not want to reuse random seeds
         RGConfig.put(RunArg.verbose, false);
-        String expert = (String) config.get(RunArg.expert);
+        String expert = ((String) config.get(RunArg.expert)).toUpperCase();
 
         // we need to set the listener to record the required data for the Learner processes
         RGConfig.put(RunArg.listener, new ArrayList<String>());
@@ -245,7 +245,7 @@ public class ExpertIteration {
         RoundRobinTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayers, params, RGConfig);
         tournament.setResultsFile(dataDir + File.separator + String.format("TournamentResults_%s_%02d.txt", prefix, iter));
         if (stateLearnerFile != null) {
-            stateListener = switch (expert.toUpperCase(Locale.ROOT)) {
+            stateListener = switch (expert) {
                 case "BASE", "MCTSACTION" -> new StateFeatureListener(stateFeatureVector,
                         useRounds ? Event.GameEvent.ROUND_OVER : Event.GameEvent.TURN_OVER,
                         false);
@@ -279,7 +279,7 @@ public class ExpertIteration {
                         true);
                 case "MCTS" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
                         100, 0, true);
-                case "MCTSAction" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
+                case "MCTSACTION>" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
                         100, 0, false);
                 default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
             };
