@@ -96,7 +96,7 @@ public class LearnFromData {
 
         AutomatedFeatures asf = new AutomatedFeatures(stateFeatures, actionFeatures);
         // construct the output file by adding _ASF before the suffix (which can be anything)
-        List<List<Object>> convertedData = asf.processData(convertedDataFile, dataFiles);
+        List<List<Object>> convertedData = asf.processData(true, convertedDataFile, dataFiles);
 
         // this will have created the raw data from which we now learn
         // whichever of state/action features is not null will prompt the type of Heuristic learned
@@ -111,12 +111,6 @@ public class LearnFromData {
         // we are now in a position to modify the features in a loop
         learnedThing = improveModel(learnedThing, learner, convertedData.size(), convertedDataFile);
 
-        if (actionFeatures != null && learnedThing instanceof ApacheLearner apache) {
-            if (apache.stateFeatureVector != null)
-                System.out.println("OK - we do empirically need this hack.");
-            apache.setStateFeatureVector(null);
-            // a bit of a hack - ASF actually contains both state and action features, but we only want to call it once
-        }
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
             JSONUtils.writeJSON(json, outputFileName);
@@ -180,7 +174,8 @@ public class LearnFromData {
 
             do {
                 bestFeatures = null;
-                System.out.printf("Iteration %d, current feature count %d / %d%n", iteration, asf.names().length, learner.featureCount());
+                if (debug)
+                    System.out.printf("Iteration %d, current feature count %d / %d%n", iteration, asf.names().length, learner.featureCount());
                 baseBIC = bestBIC;  // reset baseline
                 for (int i = 0; i < asf.names().length; i++) {
 
@@ -300,7 +295,7 @@ public class LearnFromData {
                 // We then also need to set up the data file to be used as the baseline for the next iteration
                 if (bestFeatures != null) {
                     String newFileName = dataDirectory + File.separator + "ImproveModel_Iter_" + iteration + ".txt";
-                    bestFeatures.processData(newFileName, rawData);
+                    bestFeatures.processData(false, newFileName, rawData);
                     // then remove excluded features from the bestFeatures (these are always in the file so it always contains the original raw data)
                     bestFeatures = removeExcludedFeatures(excludedFeatures, bestFeatures);
                     iteration++;
@@ -312,11 +307,11 @@ public class LearnFromData {
                     System.out.println("No feature changes improved BIC");
                 } else {
                     System.out.printf("Best feature with BIC: %.2f is %s%n", bestBIC, bestFeatureDescription);
-                    if (debug)
+                    if (debug) {
                         System.out.printf("\tCoefficients: %s%n",
                                 glm.coefficients() != null ?
                                         Arrays.stream(glm.coefficients()).mapToObj(d -> String.format("%.2f", d)).collect(joining("|")) : "[]");
-
+                    }
                     asf = bestFeatures;
                 }
 
@@ -377,7 +372,7 @@ public class LearnFromData {
 
         AutomatedFeatures localASF = asf.copy();
         if (rawData != null && rawData.length > 0)
-            localASF.processData(outputFile, rawData);
+            localASF.processData(false, outputFile, rawData);
 
         if (learner.actionFeatureVector != null)
             learner.setActionFeatureVector(localASF);

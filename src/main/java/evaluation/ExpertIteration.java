@@ -279,7 +279,7 @@ public class ExpertIteration {
                         true);
                 case "MCTS" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
                         100, 0, true);
-                case "MCTSACTION>" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
+                case "MCTSACTION" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
                         100, 0, false);
                 default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
             };
