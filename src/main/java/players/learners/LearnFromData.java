@@ -83,6 +83,7 @@ public class LearnFromData {
     }
 
     public Object learn() {
+        long startTime = System.currentTimeMillis();
         File dataFile = new File(data);
         String convertedDataFile = data.replaceAll("\\.[^.]+$", "_ASF$0");
         String[] dataFiles = new String[]{data};
@@ -131,6 +132,9 @@ public class LearnFromData {
                 throw new RuntimeException(e);
             }
         }
+        long endTime = System.currentTimeMillis();
+        System.out.printf("Learned heuristic in %d minutes with %d features and %d rows%n",
+                (endTime - startTime) / 60000, learner.featureCount(), convertedData.size());
         return learnedThing;
     }
 

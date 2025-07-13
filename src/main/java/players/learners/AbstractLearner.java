@@ -95,6 +95,12 @@ public abstract class AbstractLearner implements ILearner {
         return this;
     }
 
+    public int featureCount() {
+        int stateCount = stateFeatureVector == null ? 0 : stateFeatureVector.names().length;
+        int actionCount = actionFeatureVector == null ? 0 : actionFeatureVector.names().length;
+        return stateCount + actionCount;
+    }
+
     protected void loadData(String... files) {
 
         Pair<List<String>, List<List<String>>> rawData = Utils.loadDataWithHeader("\t", files);
