@@ -2,16 +2,11 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
-import games.descent2e.abilities.NightStalker;
-import games.descent2e.actions.monsterfeats.MonsterAbilities;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
-import games.descent2e.components.Monster;
 import utilities.Distance;
 
 import static games.descent2e.DescentHelper.hasLineOfSight;
 import static games.descent2e.DescentHelper.inRange;
-import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
  * This works in exactly the same way as a Melee Attack
@@ -24,17 +19,12 @@ public class RangedAttack extends MeleeAttack {
 
     public RangedAttack(int attackingFigure, int defendingFigure) {
         super(attackingFigure, defendingFigure);
+        this.isMelee = false;
     }
 
     @Override
     public boolean execute(DescentGameState state) {
         super.execute(state);
-        Figure defender = (Figure) state.getComponentById(defendingFigure);
-        if (defender instanceof Monster) {
-            if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)) {
-                NightStalker.addNightStalker(state, attackingFigure, defendingFigure);
-            }
-        }
         return true;
     }
 

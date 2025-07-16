@@ -37,7 +37,7 @@ public class MultiAttack extends RangedAttack {
         super.execute(state);
 
         // remove final "; Result: " from result
-        result = result.substring(0, result.length() - 12);
+        result = result.substring(0, result.length() - 10);
         for (int i = 1; i < defendingFigures.size(); i++) {
             result += " & " + (state.getComponentById(defendingFigures.get(i)).getComponentName().replace("Hero: ", ""));
         }
@@ -60,7 +60,7 @@ public class MultiAttack extends RangedAttack {
         if (defender instanceof Monster) {
             if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
             {
-                NightStalker.addNightStalker(state, attackingFigure, defendingFigure);
+                NightStalker.addNightStalker(state, ((Figure) state.getComponentById(attackingFigure)).getPosition(), defender.getPosition());
             }
         }
 

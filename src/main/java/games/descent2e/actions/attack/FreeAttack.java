@@ -2,18 +2,12 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
-import games.descent2e.abilities.NightStalker;
-import games.descent2e.actions.monsterfeats.MonsterAbilities;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
-import games.descent2e.components.Monster;
 
-import java.util.HashSet;
 import java.util.Objects;
 
 import static games.descent2e.DescentHelper.hasLineOfSight;
 import static games.descent2e.DescentHelper.inRange;
-import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
 
 public class FreeAttack extends RangedAttack {
 
@@ -21,6 +15,7 @@ public class FreeAttack extends RangedAttack {
     public FreeAttack(int attackingFigure, int defendingFigure, boolean isMelee) {
         super(attackingFigure, defendingFigure);
         this.isMelee = isMelee;
+        this.isFreeAttack = true;
     }
 
     @Override

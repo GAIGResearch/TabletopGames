@@ -4,12 +4,9 @@ import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.attack.MeleeAttack;
-import games.descent2e.actions.attack.RangedAttack;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 
 import static games.descent2e.DescentHelper.getAttackType;
-import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 public class RageAttack extends MeleeAttack {
     public RageAttack(int attackingFigure, int defendingFigure) {
@@ -17,9 +14,9 @@ public class RageAttack extends MeleeAttack {
     }
 
     public boolean execute(DescentGameState state) {
+        addDamage(1);
         super.execute(state);
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
-        addDamage(1);
         attacker.getAttribute(Figure.Attribute.Fatigue).increment();
         return true;
     }

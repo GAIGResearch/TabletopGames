@@ -8,10 +8,12 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
+import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.items.Shield;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
 
 import java.util.*;
@@ -75,6 +77,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     int range;
     boolean skip = false;
     boolean reduced = false;
+    protected boolean isMelee = true;
+    boolean isFreeAttack = false;
 
     public String result = "";
 
@@ -102,11 +106,23 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
+        // This is only applicable for Ranged, Multi and Free Attacks, which are child classes of MeleeAttack
+        if (!isMelee)
+        {
+            if (defender instanceof Monster) {
+                if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)) {
+                    NightStalker.addNightStalker(state, attacker.getPosition(), defender.getPosition());
+                }
+            }
+        }
+
         result = "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
 
         movePhaseForward(state);
 
-        attacker.getNActionsExecuted().increment();
+        // Only count as an action if it is an Attack action, not a Free Attack action
+        if (!isFreeAttack) attacker.getNActionsExecuted().increment();
+
         attacker.setHasAttacked(true);
 
         // When executing a melee attack we need to:
