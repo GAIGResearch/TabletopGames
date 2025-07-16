@@ -82,19 +82,21 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        DescentGameState dgs = (DescentGameState) state;
-        Hero hero = (Hero) dgs.getActingFigure();
         if (action instanceof EndCurrentPhase) {
             completed = true;
         }
 
         if (executionComplete(state)) {
+            DescentGameState dgs = (DescentGameState) state;
+            Hero hero = (Hero) dgs.getActingFigure();
+
+            // Restore the hero's saved attributes
             hero.setAttribute(Figure.Attribute.MovePoints, oldMovePoints);
             hero.setUsedExtraAction(oldFreeAttack);
             hero.setHasMoved(oldHasMoved);
             hero.setFeatAvailable(false);
+            hero.getNActionsExecuted().increment();
         }
-        hero.getNActionsExecuted().increment();
     }
 
     @Override
