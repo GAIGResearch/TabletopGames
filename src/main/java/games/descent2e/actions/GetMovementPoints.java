@@ -3,7 +3,9 @@ package games.descent2e.actions;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 
 public class GetMovementPoints extends DescentAction {
     public GetMovementPoints() {
@@ -38,6 +40,16 @@ public class GetMovementPoints extends DescentAction {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
+
+        if (f instanceof Monster)
+        {
+            // Zombies can only move once per turn
+            if (((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.SHAMBLING)) {
+                if (f.getActionsTaken().contains("Get Movement Points")) {
+                    return false;
+                }
+            }
+        }
 
         return !f.hasCondition(DescentTypes.DescentCondition.Immobilize) && !f.getNActionsExecuted().isMaximum() && f.getAttribute(Figure.Attribute.MovePoints).isMinimum();
     }
