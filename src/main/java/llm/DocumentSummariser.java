@@ -29,7 +29,7 @@ public class DocumentSummariser {
                 // Close the document
                 document.close();
             } catch (IOException e) {
-                throw new RuntimeException("Error reading PDF file: " + filePath, e);
+                throw new IllegalArgumentException("Error reading PDF file: " + filePath, e);
             }
         } else {
             // Read in with Scanner
