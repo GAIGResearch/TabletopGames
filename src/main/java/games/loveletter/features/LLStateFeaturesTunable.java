@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static core.CoreConstants.GameResult.LOSE_ROUND;
 import static games.loveletter.cards.CardType.*;
 
 /**
@@ -22,7 +21,7 @@ public class LLStateFeaturesTunable extends TunableStateFeatures {
     static String[] allNames = new String[]{"CARDS", "AFFECTION", "COUNTESS", "BARON",
             "GUARD", "HANDMAID", "KING", "PRIEST", "PRINCE", "PRINCESS", "HIDDEN",
             "ADVANTAGE", "TURN", "ROUND",
-            "KNOWLEDGE", "PROTECTION", "KNOCKED_OUT",
+            "KNOWLEDGE", "PROTECTION",
             "GUARD_DISCARD", "HANDMAID_DISCARD", "PRIEST_DISCARD", "BARON_DISCARD", "PRINCE_DISCARD",
             "KING_DISCARD", "COUNTESS_DISCARD", "PRINCESS_DISCARD"};
 
@@ -95,34 +94,30 @@ public class LLStateFeaturesTunable extends TunableStateFeatures {
         if (active[15]) {
             data[15] = IntStream.range(0, llgs.getNPlayers()).map(p -> llgs.isProtected(p) ? (int) Math.pow(2, p) : 0).sum();
         }
-        // Knocked out - whether the player is knocked out
-        if (active[16]) {
-            data[16] = IntStream.range(0, llgs.getNPlayers()).map(p -> llgs.getPlayerResults()[p] == LOSE_ROUND ? (int) Math.pow(2, p) : 0).sum();
-        }
         // Discard piles
+        if (active[16])
+            data[16] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == Guard).count();
         if (active[17])
             data[17] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
-                    .filter(card -> card.cardType == Guard).count();
+                    .filter(card -> card.cardType == Handmaid).count();
         if (active[18])
             data[18] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
-                    .filter(card -> card.cardType == Handmaid).count();
+                    .filter(card -> card.cardType == Priest).count();
         if (active[19])
             data[19] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
-                    .filter(card -> card.cardType == Priest).count();
+                    .filter(card -> card.cardType == Baron).count();
         if (active[20])
             data[20] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
-                    .filter(card -> card.cardType == Baron).count();
+                    .filter(card -> card.cardType == Prince).count();
         if (active[21])
             data[21] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
-                    .filter(card -> card.cardType == Prince).count();
+                    .filter(card -> card.cardType == King).count();
         if (active[22])
             data[22] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
-                    .filter(card -> card.cardType == King).count();
+                    .filter(card -> card.cardType == Countess).count();
         if (active[23])
             data[23] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
-                    .filter(card -> card.cardType == Countess).count();
-        if (active[24])
-            data[24] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
                     .filter(card -> card.cardType == Princess).count();
 
         return data;
