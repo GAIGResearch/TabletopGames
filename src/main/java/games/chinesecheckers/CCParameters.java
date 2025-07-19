@@ -15,7 +15,6 @@ public class CCParameters extends AbstractParameters {
     // These are the colours of the base/target nodes for each player (where they need to get to)
     // To find the starting nodes, look at the colour from boardOpposites
     public Map<Peg.Colour, int[]> colourIndices = new HashMap<>();
-
     {
         colourIndices.put(Peg.Colour.red, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         colourIndices.put(Peg.Colour.purple, new int[]{111, 112, 113, 114, 115, 116, 117, 118, 119, 120});

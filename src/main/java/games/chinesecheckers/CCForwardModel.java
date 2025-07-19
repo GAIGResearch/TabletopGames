@@ -175,8 +175,7 @@ public class CCForwardModel extends StandardForwardModel {
         CCParameters params = (CCParameters) state.getGameParameters();
 
         for (int p = 0; p < state.getNPlayers(); p++) {
-            Peg.Colour col = params.playerColours.get(state.getNPlayers())[p];
-            if (checkWinCondition(state, col)) {
+            if (checkWinCondition(state)) {
                 endGame(state);
             }
         }
@@ -189,14 +188,18 @@ public class CCForwardModel extends StandardForwardModel {
         }
     }
 
-    private boolean checkWinCondition(CCGameState state, Peg.Colour colour) {
+    private boolean checkWinCondition(CCGameState state) {
+        int player = state.getCurrentPlayer();
+        Peg.Colour colour = state.getPlayerColour(player);
+        // only the current player can win after their turn
         CCParameters params = (CCParameters) state.getGameParameters();
         int[] colourIndices = params.colourIndices.get(colour);
         int counter = 0;
         boolean PegIn = false;
+        // we win is all target nodes are occupied, and at least one of them is ours (anti-spoiling rule)
         List<CCNode> nodes = state.getStarBoard().getBoardNodes();
         for (int i : colourIndices) {
-            if (nodes.get(i).isNodeOccupied() && nodes.get(i).getOccupiedPeg().getColour() == colour) {
+            if (nodes.get(i).isNodeOccupied() ) {
                 PegIn = true;
             }
             if (nodes.get(i).isNodeOccupied()) {
