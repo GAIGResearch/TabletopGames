@@ -10,7 +10,7 @@ import games.chinesecheckers.components.Peg;
 
 import java.util.List;
 
-public class CCHeuristic extends TunableParameters implements IStateHeuristic  {
+public class CCHeuristic extends TunableParameters implements IStateHeuristic {
 
     @Override
     protected AbstractParameters _copy() {
@@ -24,24 +24,29 @@ public class CCHeuristic extends TunableParameters implements IStateHeuristic  {
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
         CCGameState state = (CCGameState) gs;
+        CCParameters params = (CCParameters) state.getGameParameters();
+
+        // get player colour from parameters
+        Peg.Colour playercolour = params.playerColours.get(state.getNPlayers())[state.getCurrentPlayer()];
+        Peg.Colour oppositeColour = params.boardOpposites.get(playercolour);
+
+        int[] homeNodes = params.colourIndices.get(playercolour);
+        int[] targetNodes = params.colourIndices.get(oppositeColour);
+
+        // give one point for each peg in the target area of the opposite colour
+        // and subtract one point for each peg in the player's own starting area
 
         int score = 0;
-        if(playerId == 0){
-            List<CCNode> nodes = state.getStarBoard().getBoardNodes();
-            for(int i = 111; i <= 120; i++){
-                if(nodes.get(i).isNodeOccupied() && nodes.get(i).getOccupiedPeg().getColour() == Peg.Colour.purple){
-                    score++;
-                }
+        List<CCNode> nodes = state.getStarBoard().getBoardNodes();
+        for (int i : homeNodes) {
+            if (nodes.get(i).isNodeOccupied() && nodes.get(i).getOccupiedPeg().getColour() == playercolour) {
+                score--;
             }
         }
-        if(playerId == 1){
-            List<CCNode> nodes = state.getStarBoard().getBoardNodes();
-            for(int i = 0; i <= 9; i++){
-                if(nodes.get(i).isNodeOccupied() && nodes.get(i).getOccupiedPeg().getColour() == Peg.Colour.red){
-                    score++;
-                }
+        for (int i : targetNodes) {
+            if (nodes.get(i).isNodeOccupied() && nodes.get(i).getOccupiedPeg().getColour() == playercolour) {
+                score++;
             }
         }
         return score;
