@@ -18,21 +18,21 @@ public class CCNode extends Component {
     private int x;
     private int y;
 
-    private Set<CCNode> neighbours;  // Neighbours of this board node
+    private List<CCNode> neighbours;  // Neighbours of this board node
     private Map<CCNode, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node
     private int maxNeighbours = 6;  // Maximum number of neighbours for this board node
 
 
     public CCNode() {
         super(CoreConstants.ComponentType.BOARD_NODE, "CC", 0);
-        this.neighbours = new HashSet<>();
+        this.neighbours = new ArrayList<>();
         this.neighbourSideMapping = new HashMap<>();
     }
 
     public CCNode(int id) {
         super(CoreConstants.ComponentType.BOARD_NODE, "CC", id);
         colour = Peg.Colour.neutral;
-        this.neighbours = new HashSet<>();
+        this.neighbours = new ArrayList<>();
         this.neighbourSideMapping = new HashMap<>();
     }
 
@@ -87,18 +87,6 @@ public class CCNode extends Component {
     }
 
     /**
-     * Removes neighbour of this node.
-     *
-     * @param neighbour - neighbour to remove.
-     */
-    public void removeNeighbour(CCNode neighbour) {
-        if (neighbours.contains(neighbour)) {
-            neighbours.remove(neighbour);
-            neighbourSideMapping.remove(neighbour);
-        }
-    }
-
-    /**
      * Adds neighbour to specific side of this node.
      *
      * @param neighbour - new neighbour to be added.
@@ -114,21 +102,16 @@ public class CCNode extends Component {
         }
     }
 
-    /**
-     * Copies all node properties to a new instance of this node.
-     *
-     * @return - a new instance of this node.
-     */
+
     @Override
     public BoardNode copy() {
-        // WARNING: DO not copy this directly, the GraphBoard copies it to correctly assign neighbour references!
-        return null;
+        throw new UnsupportedOperationException("Use copy() without parameters instead.");
     }
 
     /**
      * @return the neighbours of this node.
      */
-    public Set<CCNode> getNeighbours() {
+    public List<CCNode> getNeighbours() {
         return neighbours;
     }
 
@@ -162,9 +145,11 @@ public class CCNode extends Component {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof CCNode) {
-            CCNode other = (CCNode) o;
-            return componentID == other.componentID && occupiedPeg.equals(other.occupiedPeg) && x == other.x && y == other.y && Objects.equals(neighbours, other.neighbours) && Objects.equals(neighbourSideMapping, other.neighbourSideMapping) && maxNeighbours == other.maxNeighbours;
+        if (o instanceof CCNode other) {
+            return componentID == other.componentID && occupiedPeg == other.occupiedPeg &&
+                    x == other.x && y == other.y && Objects.equals(neighbours, other.neighbours) &&
+                    Objects.equals(neighbourSideMapping, other.neighbourSideMapping) &&
+                    maxNeighbours == other.maxNeighbours;
         }
         return false;
     }

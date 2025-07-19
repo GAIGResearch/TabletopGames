@@ -9,6 +9,10 @@ import java.util.Map;
 
 public class CCParameters extends AbstractParameters {
 
+    public CCParameters() {
+        setTimeoutRounds(200);
+    }
+
     // These are the colours of the base/target nodes for each player (where they need to get to)
     // To find the starting nodes, look at the colour from boardOpposites
     public Map<Peg.Colour, int[]> colourIndices = new HashMap<>();

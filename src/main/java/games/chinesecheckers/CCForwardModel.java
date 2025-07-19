@@ -177,8 +177,13 @@ public class CCForwardModel extends StandardForwardModel {
                 endGame(state);
             }
         }
-        if (state.isNotTerminal())
+        if (state.isNotTerminal()) {
+            int currentPlayer = state.getCurrentPlayer();
             endPlayerTurn(state);
+            if (state.getCurrentPlayer() == 0 && currentPlayer != 0 ) {
+                endRound(state);
+            }
+        }
     }
 
     private boolean checkWinCondition(CCGameState state, Peg.Colour colour) {

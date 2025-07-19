@@ -39,21 +39,21 @@ public class Peg extends Component {
         }
     }
 
-    CCNode occupiedNode;
+    // componentID is used to identify the peg in the game state
+    int occupiedNode;
 
     private Colour team;
 
     private boolean inDestination = false;
 
-    public Peg() {
-        super(CoreConstants.ComponentType.TOKEN, "PEG");
-
-    }
-
     public Peg(Colour team, CCNode occupiedNode) {
         super(CoreConstants.ComponentType.TOKEN, "PEG");
         this.team = team;
-        this.occupiedNode = occupiedNode;
+        this.occupiedNode = occupiedNode.getComponentID();
+    }
+
+    private Peg(int componentID) {
+        super(CoreConstants.ComponentType.TOKEN, "PEG", componentID);
     }
 
     public void setInDestination(boolean value) {
@@ -70,9 +70,10 @@ public class Peg extends Component {
 
     @Override
     public Component copy() {
-        Peg copy = new Peg();
-        copy.setInDestination(getInDestination());
-        copy.team = getColour();
+        Peg copy = new Peg(this.componentID);
+        copy.inDestination = this.inDestination;
+        copy.team = team;
+        copy.occupiedNode = occupiedNode;
         return copy;
     }
 
@@ -83,9 +84,9 @@ public class Peg extends Component {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Peg) {
-            Peg other = (Peg) o;
-            return componentID == other.componentID && Objects.equals(occupiedNode, other.occupiedNode) && Objects.equals(team, other.team) && inDestination == other.inDestination;
+        if (o instanceof Peg other) {
+            return componentID == other.componentID && occupiedNode == other.occupiedNode &&
+                    team == other.team && inDestination == other.inDestination;
         }
         return false;
     }
