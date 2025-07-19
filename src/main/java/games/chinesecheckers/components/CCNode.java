@@ -19,21 +19,23 @@ public class CCNode extends Component {
     private int y;
 
     private List<CCNode> neighbours;  // Neighbours of this board node
-    private Map<CCNode, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node
     private int maxNeighbours = 6;  // Maximum number of neighbours for this board node
+    private int[] neighboursBySide;// Neighbours by side
 
 
     public CCNode() {
         super(CoreConstants.ComponentType.BOARD_NODE, "CC", 0);
         this.neighbours = new ArrayList<>();
-        this.neighbourSideMapping = new HashMap<>();
+        this.neighboursBySide = new int[maxNeighbours];
+        Arrays.fill(neighboursBySide, -1);
     }
 
     public CCNode(int id) {
         super(CoreConstants.ComponentType.BOARD_NODE, "CC", id);
         colour = Peg.Colour.neutral;
         this.neighbours = new ArrayList<>();
-        this.neighbourSideMapping = new HashMap<>();
+        this.neighboursBySide = new int[maxNeighbours];
+        Arrays.fill(neighboursBySide, -1);
     }
 
     public void setOccupiedPeg(Peg peg) {
@@ -95,10 +97,14 @@ public class CCNode extends Component {
      */
     public void addNeighbour(CCNode neighbour, int side) {
         if (neighbours.size() <= maxNeighbours && side <= maxNeighbours || maxNeighbours == -1) {
-            if (!(neighbours.contains(neighbour)) && !(neighbourSideMapping.containsKey(neighbour))) {
-                neighbours.add(neighbour);
-                neighbourSideMapping.put(neighbour, side);
+            if (neighbours.contains(neighbour)) {
+                throw new IllegalArgumentException("Neighbour already exists in this node's neighbours.");
             }
+            if (neighboursBySide[side] != -1) {
+                throw new IllegalArgumentException("Neighbour already exists in this node's neighbours by side mapping.");
+            }
+            neighbours.add(neighbour);
+            neighboursBySide[side] = neighbour.getID();
         }
     }
 
@@ -118,8 +124,17 @@ public class CCNode extends Component {
     /**
      * @return the neighbours mapping to sides of this node.
      */
-    public Map<CCNode, Integer> getNeighbourSideMapping() {
-        return neighbourSideMapping;
+    public int getNeighbourBySide(int side) {
+        return neighboursBySide[side];
+    }
+
+    public int getSideOfNeighbour(int neighbourID) {
+        for (int i = 0; i < neighboursBySide.length; i++) {
+            if (neighboursBySide[i] == neighbourID) {
+                return i;
+            }
+        }
+        return -1; // Not found
     }
 
     public void loadBoardNode(JSONObject node) {
@@ -140,7 +155,7 @@ public class CCNode extends Component {
 
     @Override
     public final int hashCode() {
-        return Objects.hash(componentID);
+        return componentID;
     }
 
     @Override
@@ -148,7 +163,7 @@ public class CCNode extends Component {
         if (o instanceof CCNode other) {
             return componentID == other.componentID && occupiedPeg == other.occupiedPeg &&
                     x == other.x && y == other.y && Objects.equals(neighbours, other.neighbours) &&
-                    Objects.equals(neighbourSideMapping, other.neighbourSideMapping) &&
+                    Arrays.equals(neighboursBySide, other.neighboursBySide) &&
                     maxNeighbours == other.maxNeighbours;
         }
         return false;

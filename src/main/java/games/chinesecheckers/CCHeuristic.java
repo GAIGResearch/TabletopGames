@@ -31,8 +31,7 @@ public class CCHeuristic extends TunableParameters implements IStateHeuristic {
         Peg.Colour playercolour = params.playerColours.get(state.getNPlayers())[state.getCurrentPlayer()];
         Peg.Colour oppositeColour = params.boardOpposites.get(playercolour);
 
-        int[] homeNodes = params.colourIndices.get(playercolour);
-        int[] targetNodes = params.colourIndices.get(oppositeColour);
+        int[] targetNodes = params.colourIndices.get(playercolour);
         int referenceNode = targetNodes[0];
 
         // give one point for each peg in the target area of the opposite colour
@@ -44,9 +43,9 @@ public class CCHeuristic extends TunableParameters implements IStateHeuristic {
         for (CCNode node : nodes) {
             if (node.isNodeOccupied() && node.getOccupiedPeg().getColour() == playercolour) {
                 if (node.getBaseColour() == playercolour)
-                    score -= 1.0;
-                else if (node.getBaseColour() == oppositeColour)
                     score += 1.0;
+                else if (node.getBaseColour() == oppositeColour)
+                    score -= 1.0;
                 else {
                     int distanceToTarget = state.starBoard.distanceBetween(node.getID(), referenceNode);
                     score += (10 - distanceToTarget) / 10.0; // closer to target node gives more points

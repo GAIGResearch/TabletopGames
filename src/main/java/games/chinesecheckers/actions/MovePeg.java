@@ -61,14 +61,13 @@ public class MovePeg extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof MovePeg)) return false;
-        MovePeg peg = (MovePeg) obj;
-        return Objects.equals(from, peg.from) && Objects.equals(to, peg.to);
+        if (!(obj instanceof MovePeg peg)) return false;
+        return from == peg.from && to == peg.to;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(from, to);
+        return 3 - from * 31 + 8191 * to;
     }
 
     @Override

@@ -4,8 +4,7 @@ import core.AbstractParameters;
 import games.chinesecheckers.components.Peg;
 import gametemplate.GTParameters;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class CCParameters extends AbstractParameters {
 
@@ -16,6 +15,7 @@ public class CCParameters extends AbstractParameters {
     // These are the colours of the base/target nodes for each player (where they need to get to)
     // To find the starting nodes, look at the colour from boardOpposites
     public Map<Peg.Colour, int[]> colourIndices = new HashMap<>();
+
     {
         colourIndices.put(Peg.Colour.red, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         colourIndices.put(Peg.Colour.purple, new int[]{111, 112, 113, 114, 115, 116, 117, 118, 119, 120});
@@ -26,6 +26,7 @@ public class CCParameters extends AbstractParameters {
     }
 
     public Map<Peg.Colour, Peg.Colour> boardOpposites = new HashMap<>();
+
     {
         boardOpposites.put(Peg.Colour.red, Peg.Colour.purple);
         boardOpposites.put(Peg.Colour.purple, Peg.Colour.red);
@@ -35,13 +36,14 @@ public class CCParameters extends AbstractParameters {
         boardOpposites.put(Peg.Colour.blue, Peg.Colour.orange);
     }
 
-    public Map<Integer, Peg.Colour[]> playerColours = new HashMap<>();
-    {
-        playerColours.put(2, new Peg.Colour[]{Peg.Colour.purple, Peg.Colour.red});
-        playerColours.put(3, new Peg.Colour[]{Peg.Colour.purple, Peg.Colour.yellow, Peg.Colour.orange});
-        playerColours.put(4, new Peg.Colour[]{Peg.Colour.purple, Peg.Colour.yellow, Peg.Colour.red, Peg.Colour.green});
-        playerColours.put(6, new Peg.Colour[]{Peg.Colour.purple, Peg.Colour.red, Peg.Colour.blue, Peg.Colour.yellow, Peg.Colour.orange, Peg.Colour.green});
-    }
+    public List<Peg.Colour[]> playerColours = Arrays.asList(
+            new Peg.Colour[0], new Peg.Colour[0],
+            new Peg.Colour[]{Peg.Colour.purple, Peg.Colour.red},
+            new Peg.Colour[]{Peg.Colour.purple, Peg.Colour.yellow, Peg.Colour.orange},
+            new Peg.Colour[]{Peg.Colour.purple, Peg.Colour.yellow, Peg.Colour.red, Peg.Colour.green},
+            new Peg.Colour[0],
+            new Peg.Colour[]{Peg.Colour.purple, Peg.Colour.red, Peg.Colour.blue, Peg.Colour.yellow, Peg.Colour.orange, Peg.Colour.green}
+    );
 
     @Override
     protected AbstractParameters _copy() {
