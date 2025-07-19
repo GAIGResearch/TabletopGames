@@ -172,7 +172,6 @@ public class CCForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         CCGameState state = (CCGameState) currentState;
-        CCParameters params = (CCParameters) state.getGameParameters();
 
         for (int p = 0; p < state.getNPlayers(); p++) {
             if (checkWinCondition(state)) {

@@ -28,7 +28,7 @@ public class CCHeuristic extends TunableParameters implements IStateHeuristic {
         CCParameters params = (CCParameters) state.getGameParameters();
 
         // get player colour from parameters
-        Peg.Colour playercolour = params.playerColours.get(state.getNPlayers())[state.getCurrentPlayer()];
+        Peg.Colour playercolour = state.getPlayerColour(playerId);
         Peg.Colour oppositeColour = params.boardOpposites.get(playercolour);
 
         int[] targetNodes = params.colourIndices.get(playercolour);
