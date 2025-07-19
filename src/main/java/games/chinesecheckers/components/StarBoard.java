@@ -78,6 +78,9 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
     }
 
 
+    public CCNode getNodeById(int id) {
+        return nodesByID.get(id);
+    }
     /**
      * Sets the list of board nodes to the given list.
      *
@@ -291,7 +294,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(24).addNeighbour(this.getBoardNodes().get(36), 2);
         this.getBoardNodes().get(24).addNeighbour(this.getBoardNodes().get(35), 3);
         this.getBoardNodes().get(24).addNeighbour(this.getBoardNodes().get(23), 4);
-        this.getBoardNodes().get(24).addNeighbour(this.getBoardNodes().get(10), 5);
+        this.getBoardNodes().get(24).addNeighbour(this.getBoardNodes().get(11), 5);
 
         this.getBoardNodes().get(25).setCoordinates(2, 5);
         this.getBoardNodes().get(25).addNeighbour(this.getBoardNodes().get(13), 0);
@@ -299,7 +302,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(25).addNeighbour(this.getBoardNodes().get(37), 2);
         this.getBoardNodes().get(25).addNeighbour(this.getBoardNodes().get(36), 3);
         this.getBoardNodes().get(25).addNeighbour(this.getBoardNodes().get(24), 4);
-        this.getBoardNodes().get(25).addNeighbour(this.getBoardNodes().get(11), 5);
+        this.getBoardNodes().get(25).addNeighbour(this.getBoardNodes().get(12), 5);
 
         this.getBoardNodes().get(26).setCoordinates(3, 5);
         this.getBoardNodes().get(26).addNeighbour(this.getBoardNodes().get(14), 0);
@@ -327,7 +330,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(29).setCoordinates(6, 5);
         this.getBoardNodes().get(29).addNeighbour(this.getBoardNodes().get(17), 0);
-        this.getBoardNodes().get(29).addNeighbour(this.getBoardNodes().get(18), 1);
+        this.getBoardNodes().get(29).addNeighbour(this.getBoardNodes().get(30), 1);
         this.getBoardNodes().get(29).addNeighbour(this.getBoardNodes().get(41), 2);
         this.getBoardNodes().get(29).addNeighbour(this.getBoardNodes().get(40), 3);
         this.getBoardNodes().get(29).addNeighbour(this.getBoardNodes().get(28), 4);
@@ -351,7 +354,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(32).setCoordinates(9, 5);
         this.getBoardNodes().get(32).addNeighbour(this.getBoardNodes().get(20), 0);
-        this.getBoardNodes().get(32).addNeighbour(this.getBoardNodes().get(21), 1);
+        this.getBoardNodes().get(32).addNeighbour(this.getBoardNodes().get(33), 1);
         this.getBoardNodes().get(32).addNeighbour(this.getBoardNodes().get(44), 2);
         this.getBoardNodes().get(32).addNeighbour(this.getBoardNodes().get(43), 3);
         this.getBoardNodes().get(32).addNeighbour(this.getBoardNodes().get(31), 4);
@@ -359,7 +362,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(33).setCoordinates(10, 5);
         this.getBoardNodes().get(33).addNeighbour(this.getBoardNodes().get(21), 0);
-        this.getBoardNodes().get(33).addNeighbour(this.getBoardNodes().get(22), 1);
+        this.getBoardNodes().get(33).addNeighbour(this.getBoardNodes().get(34), 1);
         this.getBoardNodes().get(33).addNeighbour(this.getBoardNodes().get(45), 2);
         this.getBoardNodes().get(33).addNeighbour(this.getBoardNodes().get(44), 3);
         this.getBoardNodes().get(33).addNeighbour(this.getBoardNodes().get(32), 4);
@@ -387,7 +390,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(37).setCoordinates(3, 6);
         this.getBoardNodes().get(37).addNeighbour(this.getBoardNodes().get(26), 0);
-        this.getBoardNodes().get(37).addNeighbour(this.getBoardNodes().get(27), 1);
+        this.getBoardNodes().get(37).addNeighbour(this.getBoardNodes().get(38), 1);
         this.getBoardNodes().get(37).addNeighbour(this.getBoardNodes().get(48), 2);
         this.getBoardNodes().get(37).addNeighbour(this.getBoardNodes().get(47), 3);
         this.getBoardNodes().get(37).addNeighbour(this.getBoardNodes().get(36), 4);
@@ -395,7 +398,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(38).setCoordinates(4, 6);
         this.getBoardNodes().get(38).addNeighbour(this.getBoardNodes().get(27), 0);
-        this.getBoardNodes().get(38).addNeighbour(this.getBoardNodes().get(28), 1);
+        this.getBoardNodes().get(38).addNeighbour(this.getBoardNodes().get(39), 1);
         this.getBoardNodes().get(38).addNeighbour(this.getBoardNodes().get(49), 2);
         this.getBoardNodes().get(38).addNeighbour(this.getBoardNodes().get(48), 3);
         this.getBoardNodes().get(38).addNeighbour(this.getBoardNodes().get(37), 4);
@@ -403,7 +406,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(39).setCoordinates(5, 6);
         this.getBoardNodes().get(39).addNeighbour(this.getBoardNodes().get(28), 0);
-        this.getBoardNodes().get(39).addNeighbour(this.getBoardNodes().get(29), 1);
+        this.getBoardNodes().get(39).addNeighbour(this.getBoardNodes().get(40), 1);
         this.getBoardNodes().get(39).addNeighbour(this.getBoardNodes().get(50), 2);
         this.getBoardNodes().get(39).addNeighbour(this.getBoardNodes().get(49), 3);
         this.getBoardNodes().get(39).addNeighbour(this.getBoardNodes().get(38), 4);
@@ -427,7 +430,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(42).setCoordinates(8, 6);
         this.getBoardNodes().get(42).addNeighbour(this.getBoardNodes().get(31), 0);
-        this.getBoardNodes().get(42).addNeighbour(this.getBoardNodes().get(32), 1);
+        this.getBoardNodes().get(42).addNeighbour(this.getBoardNodes().get(43), 1);
         this.getBoardNodes().get(42).addNeighbour(this.getBoardNodes().get(53), 2);
         this.getBoardNodes().get(42).addNeighbour(this.getBoardNodes().get(52), 3);
         this.getBoardNodes().get(42).addNeighbour(this.getBoardNodes().get(41), 4);
@@ -435,7 +438,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(43).setCoordinates(9, 6);
         this.getBoardNodes().get(43).addNeighbour(this.getBoardNodes().get(32), 0);
-        this.getBoardNodes().get(43).addNeighbour(this.getBoardNodes().get(33), 1);
+        this.getBoardNodes().get(43).addNeighbour(this.getBoardNodes().get(44), 1);
         this.getBoardNodes().get(43).addNeighbour(this.getBoardNodes().get(54), 2);
         this.getBoardNodes().get(43).addNeighbour(this.getBoardNodes().get(53), 3);
         this.getBoardNodes().get(43).addNeighbour(this.getBoardNodes().get(42), 4);
@@ -443,7 +446,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(44).setCoordinates(10, 6);
         this.getBoardNodes().get(44).addNeighbour(this.getBoardNodes().get(33), 0);
-        this.getBoardNodes().get(44).addNeighbour(this.getBoardNodes().get(34), 1);
+        this.getBoardNodes().get(44).addNeighbour(this.getBoardNodes().get(45), 1);
         this.getBoardNodes().get(44).addNeighbour(this.getBoardNodes().get(55), 2);
         this.getBoardNodes().get(44).addNeighbour(this.getBoardNodes().get(54), 3);
         this.getBoardNodes().get(44).addNeighbour(this.getBoardNodes().get(43), 4);
@@ -463,7 +466,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(47).setCoordinates(2, 7);
         this.getBoardNodes().get(47).addNeighbour(this.getBoardNodes().get(37), 0);
-        this.getBoardNodes().get(47).addNeighbour(this.getBoardNodes().get(38), 1);
+        this.getBoardNodes().get(47).addNeighbour(this.getBoardNodes().get(48), 1);
         this.getBoardNodes().get(47).addNeighbour(this.getBoardNodes().get(57), 2);
         this.getBoardNodes().get(47).addNeighbour(this.getBoardNodes().get(56), 3);
         this.getBoardNodes().get(47).addNeighbour(this.getBoardNodes().get(46), 4);
@@ -471,7 +474,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(48).setCoordinates(3, 7);
         this.getBoardNodes().get(48).addNeighbour(this.getBoardNodes().get(38), 0);
-        this.getBoardNodes().get(48).addNeighbour(this.getBoardNodes().get(39), 1);
+        this.getBoardNodes().get(48).addNeighbour(this.getBoardNodes().get(49), 1);
         this.getBoardNodes().get(48).addNeighbour(this.getBoardNodes().get(58), 2);
         this.getBoardNodes().get(48).addNeighbour(this.getBoardNodes().get(57), 3);
         this.getBoardNodes().get(48).addNeighbour(this.getBoardNodes().get(47), 4);
@@ -479,15 +482,15 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(49).setCoordinates(4, 7);
         this.getBoardNodes().get(49).addNeighbour(this.getBoardNodes().get(39), 0);
-        this.getBoardNodes().get(49).addNeighbour(this.getBoardNodes().get(40), 1);
+        this.getBoardNodes().get(49).addNeighbour(this.getBoardNodes().get(50), 1);
         this.getBoardNodes().get(49).addNeighbour(this.getBoardNodes().get(59), 2);
         this.getBoardNodes().get(49).addNeighbour(this.getBoardNodes().get(58), 3);
         this.getBoardNodes().get(49).addNeighbour(this.getBoardNodes().get(48), 4);
-        this.getBoardNodes().get(49).addNeighbour(this.getBoardNodes().get(37), 5);
+        this.getBoardNodes().get(49).addNeighbour(this.getBoardNodes().get(38), 5);
 
         this.getBoardNodes().get(50).setCoordinates(5, 7);
         this.getBoardNodes().get(50).addNeighbour(this.getBoardNodes().get(40), 0);
-        this.getBoardNodes().get(50).addNeighbour(this.getBoardNodes().get(41), 1);
+        this.getBoardNodes().get(50).addNeighbour(this.getBoardNodes().get(51), 1);
         this.getBoardNodes().get(50).addNeighbour(this.getBoardNodes().get(60), 2);
         this.getBoardNodes().get(50).addNeighbour(this.getBoardNodes().get(59), 3);
         this.getBoardNodes().get(50).addNeighbour(this.getBoardNodes().get(49), 4);
@@ -495,7 +498,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(51).setCoordinates(6, 7);
         this.getBoardNodes().get(51).addNeighbour(this.getBoardNodes().get(41), 0);
-        this.getBoardNodes().get(51).addNeighbour(this.getBoardNodes().get(42), 1);
+        this.getBoardNodes().get(51).addNeighbour(this.getBoardNodes().get(52), 1);
         this.getBoardNodes().get(51).addNeighbour(this.getBoardNodes().get(61), 2);
         this.getBoardNodes().get(51).addNeighbour(this.getBoardNodes().get(60), 3);
         this.getBoardNodes().get(51).addNeighbour(this.getBoardNodes().get(50), 4);
@@ -503,7 +506,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(52).setCoordinates(7, 7);
         this.getBoardNodes().get(52).addNeighbour(this.getBoardNodes().get(42), 0);
-        this.getBoardNodes().get(52).addNeighbour(this.getBoardNodes().get(43), 1);
+        this.getBoardNodes().get(52).addNeighbour(this.getBoardNodes().get(53), 1);
         this.getBoardNodes().get(52).addNeighbour(this.getBoardNodes().get(62), 2);
         this.getBoardNodes().get(52).addNeighbour(this.getBoardNodes().get(61), 3);
         this.getBoardNodes().get(52).addNeighbour(this.getBoardNodes().get(51), 4);
@@ -519,7 +522,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(54).setCoordinates(9, 7);
         this.getBoardNodes().get(54).addNeighbour(this.getBoardNodes().get(44), 0);
-        this.getBoardNodes().get(54).addNeighbour(this.getBoardNodes().get(45), 1);
+        this.getBoardNodes().get(54).addNeighbour(this.getBoardNodes().get(55), 1);
         this.getBoardNodes().get(54).addNeighbour(this.getBoardNodes().get(64), 2);
         this.getBoardNodes().get(54).addNeighbour(this.getBoardNodes().get(63), 3);
         this.getBoardNodes().get(54).addNeighbour(this.getBoardNodes().get(53), 4);
@@ -540,7 +543,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(57).setCoordinates(3, 8);
         this.getBoardNodes().get(57).addNeighbour(this.getBoardNodes().get(48), 0);
-        this.getBoardNodes().get(57).addNeighbour(this.getBoardNodes().get(49), 1);
+        this.getBoardNodes().get(57).addNeighbour(this.getBoardNodes().get(58), 1);
         this.getBoardNodes().get(57).addNeighbour(this.getBoardNodes().get(67), 2);
         this.getBoardNodes().get(57).addNeighbour(this.getBoardNodes().get(66), 3);
         this.getBoardNodes().get(57).addNeighbour(this.getBoardNodes().get(56), 4);
@@ -548,7 +551,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(58).setCoordinates(4, 8);
         this.getBoardNodes().get(58).addNeighbour(this.getBoardNodes().get(49), 0);
-        this.getBoardNodes().get(58).addNeighbour(this.getBoardNodes().get(50), 1);
+        this.getBoardNodes().get(58).addNeighbour(this.getBoardNodes().get(59), 1);
         this.getBoardNodes().get(58).addNeighbour(this.getBoardNodes().get(68), 2);
         this.getBoardNodes().get(58).addNeighbour(this.getBoardNodes().get(67), 3);
         this.getBoardNodes().get(58).addNeighbour(this.getBoardNodes().get(57), 4);
@@ -556,7 +559,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(59).setCoordinates(5, 8);
         this.getBoardNodes().get(59).addNeighbour(this.getBoardNodes().get(50), 0);
-        this.getBoardNodes().get(59).addNeighbour(this.getBoardNodes().get(51), 1);
+        this.getBoardNodes().get(59).addNeighbour(this.getBoardNodes().get(60), 1);
         this.getBoardNodes().get(59).addNeighbour(this.getBoardNodes().get(69), 2);
         this.getBoardNodes().get(59).addNeighbour(this.getBoardNodes().get(68), 3);
         this.getBoardNodes().get(59).addNeighbour(this.getBoardNodes().get(58), 4);
@@ -564,7 +567,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(60).setCoordinates(6, 8);
         this.getBoardNodes().get(60).addNeighbour(this.getBoardNodes().get(51), 0);
-        this.getBoardNodes().get(60).addNeighbour(this.getBoardNodes().get(52), 1);
+        this.getBoardNodes().get(60).addNeighbour(this.getBoardNodes().get(61), 1);
         this.getBoardNodes().get(60).addNeighbour(this.getBoardNodes().get(70), 2);
         this.getBoardNodes().get(60).addNeighbour(this.getBoardNodes().get(69), 3);
         this.getBoardNodes().get(60).addNeighbour(this.getBoardNodes().get(59), 4);
@@ -572,7 +575,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(61).setCoordinates(7, 8);
         this.getBoardNodes().get(61).addNeighbour(this.getBoardNodes().get(52), 0);
-        this.getBoardNodes().get(61).addNeighbour(this.getBoardNodes().get(53), 1);
+        this.getBoardNodes().get(61).addNeighbour(this.getBoardNodes().get(62), 1);
         this.getBoardNodes().get(61).addNeighbour(this.getBoardNodes().get(71), 2);
         this.getBoardNodes().get(61).addNeighbour(this.getBoardNodes().get(70), 3);
         this.getBoardNodes().get(61).addNeighbour(this.getBoardNodes().get(60), 4);
@@ -580,7 +583,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(62).setCoordinates(8, 8);
         this.getBoardNodes().get(62).addNeighbour(this.getBoardNodes().get(53), 0);
-        this.getBoardNodes().get(62).addNeighbour(this.getBoardNodes().get(54), 1);
+        this.getBoardNodes().get(62).addNeighbour(this.getBoardNodes().get(63), 1);
         this.getBoardNodes().get(62).addNeighbour(this.getBoardNodes().get(72), 2);
         this.getBoardNodes().get(62).addNeighbour(this.getBoardNodes().get(71), 3);
         this.getBoardNodes().get(62).addNeighbour(this.getBoardNodes().get(61), 4);
@@ -588,7 +591,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(63).setCoordinates(9, 8);
         this.getBoardNodes().get(63).addNeighbour(this.getBoardNodes().get(54), 0);
-        this.getBoardNodes().get(63).addNeighbour(this.getBoardNodes().get(55), 1);
+        this.getBoardNodes().get(63).addNeighbour(this.getBoardNodes().get(64), 1);
         this.getBoardNodes().get(63).addNeighbour(this.getBoardNodes().get(73), 2);
         this.getBoardNodes().get(63).addNeighbour(this.getBoardNodes().get(72), 3);
         this.getBoardNodes().get(63).addNeighbour(this.getBoardNodes().get(62), 4);
@@ -693,14 +696,14 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(77).setCoordinates(3, 10);
         this.getBoardNodes().get(77).addNeighbour(this.getBoardNodes().get(67), 0);
-        this.getBoardNodes().get(77).addNeighbour(this.getBoardNodes().get(68), 1);
+        this.getBoardNodes().get(77).addNeighbour(this.getBoardNodes().get(78), 1);
         this.getBoardNodes().get(77).addNeighbour(this.getBoardNodes().get(89), 2);
         this.getBoardNodes().get(77).addNeighbour(this.getBoardNodes().get(88), 3);
         this.getBoardNodes().get(77).addNeighbour(this.getBoardNodes().get(76), 4);
         this.getBoardNodes().get(77).addNeighbour(this.getBoardNodes().get(66), 5);
 
         this.getBoardNodes().get(78).setCoordinates(4, 10);
-        this.getBoardNodes().get(78).addNeighbour(this.getBoardNodes().get(69), 0);
+        this.getBoardNodes().get(78).addNeighbour(this.getBoardNodes().get(68), 0);
         this.getBoardNodes().get(78).addNeighbour(this.getBoardNodes().get(79), 1);
         this.getBoardNodes().get(78).addNeighbour(this.getBoardNodes().get(90), 2);
         this.getBoardNodes().get(78).addNeighbour(this.getBoardNodes().get(89), 3);
@@ -708,7 +711,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(78).addNeighbour(this.getBoardNodes().get(67), 5);
 
         this.getBoardNodes().get(79).setCoordinates(5, 10);
-        this.getBoardNodes().get(79).addNeighbour(this.getBoardNodes().get(70), 0);
+        this.getBoardNodes().get(79).addNeighbour(this.getBoardNodes().get(69), 0);
         this.getBoardNodes().get(79).addNeighbour(this.getBoardNodes().get(80), 1);
         this.getBoardNodes().get(79).addNeighbour(this.getBoardNodes().get(91), 2);
         this.getBoardNodes().get(79).addNeighbour(this.getBoardNodes().get(90), 3);
@@ -716,7 +719,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(79).addNeighbour(this.getBoardNodes().get(68), 5);
 
         this.getBoardNodes().get(80).setCoordinates(6, 10);
-        this.getBoardNodes().get(80).addNeighbour(this.getBoardNodes().get(71), 0);
+        this.getBoardNodes().get(80).addNeighbour(this.getBoardNodes().get(70), 0);
         this.getBoardNodes().get(80).addNeighbour(this.getBoardNodes().get(81), 1);
         this.getBoardNodes().get(80).addNeighbour(this.getBoardNodes().get(92), 2);
         this.getBoardNodes().get(80).addNeighbour(this.getBoardNodes().get(91), 3);
@@ -724,7 +727,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(80).addNeighbour(this.getBoardNodes().get(69), 5);
 
         this.getBoardNodes().get(81).setCoordinates(7, 10);
-        this.getBoardNodes().get(81).addNeighbour(this.getBoardNodes().get(72), 0);
+        this.getBoardNodes().get(81).addNeighbour(this.getBoardNodes().get(71), 0);
         this.getBoardNodes().get(81).addNeighbour(this.getBoardNodes().get(82), 1);
         this.getBoardNodes().get(81).addNeighbour(this.getBoardNodes().get(93), 2);
         this.getBoardNodes().get(81).addNeighbour(this.getBoardNodes().get(92), 3);
@@ -732,7 +735,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(81).addNeighbour(this.getBoardNodes().get(70), 5);
 
         this.getBoardNodes().get(82).setCoordinates(8, 10);
-        this.getBoardNodes().get(82).addNeighbour(this.getBoardNodes().get(73), 0);
+        this.getBoardNodes().get(82).addNeighbour(this.getBoardNodes().get(72), 0);
         this.getBoardNodes().get(82).addNeighbour(this.getBoardNodes().get(83), 1);
         this.getBoardNodes().get(82).addNeighbour(this.getBoardNodes().get(94), 2);
         this.getBoardNodes().get(82).addNeighbour(this.getBoardNodes().get(93), 3);
@@ -740,7 +743,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(82).addNeighbour(this.getBoardNodes().get(71), 5);
 
         this.getBoardNodes().get(83).setCoordinates(9, 10);
-        this.getBoardNodes().get(83).addNeighbour(this.getBoardNodes().get(74), 0);
+        this.getBoardNodes().get(83).addNeighbour(this.getBoardNodes().get(73), 0);
         this.getBoardNodes().get(83).addNeighbour(this.getBoardNodes().get(84), 1);
         this.getBoardNodes().get(83).addNeighbour(this.getBoardNodes().get(95), 2);
         this.getBoardNodes().get(83).addNeighbour(this.getBoardNodes().get(94), 3);
@@ -776,7 +779,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(88).setCoordinates(2, 11);
         this.getBoardNodes().get(88).addNeighbour(this.getBoardNodes().get(77), 0);
-        this.getBoardNodes().get(88).addNeighbour(this.getBoardNodes().get(79), 1);
+        this.getBoardNodes().get(88).addNeighbour(this.getBoardNodes().get(89), 1);
         this.getBoardNodes().get(88).addNeighbour(this.getBoardNodes().get(101), 2);
         this.getBoardNodes().get(88).addNeighbour(this.getBoardNodes().get(100), 3);
         this.getBoardNodes().get(88).addNeighbour(this.getBoardNodes().get(87), 4);
@@ -784,7 +787,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(89).setCoordinates(3, 11);
         this.getBoardNodes().get(89).addNeighbour(this.getBoardNodes().get(78), 0);
-        this.getBoardNodes().get(89).addNeighbour(this.getBoardNodes().get(79), 1);
+        this.getBoardNodes().get(89).addNeighbour(this.getBoardNodes().get(90), 1);
         this.getBoardNodes().get(89).addNeighbour(this.getBoardNodes().get(102), 2);
         this.getBoardNodes().get(89).addNeighbour(this.getBoardNodes().get(101), 3);
         this.getBoardNodes().get(89).addNeighbour(this.getBoardNodes().get(88), 4);
@@ -800,7 +803,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
 
         this.getBoardNodes().get(91).setCoordinates(5, 11);
         this.getBoardNodes().get(91).addNeighbour(this.getBoardNodes().get(80), 0);
-        this.getBoardNodes().get(91).addNeighbour(this.getBoardNodes().get(81), 1);
+        this.getBoardNodes().get(91).addNeighbour(this.getBoardNodes().get(92), 1);
         this.getBoardNodes().get(91).addNeighbour(this.getBoardNodes().get(104), 2);
         this.getBoardNodes().get(91).addNeighbour(this.getBoardNodes().get(103), 3);
         this.getBoardNodes().get(91).addNeighbour(this.getBoardNodes().get(90), 4);
@@ -867,14 +870,12 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(100).addNeighbour(this.getBoardNodes().get(101), 1);
         this.getBoardNodes().get(100).addNeighbour(this.getBoardNodes().get(99), 4);
         this.getBoardNodes().get(100).addNeighbour(this.getBoardNodes().get(87), 5);
-        ;
 
         this.getBoardNodes().get(101).setCoordinates(3, 12);
         this.getBoardNodes().get(101).addNeighbour(this.getBoardNodes().get(89), 0);
         this.getBoardNodes().get(101).addNeighbour(this.getBoardNodes().get(102), 1);
         this.getBoardNodes().get(101).addNeighbour(this.getBoardNodes().get(100), 4);
         this.getBoardNodes().get(101).addNeighbour(this.getBoardNodes().get(88), 5);
-        ;
 
         this.getBoardNodes().get(102).setCoordinates(4, 12);
         this.getBoardNodes().get(102).addNeighbour(this.getBoardNodes().get(90), 0);
@@ -882,7 +883,6 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(102).addNeighbour(this.getBoardNodes().get(111), 2);
         this.getBoardNodes().get(102).addNeighbour(this.getBoardNodes().get(101), 4);
         this.getBoardNodes().get(102).addNeighbour(this.getBoardNodes().get(89), 5);
-        ;
 
         this.getBoardNodes().get(103).setCoordinates(5, 12);
         this.getBoardNodes().get(103).addNeighbour(this.getBoardNodes().get(91), 0);
@@ -891,7 +891,6 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(103).addNeighbour(this.getBoardNodes().get(111), 3);
         this.getBoardNodes().get(103).addNeighbour(this.getBoardNodes().get(102), 4);
         this.getBoardNodes().get(103).addNeighbour(this.getBoardNodes().get(90), 5);
-        ;
 
         this.getBoardNodes().get(104).setCoordinates(6, 12);
         this.getBoardNodes().get(104).addNeighbour(this.getBoardNodes().get(92), 0);
@@ -900,7 +899,6 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(104).addNeighbour(this.getBoardNodes().get(112), 3);
         this.getBoardNodes().get(104).addNeighbour(this.getBoardNodes().get(103), 4);
         this.getBoardNodes().get(104).addNeighbour(this.getBoardNodes().get(91), 5);
-        ;
 
         this.getBoardNodes().get(105).setCoordinates(7, 12);
         this.getBoardNodes().get(105).addNeighbour(this.getBoardNodes().get(93), 0);
@@ -909,7 +907,6 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(105).addNeighbour(this.getBoardNodes().get(113), 3);
         this.getBoardNodes().get(105).addNeighbour(this.getBoardNodes().get(104), 4);
         this.getBoardNodes().get(105).addNeighbour(this.getBoardNodes().get(92), 5);
-        ;
 
         this.getBoardNodes().get(106).setCoordinates(8, 12);
         this.getBoardNodes().get(106).addNeighbour(this.getBoardNodes().get(94), 0);
@@ -917,40 +914,34 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(106).addNeighbour(this.getBoardNodes().get(114), 3);
         this.getBoardNodes().get(106).addNeighbour(this.getBoardNodes().get(105), 4);
         this.getBoardNodes().get(106).addNeighbour(this.getBoardNodes().get(93), 5);
-        ;
 
         this.getBoardNodes().get(107).setCoordinates(9, 12);
         this.getBoardNodes().get(107).addNeighbour(this.getBoardNodes().get(95), 0);
         this.getBoardNodes().get(107).addNeighbour(this.getBoardNodes().get(108), 1);
         this.getBoardNodes().get(107).addNeighbour(this.getBoardNodes().get(106), 4);
         this.getBoardNodes().get(107).addNeighbour(this.getBoardNodes().get(94), 5);
-        ;
 
         this.getBoardNodes().get(108).setCoordinates(10, 12);
         this.getBoardNodes().get(108).addNeighbour(this.getBoardNodes().get(96), 0);
         this.getBoardNodes().get(108).addNeighbour(this.getBoardNodes().get(109), 1);
         this.getBoardNodes().get(108).addNeighbour(this.getBoardNodes().get(107), 4);
         this.getBoardNodes().get(108).addNeighbour(this.getBoardNodes().get(95), 5);
-        ;
 
         this.getBoardNodes().get(109).setCoordinates(11, 12);
         this.getBoardNodes().get(109).addNeighbour(this.getBoardNodes().get(97), 0);
         this.getBoardNodes().get(109).addNeighbour(this.getBoardNodes().get(110), 1);
         this.getBoardNodes().get(109).addNeighbour(this.getBoardNodes().get(108), 4);
         this.getBoardNodes().get(109).addNeighbour(this.getBoardNodes().get(96), 5);
-        ;
 
         this.getBoardNodes().get(110).setCoordinates(12, 12);
         this.getBoardNodes().get(110).addNeighbour(this.getBoardNodes().get(109), 4);
         this.getBoardNodes().get(110).addNeighbour(this.getBoardNodes().get(97), 5);
-        ;
 
         this.getBoardNodes().get(111).setCoordinates(4, 13);
         this.getBoardNodes().get(111).addNeighbour(this.getBoardNodes().get(103), 0);
         this.getBoardNodes().get(111).addNeighbour(this.getBoardNodes().get(112), 1);
         this.getBoardNodes().get(111).addNeighbour(this.getBoardNodes().get(115), 2);
         this.getBoardNodes().get(111).addNeighbour(this.getBoardNodes().get(102), 5);
-        ;
 
         this.getBoardNodes().get(112).setCoordinates(5, 13);
         this.getBoardNodes().get(112).addNeighbour(this.getBoardNodes().get(104), 0);
@@ -959,7 +950,6 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(112).addNeighbour(this.getBoardNodes().get(115), 3);
         this.getBoardNodes().get(112).addNeighbour(this.getBoardNodes().get(111), 4);
         this.getBoardNodes().get(112).addNeighbour(this.getBoardNodes().get(103), 5);
-        ;
 
         this.getBoardNodes().get(113).setCoordinates(6, 13);
         this.getBoardNodes().get(113).addNeighbour(this.getBoardNodes().get(105), 0);
@@ -968,21 +958,18 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(113).addNeighbour(this.getBoardNodes().get(116), 3);
         this.getBoardNodes().get(113).addNeighbour(this.getBoardNodes().get(112), 4);
         this.getBoardNodes().get(113).addNeighbour(this.getBoardNodes().get(104), 5);
-        ;
 
         this.getBoardNodes().get(114).setCoordinates(7, 13);
         this.getBoardNodes().get(114).addNeighbour(this.getBoardNodes().get(106), 0);
         this.getBoardNodes().get(114).addNeighbour(this.getBoardNodes().get(117), 3);
         this.getBoardNodes().get(114).addNeighbour(this.getBoardNodes().get(113), 4);
         this.getBoardNodes().get(114).addNeighbour(this.getBoardNodes().get(105), 5);
-        ;
 
         this.getBoardNodes().get(115).setCoordinates(5, 14);
         this.getBoardNodes().get(115).addNeighbour(this.getBoardNodes().get(112), 0);
         this.getBoardNodes().get(115).addNeighbour(this.getBoardNodes().get(116), 1);
         this.getBoardNodes().get(115).addNeighbour(this.getBoardNodes().get(118), 2);
         this.getBoardNodes().get(115).addNeighbour(this.getBoardNodes().get(111), 5);
-        ;
 
         this.getBoardNodes().get(116).setCoordinates(6, 14);
         this.getBoardNodes().get(116).addNeighbour(this.getBoardNodes().get(113), 0);
@@ -991,33 +978,28 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(116).addNeighbour(this.getBoardNodes().get(118), 3);
         this.getBoardNodes().get(116).addNeighbour(this.getBoardNodes().get(115), 4);
         this.getBoardNodes().get(116).addNeighbour(this.getBoardNodes().get(112), 5);
-        ;
 
         this.getBoardNodes().get(117).setCoordinates(7, 14);
         this.getBoardNodes().get(117).addNeighbour(this.getBoardNodes().get(114), 0);
         this.getBoardNodes().get(117).addNeighbour(this.getBoardNodes().get(119), 3);
         this.getBoardNodes().get(117).addNeighbour(this.getBoardNodes().get(116), 4);
         this.getBoardNodes().get(117).addNeighbour(this.getBoardNodes().get(113), 5);
-        ;
 
         this.getBoardNodes().get(118).setCoordinates(5, 15);
         this.getBoardNodes().get(118).addNeighbour(this.getBoardNodes().get(116), 0);
         this.getBoardNodes().get(118).addNeighbour(this.getBoardNodes().get(119), 1);
         this.getBoardNodes().get(118).addNeighbour(this.getBoardNodes().get(120), 2);
         this.getBoardNodes().get(118).addNeighbour(this.getBoardNodes().get(115), 5);
-        ;
 
         this.getBoardNodes().get(119).setCoordinates(6, 15);
         this.getBoardNodes().get(119).addNeighbour(this.getBoardNodes().get(117), 0);
         this.getBoardNodes().get(119).addNeighbour(this.getBoardNodes().get(120), 3);
         this.getBoardNodes().get(119).addNeighbour(this.getBoardNodes().get(118), 4);
         this.getBoardNodes().get(119).addNeighbour(this.getBoardNodes().get(116), 5);
-        ;
 
         this.getBoardNodes().get(120).setCoordinates(6, 16);
         this.getBoardNodes().get(120).addNeighbour(this.getBoardNodes().get(119), 0);
         this.getBoardNodes().get(120).addNeighbour(this.getBoardNodes().get(118), 5);
-        ;
     }
 
     /**

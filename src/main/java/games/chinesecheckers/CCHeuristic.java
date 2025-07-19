@@ -48,7 +48,7 @@ public class CCHeuristic extends TunableParameters implements IStateHeuristic {
                     score -= 1.0;
                 else {
                     int distanceToTarget = state.starBoard.distanceBetween(node.getID(), referenceNode);
-                    score += (10 - distanceToTarget) / 10.0; // closer to target node gives more points
+                    score += (Math.max(0, 10 - distanceToTarget)) / 10.0; // closer to target node gives more points
                 }
             }
         }
