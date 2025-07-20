@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static games.descent2e.DescentHelper.forcedFatigue;
+import static games.descent2e.DescentHelper.webbed;
 import static utilities.Utils.getNeighbourhood;
 
 public class Move extends AbstractAction {
@@ -53,6 +55,10 @@ public class Move extends AbstractAction {
         startPosition = f.getPosition();
 
         // Remove from old position
+        if (webbed(dgs, f, startPosition)) {
+            // If webbed, we are forced to lose Fatigue
+            forcedFatigue(dgs, f, "Caught in a Web");
+        }
         remove(dgs, f);
 
         // Go through all positions traveled as part of this movement, except for final one, applying all costs and penalties
@@ -187,6 +193,11 @@ public class Move extends AbstractAction {
                     else
                         f.decrementAttribute(e.getKey(), e.getValue());
                 }
+            }
+
+            if (webbed(dgs, f, position)) {
+                // If webbed, we are forced to lose Fatigue
+                forcedFatigue(dgs, f, "Caught in a Web");
             }
         }
     }

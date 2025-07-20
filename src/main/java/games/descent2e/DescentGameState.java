@@ -45,6 +45,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     List<List<Monster>> monstersOriginal;
     List<Integer> monstersPerGroup;
     List<String> monsterGroups;
+    List<Integer> webMonstersIDs; // Monsters with the Web passive ability
     int overlordPlayer;
     ArrayList<DToken> tokens;
     Quest currentQuest;
@@ -75,6 +76,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         monstersOriginal = new ArrayList<>();
         monstersPerGroup = new ArrayList<>();
         monsterGroups = new ArrayList<>();
+        webMonstersIDs = new ArrayList<>();
         defeatedFigures = new ArrayList<>();
     }
 
@@ -155,6 +157,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.monstersPerGroup.addAll(monstersPerGroup);
         copy.monsterGroups = new ArrayList<>();
         copy.monsterGroups.addAll(monsterGroups);
+        copy.webMonstersIDs = new ArrayList<>();
+        copy.webMonstersIDs.addAll(webMonstersIDs);
         copy.tileReferences = tileReferences.clone();
         copy.gridReferences = new HashMap<>();
         for (Map.Entry<String, Map<Vector2D, Vector2D>> e : gridReferences.entrySet()) {
@@ -252,6 +256,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 Objects.equals(monstersOriginal, that.monstersOriginal) &&
                 Objects.equals(monstersPerGroup, that.monstersPerGroup) &&
                 Objects.equals(monsterGroups, that.monsterGroups) &&
+                Objects.equals(webMonstersIDs, that.webMonstersIDs) &&
                 Objects.equals(currentQuest, that.currentQuest) &&
                 Objects.equals(defeatedFigures, that.defeatedFigures) &&
                 monsterActingNext == that.monsterActingNext &&
@@ -263,7 +268,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
-                monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest,
+                monsters, monstersOriginal, monstersPerGroup, monsterGroups, webMonstersIDs, overlordPlayer, tokens, currentQuest,
                 defeatedFigures, monsterActingNext, heroActingNext, monsterGroupActingNext);
         result = 31 * result + Arrays.deepHashCode(tileReferences);
         return result;
@@ -288,6 +293,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 monstersOriginal.hashCode(),
                 monstersPerGroup.hashCode(),
                 monsterGroups.hashCode(),
+                webMonstersIDs.hashCode(),
                 overlordPlayer,
                 tokens.hashCode(),
                 currentQuest.hashCode(),
@@ -355,6 +361,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public List<String> getMonsterGroups() {
         return monsterGroups;
+    }
+    public List<Integer> getWebMonstersIDs() {
+        return webMonstersIDs;
     }
 
     public Deck<Card> getSearchCards() {

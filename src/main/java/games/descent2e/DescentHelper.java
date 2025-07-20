@@ -777,6 +777,37 @@ public class DescentHelper {
         return -1;
     }
 
+    public static boolean webbed(DescentGameState dgs, Figure f, Vector2D position)
+    {
+        // First, this only applies to Heroes present on the map
+        if (!(f instanceof Hero)) return false;
+        if (f.isOffMap()) return false;
+
+        // Then, check if there is a Monster with the Web passive
+        List<Integer> webMonsters = dgs.getWebMonstersIDs();
+        if (webMonsters.isEmpty()) return false;
+
+        // Last, check if we are adjacent to any of them
+        BoardNode currentTile = dgs.masterBoard.getElement(position.getX(), position.getY());
+        Set<BoardNode> neighbours = currentTile.getNeighbours().keySet();
+
+        for (BoardNode neighbour : neighbours) {
+            if (neighbour == null) continue;
+            int neighbourID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
+            if (neighbourID != -1) {
+                if (webMonsters.contains(neighbourID)) {
+                    Figure other = (Figure) dgs.getComponentById(neighbourID);
+                    if (other instanceof Monster && ((Monster) other).hasPassive(MonsterAbilities.MonsterPassive.WEB)) {
+                        // If we are adjacent to a Monster with the Web passive, then we are webbed
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     public static void forcedFatigue(DescentGameState dgs, Figure f, String source) {
         if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
             f.getAttribute(Figure.Attribute.Fatigue).increment();
@@ -810,6 +841,10 @@ public class DescentHelper {
 
             // Remove from board
             Move.remove(dgs, m);
+
+            if (dgs.webMonstersIDs.contains(m.getComponentID())) {
+                dgs.webMonstersIDs.remove(m.getComponentID());
+            }
 
             // Remove from state lists
             for (List<Monster> monsterGroup: dgs.getMonsters()) {

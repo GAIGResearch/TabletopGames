@@ -16,6 +16,7 @@ import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
@@ -572,6 +573,12 @@ public class DescentForwardModel extends StandardForwardModel {
                         } else {
                             dgs.monsters.get(index).add(indexToSpawn, monster);
                         }
+
+                        // If the Monster has the Web passive, add it to our GameState list
+                        if (monster.hasPassive(MonsterAbilities.MonsterPassive.WEB))
+                        {
+                            dgs.webMonstersIDs.add(monster.getComponentID());
+                        }
                         //System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
                         break;
                     }
@@ -904,15 +911,14 @@ public class DescentForwardModel extends StandardForwardModel {
                     twoHeroActions.add(restore);
                 }
 
-                // TODO: Fix this
-
                 // Free Attack
                 AttackType attackType = getAttackType(actingFigure);
 
                 if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
-                    List<Integer> targets = getMeleeTargets(dgs, actingFigure);
+                    boolean reach = checkReach(dgs, actingFigure);
+                    List<Integer> targets = getMeleeTargets(dgs, actingFigure, reach);
                     for (Integer target : targets) {
-                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, true);
+                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, true, reach);
                         if (freeAttack.canExecute(dgs)) {
                             actions.add(freeAttack);
                             twoHeroActions.add(freeAttack);
@@ -923,7 +929,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
                     List<Integer> targets = getRangedTargets(dgs, actingFigure);
                     for (Integer target : targets) {
-                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false);
+                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false, false);
                         if (freeAttack.canExecute(dgs)) {
                             actions.add(freeAttack);
                             twoHeroActions.add(freeAttack);
@@ -1077,11 +1083,13 @@ public class DescentForwardModel extends StandardForwardModel {
 
     private List<AbstractAction> meleeAttackActions(DescentGameState dgs, Figure f) {
 
-        List<Integer> targets = getMeleeTargets(dgs, f);
+        boolean reach = checkReach(dgs, f);
+
+        List<Integer> targets = getMeleeTargets(dgs, f, reach);
         List<MeleeAttack> actions = new ArrayList<>();
 
         for (Integer target : targets) {
-            MeleeAttack attack = new MeleeAttack(f.getComponentID(), target);
+            MeleeAttack attack = new MeleeAttack(f.getComponentID(), target, reach);
             if (attack.canExecute(dgs))
                 actions.add(attack);
         }
@@ -1902,6 +1910,13 @@ public class DescentForwardModel extends StandardForwardModel {
                             dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
                         }
                     }
+
+                    // If the Monster has the Web passive, add it to our GameState list
+                    if (monster.hasPassive(MonsterAbilities.MonsterPassive.WEB))
+                    {
+                        dgs.webMonstersIDs.add(monster.getComponentID());
+                    }
+
                     break;
                 }
             }
