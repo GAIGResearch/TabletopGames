@@ -211,6 +211,9 @@ public enum RunArg {
     expertTime("The multiplier to use for the expert's budget (if MCTS). Default is 10.",
             10,
             new Usage[]{Usage.ExpertIteration}),
+    maxRecords("The maximum number of records to use for learning. Default is 10000.",
+            10000,
+            new Usage[]{Usage.ExpertIteration}),
     seed("(Optional) Random seed to use for process. This is not the seed used for games, but the seed of \n" +
             "\t the random number generator used to generate these.",
             System.currentTimeMillis(),

@@ -30,6 +30,7 @@ public class LearnFromData {
     IActionFeatureVector actionFeatures;
     String data;
     boolean debug = false;
+    int maxRecords = 10000;
 
 
     public static void main(String[] args) {
@@ -96,7 +97,7 @@ public class LearnFromData {
 
         AutomatedFeatures asf = new AutomatedFeatures(stateFeatures, actionFeatures);
         // construct the output file by adding _ASF before the suffix (which can be anything)
-        List<List<Object>> convertedData = asf.processData(true, convertedDataFile, dataFiles);
+        List<List<Object>> convertedData = asf.processData(true, convertedDataFile, maxRecords, dataFiles);
 
         // this will have created the raw data from which we now learn
         // whichever of state/action features is not null will prompt the type of Heuristic learned
@@ -295,7 +296,7 @@ public class LearnFromData {
                 // We then also need to set up the data file to be used as the baseline for the next iteration
                 if (bestFeatures != null) {
                     String newFileName = dataDirectory + File.separator + "ImproveModel_Iter_" + iteration + ".txt";
-                    bestFeatures.processData(false, newFileName, rawData);
+                    bestFeatures.processData(false, newFileName, maxRecords, rawData);
                     // then remove excluded features from the bestFeatures (these are always in the file so it always contains the original raw data)
                     bestFeatures = removeExcludedFeatures(excludedFeatures, bestFeatures);
                     iteration++;
@@ -358,6 +359,10 @@ public class LearnFromData {
         return columnsWithInteraction.contains(feature);
     }
 
+    public void setMaxRecords(int i) {
+        maxRecords = i;
+    }
+
     private record FeatureAnalysisResult(
             AutomatedFeatures adjustedASF,
             GLMHeuristic newHeuristic,
@@ -372,7 +377,7 @@ public class LearnFromData {
 
         AutomatedFeatures localASF = asf.copy();
         if (rawData != null && rawData.length > 0)
-            localASF.processData(false, outputFile, rawData);
+            localASF.processData(false, outputFile, maxRecords, rawData);
 
         if (learner.actionFeatureVector != null)
             learner.setActionFeatureVector(localASF);

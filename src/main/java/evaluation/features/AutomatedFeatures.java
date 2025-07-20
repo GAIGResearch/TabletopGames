@@ -381,7 +381,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return columnDetails;
     }
 
-    public List<List<Object>> processData(boolean overwriteAllFeatures, String outputFile, String... inputFiles) {
+    public List<List<Object>> processData(boolean overwriteAllFeatures, String outputFile, int maxRecords, String... inputFiles) {
         // inputFiles contain the raw data.
         // There can be two types of columns:
         // 1. Columns that refer to existing featureNames. These are detected by matching the names.
@@ -415,6 +415,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         for (int i = 0; i < headers.size(); i++) {
             dataColumns.add(new ArrayList<>());
         }
+        int count = 0;
         for (List<String> row : dataRows) {
             if (row.size() != headers.size()) {
                 System.err.println("Warning: Skipping row with inconsistent number of columns: " + row);
@@ -422,6 +423,10 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             }
             for (int i = 0; i < headers.size(); i++) {
                 dataColumns.get(i).add(row.get(i));
+            }
+            count++;
+            if (maxRecords > 0 && count >= maxRecords) {
+                break; // Stop processing if we reached the maximum number of records
             }
         }
         List<List<?>> newDataColumns = new ArrayList<>(); // set up to take the new data (especially where we can just copy this from the old)

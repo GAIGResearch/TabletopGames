@@ -211,8 +211,10 @@ public class ExpertIteration {
             iter++;
         } while (true);
     }
+
     /**
      * Converts milliseconds to a Pair of hours and minutes.
+     *
      * @param millis Time in milliseconds.
      * @return Pair where a = hours, b = minutes.
      */
@@ -365,6 +367,7 @@ public class ExpertIteration {
                     loadClass(actionLearnerFile),
                     bicMultiplier,
                     bicTimer);
+            learnFromData.setMaxRecords((int) config.get(RunArg.maxRecords));
             actionHeuristic = (IActionHeuristic) learnFromData.learn();
         }
         return Pair.of(stateHeuristic, actionHeuristic);
