@@ -7,6 +7,7 @@ import core.components.Deck;
 import core.components.GridBoard;
 import core.properties.Property;
 import core.properties.PropertyInt;
+import core.properties.PropertyStringArray;
 import core.properties.PropertyVector2D;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
@@ -31,15 +32,33 @@ public class DescentHelper {
     // A lot of these were originally within DescentForwardModel, and were originally private
     // But once more classes needed the same code, were moved here to clean it up
 
-    public static List<Integer> getMeleeTargets(DescentGameState dgs, Figure f) {
+    public static Boolean checkReach(DescentGameState dgs, Figure f) {
 
-        // TODO: Check for Reach weapons, so far only affects monsters with Reach passive
-        // If the figure has the Reach passive, they can attack up to two spaces away
-        boolean reach = false;
+        // If the figure has the Reach passive or a Reach weapon, they can attack up to two spaces away
+
         if (f instanceof Monster && ((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.REACH))
         {
-            reach = true;
+            return true;
         }
+
+        if (f instanceof Hero)
+        {
+            Deck<DescentCard> hand = ((Hero) f).getHandEquipment();
+            if (hand != null) {
+                for (DescentCard item : hand.getComponents()) {
+                    String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                    if (equipmentType == null) continue;
+                    if (Arrays.asList(equipmentType).contains("Reach")) {
+                        return true;
+                    }
+                }
+            }
+
+        }
+        return false;
+    }
+
+    public static List<Integer> getMeleeTargets(DescentGameState dgs, Figure f, boolean reach) {
 
         List<Integer> targets = new ArrayList<>();
 

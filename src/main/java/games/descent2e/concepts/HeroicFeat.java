@@ -121,15 +121,16 @@ public class HeroicFeat {
 
             case ExtraAttack:
                 DescentTypes.AttackType attackType = getAttackType(f);
+                boolean reach = checkReach(dgs, f);
                 if (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH) {
-                    for (int target : getMeleeTargets(dgs, f)) {
-                        feat = new HeroicFeatExtraAttack(dgs.getActingFigure().getComponentID(), target, true);
+                    for (int target : getMeleeTargets(dgs, f, reach)) {
+                        feat = new HeroicFeatExtraAttack(dgs.getActingFigure().getComponentID(), target, true, reach);
                         if (feat.canExecute(dgs)) myFeats.add(feat);
                     }
                 }
                 if (attackType == DescentTypes.AttackType.RANGED || attackType == DescentTypes.AttackType.BOTH) {
                     for (int target : getRangedTargets(dgs, f)) {
-                        feat = new HeroicFeatExtraAttack(dgs.getActingFigure().getComponentID(), target, false);
+                        feat = new HeroicFeatExtraAttack(dgs.getActingFigure().getComponentID(), target, false, false);
                         if (feat.canExecute(dgs)) myFeats.add(feat);
                     }
                 }

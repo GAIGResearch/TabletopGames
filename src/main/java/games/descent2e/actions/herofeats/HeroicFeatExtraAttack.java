@@ -15,8 +15,8 @@ public class HeroicFeatExtraAttack extends FreeAttack {
 
     // Grisban the Thirsty's Heroic Feat
 
-    public HeroicFeatExtraAttack(int attackingFigure, int defendingFigure, boolean isMelee) {
-        super(attackingFigure, defendingFigure, isMelee);
+    public HeroicFeatExtraAttack(int attackingFigure, int defendingFigure, boolean isMelee, boolean reach) {
+        super(attackingFigure, defendingFigure, isMelee, reach);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     }
 
     public HeroicFeatExtraAttack copy() {
-        HeroicFeatExtraAttack retValue = new HeroicFeatExtraAttack(attackingFigure, defendingFigure, isMelee);
+        HeroicFeatExtraAttack retValue = new HeroicFeatExtraAttack(attackingFigure, defendingFigure, isMelee, hasReach);
         copyComponentTo(retValue);
         return retValue;
     }

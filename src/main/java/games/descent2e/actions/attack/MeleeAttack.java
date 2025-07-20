@@ -68,6 +68,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     protected int interruptPlayer;
     int surgesToSpend;
     int extraRange, pierce, extraDamage, extraDefence, mending, fatigueHeal;
+    protected boolean hasReach;
     boolean isDiseasing;
     boolean isImmobilizing;
     boolean isPoisoning;
@@ -84,10 +85,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     Set<Surge> surgesUsed = new HashSet<>();
 
-    public MeleeAttack(int attackingFigure, int defendingFigure) {
+    public MeleeAttack(int attackingFigure, int defendingFigure, boolean reach) {
         super(ACTION_POINT_SPEND);
         this.attackingFigure = attackingFigure;
         this.defendingFigure = defendingFigure;
+        this.hasReach = reach;
     }
 
     @Override
@@ -407,7 +409,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public MeleeAttack copy() {
-        MeleeAttack retValue = new MeleeAttack(attackingFigure, defendingFigure);
+        MeleeAttack retValue = new MeleeAttack(attackingFigure, defendingFigure, hasReach);
         copyComponentTo(retValue);
         return retValue;
     }
@@ -439,7 +441,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         if (f.getNActionsExecuted().isMaximum()) return false;
-        return inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 1);
+        if (hasReach) return inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 2);
+        else return inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 1);
     }
 
     @Override
@@ -448,7 +451,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             MeleeAttack other = (MeleeAttack) obj;
             return other.attackingFigure == attackingFigure &&
                     other.surgesToSpend == surgesToSpend && other.extraDamage == extraDamage &&
-                    other.extraDefence == extraDefence &&
+                    other.extraDefence == extraDefence && other.hasReach == hasReach &&
                     other.isDiseasing == isDiseasing && other.isImmobilizing == isImmobilizing &&
                     other.isPoisoning == isPoisoning && other.isStunning == isStunning &&
                     other.extraRange == extraRange && other.pierce == pierce && other.mending == mending &&
@@ -464,7 +467,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce,
+        return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce, hasReach,
                 extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, fatigueHeal,
                 surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, reduced, result);
     }
@@ -503,6 +506,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 + ") on " + defenderName + "(" + defendingPlayer + "). "
                 + "Phase: " + phase + ". Interrupt player: " + interruptPlayer
                 + ". Surges to spend: " + surgesToSpend
+                + ". Has reach: " + hasReach
                 + ". Extra range: " + extraRange
                 + ". Pierce: " + pierce
                 + ". Extra damage: " + extraDamage

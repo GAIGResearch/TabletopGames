@@ -4,7 +4,6 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
-import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.attack.Surge;
@@ -100,11 +99,13 @@ public class ArchetypeSkills {
 
     private static List<AbstractAction> rageAttackActions(DescentGameState dgs, Figure f) {
 
-        List<Integer> targets = getMeleeTargets(dgs, f);
+        boolean reach = checkReach(dgs, f);
+
+        List<Integer> targets = getMeleeTargets(dgs, f, reach);
         List<RageAttack> actions = new ArrayList<>();
 
         for (Integer target : targets) {
-            RageAttack rage = new RageAttack(f.getComponentID(), target);
+            RageAttack rage = new RageAttack(f.getComponentID(), target, reach);
             if (rage.canExecute(dgs)) actions.add(rage);
         }
 

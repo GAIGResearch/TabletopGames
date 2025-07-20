@@ -55,7 +55,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
             List<Integer> targets = DescentHelper.getRangedTargets(dgs, hero);
             if (!targets.isEmpty())
                 for (Integer target : targets)
-                    attacks.add(new FreeAttack(hero.getComponentID(), target, false));
+                    attacks.add(new FreeAttack(hero.getComponentID(), target, false, false));
         }
 
         moveActions = moveActions(dgs, hero);

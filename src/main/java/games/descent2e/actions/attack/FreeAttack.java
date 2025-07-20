@@ -12,10 +12,11 @@ import static games.descent2e.DescentHelper.inRange;
 public class FreeAttack extends RangedAttack {
 
     protected boolean isMelee;
-    public FreeAttack(int attackingFigure, int defendingFigure, boolean isMelee) {
+    public FreeAttack(int attackingFigure, int defendingFigure, boolean isMelee, boolean reach) {
         super(attackingFigure, defendingFigure);
         this.isMelee = isMelee;
         this.isFreeAttack = true;
+        this.hasReach = reach;
     }
 
     @Override
@@ -86,7 +87,7 @@ public class FreeAttack extends RangedAttack {
     }
 
     public FreeAttack copy() {
-        FreeAttack retValue = new FreeAttack(attackingFigure, defendingFigure, isMelee);
+        FreeAttack retValue = new FreeAttack(attackingFigure, defendingFigure, isMelee, hasReach);
         copyComponentTo(retValue);
         return retValue;
     }

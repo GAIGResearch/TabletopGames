@@ -18,7 +18,8 @@ public class RangedAttack extends MeleeAttack {
     public static final int MAX_RANGE = 8;
 
     public RangedAttack(int attackingFigure, int defendingFigure) {
-        super(attackingFigure, defendingFigure);
+        // Ranged Attacks can never have Reach, only Melee attacks can
+        super(attackingFigure, defendingFigure, false);
         this.isMelee = false;
     }
 

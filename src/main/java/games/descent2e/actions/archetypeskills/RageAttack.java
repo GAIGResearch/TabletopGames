@@ -9,8 +9,8 @@ import games.descent2e.components.Figure;
 import static games.descent2e.DescentHelper.getAttackType;
 
 public class RageAttack extends MeleeAttack {
-    public RageAttack(int attackingFigure, int defendingFigure) {
-        super(attackingFigure, defendingFigure);
+    public RageAttack(int attackingFigure, int defendingFigure, boolean reach) {
+        super(attackingFigure, defendingFigure, reach);
     }
 
     public boolean execute(DescentGameState state) {
@@ -34,7 +34,7 @@ public class RageAttack extends MeleeAttack {
     }
 
     public RageAttack copy() {
-        RageAttack retValue = new RageAttack(attackingFigure, defendingFigure);
+        RageAttack retValue = new RageAttack(attackingFigure, defendingFigure, hasReach);
         copyComponentTo(retValue);
         return retValue;
     }
