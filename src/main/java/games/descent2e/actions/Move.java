@@ -70,6 +70,10 @@ public class Move extends AbstractAction {
 
         f.setHasMoved(true);
 
+        // If for whatever reason we were Immobilized mid-turn, end our movement now
+        if (f.hasCondition(DescentTypes.DescentCondition.Immobilize))
+            f.getAttribute(Figure.Attribute.MovePoints).setToMin();
+
         f.addActionTaken(toString());
 
         //DescentHelper.gridCounter(dgs, f.getComponentID(), startPosition, positionsTraveled);
@@ -90,6 +94,9 @@ public class Move extends AbstractAction {
         int player = ((PropertyInt) node.getProperty("players")).value;
         if (!f.isOffMap()) {
             if (player != -1 && player != f.getComponentID()) return false;
+
+            // We also cannot move if we are Immobilized and on the map
+            if (f.hasCondition(DescentTypes.DescentCondition.Immobilize)) return false;
             //if (checkCollision(dgs, f, finalPosition)) return false;
         }
         return finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();

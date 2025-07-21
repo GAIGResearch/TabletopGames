@@ -808,6 +808,12 @@ public class DescentHelper {
         return false;
     }
 
+    public static void immobilize(Figure f) {
+        // Any figure that is Immobilized is forced to have its Movement end
+        f.addCondition(DescentTypes.DescentCondition.Immobilize);
+        f.getAttribute(MovePoints).setToMin();
+    }
+
     public static void forcedFatigue(DescentGameState dgs, Figure f, String source) {
         if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
             f.getAttribute(Figure.Attribute.Fatigue).increment();

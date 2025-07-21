@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.StopMove;
 import games.descent2e.actions.Triggers;
@@ -241,6 +242,10 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure hero = (Figure) dgs.getComponentById(heroID);
+        Figure ally = (Figure) dgs.getComponentById(allyID);
+        // Check if either the Hero or the Ally is Immobilized
+        if (hero.hasCondition(DescentTypes.DescentCondition.Immobilize) || ally.hasCondition(DescentTypes.DescentCondition.Immobilize))
+            return false;
         return !(hero instanceof Hero) || ((Hero) hero).isFeatAvailable();
     }
 

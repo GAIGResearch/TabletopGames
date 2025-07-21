@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
+import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.StopMove;
@@ -136,6 +137,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure hero = dgs.getActingFigure();
+        if (hero.hasCondition(DescentTypes.DescentCondition.Immobilize)) return false;
         if (hero instanceof Hero && !((Hero) hero).isFeatAvailable()) return false;
         return !hero.getNActionsExecuted().isMaximum();
     }

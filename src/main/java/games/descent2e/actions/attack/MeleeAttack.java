@@ -18,8 +18,7 @@ import games.descent2e.components.*;
 
 import java.util.*;
 
-import static games.descent2e.DescentHelper.getFigureIndex;
-import static games.descent2e.DescentHelper.inRange;
+import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 import static games.descent2e.actions.attack.MeleeAttack.Interrupters.*;
@@ -395,7 +394,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         }
         // Applies the Immobilized condition
         if (isImmobilizing) {
-            defender.addCondition(DescentTypes.DescentCondition.Immobilize);
+            immobilize(defender);
         }
         // Applies the Poisoned condition
         if (isPoisoning) {
