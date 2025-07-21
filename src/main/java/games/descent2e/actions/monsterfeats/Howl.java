@@ -27,12 +27,36 @@ public class Howl extends TriggerAttributeTest {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Howl";
+        String attackerName = ((Figure) gameState.getComponentById(attackingFigure)).getName().replace("Hero: ", "");;
+        String defenderName = ((Figure) gameState.getComponentById(defendingFigure)).getName().replace("Hero: ", "");
+
+        String string = "Howl by "+ attackerName + " on " + defenderName;
+
+        for (int i = 0; i < heroes.size(); i++) {
+            Figure defender = (Figure) gameState.getComponentById(heroes.get(i));
+            defenderName = defender.getComponentName().replace("Hero: ", "");
+            string += defenderName;
+
+            if (i < heroes.size() - 1) {
+                string += " and ";
+            }
+        }
+
+        return string;
     }
 
     @Override
     public String toString() {
-        return "Howl";
+
+        String string = "Howl by " + attackingFigure + " on ";
+        for (int i = 0; i < heroes.size(); i++) {
+            string += heroes.get(i);
+            if (i < heroes.size() - 1) {
+                string += " and ";
+            }
+        }
+
+        return string;
     }
 
     @Override
