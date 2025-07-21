@@ -16,8 +16,7 @@ import utilities.Vector2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import static games.descent2e.DescentHelper.getAttackingTiles;
-import static games.descent2e.DescentHelper.inRange;
+import static games.descent2e.DescentHelper.*;
 
 public class MonsterAbilities {
 
@@ -50,12 +49,15 @@ public class MonsterAbilities {
             Monster actingFigure = (Monster) dgs.getActingFigure();
             ArrayList<AbstractAction> actions = new ArrayList<>();
             if (actingFigure.getActions().isEmpty()) return actions;
+
+            List<Hero> heroes = dgs.getHeroes();
+
             for (MonsterAbility action : actingFigure.getActions()) {
+
+                List<Integer> targets = new ArrayList<>();
+
                 switch (action) {
                     case HOWL:
-
-                        List<Hero> heroes = dgs.getHeroes();
-                        List<Integer> targets = new ArrayList<>();
 
                         Pair<Integer, Integer> size = actingFigure.getSize();
                         List<BoardNode> attackingTiles = new ArrayList<>();
@@ -86,11 +88,22 @@ public class MonsterAbilities {
                                 actions.add(howl);
                         }
                         break;
-//                case GRAB:
-                    /*DescentAction grab = new Grab();
-                    if (grab.canExecute(dgs))
-                        actions.add(new Grab());
-                    break;*/
+
+                    case GRAB:
+
+                        targets = getMeleeTargets(dgs, f, false);
+
+                        if (!targets.isEmpty())
+                        {
+                            for (Integer target : targets)
+                            {
+                                DescentAction grab = new Grab(actingFigure.getComponentID(), target);
+                                if (grab.canExecute(dgs))
+                                    actions.add(grab);
+                            }
+                        }
+
+                        break;
                     case HEAL:
                         int range = 3;
                         for (List<Monster> monsters : dgs.getMonsters()) {
