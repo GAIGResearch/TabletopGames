@@ -58,6 +58,77 @@ public class DescentHelper {
         return false;
     }
 
+    public static Set<BoardNode> getAdjacentTiles(DescentGameState dgs, Figure f) {
+
+        Set<BoardNode> tiles = new HashSet<>();
+
+        Pair<Integer, Integer> size = f.getSize();
+        List<BoardNode> attackingTiles = new ArrayList<>();
+
+        Vector2D currentLocation = f.getPosition();
+        BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+
+        if (size.a > 1 || size.b > 1)
+        {
+            attackingTiles.addAll(getAttackingTiles(f.getComponentID(), anchorTile, attackingTiles));
+        }
+        else {
+            attackingTiles.add(anchorTile);
+        }
+
+        // Find valid neighbours in master graph - used for melee attacks
+        for (BoardNode currentTile : attackingTiles) {
+
+            Set<BoardNode> neighbours = currentTile.getNeighbours().keySet();
+            for (BoardNode neighbour : neighbours)
+            {
+                if (neighbour == null) continue;
+                tiles.add(neighbour);
+            }
+
+        }
+
+        return tiles;
+    }
+
+    public static List<Integer> getAdjacentTargets(DescentGameState dgs, Figure f, boolean friendlyFire)
+    {
+        List<Integer> targets = new ArrayList<>();
+        Set<BoardNode> tiles = getAdjacentTiles(dgs, f);
+
+        for (BoardNode tile : tiles) {
+            int neighbourID = ((PropertyInt) tile.getProperty(playersHash)).value;
+            // Continue only if the tile is occupied by a different figure
+            if (neighbourID != -1 || neighbourID != f.getComponentID()) {
+                Figure other = (Figure) dgs.getComponentById(neighbourID);
+                // For this we don't need to check for line of sight, as we are only checking adjacent tiles
+                // If Friendly Fire is enabled, we don't care whether a Monster is attacking a Monster
+                if (!friendlyFire) {
+                    if (f instanceof Monster && other instanceof Hero) {
+                        // Monster attacks a hero
+                        if (!targets.contains(other.getComponentID())) {
+                            targets.add(other.getComponentID());
+                        }
+                    } else if (f instanceof Hero && other instanceof Monster) {
+                        // Player attacks a monster
+                        if (!targets.contains(other.getComponentID())) {
+                            targets.add(other.getComponentID());
+                        }
+                    }
+                }
+
+                // Friendly Fire enabled. Have fun killing your own team!
+                else {
+                    if (!targets.contains(other.getComponentID())) {
+                        targets.add(other.getComponentID());
+                    }
+                }
+            }
+        }
+
+        return targets;
+    }
+
     public static List<Integer> getMeleeTargets(DescentGameState dgs, Figure f, boolean reach) {
 
         List<Integer> targets = new ArrayList<>();

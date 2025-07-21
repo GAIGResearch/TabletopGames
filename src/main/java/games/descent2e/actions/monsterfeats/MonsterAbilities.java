@@ -28,7 +28,8 @@ public class MonsterAbilities {
         AIR,
         EARTH,
         FIRE,
-        WATER;
+        WATER,
+        FLAIL;
     }
 
     public enum MonsterPassive {
@@ -105,7 +106,9 @@ public class MonsterAbilities {
                         }
 
                         break;
+
                     case HEAL:
+
                         int range = 3;
                         for (List<Monster> monsters : dgs.getMonsters()) {
                             for (Monster monster : monsters) {
@@ -116,32 +119,55 @@ public class MonsterAbilities {
                                 }
                             }
                         }
+
                         break;
-                /*case THROW:
-                    DescentAction throwAction = new Throw();
-                    if (throwAction.canExecute(dgs))
-                        actions.add(new Throw());
-                    break;*/
+
+                    /*case THROW:
+
+                        DescentAction throwAction = new Throw();
+                        if (throwAction.canExecute(dgs))
+                            actions.add(throwAction);
+
+                        break;*/
+
                     case AIR:
+
                         DescentAction air = new Air(actingFigure.getComponentID());
                         if (air.canExecute(dgs))
                             actions.add(air);
+
                         break;
-                /*case EARTH:
-                    DescentAction earth = new Earth();
-                    if (earth.canExecute(dgs))
-                        actions.add(new Earth());
-                    break;
-                case FIRE:
-                    DescentAction fire = new Fire();
-                    if (fire.canExecute(dgs))
-                        actions.add(new Fire());
-                    break;
-                case WATER:
-                    DescentAction water = new Water();
-                    if (water.canExecute(dgs))
-                        actions.add(new Water());
-                    break;*/
+
+                    case EARTH:
+
+                        targets = getAdjacentTargets(dgs, f, false);
+                        DescentAction earth = new Earth(f.getComponentID(), targets);
+                        if (earth.canExecute(dgs))
+                            actions.add(earth);
+
+                        break;
+
+                    /*case FIRE:
+
+                        targets = getAdjacentTargets(dgs, f, true);
+                        DescentAction fire = new Fire(f.getComponentID(), targets);
+                        if (fire.canExecute(dgs))
+                            actions.add(fire);
+
+                        break;*/
+
+                    case WATER:
+
+                        targets = getAdjacentTargets(dgs, f, false);
+                        DescentAction water = new Water(f.getComponentID(), targets);
+                        if (water.canExecute(dgs))
+                            actions.add(water);
+
+                        break;
+
+                    /*case FLAIL:
+                        break;*/
+
                     default:
                         break;
                 }

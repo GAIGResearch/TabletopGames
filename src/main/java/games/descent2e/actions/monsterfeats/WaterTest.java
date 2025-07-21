@@ -3,17 +3,14 @@ package games.descent2e.actions.monsterfeats;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
-import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
 
-import static games.descent2e.DescentHelper.immobilize;
+public class WaterTest extends AttributeTest {
 
-public class GrabTest extends AttributeTest {
-
-    public GrabTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
+    public WaterTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
         super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Grab (Might) Test: " + sourceFigure + "-" + testCount;
+        attributeTestName = "Water (Willpower) Test: " + sourceFigure + "-" + testCount;
     }
 
     @Override
@@ -23,12 +20,12 @@ public class GrabTest extends AttributeTest {
 
     @Override
     public String toString() {
-        return "Grab (Might) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        return "Water (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
     }
 
     @Override
     public String toStringWithResult() {
-        return this + " - " + getTestingName() + " (" + (result ? "Passed)" : "Failed; Immobilized)");
+        return this + " - " + getTestingName() + " (" + (result ? "Passed)" : "Failed; +1 Fatigue)");
     }
 
     @Override
@@ -40,24 +37,27 @@ public class GrabTest extends AttributeTest {
 
         if (result)
         {
-            //System.out.println("Passed Grab (Might) Test!");
+            //System.out.println("Passed Water (Willpower) Test!");
         }
         else
         {
-            //System.out.println("Failed Grab (Might) Test!");
-            immobilize(f);
+            //System.out.println("Failed Water (Willpower) Test!");
+            String test = "Water of " + ((Figure) dgs.getComponentById(super.getSourceFigure())).getName();
+            // Suffer 2 Fatigue on failure
+            DescentHelper.forcedFatigue(dgs, f, test);
+            DescentHelper.forcedFatigue(dgs, f, test);
         }
     }
 
     @Override
-    public GrabTest _copy() {
-        return new GrabTest(testingFigure, attribute, sourceFigure, testCount);
+    public WaterTest _copy() {
+        return new WaterTest(testingFigure, attribute, sourceFigure, testCount);
     }
 
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof GrabTest ht) {
+        if (obj instanceof WaterTest ht) {
             return super.equals(ht);
         } else {
             return false;

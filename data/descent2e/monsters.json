@@ -124,7 +124,7 @@
         "Health": ["Integer", 3],
         "defence": ["String[]", ["brown"]],
         "attack": ["String[]", ["blue", "yellow"]],
-        "passive": ["String[]", ["Shambling", "Surge: Disease","Surge: +1 Heart"]]
+        "passive": ["String[]", ["Shambling", "Surge: Disease", "Surge: +1 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -133,7 +133,7 @@
         "Health": ["Integer", 6],
         "defence": ["String[]", ["brown"]],
         "attack": ["String[]", ["blue", "yellow"]],
-        "passive": ["String[]", ["Shambling", "Surge: Disease","Surge: +1 Heart"]],
+        "passive": ["String[]", ["Shambling", "Surge: Disease", "Surge: +1 Heart"]],
         "action": ["String[]", ["Grab"]]
       }
     ],
@@ -145,7 +145,7 @@
         "Health": ["Integer", 5],
         "defence": ["String[]", ["brown"]],
         "attack": ["String[]", ["blue", "yellow"]],
-        "passive": ["String[]", ["Shambling", "Surge: Disease","Surge: +2 Heart"]]
+        "passive": ["String[]", ["Shambling", "Surge: Disease", "Surge: +2 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -154,7 +154,7 @@
         "Health": ["Integer", 9],
         "defence": ["String[]", ["brown"]],
         "attack": ["String[]", ["blue", "yellow", "red"]],
-        "passive": ["String[]", ["Shambling", "Surge: Disease","Surge: +2 Heart"]],
+        "passive": ["String[]", ["Shambling", "Surge: Disease", "Surge: +2 Heart"]],
         "action": ["String[]", ["Grab"]]
       }
     ]
@@ -177,7 +177,7 @@
         "Health": ["Integer", 3],
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow"]],
-        "passive": ["String[]", ["Surge: Poison","Surge: +1 Heart"]]
+        "passive": ["String[]", ["Surge: Poison", "Surge: +1 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -186,7 +186,7 @@
         "Health": ["Integer", 5],
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow"]],
-        "passive": ["String[]", ["Web","Surge: Poison","Surge: +1 Heart"]]
+        "passive": ["String[]", ["Web", "Surge: Poison", "Surge: +1 Heart"]]
       }
     ],
     "act2": [
@@ -197,7 +197,7 @@
         "Health": ["Integer", 5],
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow", "yellow"]],
-        "passive": ["String[]", ["Surge: Poison","Surge: +2 Heart"]]
+        "passive": ["String[]", ["Surge: Poison", "Surge: +2 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -206,7 +206,7 @@
         "Health": ["Integer", 7],
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow", "yellow"]],
-        "passive": ["String[]", ["Web","Surge: Poison","Surge: +2 Heart","Surge: +1 Heart"]]
+        "passive": ["String[]", ["Web", "Surge: Poison", "Surge: +2 Heart", "Surge: +1 Heart"]]
       }
     ]
   },
@@ -228,7 +228,7 @@
         "Health": ["Integer", 4],
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow"]],
-        "passive": ["String[]", ["Surge: Mend 1","Surge: +1 Heart"]]
+        "passive": ["String[]", ["Surge: Mend 1", "Surge: +1 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -237,7 +237,7 @@
         "Health": ["Integer", 5],
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow"]],
-        "passive": ["String[]", ["Surge: Mend 2","Surge: +2 Heart"]],
+        "passive": ["String[]", ["Surge: Mend 2", "Surge: +2 Heart"]],
         "action": ["String[]", ["Heal"]]
       }
     ],
@@ -249,7 +249,7 @@
         "Health": ["Integer", 5],
         "defence": ["String[]", ["grey", "brown"]],
         "attack": ["String[]", ["blue", "yellow"]],
-        "passive": ["String[]", ["Surge: Mend 2","Surge: +2 Heart"]]
+        "passive": ["String[]", ["Surge: Mend 2", "Surge: +2 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -258,7 +258,7 @@
         "Health": ["Integer", 7],
         "defence": ["String[]", ["grey", "brown"]],
         "attack": ["String[]", ["blue", "yellow", "yellow"]],
-        "passive": ["String[]", ["Surge: Mend 3","Surge: +3 Heart"]],
+        "passive": ["String[]", ["Surge: Mend 3", "Surge: +3 Heart"]],
         "action": ["String[]", ["Heal"]]
       }
     ]
@@ -281,7 +281,7 @@
         "Health": ["Integer", 5],
         "defence": ["String[]", ["grey", "grey"]],
         "attack": ["String[]", ["blue", "red"]],
-        "passive": ["String[]", ["Reach","Surge: +2 Heart"]]
+        "passive": ["String[]", ["Reach", "Surge: +2 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -290,7 +290,7 @@
         "Health": ["Integer", 8],
         "defence": ["String[]", ["grey", "grey"]],
         "attack": ["String[]", ["blue", "red"]],
-        "passive": ["String[]", ["Reach","Surge: +3 Heart"]],
+        "passive": ["String[]", ["Reach", "Surge: +3 Heart"]],
         "action": ["String[]", ["Throw"]]
       }
     ],
@@ -302,7 +302,7 @@
         "Health": ["Integer", 7],
         "defence": ["String[]", ["black", "grey"]],
         "attack": ["String[]", ["blue", "red", "red"]],
-        "passive": ["String[]", ["Reach","Surge: +1 Heart"]]
+        "passive": ["String[]", ["Reach", "Surge: +1 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -311,7 +311,7 @@
         "Health": ["Integer", 9],
         "defence": ["String[]", ["black", "grey"]],
         "attack": ["String[]", ["blue", "red", "red"]],
-        "passive": ["String[]", ["Reach","Surge: +2 Heart"]],
+        "passive": ["String[]", ["Reach", "Surge: +2 Heart"]],
         "action": ["String[]", ["Throw"]]
       }
     ]
@@ -385,7 +385,7 @@
         "Health": ["Integer", 5],
         "defence": ["String[]", ["black"]],
         "attack": ["String[]", ["blue", "red"]],
-        "passive": ["String[]", ["Reach","Surge: Immobilize","Surge: +1 Heart"]]
+        "passive": ["String[]", ["Reach", "Surge: Immobilize", "Surge: +1 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -394,7 +394,7 @@
         "Health": ["Integer", 7],
         "defence": ["String[]", ["black"]],
         "attack": ["String[]", ["blue", "red"]],
-        "passive": ["String[]", ["Reach", "Flail","Surge: Immobilize","Surge: +2 Heart"]]
+        "passive": ["String[]", ["Reach", "Flail", "Surge: Immobilize", "Surge: +2 Heart"]]
       }
     ],
     "act2": [
@@ -405,7 +405,7 @@
         "Health": ["Integer", 7],
         "defence": ["String[]", ["grey", "grey"]],
         "attack": ["String[]", ["blue", "red", "yellow"]],
-        "passive": ["String[]", ["Reach","Surge: Immobilize","Surge: +2 Heart"]]
+        "passive": ["String[]", ["Reach", "Surge: Immobilize", "Surge: +2 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -414,7 +414,7 @@
         "Health": ["Integer", 9],
         "defence": ["String[]", ["grey", "grey"]],
         "attack": ["String[]", ["blue", "red", "yellow"]],
-        "passive": ["String[]", ["Reach", "Flail","Surge: Immobilize","Surge: +3 Heart"]]
+        "passive": ["String[]", ["Reach", "Flail", "Surge: Immobilize", "Surge: +3 Heart"]]
       }
     ]
   },
@@ -436,7 +436,7 @@
         "Health": ["Integer", 6],
         "defence": ["String[]", ["grey", "grey"]],
         "attack": ["String[]", ["blue", "red"]],
-        "passive": ["String[]", ["Shadow","Surge: +1 Heart"]]
+        "passive": ["String[]", ["Shadow", "Surge: +1 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -445,7 +445,7 @@
         "Health": ["Integer", 9],
         "defence": ["String[]", ["grey", "grey"]],
         "attack": ["String[]", ["blue", "red"]],
-        "passive": ["String[]", ["Shadow","Surge: Fire Breath","Surge: +2 Heart"]]
+        "passive": ["String[]", ["Shadow", "Surge: Fire Breath", "Surge: +2 Heart"]]
       }
     ],
     "act2": [
@@ -456,7 +456,7 @@
         "Health": ["Integer", 8],
         "defence": ["String[]", ["black", "grey"]],
         "attack": ["String[]", ["blue", "red", "red"]],
-        "passive": ["String[]", ["Shadow","Surge: +2 Heart"]]
+        "passive": ["String[]", ["Shadow", "Surge: +2 Heart"]]
       },
       {
         "instance": ["String", "Master"],
@@ -465,7 +465,7 @@
         "Health": ["Integer", 10],
         "defence": ["String[]", ["black", "grey"]],
         "attack": ["String[]", ["blue", "red", "red"]],
-        "passive": ["String[]", ["Shadow","Surge: Fire Breath","Surge: +3 Heart"]]
+        "passive": ["String[]", ["Shadow", "Surge: Fire Breath", "Surge: +3 Heart"]]
       }
     ]
   }

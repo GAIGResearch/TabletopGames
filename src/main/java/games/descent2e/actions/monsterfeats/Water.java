@@ -2,11 +2,8 @@ package games.descent2e.actions.monsterfeats;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import games.descent2e.DescentGameState;
-import games.descent2e.actions.attack.EndCurrentPhase;
 import games.descent2e.actions.attack.TriggerAttributeTest;
-import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 
@@ -14,13 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTests.*;
+import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTests.POST_TEST;
+import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTests.PRE_TEST;
 
-public class Howl extends TriggerAttributeTest {
+public class Water extends TriggerAttributeTest {
 
     List<Integer> heroes;
     int heroIndex = 0;
-    public Howl(int attackingFigure, List<Integer> targets) {
+    public Water(int attackingFigure, List<Integer> targets) {
         super(attackingFigure, targets.get(0));
         this.heroes = targets;
     }
@@ -28,7 +26,7 @@ public class Howl extends TriggerAttributeTest {
     @Override
     public String getString(AbstractGameState gameState) {
         String attackerName = ((Figure) gameState.getComponentById(attackingFigure)).getName().replace("Hero: ", "");;
-        String string = "Howl by "+ attackerName + " on ";
+        String string = "Water by "+ attackerName + " on ";
 
         for (int i = 0; i < heroes.size(); i++) {
             Figure defender = (Figure) gameState.getComponentById(heroes.get(i));
@@ -46,7 +44,7 @@ public class Howl extends TriggerAttributeTest {
     @Override
     public String toString() {
 
-        String string = "Howl by " + attackingFigure + " on ";
+        String string = "Water by " + attackingFigure + " on ";
         for (int i = 0; i < heroes.size(); i++) {
             string += heroes.get(i);
             if (i < heroes.size() - 1) {
@@ -97,10 +95,10 @@ public class Howl extends TriggerAttributeTest {
 
         // System.out.println(((Figure) dgs.getComponentById(defendingFigure)).getName());
 
-        HowlTest howlTest = new HowlTest(defendingFigure, Figure.Attribute.Willpower, attackingFigure, monster.getNActionsExecuted().getValue());
+        WaterTest waterTest = new WaterTest(defendingFigure, Figure.Attribute.Willpower, attackingFigure, monster.getNActionsExecuted().getValue());
 
-        if (howlTest.canExecute(dgs)) {
-            retVal.add(howlTest);
+        if (waterTest.canExecute(dgs)) {
+            retVal.add(waterTest);
         }
 
         if (retVal.isEmpty())
@@ -116,13 +114,13 @@ public class Howl extends TriggerAttributeTest {
     }
 
     @Override
-    public Howl copy() {
-        Howl retVal = new Howl(attackingFigure, heroes);
+    public Water copy() {
+        Water retVal = new Water(attackingFigure, heroes);
         copyComponentTo(retVal);
         return retVal;
     }
 
-    public void copyComponentTo(Howl retVal)
+    public void copyComponentTo(Water retVal)
     {
         retVal.heroIndex = heroIndex;
         super.copyComponentTo(retVal);
@@ -132,7 +130,7 @@ public class Howl extends TriggerAttributeTest {
     public boolean canExecute(DescentGameState dgs) {
         if (heroes.isEmpty()) return false;
         Figure f = (Figure) dgs.getComponentById(attackingFigure);
-        return f instanceof Monster && (((Monster) f).hasAction(MonsterAbilities.MonsterAbility.HOWL));
+        return f instanceof Monster && (((Monster) f).hasAction(MonsterAbilities.MonsterAbility.WATER));
     }
 
     @Override
@@ -140,8 +138,8 @@ public class Howl extends TriggerAttributeTest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        Howl howl = (Howl) o;
-        return heroIndex == howl.heroIndex && Objects.equals(heroes, howl.heroes);
+        Water water = (Water) o;
+        return heroIndex == water.heroIndex && Objects.equals(heroes, water.heroes);
     }
 
     @Override

@@ -3,17 +3,16 @@ package games.descent2e.actions.monsterfeats;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
-import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
 
 import static games.descent2e.DescentHelper.immobilize;
 
-public class GrabTest extends AttributeTest {
+public class EarthTest extends AttributeTest {
 
-    public GrabTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
+    public EarthTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
         super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Grab (Might) Test: " + sourceFigure + "-" + testCount;
+        attributeTestName = "Earth (Awareness) Test: " + sourceFigure + "-" + testCount;
     }
 
     @Override
@@ -23,7 +22,7 @@ public class GrabTest extends AttributeTest {
 
     @Override
     public String toString() {
-        return "Grab (Might) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        return "Earth (Awareness) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
     }
 
     @Override
@@ -40,24 +39,24 @@ public class GrabTest extends AttributeTest {
 
         if (result)
         {
-            //System.out.println("Passed Grab (Might) Test!");
+            //System.out.println("Passed Earth (Awareness) Test!");
         }
         else
         {
-            //System.out.println("Failed Grab (Might) Test!");
+            //System.out.println("Failed Earth (Awareness) Test!");
             immobilize(f);
         }
     }
 
     @Override
-    public GrabTest _copy() {
-        return new GrabTest(testingFigure, attribute, sourceFigure, testCount);
+    public EarthTest _copy() {
+        return new EarthTest(testingFigure, attribute, sourceFigure, testCount);
     }
 
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof GrabTest ht) {
+        if (obj instanceof EarthTest ht) {
             return super.equals(ht);
         } else {
             return false;
