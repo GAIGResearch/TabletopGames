@@ -22,10 +22,11 @@ public class AttackAllAdjacent extends MultiAttack {
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        // TODO: current acting figure is doing this, find it
-        // TODO: find all adjacent enemies next to the figure and attack them as in super class
         dgs.setActionInProgress(this);
-        if (dgs.getActingFigure() instanceof Hero) {((Hero) dgs.getActingFigure()).setFeatAvailable(false); }
+        Figure hero = (Figure) dgs.getComponentById(attackingFigure);
+        if (hero instanceof Hero) {
+            ((Hero) hero).setFeatAvailable(false);
+        }
         super.execute(dgs);
         return true;
     }

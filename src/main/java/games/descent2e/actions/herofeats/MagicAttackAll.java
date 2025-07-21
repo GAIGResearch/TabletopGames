@@ -49,8 +49,10 @@ public class MagicAttackAll extends DescentAction {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
+        if (f.getNActionsExecuted().isMaximum()) return false;
         // We can only use this if we attack with a Magic weapon
         if (f instanceof Hero) {
+            if (!(((Hero) f).isFeatAvailable())) return false;
             Deck<DescentCard> hand = ((Hero) f).getHandEquipment();
             if (hand == null) return false;
             boolean hasMagicItem = false;
