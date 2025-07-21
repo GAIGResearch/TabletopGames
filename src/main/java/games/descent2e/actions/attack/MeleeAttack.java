@@ -108,14 +108,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
-        // This is only applicable for non-adjacent attacks, i.e. MeleeAttack without Reach
+        // Check for Night Stalker passive
+        // This is only applicable for non-adjacent attacks, i.e. Ranged Attacks or Melee with Reach
         if (!isMelee || hasReach)
         {
-            if (defender instanceof Monster) {
-                if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)) {
-                    NightStalker.addNightStalker(state, attacker.getPosition(), defender.getPosition());
-                }
-            }
+            NightStalker.addNightStalker(state, attacker, defender);
         }
 
         // Check if the target has the Shadow passive and if we are adjacent to it
@@ -470,8 +467,19 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         if (f.getNActionsExecuted().isMaximum()) return false;
-        if (hasReach) return inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 2);
-        else return inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 1);
+        Figure target = (Figure) dgs.getComponentById(defendingFigure);
+
+        if (target instanceof Monster)
+        {
+            if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
+                !DescentHelper.checkAdjacent(dgs, f, target)) {
+                // If the target has the Air passive and we are not adjacent, we cannot attack them
+                return false;
+            }
+        }
+
+        if (hasReach) return inRange(f.getPosition(), target.getPosition(), 2);
+        else return inRange(f.getPosition(), target.getPosition(), 1);
     }
 
     @Override

@@ -2,7 +2,10 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 import utilities.Distance;
 
 import static games.descent2e.DescentHelper.hasLineOfSight;
@@ -104,7 +107,18 @@ public class RangedAttack extends MeleeAttack {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         if (f.getNActionsExecuted().isMaximum()) return false;
+
         Figure target = (Figure) dgs.getComponentById(defendingFigure);
+
+        if (target instanceof Monster)
+        {
+            if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
+                    !DescentHelper.checkAdjacent(dgs, f, target)) {
+                // If the target has the Air passive and we are not adjacent, we cannot attack them
+                return false;
+            }
+        }
+
         return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), MAX_RANGE);
     }
 

@@ -808,15 +808,8 @@ public class DescentHelper {
         return false;
     }
 
-    public static boolean checkShadow(DescentGameState dgs, Figure f, Figure target)
+    public static boolean checkAdjacent(DescentGameState dgs, Figure f, Figure target)
     {
-        // First, this only applies to Heroes
-        if (!(f instanceof Hero)) return false;
-
-        // Then, check if the target Monster has the Shadow passive
-        if (!(target instanceof Monster) || !((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.SHADOW)) return false;
-
-        // Last, check if we are adjacent to the target
         Vector2D position = f.getPosition();
         BoardNode currentTile = dgs.masterBoard.getElement(position.getX(), position.getY());
         Set<BoardNode> neighbours = currentTile.getNeighbours().keySet();
@@ -830,6 +823,18 @@ public class DescentHelper {
         }
 
         return false;
+    }
+
+    public static boolean checkShadow(DescentGameState dgs, Figure f, Figure target)
+    {
+        // First, this only applies to Heroes
+        if (!(f instanceof Hero)) return false;
+
+        // Then, check if the target Monster has the Shadow passive
+        if (!(target instanceof Monster) || !((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.SHADOW)) return false;
+
+        // Last, check if we are adjacent to the target
+        return checkAdjacent(dgs, f, target);
     }
 
     public static void immobilize(Figure f) {

@@ -34,6 +34,7 @@ import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
 import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.archetypeskills.ArchetypeSkills.getArchetypeSkillActions;
+import static games.descent2e.actions.monsterfeats.Air.removeAirImmunity;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
 import static games.descent2e.components.Figure.Attribute.Health;
@@ -317,6 +318,7 @@ public class DescentForwardModel extends StandardForwardModel {
         // Cleanses actionsInProgress to remove any that were considered completed but not previously removed
         //    dgs.isActionInProgress();
         Figure actingFigure = dgs.getActingFigure();
+        Figure nextActingFigure;
 
         if (checkEndOfGame(dgs))
             return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
@@ -338,10 +340,10 @@ public class DescentForwardModel extends StandardForwardModel {
                         throw new AssertionError("No monsters to activate - game should be over");
                     }
                 } else {
-                    // next hero
-                    actingFigure = dgs.heroes.get(dgs.heroActingNext);
-                    if (dgs.getTurnOwner() != actingFigure.getOwnerId()) {
-                        endPlayerTurn(dgs, actingFigure.getOwnerId()); // change player if the next hero is controlled by a different player
+                    // Next Hero
+                    nextActingFigure = dgs.heroes.get(dgs.heroActingNext);
+                    if (dgs.getTurnOwner() != nextActingFigure.getOwnerId()) {
+                        endPlayerTurn(dgs, nextActingFigure.getOwnerId()); // change player if the next hero is controlled by a different player
                     }
                 }
 
@@ -374,6 +376,28 @@ public class DescentForwardModel extends StandardForwardModel {
                 } else {
                     dgs.monsterActingNext = nextMonster;  // continue turn with the next monster
                 }
+            }
+        }
+
+        // Start of New Figure's Turn
+
+        nextActingFigure = dgs.getActingFigure();
+
+        // Check if we have a new acting figure
+        // If so, apply Start of Turn effects and checks
+        if (!Objects.equals(actingFigure, nextActingFigure)) {
+
+            // Hero
+            // if (newActingFigure instanceof Hero) { }
+
+            /*
+            // TODO: Hero turn start of turn abilities
+            */
+
+            // Monster
+            if (nextActingFigure instanceof Monster) {
+                // Remove conditions that should be removed on activation
+                removeAirImmunity(dgs, (Monster) nextActingFigure);
             }
         }
 
@@ -421,8 +445,6 @@ public class DescentForwardModel extends StandardForwardModel {
         // Campaign phase -> quest phase
 
         // choosing interlude: the heroes pick if they won >= 2 act 1 quests, overlord picks if they won >=2 quests
-
-        // TODO: in 2-hero games, free regular attack action each turn or recover 2 damage.
     }
 
 

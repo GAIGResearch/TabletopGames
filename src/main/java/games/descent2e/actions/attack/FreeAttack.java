@@ -2,7 +2,10 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 
 import java.util.Objects;
 
@@ -36,11 +39,25 @@ public class FreeAttack extends RangedAttack {
 
         Figure target = (Figure) dgs.getComponentById(defendingFigure);
 
+        if (target instanceof Monster)
+        {
+            if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
+                    !DescentHelper.checkAdjacent(dgs, f, target)) {
+                // If the target has the Air passive and we are not adjacent, we cannot attack them
+                return false;
+            }
+        }
+
         int range = MAX_RANGE;
 
         if (isMelee)
         {
             range = 1;
+        }
+
+        if (hasReach)
+        {
+            range = 2;
         }
 
         return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), range);

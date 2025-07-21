@@ -38,7 +38,8 @@ public class MonsterAbilities {
         SHAMBLING,
         WEB,
         REACH,
-        SHADOW;
+        SHADOW,
+        AIR;
     }
 
     public static ArrayList<AbstractAction> getMonsterActions(DescentGameState dgs)
@@ -120,13 +121,13 @@ public class MonsterAbilities {
                     DescentAction throwAction = new Throw();
                     if (throwAction.canExecute(dgs))
                         actions.add(new Throw());
-                    break;
-                case AIR:
-                    DescentAction air = new Air();
-                    if (air.canExecute(dgs))
-                        actions.add(new Air());
-                    break;
-                case EARTH:
+                    break;*/
+                    case AIR:
+                        DescentAction air = new Air(actingFigure.getComponentID());
+                        if (air.canExecute(dgs))
+                            actions.add(air);
+                        break;
+                /*case EARTH:
                     DescentAction earth = new Earth();
                     if (earth.canExecute(dgs))
                         actions.add(new Earth());

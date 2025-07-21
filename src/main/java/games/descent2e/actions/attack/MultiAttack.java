@@ -2,6 +2,7 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DicePool;
@@ -83,12 +84,9 @@ public class MultiAttack extends RangedAttack {
         DicePool defencePool = defender.getDefenceDice();
         state.setDefenceDicePool(defencePool);
 
+        // Check again for Night Stalker passive
         if (!isMelee || hasReach) {
-            if (defender instanceof Monster) {
-                if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)) {
-                    NightStalker.addNightStalker(state, ((Figure) state.getComponentById(attackingFigure)).getPosition(), defender.getPosition());
-                }
-            }
+            NightStalker.addNightStalker(state, ((Figure) state.getComponentById(attackingFigure)), defender);
         }
 
         //System.out.println("Next target (" + (index+1) + "/" + defendingFigures.size() + "): " + defender.getComponentName());
@@ -163,8 +161,19 @@ public class MultiAttack extends RangedAttack {
         {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
             if (target == null) return false;
+
+            if (target instanceof Monster)
+            {
+                if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
+                        !DescentHelper.checkAdjacent(dgs, f, target)) {
+                    // If the target has the Air passive and we are not adjacent, we cannot attack them
+                    return false;
+                }
+            }
+
             if(!inRange(f.getPosition(), target.getPosition(), MAX_RANGE)) return false;
             if(!hasLineOfSight(dgs, f.getPosition(), target.getPosition())) return false;
+
         }
         return true;
     }

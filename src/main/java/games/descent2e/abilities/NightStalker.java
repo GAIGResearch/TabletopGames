@@ -1,6 +1,7 @@
 package games.descent2e.abilities;
 
 import games.descent2e.DescentGameState;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
 import utilities.Vector2D;
 
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static games.descent2e.DescentHelper.checkAdjacent;
 import static games.descent2e.components.DiceType.BROWN;
 
 // This monster gains an extra Brown defence die when its attacker is not adjacent to it
@@ -23,9 +25,15 @@ public class NightStalker {
         return nightStalkerDicePool;
     }
 
-    public static void addNightStalker(DescentGameState state, Vector2D position, Vector2D other) {
+    public static void addNightStalker(DescentGameState state, Figure attacker, Figure defender) {
+
+        // Night Stalker is only applicable to attacks on Monsters with the Passive
+        if (!(defender instanceof Monster) || !(((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))) {
+            return; // Only applicable to Monsters
+        }
+
         // Apply Night Stalker ability if the attacker is not adjacent to the defender
-        if (Math.abs(position.getX() - other.getX()) > 1 || Math.abs(position.getY() - other.getY()) > 1) {
+        if (!checkAdjacent(state, attacker, defender)) {
             List<DescentDice> dice = new ArrayList<>(state.getDefenceDicePool().getComponents());
             dice.addAll(getNightStalkerDicePool().getComponents());
             DicePool newPool = state.getDefenceDicePool().copy();
