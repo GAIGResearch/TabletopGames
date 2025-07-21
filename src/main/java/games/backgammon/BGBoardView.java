@@ -210,12 +210,9 @@ public class BGBoardView extends JComponent {
 
         // Then, if firstClick is -1, we look through validActions to find the from position of all valid moves
         // and highlight the triangles that are valid moves
-        // i and from/to in MovePiece use 0..23 for the points
-        // firstClick and secondClick use 1..24 for the points
-        int clickPlayerPerspective = currentPlayer == 0 ? i : (23 - i);
         if (firstClick == -1) {
             for (MovePiece action : validActions) {
-                if (action.from == clickPlayerPerspective) {
+                if (action.from == i + 1) {
                     g2d.setColor(Color.YELLOW);
                     g2d.setStroke(new BasicStroke(2));
                     g2d.drawPolygon(xPoints, yPoints, 3);
@@ -226,18 +223,21 @@ public class BGBoardView extends JComponent {
             // Highlight the second click position
             // but only considering validActions for which from = firstClick
             for (MovePiece action : validActions) {
-                int fromPoint = currentPlayer == 0 ? firstClick - 1 : 24 - firstClick;
+                int fromPoint =  firstClick;
                 if (firstClick == 25 && currentPlayer == 0 || firstClick == 0 && currentPlayer == 1) {
-                    fromPoint = -1; // Bar
+                    fromPoint = 0; // Bar
                 }
-                if (action.from == fromPoint && action.to == clickPlayerPerspective) {
+                if (firstClick == 0 && currentPlayer == 0 || firstClick == 25 && currentPlayer == 1) {
+                    fromPoint = -1; // Bearing off
+                }
+                if (action.from == fromPoint && action.to == i + 1) {
                     g2d.setColor(Color.RED);
                     g2d.setStroke(new BasicStroke(2));
                     g2d.drawPolygon(xPoints, yPoints, 3);
                     break;
                 }
             }
-            if (i == firstClick - 1) {
+            if (i + 1 == firstClick) {
                 // also keep yellow if we have clicked on a triangle
                 g2d.setColor(Color.YELLOW);
                 g2d.setStroke(new BasicStroke(2));
