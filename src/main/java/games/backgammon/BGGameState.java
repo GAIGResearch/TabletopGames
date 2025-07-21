@@ -184,11 +184,12 @@ public class BGGameState extends AbstractGameState {
         copy.diceUsed = Arrays.copyOf(diceUsed, diceUsed.length);
 
         copy.counters = new ArrayList<>();
-        for (int i = 0; i < getNPlayers(); i++) {
+        for (int i = 0; i < counters.size(); i++) {
             // individual counters are immutable, so we can avoid the overhead of copying them
             List<Token> playerCounters = new ArrayList<>(counters.get(i));
             copy.counters.add(playerCounters);
         }
+        copy.playerTrackMapping = playerTrackMapping; // this is immutable, so we can just copy the reference
         return copy;
     }
 

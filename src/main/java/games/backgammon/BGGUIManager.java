@@ -2,8 +2,6 @@ package games.backgammon;
 
 import core.*;
 import core.actions.AbstractAction;
-import games.dotsboxes.AddGridCellEdge;
-import games.dotsboxes.DBEdge;
 import gui.*;
 import players.human.ActionController;
 
@@ -14,14 +12,14 @@ import java.util.Set;
 
 public class BGGUIManager extends AbstractGUIManager {
 
-    BackgammonBoardView view;
+    BGBoardView view;
     static int backgammonWidth = 800;
     static int backgammonHeight = 600;
 
     public BGGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
         BGGameState state = (BGGameState) game.getGameState();
-        view = new BackgammonBoardView((BGForwardModel) game.getForwardModel());
+        view = new BGBoardView((BGForwardModel) game.getForwardModel());
 
         width = backgammonWidth;
         height = backgammonHeight;
@@ -55,18 +53,18 @@ public class BGGUIManager extends AbstractGUIManager {
 
         if (view.firstClick != -1 && view.secondClick != -1) {
             int playerId = bgState.getCurrentPlayer();
-            int from = playerId == 0 ? view.firstClick : 25 - view.firstClick;
-            int to = playerId == 0 ? view.secondClick : 25 - view.secondClick;
+            int from = view.firstClick;
+            int to = view.secondClick;
 
             // Handle special cases for the bar (0) and bearing off (25)
-            if (view.firstClick == 25) from = 0; // Bar
-            if (view.secondClick == 0) to = 0; // Bearing off
+            if (view.firstClick == 25) from = playerId == 0 ? 0 : -1; // Bar
+            if (view.secondClick == 0) to = playerId == 0 ? -1 : 0; // Bearing off
 
             // Check if a valid MovePiece action exists
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(bgState);
             for (AbstractAction action : actions) {
                 if (action instanceof MovePiece move) {
-                    if (move.from == from - 1 && move.to == to - 1) {
+                    if (move.from == from && move.to == to) {
                         ac.addAction(move);
                         break;
                     }

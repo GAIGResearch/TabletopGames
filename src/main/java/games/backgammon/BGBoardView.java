@@ -1,24 +1,15 @@
 package games.backgammon;
 
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.CoreConstants;
-import core.actions.AbstractAction;
-import games.descent2e.actions.Move;
-import games.dotsboxes.AddGridCellEdge;
-import games.dotsboxes.DBEdge;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class BackgammonBoardView extends JComponent {
+public class BGBoardView extends JComponent {
 
     private final int boardWidth = 800;
     private final int boardHeight = 400;
@@ -28,7 +19,7 @@ public class BackgammonBoardView extends JComponent {
     int discRadius = 20;
     int discMargin = 5;
 
-    private int[][] piecesPerPoint = new int[2][24]; // [player][point]
+    private int[][] piecesPerPoint = new int[2][25]; // [player][point]
     private int[] piecesOnBar = new int[2];      // [player]
     private int[] piecesBorneOff = new int[2];   // [player]
     private int[] diceValues = new int[2];
@@ -40,7 +31,7 @@ public class BackgammonBoardView extends JComponent {
     int firstClick = -1;
     int secondClick = -1;
 
-    public BackgammonBoardView(BGForwardModel model) {
+    public BGBoardView(BGForwardModel model) {
         this.setPreferredSize(new Dimension(boardWidth, boardHeight));
         forwardModel = model;
 
@@ -97,8 +88,8 @@ public class BackgammonBoardView extends JComponent {
 
         // Update pieces on points
         for (int player = 0; player < nPlayers; player++) {
-            for (int i = 0; i < boardLength; i++) {
-                piecesPerPoint[player][i] = state.getPiecesOnPoint(player, i+1);
+            for (int i = 1; i <= boardLength; i++) {
+                piecesPerPoint[player][i] = state.getPiecesOnPoint(player, i);
                 piecesOnBar[player] = state.getPiecesOnBar(player);
                 piecesBorneOff[player] = state.getPiecesBorneOff(player);
             }
@@ -126,14 +117,14 @@ public class BackgammonBoardView extends JComponent {
 
         // Draw the discs on the triangles
         // point is measured from the perspective of player 0
-        for (int point = 0; point < piecesPerPoint[0].length; point++) {
+        for (int point = 1; point < piecesPerPoint[0].length; point++) {
             // which player (if any) has discs on this point
             int player = piecesPerPoint[0][point] > 0 ? 0 : (piecesPerPoint[1][point] > 0 ? 1 : -1);
             if (player == -1) continue; // No discs on this point
 
             int numDiscs = piecesPerPoint[player][point];
-            boolean topRowOfTriangles = point < 12;
-            int position = topRowOfTriangles ? (11 - point) : (point - 12);
+            boolean topRowOfTriangles = point < 13;
+            int position = topRowOfTriangles ? (12 - point) : (point - 13);
             // Calculate the x position based on the triangle base and margin
             int x = margin + position * triangleBase + triangleBase / 2 - discRadius / 2;
             // Calculate the y position based on the triangle height and margin
