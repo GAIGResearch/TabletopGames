@@ -10,7 +10,6 @@ import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
-import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
@@ -72,6 +71,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     boolean isImmobilizing;
     boolean isPoisoning;
     boolean isStunning;
+    boolean hasShadow = false;
+    boolean hitShadow = false;
 
     int damage;
     int range;
@@ -107,12 +108,31 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
-        // This is only applicable for Ranged, Multi and Free Attacks, which are child classes of MeleeAttack
-        if (!isMelee)
+        // This is only applicable for non-adjacent attacks, i.e. MeleeAttack without Reach
+        if (!isMelee || hasReach)
         {
             if (defender instanceof Monster) {
                 if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)) {
                     NightStalker.addNightStalker(state, attacker.getPosition(), defender.getPosition());
+                }
+            }
+        }
+
+        // Check if the target has the Shadow passive and if we are adjacent to it
+        // If we are, the Hero must spend a Surge on Shadow to hit it
+        // Only need to check once for all Monsters
+        if (!hasShadow) {
+            if (checkShadow(state, attacker, defender)) {
+                hasShadow = true;
+                SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
+                if (!attacker.getAbilities().contains(shadowSurge)) {
+                    attacker.addAbility(new SurgeAttackAction(Surge.SHADOW, attackingFigure));
+                }
+            } else {
+                // Only enable the Shadow Surge if the target has the Shadow passive
+                SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
+                if (attacker.getAbilities().contains(shadowSurge)) {
+                    attacker.removeAbility(shadowSurge);
                 }
             }
         }
@@ -345,6 +365,16 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         defenderName = defender.getComponentName().replace("Hero: ", "");
+
+        // If the target has the Shadow passive and we did not spend a Shadow surge, automatically miss
+        if (hasShadow && !hitShadow) {
+            if (defender instanceof Monster && ((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.SHADOW) && !surgesUsed.contains(Surge.SHADOW))
+            {
+                System.out.println("Missed due to Shadow passive, and no surge spent to counter.");
+                result += "Missed; Damage: " + damage + "; Range: " + range;
+                return;
+            }
+        }
 
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         if (startingHealth - damage <= 0) {
@@ -609,6 +639,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void setStunning(boolean stun) {
         isStunning = stun;
+    }
+    public void setShadow(boolean shadow) {
+        hitShadow = shadow;
     }
     public void addDamage(int damageBonus) {
         extraDamage += damageBonus;

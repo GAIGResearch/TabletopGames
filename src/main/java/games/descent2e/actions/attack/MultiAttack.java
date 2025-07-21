@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static games.descent2e.DescentHelper.hasLineOfSight;
-import static games.descent2e.DescentHelper.inRange;
+import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
@@ -32,6 +31,33 @@ public class MultiAttack extends RangedAttack {
 
     @Override
     public boolean execute(DescentGameState state) {
+
+        // We need to check all defending figures to see if they are Monsters with the Shadow Passive
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        for (int target : defendingFigures) {
+            if (!hasShadow) {
+                Figure defender = (Figure) state.getComponentById(target);
+                if (checkShadow(state, attacker, defender)) {
+                    hasShadow = true;
+                    SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
+                    if (!attacker.getAbilities().contains(shadowSurge)) {
+                        attacker.addAbility(new SurgeAttackAction(Surge.SHADOW, attackingFigure));
+                    }
+                }
+            }
+            else break;
+        }
+
+        // If no targets have the Shadow Passive, remove the ability to use the Shadow Surge
+        if (!hasShadow)
+        {
+            // Only enable the Shadow Surge if the target has the Shadow passive
+            SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
+            if (attacker.getAbilities().contains(shadowSurge)) {
+                attacker.removeAbility(shadowSurge);
+            }
+        }
+
         defendingFigure = defendingFigures.get(0);
         index = 0;
         super.execute(state);
@@ -57,10 +83,11 @@ public class MultiAttack extends RangedAttack {
         DicePool defencePool = defender.getDefenceDice();
         state.setDefenceDicePool(defencePool);
 
-        if (defender instanceof Monster) {
-            if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
-            {
-                NightStalker.addNightStalker(state, ((Figure) state.getComponentById(attackingFigure)).getPosition(), defender.getPosition());
+        if (!isMelee || hasReach) {
+            if (defender instanceof Monster) {
+                if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)) {
+                    NightStalker.addNightStalker(state, ((Figure) state.getComponentById(attackingFigure)).getPosition(), defender.getPosition());
+                }
             }
         }
 
