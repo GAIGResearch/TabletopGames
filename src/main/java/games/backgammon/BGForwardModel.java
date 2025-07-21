@@ -49,10 +49,14 @@ public class BGForwardModel extends StandardForwardModel {
             tokensAt(gameState, 0);
         }
 
+        // The convention is that all player pieces enter the board at the most distant point, and move towards the home board.
+        // Hence a piece enters at 24 when coming from the bar, and moves to 23, 22, ..., 1, 0 (bearing off).
+        // Players move 'naturally' on the counters list so that they move from index 0 through to the end
+        // Hence, playerTrackMapping is {24...1} for white, and {1...24} for black.
         gameState.playerTrackMapping = new int[2][bgp.boardSize];
         for (int i = 0; i < bgp.boardSize; i++) {
-            gameState.playerTrackMapping[1][i] = i + 1;
             gameState.playerTrackMapping[0][i] = bgp.boardSize - i;
+            gameState.playerTrackMapping[1][i] = i + 1;
         }
         gameState.piecesBorneOff = new int[2];
         gameState.dice = new Dice[bgp.diceNumber];
@@ -113,7 +117,7 @@ public class BGForwardModel extends StandardForwardModel {
             // now we can bear off, so add these possibilities to the actions list
             int maxDieValue = Arrays.stream(diceAvailable).max().orElse(0);
             for (int i = 0; i < maxDieValue; i++) {
-                int physicalIndex = bgs.getPhysicalSpace(playerId, boardSize - i  - 1);
+                int physicalIndex = bgs.getPhysicalSpace(playerId, boardSize - i - 1);
                 if (bgs.getPiecesOnPoint(playerId, physicalIndex) > 0) {
                     // we can bear off this piece
                     actions.add(new MovePiece(physicalIndex, -1));

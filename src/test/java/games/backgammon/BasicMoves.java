@@ -27,7 +27,7 @@ public class BasicMoves {
     }
 
     @Test
-    public void testInitialSetup() {
+    public void testInitialSetupByRaceTrack() {
         assertEquals(25, gameState.counters.size());
         for (int i = 0; i < 24; i++) {
             int physicalRefP0 = gameState.getPhysicalSpace(0, i);
@@ -37,19 +37,19 @@ public class BasicMoves {
                     physicalRefP1, gameState.getPiecesOnPoint(1, physicalRefP1)
             );
             switch (i) {
-                case 5:
+                case 18:
                     assertEquals(parameters.startingAt6, gameState.getPiecesOnPoint(0, physicalRefP0));
                     assertEquals(parameters.startingAt6, gameState.getPiecesOnPoint(1, physicalRefP1));
                     break;
-                case 7:
+                case 16:
                     assertEquals(parameters.startingAt8, gameState.getPiecesOnPoint(0, physicalRefP0));
                     assertEquals(parameters.startingAt8, gameState.getPiecesOnPoint(1, physicalRefP1));
                     break;
-                case 12:
+                case 11:
                     assertEquals(parameters.startingAt13, gameState.getPiecesOnPoint(0, physicalRefP0));
                     assertEquals(parameters.startingAt13, gameState.getPiecesOnPoint(1, physicalRefP1));
                     break;
-                case 23:
+                case 0:
                     assertEquals(parameters.startingAt24, gameState.getPiecesOnPoint(0, physicalRefP0));
                     assertEquals(parameters.startingAt24, gameState.getPiecesOnPoint(1, physicalRefP1));
                     break;
@@ -57,6 +57,60 @@ public class BasicMoves {
                     // all other points should have no pieces
                     assertEquals(0, gameState.getPiecesOnPoint(0, physicalRefP0));
                     assertEquals(0, gameState.getPiecesOnPoint(1, physicalRefP1));
+            }
+        }
+        assertEquals(0, gameState.getPiecesOnBar(0));
+        assertEquals(0, gameState.getPiecesOnBar(1));
+        assertEquals(0, gameState.piecesBorneOff[0]);
+        assertEquals(0, gameState.piecesBorneOff[1]);
+    }
+
+
+    @Test
+    public void testInitialSetupByClassicNumbering() {
+        assertEquals(25, gameState.counters.size());
+        for (int i = 1; i <= 24; i++) {
+            System.out.printf("Checking point %d, P0: %d, P1: %d%n", i,
+                    gameState.getPiecesOnPoint(0, i),
+                    gameState.getPiecesOnPoint(1, i)
+            );
+            switch (i) {
+                case 1:
+                    assertEquals(0, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(parameters.startingAt24, gameState.getPiecesOnPoint(1, i));
+                    break;
+                case 6:
+                    assertEquals(parameters.startingAt6, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(0, gameState.getPiecesOnPoint(1, i));
+                    break;
+                case 8:
+                    assertEquals(parameters.startingAt8, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(0, gameState.getPiecesOnPoint(1, i));
+                    break;
+                case 12:
+                    assertEquals(0, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(parameters.startingAt13, gameState.getPiecesOnPoint(1, i));
+                    break;
+                case 13:
+                    assertEquals(parameters.startingAt13, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(0, gameState.getPiecesOnPoint(1, i));
+                    break;
+                case 17:
+                    assertEquals(0, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(parameters.startingAt8, gameState.getPiecesOnPoint(1, i));
+                    break;
+                case 19:
+                    assertEquals(0, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(parameters.startingAt6, gameState.getPiecesOnPoint(1, i));
+                    break;
+                case 24:
+                    assertEquals(parameters.startingAt24, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(0, gameState.getPiecesOnPoint(1, i));
+                    break;
+                default:
+                    // all other points should have no pieces
+                    assertEquals(0, gameState.getPiecesOnPoint(0, i));
+                    assertEquals(0, gameState.getPiecesOnPoint(1, i));
             }
         }
         assertEquals(0, gameState.getPiecesOnBar(0));
@@ -243,16 +297,17 @@ public class BasicMoves {
         assertEquals(6, gameState.getAvailableDiceValues()[0]);
         assertEquals(1, gameState.getAvailableDiceValues().length);
         availableActions = forwardModel.computeAvailableActions(gameState);
-        assertEquals(1, availableActions.size());
+        assertEquals(2, availableActions.size());
         assertTrue(availableActions.contains(new MovePiece(19, -1)));
+        assertTrue(availableActions.contains(new MovePiece(21, -1)));
     }
 
     @Test
     public void bearingOffUsesLowestDie() {
         // first we move all pieces to the homeboard of player 1
-        for (int pos = 5; pos < 24; pos++) {
+        for (int pos = 1; pos < 24; pos++) {
             for (int i = gameState.getPiecesOnPoint(1, pos); i > 0; i--)
-                gameState.movePiece(1, pos, 1); // just needs a 2
+                gameState.movePiece(1, pos, 24); // just needs a 2
         }
         // take two actions for player 0
         gameState.setDiceValues(new int[]{2, 3});
@@ -264,7 +319,7 @@ public class BasicMoves {
         assertEquals(1, gameState.getCurrentPlayer());
         var availableActions = forwardModel.computeAvailableActions(gameState);
         assertEquals(1, availableActions.size());
-        assertTrue(availableActions.contains(new MovePiece(1, -1)));
+        assertTrue(availableActions.contains(new MovePiece(24, -1)));
 
         forwardModel.next(gameState, availableActions.get(0));
         assertEquals(1, gameState.getPiecesBorneOff(1));
@@ -288,10 +343,10 @@ public class BasicMoves {
     @Test
     public void passActionIfNoMovesPossibleAtStartOfPlayersTurn() {
         // first we move all pieces of player 0 to position 12 (point 13)
-        for (int pos = 0; pos < 24; pos++) {
-            if (pos == 12) continue;
+        for (int pos = 1; pos <= 24; pos++) {
+            if (pos == 13) continue;
             for (int i = gameState.getPiecesOnPoint(0, pos); i > 0; i--)
-                gameState.movePiece(0, pos, 12);  // a pretty random point in the home board
+                gameState.movePiece(0, pos, 13);  // a pretty random point in the home board
         }
         gameState.setDiceValues(new int[]{1, 1});
         var availableActions = forwardModel.computeAvailableActions(gameState);
@@ -314,6 +369,7 @@ public class BasicMoves {
     @Test
     public void twoTurnsPerRound() {
         for (int t = 0; t < 10; t++) {
+            // this will occasionally report an error as it is possible for a turn to be skipped if the dice say no move is possible
             assertEquals(t / 2, gameState.getRoundCounter());
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
             assertEquals(1, gameState.getAvailableDiceValues().length);

@@ -169,7 +169,7 @@ public class BGGameState extends AbstractGameState {
 
     public boolean allPiecesOnHomeBoard(int playerId) {
         BGParameters params = (BGParameters) getGameParameters();
-        return piecesOnHomeBoard(playerId) == params.piecesPerPlayer;
+        return piecesOnHomeBoard(playerId) == (params.piecesPerPlayer - piecesBorneOff[playerId]);
     }
 
     @Override
