@@ -4,6 +4,7 @@ package games.backgammon;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.Token;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,33 +28,39 @@ public class BasicMoves {
 
     @Test
     public void testInitialSetup() {
-        assertEquals(24, gameState.piecesPerPoint[0].length);
+        assertEquals(25, gameState.counters.size());
         for (int i = 0; i < 24; i++) {
-            //          System.out.println("piecesPerPoint[*][" + i + "] = " + gameState.piecesPerPoint[0][i]+ ", " + gameState.piecesPerPoint[1][i]);
+            int physicalRefP0 = gameState.getPhysicalSpace(0, i);
+            int physicalRefP1 = gameState.getPhysicalSpace(1, i);
+            System.out.printf("Checking point %d, P0: %d/%d, P1: %d/%d\n", i,
+                    physicalRefP0, gameState.getPiecesOnPoint(0, physicalRefP0),
+                    physicalRefP1, gameState.getPiecesOnPoint(1, physicalRefP1)
+            );
             switch (i) {
                 case 5:
-                    assertEquals(parameters.startingAt6, gameState.piecesPerPoint[0][i]);
-                    assertEquals(parameters.startingAt6, gameState.piecesPerPoint[1][i]);
+                    assertEquals(parameters.startingAt6, gameState.getPiecesOnPoint(0, physicalRefP0));
+                    assertEquals(parameters.startingAt6, gameState.getPiecesOnPoint(1, physicalRefP1));
                     break;
                 case 7:
-                    assertEquals(parameters.startingAt8, gameState.piecesPerPoint[0][i]);
-                    assertEquals(parameters.startingAt8, gameState.piecesPerPoint[1][i]);
+                    assertEquals(parameters.startingAt8, gameState.getPiecesOnPoint(0, physicalRefP0));
+                    assertEquals(parameters.startingAt8, gameState.getPiecesOnPoint(1, physicalRefP1));
                     break;
                 case 12:
-                    assertEquals(parameters.startingAt13, gameState.piecesPerPoint[0][i]);
-                    assertEquals(parameters.startingAt13, gameState.piecesPerPoint[1][i]);
+                    assertEquals(parameters.startingAt13, gameState.getPiecesOnPoint(0, physicalRefP0));
+                    assertEquals(parameters.startingAt13, gameState.getPiecesOnPoint(1, physicalRefP1));
                     break;
                 case 23:
-                    assertEquals(parameters.startingAt24, gameState.piecesPerPoint[0][i]);
-                    assertEquals(parameters.startingAt24, gameState.piecesPerPoint[1][i]);
+                    assertEquals(parameters.startingAt24, gameState.getPiecesOnPoint(0, physicalRefP0));
+                    assertEquals(parameters.startingAt24, gameState.getPiecesOnPoint(1, physicalRefP1));
                     break;
                 default:
-                    assertEquals(0, gameState.piecesPerPoint[0][i]);
-                    assertEquals(0, gameState.piecesPerPoint[1][i]);
+                    // all other points should have no pieces
+                    assertEquals(0, gameState.getPiecesOnPoint(0, physicalRefP0));
+                    assertEquals(0, gameState.getPiecesOnPoint(1, physicalRefP1));
             }
         }
-        assertEquals(0, gameState.piecesOnBar[0]);
-        assertEquals(0, gameState.piecesOnBar[1]);
+        assertEquals(0, gameState.getPiecesOnBar(0));
+        assertEquals(0, gameState.getPiecesOnBar(1));
         assertEquals(0, gameState.piecesBorneOff[0]);
         assertEquals(0, gameState.piecesBorneOff[1]);
     }
@@ -67,14 +74,14 @@ public class BasicMoves {
         // for each of the two dice values, player 0 should be able to move their pieces from any starting point
         // to any point that is not occupied by two or more opponent pieces
 
-        assertTrue(availableActions.contains(new MovePiece(5, 4)));
-        assertTrue(availableActions.contains(new MovePiece(7, 6)));
-        assertFalse(availableActions.contains(new MovePiece(12, 11)));  // due to black pieces
-        assertTrue(availableActions.contains(new MovePiece(23, 22)));
-        assertTrue(availableActions.contains(new MovePiece(5, 1)));
-        assertTrue(availableActions.contains(new MovePiece(7, 3)));
-        assertTrue(availableActions.contains(new MovePiece(12, 8)));
-        assertTrue(availableActions.contains(new MovePiece(23, 19)));
+        assertTrue(availableActions.contains(new MovePiece(24, 23)));
+        assertFalse(availableActions.contains(new MovePiece(13, 12)));  // due to black pieces
+        assertTrue(availableActions.contains(new MovePiece(8, 7)));
+        assertTrue(availableActions.contains(new MovePiece(6, 5)));
+        assertTrue(availableActions.contains(new MovePiece(24, 20)));
+        assertTrue(availableActions.contains(new MovePiece(13, 9)));
+        assertTrue(availableActions.contains(new MovePiece(8, 4)));
+        assertTrue(availableActions.contains(new MovePiece(6, 2)));
         assertEquals(7, availableActions.size());
     }
 
@@ -82,10 +89,10 @@ public class BasicMoves {
     public void testInitialMovesToOwnStacks() {
         gameState.setDiceValues(new int[]{2, 2});
         var availableActions = forwardModel.computeAvailableActions(gameState);
-        assertTrue(availableActions.contains(new MovePiece(5, 3)));
-        assertTrue(availableActions.contains(new MovePiece(7, 5)));
-        assertTrue(availableActions.contains(new MovePiece(12, 10)));
-        assertTrue(availableActions.contains(new MovePiece(23, 21)));
+        assertTrue(availableActions.contains(new MovePiece(6, 4)));
+        assertTrue(availableActions.contains(new MovePiece(8, 6)));
+        assertTrue(availableActions.contains(new MovePiece(13, 11)));
+        assertTrue(availableActions.contains(new MovePiece(24, 22)));
         assertEquals(4, availableActions.size());
     }
 
@@ -93,25 +100,25 @@ public class BasicMoves {
     public void testCannotBearOffAtStart() {
         gameState.setDiceValues(new int[]{5, 6});
         var availableActions = forwardModel.computeAvailableActions(gameState);
-        assertFalse(availableActions.contains(new MovePiece(5, 0)));  // black pieces in the way
-        assertTrue(availableActions.contains(new MovePiece(7, 2)));
-        assertTrue(availableActions.contains(new MovePiece(12, 7)));
-        assertFalse(availableActions.contains(new MovePiece(23, 18))); // black pieces in the way
-        assertFalse(availableActions.contains(new MovePiece(5, -1)));  // no bearing off
-        assertTrue(availableActions.contains(new MovePiece(7, 1)));
-        assertTrue(availableActions.contains(new MovePiece(12, 6)));
-        assertTrue(availableActions.contains(new MovePiece(23, 17)));
+        assertTrue(availableActions.contains(new MovePiece(13, 8)));
+        assertTrue(availableActions.contains(new MovePiece(8, 3)));
+        assertTrue(availableActions.contains(new MovePiece(13, 7)));
+        assertFalse(availableActions.contains(new MovePiece(24, 19))); // black pieces in the way
+        assertFalse(availableActions.contains(new MovePiece(6, -1)));  // no bearing off
+        assertTrue(availableActions.contains(new MovePiece(8, 2)));
+        assertTrue(availableActions.contains(new MovePiece(13, 7)));
+        assertTrue(availableActions.contains(new MovePiece(24, 18)));
         assertEquals(5, availableActions.size());
     }
 
     @Test
     public void testMovePieceActionDoes() {
         gameState.setDiceValues(new int[]{1, 4});
-        assertEquals(5, gameState.piecesPerPoint[0][5]);
-        assertEquals(0, gameState.piecesPerPoint[0][4]);
-        forwardModel.next(gameState, new MovePiece(5, 4));
-        assertEquals(4, gameState.piecesPerPoint[0][5]);
-        assertEquals(1, gameState.piecesPerPoint[0][4]);
+        assertEquals(5, gameState.getPiecesOnPoint(0, 6));
+        assertEquals(0, gameState.getPiecesOnPoint(0, 5));
+        forwardModel.next(gameState, new MovePiece(6, 5));
+        assertEquals(4, gameState.getPiecesOnPoint(0, 6));
+        assertEquals(1, gameState.getPiecesOnPoint(0, 5));
         // and only one dice value available
         assertEquals(4, gameState.getAvailableDiceValues()[0]);
         assertEquals(1, gameState.getAvailableDiceValues().length);
@@ -121,29 +128,30 @@ public class BasicMoves {
     @Test
     public void testHitOnOpponentPiece() {
         gameState.setDiceValues(new int[]{1, 4});
-        forwardModel.next(gameState, new MovePiece(5, 4));
+        forwardModel.next(gameState, new MovePiece(6, 5));
         assertEquals(0, gameState.getCurrentPlayer());
-        forwardModel.next(gameState, new MovePiece(7, 3));
+        forwardModel.next(gameState, new MovePiece(8, 4));
         assertEquals(1, gameState.getCurrentPlayer());
         assertEquals(1, gameState.getTurnCounter());
         assertEquals(2, gameState.getAvailableDiceValues().length);
 
+        // now black's turn
         gameState.setDiceValues(new int[]{1, 4});
         List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
-        assertTrue(actions.contains(new MovePiece(5, 4)));
-        assertTrue(actions.contains(new MovePiece(7, 6)));
-        assertFalse(actions.contains(new MovePiece(12, 11))); // due to white pieces
-        assertTrue(actions.contains(new MovePiece(23, 22)));
-        assertTrue(actions.contains(new MovePiece(5, 1)));
-        assertTrue(actions.contains(new MovePiece(7, 3)));
-        assertTrue(actions.contains(new MovePiece(12, 8)));
-        assertTrue(actions.contains(new MovePiece(23, 19)));  // this should hit
+        assertTrue(actions.contains(new MovePiece(1, 2)));
+        assertTrue(actions.contains(new MovePiece(1, 5)));  // this should hit
+        assertFalse(actions.contains(new MovePiece(12, 13))); // due to white pieces
+        assertTrue(actions.contains(new MovePiece(12, 16)));
+        assertTrue(actions.contains(new MovePiece(17, 18)));
+        assertTrue(actions.contains(new MovePiece(17, 21)));
+        assertTrue(actions.contains(new MovePiece(19, 20)));
+        assertTrue(actions.contains(new MovePiece(19, 23)));
         assertEquals(7, actions.size());
 
         // Now we take the hit
-        forwardModel.next(gameState, new MovePiece(23, 19));
-        assertEquals(0, gameState.getPiecesOnPoint(0, 4));
-        assertEquals(1, gameState.getPiecesOnPoint(1, 19));
+        forwardModel.next(gameState, new MovePiece(1, 5));
+        assertEquals(0, gameState.getPiecesOnPoint(0, 5));
+        assertEquals(1, gameState.getPiecesOnPoint(1, 5));
         assertEquals(1, gameState.getPiecesOnBar(0));
         assertEquals(1, gameState.blots[0]);
         assertEquals(0, gameState.blots[1]);
@@ -151,45 +159,49 @@ public class BasicMoves {
 
     @Test
     public void mustMoveFromBarFirst() {
-        // set a piece on the bar  (technically this means we have 16 pieces)
-        gameState.piecesOnBar[0] = 1;
+        // set a piece on the bar (technically this means we have 16 pieces)
+        gameState.counters.get(0).add(new Token("White"));
+        gameState.counters.get(0).get(0).setOwnerId(0);
         gameState.setDiceValues(new int[]{2, 3});
         var availableActions = forwardModel.computeAvailableActions(gameState);
-        assertTrue(availableActions.contains(new MovePiece(-1, 22)));
-        assertTrue(availableActions.contains(new MovePiece(-1, 21)));
+        assertTrue(availableActions.contains(new MovePiece(0, 23)));
+        assertTrue(availableActions.contains(new MovePiece(0, 22)));
         assertEquals(2, availableActions.size());
 
-        gameState.movePiece(1, 12, 2);
-        assertEquals(1, gameState.getPiecesOnPoint(1, 2));
+        gameState.movePiece(1, 12, 22);
+        assertEquals(1, gameState.getPiecesOnPoint(1, 22));
         availableActions = forwardModel.computeAvailableActions(gameState);
-        assertTrue(availableActions.contains(new MovePiece(-1, 22)));
-        assertTrue(availableActions.contains(new MovePiece(-1, 21)));
+        assertTrue(availableActions.contains(new MovePiece(0, 23)));
+        assertTrue(availableActions.contains(new MovePiece(0, 22)));
         assertEquals(2, availableActions.size());
 
-        gameState.movePiece(1, 12, 2);
-        assertEquals(2, gameState.getPiecesOnPoint(1, 2));
+        gameState.movePiece(1, 12, 22);
+        assertEquals(2, gameState.getPiecesOnPoint(1, 22));
         availableActions = forwardModel.computeAvailableActions(gameState);
-        assertFalse(availableActions.contains(new MovePiece(-1, 21)));
-        assertTrue(availableActions.contains(new MovePiece(-1, 22)));
+        assertFalse(availableActions.contains(new MovePiece(0, 22)));
+        assertTrue(availableActions.contains(new MovePiece(0, 23)));
         assertEquals(1, availableActions.size());
     }
 
     @Test
     public void turnSkippedIfPiecesOnBarAndNoMovePossible() {
-        gameState.piecesOnBar[0] = 2;
+        gameState.counters.get(0).add(new Token("White"));
+        gameState.counters.get(0).get(0).setOwnerId(0);
+        gameState.counters.get(0).add(new Token("White"));
+        gameState.counters.get(0).get(1).setOwnerId(0);
         gameState.setDiceValues(new int[]{2, 3});
 
-        gameState.movePiece(1, 12, 1);
-        gameState.movePiece(1, 12, 1);
-        assertEquals(2, gameState.getPiecesOnPoint(1, 1));
+        gameState.movePiece(1, 12, 22);
+        gameState.movePiece(1, 12, 22);
+        assertEquals(2, gameState.getPiecesOnPoint(1, 22));
 
         var availableActions = forwardModel.computeAvailableActions(gameState);
-        assertFalse(availableActions.contains(new MovePiece(-1, 22)));
-        assertTrue(availableActions.contains(new MovePiece(-1, 21)));
+        assertFalse(availableActions.contains(new MovePiece(0, 22)));
+        assertTrue(availableActions.contains(new MovePiece(0, 23)));
         assertEquals(1, availableActions.size());
 
         forwardModel.next(gameState, availableActions.get(0));
-        assertEquals(1, gameState.getPiecesOnPoint(0, 21));
+        assertEquals(1, gameState.getPiecesOnPoint(0, 23));
         assertEquals(1, gameState.getPiecesOnBar(0));
         assertEquals(1, gameState.getCurrentPlayer());
         assertEquals(2, gameState.getAvailableDiceValues().length);
@@ -198,37 +210,41 @@ public class BasicMoves {
     @Test
     public void mayOnlyBearOffOnceAllPiecesInHomeBoard() {
         // first we move all pieces to the homeboard of player 1
-        for (int pos = 6; pos < 24; pos++) {
+        for (int pos = 1; pos < 19; pos++) {
             for (int i = gameState.getPiecesOnPoint(1, pos); i > 0; i--)
-                gameState.movePiece(1, pos, 4);  // a pretty random point in the home board
+                gameState.movePiece(1, pos, 21);  // a pretty random point in the home board
         }
         // take two actions for player 0
         gameState.setDiceValues(new int[]{5, 6});
         do {
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
         } while (gameState.getCurrentPlayer() == 0);
-        gameState.movePiece(1, 4, 20);
+        gameState.movePiece(1, 21, 5);
 
         gameState.setDiceValues(new int[]{5, 6});
         assertEquals(1, gameState.getCurrentPlayer());
         var availableActions = forwardModel.computeAvailableActions(gameState);
-        assertEquals(2, availableActions.size());
-        assertTrue(availableActions.contains(new MovePiece(20, 14)));
-        assertTrue(availableActions.contains(new MovePiece(20, 15)));
+        assertEquals(3, availableActions.size());
+        assertTrue(availableActions.contains(new MovePiece(5, 10)));
+        assertTrue(availableActions.contains(new MovePiece(5, 11)));
+        assertTrue(availableActions.contains(new MovePiece(19, 24)));
 
-        gameState.movePiece(1, 20, 5);
+        gameState.movePiece(1, 5, 21);
         availableActions = forwardModel.computeAvailableActions(gameState);
-        assertEquals(2, availableActions.size());
-        assertTrue(availableActions.contains(new MovePiece(4, -1)));
-        assertTrue(availableActions.contains(new MovePiece(5, -1)));
+        assertEquals(3, availableActions.size());
+        assertTrue(availableActions.contains(new MovePiece(21, -1)));
+        assertTrue(availableActions.contains(new MovePiece(19, -1)));
+        assertTrue(availableActions.contains(new MovePiece(19, 24)));
 
-        forwardModel.next(gameState, new MovePiece(5, -1));
+        forwardModel.next(gameState, new MovePiece(21, -1));
         assertEquals(1, gameState.getPiecesBorneOff(1));
         assertEquals(1, gameState.getGameScore(1), 0.01);
         assertEquals(0, gameState.getGameScore(0), 0.01);
+        assertEquals(6, gameState.getAvailableDiceValues()[0]);
+        assertEquals(1, gameState.getAvailableDiceValues().length);
         availableActions = forwardModel.computeAvailableActions(gameState);
         assertEquals(1, availableActions.size());
-        assertTrue(availableActions.contains(new MovePiece(4, -1)));
+        assertTrue(availableActions.contains(new MovePiece(19, -1)));
     }
 
     @Test

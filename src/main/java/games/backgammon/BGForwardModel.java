@@ -5,7 +5,7 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.Dice;
+import core.components.*;
 import gametemplate.actions.GTAction;
 
 import java.util.*;
@@ -26,23 +26,35 @@ public class BGForwardModel extends StandardForwardModel {
         BGGameState gameState = (BGGameState) firstState;
         BGParameters bgp = (BGParameters) firstState.getGameParameters();
 
-        gameState.piecesPerPoint = new int[2][bgp.boardSize];
-        gameState.piecesOnBar = new int[2];
-        gameState.piecesOnBar[0] = bgp.startingAtBar;
-        gameState.piecesOnBar[1] = bgp.startingAtBar;
+        gameState.counters = new ArrayList<>(bgp.boardSize + 1);
+        for (int i = 0; i <= bgp.boardSize; i++) {
+            gameState.counters.add(new ArrayList<>());
+        }
+        // we use the convention that 0 is the 'bar'. Once a piece is borne off it cannot reenter
+        // the game, and so is no longer tracked as a Token (just a count of the number borne off)
+        // Distribute counters based on starting positions
+        for (int i = 0; i < bgp.startingAt24; i++) {
+            tokensAt(gameState, 24);
+        }
+        for (int i = 0; i < bgp.startingAt13; i++) {
+            tokensAt(gameState, 13);
+        }
+        for (int i = 0; i < bgp.startingAt8; i++) {
+            tokensAt(gameState, 8);
+        }
+        for (int i = 0; i < bgp.startingAt6; i++) {
+            tokensAt(gameState, 6);
+        }
+        for (int i = 0; i < bgp.startingAtBar; i++) {
+            tokensAt(gameState, 0);
+        }
+
+        gameState.playerTrackMapping = new int[2][bgp.boardSize];
+        for (int i = 0; i < bgp.boardSize; i++) {
+            gameState.playerTrackMapping[1][i] = i + 1;
+            gameState.playerTrackMapping[0][i] = bgp.boardSize - i;
+        }
         gameState.piecesBorneOff = new int[2];
-
-        // Initialize pieces according to BGParameters
-        gameState.piecesPerPoint[0][23] = bgp.startingAt24;
-        gameState.piecesPerPoint[0][5] = bgp.startingAt6;
-        gameState.piecesPerPoint[0][7] = bgp.startingAt8;
-        gameState.piecesPerPoint[0][12] = bgp.startingAt13;
-
-        gameState.piecesPerPoint[1][23] = bgp.startingAt24;
-        gameState.piecesPerPoint[1][5] = bgp.startingAt6;
-        gameState.piecesPerPoint[1][7] = bgp.startingAt8;
-        gameState.piecesPerPoint[1][12] = bgp.startingAt13;
-
         gameState.dice = new Dice[bgp.diceNumber];
         for (int i = 0; i < bgp.diceNumber; i++) {
             gameState.dice[i] = new Dice(bgp.diceSides);
@@ -51,6 +63,15 @@ public class BGForwardModel extends StandardForwardModel {
         gameState.rollDice();
 
         gameState.blots = new int[2];
+    }
+
+    private void tokensAt(BGGameState state, int space) {
+        Token whiteToken = new Token("White");
+        whiteToken.setOwnerId(0);
+        Token blackToken = new Token("Black");
+        blackToken.setOwnerId(1);
+        state.counters.get(space).add(whiteToken);
+        state.counters.get(24 - space + 1).add(blackToken);
     }
 
     /**
@@ -66,19 +87,21 @@ public class BGForwardModel extends StandardForwardModel {
         // and add the possible moves to the list of actions
         // (removing any moves that would move to a point occupied by two or more opponent tokens)
         BGGameState bgs = (BGGameState) gameState;
+        BGParameters bgp = (BGParameters) gameState.getGameParameters();
         int playerId = bgs.getCurrentPlayer();
         // just look at unique dice values
         int[] diceAvailable = Arrays.stream(bgs.getAvailableDiceValues())
                 .distinct()
                 .toArray();
-        int boardSize = bgs.piecesPerPoint[playerId].length;
+        int boardSize = bgp.boardSize;
 
         if (bgs.getPiecesOnBar(playerId) > 0) {
             // player has pieces on the bar, so they can only move those
             for (int i : diceAvailable) {
-                if (bgs.piecesPerPoint[1 - playerId][i - 1] < 2) {
+                int physicalIndex = bgs.getPhysicalSpace(playerId, i - 1);
+                if (bgs.getPiecesOnPoint(1 - playerId, physicalIndex) < 2) {
                     // we can move to this point
-                    actions.add(new MovePiece(-1, boardSize - i));
+                    actions.add(new MovePiece(0, physicalIndex));
                 }
             }
             if (actions.isEmpty())
@@ -90,20 +113,22 @@ public class BGForwardModel extends StandardForwardModel {
             // now we can bear off, so add these possibilities to the actions list
             int maxDieValue = Arrays.stream(diceAvailable).max().orElse(0);
             for (int i = 0; i < maxDieValue; i++) {
-                if (bgs.piecesPerPoint[playerId][i] > 0) {
+                int physicalIndex = bgs.getPhysicalSpace(playerId, boardSize - i  - 1);
+                if (bgs.getPiecesOnPoint(playerId, physicalIndex) > 0) {
                     // we can bear off this piece
-                    actions.add(new MovePiece(i, -1));
+                    actions.add(new MovePiece(physicalIndex, -1));
                 }
             }
         }
 
         for (int i : diceAvailable) {
-            for (int from = i; from < boardSize; from++) {
-                if (bgs.piecesPerPoint[playerId][from] > 0) {
-                    int to = from - i;
-                    if (bgs.piecesPerPoint[1 - playerId][boardSize - to - 1] < 2) {
+            for (int from = 0; from < boardSize - i; from++) {
+                int physicalIndexFrom = bgs.getPhysicalSpace(playerId, from);
+                if (bgs.getPiecesOnPoint(playerId, physicalIndexFrom) > 0) {
+                    int physicalIndexTo = bgs.getPhysicalSpace(playerId, from + i);
+                    if (bgs.getPiecesOnPoint(1 - playerId, physicalIndexTo) < 2) {
                         // we can move to this point
-                        actions.add(new MovePiece(from, to));
+                        actions.add(new MovePiece(physicalIndexFrom, physicalIndexTo));
                     }
                 }
             }

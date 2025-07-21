@@ -86,6 +86,8 @@ public class BackgammonBoardView extends JComponent {
 
     public synchronized void update(BGGameState state) {
         int nPlayers = state.getNPlayers();
+        BGParameters params = (BGParameters) state.getGameParameters();
+        int boardLength = params.boardSize;
 
         validActions = forwardModel.computeAvailableActions(state).stream()
                 .filter(a -> a instanceof MovePiece)
@@ -95,9 +97,11 @@ public class BackgammonBoardView extends JComponent {
 
         // Update pieces on points
         for (int player = 0; player < nPlayers; player++) {
-            piecesPerPoint[player] = state.getPlayerPieces(player);
-            piecesOnBar[player] = state.getPiecesOnBar(player);
-            piecesBorneOff[player] = state.getPiecesBorneOff(player);
+            for (int i = 0; i < boardLength; i++) {
+                piecesPerPoint[player][i] = state.getPiecesOnPoint(player, i+1);
+                piecesOnBar[player] = state.getPiecesOnBar(player);
+                piecesBorneOff[player] = state.getPiecesBorneOff(player);
+            }
         }
         diceValues = state.getDiceValues();
         diceUsed = state.diceUsed.clone();
@@ -124,10 +128,10 @@ public class BackgammonBoardView extends JComponent {
         // point is measured from the perspective of player 0
         for (int point = 0; point < piecesPerPoint[0].length; point++) {
             // which player (if any) has discs on this point
-            int player = piecesPerPoint[0][point] > 0 ? 0 : (piecesPerPoint[1][23 - point] > 0 ? 1 : -1);
+            int player = piecesPerPoint[0][point] > 0 ? 0 : (piecesPerPoint[1][point] > 0 ? 1 : -1);
             if (player == -1) continue; // No discs on this point
 
-            int numDiscs = piecesPerPoint[player][player == 0 ? point : (23 - point)];
+            int numDiscs = piecesPerPoint[player][point];
             boolean topRowOfTriangles = point < 12;
             int position = topRowOfTriangles ? (11 - point) : (point - 12);
             // Calculate the x position based on the triangle base and margin

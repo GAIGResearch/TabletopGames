@@ -10,10 +10,10 @@ public class MovePiece extends AbstractAction {
     public final boolean diceOverride;
 
     /**
-     * Move Piece from one point to another (-1 is the bar)
+     * Move Piece from one point to another
      *
-     * @param from -1 for the bar, 0-23 for the points
-     * @param to   0-23 for the points, -1 to bear off
+     * @param from 0 for the bar, 1-24 for the points
+     * @param to   1-24 for the points, -1 to bear off
      */
     public MovePiece(int from, int to) {
         this(from, to, false);
@@ -23,36 +23,26 @@ public class MovePiece extends AbstractAction {
         this.from = from;
         this.to = to;
         this.diceOverride = diceOverride;
-        if (from > -1 && from < to) {
-            throw new IllegalArgumentException("from must be greater than to");
-        }
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         BGGameState bgp = (BGGameState) gs;
         int playerId = bgp.getCurrentPlayer();
-        int piecesAtStart = from < 0 ? bgp.getPiecesOnBar(playerId) : bgp.getPiecesOnPoint(playerId, from);
-        int boardLength = bgp.getPlayerPieces(0).length;
+        int piecesAtStart = bgp.getPiecesOnPoint(playerId, from);
         if (piecesAtStart > 0) {
-            if (to < 0) {
-                // we are bearing off
-                bgp.movePiece(playerId, from, to);
-            } else {
+            if (to > -1) {
+                // we are not bearing off
                 // check to see if opponent has pieces on the point
-                int opponentPieces = bgp.getPiecesOnPoint(1 - playerId, boardLength - to - 1);
+                int opponentPieces = bgp.getPiecesOnPoint(1 - playerId, to);
                 if (opponentPieces > 1) {
                     throw new IllegalArgumentException("Cannot move to a point occupied by two or more opponent pieces");
                 } else if (opponentPieces == 1) {
                     // hit the opponent's piece
-                    bgp.movePieceToBar(1 - playerId, boardLength - to - 1); // move to bar
-                    // then move ours
-                    bgp.movePiece(playerId, from, to);
-                } else {
-                    // we just move the piece
-                    bgp.movePiece(playerId, from, to);
+                    bgp.movePieceToBar(1 - playerId, to); // move to bar
                 }
             }
+            bgp.movePiece(playerId, from, to);
         } else {
             throw new IllegalArgumentException("No pieces on the from point");
         }
@@ -61,17 +51,25 @@ public class MovePiece extends AbstractAction {
             int dieValue = switch (to) {
                 case -1 -> {
                     // in this case any die value will do...so we take the lowest available one
-                    int min = 6;
+                    int minDieValue = Math.min(from, 25 - from);
+                    int min = 7;
                     for (int d : bgp.getAvailableDiceValues()) {
-                        if (d < min && d >= from + 1) {
+                        if (d < min && d >= minDieValue) {
                             min = d;
                         }
                     }
-                    if (min == 0)
+                    if (min == 7)
                         throw new IllegalArgumentException("No dice available for this move");
                     yield min;
                 }
-                default -> from < 0 ? boardLength - to : from - to;
+                // TODO: When we introduce XII this will need to change as progression is not always linear
+                // will probably be easiest to record the dice used when the action is created
+                default -> {
+                    int trial = Math.abs(from - to);
+                    if (trial <= 6)
+                        yield trial;
+                    yield 24 - trial + 1; // convert to die value
+                }
             };
             bgp.useDiceValue(dieValue);
         }
@@ -98,7 +96,7 @@ public class MovePiece extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Move Piece from %d to %d", from + 1, to + 1);
+        return String.format("Move Piece from %d to %d", from, to);
     }
 
     @Override
@@ -106,8 +104,8 @@ public class MovePiece extends AbstractAction {
         BGGameState bgp = (BGGameState) gameState;
         StringBuilder sb = new StringBuilder();
         int player = bgp.getCurrentPlayer();
-        int pieces = from < 0 ? bgp.getPiecesOnBar(player) : bgp.getPiecesOnPoint(player, from);
-        sb.append("Move Piece from ").append(from + 1).append(" to ").append(to + 1).append(" (1 of ").append(pieces).append(" pieces)");
+        int pieces = bgp.getPiecesOnPoint(player, from);
+        sb.append("Move Piece from ").append(from).append(" to ").append(to).append(" (1 of ").append(pieces).append(" pieces)");
         return sb.toString();
     }
 }

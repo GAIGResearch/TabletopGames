@@ -18,26 +18,29 @@ public class BGStateFeatures implements IStateFeatureVector {
     @Override
     public double[] doubleVector(AbstractGameState state, int playerID) {
         BGGameState bgState = (BGGameState) state;
+        BGParameters params = (BGParameters) state.getGameParameters();
         double[] features = new double[names.length];
         // BorneOff
         features[0] = bgState.getGameScore(playerID);
         features[1] = bgState.getGameScore(1 - playerID);
 
         // Bar
-        features[2] = bgState.piecesOnBar[playerID];
-        features[3] = bgState.piecesOnBar[1 - playerID];
+        features[2] = bgState.getPiecesOnBar(playerID);
+        features[3] = bgState.getPiecesOnBar(1 - playerID);
 
         // HomeBoard
         features[4] = bgState.piecesOnHomeBoard(playerID);
         features[5] = bgState.piecesOnHomeBoard(1 - playerID);
 
         // MeanToHome and PiecesOnBoard
-        int sum = 0, count = 0, boardLen = bgState.piecesPerPoint[playerID].length;
+        int sum = 0, count = 0, boardLen = params.boardSize;
         int singletons = 0;
         for (int i = 0; i < boardLen; i++) {
-            sum += bgState.piecesPerPoint[playerID][i] * i;
-            count += bgState.piecesPerPoint[playerID][i];
-            if (bgState.piecesPerPoint[playerID][i] == 1) {
+            int physicalIndex = bgState.getPhysicalSpace(playerID, i);
+            int piecesOnPoint = bgState.getPiecesOnPoint(playerID, physicalIndex);
+            sum += piecesOnPoint * i;
+            count += piecesOnPoint;
+            if (piecesOnPoint == 1) {
                 singletons++;
             }
         }
@@ -48,11 +51,12 @@ public class BGStateFeatures implements IStateFeatureVector {
         count = 0;
         sum = 0;
         singletons = 0;
-        boardLen = bgState.piecesPerPoint[1 - playerID].length;
         for (int i = 0; i < boardLen; i++) {
-            sum += bgState.piecesPerPoint[1 - playerID][i] * i;
-            count += bgState.piecesPerPoint[1 - playerID][i];
-            if (bgState.piecesPerPoint[1 - playerID][i] == 1) {
+            int physicalIndex = bgState.getPhysicalSpace(1 - playerID, i);
+            int piecesOnPoint = bgState.getPiecesOnPoint(1 - playerID, physicalIndex);
+            sum += piecesOnPoint * i;
+            count += piecesOnPoint;
+            if (piecesOnPoint == 1) {
                 singletons++;
             }
         }
