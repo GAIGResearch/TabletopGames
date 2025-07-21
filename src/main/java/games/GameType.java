@@ -5,7 +5,8 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
 import core.rules.AbstractRuleBasedForwardModel;
-import dev.langchain4j.agent.tool.P;
+import games.XIIScripta.XIIGameState;
+import games.XIIScripta.XIIParameters;
 import games.backgammon.*;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameParameters;
@@ -293,6 +294,10 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement, DiceRolling),
             BGGameState.class, BGForwardModel.class, BGParameters.class, BGGUIManager.class),
+    XIIScripta(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement, DiceRolling),
+            XIIGameState.class, BGForwardModel.class, XIIParameters.class, null),
     Mastermind(1,1,
             Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
             List.of(PatternBuilding),

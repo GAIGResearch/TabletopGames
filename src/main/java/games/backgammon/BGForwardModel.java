@@ -34,29 +34,46 @@ public class BGForwardModel extends StandardForwardModel {
         // the game, and so is no longer tracked as a Token (just a count of the number borne off)
         // Distribute counters based on starting positions
         for (int i = 0; i < bgp.startingAt24; i++) {
-            tokensAt(gameState, 24);
+            tokensAt(gameState, 24, bgp);
         }
         for (int i = 0; i < bgp.startingAt13; i++) {
-            tokensAt(gameState, 13);
+            tokensAt(gameState, 13, bgp);
         }
         for (int i = 0; i < bgp.startingAt8; i++) {
-            tokensAt(gameState, 8);
+            tokensAt(gameState, 8, bgp);
         }
         for (int i = 0; i < bgp.startingAt6; i++) {
-            tokensAt(gameState, 6);
+            tokensAt(gameState, 6, bgp);
         }
         for (int i = 0; i < bgp.startingAtBar; i++) {
-            tokensAt(gameState, 0);
+            tokensAt(gameState, 0, bgp);
         }
 
         // The convention is that all player pieces enter the board at the most distant point, and move towards the home board.
+        // (if route == Counter)
         // Hence a piece enters at 24 when coming from the bar, and moves to 23, 22, ..., 1, 0 (bearing off).
-        // Players move 'naturally' on the counters list so that they move from index 0 through to the end
+        // Players move 'naturally' on the counters' list so that they move from index 0 through to the end
         // Hence, playerTrackMapping is {24...1} for white, and {1...24} for black.
-        gameState.playerTrackMapping = new int[2][bgp.boardSize];
+        gameState.playerTrackMapping = bgp.route == BGParameters.Route.CommonHalfA ?
+                new int[2][bgp.boardSize - bgp.homeBoardSize] :
+                new int[2][bgp.boardSize];
         for (int i = 0; i < bgp.boardSize; i++) {
-            gameState.playerTrackMapping[0][i] = bgp.boardSize - i;
-            gameState.playerTrackMapping[1][i] = i + 1;
+            switch (bgp.route) {
+                case Counter -> {
+                    gameState.playerTrackMapping[0][i] = bgp.boardSize - i;
+                    gameState.playerTrackMapping[1][i] = i + 1;
+                }
+                case Common -> {  // both players race in the same direction
+                    gameState.playerTrackMapping[0][i] = bgp.boardSize - i;
+                    gameState.playerTrackMapping[1][i] = bgp.boardSize - i;
+                }
+                case CommonHalfA -> {
+                    // in this case we use a different first 6 spaces for each player
+                    gameState.playerTrackMapping[0][i] = bgp.boardSize - i - bgp.homeBoardSize;
+                    gameState.playerTrackMapping[1][i] = bgp.boardSize - i - bgp.homeBoardSize;
+                }
+            }
+
         }
         gameState.piecesBorneOff = new int[2];
         gameState.dice = new Dice[bgp.diceNumber];
@@ -69,13 +86,18 @@ public class BGForwardModel extends StandardForwardModel {
         gameState.blots = new int[2];
     }
 
-    private void tokensAt(BGGameState state, int space) {
+    private void tokensAt(BGGameState state, int space, BGParameters params) {
+        BGParameters.Route route = params.route;
+        int boardSize = params.boardSize;
         Token whiteToken = new Token("White");
         whiteToken.setOwnerId(0);
         Token blackToken = new Token("Black");
         blackToken.setOwnerId(1);
         state.counters.get(space).add(whiteToken);
-        state.counters.get(24 - space + 1).add(blackToken);
+        switch (route) {
+            case Counter -> state.counters.get(boardSize - space + 1).add(blackToken);
+            case Common, CommonHalfA -> state.counters.get(space).add(blackToken);
+        }
     }
 
     /**

@@ -1,0 +1,22 @@
+package games.XIIScripta;
+
+import games.backgammon.BGParameters;
+
+// This just overrides the default parameters for Backgammon
+public class XIIParameters extends BGParameters {
+
+    public XIIParameters() {
+        addTunableParameter("boardSize", 36);
+        addTunableParameter("piecesPerPlayer", 15);
+        addTunableParameter("startingAtBar", 15);
+        addTunableParameter("homeBoardSize", 6);
+        addTunableParameter("diceNumber", 2);
+        addTunableParameter("diceSides", 6);
+        addTunableParameter("startingAt6", 0);
+        addTunableParameter("startingAt8", 0);
+        addTunableParameter("startingAt13", 0);
+        addTunableParameter("startingAt24", 0);
+        addTunableParameter("route", Route.Common);
+        _reset();
+    }
+}

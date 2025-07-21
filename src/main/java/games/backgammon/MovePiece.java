@@ -7,22 +7,13 @@ public class MovePiece extends AbstractAction {
 
     public final int from;
     public final int to;
-    public final boolean diceOverride;
 
     /**
      * Move Piece from one point to another
-     *
-     * @param from 0 for the bar, 1-24 for the points
-     * @param to   1-24 for the points, -1 to bear off
      */
     public MovePiece(int from, int to) {
-        this(from, to, false);
-    }
-
-    public MovePiece(int from, int to, boolean diceOverride) {
         this.from = from;
         this.to = to;
-        this.diceOverride = diceOverride;
     }
 
     @Override
@@ -46,34 +37,36 @@ public class MovePiece extends AbstractAction {
         } else {
             throw new IllegalArgumentException("No pieces on the from point");
         }
-        if (!diceOverride) {
-            // mark the die as used
-            int dieValue = switch (to) {
-                case -1 -> {
-                    // in this case any die value will do...so we take the lowest available one
-                    int minDieValue = Math.min(from, 25 - from);
-                    int min = 7;
-                    for (int d : bgp.getAvailableDiceValues()) {
-                        if (d < min && d >= minDieValue) {
-                            min = d;
-                        }
-                    }
-                    if (min == 7)
-                        throw new IllegalArgumentException("No dice available for this move");
-                    yield min;
-                }
-                // TODO: When we introduce XII this will need to change as progression is not always linear
-                // will probably be easiest to record the dice used when the action is created
-                default -> {
-                    int trial = Math.abs(from - to);
-                    if (trial <= 6)
-                        yield trial;
-                    yield 24 - trial + 1; // convert to die value
-                }
-            };
-            bgp.useDiceValue(dieValue);
-        }
+        // mark the die as used
+        int dieValue = calculateDieValueUsed(bgp);
+        bgp.useDiceValue(dieValue);
         return true;
+    }
+
+    protected int calculateDieValueUsed(BGGameState bgp) {
+        // from and to are the physical points. To find the die value used, we need to consider the
+        // distance moved in terms of the game rules (via playerTrack)
+
+        BGParameters params = (BGParameters) bgp.getGameParameters();
+        int player = bgp.getCurrentPlayer();
+        if (from == 0) {
+            // in this case we are moving from the bar
+            return bgp.getLogicalPosition(player, to);
+        } else if (to == -1) {
+            // in this case any die value will do...so we take the lowest available one
+            int minDieValue = bgp.playerTrackMapping[0].length - bgp.getLogicalPosition(player, from);
+            int min = params.diceSides + 1;
+            for (int d : bgp.getAvailableDiceValues()) {
+                if (d < min && d >= minDieValue) {
+                    min = d;
+                }
+            }
+            if (min == params.diceSides + 1)
+                throw new IllegalArgumentException("No dice available for this move");
+            return min;
+        } else {
+            return bgp.getLogicalPosition(player, to) - bgp.getLogicalPosition(player, from);
+        }
     }
 
     @Override
@@ -86,12 +79,12 @@ public class MovePiece extends AbstractAction {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         MovePiece movePiece = (MovePiece) obj;
-        return from == movePiece.from && to == movePiece.to && diceOverride == movePiece.diceOverride;
+        return from == movePiece.from && to == movePiece.to;
     }
 
     @Override
     public int hashCode() {
-        return 31 * from + to - 320 * (diceOverride ? 1 : 0);
+        return 31 * from + to;
     }
 
     @Override

@@ -91,21 +91,33 @@ public class BGGameState extends AbstractGameState {
         return playerTrackMapping[playerId][nthPoint];
     }
 
+    /*
+    The reverse mapping from the physical space on the board to the logical position on the player's track.
+     */
+    public int getLogicalPosition(int playerId, int physicalPoint) {
+        for (int i = 0; i < playerTrackMapping[playerId].length; i++) {
+            if (playerTrackMapping[playerId][i] == physicalPoint) {
+                return i + 1;
+            }
+        }
+        throw new IllegalArgumentException("Physical point not found in player's track: " + physicalPoint);
+    }
+
     public void movePiece(int playerId, int from, int to) {
-            // Moving on the board
-            List<Token> fromList = counters.get(from);
-            Optional<Token> token = fromList.stream()
-                    .filter(t -> t.getOwnerId() == playerId)
-                    .findFirst();
-            if (token.isEmpty()) {
-                throw new IllegalArgumentException("No pieces on the from point for player " + playerId);
-            }
-            fromList.remove(token.get());
-            if (to == -1) {
-                piecesBorneOff[playerId]++;
-            } else {
-                counters.get(to).add(token.get());
-            }
+        // Moving on the board
+        List<Token> fromList = counters.get(from);
+        Optional<Token> token = fromList.stream()
+                .filter(t -> t.getOwnerId() == playerId)
+                .findFirst();
+        if (token.isEmpty()) {
+            throw new IllegalArgumentException("No pieces on the from point for player " + playerId);
+        }
+        fromList.remove(token.get());
+        if (to == -1) {
+            piecesBorneOff[playerId]++;
+        } else {
+            counters.get(to).add(token.get());
+        }
     }
 
     public void movePieceToBar(int playerId, int point) {

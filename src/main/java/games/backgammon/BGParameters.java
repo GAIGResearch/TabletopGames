@@ -6,6 +6,10 @@ import evaluation.optimisation.TunableParameters;
 
 public class BGParameters extends TunableParameters<BGParameters> {
 
+    public enum Route {
+        Common, Counter, CommonHalfA
+    }
+
     // We add parameters for the dimensions of the backgammon board
     // and the number of pieces for each player.
 
@@ -13,10 +17,10 @@ public class BGParameters extends TunableParameters<BGParameters> {
     // moving in opposite directions in a u-shaped board.
     public int boardSize = 24; // Number of points on the board
     public int piecesPerPlayer = 15; // Number of pieces for each player
-    public int barSize = 2; // Number of points on the bar
     public int homeBoardSize = 6; // Number of points in the home board
     public int diceNumber = 2; // Number of dice used in the game
     public int diceSides = 6; // Number of sides on each die
+    public Route route = Route.Counter; // Route type for the game
 
     // starting set up of pieces in backgammon
     // 2 on the bar, 5 in the home board, 3 on the 8 point, and 5 on the 24 point.
@@ -39,6 +43,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
         addTunableParameter("startingAt24", 2);
         addTunableParameter("diceNumber", 2);
         addTunableParameter("diceSides", 6);
+        addTunableParameter("route", Route.Counter);
         _reset();
     }
 
@@ -55,7 +60,6 @@ public class BGParameters extends TunableParameters<BGParameters> {
 
     @Override
     public int hashCode() {
-        // TODO: include the hashcode of all variables.
         return super.hashCode();
     }
 
@@ -68,7 +72,6 @@ public class BGParameters extends TunableParameters<BGParameters> {
     public void _reset() {
         boardSize = (int) getParameterValue("boardSize");
         piecesPerPlayer = (int) getParameterValue("piecesPerPlayer");
-        barSize = (int) getParameterValue("barSize");
         homeBoardSize = (int) getParameterValue("homeBoardSize");
         startingAt24 = (int) getParameterValue("startingAt24");
         startingAt8 = (int) getParameterValue("startingAt8");
@@ -77,5 +80,6 @@ public class BGParameters extends TunableParameters<BGParameters> {
         startingAtBar = (int) getParameterValue("startingAtBar");
         diceNumber = (int) getParameterValue("diceNumber");
         diceSides = (int) getParameterValue("diceSides");
+        route = (Route) getParameterValue("route");
     }
 }
