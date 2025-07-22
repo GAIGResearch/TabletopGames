@@ -46,6 +46,8 @@ public class BGGameState extends AbstractGameState {
 
     protected int[] blots;
 
+    protected List<Token> movedThisTurn;
+
     public BGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
@@ -96,6 +98,7 @@ public class BGGameState extends AbstractGameState {
     The reverse mapping from the physical space on the board to the logical position on the player's track.
      */
     public int getLogicalPosition(int playerId, int physicalPoint) {
+        if (physicalPoint == 0) return 0; // the bar is always just off the track point
         for (int i = 0; i < playerTrackMapping[playerId].length; i++) {
             if (playerTrackMapping[playerId][i] == physicalPoint) {
                 return i + 1;
@@ -107,17 +110,21 @@ public class BGGameState extends AbstractGameState {
     public void movePiece(int playerId, int from, int to) {
         // Moving on the board
         List<Token> fromList = counters.get(from);
-        Optional<Token> token = fromList.stream()
+        Optional<Token> tokenOpt = fromList.stream()
                 .filter(t -> t.getOwnerId() == playerId)
                 .findFirst();
-        if (token.isEmpty()) {
+        if (tokenOpt.isEmpty()) {
             throw new IllegalArgumentException("No pieces on the from point for player " + playerId);
         }
-        fromList.remove(token.get());
+        Token token = tokenOpt.get();
+        if (!movedThisTurn.contains(token)) {
+            movedThisTurn.add(token);
+        }
+        fromList.remove(token);
         if (to == -1) {
             piecesBorneOff[playerId]++;
         } else {
-            counters.get(to).add(token.get());
+            counters.get(to).add(token);
         }
     }
 
@@ -205,6 +212,17 @@ public class BGGameState extends AbstractGameState {
         return piecesOnHomeBoard(playerId) == params.piecesPerPlayer - piecesBorneOff[playerId];
     }
 
+    // returns the physical space on the board where the token is located
+    public int locationOfToken(Token t) {
+        for (int i = 0; i < counters.size(); i++) {
+            if (counters.get(i).contains(t)) {
+                // found the token, return the point
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Token not found in game state: " + t);
+    }
+
     @Override
     protected BGGameState _copy(int playerId) {
         BGGameState copy = new BGGameState(gameParameters, getNPlayers());
@@ -224,6 +242,7 @@ public class BGGameState extends AbstractGameState {
             copy.counters.add(playerCounters);
         }
         copy.playerTrackMapping = playerTrackMapping; // this is immutable, so we can just copy the reference
+        copy.movedThisTurn = new ArrayList<>(movedThisTurn);
         return copy;
     }
 
@@ -278,6 +297,7 @@ public class BGGameState extends AbstractGameState {
                     Arrays.equals(availableDiceValues, bgs.availableDiceValues) &&
                     Arrays.equals(dice, bgs.dice) &&
                     counters.equals(bgs.counters) &&
+                    movedThisTurn.equals(bgs.movedThisTurn) &&
                     Arrays.deepEquals(playerTrackMapping, bgs.playerTrackMapping);
         }
         return false;
@@ -290,7 +310,7 @@ public class BGGameState extends AbstractGameState {
                 Arrays.hashCode(diceUsed) + 31 * 31 * 31 *
                 Arrays.hashCode(dice) + 31 * 31 * 31 * 31 *
                 Arrays.hashCode(availableDiceValues) - 31 * 255 *
-                counters.hashCode() + 31 * 31 * 31 * 31 * 31 *
+                Objects.hash(counters, movedThisTurn) + 31 * 31 * 31 * 31 * 31 *
                 Arrays.deepHashCode(playerTrackMapping) +
                 super.hashCode();
     }

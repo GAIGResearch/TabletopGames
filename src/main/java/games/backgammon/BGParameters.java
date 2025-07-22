@@ -10,10 +10,11 @@ public class BGParameters extends TunableParameters<BGParameters> {
         Common, Counter, CommonHalfA
     }
     public enum EntryRule {
-        None, Bar, Home
+        None, Bar, Entry
         // None means that there are no rules - any piece can be moved even if there are some pieces on the bar.
         // Bar means that pieces on the bar must be moved onto the board before any other pieces can be moved.
-        // Home means that pieces must be moved into the first part of the board before any other pieces can be moved.
+        // Entry means that pieces must be moved onto the board before any other pieces can be moved;
+        // but pieces moved on this turn can be moved with other dice as long as they stay on the entry board.
     }
 
     // We add parameters for the dimensions of the backgammon board

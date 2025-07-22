@@ -10,8 +10,7 @@ import gametemplate.actions.GTAction;
 
 import java.util.*;
 
-import static games.backgammon.BGParameters.EntryRule.Bar;
-import static games.backgammon.BGParameters.EntryRule.Home;
+import static games.backgammon.BGParameters.EntryRule.*;
 
 /**
  * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>
@@ -78,6 +77,7 @@ public class BGForwardModel extends StandardForwardModel {
             }
 
         }
+        gameState.movedThisTurn = new ArrayList<>();
         gameState.piecesBorneOff = new int[2];
         gameState.dice = new Dice[bgp.diceNumber];
         for (int i = 0; i < bgp.diceNumber; i++) {
@@ -132,27 +132,25 @@ public class BGForwardModel extends StandardForwardModel {
                     actions.add(new MovePiece(0, physicalIndex));
                 }
             }
-            if (bgp.entryRule == Home) {
-                // player can move these as long as they stay within the entry board
+            if (bgp.entryRule == Entry) {
+                // player can move pieces already moved as long they stay within the entry board
                 // (or as per previous chunk of code, you can move from the bar onto the board)
-                for (int pos = 0; pos < bgp.entryBoardSize; pos++) {
-                    int physicalIndex = bgs.getPhysicalSpace(playerId, pos);
-                    if (bgs.getPiecesOnPoint(playerId, physicalIndex) > 0) {
-                        // we can move this piece
-                        for (int die : diceAvailable) {
-                            int targetIndex = pos + die;
-                            if (targetIndex < bgp.entryBoardSize) {
-                                int physicalTargetIndex = bgs.getPhysicalSpace(playerId, targetIndex);
-                                if (bgs.getPiecesOnPoint(1 - playerId, physicalTargetIndex) < 2) {
-                                    // we can move to this point
-                                    actions.add(new MovePiece(physicalIndex, physicalTargetIndex));
-                                }
+                for (Token t : bgs.movedThisTurn) {
+                    int fromSpace = bgs.locationOfToken(t);
+                    int playerTrack = bgs.getLogicalPosition(playerId, fromSpace) - 1;
+                    for (int die : diceAvailable) {
+                        int targetIndex = playerTrack + die;
+                        if (targetIndex < bgp.entryBoardSize) {
+                            int toSpace = bgs.getPhysicalSpace(playerId, targetIndex);
+                            if (bgs.getPiecesOnPoint(1 - playerId, toSpace) < 2) {
+                                // we can move to this point
+                                actions.add(new MovePiece(fromSpace, toSpace));
                             }
                         }
                     }
                 }
             }
-            if (bgp.entryRule == Bar || bgp.entryRule == Home) {
+            if (bgp.entryRule == Bar || bgp.entryRule == Entry) {
                 // we cannot consider other actions until we have moved all pieces from the bar
                 if (actions.isEmpty())
                     actions.add(new DoNothing());
@@ -204,6 +202,7 @@ public class BGForwardModel extends StandardForwardModel {
             if (diceAvailable.length == 0 || computeAvailableActions(currentState).stream().noneMatch(c -> c instanceof MovePiece)) {
                 // end of turn: switch player
                 bgs.rollDice();
+                bgs.movedThisTurn = new ArrayList<>();
                 endPlayerTurn(bgs);  // default is to move to next player
                 if (bgs.getCurrentPlayer() == 0) {
                     // if we are back to player 0, we can end the round
