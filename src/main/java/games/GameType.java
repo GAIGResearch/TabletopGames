@@ -5,7 +5,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
 import core.rules.AbstractRuleBasedForwardModel;
-import games.XIIScripta.XIIGameState;
+import games.XIIScripta.XIIGUIManager;
 import games.XIIScripta.XIIParameters;
 import games.backgammon.*;
 import games.battlelore.BattleloreForwardModel;
@@ -297,7 +297,7 @@ public enum GameType {
     XIIScripta(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement, DiceRolling),
-            XIIGameState.class, BGForwardModel.class, XIIParameters.class, null),
+            BGGameState.class, BGForwardModel.class, XIIParameters.class, XIIGUIManager.class),
     Mastermind(1,1,
             Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
             List.of(PatternBuilding),
