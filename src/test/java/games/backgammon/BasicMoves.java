@@ -341,6 +341,37 @@ public class BasicMoves {
     }
 
     @Test
+    public void rollingADoubleGivesTwoActionsIfRuleSwitchedOff() {
+        parameters.setParameterValue("doubleActions", false);
+        gameState.setDiceValues(new int[]{2, 2});
+        assertEquals(2, gameState.getAvailableDiceValues().length);
+        for (int i = 0; i < 2; i++) {
+            assertEquals(2, gameState.getAvailableDiceValues()[i]);
+        }
+        for (int i = 0; i < 2; i++) {
+            assertEquals(0, gameState.getCurrentPlayer());
+            var availableActions = forwardModel.computeAvailableActions(gameState);
+            forwardModel.next(gameState, availableActions.get(0)); // take the first action
+        }
+        assertEquals(1, gameState.getCurrentPlayer());
+    }
+
+    @Test
+    public void rollingADoubleGivesFourActions() {
+        gameState.setDiceValues(new int[]{2, 2});
+        assertEquals(4, gameState.getAvailableDiceValues().length);
+        for (int i = 0; i < 4; i++) {
+            assertEquals(2, gameState.getAvailableDiceValues()[i]);
+        }
+        for (int i = 0; i < 4; i++) {
+            assertEquals(0, gameState.getCurrentPlayer());
+            var availableActions = forwardModel.computeAvailableActions(gameState);
+            forwardModel.next(gameState, availableActions.get(0)); // take the first action
+        }
+        assertEquals(1, gameState.getCurrentPlayer());
+    }
+
+    @Test
     public void passActionIfNoMovesPossibleAtStartOfPlayersTurn() {
         // first we move all pieces of player 0 to position 12 (point 13)
         for (int pos = 1; pos <= 24; pos++) {
@@ -362,6 +393,9 @@ public class BasicMoves {
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
             assertEquals(1, gameState.getAvailableDiceValues().length);
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+            while (gameState.getAvailableDiceValues().length == 4) {
+                gameState.rollDice();
+            }
             assertEquals(2, gameState.getAvailableDiceValues().length);
         }
     }
@@ -374,6 +408,9 @@ public class BasicMoves {
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
             assertEquals(1, gameState.getAvailableDiceValues().length);
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+            while (gameState.getAvailableDiceValues().length == 4) {
+                gameState.rollDice();
+            }
             assertEquals(2, gameState.getAvailableDiceValues().length);
         }
     }

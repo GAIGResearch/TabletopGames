@@ -83,7 +83,6 @@ public class BGForwardModel extends StandardForwardModel {
         for (int i = 0; i < bgp.diceNumber; i++) {
             gameState.dice[i] = new Dice(bgp.diceSides);
         }
-        gameState.diceUsed = new boolean[bgp.diceNumber];
         gameState.rollDice();
 
         gameState.blots = new int[2];

@@ -88,6 +88,8 @@ public class XIITests {
         gameState.setDiceValues(new int[]{3, 3});
         forwardModel.next(gameState, new MovePiece(0, 34));
         forwardModel.next(gameState, new MovePiece(0, 34));
+        forwardModel.next(gameState, new MovePiece(0, 34));
+        forwardModel.next(gameState, new MovePiece(0, 34));
         assertEquals(1, gameState.getCurrentPlayer());
         gameState.setDiceValues(new int[]{3, 4});
         var availableActions = forwardModel.computeAvailableActions(gameState);

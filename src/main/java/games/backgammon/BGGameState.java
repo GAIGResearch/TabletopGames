@@ -41,6 +41,7 @@ public class BGGameState extends AbstractGameState {
     protected int[] piecesBorneOff;
 
     protected Dice[] dice;
+    protected int[] availableDiceValues; // the values of the dice rolled, used for actions
     protected boolean[] diceUsed;
 
     protected int[] blots;
@@ -129,7 +130,27 @@ public class BGGameState extends AbstractGameState {
         for (Dice die : dice) {
             die.roll(rnd);
         }
-        Arrays.fill(diceUsed, false);
+        updateAvailableDiceValues();
+    }
+
+    protected void updateAvailableDiceValues() {
+        BGParameters params = (BGParameters) getGameParameters();
+        if (params.doubleActions && Arrays.stream(dice).allMatch(d -> d.getValue() == dice[0].getValue())) {
+            // if doubles, we get double the actions
+            diceUsed = new boolean[dice.length * 2];
+            availableDiceValues = new int[dice.length * 2];
+            for (int i = 0; i < dice.length; i++) {
+                availableDiceValues[i] = dice[i].getValue();
+                availableDiceValues[i + dice.length] = dice[i].getValue();
+            }
+        } else {
+            // otherwise, we just use the number of dice rolled
+            diceUsed = new boolean[dice.length];
+            availableDiceValues = new int[dice.length];
+            for (int i = 0; i < dice.length; i++) {
+                availableDiceValues[i] = dice[i].getValue();
+            }
+        }
     }
 
     // for testing only
@@ -137,12 +158,12 @@ public class BGGameState extends AbstractGameState {
         for (int i = 0; i < dice.length; i++) {
             dice[i].setValue(values[i]);
         }
-        Arrays.fill(diceUsed, false);
+        updateAvailableDiceValues();
     }
 
     public void useDiceValue(int dieValue) {
-        for (int i = 0; i < dice.length; i++) {
-            if (!diceUsed[i] && dice[i].getValue() == dieValue) {
+        for (int i = 0; i < availableDiceValues.length; i++) {
+            if (!diceUsed[i] && availableDiceValues[i] == dieValue) {
                 diceUsed[i] = true;
                 return;
             }
@@ -160,23 +181,14 @@ public class BGGameState extends AbstractGameState {
 
     public int[] getAvailableDiceValues() {
         // only return values for dice not yet used
-        int[] values = new int[dice.length];
+        int[] values = new int[availableDiceValues.length];
         int count = 0;
-        for (int i = 0; i < dice.length; i++) {
+        for (int i = 0; i < diceUsed.length; i++) {
             if (!diceUsed[i]) {
-                values[count++] = dice[i].getValue();
+                values[count++] = availableDiceValues[i];
             }
         }
         return Arrays.copyOf(values, count);
-    }
-
-    public int piecesOnEntryBoard(int playerId) {
-        BGParameters params = (BGParameters) getGameParameters();
-        int count = 0;
-        for (int i = 0; i < params.entryBoardSize; i++) {
-            count += getPiecesOnPoint(playerId, playerTrackMapping[playerId][i]);
-        }
-        return count;
     }
 
     public int piecesOnHomeBoard(int playerId) {
@@ -203,6 +215,7 @@ public class BGGameState extends AbstractGameState {
             copy.dice[i] = dice[i].copy();
         }
         copy.diceUsed = Arrays.copyOf(diceUsed, diceUsed.length);
+        copy.availableDiceValues = Arrays.copyOf(availableDiceValues, availableDiceValues.length);
 
         copy.counters = new ArrayList<>();
         for (int i = 0; i < counters.size(); i++) {
@@ -262,6 +275,7 @@ public class BGGameState extends AbstractGameState {
             return Arrays.equals(piecesBorneOff, bgs.piecesBorneOff) &&
                     Arrays.equals(blots, bgs.blots) &&
                     Arrays.equals(diceUsed, bgs.diceUsed) &&
+                    Arrays.equals(availableDiceValues, bgs.availableDiceValues) &&
                     Arrays.equals(dice, bgs.dice) &&
                     counters.equals(bgs.counters) &&
                     Arrays.deepEquals(playerTrackMapping, bgs.playerTrackMapping);
@@ -275,6 +289,7 @@ public class BGGameState extends AbstractGameState {
                 Arrays.hashCode(blots) + 31 * 31 *
                 Arrays.hashCode(diceUsed) + 31 * 31 * 31 *
                 Arrays.hashCode(dice) + 31 * 31 * 31 * 31 *
+                Arrays.hashCode(availableDiceValues) - 31 * 255 *
                 counters.hashCode() + 31 * 31 * 31 * 31 * 31 *
                 Arrays.deepHashCode(playerTrackMapping) +
                 super.hashCode();

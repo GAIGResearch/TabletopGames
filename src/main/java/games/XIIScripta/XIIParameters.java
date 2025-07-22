@@ -17,6 +17,7 @@ public class XIIParameters extends BGParameters {
         addTunableParameter("startingAt8", 0);
         addTunableParameter("startingAt13", 0);
         addTunableParameter("startingAt24", 0);
+        addTunableParameter("doubleActions", true);
         addTunableParameter("route", Route.Common);
         addTunableParameter("entryRule", EntryRule.Home);
         _reset();

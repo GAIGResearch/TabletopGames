@@ -27,6 +27,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
     public int entryBoardSize = 0; // Number of points in the entry board (0 if not used)
     public int diceNumber = 2; // Number of dice used in the game
     public int diceSides = 6; // Number of sides on each die
+    public boolean doubleActions = true; // Whether doubles allow double actions
     public Route route = Route.Counter; // Route type for the game
     public EntryRule entryRule = EntryRule.Bar; // Entry rule for pieces
 
@@ -52,6 +53,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
         addTunableParameter("startingAt24", 2);
         addTunableParameter("diceNumber", 2);
         addTunableParameter("diceSides", 6);
+        addTunableParameter("doubleActions", true);
         addTunableParameter("route", Route.Counter);
         addTunableParameter("entryRule", EntryRule.Bar);
         _reset();
@@ -91,6 +93,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
         startingAtBar = (int) getParameterValue("startingAtBar");
         diceNumber = (int) getParameterValue("diceNumber");
         diceSides = (int) getParameterValue("diceSides");
+        doubleActions = (boolean) getParameterValue("doubleActions");
         route = (Route) getParameterValue("route");
         entryRule = (EntryRule) getParameterValue("entryRule");
     }
