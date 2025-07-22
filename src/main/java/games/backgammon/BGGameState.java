@@ -170,6 +170,15 @@ public class BGGameState extends AbstractGameState {
         return Arrays.copyOf(values, count);
     }
 
+    public int piecesOnEntryBoard(int playerId) {
+        BGParameters params = (BGParameters) getGameParameters();
+        int count = 0;
+        for (int i = 0; i < params.entryBoardSize; i++) {
+            count += getPiecesOnPoint(playerId, playerTrackMapping[playerId][i]);
+        }
+        return count;
+    }
+
     public int piecesOnHomeBoard(int playerId) {
         BGParameters params = (BGParameters) getGameParameters();
         int count = 0;
@@ -181,7 +190,7 @@ public class BGGameState extends AbstractGameState {
 
     public boolean allPiecesOnHomeBoard(int playerId) {
         BGParameters params = (BGParameters) getGameParameters();
-        return piecesOnHomeBoard(playerId) == (params.piecesPerPlayer - piecesBorneOff[playerId]);
+        return piecesOnHomeBoard(playerId) == params.piecesPerPlayer - piecesBorneOff[playerId];
     }
 
     @Override

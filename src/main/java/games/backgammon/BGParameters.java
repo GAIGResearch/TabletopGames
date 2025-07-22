@@ -9,6 +9,12 @@ public class BGParameters extends TunableParameters<BGParameters> {
     public enum Route {
         Common, Counter, CommonHalfA
     }
+    public enum EntryRule {
+        None, Bar, Home
+        // None means that there are no rules - any piece can be moved even if there are some pieces on the bar.
+        // Bar means that pieces on the bar must be moved onto the board before any other pieces can be moved.
+        // Home means that pieces must be moved into the first part of the board before any other pieces can be moved.
+    }
 
     // We add parameters for the dimensions of the backgammon board
     // and the number of pieces for each player.
@@ -18,9 +24,11 @@ public class BGParameters extends TunableParameters<BGParameters> {
     public int boardSize = 24; // Number of points on the board
     public int piecesPerPlayer = 15; // Number of pieces for each player
     public int homeBoardSize = 6; // Number of points in the home board
+    public int entryBoardSize = 0; // Number of points in the entry board (0 if not used)
     public int diceNumber = 2; // Number of dice used in the game
     public int diceSides = 6; // Number of sides on each die
     public Route route = Route.Counter; // Route type for the game
+    public EntryRule entryRule = EntryRule.Bar; // Entry rule for pieces
 
     // starting set up of pieces in backgammon
     // 2 on the bar, 5 in the home board, 3 on the 8 point, and 5 on the 24 point.
@@ -36,6 +44,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
         addTunableParameter("piecesPerPlayer", 15);
         addTunableParameter("barSize", 2);
         addTunableParameter("homeBoardSize", 6);
+        addTunableParameter("entryBoardSize", 0);
         addTunableParameter("startingAtBar", 0);
         addTunableParameter("startingAt6", 5);
         addTunableParameter("startingAt8", 3);
@@ -44,6 +53,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
         addTunableParameter("diceNumber", 2);
         addTunableParameter("diceSides", 6);
         addTunableParameter("route", Route.Counter);
+        addTunableParameter("entryRule", EntryRule.Bar);
         _reset();
     }
 
@@ -73,6 +83,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
         boardSize = (int) getParameterValue("boardSize");
         piecesPerPlayer = (int) getParameterValue("piecesPerPlayer");
         homeBoardSize = (int) getParameterValue("homeBoardSize");
+        entryBoardSize = (int) getParameterValue("entryBoardSize");
         startingAt24 = (int) getParameterValue("startingAt24");
         startingAt8 = (int) getParameterValue("startingAt8");
         startingAt6 = (int) getParameterValue("startingAt6");
@@ -81,5 +92,6 @@ public class BGParameters extends TunableParameters<BGParameters> {
         diceNumber = (int) getParameterValue("diceNumber");
         diceSides = (int) getParameterValue("diceSides");
         route = (Route) getParameterValue("route");
+        entryRule = (EntryRule) getParameterValue("entryRule");
     }
 }

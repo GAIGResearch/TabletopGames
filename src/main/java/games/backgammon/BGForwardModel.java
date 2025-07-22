@@ -10,6 +10,9 @@ import gametemplate.actions.GTAction;
 
 import java.util.*;
 
+import static games.backgammon.BGParameters.EntryRule.Bar;
+import static games.backgammon.BGParameters.EntryRule.Home;
+
 /**
  * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>
  * <ol>
@@ -121,8 +124,8 @@ public class BGForwardModel extends StandardForwardModel {
                 .toArray();
         int boardSize = bgp.boardSize;
 
+        // Moves off the bar first
         if (bgs.getPiecesOnBar(playerId) > 0) {
-            // player has pieces on the bar, so they can only move those
             for (int i : diceAvailable) {
                 int physicalIndex = bgs.getPhysicalSpace(playerId, i - 1);
                 if (bgs.getPiecesOnPoint(1 - playerId, physicalIndex) < 2) {
@@ -130,9 +133,33 @@ public class BGForwardModel extends StandardForwardModel {
                     actions.add(new MovePiece(0, physicalIndex));
                 }
             }
-            if (actions.isEmpty())
-                actions.add(new DoNothing());
-            return actions;
+            if (bgp.entryRule == Home) {
+                // player can move these as long as they stay within the entry board
+                // (or as per previous chunk of code, you can move from the bar onto the board)
+                for (int pos = 0; pos < bgp.entryBoardSize; pos++) {
+                    int physicalIndex = bgs.getPhysicalSpace(playerId, pos);
+                    if (bgs.getPiecesOnPoint(playerId, physicalIndex) > 0) {
+                        // we can move this piece
+                        for (int die : diceAvailable) {
+                            int targetIndex = pos + die;
+                            if (targetIndex < bgp.entryBoardSize) {
+                                int physicalTargetIndex = bgs.getPhysicalSpace(playerId, targetIndex);
+                                if (bgs.getPiecesOnPoint(1 - playerId, physicalTargetIndex) < 2) {
+                                    // we can move to this point
+                                    actions.add(new MovePiece(physicalIndex, physicalTargetIndex));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (bgp.entryRule == Bar || bgp.entryRule == Home) {
+                // we cannot consider other actions until we have moved all pieces from the bar
+                if (actions.isEmpty())
+                    actions.add(new DoNothing());
+                return actions;
+            }
+            // else we can continue and add other actions
         }
 
         if (bgs.allPiecesOnHomeBoard(playerId)) {

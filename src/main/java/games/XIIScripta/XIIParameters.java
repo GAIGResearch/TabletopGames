@@ -10,6 +10,7 @@ public class XIIParameters extends BGParameters {
         addTunableParameter("piecesPerPlayer", 15);
         addTunableParameter("startingAtBar", 15);
         addTunableParameter("homeBoardSize", 6);
+        addTunableParameter("entryBoardSize", 12);
         addTunableParameter("diceNumber", 2);
         addTunableParameter("diceSides", 6);
         addTunableParameter("startingAt6", 0);
@@ -17,6 +18,7 @@ public class XIIParameters extends BGParameters {
         addTunableParameter("startingAt13", 0);
         addTunableParameter("startingAt24", 0);
         addTunableParameter("route", Route.Common);
+        addTunableParameter("entryRule", EntryRule.Home);
         _reset();
     }
 }
