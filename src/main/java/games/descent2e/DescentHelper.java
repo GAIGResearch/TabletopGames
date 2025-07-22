@@ -99,7 +99,7 @@ public class DescentHelper {
         for (BoardNode tile : tiles) {
             int neighbourID = ((PropertyInt) tile.getProperty(playersHash)).value;
             // Continue only if the tile is occupied by a different figure
-            if (neighbourID != -1 || neighbourID != f.getComponentID()) {
+            if (neighbourID != -1 && neighbourID != f.getComponentID()) {
                 Figure other = (Figure) dgs.getComponentById(neighbourID);
                 // For this we don't need to check for line of sight, as we are only checking adjacent tiles
                 // If Friendly Fire is enabled, we don't care whether a Monster is attacking a Monster
@@ -277,6 +277,44 @@ public class DescentHelper {
         newTiles.addAll(tempSet);
 
         return newTiles;
+    }
+
+    public static boolean checkAllSpaces(DescentGameState dgs, Figure f, Figure target, int reach) {
+
+        // We need to check line of sight and reach range from every single tile
+        // that both the attacker and the defender occupy
+        Pair<Integer, Integer> size = f.getSize();
+        Pair<Integer, Integer> targetSize = target.getSize();
+
+        Vector2D position = f.getPosition();
+        Vector2D targetPosition = target.getPosition();
+
+        // If one of the figures is larger than 1x1, we need to check all tiles available
+        if (size.a > 1 || size.b > 1 || targetSize.a > 1 || targetSize.b > 1) {
+
+            List<BoardNode> attackingTiles = new ArrayList<>();
+            List<BoardNode> defendingTiles = new ArrayList<>();
+            attackingTiles.addAll(getAttackingTiles(f.getComponentID(), dgs.getMasterBoard().getElement(f.getPosition()), attackingTiles));
+            defendingTiles.addAll(getAttackingTiles(target.getComponentID(), dgs.getMasterBoard().getElement(target.getPosition()), defendingTiles));
+
+            for (BoardNode iTile : attackingTiles)
+            {
+                position = ((PropertyVector2D) iTile.getProperty("coordinates")).values;
+                for (BoardNode jTile : defendingTiles) {
+                    targetPosition = ((PropertyVector2D) jTile.getProperty("coordinates")).values;
+                    if (inRange(position, targetPosition, reach) &&
+                            hasLineOfSight(dgs, position, targetPosition)) {
+                        // As long as at least one setup is valid, the whole Attack is valid
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // If it's just a simple 1x1 vs 1x1, don't bother with all of that
+
+        return inRange(position, targetPosition, reach) &&
+                hasLineOfSight(dgs, position, targetPosition);
     }
 
     public static boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
@@ -881,14 +919,13 @@ public class DescentHelper {
 
     public static boolean checkAdjacent(DescentGameState dgs, Figure f, Figure target)
     {
-        Vector2D position = f.getPosition();
-        BoardNode currentTile = dgs.masterBoard.getElement(position.getX(), position.getY());
-        Set<BoardNode> neighbours = currentTile.getNeighbours().keySet();
+        Set<BoardNode> adjacentTiles = getAdjacentTiles(dgs, f);
 
-        for (BoardNode neighbour : neighbours) {
-            if (neighbour == null) continue;
-            int neighbourID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
-            if (neighbourID == target.getComponentID()) {
+        for (BoardNode tile : adjacentTiles) {
+            int neighbourID = ((PropertyInt) tile.getProperty(playersHash)).value;
+            // Continue only if the tile is occupied by the target Figure
+            if (neighbourID != -1 && neighbourID == target.getComponentID()) {
+                // If we are adjacent to the target Figure, return true
                 return true;
             }
         }

@@ -58,7 +58,7 @@ public class Air extends DescentAction {
         if (f.getNActionsExecuted().isMaximum()) return false;
         if (f instanceof Monster && !f.hasAttacked())
         {
-            // If the monster already has the Air passive from using this action, there is no point in using it again
+            // If the monster already has the Air Immunity passive from using this action, there is no point in using it again
             return !((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.AIR);
         }
 

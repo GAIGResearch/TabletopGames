@@ -8,8 +8,7 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import utilities.Distance;
 
-import static games.descent2e.DescentHelper.hasLineOfSight;
-import static games.descent2e.DescentHelper.inRange;
+import static games.descent2e.DescentHelper.*;
 
 /**
  * This works in exactly the same way as a Melee Attack
@@ -113,13 +112,25 @@ public class RangedAttack extends MeleeAttack {
         if (target instanceof Monster)
         {
             if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
-                    !DescentHelper.checkAdjacent(dgs, f, target)) {
-                // If the target has the Air passive and we are not adjacent, we cannot attack them
+                    !checkAdjacent(dgs, f, target)) {
+                // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
                 return false;
             }
         }
 
-        return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), MAX_RANGE);
+        return checkAllSpaces(dgs, f, target, getRange());
+    }
+
+    @Override
+    protected int getRange() {
+        int range = MAX_RANGE;
+        if (isMelee) {
+            range = 1;
+        }
+        if (hasReach) {
+            range = 2;
+        }
+        return range;
     }
 
     @Override

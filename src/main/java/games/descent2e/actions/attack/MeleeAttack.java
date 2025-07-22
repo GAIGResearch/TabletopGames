@@ -2,8 +2,11 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.BoardNode;
 import core.components.Deck;
+import core.components.GridBoard;
 import core.interfaces.IExtendedSequence;
+import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
@@ -14,6 +17,8 @@ import games.descent2e.actions.Triggers;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
+import utilities.Pair;
+import utilities.Vector2D;
 
 import java.util.*;
 
@@ -472,14 +477,18 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (target instanceof Monster)
         {
             if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
-                !DescentHelper.checkAdjacent(dgs, f, target)) {
-                // If the target has the Air passive and we are not adjacent, we cannot attack them
+                !checkAdjacent(dgs, f, target)) {
+                // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
                 return false;
             }
         }
 
-        if (hasReach) return inRange(f.getPosition(), target.getPosition(), 2);
-        else return inRange(f.getPosition(), target.getPosition(), 1);
+        return checkAllSpaces(dgs, f, target, getRange());
+    }
+
+    protected int getRange()
+    {
+        return hasReach ? 2 : 1;
     }
 
     @Override

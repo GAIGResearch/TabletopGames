@@ -12,7 +12,7 @@ import games.descent2e.components.Hero;
 import java.util.Arrays;
 import java.util.List;
 
-import static games.descent2e.DescentHelper.inRange;
+import static games.descent2e.DescentHelper.*;
 
 public class AttackAllAdjacent extends MultiAttack {
 
@@ -54,9 +54,17 @@ public class AttackAllAdjacent extends MultiAttack {
         }
         for (int defendingFigure : defendingFigures)
         {
-            if(!inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 1)) return false;
+            Figure target = (Figure) dgs.getComponentById(defendingFigure);
+            if (target == null) return false;
+
+            if (!checkAllSpaces(dgs, f, target, getRange())) return false;
         }
         return true;
+    }
+
+    @Override
+    protected int getRange() {
+        return 1; // This action attacks all adjacent figures, so range is not relevant
     }
 
     public AttackAllAdjacent copy() {

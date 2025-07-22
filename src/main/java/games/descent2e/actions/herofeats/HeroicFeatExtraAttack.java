@@ -9,8 +9,7 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 
-import static games.descent2e.DescentHelper.hasLineOfSight;
-import static games.descent2e.DescentHelper.inRange;
+import static games.descent2e.DescentHelper.*;
 
 public class HeroicFeatExtraAttack extends FreeAttack {
 
@@ -45,23 +44,13 @@ public class HeroicFeatExtraAttack extends FreeAttack {
             if (target instanceof Monster)
             {
                 if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
-                        !DescentHelper.checkAdjacent(dgs, f, target)) {
-                    // If the target has the Air passive and we are not adjacent, we cannot attack them
+                        !checkAdjacent(dgs, f, target)) {
+                    // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
                     return false;
                 }
             }
 
-            int range = MAX_RANGE;
-
-            if (isMelee) {
-                range = 1;
-            }
-            if (hasReach)
-            {
-                range = 2;
-            }
-
-            return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), range);
+            return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), getRange());
         }
         return false;
     }

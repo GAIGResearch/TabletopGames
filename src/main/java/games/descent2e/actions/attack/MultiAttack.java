@@ -63,7 +63,7 @@ public class MultiAttack extends RangedAttack {
         index = 0;
         super.execute(state);
 
-        // remove final "; Result: " from result
+        // Remove final "; Result: " from result
         result = result.substring(0, result.length() - 10);
         for (int i = 1; i < defendingFigures.size(); i++) {
             result += " & " + (state.getComponentById(defendingFigures.get(i)).getComponentName().replace("Hero: ", ""));
@@ -157,6 +157,8 @@ public class MultiAttack extends RangedAttack {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         if (f.getNActionsExecuted().isMaximum()) return false;
+
+        int range = getRange();
         for (int defendingFigure : defendingFigures)
         {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
@@ -165,15 +167,13 @@ public class MultiAttack extends RangedAttack {
             if (target instanceof Monster)
             {
                 if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
-                        !DescentHelper.checkAdjacent(dgs, f, target)) {
-                    // If the target has the Air passive and we are not adjacent, we cannot attack them
+                        !checkAdjacent(dgs, f, target)) {
+                    // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
                     return false;
                 }
             }
 
-            if(!inRange(f.getPosition(), target.getPosition(), MAX_RANGE)) return false;
-            if(!hasLineOfSight(dgs, f.getPosition(), target.getPosition())) return false;
-
+            if (!checkAllSpaces(dgs, f, target, getRange())) return false;
         }
         return true;
     }
