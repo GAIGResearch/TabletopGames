@@ -9,7 +9,6 @@ import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import utilities.Pair;
 import utilities.Utils;
@@ -20,8 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static games.descent2e.DescentHelper.forcedFatigue;
-import static games.descent2e.DescentHelper.webbed;
+import static games.descent2e.DescentHelper.*;
 import static utilities.Utils.getNeighbourhood;
 
 public class Move extends AbstractAction {
@@ -97,66 +95,8 @@ public class Move extends AbstractAction {
 
             // We also cannot move if we are Immobilized and on the map
             if (f.hasCondition(DescentTypes.DescentCondition.Immobilize)) return false;
-            //if (checkCollision(dgs, f, finalPosition)) return false;
         }
         return finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();
-        // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
-    }
-
-    public static boolean checkCollision(DescentGameState dgs, Figure f, Vector2D anchor)
-    {
-        // Check if there is a collision with another figure
-        // We cannot end our movement on a space that is already occupied by another figure
-        boolean collision = false;
-
-        if (f.isOffMap()) return false;
-
-        Pair<Integer, Integer> fSize = f.getSize().copy();
-
-
-
-        if (f instanceof Monster) {
-            anchor = ((Monster) f).applyAnchorModifier();
-            if (((Monster) f).getOrientation().ordinal() % 2 == 1) fSize.swap();
-        }
-
-        for (int a = 0; a < fSize.b; a++) {
-            for (int b = 0; b < fSize.a; b++) {
-                Vector2D endPos = new Vector2D(anchor.getX() + b, anchor.getY() + a);
-                for (Hero h : dgs.getHeroes()) {
-                    if (h.isOffMap()) continue;
-                    if (endPos.equals(h.getPosition())) {
-                        if (f.getComponentID() != h.getComponentID()) {
-                            collision = true;
-                            break;
-                        }
-                    }
-                }
-
-                for (List<Monster> monster : dgs.getMonsters()) {
-                    if (collision) break;
-                    for (Monster m : monster) {
-                        if (m.isOffMap()) continue;
-                        Vector2D topLeftAnchorM = m.applyAnchorModifier();
-                        Pair<Integer, Integer> size = m.getSize().copy();
-                        if (m.getOrientation().ordinal() % 2 == 1) size.swap();
-                        for (int i = 0; i < size.b; i++) {
-                            for (int j = 0; j < size.a; j++) {
-                                Vector2D newPos = new Vector2D(topLeftAnchorM.getX() + j, topLeftAnchorM.getY() + i);
-                                if (endPos.equals(newPos)) {
-                                    if (f.getComponentID() != m.getComponentID()) {
-                                        collision = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return collision;
     }
 
     /**
@@ -346,10 +286,17 @@ public class Move extends AbstractAction {
                         minTerrainOrdinal = terrain.ordinal();
                         minTerrain = terrain;
                     }
-                    if (terrain == DescentTypes.TerrainType.Pit) f.setAttributeToMin(Figure.Attribute.MovePoints);
+                    if (terrain == DescentTypes.TerrainType.Pit) {
+                        f.setAttributeToMin(Figure.Attribute.MovePoints);
+                        f.getAttribute(Figure.Attribute.Health).decrement(2);
+
+                        if (f.getAttribute(Figure.Attribute.Health).isMinimum()) {
+                            figureDeath(dgs, f);
+                            }
+                        }
+                    }
                 }
             }
-        }
 
         // Apply move costs and penalties
         // Large monsters pay the minimum cost only, other figures are 1 tile wide, looking at min terrain only

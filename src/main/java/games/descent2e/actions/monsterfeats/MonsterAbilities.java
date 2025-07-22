@@ -111,7 +111,7 @@ public class MonsterAbilities {
                         int range = 3;
                         for (List<Monster> monsters : dgs.getMonsters()) {
                             for (Monster monster : monsters) {
-                                if (monster.getComponentID() == actingFigure.getComponentID() || inRange(actingFigure.getPosition(), monster.getPosition(), range)) {
+                                if (monster.getComponentID() == actingFigure.getComponentID() || checkAllSpaces(dgs, actingFigure, monster, 3)) {
                                     DescentAction heal = new Heal(monster.getComponentID(), range, true);
                                     if (heal.canExecute(dgs))
                                         actions.add(heal);
@@ -121,13 +121,19 @@ public class MonsterAbilities {
 
                         break;
 
-                    /*case THROW:
+                    case THROW:
 
-                        DescentAction throwAction = new Throw();
-                        if (throwAction.canExecute(dgs))
-                            actions.add(throwAction);
+                        targets = getMeleeTargets(dgs, f, false);
 
-                        break;*/
+                        if (!targets.isEmpty()) {
+                            for (Integer target : targets) {
+                                DescentAction throwAttack = new Throw(actingFigure.getComponentID(), target);
+                                if (throwAttack.canExecute(dgs))
+                                    actions.add(throwAttack);
+                            }
+                        }
+
+                        break;
 
                     case AIR:
 

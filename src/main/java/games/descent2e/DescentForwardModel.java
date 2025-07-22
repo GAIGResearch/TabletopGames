@@ -565,7 +565,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
                 if (position.getComponentName().equals("plain") &&
                         ((PropertyInt) position.getProperty(playersHash)).value == -1) {
-                    //if (position.getComponentName().equals("plain") && !Move.checkCollision(dgs, monster, option)) {
+                    //if (position.getComponentName().equals("plain")) {
                     // TODO: some monsters want to spawn in lava/water.
                     // This can be top-left corner, check if the other tiles are valid too
                     boolean canPlace = true;
