@@ -945,6 +945,32 @@ public class DescentHelper {
         return checkAdjacent(dgs, f, target);
     }
 
+    public static Set<BoardNode> getNeighboursInRange(DescentGameState dgs, Vector2D position, int distance, Set<BoardNode> oldTiles) {
+
+        // Get all neighbours of neighbours of (etc.) from the starting position
+        Set<BoardNode> tiles = new HashSet<>();
+        BoardNode startNode = dgs.getMasterBoard().getElement(position.getX(), position.getY());
+        tiles.add(startNode);
+
+        if (distance <= 0) {
+            return tiles;
+        }
+        else
+        {
+            Set<BoardNode> neighbours = startNode.getNeighbours().keySet();
+            for (BoardNode neighbour : neighbours) {
+
+                // Ignore any invalid tile or ones already checked
+                if (neighbour == null) continue;
+                if (oldTiles.contains(neighbour)) continue;
+
+                Set<BoardNode> subNeighbours = getNeighboursInRange(dgs, ((PropertyVector2D) neighbour.getProperty("coordinates")).values, distance - 1, tiles);
+                tiles.addAll(subNeighbours);
+            }
+        }
+        return tiles;
+    }
+
     public static void immobilize(Figure f) {
         // Any figure that is Immobilized is forced to have its Movement end
         f.addCondition(DescentTypes.DescentCondition.Immobilize);
