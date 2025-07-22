@@ -1116,6 +1116,24 @@ public class DescentForwardModel extends StandardForwardModel {
                 actions.add(attack);
         }
 
+        // If the Figure is a Monster with the Flail passive, we can target two Hereos at once
+        if (f instanceof Monster && ((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.FLAIL)) {
+            // Only proceed if we can actually make pairs out of units to attack
+            if (targets.size() > 1) {
+                for (int i = 0; i < targets.size(); i++) {
+                    for (int j = i + 1; j < targets.size(); j++) {
+                        List<Integer> pair = new ArrayList<>();
+                        pair.add(targets.get(i));
+                        pair.add(targets.get(j));
+
+                        MultiAttack flail = new MultiAttack(f.getComponentID(), pair);
+                        if (flail.canExecute(dgs))
+                            actions.add(flail);
+                    }
+                }
+            }
+        }
+
         Collections.sort(actions, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
 
         List<AbstractAction> sortedActions = new ArrayList<>();

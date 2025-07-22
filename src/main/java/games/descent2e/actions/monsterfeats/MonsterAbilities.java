@@ -29,7 +29,7 @@ public class MonsterAbilities {
         EARTH,
         FIRE,
         WATER,
-        FLAIL;
+        FIREBREATH;
     }
 
     public enum MonsterPassive {
@@ -39,6 +39,7 @@ public class MonsterAbilities {
         SHAMBLING,
         WEB,
         REACH,
+        FLAIL,
         SHADOW,
         AIR;
     }
@@ -95,10 +96,8 @@ public class MonsterAbilities {
 
                         targets = getMeleeTargets(dgs, f, false);
 
-                        if (!targets.isEmpty())
-                        {
-                            for (Integer target : targets)
-                            {
+                        if (!targets.isEmpty()) {
+                            for (Integer target : targets) {
                                 DescentAction grab = new Grab(actingFigure.getComponentID(), target);
                                 if (grab.canExecute(dgs))
                                     actions.add(grab);
@@ -141,32 +140,37 @@ public class MonsterAbilities {
                     case EARTH:
 
                         targets = getAdjacentTargets(dgs, f, false);
-                        DescentAction earth = new Earth(f.getComponentID(), targets);
-                        if (earth.canExecute(dgs))
-                            actions.add(earth);
+                        if (!targets.isEmpty()) {
+                            DescentAction earth = new Earth(f.getComponentID(), targets);
+                            if (earth.canExecute(dgs))
+                                actions.add(earth);
+                        }
 
                         break;
 
-                    /*case FIRE:
+                    case FIRE:
 
+                        // Fire explicitly targets all figures - not just enemy Heroes
+                        // So have fun with Friendly Fire hitting your own Monsters!
                         targets = getAdjacentTargets(dgs, f, true);
-                        DescentAction fire = new Fire(f.getComponentID(), targets);
-                        if (fire.canExecute(dgs))
-                            actions.add(fire);
+                        if (!targets.isEmpty()) {
+                            DescentAction fire = new Fire(f.getComponentID(), targets);
+                            if (fire.canExecute(dgs))
+                                actions.add(fire);
+                        }
 
-                        break;*/
+                        break;
 
                     case WATER:
 
                         targets = getAdjacentTargets(dgs, f, false);
-                        DescentAction water = new Water(f.getComponentID(), targets);
-                        if (water.canExecute(dgs))
-                            actions.add(water);
+                        if (!targets.isEmpty()) {
+                            DescentAction water = new Water(f.getComponentID(), targets);
+                            if (water.canExecute(dgs))
+                                actions.add(water);
+                        }
 
                         break;
-
-                    /*case FLAIL:
-                        break;*/
 
                     default:
                         break;

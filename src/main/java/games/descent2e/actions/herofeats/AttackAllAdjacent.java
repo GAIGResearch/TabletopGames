@@ -57,14 +57,9 @@ public class AttackAllAdjacent extends MultiAttack {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
             if (target == null) return false;
 
-            if (!checkAllSpaces(dgs, f, target, getRange())) return false;
+            if (!checkAdjacent(dgs, f, target)) return false;
         }
         return true;
-    }
-
-    @Override
-    protected int getRange() {
-        return 1; // This action attacks all adjacent figures, so range is not relevant
     }
 
     public AttackAllAdjacent copy() {
