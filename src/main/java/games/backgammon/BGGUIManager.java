@@ -70,7 +70,7 @@ public class BGGUIManager extends AbstractGUIManager {
                 if (action instanceof MovePiece move) {
                     if (move.from == from && move.to == to) {
                         ac.addAction(move);
-                        System.out.printf("Valid action found: MovePiece from %d to %d%n", from, to);
+                  //      System.out.printf("Valid action found: MovePiece from %d to %d%n", from, to);
                         break;
                     }
                 }
