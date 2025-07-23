@@ -56,9 +56,13 @@ public class BGGUIManager extends AbstractGUIManager {
             int from = view.firstClick;
             int to = view.secondClick;
 
-            // Handle special cases for the bar (0) and bearing off (25)
-            if (view.firstClick == 25) from = playerId == 0 ? 0 : -1; // Bar
-            if (view.secondClick == 0) to = playerId == 0 ? -1 : 0; // Bearing off
+            // Handle special cases for the bar and bearing off
+            if (view.firstClick == 25) from = playerId == 0 ? 0 : -1; // bottom right
+            if (view.secondClick == 25) to = playerId == 0 ? 0 : -1;
+            if (view.secondClick == 0) to = playerId == 0 ? -1 : 0; // top right
+            if (view.firstClick == 0) from = playerId == 0 ? -1 : 0; //
+
+            System.out.printf("Checking action from %d to %d for player %d%n", from, to, playerId);
 
             // Check if a valid MovePiece action exists
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(bgState);
@@ -66,6 +70,7 @@ public class BGGUIManager extends AbstractGUIManager {
                 if (action instanceof MovePiece move) {
                     if (move.from == from && move.to == to) {
                         ac.addAction(move);
+                        System.out.printf("Valid action found: MovePiece from %d to %d%n", from, to);
                         break;
                     }
                 }

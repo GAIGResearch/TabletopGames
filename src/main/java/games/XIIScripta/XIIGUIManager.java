@@ -53,9 +53,9 @@ public class XIIGUIManager extends AbstractGUIManager {
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         BGGameState xiiState = (BGGameState) gameState;
 
-        if (view.firstClick != -1 && view.secondClick != -1) {
-            int fromGui = view.firstClick;
-            int toGui = view.secondClick;
+        if (view.getFirstClick() != -1 && view.getSecondClick() != -1) {
+            int fromGui = view.getFirstClick();
+            int toGui = view.getSecondClick();
 
             // Convert GUI space to game state space
             int from = (fromGui >= 1 && fromGui <= 36) ? 37 - fromGui : 0;
@@ -70,8 +70,8 @@ public class XIIGUIManager extends AbstractGUIManager {
                     }
                 }
             }
-            view.firstClick = -1;
-            view.secondClick = -1;
+            view.setFirstClick(-1);
+            view.setSecondClick(-1);
         }
     }
 }

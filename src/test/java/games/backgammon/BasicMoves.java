@@ -21,6 +21,7 @@ public class BasicMoves {
     @Before
     public void setUp() {
         parameters = new BGParameters();
+        parameters.setParameterValue("doubleActions", false);
         gameState = new BGGameState(parameters, 2);
         forwardModel = new BGForwardModel();
         forwardModel.setup(gameState);
@@ -342,7 +343,6 @@ public class BasicMoves {
 
     @Test
     public void rollingADoubleGivesTwoActionsIfRuleSwitchedOff() {
-        parameters.setParameterValue("doubleActions", false);
         gameState.setDiceValues(new int[]{2, 2});
         assertEquals(2, gameState.getAvailableDiceValues().length);
         for (int i = 0; i < 2; i++) {
@@ -358,6 +358,7 @@ public class BasicMoves {
 
     @Test
     public void rollingADoubleGivesFourActions() {
+        parameters.setParameterValue("doubleActions", true);
         gameState.setDiceValues(new int[]{2, 2});
         assertEquals(4, gameState.getAvailableDiceValues().length);
         for (int i = 0; i < 4; i++) {
@@ -393,7 +394,7 @@ public class BasicMoves {
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
             assertEquals(1, gameState.getAvailableDiceValues().length);
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
-            while (gameState.getAvailableDiceValues().length == 4) {
+            while (gameState.getAvailableDiceValues().length > 2) {
                 gameState.rollDice();
             }
             assertEquals(2, gameState.getAvailableDiceValues().length);

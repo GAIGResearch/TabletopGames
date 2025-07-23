@@ -1,52 +1,26 @@
 package games.XIIScripta;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
-import java.util.ArrayList;
 
-import games.backgammon.BGGameState;
-import games.backgammon.MovePiece;
-import games.backgammon.BGForwardModel;
+import games.backgammon.*;
 
 import static java.util.stream.Collectors.toList;
 
-public class XIIBoardView extends JComponent {
+public class XIIBoardView extends BGBoardView {
 
-    private final int boardWidth = 900;
-    private final int boardHeight = 500;
-    private final int squareSize = 50;
-    private final int margin = 30;
-    private final int discRadius = 20;
-    private final int discMargin = 5;
-    private final int verticalGap = squareSize; // Add vertical gap between rows
-
-    private int[][] piecesPerSpace = new int[2][38]; // [player][space], 1-36, 0=bar, 37=bearing off
-    private int[] piecesOnBar = new int[2];
-    private int[] piecesBorneOff = new int[2];
-    private int[] diceValues = new int[2];
-    private BGForwardModel forwardModel;
-    private List<MovePiece> validActions = new ArrayList<>();
-
-    int firstClick = -1;
-    int secondClick = -1;
-
-    // Helper to convert GUI space to game state space (reverse mapping)
-    private int guiToGameStateSpace(int guiSpace) {
-        if (guiSpace >= 1 && guiSpace <= 36) {
-            return 37 - guiSpace;
-        }
-        if (guiSpace == 37)
-            return -1;
-        // Bar and bearing off zones remain unchanged
-        return guiSpace;
-    }
+    protected final int squareSize = 50;
+    protected final int verticalGap = squareSize; // Add vertical gap between rows
 
     public XIIBoardView(BGForwardModel model) {
+        super(model);
+        boardWidth = 900;
+        boardHeight = 500;
+        margin = 30;
         this.setPreferredSize(new Dimension(boardWidth, boardHeight));
         forwardModel = model;
+        piecesPerPoint = new int[2][38]; // 2 players, 38 spaces (1-36, bar, bearing off)
 
         this.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
@@ -97,6 +71,17 @@ public class XIIBoardView extends JComponent {
         });
     }
 
+    // Helper to convert GUI space to game state space (reverse mapping)
+    private int guiToGameStateSpace(int guiSpace) {
+        if (guiSpace >= 1 && guiSpace <= 36) {
+            return 37 - guiSpace;
+        }
+        if (guiSpace == 37)
+            return -1;
+        // Bar and bearing off zones remain unchanged
+        return guiSpace;
+    }
+
     // When updating, map game state positions to GUI positions
     public synchronized void update(BGGameState state) {
         int nPlayers = state.getNPlayers();
@@ -109,11 +94,11 @@ public class XIIBoardView extends JComponent {
             // Map game state positions to GUI positions
             for (int guiSpace = 1; guiSpace <= 36; guiSpace++) {
                 int gameStateSpace = guiToGameStateSpace(guiSpace);
-                piecesPerSpace[player][guiSpace] = state.getPiecesOnPoint(player, gameStateSpace);
+                piecesPerPoint[player][guiSpace] = state.getPiecesOnPoint(player, gameStateSpace);
             }
             // Bar and bearing off zones
-            piecesPerSpace[player][0] = state.getPiecesOnBar(player);
-            piecesPerSpace[player][37] = state.getPiecesBorneOff(player);
+            piecesPerPoint[player][0] = state.getPiecesOnBar(player);
+            piecesPerPoint[player][37] = state.getPiecesBorneOff(player);
             piecesOnBar[player] = state.getPiecesOnBar(player);
             piecesBorneOff[player] = state.getPiecesBorneOff(player);
         }
@@ -133,15 +118,13 @@ public class XIIBoardView extends JComponent {
 
         // Draw discs on squares
         for (int space = 1; space <= 36; space++) {
-            int player = piecesPerSpace[0][space] > 0 ? 0 : (piecesPerSpace[1][space] > 0 ? 1 : -1);
+            int player = piecesPerPoint[0][space] > 0 ? 0 : (piecesPerPoint[1][space] > 0 ? 1 : -1);
             int[] pos = getSpacePosition(space);
             drawSquare(g2d, pos[0], pos[1], space);
             if (player == -1) continue;
-            int numDiscs = piecesPerSpace[player][space];
-            drawDiscs(g2d, pos[0], pos[1], numDiscs, player);
+            int numDiscs = piecesPerPoint[player][space];
+            drawDiscs(g2d, pos[0], pos[1], numDiscs, player, false);
         }
-
-        // Do NOT draw discs on bar or borne off zones
 
         // Draw dice in the center
         drawDice(g2d, boardWidth / 2, boardHeight * 3 / 4);
@@ -197,17 +180,6 @@ public class XIIBoardView extends JComponent {
         g2d.drawRect(x, y, squareSize, squareSize);
     }
 
-    private void drawDiscs(Graphics2D g2d, int x, int y, int numDiscs, int player) {
-        for (int i = 0; i < numDiscs; i++) {
-            int dx = x;
-            int dy = y - i * (discRadius + discMargin);
-            g2d.setColor(player == 0 ? Color.WHITE : Color.BLACK);
-            g2d.fillOval(dx, dy, discRadius, discRadius);
-            g2d.setColor(Color.BLACK);
-            g2d.drawOval(dx, dy, discRadius, discRadius);
-        }
-    }
-
     private int[] getSpacePosition(int space) {
         // Returns [x, y] for the top-left of the square for a given space, with vertical gaps
         if (space == 0) // bar
@@ -223,37 +195,4 @@ public class XIIBoardView extends JComponent {
         return new int[]{0, 0};
     }
 
-    private void drawDice(Graphics2D g2d, int centerX, int centerY) {
-        int dieSize = 40;
-        int dieMargin = 10;
-        for (int i = 0; i < diceValues.length; i++) {
-            int x = centerX - (diceValues.length * (dieSize + dieMargin)) / 2 + i * (dieSize + dieMargin);
-            int y = centerY - dieSize / 2;
-            g2d.setColor(Color.WHITE);
-            g2d.fillRoundRect(x, y, dieSize, dieSize, 10, 10);
-            g2d.setColor(Color.BLACK);
-            g2d.drawRoundRect(x, y, dieSize, dieSize, 10, 10);
-            drawDieFace(g2d, x, y, dieSize, diceValues[i]);
-        }
-    }
-
-    private void drawDieFace(Graphics2D g2d, int x, int y, int size, int value) {
-        int dotSize = size / 6;
-        int offset = size / 4;
-        g2d.setColor(Color.BLACK);
-        if (value == 1 || value == 3 || value == 5)
-            g2d.fillOval(x + size / 2 - dotSize / 2, y + size / 2 - dotSize / 2, dotSize, dotSize);
-        if (value >= 2) {
-            g2d.fillOval(x + offset - dotSize / 2, y + offset - dotSize / 2, dotSize, dotSize);
-            g2d.fillOval(x + size - offset - dotSize / 2, y + size - offset - dotSize / 2, dotSize, dotSize);
-        }
-        if (value >= 4) {
-            g2d.fillOval(x + offset - dotSize / 2, y + size - offset - dotSize / 2, dotSize, dotSize);
-            g2d.fillOval(x + size - offset - dotSize / 2, y + offset - dotSize / 2, dotSize, dotSize);
-        }
-        if (value == 6) {
-            g2d.fillOval(x + offset - dotSize / 2, y + size / 2 - dotSize / 2, dotSize, dotSize);
-            g2d.fillOval(x + size - offset - dotSize / 2, y + size / 2 - dotSize / 2, dotSize, dotSize);
-        }
-    }
 }
