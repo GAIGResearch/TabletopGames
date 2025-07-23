@@ -60,7 +60,7 @@ public class BGBoardView extends JComponent {
                             default -> point + 13;
                         };
                     }
-                    System.out.printf("Clicked at (%d, %d), mapped to point %d%n", x, y, point);
+           //        System.out.printf("Clicked at (%d, %d), mapped to point %d%n", x, y, point);
                     // this is from the perspective of player 0
                     if (firstClick == -1)
                         firstClick = point;

@@ -62,7 +62,7 @@ public class BGGUIManager extends AbstractGUIManager {
             if (view.secondClick == 0) to = playerId == 0 ? -1 : 0; // top right
             if (view.firstClick == 0) from = playerId == 0 ? -1 : 0; //
 
-            System.out.printf("Checking action from %d to %d for player %d%n", from, to, playerId);
+//            System.out.printf("Checking action from %d to %d for player %d%n", from, to, playerId);
 
             // Check if a valid MovePiece action exists
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(bgState);
