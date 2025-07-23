@@ -59,7 +59,7 @@ public class XIIBoardView extends BGBoardView {
                         }
                     }
                 }
-                System.out.printf("Clicked at (%d, %d), mapped to point %d%n", x, y, space);
+         //       System.out.printf("Clicked at (%d, %d), mapped to point %d%n", x, y, space);
 
                 if (evt.getButton() == MouseEvent.BUTTON1) {
                     if (firstClick == -1)
