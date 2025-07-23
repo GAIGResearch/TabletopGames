@@ -424,7 +424,7 @@
     "type": ["String", "Monster"],
     "setup": ["Integer[]", [1, 0, 1]],
     "traits": ["String[]", ["Dark", "Cave"]],
-    "size": ["String", "2x3"],
+    "size": ["String", "3x2"],
     "img": ["String", "monsters/shadow-dragon.png"],
     "attackType": ["String", "melee"],
     "description": ["String", "Some fragmented records from the Dragon Wars speak of dragons that shrouded themselves in darkness, emerging from the blackness only to kindle their flames. The idea of such a large enemy moving with such stealth and secrecy is obviously terrifying. Fortunately, Shadow Dragons are nothing more than legend."],
