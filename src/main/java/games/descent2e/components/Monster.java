@@ -168,8 +168,10 @@ public class Monster extends Figure {
         // For simplicity's sake, we are assuming that number never goes above 3
         // As no monster has a Surge with a value greater than 3 in the base game
         // Otherwise we will need to fix the Surges called
-        if (Integer.parseInt(number) > 3)
-            number = "3";
+        if (!number.isEmpty()) {
+            if (Integer.parseInt(number) > 3)
+                number = "3";
+        }
 
         // Get rid of the unwanted characters in the string
         surge = surge.replace("Surge: ", "");
