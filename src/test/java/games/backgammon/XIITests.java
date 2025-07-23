@@ -107,6 +107,65 @@ public class XIITests {
     }
 
     @Test
+    public void testNoDoubleMoveToMoveOnToBoardWithHalfA() {
+        initialiseHalfA();
+        gameState.setDiceValues(new int[]{1, 4});
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+
+        assertTrue(availableActions.contains(new MovePiece(0, 36)));
+        assertTrue(availableActions.contains(new MovePiece(0, 33)));
+        assertEquals(2, availableActions.size());
+
+        // if we then move one piece, we cannot continue to move that piece
+        forwardModel.next(gameState, new MovePiece(0, 36));
+        availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(0, gameState.getCurrentPlayer());
+        assertTrue(availableActions.contains(new MovePiece(0, 33)));
+        assertEquals(1, availableActions.size());
+    }
+
+    @Test
+    public void firstPlayerJumpsOverOtherPlayersHomeBoardWithHalfA() {
+        initialiseHalfA();
+        do {
+            gameState.movePiece(0, 0, 31);
+        } while (gameState.getPiecesOnBar(0) > 0);
+
+        gameState.setDiceValues(new int[]{4, 4});
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+        assertTrue(availableActions.contains(new MovePiece(31, 21)));
+        assertEquals(1, availableActions.size());
+        forwardModel.next(gameState, new MovePiece(31, 21));
+        availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(0, gameState.getCurrentPlayer());
+        assertTrue(availableActions.contains(new MovePiece(21, 17)));
+        assertTrue(availableActions.contains(new MovePiece(31, 21)));
+        assertEquals(2, availableActions.size());
+    }
+
+    @Test
+    public void secondPlayerMovesToOwnHalfBoardWithHalfA() {
+        initialiseHalfA();
+        do {
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+        } while (gameState.getCurrentPlayer() == 0);
+
+        gameState.setDiceValues(new int[]{1, 4});
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+
+        assertTrue(availableActions.contains(new MovePiece(0, 30)));
+        assertTrue(availableActions.contains(new MovePiece(0, 27)));
+        assertEquals(2, availableActions.size());
+
+        // if we then move one piece, we cannot continue to move that piece
+        forwardModel.next(gameState, new MovePiece(0, 30));
+        availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(1, gameState.getCurrentPlayer());
+        assertTrue(availableActions.contains(new MovePiece(0, 27)));
+        assertEquals(1, availableActions.size());
+    }
+
+    @Test
     public void testSecondPlayerCanBlotFirstMoves() {
         gameState.setDiceValues(new int[]{2, 3});
         forwardModel.next(gameState, new MovePiece(0, 35));
@@ -220,6 +279,11 @@ public class XIITests {
         assertFalse(availableActions.contains(new MovePiece(27, 22))); // this would take us off the entry board
         assertTrue(availableActions.contains(new MovePiece(0, 32)));
         assertEquals(1, availableActions.size());
+    }
+
+    @Test
+    public void allOnHomeBoardToBearOffWithHalfA() {
+        fail("Not yet implemented");
     }
 
 }

@@ -202,7 +202,10 @@ public class BGGameState extends AbstractGameState {
         BGParameters params = (BGParameters) getGameParameters();
         int count = 0;
         for (int i = 0; i < params.homeBoardSize; i++) {
-            count += getPiecesOnPoint(playerId, playerTrackMapping[playerId][params.boardSize - i - 1]);
+            if (params.route == BGParameters.Route.CommonHalfA)
+                count += getPiecesOnPoint(playerId, playerTrackMapping[playerId][params.boardSize - params.entryBoardSize - i - 1]);
+            else
+                count += getPiecesOnPoint(playerId, playerTrackMapping[playerId][params.boardSize - i - 1]);
         }
         return count;
     }

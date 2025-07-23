@@ -128,7 +128,7 @@ public class BGForwardModel extends StandardForwardModel {
         int[] diceAvailable = Arrays.stream(bgs.getAvailableDiceValues())
                 .distinct()
                 .toArray();
-        int boardSize = bgp.boardSize;
+        int boardSize = bgp.route == BGParameters.Route.CommonHalfA ? bgp.boardSize - bgp.entryBoardSize : bgp.boardSize;
 
         // Moves off the bar first
         if (bgs.getPiecesOnBar(playerId) > 0) {
