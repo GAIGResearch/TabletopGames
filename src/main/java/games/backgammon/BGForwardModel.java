@@ -57,7 +57,7 @@ public class BGForwardModel extends StandardForwardModel {
         // Players move 'naturally' on the counters' list so that they move from index 0 through to the end
         // Hence, playerTrackMapping is {24...1} for white, and {1...24} for black.
         gameState.playerTrackMapping = bgp.route == BGParameters.Route.CommonHalfA ?
-                new int[2][bgp.boardSize - bgp.homeBoardSize] :
+                new int[2][bgp.boardSize - bgp.entryBoardSize] :
                 new int[2][bgp.boardSize];
         for (int i = 0; i < bgp.boardSize; i++) {
             switch (bgp.route) {
@@ -71,11 +71,18 @@ public class BGForwardModel extends StandardForwardModel {
                 }
                 case CommonHalfA -> {
                     // in this case we use a different first 6 spaces for each player
-                    gameState.playerTrackMapping[0][i] = bgp.boardSize - i - bgp.homeBoardSize;
-                    gameState.playerTrackMapping[1][i] = bgp.boardSize - i - bgp.homeBoardSize;
+                    if (i < bgp.entryBoardSize) {
+                        gameState.playerTrackMapping[0][i] = bgp.boardSize - i;
+                        gameState.playerTrackMapping[1][i] = bgp.boardSize - i - bgp.entryBoardSize;
+                    } else if (i >= bgp.boardSize - bgp.entryBoardSize) {
+                        // do nothing ... these spaces do not exist
+                    } else {
+                        // the rest of the board is the same for both players
+                        gameState.playerTrackMapping[0][i] = bgp.boardSize - i - bgp.entryBoardSize;
+                        gameState.playerTrackMapping[1][i] = bgp.boardSize - i - bgp.entryBoardSize;
+                    }
                 }
             }
-
         }
         gameState.movedThisTurn = new ArrayList<>();
         gameState.piecesBorneOff = new int[2];

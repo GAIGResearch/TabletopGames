@@ -4,6 +4,8 @@ import games.XIIScripta.XIIParameters;
 import org.junit.Before;
 import org.junit.Test;
 
+import static games.backgammon.BGParameters.EntryRule.Bar;
+import static games.backgammon.BGParameters.Route.CommonHalfA;
 import static org.junit.Assert.*;
 
 public class XIITests {
@@ -20,6 +22,15 @@ public class XIITests {
         forwardModel.setup(gameState);
     }
 
+    public void initialiseHalfA() {
+        parameters.setParameterValue("route", CommonHalfA);
+        parameters.setParameterValue("entryRule", Bar);
+        parameters.setParameterValue("entryBoardSize", 6);
+        gameState = new BGGameState(parameters, 2);
+        forwardModel = new BGForwardModel();
+        forwardModel.setup(gameState);
+    }
+
     @Test
     public void testPhysicalSpacesMatchTracker() {
         assertEquals(37, gameState.counters.size());
@@ -27,6 +38,30 @@ public class XIITests {
         for (int i = 0; i < 36; i++) {
             assertEquals(36 - i, gameState.getPhysicalSpace(0, i));
             assertEquals(36 - i, gameState.getPhysicalSpace(1, i));
+        }
+    }
+
+    @Test
+    public void testPhysicalSpacesMatchTrackerHalfA() {
+        initialiseHalfA();
+        assertEquals(37, gameState.counters.size());
+        assertEquals(30, gameState.playerTrackMapping[0].length);
+        assertEquals(30, gameState.playerTrackMapping[1].length);
+        for (int i = 0; i < 36; i++) {
+            switch (i) {
+                case 0, 1, 2, 3, 4, 5:
+                    assertEquals(36 - i, gameState.getPhysicalSpace(0, i));
+                    assertEquals(30 - i, gameState.getPhysicalSpace(1, i));
+                    break;
+                case 30, 31, 32, 33, 34, 35:
+                    int finalI = i;
+                    assertThrows(ArrayIndexOutOfBoundsException.class, () -> gameState.getPhysicalSpace(0, finalI));
+                    assertThrows(ArrayIndexOutOfBoundsException.class, () -> gameState.getPhysicalSpace(1, finalI));
+                    break;
+                default:
+                    assertEquals(30 - i, gameState.getPhysicalSpace(0, i));
+                    assertEquals(30 - i, gameState.getPhysicalSpace(1, i));
+            }
         }
     }
 
