@@ -394,9 +394,6 @@ public class BasicMoves {
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
             assertEquals(1, gameState.getAvailableDiceValues().length);
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
-            while (gameState.getAvailableDiceValues().length > 2) {
-                gameState.rollDice();
-            }
             assertEquals(2, gameState.getAvailableDiceValues().length);
         }
     }
@@ -409,9 +406,6 @@ public class BasicMoves {
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
             assertEquals(1, gameState.getAvailableDiceValues().length);
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
-            while (gameState.getAvailableDiceValues().length == 4) {
-                gameState.rollDice();
-            }
             assertEquals(2, gameState.getAvailableDiceValues().length);
         }
     }

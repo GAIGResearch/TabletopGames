@@ -27,6 +27,7 @@ public class XIIGUIManager extends AbstractGUIManager {
         width = boardWidth;
         height = boardHeight;
 
+        parent.removeAll(); // from BGGUIManager
         JPanel infoPanel = createGameStateInfoPanel("XII Scripta", state, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 

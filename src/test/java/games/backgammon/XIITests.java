@@ -283,7 +283,27 @@ public class XIITests {
 
     @Test
     public void allOnHomeBoardToBearOffWithHalfA() {
-        fail("Not yet implemented");
+        initialiseHalfA();
+        // first we move all pieces except 1 to region A
+        int piecesOnBar = gameState.getPiecesOnBar(0);
+        for (int i = 0; i < piecesOnBar - 1; i++) {
+            gameState.movePiece(0, 0, 3);
+        }
+        gameState.movePiece(0, 0, 7);
+        gameState.movedThisTurn.clear();
+        gameState.setDiceValues(new int[]{5, 6});
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+        assertTrue(availableActions.contains(new MovePiece(7, 1)));
+        assertTrue(availableActions.contains(new MovePiece(7, 2)));
+        assertEquals(2, availableActions.size());
+
+        forwardModel.next(gameState, new MovePiece(7, 2));
+        availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(0, gameState.getCurrentPlayer());
+        assertTrue(availableActions.contains(new MovePiece(2, -1)));
+        assertTrue(availableActions.contains(new MovePiece(3, -1)));
+        assertEquals(2, availableActions.size());
+
     }
 
 }

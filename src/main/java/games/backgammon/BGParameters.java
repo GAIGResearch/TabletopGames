@@ -4,6 +4,9 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class BGParameters extends TunableParameters<BGParameters> {
 
     public enum Route {
@@ -44,7 +47,6 @@ public class BGParameters extends TunableParameters<BGParameters> {
     public BGParameters() {
         addTunableParameter("boardSize", 24);
         addTunableParameter("piecesPerPlayer", 15);
-        addTunableParameter("barSize", 2);
         addTunableParameter("homeBoardSize", 6);
         addTunableParameter("entryBoardSize", 0);
         addTunableParameter("startingAtBar", 0);
@@ -54,7 +56,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
         addTunableParameter("startingAt24", 2);
         addTunableParameter("diceNumber", 2);
         addTunableParameter("diceSides", 6);
-        addTunableParameter("doubleActions", true);
+        addTunableParameter("doubleActions", true, List.of(false, true));
         addTunableParameter("route", Route.Counter);
         addTunableParameter("entryRule", EntryRule.Bar);
         _reset();

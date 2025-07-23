@@ -22,6 +22,8 @@ public class XIIBoardView extends BGBoardView {
         forwardModel = model;
         piecesPerPoint = new int[2][38]; // 2 players, 38 spaces (1-36, bar, bearing off)
 
+        this.removeMouseListener(this.getMouseListeners()[0]); // Remove  existing mouse listener (from BGBoardView)
+
         this.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 int x = evt.getX();
@@ -57,6 +59,7 @@ public class XIIBoardView extends BGBoardView {
                         }
                     }
                 }
+                System.out.printf("Clicked at (%d, %d), mapped to point %d%n", x, y, space);
 
                 if (evt.getButton() == MouseEvent.BUTTON1) {
                     if (firstClick == -1)

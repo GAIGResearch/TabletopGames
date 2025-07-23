@@ -23,7 +23,6 @@ public class BGBoardView extends JComponent {
     protected int[] piecesOnBar = new int[2];      // [player]
     protected int[] piecesBorneOff = new int[2];   // [player]
     protected int[] diceValues = new int[2];
-    protected boolean[] diceUsed = new boolean[2];
     protected BGForwardModel forwardModel;
     protected List<MovePiece> validActions = new ArrayList<>();
     protected int currentPlayer = 0;
@@ -109,7 +108,6 @@ public class BGBoardView extends JComponent {
             }
         }
         diceValues = state.getAvailableDiceValues();
-        diceUsed = state.diceUsed.clone();
 
         // Repaint the board to reflect the updated state
         repaint();
@@ -269,7 +267,7 @@ public class BGBoardView extends JComponent {
             int y = centerY - dieSize / 2;
 
             // Set color based on whether the die has been used
-            g2d.setColor(diceUsed[i] ? Color.LIGHT_GRAY : Color.WHITE);
+            g2d.setColor(Color.WHITE);
             g2d.fillRoundRect(x, y, dieSize, dieSize, 10, 10);
 
             g2d.setColor(Color.BLACK);
