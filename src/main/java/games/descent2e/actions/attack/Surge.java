@@ -33,7 +33,8 @@ public enum Surge {
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
         a.addDamage(2);
-    });
+    }),
+    FIRE_BREATH(1, (a, s) -> a.addInterruptAttack("Fire Breath"));
 
     private final BiConsumer<MeleeAttack, DescentGameState> lambda;
     private final int surgesUsed;

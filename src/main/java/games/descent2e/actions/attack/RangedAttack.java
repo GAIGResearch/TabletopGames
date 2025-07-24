@@ -35,6 +35,12 @@ public class RangedAttack extends MeleeAttack {
     public boolean attackMissed(DescentGameState state) {
         if (super.attackMissed(state))
             return true; // due to no damage done
+
+        // We have children inheriting from RangedAttack which are technically MeleeAttacks
+        // For normal RangedAttacks we ignore this following check and continue
+        // But for any children that are MeleeAttacks, we can stop here
+        if (isMelee) return false;
+
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         if (defender == null) {

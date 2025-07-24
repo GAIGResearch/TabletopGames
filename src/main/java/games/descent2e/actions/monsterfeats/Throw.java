@@ -65,8 +65,7 @@ public class Throw extends TriggerAttributeTest {
 
         Figure target = (Figure) dgs.getComponentById(defendingFigure);
         if (target.isOffMap()) {
-            Set<BoardNode> targetSpaces = new HashSet<>();
-            targetSpaces = getNeighboursInRange(dgs, target.getPosition(), distance, targetSpaces);
+            Set<BoardNode> targetSpaces = getNeighboursInRange(dgs, target.getPosition(), distance);
 
             for (BoardNode space : targetSpaces) {
                 if (space == null) continue;

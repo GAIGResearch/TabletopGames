@@ -204,8 +204,7 @@ public class Monster extends Figure {
                 surges.add(Surge.STUN);
                 break;
             case "FIREBREATH":
-                // TODO - Implement FIREBREATH for Surges, when we get to the Dragons
-                //surges.add(Surge.FIREBREATH);
+                surges.add(Surge.FIRE_BREATH);
                 break;
             default:
                 break;

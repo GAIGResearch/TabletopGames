@@ -281,6 +281,8 @@ public class DescentHelper {
 
     public static boolean checkAllSpaces(DescentGameState dgs, Figure f, Figure target, int reach) {
 
+        if (reach < 0) return false;
+
         // We need to check line of sight and reach range from every single tile
         // that both the attacker and the defender occupy
         Pair<Integer, Integer> size = f.getSize();
@@ -315,6 +317,43 @@ public class DescentHelper {
 
         return inRange(position, targetPosition, reach) &&
                 hasLineOfSight(dgs, position, targetPosition);
+    }
+
+    public static int getRangeAllSpaces(DescentGameState dgs, Figure f, Figure target) {
+
+        // We need to check line of sight and reach range from every single tile
+        // that both the attacker and the defender occupy
+        Pair<Integer, Integer> size = f.getSize();
+        Pair<Integer, Integer> targetSize = target.getSize();
+
+        Vector2D position = f.getPosition();
+        Vector2D targetPosition = target.getPosition();
+
+        int range = Integer.MAX_VALUE; // Arbitrarily large number, to be reduced later
+
+        // If one of the figures is larger than 1x1, we need to check all tiles available
+        if (size.a > 1 || size.b > 1 || targetSize.a > 1 || targetSize.b > 1) {
+
+            List<BoardNode> attackingTiles = new ArrayList<>();
+            List<BoardNode> defendingTiles = new ArrayList<>();
+            attackingTiles.addAll(getAttackingTiles(f.getComponentID(), dgs.getMasterBoard().getElement(f.getPosition()), attackingTiles));
+            defendingTiles.addAll(getAttackingTiles(target.getComponentID(), dgs.getMasterBoard().getElement(target.getPosition()), defendingTiles));
+
+            for (BoardNode iTile : attackingTiles)
+            {
+                position = ((PropertyVector2D) iTile.getProperty("coordinates")).values;
+                for (BoardNode jTile : defendingTiles) {
+                    targetPosition = ((PropertyVector2D) jTile.getProperty("coordinates")).values;
+                    Vector2D newRange2D = getRange(position, targetPosition);
+                    int newRange = Math.max(newRange2D.getX(), newRange2D.getY());
+                    range = Math.min(range, newRange);
+                }
+            }
+        }
+
+        // If it's just a simple 1x1 vs 1x1, don't bother with all of that
+
+        return range;
     }
 
     public static boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
@@ -945,14 +984,15 @@ public class DescentHelper {
         return checkAdjacent(dgs, f, target);
     }
 
-    public static Set<BoardNode> getNeighboursInRange(DescentGameState dgs, Vector2D position, int distance, Set<BoardNode> oldTiles) {
+    public static Set<BoardNode> getNeighboursInRange(DescentGameState dgs, Vector2D position, int distance) {
 
         // Get all neighbours of neighbours of (etc.) from the starting position
         Set<BoardNode> tiles = new HashSet<>();
         BoardNode startNode = dgs.getMasterBoard().getElement(position.getX(), position.getY());
         tiles.add(startNode);
 
-        if (distance <= 0) {
+        if (distance <= 1) {
+            tiles.addAll(startNode.getNeighbours().keySet());
             return tiles;
         }
         else
@@ -962,9 +1002,8 @@ public class DescentHelper {
 
                 // Ignore any invalid tile or ones already checked
                 if (neighbour == null) continue;
-                if (oldTiles.contains(neighbour)) continue;
 
-                Set<BoardNode> subNeighbours = getNeighboursInRange(dgs, ((PropertyVector2D) neighbour.getProperty("coordinates")).values, distance - 1, tiles);
+                Set<BoardNode> subNeighbours = getNeighboursInRange(dgs, ((PropertyVector2D) neighbour.getProperty("coordinates")).values, distance - 1);
                 tiles.addAll(subNeighbours);
             }
         }

@@ -2,11 +2,8 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.BoardNode;
 import core.components.Deck;
-import core.components.GridBoard;
 import core.interfaces.IExtendedSequence;
-import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
@@ -15,10 +12,9 @@ import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.items.Shield;
+import games.descent2e.actions.monsterfeats.FireBreath;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
-import utilities.Pair;
-import utilities.Vector2D;
 
 import java.util.*;
 
@@ -45,6 +41,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         PRE_DAMAGE(TAKE_DAMAGE, DEFENDER),
         POST_DAMAGE(ROLL_OWN_DICE, DEFENDER),
         NEXT_TARGET,        // This is only used in MultiAttacks, where we repeat the attack on the next target
+        INTERRUPT_ATTACK(ACTION_POINT_SPEND, ATTACKER),   // This is used for extra attacks (e.g. Fire Breath) that can trigger from Surges from this attack
         ALL_DONE;
 
         public final Triggers interrupt;
@@ -84,7 +81,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     boolean skip = false;
     boolean reduced = false;
     protected boolean isMelee = true;
-    boolean isFreeAttack = false;
+    protected boolean isFreeAttack = false;
 
     public String result = "";
 
@@ -139,7 +136,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             }
         }
 
-        result = "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
+        result = getInitialResult(state);
 
         movePhaseForward(state);
 
@@ -147,6 +144,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (!isFreeAttack) attacker.getNActionsExecuted().increment();
 
         attacker.setHasAttacked(true);
+
+        removeInterruptAttacks();
 
         // When executing a melee attack we need to:
         // 1) roll the dice (with possible interrupt beforehand)
@@ -255,7 +254,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     //System.out.println(this.toString() + " (" + this.getString(state)  + ") missed!");
                     result += "Missed; Damage: " + damage + "; Range: " + range;
                     attacker.addActionTaken(toStringWithResult());
-                    phase = ALL_DONE;
+
+                    // Even if our initial attack missed, any addition interrupt attacks might still hit
+                    phase = INTERRUPT_ATTACK;
                 }
                 else {
                     defenceRoll(state);
@@ -272,9 +273,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             case POST_DAMAGE:
                 applyDamage(state);
                 attacker.addActionTaken(toStringWithResult());
-                phase = ALL_DONE;
+                phase = INTERRUPT_ATTACK;
                 //System.out.println(this.toString() + " (" + this.getString(state)  + ") done!");
                 break;
+            case INTERRUPT_ATTACK:
+                phase = ALL_DONE;
         }
         // and reset interrupts
     }
@@ -368,13 +371,14 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         defenderName = defender.getComponentName().replace("Hero: ", "");
 
-        // If the target has the Shadow passive and we did not spend a Shadow surge, automatically miss
-        if (hasShadow && !hitShadow) {
-            if (defender instanceof Monster && ((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.SHADOW) && !surgesUsed.contains(Surge.SHADOW))
-            {
-                System.out.println("Missed due to Shadow passive, and no surge spent to counter.");
-                result += "Missed; Damage: " + damage + "; Range: " + range;
-                return;
+        // If the attacker is a Hero, target has the Shadow passive and we did not spend a Shadow surge, automatically miss
+        if (attacker instanceof Hero) {
+            if (hasShadow && !hitShadow) {
+                if (defender instanceof Monster && ((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.SHADOW) && !surgesUsed.contains(Surge.SHADOW)) {
+                    //System.out.println("Missed due to Shadow passive, and no surge spent to counter.");
+                    result += "Missed; Damage: " + damage + "; Range: " + range;
+                    return;
+                }
             }
         }
 
@@ -611,6 +615,26 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (phase == POST_DEFENCE_ROLL || phase == PRE_DAMAGE) {
             retValue.add(new EndCurrentPhase());
         }
+
+        // We check for any interrupt attacks that can be used after this attack has concluded
+        if (phase == INTERRUPT_ATTACK)
+        {
+            List<AbstractAction> interruptAttacks = new ArrayList<>();
+            if (FireBreath.isEnabled())
+            {
+                Set<FireBreath> fireBreath = FireBreath.constructFireBreath(state, attackingFigure, defendingFigure);
+                if (!fireBreath.isEmpty()) interruptAttacks.addAll(fireBreath);
+            }
+
+            if (!interruptAttacks.isEmpty())
+            {
+                retValue.addAll(interruptAttacks);
+                // We don't have to make the attack if we don't want to
+                // e.g. if the only legal target for Fire Breath to hit is the Dragon itself
+                retValue.add(new EndCurrentPhase());
+            }
+        }
+
         // Remove any duplicate actions from the return list
         return new ArrayList<>(new HashSet<>(retValue));
     }
@@ -708,5 +732,35 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public void setSkip(boolean s)
     {
         skip = s;
+    }
+
+    public String getInitialResult(DescentGameState dgs)
+    {
+        Figure defender = (Figure) dgs.getComponentById(defendingFigure);
+        return "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
+    }
+
+    public void addInterruptAttack (String attack)
+    {
+        // So far the only interrupt attack we have is Fire Breath
+        // But I'm sure as more Monsters are included beyond the base game
+        // more of these will be included
+
+        switch (attack)
+        {
+            case "Fire Breath":
+                FireBreath.increaseEnabled();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public void removeInterruptAttacks()
+    {
+        // Switch off all interrupt attacks that have been enabled
+        // So that we don't accidentally enable them again for different attacks
+        FireBreath.disable();
     }
 }

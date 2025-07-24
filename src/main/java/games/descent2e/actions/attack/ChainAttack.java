@@ -1,0 +1,108 @@
+package games.descent2e.actions.attack;
+
+import core.AbstractGameState;
+import games.descent2e.DescentGameState;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
+
+import java.util.List;
+import java.util.Objects;
+
+import static games.descent2e.DescentHelper.*;
+
+public class ChainAttack extends MultiAttack{
+
+    protected int distance;
+
+    // A Chain Attack is a Multi Attack where all targets are within a set distance from the first target
+    // Think of it like Chain Lightning - you have a set distance you can travel for the attack
+    // And you can only hit targets that you can pass through during that distance
+
+    public ChainAttack(int attackingFigure, List<Integer> defendingFigures, int distance) {
+        super(attackingFigure, defendingFigures);
+        this.distance = distance;
+    }
+
+    @Override
+    public boolean execute(DescentGameState state) {
+        return super.execute(state);
+    }
+
+    @Override
+    public boolean canExecute(DescentGameState dgs) {
+        Figure f = dgs.getActingFigure();
+
+        if (!isFreeAttack) {
+            if (f.getNActionsExecuted().isMaximum()) return false;
+        }
+
+        // Figures can't end turn on an occupied space
+        // Therefore, an attack cannot have more targets than the distance it can legally move
+        if (defendingFigures.size() > distance) return false;
+
+        int remaining = distance;
+
+        for (int i = 0; i < defendingFigures.size(); i++)
+        {
+            int defendingFigure = defendingFigures.get(i);
+            Figure target = (Figure) dgs.getComponentById(defendingFigure);
+            if (target == null) return false;
+
+            if (target instanceof Monster)
+            {
+                if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
+                        !checkAdjacent(dgs, f, target)) {
+                    // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
+                    return false;
+                }
+            }
+
+            // We need to check from the initial target's position
+            if (i < 1) continue;
+            Figure firstTarget = (Figure) dgs.getComponentById(defendingFigures.get(0));
+            if (!checkAllSpaces(dgs, firstTarget, target, distance)) return false;
+
+            // And then compare it to the previous target's position
+            if (i < 2) continue;
+            Figure previousTarget = (Figure) dgs.getComponentById(defendingFigures.get(i - 1));
+            int difference = getRangeAllSpaces(dgs, previousTarget, target);
+            remaining -= difference;
+            if (remaining < 0) return false;
+            if (!checkAllSpaces(dgs, previousTarget, target, remaining)) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return super.getString(gameState).replace("Multi Attack by ", "Chain Attack by ");
+    }
+
+    @Override
+    public String toString() {
+        return super.toString().replace("Multi Attack by ", "Chain Attack by ");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ChainAttack that = (ChainAttack) o;
+        return index == that.index && Objects.equals(defendingFigures, that.defendingFigures) && distance == that.distance;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), distance);
+    }
+
+    @Override
+    public ChainAttack copy() {
+        ChainAttack retValue = new ChainAttack(attackingFigure, defendingFigures, distance);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+}

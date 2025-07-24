@@ -2,7 +2,6 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
-import games.descent2e.DescentHelper;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DicePool;
@@ -23,7 +22,7 @@ import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 public class MultiAttack extends RangedAttack {
 
     public List<Integer> defendingFigures;
-    int index;
+    protected int index;
 
     public MultiAttack(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures.get(0));
@@ -62,13 +61,6 @@ public class MultiAttack extends RangedAttack {
         defendingFigure = defendingFigures.get(0);
         index = 0;
         super.execute(state);
-
-        // Remove final "; Result: " from result
-        result = result.substring(0, result.length() - 10);
-        for (int i = 1; i < defendingFigures.size(); i++) {
-            result += " & " + (state.getComponentById(defendingFigures.get(i)).getComponentName().replace("Hero: ", ""));
-        }
-        result += "; Result: ";
 
         return true;
     }
@@ -112,7 +104,7 @@ public class MultiAttack extends RangedAttack {
                 else
                 {
                     ((Figure) state.getComponentById(attackingFigure)).addActionTaken(toStringWithResult());
-                    phase = ALL_DONE;
+                    phase = INTERRUPT_ATTACK;
                 }
                 break;
             default:
@@ -156,9 +148,11 @@ public class MultiAttack extends RangedAttack {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-        if (f.getNActionsExecuted().isMaximum()) return false;
 
-        int range = getRange();
+        if (!isFreeAttack) {
+            if (f.getNActionsExecuted().isMaximum()) return false;
+        }
+
         for (int defendingFigure : defendingFigures)
         {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
@@ -215,5 +209,18 @@ public class MultiAttack extends RangedAttack {
         target.index = index;
         target.defendingFigure = defendingFigure;  // we also need to set this, as the constructor overrides it
         super.copyComponentTo(target);
+    }
+
+    @Override
+    public String getInitialResult(DescentGameState dgs)
+    {
+        String retVal = super.getInitialResult(dgs);
+        // Remove final "; Result: " from result
+        retVal = retVal.substring(0, retVal.length() - 10);
+        for (int i = 1; i < defendingFigures.size(); i++) {
+            retVal += " & " + (dgs.getComponentById(defendingFigures.get(i)).getComponentName().replace("Hero: ", ""));
+        }
+        retVal += "; Result: ";
+        return retVal;
     }
 }
