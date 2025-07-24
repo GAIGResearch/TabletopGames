@@ -1,7 +1,7 @@
 {
         "class":"players.mcts.MCTSParams",
         "rolloutType" : "PARAMS",
-        "rolloutLength" : [0, 1, 3, 10, 30],
+        "rolloutLength" : [0, 1, 3, 10, 30, 100],
         "rolloutPolicyParams" : {
                 "class" : "players.simple.BoltzmannActionParams",
                 "temperature" : [0.01, 0.1, 1.0, 10.0],
@@ -10,12 +10,14 @@
         "oppModelType" : ["DEFAULT", "RANDOM"],
         "MAST" : "None",
         "budgetType" : "BUDGET_TIME",
+        "K" : [0.01, 1.0, 100.0],
         "FPU" : [1.0, 100.0, 10000.0, 1000000.0],
-        "backupPolicy" : "MaxMC",
-        "pUCT" : [false, true],
+        "treePolicy" : ["AlphaGo", "UCB", "UCB_Tuned"],
+        "opponentTreePolicy" : ["SelfOnly", "OneTree", "MultiTree"],
+        "reuseTree" : [false, true],
+        "pUCT" : true,
         "pUCTTemperature" : [0.0, 0.01, 0.1, 1.0, 10.0],
         "budget" : -999,
         "epsilon" : 1e-6,
-        "breakMS" : 0,
-        "exploreEpsilon" : 0.30
+        "breakMS" : 0
 }

@@ -231,7 +231,6 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class WinCause extends AbstractMetric {
         int killer = -1;
         int victim = -1;
-        Set<Integer> eliminatedPlayers = new HashSet<>();
 
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -239,7 +238,6 @@ public class LoveLetterMetrics implements IMetricsCollection {
                 String[] text = ((LogEvent) e.action).text.split(":")[1].split(",");
                 killer = Integer.parseInt(text[0].trim());
                 victim = Integer.parseInt(text[1].trim());
-                eliminatedPlayers.add(victim);
                 return false;
             } else {
                 AbstractAction action = e.state.getHistory().get(e.state.getHistory().size() - 1).b;  // Last action played
@@ -255,7 +253,6 @@ public class LoveLetterMetrics implements IMetricsCollection {
                     // Reset killer, victim
                     killer = -1;
                     victim = -1;
-                    eliminatedPlayers.clear();
                     return true;
                 }
                 return false;
@@ -273,7 +270,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             boolean sameCardInHand = false;
             CardType cardType = null;
             for (int i = 0; i < llgs.getNPlayers(); ++i) {
-                if (!eliminatedPlayers.contains(i)) {
+                if (llgs.isCurrentlyActive(i)) {
                     if (cardType == null) {
                         cardType = llgs.getPlayerHandCards().get(i).peek().cardType;
                     } else if (cardType == llgs.getPlayerHandCards().get(i).peek().cardType) {
@@ -281,15 +278,14 @@ public class LoveLetterMetrics implements IMetricsCollection {
                     }
                 }
             }
-            for (int i = 0; i < llgs.getNPlayers(); ++i) {
-                if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_ROUND)
-                    if (sameCardInHand) return llgs.getPlayerHandCards().get(i).get(0).cardType + ".tiebreak";
-                    else return llgs.getPlayerHandCards().get(i).get(0).cardType + ".end";
-                else if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.DRAW_ROUND) {
-                    return llgs.getPlayerHandCards().get(i).get(0).cardType + ".tie";
-                }
-            }
-            return "";
+            List<Integer> winners = llgs.getRoundWinners();
+            if (winners.size() == 1)
+                if (sameCardInHand)
+                    return llgs.getPlayerHandCards().get(winners.get(0)).get(0).cardType + ".tiebreak";
+                else
+                    return llgs.getPlayerHandCards().get(winners.get(0)).get(0).cardType + ".end";
+            else
+                return llgs.getPlayerHandCards().get(winners.get(0)).get(0).cardType + ".tie";
         }
 
         @Override

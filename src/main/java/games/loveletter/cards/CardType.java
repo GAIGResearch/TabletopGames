@@ -57,7 +57,7 @@ public enum CardType {
             boolean discard = play.isDiscard();
             List<AbstractAction> cardActions = new ArrayList<>();
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-                if (targetPlayer == p || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
+                if (targetPlayer == p || !gs.isCurrentlyActive(targetPlayer) || gs.isProtected(targetPlayer))
                     continue;
                 cardActions.add(new PriestAction(play.getCardIdx(), p, targetPlayer, true, discard));
             }
@@ -70,7 +70,7 @@ public enum CardType {
             boolean discard = play.isDiscard();
             List<AbstractAction> cardActions = new ArrayList<>();
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-                if (targetPlayer == p || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
+                if (targetPlayer == p || !gs.isCurrentlyActive(targetPlayer) || gs.isProtected(targetPlayer))
                     continue;
                 cardActions.add(new KingAction(play.getCardIdx(), p, targetPlayer, true, discard));
             }
@@ -83,7 +83,7 @@ public enum CardType {
             boolean discard = play.isDiscard();
             List<AbstractAction> cardActions = new ArrayList<>();
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-                if (targetPlayer == p || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
+                if (targetPlayer == p || !gs.isCurrentlyActive(targetPlayer) || gs.isProtected(targetPlayer))
                     continue;
                 cardActions.add(new BaronAction(play.getCardIdx(), p, targetPlayer, true, discard));
             }
@@ -96,7 +96,7 @@ public enum CardType {
             boolean discard = play.isDiscard();
             List<AbstractAction> cardActions = new ArrayList<>();
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-                if (gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
+                if (!gs.isCurrentlyActive(targetPlayer) || gs.isProtected(targetPlayer))
                     continue;
                 cardActions.add(new PrinceAction(play.getCardIdx(), p, targetPlayer, true, discard));
             }
@@ -111,7 +111,7 @@ public enum CardType {
             List<AbstractAction> cardActions = new ArrayList<>();
             if (target == -1) {
                 for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-                    if (targetPlayer == p || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
+                    if (targetPlayer == p || !gs.isCurrentlyActive(targetPlayer) || gs.isProtected(targetPlayer))
                         continue;
                     for (CardType type : CardType.values()) {
                         if (type != CardType.Guard) {

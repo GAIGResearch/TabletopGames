@@ -95,14 +95,21 @@ public abstract class AbstractLearner implements ILearner {
         return this;
     }
 
+    public int featureCount() {
+        int stateCount = stateFeatureVector == null ? 0 : stateFeatureVector.names().length;
+        int actionCount = actionFeatureVector == null ? 0 : actionFeatureVector.names().length;
+        return stateCount + actionCount;
+    }
+
     protected void loadData(String... files) {
 
         Pair<List<String>, List<List<String>>> rawData = Utils.loadDataWithHeader("\t", files);
         header = rawData.a.toArray(new String[0]);
 
         String[] specialColumns = {"GameID", "Player", "Turn", "Round", "Tick", "CurrentScore", "Win", "Ordinal",
-                "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks", "CHOSEN",
-                "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE", "VISIT_PROPORTION"};
+                "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks",
+                "ActualWin", "ActualOrdinal", "ActualScore", "ActualScoreAdv",
+                "CHOSEN", "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE", "VISIT_PROPORTION"};
         Map<String, Integer> indexForSpecialColumns = new HashMap<>();
 
         // then set descriptions to the rest of the data

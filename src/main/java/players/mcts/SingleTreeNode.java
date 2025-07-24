@@ -2,7 +2,6 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.interfaces.IActionHeuristic;
 import players.PlayerConstants;
 import utilities.*;
@@ -15,7 +14,7 @@ import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
-import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
+import static players.mcts.MCTSEnums.RolloutTermination.EXACT;
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 import static utilities.Utils.*;
@@ -896,7 +895,7 @@ public class SingleTreeNode {
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
-        if (params.rolloutLength > 0 || params.rolloutTermination != DEFAULT) {
+        if (params.rolloutLength > 0 || params.rolloutTermination != EXACT) {
             // even if rollout length is zero, we may rollout a few actions to reach the end of our turn, or the start of our next turn
             if (params.information == Closed_Loop) {
                 // the thinking here is that in openLoop we copy the state right at the root, and then use the forward
@@ -946,7 +945,7 @@ public class SingleTreeNode {
         };
         if (rolloutDepth >= maxRollout) {
             return switch (params.rolloutTermination) {
-                case DEFAULT -> true;
+                case EXACT -> true;
                 case END_ACTION -> lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
                 case START_ACTION -> lastActorInRollout != root.decisionPlayer && currentActor == root.decisionPlayer;
                 case END_TURN -> rollerState.getTurnCounter() != lastTurnInRollout;

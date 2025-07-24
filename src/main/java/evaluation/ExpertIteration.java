@@ -177,25 +177,51 @@ public class ExpertIteration {
         }
 
         do {
+            long iterationStartTime = System.currentTimeMillis();
             // learn the heuristics from the data
             finished = gatherDataAndCheckConvergence();
             //  stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%02d.txt", prefix, 0);
             //   actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%02d.txt", prefix, 0);
 
+            long dataGatheringTime = System.currentTimeMillis() - iterationStartTime;
             if (finished)
                 break; // we are done, so we don't need to learn heuristics
 
             Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
+            long learningTime = System.currentTimeMillis() - iterationStartTime - dataGatheringTime;
 
             IActionHeuristic newActionHeuristic = learnedHeuristics.b;
             IStateHeuristic newStateHeuristic = learnedHeuristics.a;
 
             tuneAgents(newStateHeuristic, newActionHeuristic, currentActionHeuristic);
+            long tuningTime = System.currentTimeMillis() - iterationStartTime - dataGatheringTime - learningTime;
 
             currentActionHeuristic = newActionHeuristic;
-
+            Pair<Long, Long> totalTime = calculateHoursAndMinutes(System.currentTimeMillis() - iterationStartTime);
+            Pair<Long, Long> dataTime = calculateHoursAndMinutes(dataGatheringTime);
+            Pair<Long, Long> learnTime = calculateHoursAndMinutes(learningTime);
+            Pair<Long, Long> tuneTime = calculateHoursAndMinutes(tuningTime);
+            System.out.printf(
+                    "Iteration %d completed in %d h %2d m (data: %d h %2d m, learn: %d h %2d m, tune: %d h %2d m)%n",
+                    iter, totalTime.a, totalTime.b,
+                    dataTime.a, dataTime.b,
+                    learnTime.a, learnTime.b,
+                    tuneTime.a, tuneTime.b
+            );
             iter++;
         } while (true);
+    }
+
+    /**
+     * Converts milliseconds to a Pair of hours and minutes.
+     *
+     * @param millis Time in milliseconds.
+     * @return Pair where a = hours, b = minutes.
+     */
+    private Pair<Long, Long> calculateHoursAndMinutes(long millis) {
+        long hours = millis / (1000 * 60 * 60);
+        long minutes = (millis / (1000 * 60)) % 60;
+        return Pair.of(hours, minutes);
     }
 
     // A tournament of all current agents to gather data for the next training run
@@ -204,7 +230,7 @@ public class ExpertIteration {
     private boolean gatherDataAndCheckConvergence() {
         RGConfig.put(RunArg.mode, "random");  // we are most interested in a wide range of data, so do not want to reuse random seeds
         RGConfig.put(RunArg.verbose, false);
-        String expert = (String) config.get(RunArg.expert);
+        String expert = ((String) config.get(RunArg.expert)).toUpperCase();
 
         // we need to set the listener to record the required data for the Learner processes
         RGConfig.put(RunArg.listener, new ArrayList<String>());
@@ -221,7 +247,7 @@ public class ExpertIteration {
         RoundRobinTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayers, params, RGConfig);
         tournament.setResultsFile(dataDir + File.separator + String.format("TournamentResults_%s_%02d.txt", prefix, iter));
         if (stateLearnerFile != null) {
-            stateListener = switch (expert.toUpperCase(Locale.ROOT)) {
+            stateListener = switch (expert) {
                 case "BASE", "MCTSACTION" -> new StateFeatureListener(stateFeatureVector,
                         useRounds ? Event.GameEvent.ROUND_OVER : Event.GameEvent.TURN_OVER,
                         false);
@@ -230,7 +256,7 @@ public class ExpertIteration {
             };
             String fileName = String.format("State_%s_%02d.txt", prefix, iter);
             stateDataFilesByIteration[iter] = dataDir + File.separator + fileName;
-            if (stateListener !=null) {
+            if (stateListener != null) {
                 stateListener.setNth(everyN);
                 stateListener.setLogger(new FileStatsLogger(fileName, "\t", false));
                 stateListener.setOutputDirectory(dataDir);
@@ -242,7 +268,7 @@ public class ExpertIteration {
             // For the oracle we set a high budget, and tweak parameters to ensure some exploration
             oracle.setName("Oracle");
             oracle.setBudget(budget * expertTime);
- //           oracle.getParameters().setParameterValue("rolloutLength", 10);
+            //           oracle.getParameters().setParameterValue("rolloutLength", 10);
             oracle.getParameters().setParameterValue("reuseTree", false); // we only look at occasional actions
             oracle.getParameters().setParameterValue("maxTreeDepth", 1000);
             if (((double) oracle.getParameters().getParameterValue("FPU")) < 1000.0)
@@ -255,7 +281,7 @@ public class ExpertIteration {
                         true);
                 case "MCTS" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
                         100, 0, true);
-                case "MCTSAction" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
+                case "MCTSACTION" -> new MCTSExpertIterationListener(oracle, actionFeatureVector, stateFeatureVector,
                         100, 0, false);
                 default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
             };
@@ -269,18 +295,18 @@ public class ExpertIteration {
         }
         tournament.run();
 
+        int alphaWinner = tournament.getAlphaRankWinnerByWinRate();
+        AbstractPlayer winner = alphaWinner > -1 ? agents.get(alphaWinner) : tournament.getWinner();
         // Are we done?
         if (iter > 0) {
-            int alphaWinner = tournament.getAlphaRankWinnerByWinRate();
-            String winner = alphaWinner > -1 ? agents.get(alphaWinner).toString() : tournament.getWinner().toString();
-            tournamentWinsByAgent.merge(winner, 1, Integer::sum);
-            if (winner.equals(bestAgent.toString())) {
+            tournamentWinsByAgent.merge(winner.toString(), 1, Integer::sum);
+            if (winner.toString().equals(bestAgent.toString())) {
                 consecutiveWins++;
             } else {
                 consecutiveWins = 1; // reset the counter
             }
         }
-        bestAgent = tournament.getWinner().copy();
+        bestAgent = winner.copy();
 
         if (bestAgent instanceof IAnyTimePlayer anyTime) {
             anyTime.setBudget(budget); // make sure the budget is set on the best agent
@@ -341,6 +367,7 @@ public class ExpertIteration {
                     loadClass(actionLearnerFile),
                     bicMultiplier,
                     bicTimer);
+            learnFromData.setMaxRecords((int) config.get(RunArg.maxRecords));
             actionHeuristic = (IActionHeuristic) learnFromData.learn();
         }
         return Pair.of(stateHeuristic, actionHeuristic);
