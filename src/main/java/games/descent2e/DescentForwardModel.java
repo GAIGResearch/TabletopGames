@@ -315,90 +315,53 @@ public class DescentForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DescentGameState dgs = (DescentGameState) currentState;
-        // Cleanses actionsInProgress to remove any that were considered completed but not previously removed
-        //    dgs.isActionInProgress();
-        Figure actingFigure = dgs.getActingFigure();
-        Figure nextActingFigure;
 
         if (checkEndOfGame(dgs))
             return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
 
-        if (action instanceof EndFigureTurn) {
-            // now check to see if we need to end the player turn
-            dgs.logEvent(Event.GameEvent.GAME_EVENT, "End Turn: " + actingFigure.getName().replace("Hero: ", "") + "; " + actingFigure.getComponentID() + ";" + actingFigure.getPosition());
-            if (actingFigure instanceof Hero) {
-                dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
-                if (dgs.heroActingNext == 0) {
-                    // we have reached the overlord player
-                    endPlayerTurn(dgs, 0);  // we just move on to the next player
-                    overlordCheckFatigue(dgs, true);
-                    // reset all monsters for acting
-                    dgs.monsterActingNext = -1;
-                    dgs.monsterGroupActingNext = 0;
-                    dgs.monsterActingNext = dgs.nextMonster();
-                    if (dgs.monsterActingNext == -1) {
-                        throw new AssertionError("No monsters to activate - game should be over");
-                    }
-                } else {
-                    // Next Hero
-                    nextActingFigure = dgs.heroes.get(dgs.heroActingNext);
-                    if (dgs.getTurnOwner() != nextActingFigure.getOwnerId()) {
-                        endPlayerTurn(dgs, nextActingFigure.getOwnerId()); // change player if the next hero is controlled by a different player
-                    }
-                }
+        // There is a slim but non-zero chance that, somehow, the last acting Monster the Overlord had just killed itself with a Friendly Fire incident
+        // We need to account for that here
+        boolean lastMonsterTeamKilled = (dgs.getCurrentPlayer() == dgs.overlordPlayer && dgs.getCurrentMonsterGroup().isEmpty());
 
+        if (action instanceof EndFigureTurn || lastMonsterTeamKilled) {
+
+            // If the Overlord's last playable Monster just killed itself, always end the Overlord's turn
+            if (lastMonsterTeamKilled) {
+                dgs.logEvent(Event.GameEvent.GAME_EVENT, "End Turn: Previous Monster died to friendly fire.");
+                endOverlordPlayerTurn(dgs);
             } else {
-                // we check to see if we need to end the overlord turn (and hence also the round)
-                int nextMonster = dgs.nextMonster();
-                if (nextMonster == -1) {
-                    // Overlord has no more monsters to activate
-                    endPlayerTurn(dgs);
-                    overlordCheckFatigue(dgs, false);
-                    checkReinforcements(dgs);
+                Figure actingFigure = dgs.getActingFigure();
+                dgs.logEvent(Event.GameEvent.GAME_EVENT, "End Turn: " + actingFigure.getName().replace("Hero: ", "") + "; " + actingFigure.getComponentID() + ";" + actingFigure.getPosition());
 
-                    // Reset figures for the next round
-                    for (Figure f : dgs.getHeroes()) {
-                        f.resetRound();
-                    }
-                    for (List<Monster> mList : dgs.getMonsters()) {
-                        for (Monster m : mList) {
-                            m.resetRound();
-                        }
-                    }
-                    dgs.overlord.resetRound();
-                    dgs.monsterGroupActingNext = 0;
-                    dgs.monsterActingNext = 0;
-                    dgs.heroActingNext = 0;
-                    while (dgs.getHeroes().get(dgs.heroActingNext).isDefeated() && dgs.heroActingNext < dgs.getHeroes().size()) {
-                        dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
-                    }
-                    endRound(dgs, 1);
-                } else {
-                    dgs.monsterActingNext = nextMonster;  // continue turn with the next monster
-                }
+                // Now check to see if we need to end the player turn
+                if (actingFigure instanceof Hero) endHeroPlayerTurn(dgs);
+                else endOverlordPlayerTurn(dgs);
             }
+
+            startOfNewTurn(dgs);
         }
+    }
 
-        // Start of New Figure's Turn
+    private void startOfNewTurn(DescentGameState dgs) {
 
-        nextActingFigure = dgs.getActingFigure();
+        // Start of new Figure's Turn
+        Figure actingFigure = dgs.getActingFigure();
 
-        // Check if we have a new acting figure
-        // If so, apply Start of Turn effects and checks
-        if (!Objects.equals(actingFigure, nextActingFigure)) {
+        // Apply Start of Turn effects and checks
 
-            // Hero
-            // if (newActingFigure instanceof Hero) { }
+        /*
+        // Hero
+        if (actingFigure instanceof Hero) {
 
-            /*
-            // TODO: Hero turn start of turn abilities
-            */
+        // TODO: Hero turn start of turn abilities
 
-            // Monster
-            if (nextActingFigure instanceof Monster) {
-                // Remove conditions that should be removed on activation
-                removeAirImmunity(dgs, (Monster) nextActingFigure);
-            }
+        }
+        */
+
+        // Monster
+        if (actingFigure instanceof Monster) {
+            // Remove conditions that should be removed on activation
+            removeAirImmunity(dgs, (Monster) actingFigure);
         }
 
         /*
@@ -445,6 +408,61 @@ public class DescentForwardModel extends StandardForwardModel {
         // Campaign phase -> quest phase
 
         // choosing interlude: the heroes pick if they won >= 2 act 1 quests, overlord picks if they won >=2 quests
+    }
+
+    private void endHeroPlayerTurn(DescentGameState dgs)
+    {
+        dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
+        if (dgs.heroActingNext == 0) {
+            // we have reached the overlord player
+            endPlayerTurn(dgs, 0);  // we just move on to the next player
+            overlordCheckFatigue(dgs, true);
+            // reset all monsters for acting
+            dgs.monsterActingNext = -1;
+            dgs.monsterGroupActingNext = 0;
+            dgs.monsterActingNext = dgs.nextMonster();
+            if (dgs.monsterActingNext == -1) {
+                throw new AssertionError("No monsters to activate - game should be over");
+            }
+        } else {
+            // Next Hero
+            Figure nextActingFigure = dgs.heroes.get(dgs.heroActingNext);
+            if (dgs.getTurnOwner() != nextActingFigure.getOwnerId()) {
+                endPlayerTurn(dgs, nextActingFigure.getOwnerId()); // change player if the next hero is controlled by a different player
+            }
+        }
+    }
+
+    private void endOverlordPlayerTurn(DescentGameState dgs)
+    {
+        // We check to see if we need to end the overlord turn (and hence also the round)
+        int nextMonster = dgs.nextMonster();
+        if (nextMonster == -1) {
+            // Overlord has no more monsters to activate
+            endPlayerTurn(dgs);
+            overlordCheckFatigue(dgs, false);
+            checkReinforcements(dgs);
+
+            // Reset figures for the next round
+            for (Figure f : dgs.getHeroes()) {
+                f.resetRound();
+            }
+            for (List<Monster> mList : dgs.getMonsters()) {
+                for (Monster m : mList) {
+                    m.resetRound();
+                }
+            }
+            dgs.overlord.resetRound();
+            dgs.monsterGroupActingNext = 0;
+            dgs.monsterActingNext = 0;
+            dgs.heroActingNext = 0;
+            while (dgs.getHeroes().get(dgs.heroActingNext).isDefeated() && dgs.heroActingNext < dgs.getHeroes().size()) {
+                dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
+            }
+            endRound(dgs, 1);
+        } else {
+            dgs.monsterActingNext = nextMonster;  // continue turn with the next monster
+        }
     }
 
 

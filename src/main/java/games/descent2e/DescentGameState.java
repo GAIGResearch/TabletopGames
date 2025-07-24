@@ -362,6 +362,11 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     public List<String> getMonsterGroups() {
         return monsterGroups;
     }
+
+    public List<Monster> getCurrentMonsterGroup()
+    {
+        return getMonsters().get(monsterGroupActingNext);
+    }
     public List<Integer> getWebMonstersIDs() {
         return webMonstersIDs;
     }
@@ -379,7 +384,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
      */
     public Figure getActingFigure() {
         // Find current monster group + monster playing
-        List<Monster> monsterGroup = getMonsters().get(monsterGroupActingNext);
+        List<Monster> monsterGroup = getCurrentMonsterGroup();
 
         // Find currently acting figure (hero or monster)
         Figure actingFigure;
@@ -418,7 +423,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public int nextMonster() {
         do {
-            int groupSize = getMonsters().get(monsterGroupActingNext).size();
+            int groupSize = getCurrentMonsterGroup().size();
             // Only looks for the next monster in the group as long as the group is not empty
             if (groupSize == 0) {
                 // all dead
@@ -433,6 +438,14 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             }
         } while (monsterGroupActingNext > -1);
         return -1;
+    }
+    public void teamkill()
+    {
+        // If this function is called then somehow we've killed a Monster of the same group indexed before the actingFigure
+        // So, as nextMonster() will return the next monster in the group
+        // We need to go two steps back before we can go one step forwards
+        monsterActingNext -= 2;
+        monsterActingNext = nextMonster();
     }
 
     public int nextMonsterGroup() {

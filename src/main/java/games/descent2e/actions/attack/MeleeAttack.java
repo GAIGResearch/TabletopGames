@@ -390,6 +390,24 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             int index1 = getFigureIndex(state, defender);
             int index2 = getFigureIndex(state, attacker);
 
+            // Though rare, some attacks like a Dragon's Fire Breath or an Elemental's Fire can defeat teammate Monsters
+            // We need to check here so that getActingFigure() doesn't return an out of bounds error
+            if (attacker instanceof Monster && defender instanceof Monster)
+            {
+                List<Monster> monsters = state.getCurrentMonsterGroup();
+                if (monsters != null)
+                {
+                    // Check if both attacker and defender are the same kind of Monster
+                    if (monsters.contains(attacker) && monsters.contains(defender))
+                    {
+                        if(monsters.indexOf(attacker) >= monsters.indexOf(defender))
+                        {
+                            state.teamkill();
+                        }
+                    }
+                }
+            }
+
             // Death
             DescentHelper.figureDeath(state, defender);
 
