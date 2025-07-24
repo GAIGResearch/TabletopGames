@@ -16,7 +16,7 @@ public class XIIParameters extends BGParameters {
         addTunableParameter("startingAt13", 0);
         addTunableParameter("startingAt24", 0);
         addTunableParameter("homeBoardSize", 6);
-        addTunableParameter("entryBoardSize", 6, List.of(0, 6));
+        addTunableParameter("entryBoardSize", 12, List.of(0, 6, 12));
         addTunableParameter("diceNumber", 2, List.of(2, 3));
         addTunableParameter("diceSides", 6);
         addTunableParameter("doubleActions", true, List.of(false, true));
