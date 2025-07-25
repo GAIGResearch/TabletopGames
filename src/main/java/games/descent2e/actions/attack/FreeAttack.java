@@ -47,7 +47,7 @@ public class FreeAttack extends RangedAttack {
             }
         }
 
-        return checkAllSpaces(dgs, f, target, getRange());
+        return checkAllSpaces(dgs, f, target, getRange(), true);
     }
 
     @Override

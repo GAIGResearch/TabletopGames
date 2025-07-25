@@ -168,7 +168,7 @@ public class MultiAttack extends RangedAttack {
                 }
             }
 
-            if (!checkAllSpaces(dgs, f, target, getRange())) return false;
+            if (!checkAllSpaces(dgs, f, target, getRange(), true)) return false;
         }
         return true;
     }

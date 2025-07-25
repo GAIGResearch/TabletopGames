@@ -124,7 +124,7 @@ public class RangedAttack extends MeleeAttack {
             }
         }
 
-        return checkAllSpaces(dgs, f, target, getRange());
+        return checkAllSpaces(dgs, f, target, getRange(), true);
     }
 
     @Override

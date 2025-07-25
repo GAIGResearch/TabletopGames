@@ -14,7 +14,6 @@ import utilities.Vector2D;
 import java.util.*;
 
 import static core.CoreConstants.playersHash;
-import static games.descent2e.DescentHelper.getNeighboursInRange;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 public class FireBreath extends ChainAttack {
@@ -24,7 +23,7 @@ public class FireBreath extends ChainAttack {
     // So that we don't get stuck in a loop, we can only execute that many Fire Breaths
     public static int enabled = 0;
     public FireBreath(int attackingFigure, List<Integer> defendingFigures, int distance, List<Vector2D> pathway) {
-        super(attackingFigure, defendingFigures, distance, pathway);
+        super(attackingFigure, defendingFigures, distance, pathway, false);
         this.isFreeAttack = true;
         this.isMelee = true;
         // We don't care about attackMissed() checking for range, so we count it as Melee

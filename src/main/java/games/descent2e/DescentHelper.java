@@ -279,7 +279,10 @@ public class DescentHelper {
         return newTiles;
     }
 
-    public static boolean checkAllSpaces(DescentGameState dgs, Figure f, Figure target, int reach) {
+    public static boolean checkAllSpaces(DescentGameState dgs, Figure f, Figure target, int reach, boolean lineOfSight) {
+
+        // lineOfSight is to check whether we care for line of sight or not
+        // If it is false, we only need to check for Range instead
 
         if (reach < 0) return false;
 
@@ -305,7 +308,7 @@ public class DescentHelper {
                 for (BoardNode jTile : defendingTiles) {
                     targetPosition = ((PropertyVector2D) jTile.getProperty("coordinates")).values;
                     if (inRange(position, targetPosition, reach) &&
-                            hasLineOfSight(dgs, position, targetPosition)) {
+                            (!lineOfSight || hasLineOfSight(dgs, position, targetPosition))) {
                         // As long as at least one setup is valid, the whole Attack is valid
                         return true;
                     }
@@ -314,9 +317,8 @@ public class DescentHelper {
         }
 
         // If it's just a simple 1x1 vs 1x1, don't bother with all of that
-
         return inRange(position, targetPosition, reach) &&
-                hasLineOfSight(dgs, position, targetPosition);
+                (!lineOfSight || hasLineOfSight(dgs, position, targetPosition));
     }
 
     public static int getRangeAllSpaces(DescentGameState dgs, Figure f, Figure target) {
@@ -352,6 +354,11 @@ public class DescentHelper {
         }
 
         // If it's just a simple 1x1 vs 1x1, don't bother with all of that
+
+        else {
+            Vector2D newRange2D = getRange(position, targetPosition);
+            range = Math.max(newRange2D.getX(), newRange2D.getY());
+        }
 
         return range;
     }

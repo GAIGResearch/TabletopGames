@@ -111,7 +111,7 @@ public class MonsterAbilities {
                         int range = 3;
                         for (List<Monster> monsters : dgs.getMonsters()) {
                             for (Monster monster : monsters) {
-                                if (monster.getComponentID() == actingFigure.getComponentID() || checkAllSpaces(dgs, actingFigure, monster, 3)) {
+                                if (monster.getComponentID() == actingFigure.getComponentID() || checkAllSpaces(dgs, actingFigure, monster, 3, false)) {
                                     DescentAction heal = new Heal(monster.getComponentID(), range, true);
                                     if (heal.canExecute(dgs))
                                         actions.add(heal);

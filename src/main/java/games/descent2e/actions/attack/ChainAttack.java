@@ -17,14 +17,16 @@ public class ChainAttack extends MultiAttack{
 
     protected int distance;
     protected List<Vector2D> pathway;
+    boolean lineOfSight = false; // Check whether we need Line Of Sight for our attacks
 
     // A Chain Attack is a Multi Attack where all targets are within a set distance from the first target
     // Think of it like Chain Lightning - you have a set distance you can travel for the attack
     // And you can only hit targets that you can pass through during that distance
 
-    public ChainAttack(int attackingFigure, List<Integer> defendingFigures, int distance, List<Vector2D> pathway) {
+    public ChainAttack(int attackingFigure, List<Integer> defendingFigures, int distance, List<Vector2D> pathway, boolean lineOfSight) {
         super(attackingFigure, defendingFigures);
         this.distance = distance;
+        this.lineOfSight = lineOfSight;
         this.pathway = new ArrayList<>();
         for (Vector2D v : pathway) {
             this.pathway.add(v.copy());
@@ -68,7 +70,7 @@ public class ChainAttack extends MultiAttack{
             // We need to check from the initial target's position
             if (i < 1) continue;
             Figure firstTarget = (Figure) dgs.getComponentById(defendingFigures.get(0));
-            if (!checkAllSpaces(dgs, firstTarget, target, distance)) return false;
+            if (!checkAllSpaces(dgs, firstTarget, target, distance, lineOfSight)) return false;
 
             // And then compare it to the previous target's position
             if (i < 2) continue;
@@ -76,7 +78,7 @@ public class ChainAttack extends MultiAttack{
             int difference = getRangeAllSpaces(dgs, previousTarget, target);
             remaining -= difference;
             if (remaining < 0) return false;
-            if (!checkAllSpaces(dgs, previousTarget, target, remaining)) return false;
+            if (!checkAllSpaces(dgs, previousTarget, target, remaining, lineOfSight)) return false;
         }
         return true;
     }
@@ -106,17 +108,17 @@ public class ChainAttack extends MultiAttack{
         if (!super.equals(o)) return false;
         ChainAttack that = (ChainAttack) o;
         return index == that.index && Objects.equals(defendingFigures, that.defendingFigures)
-                && distance == that.distance && Objects.equals(pathway, that.pathway);
+                && distance == that.distance && Objects.equals(pathway, that.pathway) && lineOfSight == that.lineOfSight;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), distance, pathway.hashCode());
+        return Objects.hash(super.hashCode(), distance, pathway.hashCode(), lineOfSight);
     }
 
     @Override
     public ChainAttack copy() {
-        ChainAttack retValue = new ChainAttack(attackingFigure, defendingFigures, distance, pathway);
+        ChainAttack retValue = new ChainAttack(attackingFigure, defendingFigures, distance, pathway, lineOfSight);
         copyComponentTo(retValue);
         return retValue;
     }

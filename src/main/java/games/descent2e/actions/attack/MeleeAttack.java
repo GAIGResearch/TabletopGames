@@ -505,7 +505,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             }
         }
 
-        return checkAllSpaces(dgs, f, target, getRange());
+        return checkAllSpaces(dgs, f, target, getRange(), true);
     }
 
     protected int getRange()
