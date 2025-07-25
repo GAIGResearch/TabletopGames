@@ -20,6 +20,21 @@ public class PuertoRicoActionFeatures implements IActionFeatureVector {
     }
 
     @Override
+    public Class<?>[] types() {
+        return new Class<?>[] {
+                String.class, PuertoRicoConstants.BuildingType.class, Integer.class, Integer.class,
+                PuertoRicoConstants.Crop.class, Integer.class,
+                Integer.class, Boolean.class, Integer.class, Integer.class,
+                PuertoRicoConstants.Role.class
+        };
+    }
+
+    @Override
+    public double[] doubleVector(AbstractAction action, AbstractGameState state, int playerID) {
+        throw new UnsupportedOperationException("Use featureVector instead of doubleVector for PuertoRicoActionFeatures");
+    }
+
+    @Override
     public Object[] featureVector(AbstractAction action, AbstractGameState state, int playerID) {
         PuertoRicoGameState prs = (PuertoRicoGameState) state;
 
@@ -39,8 +54,8 @@ public class PuertoRicoActionFeatures implements IActionFeatureVector {
         } else if (action instanceof DiscardGoodsExcept discard){
             setCropFeatures(prs, playerID, discard.crop, retValue);
         } else if (action instanceof DrawPlantation){
-            retValue[1]
         }
+        return retValue;
     }
 
     private void setCropFeatures(PuertoRicoGameState prs, int playerID, PuertoRicoConstants.Crop crop, Object[] retValue) {
