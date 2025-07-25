@@ -5,7 +5,9 @@ import games.descent2e.DescentGameState;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
+import utilities.Vector2D;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,14 +16,19 @@ import static games.descent2e.DescentHelper.*;
 public class ChainAttack extends MultiAttack{
 
     protected int distance;
+    protected List<Vector2D> pathway;
 
     // A Chain Attack is a Multi Attack where all targets are within a set distance from the first target
     // Think of it like Chain Lightning - you have a set distance you can travel for the attack
     // And you can only hit targets that you can pass through during that distance
 
-    public ChainAttack(int attackingFigure, List<Integer> defendingFigures, int distance) {
+    public ChainAttack(int attackingFigure, List<Integer> defendingFigures, int distance, List<Vector2D> pathway) {
         super(attackingFigure, defendingFigures);
         this.distance = distance;
+        this.pathway = new ArrayList<>();
+        for (Vector2D v : pathway) {
+            this.pathway.add(v.copy());
+        }
     }
 
     @Override
@@ -76,7 +83,15 @@ public class ChainAttack extends MultiAttack{
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return super.getString(gameState).replace("Multi Attack by ", "Chain Attack by ");
+        String path = pathway.isEmpty() ? "Chain Attack by" : "Chain Attack along ";
+        for (int i = 0; i < pathway.size(); i++) {
+            if (i == pathway.size() - 1)
+                path += pathway.get(i) + " by ";
+            else
+                path += pathway.get(i) + ", ";
+        }
+
+        return super.getString(gameState).replace("Multi Attack by ", path);
     }
 
     @Override
@@ -90,17 +105,18 @@ public class ChainAttack extends MultiAttack{
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         ChainAttack that = (ChainAttack) o;
-        return index == that.index && Objects.equals(defendingFigures, that.defendingFigures) && distance == that.distance;
+        return index == that.index && Objects.equals(defendingFigures, that.defendingFigures)
+                && distance == that.distance && Objects.equals(pathway, that.pathway);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), distance);
+        return Objects.hash(super.hashCode(), distance, pathway.hashCode());
     }
 
     @Override
     public ChainAttack copy() {
-        ChainAttack retValue = new ChainAttack(attackingFigure, defendingFigures, distance);
+        ChainAttack retValue = new ChainAttack(attackingFigure, defendingFigures, distance, pathway);
         copyComponentTo(retValue);
         return retValue;
     }

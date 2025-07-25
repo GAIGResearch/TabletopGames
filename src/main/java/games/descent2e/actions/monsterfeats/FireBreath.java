@@ -23,8 +23,8 @@ public class FireBreath extends ChainAttack {
     // i.e. how many times a Shadow Dragon has spent the Fire Breath surge in a single attack
     // So that we don't get stuck in a loop, we can only execute that many Fire Breaths
     public static int enabled = 0;
-    public FireBreath(int attackingFigure, List<Integer> defendingFigures) {
-        super(attackingFigure, defendingFigures, 4);
+    public FireBreath(int attackingFigure, List<Integer> defendingFigures, int distance, List<Vector2D> pathway) {
+        super(attackingFigure, defendingFigures, distance, pathway);
         this.isFreeAttack = true;
         this.isMelee = true;
         // We don't care about attackMissed() checking for range, so we count it as Melee
@@ -80,12 +80,12 @@ public class FireBreath extends ChainAttack {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return super.getString(gameState).replace("Chain Attack by ", "Fire Breath by ");
+        return super.getString(gameState).replace("Chain Attack", "Fire Breath");
     }
 
     @Override
     public String toString() {
-        return super.toString().replace("Chain Attack by ", "Fire Breath by ");
+        return super.toString().replace("Chain Attack", "Fire Breath");
     }
 
     @Override
@@ -104,7 +104,7 @@ public class FireBreath extends ChainAttack {
 
     @Override
     public ChainAttack copy() {
-        FireBreath retValue = new FireBreath(attackingFigure, defendingFigures);
+        FireBreath retValue = new FireBreath(attackingFigure, defendingFigures, distance, pathway);
         copyComponentTo(retValue);
         return retValue;
     }
@@ -115,33 +115,109 @@ public class FireBreath extends ChainAttack {
 
         Set<FireBreath> allBreaths = new HashSet<>();
         // We have already attacked the defending figure with this attack, so we should ignore it as a target
-        List<Integer> targets = new ArrayList<>();
+        List<List<Integer>> targets = new ArrayList<>();
+        List<List<Vector2D>> paths = new ArrayList<>();
         FireBreath fireBreath;
 
         Figure target = (Figure) dgs.getComponentById(defendingFigure);
-        Vector2D position = target.getPosition();
-        List<Vector2D> positions = new ArrayList<>();
-        positions.add(position);
-        Set<BoardNode> tiles = new HashSet<>();
-        tiles = getNeighboursInRange(dgs, position, 4);
+        Vector2D step0 = target.getPosition();
+        BoardNode startPosition = dgs.getMasterBoard().getElement(step0);
 
-        // Go through and collect all the possible tiles that contain a Figure
-        for (BoardNode tile : tiles) {
-            int neighbourID = ((PropertyInt) tile.getProperty(playersHash)).value;
-            // Ignore any empty tiles
-            if (neighbourID == -1) continue;
-            Vector2D pos = ((PropertyVector2D) tile.getProperty("coordinates")).values;
+        for (BoardNode tile1 : startPosition.getNeighbours().keySet())
+        {
+            boolean valid1 = false;
+            Vector2D step1 = ((PropertyVector2D) tile1.getProperty("coordinates")).values;
 
-            // Add any tiles that have Figures, to examine later
-            if(positions.contains(pos)) continue;
-            positions.add(pos);
+            // If a valid target is here, add it to the list of targets
+            int neighbourID1 = ((PropertyInt) tile1.getProperty(playersHash)).value;
+            if (neighbourID1 != -1 && neighbourID1 != defendingFigure) {
+                valid1 = true;
+                List<Integer> newTargets = new ArrayList<>();
+                newTargets.add(neighbourID1);
 
-            // We can immediately create a new Fire Breath action by pairing the tile's figure with the original target
-            fireBreath = new FireBreath(attackingFigure, List.of(neighbourID));
-            if (!allBreaths.contains(fireBreath)) allBreaths.add(fireBreath);
+                List<Vector2D> newPath = new ArrayList<>();
+                newPath.add(step0);
+                newPath.add(step1);
+
+                if (!targets.contains(newTargets)) {
+                    targets.add(newTargets);
+                    paths.add(newPath);
+                }
+            }
+
+            for (BoardNode tile2 : tile1.getNeighbours().keySet())
+            {
+                boolean valid2 = false;
+                if (tile2.equals(startPosition)) continue; // Ignore the original target tile
+
+                Vector2D step2 = ((PropertyVector2D) tile2.getProperty("coordinates")).values;
+
+                int neighbourID2 = ((PropertyInt) tile2.getProperty(playersHash)).value;
+                if (neighbourID2 != -1 && neighbourID2 != defendingFigure && neighbourID2 != neighbourID1) {
+                    valid2 = true;
+
+                    List<Integer> newTargets = new ArrayList<>();
+                    List<Vector2D> newPath = new ArrayList<>();
+
+                    // If the first tile was not empty, that target must come first
+                    if(valid1) {
+                        newTargets.add(neighbourID1);
+                    }
+                    newTargets.add(neighbourID2);
+
+                    newPath.add(step0);
+                    newPath.add(step1);
+                    newPath.add(step2);
+
+                    if (!targets.contains(newTargets)) {
+                        targets.add(newTargets);
+                        paths.add(newPath);
+                    }
+                }
+
+                for (BoardNode tile3 : tile2.getNeighbours().keySet())
+                {
+                    if (tile3.equals(startPosition)) continue; // Ignore the original target tile
+                    if (tile3.equals(tile1)) continue; // Ignore the tile we just came from
+
+                    Vector2D step3 = ((PropertyVector2D) tile3.getProperty("coordinates")).values;
+
+                    int neighbourID3 = ((PropertyInt) tile3.getProperty(playersHash)).value;
+                    if (neighbourID3 != -1 && neighbourID3 != defendingFigure &&
+                            neighbourID3 != neighbourID1 && neighbourID3 != neighbourID2) {
+
+                        List<Integer> newTargets = new ArrayList<>();
+                        List<Vector2D> newPath = new ArrayList<>();
+
+                        // If the first or second tiles was not empty, those targets must come first
+                        if(valid1) {
+                            newTargets.add(neighbourID1);
+                        }
+                        if(valid2) {
+                            newTargets.add(neighbourID2);
+                        }
+                        newTargets.add(neighbourID3);
+
+                        newPath.add(step0);
+                        newPath.add(step1);
+                        newPath.add(step2);
+                        newPath.add(step3);
+                        if (!targets.contains(newTargets)) {
+                            targets.add(newTargets);
+                            paths.add(newPath);
+                        }
+                    }
+                }
+            }
         }
 
-
+        // Now we have all the possible targets, we can create a Fire Breath for each
+        for (int i = 0; i < targets.size(); i++) {
+            List<Integer> targetList = targets.get(i);
+            if(targetList.isEmpty() || targetList.contains(defendingFigure)) continue;
+            fireBreath = new FireBreath(attackingFigure, targetList, 4, paths.get(i));
+            allBreaths.add(fireBreath);
+        }
 
         // Now that we have all possible Fire Breaths, we only return those we know we can execute
         for (FireBreath breath: allBreaths) {

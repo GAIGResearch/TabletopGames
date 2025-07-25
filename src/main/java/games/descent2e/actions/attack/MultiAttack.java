@@ -126,11 +126,12 @@ public class MultiAttack extends RangedAttack {
             defenderName = defender.getComponentName().replace("Hero: ", "");
             string += defenderName;
 
-            Double range = getDistanceFromFigures(attacker, defender);
-            if (range > 1.0)
-            {
-                String distance = Double.toString(range);
-                string += " (Range: " + distance + ")";
+            if (!isMelee) {
+                Double range = getDistanceFromFigures(attacker, defender);
+                if (range > 1.0) {
+                    String distance = Double.toString(range);
+                    string += " (Range: " + distance + ")";
+                }
             }
 
             if (i < defendingFigures.size() - 1) {
