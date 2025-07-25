@@ -5,14 +5,14 @@ import core.interfaces.IStateFeatureVector;
 
 public class BGStateFeatures implements IStateFeatureVector {
 
-
     String[] names = new String[]{
             "BorneOff", "BorneOff_Opp",
             "Bar", "Bar_Opp",
             "HomeBoard", "HomeBoard_Opp",
             "Singletons", "Singletons_Opp",
             "MeanToHome", "MeanToHome_Opp",
-            "PiecesOnBoard", "PiecesOnBoard_Opp"
+            "PiecesOnBoard", "PiecesOnBoard_Opp",
+            "Stacks", "Stacks_Opp"
     };
 
     @Override
@@ -35,6 +35,7 @@ public class BGStateFeatures implements IStateFeatureVector {
         // MeanToHome and PiecesOnBoard
         int sum = 0, count = 0, boardLen = params.boardSize;
         int singletons = 0;
+        int stacks = 0;
         for (int i = 0; i < boardLen; i++) {
             int physicalIndex = bgState.getPhysicalSpace(playerID, i);
             int piecesOnPoint = bgState.getPiecesOnPoint(playerID, physicalIndex);
@@ -42,15 +43,19 @@ public class BGStateFeatures implements IStateFeatureVector {
             count += piecesOnPoint;
             if (piecesOnPoint == 1) {
                 singletons++;
+            } else {
+                stacks++;
             }
         }
         features[6] = singletons;
         features[8] = count > 0 ? (double) sum / count : 0.0;
         features[10] = sum;
+        features[12] = stacks;
 
         count = 0;
         sum = 0;
         singletons = 0;
+        stacks = 0;
         for (int i = 0; i < boardLen; i++) {
             int physicalIndex = bgState.getPhysicalSpace(1 - playerID, i);
             int piecesOnPoint = bgState.getPiecesOnPoint(1 - playerID, physicalIndex);
@@ -58,11 +63,14 @@ public class BGStateFeatures implements IStateFeatureVector {
             count += piecesOnPoint;
             if (piecesOnPoint == 1) {
                 singletons++;
+            } else {
+                stacks++;
             }
         }
         features[7] = singletons;
         features[9] = count > 0 ? (double) sum / count : 0.0;
         features[11] = sum;
+        features[13] = stacks;
 
         return features;
 

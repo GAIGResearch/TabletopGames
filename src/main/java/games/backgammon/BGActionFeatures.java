@@ -10,7 +10,7 @@ public class BGActionFeatures implements IActionFeatureVector {
     String[] names = new String[] {
             "FromPosition", "ToPosition",
             "FromOccupancy", "ToOccupancy",
-            "Blot", "FirstDie"
+            "Blot", "RemainingDice", "ToHome"
     };
 
     @Override
@@ -20,26 +20,18 @@ public class BGActionFeatures implements IActionFeatureVector {
         if (action instanceof DoNothing) {
             return new double[names.length];
         }
-        int boardLength = params.boardSize;
+        int boardLength = bgState.playerTrackMapping[0].length;
 
         MovePiece move = (MovePiece) action;
         double[] features = new double[names.length];
 
         // MovePiece uses the physical board positions, so we need to convert these to the distance on the track
-        int from = -1;
-        int to = -1;
-        for (int i = 0 ; i < boardLength; i++) {
-            if (bgState.getPhysicalSpace(playerID, i) == move.from) {
-                from = i;
-            }
-            if (bgState.getPhysicalSpace(playerID, i) == move.to) {
-                to = i;
-            }
-        }
+        int from = bgState.getLogicalPosition(playerID, move.from);
+        int to = move.to == -1 ? -1 : bgState.getLogicalPosition(playerID, move.to);
 
         features[0] = from;
-        // -1 means we are bearing off, so we use the board length to represent this
-        features[1] = to < 0 ? boardLength : to;
+        // -1 means we are bearing off, so we use the board length + 1 to represent this
+        features[1] = to < 0 ? boardLength + 1 : to;
 
         features[2] = bgState.getPiecesOnPoint(playerID, move.from);
 
@@ -49,8 +41,10 @@ public class BGActionFeatures implements IActionFeatureVector {
         int opponentID = 1 - playerID;
         features[4] = (move.to >= 0 && bgState.getPiecesOnPoint(opponentID, move.to) == 1) ? 1.0 : 0.0;
 
-        // Is this out first die to use?
-        features[5] = bgState.getAvailableDiceValues().length == 2 ? 1.0 : 0.0;
+        // Remaining dice
+        features[5] = bgState.getAvailableDiceValues().length - 1;
+
+        features[6] = to >= boardLength - params.homeBoardSize ? 1.0 : 0.0;
 
         return features;
 
