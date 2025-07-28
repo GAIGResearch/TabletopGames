@@ -9,6 +9,7 @@ import java.util.*;
 public class Quest {
 
     private String name;
+    private List<String> monsterTraits; // categories for randomly choosing which open groups to spawn
     private List<String[]> monsters;  // name, tile, bonus effects for each monster type
     private List<DToken.DTokenDef> tokens;  // token, meaning, how many, where
     private List<GameOverCondition> gameOverConditions;  // How does the game end?
@@ -59,6 +60,12 @@ public class Quest {
     }
     public List<String[]> getMonsters() {
         return monsters;
+    }
+    public void setMonsterTraits(List<String> monsterTraits) {
+        this.monsterTraits = monsterTraits;
+    }
+    public List<String> getMonsterTraits() {
+        return monsterTraits;
     }
     public void setAct(int act) {
         this.act = act;
@@ -116,6 +123,10 @@ public class Quest {
         if (monsters != null) {
             q.monsters = new ArrayList<>(Collections.nCopies(monsters.size(), null));
             Collections.copy(q.monsters, monsters);
+        }
+        if (monsterTraits != null) {
+            q.monsterTraits = new ArrayList<>(Collections.nCopies(monsterTraits.size(), null));
+            Collections.copy(q.monsterTraits, monsterTraits);
         }
         q.act = act;
         if (tokens != null)
@@ -179,8 +190,8 @@ public class Quest {
         if (o == null || getClass() != o.getClass()) return false;
         Quest quest = (Quest) o;
         return act == quest.act && Objects.equals(name, quest.name) &&
-                Objects.equals(monsters, quest.monsters) && Objects.equals(tokens, quest.tokens) &&
-                Objects.equals(gameOverConditions, quest.gameOverConditions) &&
+                Objects.equals(monsters, quest.monsters) && Objects.equals(monsterTraits, quest.monsterTraits) &&
+                Objects.equals(tokens, quest.tokens) && Objects.equals(gameOverConditions, quest.gameOverConditions) &&
                 Objects.equals(overlordRewards, quest.overlordRewards) && Objects.equals(heroRewards, quest.heroRewards) &&
                 Objects.equals(commonRewards, quest.commonRewards) && Objects.equals(boards, quest.boards) &&
                 Objects.equals(startingLocations, quest.startingLocations) && Objects.equals(nextMainQuests, quest.nextMainQuests) &&
@@ -189,7 +200,7 @@ public class Quest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, monsters, tokens, gameOverConditions, overlordRewards, heroRewards,
+        return Objects.hash(name, monsters, monsterTraits, tokens, gameOverConditions, overlordRewards, heroRewards,
                 commonRewards, boards, startingLocations, nextMainQuests, nextSideQuests, act);
     }
 }

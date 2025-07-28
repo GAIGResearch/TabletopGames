@@ -183,8 +183,20 @@ public class DescentGameData extends AbstractGameData {
                     q.setStartingLocations(startingLocations);
                 }
 
+                // Find monsters traits for open groups
+                ArrayList<String> qTraits = new ArrayList<>();
+
+                JSONArray mts = (JSONArray) obj.get("traits");
+                if (mts != null) {
+                    for (Object o1 : mts) {
+                        qTraits.add((String) o1);
+                    }
+                    q.setMonsterTraits(qTraits);
+                }
+
                 // Find monsters
                 ArrayList<String[]> qMonsters = new ArrayList<>();
+
                 JSONArray ms = (JSONArray) obj.get("monsters");
                 if (ms != null) {
                     for (Object o1 : ms) {
