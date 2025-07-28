@@ -4,7 +4,7 @@
     "verticesKey": "name",
     "neighboursKey": "neighbours",
     "maxNeighbours": -1,
-    "id": "board1",
+    "id": "acolyte-of-saradyn",
     "nodes" :
     [
       {
