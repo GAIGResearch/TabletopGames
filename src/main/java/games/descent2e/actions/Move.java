@@ -272,6 +272,12 @@ public class Move extends AbstractAction {
         // Place figure on all spaces occupied. Save the terrain with minimum ordinal (big monsters only take this penalty)
         int minTerrainOrdinal = DescentTypes.TerrainType.values().length;
         DescentTypes.TerrainType minTerrain = null;
+
+        // These are enabled by default and immediately disabled the moment we do not occupy a Pit or Lava tile
+        // This is so we can check whether a figure is entirely within that tile type
+        boolean isPit = true;
+        boolean isLava = true;
+
         for (int i = 0; i < size.b; i++) {
             for (int j = 0; j < size.a; j++) {
                 BoardNode destinationTile = dgs.getMasterBoard().getElement(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
@@ -286,17 +292,34 @@ public class Move extends AbstractAction {
                         minTerrainOrdinal = terrain.ordinal();
                         minTerrain = terrain;
                     }
-                    if (terrain == DescentTypes.TerrainType.Pit) {
-                        f.setAttributeToMin(Figure.Attribute.MovePoints);
-                        f.getAttribute(Figure.Attribute.Health).decrement(2);
-
-                        if (f.getAttribute(Figure.Attribute.Health).isMinimum()) {
-                            figureDeath(dgs, f);
-                            }
-                        }
+                    if (terrain != DescentTypes.TerrainType.Pit) {
+                        isPit = false;
+                    }
+                    if (terrain != DescentTypes.TerrainType.Lava) {
+                        isLava = false;
                     }
                 }
             }
+        }
+
+        // Ending movement in a Pit deals damage and stops us moving any further
+        if (isPit) {
+            f.setAttributeToMin(Figure.Attribute.MovePoints);
+            f.getAttribute(Figure.Attribute.Health).decrement(2);
+
+            if (f.getAttribute(Figure.Attribute.Health).isMinimum()) {
+                figureDeath(dgs, f);
+            }
+        }
+
+        // Entering Lava deals 1 damage
+        // Ending movement in Lava instantly defeats the figure if it only occupies Lava tiles
+        if (isLava) {
+            f.getAttribute(Figure.Attribute.Health).decrement(1);
+            if (f.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
+                figureDeath(dgs, f);
+            }
+        }
 
         // Apply move costs and penalties
         // Large monsters pay the minimum cost only, other figures are 1 tile wide, looking at min terrain only
