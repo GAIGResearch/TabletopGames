@@ -80,11 +80,10 @@ public class LLStateFeaturesTunable extends TunableStateFeatures {
         if (active[14]) {
             int value = 0;
             for (int p = 0; p < llgs.getNPlayers(); p++) {
-                if (p != llgs.getCurrentPlayer() && llgs.isNotTerminalForPlayer(p)) {
+                if (p != playerId && llgs.isNotTerminalForPlayer(p)) {
                     PartialObservableDeck<LoveLetterCard> hand = llgs.getPlayerHandCards().get(p);
-                    if (hand.getSize() > 0 && hand.getVisibilityForPlayer(0, llgs.getCurrentPlayer())) {
-                        value += (int) (Math.pow(10, p)) * hand.getComponents().get(0).cardType.getValue();
-                        break; // we just care if any other player knows the card
+                    if (hand.getSize() > 0 && hand.getVisibilityForPlayer(0, playerId)) {
+                        value += 1;
                     }
                 }
             }
