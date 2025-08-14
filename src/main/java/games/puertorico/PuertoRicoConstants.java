@@ -5,6 +5,8 @@ import games.puertorico.roles.*;
 
 import java.util.*;
 
+import static games.puertorico.PuertoRicoConstants.Crop.INDIGO;
+
 
 public class PuertoRicoConstants {
 
@@ -96,12 +98,12 @@ public class PuertoRicoConstants {
     }
 
     public enum BuildingType {  // TODO: replace numbers in tooltips with parameters/variables
-        SMALL_INDIGO_PLANT(1, 1, 1, "Small Indigo Plant, cost 1, VP 1, capacity 1"),
-        INDIGO_PLANT(3, 2, 3, 2, 1, "Indigo Plant, cost 3, VP 2, capacity 3"),
-        SMALL_SUGAR_MILL(2, 1, 1, "Small Sugar Mill, cost 2, VP 1, capacity 1"),
-        SUGAR_MILL(4, 2, 3, 2, 1, "Sugar Mill, cost 4, VP 2, capacity 3"),
-        TOBACCO_STORAGE(5, 3, 3, 3, 1, "Tobacco Storage, cost 5, VP 3, capacity 3"),
-        COFFEE_ROASTER(6, 3, 2, 3, 1, "Coffee Roaster, cost 6, VP 3, capacity 2"),
+        SMALL_INDIGO_PLANT(1, 1, 1, 1, 1, "Small Indigo Plant, cost 1, VP 1, capacity 1", INDIGO),
+        INDIGO_PLANT(3, 2, 3, 2, 1, "Indigo Plant, cost 3, VP 2, capacity 3", INDIGO),
+        SMALL_SUGAR_MILL(2, 1, 1, 1, 1, "Small Sugar Mill, cost 2, VP 1, capacity 1", Crop.SUGAR),
+        SUGAR_MILL(4, 2, 3, 2, 1, "Sugar Mill, cost 4, VP 2, capacity 3", Crop.SUGAR),
+        TOBACCO_STORAGE(5, 3, 3, 3, 1, "Tobacco Storage, cost 5, VP 3, capacity 3", Crop.TOBACCO),
+        COFFEE_ROASTER(6, 3, 2, 3, 1, "Coffee Roaster, cost 6, VP 3, capacity 2", Crop.COFFEE),
         SMALL_MARKET(2, 1, 1, "Small Market, cost 2, VP 1, capacity 1. +1 doubloon with sale (trader phase)."),
         HACIENDA(2, 1, 1, "Hacienda, cost 2, VP 1, capacity 1. +1 plantation from supply (settler phase)."),
         CONSTRUCTION_HUT(2, 1, 1, "Construction Hut, cost 2, VP 1, capacity 1. quarry instead of plantation (settler phase)."),
@@ -126,14 +128,20 @@ public class PuertoRicoConstants {
         public final int nMaxQuarryDiscount;
         public final String tooltip;
         public final int size;
+        public final Crop crop; // null if not a production building
 
         BuildingType(int cost, int vp, int capacity, int nMaxQuarryDiscount, int size, String tooltip) {
+            this(cost, vp, capacity, nMaxQuarryDiscount, size, tooltip, null);
+        }
+
+        BuildingType(int cost, int vp, int capacity, int nMaxQuarryDiscount, int size, String tooltip, Crop production) {
             this.cost = cost;
             this.vp = vp;
             this.capacity = capacity;
             this.nMaxQuarryDiscount = nMaxQuarryDiscount;
             this.tooltip = tooltip;
             this.size = size;
+            this.crop = production;
         }
 
         BuildingType(int cost, int vp, int nMaxQuarryDiscount, String tooltip) {

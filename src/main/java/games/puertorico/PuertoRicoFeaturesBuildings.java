@@ -7,9 +7,11 @@ import java.util.Arrays;
 
 public class PuertoRicoFeaturesBuildings implements IStateFeatureVector {
 
-    String[] base = new String[] {"VP", "Doubloons", "Stores", "PlantationSize", "Vacancies"};
+    PuertoRicoFeaturesBase baseFeatures = new PuertoRicoFeaturesBase();
+
     @Override
     public String[] names() {
+        String base[] = baseFeatures.names();
         String[] buildings = Arrays.stream(PuertoRicoConstants.BuildingType.values()).map(PuertoRicoConstants.BuildingType::toString).toArray(String[]::new);
         String[] retValue = new String[base.length + buildings.length];
         System.arraycopy(base, 0, retValue, 0, base.length);
@@ -21,11 +23,8 @@ public class PuertoRicoFeaturesBuildings implements IStateFeatureVector {
         PuertoRicoGameState state = (PuertoRicoGameState) gs;
         double[] retValue = new double[names().length];
 
-        retValue[0] = state.getGameScore(playerID);
-        retValue[1] = state.getPlayerBoard(playerID).getDoubloons();
-        retValue[2] = state.getPlayerBoard(playerID).getStores().values().stream().mapToInt(Integer::intValue).sum();
-        retValue[3] = state.getPlayerBoard(playerID).getPlantationSize();
-        retValue[4] = state.getPlayerBoard(playerID).getPlantationVacancies() + state.getPlayerBoard(playerID).getTownVacancies();
+        double[] base = baseFeatures.doubleVector(gs, playerID);
+        System.arraycopy(base, 0, retValue, 0, base.length);
 
         for (int i = 0; i < PuertoRicoConstants.BuildingType.values().length; i++) {
             int finalI = i;
