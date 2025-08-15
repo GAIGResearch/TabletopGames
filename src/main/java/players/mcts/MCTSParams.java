@@ -220,10 +220,14 @@ public class MCTSParams extends PlayerParameters {
 
     public AbstractPlayer getRolloutStrategy() {
         if (rolloutPolicy == null) {
-            if (rolloutType == PARAMS)
+            if (rolloutType == PARAMS) {
+                if (rolloutPolicyParams == null) {
+                    throw new AssertionError("Rollout policy parameters have not been set");
+                }
                 rolloutPolicy = (AbstractPlayer) rolloutPolicyParams.instantiate();
-            else
+            } else {
                 rolloutPolicy = constructStrategy(rolloutType, rolloutClass);
+            }
             rolloutPolicy.getParameters().actionSpace = actionSpace;  // TODO makes sense?
         }
         return rolloutPolicy;

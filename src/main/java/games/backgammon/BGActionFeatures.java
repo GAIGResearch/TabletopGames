@@ -10,7 +10,8 @@ public class BGActionFeatures implements IActionFeatureVector {
     String[] names = new String[] {
             "FromPosition", "ToPosition",
             "FromOccupancy", "ToOccupancy",
-            "Blot", "RemainingDice", "ToHome"
+            "Blot", "RemainingDice", "ToHome",
+            "FirstDie"
     };
 
     @Override
@@ -45,6 +46,9 @@ public class BGActionFeatures implements IActionFeatureVector {
         features[5] = bgState.getAvailableDiceValues().length - 1;
 
         features[6] = to >= boardLength - params.homeBoardSize ? 1.0 : 0.0;
+
+        // First Die
+        features[7] = bgState.getAvailableDiceValues().length == 2 ? 1.0 : 0.0;
 
         return features;
 
