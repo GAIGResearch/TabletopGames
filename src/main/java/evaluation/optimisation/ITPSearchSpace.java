@@ -208,7 +208,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                 }
             }
             if (index == -1) {
-                throw new AssertionError("Value " + value + " not found in possible values for " + fullParameterName);
+                throw new AssertionError("Value " + value + " not found in possible values in search space for " + fullParameterName);
             }
             settings[i] = index;
         }
