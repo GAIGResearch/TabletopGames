@@ -1,5 +1,6 @@
 package utilities;
 
+import core.interfaces.IHasName;
 import core.interfaces.IToJSON;
 import evaluation.optimisation.TunableParameters;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -268,7 +269,18 @@ public class JSONUtils {
             JSONObject rawData = (JSONObject) jsonParser.parse(reader);
             // We expect a class field to tell us the Class to use
             // then a set of parameter values
-            return loadClassFromJSON(rawData);
+            T retValue = loadClassFromJSON(rawData);
+            if (retValue instanceof IHasName hasName) {
+                if (hasName.getName() == null || hasName.getName().isEmpty()) {
+                    // if the name is not set, we set it to the filename without the .json extension
+                    String name = new File(filename).getName();
+                    if (name.endsWith(".json")) {
+                        name = name.substring(0, name.length() - 5);
+                    }
+                    hasName.setName(name);
+                }
+            }
+            return retValue;
 
         } catch (FileNotFoundException e) {
             throw new AssertionError("File not found to load : " + filename);
@@ -434,7 +446,7 @@ public class JSONUtils {
             } else if (value instanceof String) {
                 sb.append("\"").append(value).append("\"");
             } else if (value instanceof Long || value instanceof Integer ||
-                     value instanceof Boolean) {
+                    value instanceof Boolean) {
                 sb.append(value);
             } else if (value instanceof Number n) {
                 sb.append(String.format("%.3g", n.doubleValue()));
@@ -516,6 +528,9 @@ public class JSONUtils {
             return possibleValue.toString().equals(value.toString());
         } else if (possibleValue instanceof Number && value instanceof Number) {
             return ((Number) possibleValue).doubleValue() == ((Number) value).doubleValue();
-        } else return possibleValue.equals(value);
+        } else if (possibleValue instanceof IHasName pName && value instanceof IHasName name) {
+            return pName.getName().equals(name.getName());
+        } else
+            return possibleValue.equals(value);
     }
 }

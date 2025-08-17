@@ -203,6 +203,13 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                 // we use the default value
                 value = itp.getDefaultParameterValue(fullParameterName);
             }
+            if (value instanceof String str) {
+                // if the value is a string, we need to check if it is a JSON file
+                if (str.endsWith(".json")) {
+                    // we load the JSON file and use that as the value
+                    value = JSONUtils.loadClassFromFile(str);
+                }
+            }
             // we need to find the index of the value in the list of possible values
             List<Object> possibleValues = values.get(i);
             int index = -1;
@@ -234,7 +241,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
             // slightly awkward...TunableParameters has a rawJSON set of data that should be used to provide local overrides to the
             // global defaults specific to the main parameter definition
             Object defaultValue = itp instanceof TunableParameters<?> tp ? tp.getDefaultOverride(keyName) : itp.getDefaultParameterValue(keyName);
-            if (!value.equals(defaultValue)) {
+            if (!JSONUtils.areValuesEqual(value, defaultValue)) {
                 throw new AssertionError("Value " + value + " for parameter " + keyName + " does not match default value " + defaultValue);
             }
         }
