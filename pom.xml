@@ -262,6 +262,25 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>OneStepDeviations</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.optimisation.OneStepDeviations</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>OneStepDeviations</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <id>ExpertIteration</id>
                         <configuration>
                             <descriptorRefs>

@@ -19,7 +19,7 @@
         "epsilon" : 1e-6,
         "breakMS" : 0,
         "exploreEpsilon" : 0.30,
-        "rolloutTermination" : "DEFAULT",
+        "rolloutTermination" : "EXACT",
         "maintainMasterState" : false,
         "heuristic" : [{
                 "class" : "players.heuristics.WinOnlyHeuristic"

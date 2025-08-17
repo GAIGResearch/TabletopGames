@@ -75,12 +75,12 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                 System.out.println("\tLoading " + pName);
             if (isParamArray(pName, rawData)) {
                 List<?> pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
-                params.addTunableParameter(pName, params.getDefaultParameterValue(pName),
+                params.addTunableParameter(pName, params.getParameterType(pName), params.getDefaultParameterValue(pName),
                         new ArrayList<>(pValue));
             } else {
                 Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
                 if (pValue != null)
-                    params.addTunableParameter(pName, pValue);
+                    params.addTunableParameter(pName, params.getParameterType(pName), pValue);
             }
         }
         params._reset();
@@ -93,6 +93,14 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
             }
         }
+    }
+
+    private Class<?> getParameterType(String pName) {
+        Class<?> type = parameterTypes.get(pName);
+        if (type == null) {
+            throw new AssertionError("No type found for parameter " + pName + " in " + this.getClass().getSimpleName());
+        }
+        return type;
     }
 
     /**

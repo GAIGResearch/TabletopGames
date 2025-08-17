@@ -74,7 +74,7 @@ public class TestAutomatedFeatures {
         // check that the heuristic initialises correctly
         int expectedStateFeatures = (new DomStateFeaturesReduced()).names().length;
         assertEquals(expectedStateFeatures, linearStateHeuristic.names().length);
-        int additionalFeaturesInJSON = 21;
+        int additionalFeaturesInJSON = 18; // counted in file
         assertEquals(expectedStateFeatures +
                         additionalFeaturesInJSON,
                 logisticActionHeuristic.names().length);
