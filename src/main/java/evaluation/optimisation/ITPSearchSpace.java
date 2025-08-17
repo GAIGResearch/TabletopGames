@@ -92,6 +92,11 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                 if (itp.getParameterNames().contains(baseKey)) {
                     Object data = json.get(baseKey);
                     String key = "".equals(nameSpace) ? (String) baseKey : nameSpace + "." + baseKey;
+                    // check to see if this is a json file
+                    if (data instanceof String str) {
+                        if (str.endsWith(".json"))
+                            data = JSONUtils.loadJSONFile(str);
+                    }
                     if (data instanceof JSONObject) {
                         // in this case we have nesting, and need to recurse to get all the relevant parameters
                         // we use key as the nameSpace
@@ -155,8 +160,8 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
     }
 
     /*
-    * This method returns the default settings for the search space.
-    * If the actual default value is not in the search space, then the value will be -1.
+     * This method returns the default settings for the search space.
+     * If the actual default value is not in the search space, then the value will be -1.
      */
     public int[] defaultSettings() {
         int[] settings = new int[searchDimensions.size()];
@@ -246,11 +251,11 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
 
     @SuppressWarnings("unchecked")
     public void writeAgentJSON(int[] settings, String fileName) {
-            JSONObject json = constructAgentJSON(settings);
-            int budget = (int) itp.getParameterValue("budget");
-            if (budget > 0)
-                json.put("budget", budget);
-            JSONUtils.writeJSON(json, fileName);
+        JSONObject json = constructAgentJSON(settings);
+        int budget = (int) itp.getParameterValue("budget");
+        if (budget > 0)
+            json.put("budget", budget);
+        JSONUtils.writeJSON(json, fileName);
     }
 
     private void setTo(int[] settings) {
