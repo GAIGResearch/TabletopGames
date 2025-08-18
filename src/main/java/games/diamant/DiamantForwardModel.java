@@ -10,15 +10,17 @@ import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
+import games.diamant.cards.DiamantCard.HazardType;
 import games.diamant.components.ActionsPlayed;
 import utilities.ActionTreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static java.util.stream.Collectors.*;
 
 public class DiamantForwardModel extends StandardForwardModel implements ITreeActionSpace {
     @Override
@@ -40,7 +42,19 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         dgs.actionsPlayed = new ActionsPlayed();
         dgs.recordOfPlayerActions = new ArrayList<>();
 
+        // Relic deck initialization if relicVariant is true
+        DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
+        if (dp.relicVariant) {
+            dgs.relicDeck = new Deck<>("RelicDeck", VISIBLE_TO_ALL);
+        }
+
         createCards(dgs);
+
+        // If relic variant, add top relic to main deck before shuffling
+        if (dp.relicVariant && dgs.relicDeck != null && dgs.relicDeck.getSize() > 0) {
+            dgs.mainDeck.add(dgs.relicDeck.draw());
+        }
+
         dgs.mainDeck.shuffle(dgs.getRnd());
 
         // Draw first card and play it
@@ -66,14 +80,23 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
 
         // Add hazards
         for (int i = 0; i < dp.nHazardCardsPerType; i++) {
-            for (DiamantCard.HazardType h : DiamantCard.HazardType.values())
-                if (h != DiamantCard.HazardType.None)
+            for (HazardType h : HazardType.values())
+                if (h != HazardType.None)
                     dgs.mainDeck.add(new DiamantCard(DiamantCard.DiamantCardType.Hazard, h, 0));
         }
 
         // Add treasures
         for (int t : dp.treasures)
-            dgs.mainDeck.add(new DiamantCard(DiamantCard.DiamantCardType.Treasure, DiamantCard.HazardType.None, t));
+            dgs.mainDeck.add(new DiamantCard(DiamantCard.DiamantCardType.Treasure, HazardType.None, t));
+
+        // Add relics if relicVariant is enabled (we add these in reverse order so
+        // that the first relic drawn is the last one added
+        if (dp.relicVariant && dgs.relicDeck != null) {
+            for (int i = dp.relics.length - 1; i >= 0; i--) {
+                DiamantCard relicCard = new DiamantCard(DiamantCard.DiamantCardType.Relic, HazardType.None, dp.relics[i]);
+                dgs.relicDeck.add(relicCard); // rest in relic deck
+            }
+        }
     }
 
     /**
@@ -99,17 +122,26 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     public void playActions(DiamantGameState dgs) {
         // How many players play ExitFromCave?
         int nPlayersExit = 0;
+        int lastExitingPlayer = -1;
         for (int p : dgs.actionsPlayed.keySet())
             if (dgs.actionsPlayed.get(p) instanceof ExitFromCave) {
                 nPlayersExit += 1;
+                lastExitingPlayer = p;
                 dgs.recordOfPlayerActions.add(new DiamantGameState.PlayerTurnRecord(p, dgs.nCave, dgs.discardDeck.getSize()));
             }
 
+        DiamantParameters params = (DiamantParameters) dgs.getGameParameters();
+
+        // If exactly one player leaves, and relicVariant is enabled, they pick up all relics on the path
+        if (params.relicVariant && nPlayersExit == 1) {
+            int relicValue = removeRelicsFromPath(dgs);
+            dgs.treasureChests.get(lastExitingPlayer).increment(relicValue);
+        }
 
         if (nPlayersExit == dgs.getNPlayersInCave()) {
             // All active players left the cave
             distributeGemsAmongPlayers(dgs, nPlayersExit);
-            dgs.nGemsOnPath = 0;
+            dgs.gemsOnPath.clear();
             prepareNewCave(dgs);
         } else {
             if (nPlayersExit > 0) {
@@ -122,23 +154,44 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
 
     }
 
+    private int removeRelicsFromPath(DiamantGameState dgs) {
+        List<DiamantCard> relicsOnPath = dgs.path.stream()
+                .filter(c -> c.getCardType() == DiamantCard.DiamantCardType.Relic)
+                .toList();
+        int relicValue = relicsOnPath.stream().mapToInt(DiamantCard::getValue).sum();
+        dgs.path.removeAll(relicsOnPath);
+        dgs.discardDeck.add(relicsOnPath); // Add relics to discard deck
+        return relicValue;
+    }
+
     private void distributeGemsAmongPlayers(DiamantGameState dgs, int nPlayersExit) {
-        int gems_to_players;
-        if (nPlayersExit == 1) {
-            gems_to_players = dgs.nGemsOnPath;
-            dgs.nGemsOnPath = 0;
-        } else {
-            gems_to_players = (int) Math.floor(dgs.nGemsOnPath / (double) nPlayersExit);
-            dgs.nGemsOnPath = dgs.nGemsOnPath % nPlayersExit;
+        int nPlayers = dgs.getNPlayers();
+        int gemsCollected = 0;
+
+        // Divide up gems per space
+        for (int i = 0; i < dgs.gemsOnPath.size(); i++) {
+            int gems = dgs.gemsOnPath.get(i);
+            int gemsPerPlayer = nPlayersExit > 0 ? gems / nPlayersExit : 0;
+            int gemsLeft = nPlayersExit > 0 ? gems % nPlayersExit : gems;
+
+            gemsCollected += gemsPerPlayer;
+            // Update gems left on this path card
+            dgs.gemsOnPath.set(i, gemsLeft);
         }
 
-        for (int p = 0; p < dgs.getNPlayers(); p++) {
+        // Give collected gems to players, move hand to chest, set not in cave
+        int actualExiting = 0;
+        for (int p = 0; p < nPlayers; p++) {
             if (dgs.actionsPlayed.get(p) instanceof ExitFromCave) {
-                dgs.hands.get(p).increment(gems_to_players);                             // increment hand gems
-                dgs.treasureChests.get(p).increment(dgs.hands.get(p).getValue());   // hand gems to chest
-                dgs.hands.get(p).setValue(0);                                 // hand gems <- 0
-                dgs.playerInCave.set(p, false);                                       // Set to not in Cave
+                actualExiting++;
+                dgs.hands.get(p).increment(gemsCollected); // increment hand gems
+                dgs.treasureChests.get(p).increment(dgs.hands.get(p).getValue()); // hand gems to chest
+                dgs.hands.get(p).setValue(0); // hand gems <- 0
+                dgs.playerInCave.set(p, false); // Set to not in Cave
             }
+        }
+        if (actualExiting != nPlayersExit) {
+            throw new AssertionError("Number of players exiting does not match nPlayersExit parameter.");
         }
     }
 
@@ -150,23 +203,27 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     private void prepareNewCave(DiamantGameState dgs) {
         DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
 
+        endRound(dgs);
+
         dgs.nCave++;
 
         // No more caves ?
         if (dgs.nCave == dp.nCaves)
             endGame(dgs);
         else {
+
+            if (dp.relicVariant) {
+                // remove any untaken relics from the path and add to discard
+                removeRelicsFromPath(dgs);
+                // add new relic to main deck
+                dgs.mainDeck.add(dgs.relicDeck.draw());
+            }
+
             // Move path cards to maindeck and shuffle
             dgs.mainDeck.add(dgs.path);
             dgs.path.clear();
-            dgs.mainDeck.shuffle(dgs.getRnd());
 
-            // Initialize game state
-            dgs.nHazardExplosionsOnPath = 0;
-            dgs.nHazardPoissonGasOnPath = 0;
-            dgs.nHazardRockfallsOnPath = 0;
-            dgs.nHazardScorpionsOnPath = 0;
-            dgs.nHazardSnakesOnPath = 0;
+            dgs.mainDeck.shuffle(dgs.getRnd());
 
             // All the player will participate in next cave
             for (int p = 0; p < dgs.getNPlayers(); p++)
@@ -208,42 +265,48 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         DiamantCard card = dgs.mainDeck.draw();
         dgs.path.add(card);
 
+        // Add gems for this card to gemsOnPath (0 if not treasure)
         if (card.getCardType() == DiamantCard.DiamantCardType.Treasure) {
-            int gems_to_players = (int) Math.floor(card.getNumberOfGems() / (double) dgs.getNPlayersInCave());
-            int gems_to_path = card.getNumberOfGems() % dgs.getNPlayersInCave();
+            int nInCave = dgs.getNPlayersInCave();
+            int gems_to_players = nInCave > 0 ? (int) Math.floor(card.getValue() / (double) nInCave) : 0;
+            int gems_to_path = nInCave > 0 ? card.getValue() % nInCave : card.getValue();
 
             for (int p = 0; p < dgs.getNPlayers(); p++)
                 if (dgs.playerInCave.get(p))
                     dgs.hands.get(p).increment(gems_to_players);
 
-            dgs.nGemsOnPath += gems_to_path;
+            dgs.gemsOnPath.add(gems_to_path);
         } else if (card.getCardType() == DiamantCard.DiamantCardType.Hazard) {
-            if (card.getHazardType() == DiamantCard.HazardType.Explosions) dgs.nHazardExplosionsOnPath += 1;
-            else if (card.getHazardType() == DiamantCard.HazardType.PoissonGas) dgs.nHazardPoissonGasOnPath += 1;
-            else if (card.getHazardType() == DiamantCard.HazardType.Rockfalls) dgs.nHazardRockfallsOnPath += 1;
-            else if (card.getHazardType() == DiamantCard.HazardType.Scorpions) dgs.nHazardScorpionsOnPath += 1;
-            else if (card.getHazardType() == DiamantCard.HazardType.Snakes) dgs.nHazardSnakesOnPath += 1;
+            dgs.gemsOnPath.add(0);
 
             DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
             // If there are two hazards cards of the same type -> finish the cave
-            if (dgs.nHazardSnakesOnPath == dp.nHazardsToDead ||
-                    dgs.nHazardScorpionsOnPath == dp.nHazardsToDead ||
-                    dgs.nHazardRockfallsOnPath == dp.nHazardsToDead ||
-                    dgs.nHazardPoissonGasOnPath == dp.nHazardsToDead ||
-                    dgs.nHazardExplosionsOnPath == dp.nHazardsToDead) {
-                // All active players loose all gems on hand.
+            Map<HazardType, Long> hazardCount = dgs.path.stream()
+                    .filter(c -> c.getCardType() == DiamantCard.DiamantCardType.Hazard)
+                    .map(DiamantCard::getHazardType)
+                    .collect(groupingBy(h -> h, counting()));
+            if (hazardCount.getOrDefault(card.getHazardType(), 0L) >= dp.nHazardsToDead) {
+                // Hazard card is the second of its type, cave ends
+                // All active players lose all gems on hand.
                 for (int p = 0; p < dgs.getNPlayers(); p++) {
                     if (dgs.playerInCave.get(p)) {
                         dgs.hands.get(p).setValue(0);
                         dgs.recordOfPlayerActions.add(new DiamantGameState.PlayerTurnRecord(p, dgs.nCave, -1));
                     }
                 }
-                // Gems on Path are also loosed
-                dgs.nGemsOnPath = 0;
+                // Gems on Path are also lost
+                dgs.gemsOnPath.clear();
 
                 // Remove last card (it is the hazard one) from path and add to discardDeck
                 dgs.path.draw();
                 dgs.discardDeck.add(card);
+
+                // Remove any relics from the path if relicVariant is enabled (also to discard deck)
+                DiamantParameters params = (DiamantParameters) dgs.getGameParameters();
+                if (params.relicVariant) {
+                    // Remove all relic cards from the path
+                    removeRelicsFromPath(dgs);
+                }
 
                 // Start new cave
                 prepareNewCave(dgs);
