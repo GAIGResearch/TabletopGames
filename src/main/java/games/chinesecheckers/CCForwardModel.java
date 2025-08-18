@@ -195,10 +195,10 @@ public class CCForwardModel extends StandardForwardModel {
         int[] colourIndices = params.colourIndices.get(colour);
         int counter = 0;
         boolean PegIn = false;
-        // we win is all target nodes are occupied, and at least one of them is ours (anti-spoiling rule)
+        // we win if all target nodes are occupied, and at least one of them is ours (anti-spoiling rule)
         List<CCNode> nodes = state.getStarBoard().getBoardNodes();
         for (int i : colourIndices) {
-            if (nodes.get(i).isNodeOccupied() ) {
+            if (nodes.get(i).isNodeOccupied() && nodes.get(i).getOccupiedPeg().getColour() == colour) {
                 PegIn = true;
             }
             if (nodes.get(i).isNodeOccupied()) {
