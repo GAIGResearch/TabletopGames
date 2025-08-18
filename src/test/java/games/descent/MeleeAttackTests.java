@@ -25,15 +25,11 @@ public class MeleeAttackTests {
 
     @Before
     public void setup() {
-        long seed = 234;
-        // a rather cruddy way of ensuring we get the right hero in the right place
-        do {
-            seed++;
-            DescentParameters params = new DescentParameters();
-            params.setRandomSeed(seed);
-            state = new DescentGameState(new DescentParameters(), 2);
-            fm.setup(state);
-        } while (!state.getHeroes().get(0).getName().equals("Hero: Avric Albright"));
+        DescentParameters params = new DescentParameters();
+        params.heroesToBePlayed = List.of("Avric Albright");
+        state = new DescentGameState(params, 2);
+        fm.setup(state);
+        assertEquals("Hero: Avric Albright", state.getHeroes().get(0).getName());
     }
 
     @Test
@@ -358,9 +354,15 @@ public class MeleeAttackTests {
         victim.setPosition(victimPos);
         ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
 
+        int loopCount = 0;
         while (!state.getActingFigure().equals(attacker)) {
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             fm.next(state, actions.get(0));
+            System.out.println(state.getActingFigure() + " : " + actions.get(0));
+            loopCount++;
+            if (loopCount > 100) {
+                fail("Looped too many times waiting for monster to act");
+            }
         }
         assertEquals(state.getActingFigure(), attacker);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
@@ -379,10 +381,15 @@ public class MeleeAttackTests {
         attack.execute(state);
 
         // Might pause because we roll a Surge or have a reaction - here we ensure it continues
+        loopCount = 0;
         while (!attack.executionComplete(state)) {
             AbstractAction action = attack._computeAvailableActions(state).get(0);
             action.execute(state);
             attack._afterAction(state, action);
+            loopCount++;
+            if (loopCount > 100) {
+                fail("Looped too many times waiting for attack to complete");
+            }
         }
 
         assertEquals(2, state.getAttackDicePool().getSize());
@@ -408,10 +415,15 @@ public class MeleeAttackTests {
         victim.setPosition(victimPos);
         ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
 
+        int loopCount = 0;
         while (state.getActingFigure().getComponentID() != attacker.getComponentID()) {
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             fm.next(state, actions.get(0));
-            System.out.println(state.getActingFigure());
+            System.out.println(state.getActingFigure() + " : " + actions.get(0));
+            loopCount++;
+            if (loopCount > 100) {
+                fail("Looped too many times waiting for monster to act");
+            }
         }
         assertEquals(state.getActingFigure(), attacker);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
@@ -498,10 +510,15 @@ public class MeleeAttackTests {
         attack.execute(state);
 
         // Might pause because we roll a Surge or have a reaction - here we ensure it continues
+        int count = 0;
         while (!attack.executionComplete(state)) {
             AbstractAction action = attack._computeAvailableActions(state).get(0);
             action.execute(state);
             attack._afterAction(state, action);
+            count++;
+            if (count > 100) {
+                fail("Looped too many times waiting for attack to complete");
+            }
         }
         assertEquals(attack, state.currentActionInProgress());
         assertEquals(2, state.getAttackDicePool().getSize());

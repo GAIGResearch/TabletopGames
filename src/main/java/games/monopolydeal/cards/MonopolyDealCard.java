@@ -52,15 +52,16 @@ public class MonopolyDealCard extends Card{
         }
     }
 
+    // We do not use super.hashCode/equals as part of this.hashCode/equals because we want cards to be the same, even if they have different component ids
     @Override
     public int hashCode(){
-        return Objects.hash(super.hashCode(), type.ordinal(), useAs.ordinal());
+        return Objects.hash(type.ordinal(), useAs.ordinal());
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MonopolyDealCard other) {
-            return other.type == type && other.useAs == useAs && super.equals(obj);
+            return other.type == type && other.useAs == useAs;
         }
         return false;
     }

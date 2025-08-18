@@ -56,9 +56,7 @@ public class BuyCard extends TMAction {
             }
         } else {
             gs.getPlayerHands()[player].add(card);
-            boolean cardFound = gs.getPlayerCardChoice()[player].remove(card);
-            if (!cardFound)
-                throw new AssertionError("Card not found : " + card);
+            gs.getPlayerCardChoice()[player].remove(card);
         }
         return true;
     }

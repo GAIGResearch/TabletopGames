@@ -108,6 +108,15 @@ public class DescentGameData extends AbstractGameData {
         return null;
     }
 
+    public Hero findHero(String name) {
+        for (Hero h: heroes) {
+            if (h.getComponentName().equalsIgnoreCase(name)) {
+                return h.copy();
+            }
+        }
+        throw new IllegalArgumentException("Hero not found: " + name);
+    }
+
     public List<Hero> findHeroes(DescentTypes.Archetype archetype) {
         List<Hero> heroes = new ArrayList<>();
         for (Hero f: this.heroes) {
