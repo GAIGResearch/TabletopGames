@@ -174,7 +174,7 @@ public class CCForwardModel extends StandardForwardModel {
         CCGameState state = (CCGameState) currentState;
 
         for (int p = 0; p < state.getNPlayers(); p++) {
-            if (checkWinCondition(state)) {
+            if (checkWinCondition(state, p)) {
                 endGame(state);
             }
         }
@@ -187,10 +187,8 @@ public class CCForwardModel extends StandardForwardModel {
         }
     }
 
-    private boolean checkWinCondition(CCGameState state) {
-        int player = state.getCurrentPlayer();
+    private boolean checkWinCondition(CCGameState state, int player) {
         Peg.Colour colour = state.getPlayerColour(player);
-        // only the current player can win after their turn
         CCParameters params = (CCParameters) state.getGameParameters();
         int[] colourIndices = params.colourIndices.get(colour);
         int counter = 0;
