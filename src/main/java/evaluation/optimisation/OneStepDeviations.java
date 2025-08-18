@@ -267,7 +267,7 @@ public class OneStepDeviations {
             }
             iteration++;
             numberStillUnderConsideration = (int) stillUnderConsideration.stream().filter(b -> b).count();
-            finished = numberStillUnderConsideration <= params.nPlayers + 2 || iteration >= params.repeats;
+            finished = numberStillUnderConsideration <= params.nPlayers + 2 || iteration > params.repeats;
 
         } while (!finished);
 
