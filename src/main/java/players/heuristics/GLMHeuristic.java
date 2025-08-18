@@ -17,7 +17,7 @@ public abstract class GLMHeuristic implements ICoefficients, IHasName {
      * (In a GLM we have g(mu) = X*beta, where g is the link function, mu is the expected value of the response variable)
      * Hence given the coefficients, beta, we need the inverse link function to get the expected value of the response variable
      */
-    protected String name;
+    protected String name = "";
 
     protected double[] coefficients;
 
