@@ -148,16 +148,17 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         // This is where the call for the Attribute Tests would go
         List<AbstractAction> retVal = new ArrayList<>();
         // TODO: This feels incredibly hacky, but for whatever reason, it just works.
-        if (state.getHistory().isEmpty()) return null;
+        if (state.getHistory().isEmpty()) return retVal;
         AbstractAction lastAction = state.getHistory().get(state.getHistory().size() - 1).b;
         if (lastAction instanceof RerollAttributeTest || lastAction instanceof EndCurrentPhase) {
             // If the Reroll option is available, even if the player chooses not to take it, the Game is expecting
             // there to be at least something within the retVal list of possible actions for the next player.
             // This seems to be more of an issue with how the TAG Framework handles multiple IExtendedSequences on top of each other,
             // and will require further inspecting to resolve.
+            // Note from James: A key constraint imposed by the TAG framework is that there must *always* be an action that is executable
+            // in a game state. It is invalid for computeAvailableActions to return an empty list UNLESS the game is over.
             retVal.add(new DoNothing());
         }
-        if (retVal.isEmpty()) return null;
         return retVal;
     }
 
