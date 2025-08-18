@@ -12,9 +12,9 @@ import java.util.Set;
 
 public class HowlTest extends AttributeTest {
 
-    public HowlTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
-        super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Howl (Willpower) Test: " + sourceFigure + "-" + testCount;
+    public HowlTest(int testingFigure, Figure.Attribute attribute, int sourceFigure) {
+        super(testingFigure, attribute, sourceFigure);
+        attributeTestName = "Howl (Willpower) Test: " + sourceFigure;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class HowlTest extends AttributeTest {
 
     @Override
     public String toString() {
-        return "Howl (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        return "Howl (Willpower) Test by " + super.getSourceFigure() + " on " + super.getTestingFigure();
     }
 
     @Override
@@ -53,7 +53,7 @@ public class HowlTest extends AttributeTest {
 
     @Override
     public HowlTest _copy() {
-        return new HowlTest(testingFigure, attribute, sourceFigure, testCount);
+        return new HowlTest(testingFigure, attribute, sourceFigure);
     }
 
     @Override

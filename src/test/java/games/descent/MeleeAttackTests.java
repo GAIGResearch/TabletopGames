@@ -9,6 +9,7 @@ import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.*;
 import games.descent2e.actions.monsterfeats.Howl;
+import games.descent2e.actions.monsterfeats.HowlTest;
 import games.descent2e.components.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -354,16 +355,7 @@ public class MeleeAttackTests {
         victim.setPosition(victimPos);
         ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
 
-        int loopCount = 0;
-        while (!state.getActingFigure().equals(attacker)) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            fm.next(state, actions.get(0));
-            System.out.println(state.getActingFigure() + " : " + actions.get(0));
-            loopCount++;
-            if (loopCount > 100) {
-                fail("Looped too many times waiting for monster to act");
-            }
-        }
+        advanceToMonsterAction(attacker);
         assertEquals(state.getActingFigure(), attacker);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertFalse(actions.stream().noneMatch(a -> a instanceof Howl));
@@ -381,16 +373,7 @@ public class MeleeAttackTests {
         attack.execute(state);
 
         // Might pause because we roll a Surge or have a reaction - here we ensure it continues
-        loopCount = 0;
-        while (!attack.executionComplete(state)) {
-            AbstractAction action = attack._computeAvailableActions(state).get(0);
-            action.execute(state);
-            attack._afterAction(state, action);
-            loopCount++;
-            if (loopCount > 100) {
-                fail("Looped too many times waiting for attack to complete");
-            }
-        }
+        completeAttack(attack);
 
         assertEquals(2, state.getAttackDicePool().getSize());
         assertEquals(1, state.getAttackDicePool().getNumber(DiceType.YELLOW));
@@ -404,19 +387,9 @@ public class MeleeAttackTests {
         assertTrue(actions.stream().noneMatch(a -> a instanceof Howl));
     }
 
-    @Test
-    public void monsterOnlyUsesAbilityOnce() {
-        Monster attacker = state.getMonsters().get(1).get(0);
-        Figure victim = state.getActingFigure();
-
-        Vector2D attackerPos = new Vector2D(4, 3);
-        Vector2D victimPos = new Vector2D(5, 4);
-        attacker.setPosition(attackerPos);
-        victim.setPosition(victimPos);
-        ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
-
+    private void advanceToMonsterAction(Monster attacker) {
         int loopCount = 0;
-        while (state.getActingFigure().getComponentID() != attacker.getComponentID()) {
+        while (!state.getActingFigure().equals(attacker)) {
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             fm.next(state, actions.get(0));
             System.out.println(state.getActingFigure() + " : " + actions.get(0));
@@ -426,20 +399,66 @@ public class MeleeAttackTests {
             }
         }
         assertEquals(state.getActingFigure(), attacker);
+    }
+
+    private void completeAttack(MeleeAttack attack) {
+        int loopCount = 0;
+        while (!attack.executionComplete(state)) {
+            AbstractAction action = attack._computeAvailableActions(state).get(0);
+            action.execute(state);
+            attack._afterAction(state, action);
+            loopCount++;
+            if (loopCount > 100) {
+                fail("Looped too many times waiting for attack to complete");
+            }
+        }
+    }
+
+    @Test
+    public void howlWithTwoVictims() {
+        Monster attacker = state.getMonsters().get(1).get(0);
+        Figure victim1 = state.getHeroes().get(0);
+        Figure victim2 = state.getHeroes().get(1);
+
+        Vector2D attackerPos = new Vector2D(4, 3);
+        Vector2D victim1Pos = new Vector2D(5, 4);
+        Vector2D victim2Pos = new Vector2D(4, 4);
+        attacker.setPosition(attackerPos);
+        victim1.setPosition(victim1Pos);
+        victim2.setPosition(victim2Pos);
+
+        advanceToMonsterAction(attacker);
+        assertEquals(state.getActingFigure(), attacker);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertFalse(actions.stream().noneMatch(a -> a instanceof Howl));
-        Howl howl = (Howl) actions.stream().filter(a -> a instanceof Howl).findFirst().get();
-        // Force the dice to roll a result that goes all the way to the end without interruptions
-        howl.execute(state);
-        AbstractAction action = howl._computeAvailableActions(state).get(0);
-        action.execute(state);
-        howl._afterAction(state, action);
-        assertTrue(howl.executionComplete(state));
+        assertTrue(actions.stream().anyMatch(a -> a instanceof Howl));
+        Howl howl = (Howl) actions.stream().filter(a -> a instanceof Howl).findFirst().orElseThrow();
+        assertEquals(2, howl.getTargets().size());
+        assertTrue(howl.getTargets().contains(victim1.getComponentID()));
+        assertTrue(howl.getTargets().contains(victim2.getComponentID()));
 
+        fm.next(state, howl);
+        assertEquals(howl, state.currentActionInProgress());
+        assertEquals(victim1.getOwnerId(), state.getCurrentPlayer());
         actions = fm.computeAvailableActions(state);
-
-        assertTrue(actions.stream().noneMatch(a -> a instanceof MeleeAttack));
-        assertTrue(actions.stream().noneMatch(a -> a instanceof Howl));
+        assertEquals(1, actions.size());
+        assertTrue(actions.get(0) instanceof HowlTest);
+        do {
+            fm.next(state, actions.get(0));
+            actions = fm.computeAvailableActions(state);
+        } while (howl.currentTarget() == victim1.getComponentID());
+        assertEquals(victim2.getOwnerId(), state.getCurrentPlayer());
+        assertEquals(victim2.getComponentID(), howl.currentTarget());
+        assertEquals(1, actions.size());
+        assertTrue(actions.get(0) instanceof HowlTest);
+        do {
+            fm.next(state, actions.get(0));
+            actions = fm.computeAvailableActions(state);
+        } while (howl.currentTarget() == victim2.getComponentID());
+        assertFalse(state.isActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(attacker, state.getActingFigure());
+        // Howl is an action, not an Attack, so can be used twice
+        assertTrue(actions.stream().anyMatch(a -> a instanceof Howl));
     }
 
     @Test
