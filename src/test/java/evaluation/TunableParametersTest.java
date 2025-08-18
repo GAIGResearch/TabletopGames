@@ -321,4 +321,10 @@ public class TunableParametersTest {
         assertNull(heuristicJSON.get("heuristicType"));
     }
 
+    @Test
+    public void searchSpaceWithJSONSubFile() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/SearchSpaceWithJsonFileRef.json");
+        // this fails if it throws an exception
+    }
+
 }

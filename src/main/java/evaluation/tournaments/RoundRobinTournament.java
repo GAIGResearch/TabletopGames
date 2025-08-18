@@ -240,6 +240,9 @@ public class RoundRobinTournament extends AbstractTournament {
     public void createAndRunMatchUp(List<Integer> matchUp) {
 
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
+        if (gameSeeds == null || gameSeeds.isEmpty()) {
+            gameSeeds = IntStream.range(0, gamesPerMatchup).mapToObj(i -> seedRnd.nextInt()).collect(toList());
+        }
         switch (tournamentMode) {
             case FIXED:
                 // we add the agents to the matchUp in the order they are in the list

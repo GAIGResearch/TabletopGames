@@ -1,6 +1,7 @@
 package players.heuristics;
 
 import core.interfaces.ICoefficients;
+import core.interfaces.IHasName;
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.json.simple.JSONObject;
 import utilities.Pair;
@@ -8,7 +9,7 @@ import utilities.Pair;
 import java.util.List;
 import java.util.function.DoubleUnaryOperator;
 
-public abstract class GLMHeuristic implements ICoefficients {
+public abstract class GLMHeuristic implements ICoefficients, IHasName {
 
     /**
      * A Generalised Linear Model (GLM) State Heuristic
@@ -16,6 +17,7 @@ public abstract class GLMHeuristic implements ICoefficients {
      * (In a GLM we have g(mu) = X*beta, where g is the link function, mu is the expected value of the response variable)
      * Hence given the coefficients, beta, we need the inverse link function to get the expected value of the response variable
      */
+    protected String name = "";
 
     protected double[] coefficients;
 
@@ -86,4 +88,19 @@ public abstract class GLMHeuristic implements ICoefficients {
         return this;
     }
 
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name + " : " + getClass().getSimpleName();
+    }
 }

@@ -13,7 +13,7 @@ public class BoltzmannActionParams extends TunableParameters {
     public BoltzmannActionParams() {
         addTunableParameter("temperature", 1.0);
         addTunableParameter("epsilon", 0.0);
-        addTunableParameter("actionHeuristic", (IActionHeuristic) (gameState, action, actions) -> 0.0);
+        addTunableParameter("actionHeuristic", IActionHeuristic.class, (IActionHeuristic) (gameState, action, actions) -> 0.0);
     }
 
     @Override

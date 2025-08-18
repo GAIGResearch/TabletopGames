@@ -74,7 +74,6 @@ public class OneStepDeviations {
         List<List<Integer>> playerSettings = new ArrayList<>();
 
         playerSettings.add(Arrays.stream(baseSettings).boxed().toList()); // dummy for baseline agent
-        int nextIndex = 1;
         for (int i = 0; i < baseSettings.length; i++) {
             for (int j = 0; j < params.searchSpace.nValues(i); j++) {
                 if (j == baseSettings[i]) {
@@ -83,7 +82,6 @@ public class OneStepDeviations {
                 int[] settings = baseSettings.clone();
                 settings[i] = j;
                 playerSettings.add(Arrays.stream(settings).boxed().toList());
-                nextIndex++;
             }
         }
 
@@ -260,7 +258,6 @@ public class OneStepDeviations {
                             totalScore.add(0.0);
                             totalScoreSquared.add(0.0);
                             stillUnderConsideration.add(true);
-                            nextIndex++;
                             if (params.verbose)
                                 System.out.printf("Adding new player %s with settings %s%n", getAgentName(combinedSettingsArray, baseSettings),
                                         Arrays.toString(combinedSettingsArray));
@@ -270,7 +267,7 @@ public class OneStepDeviations {
             }
             iteration++;
             numberStillUnderConsideration = (int) stillUnderConsideration.stream().filter(b -> b).count();
-            finished = numberStillUnderConsideration <= params.nPlayers + 2 || iteration >= params.repeats;
+            finished = numberStillUnderConsideration <= params.nPlayers + 2 || iteration > params.repeats;
 
         } while (!finished);
 

@@ -1,16 +1,20 @@
 package evaluation;
 
 import core.AbstractPlayer;
+import core.Game;
 import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import org.junit.*;
+import players.basicMCTS.BasicMCTSPlayer;
+import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 
 import java.io.File;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static players.PlayerConstants.BUDGET_TIME;
 
 public class RunGamesTest {
 
@@ -131,5 +135,50 @@ public class RunGamesTest {
         assertEquals(66, tournament.getNGamesPlayed()[2], 15);
         assertEquals(66, tournament.getNGamesPlayed()[3], 15);
     }
+
+    @Test
+    public void playersCopiedCorrectly() {
+        config.put(RunArg.mode, "random");
+        config.put(RunArg.matchups, 1);
+        List<AbstractPlayer> singleAgent = Collections.singletonList(new MCTSPlayer());
+        singleAgent.get(0).getParameters().setParameterValue("budgetType", BUDGET_TIME);
+        singleAgent.get(0).getParameters().setParameterValue("reuseTree", true);
+        singleAgent.get(0).getParameters().setParameterValue("budget", 20);
+        tournament = new RoundRobinTournament(singleAgent, GameType.Poker, 3, null, config);
+        tournament.createAndRunMatchUp(List.of(0, 0, 0));
+
+        Game game = tournament.getGame();
+        assertEquals(3, game.getPlayers().size());
+        assertEquals(0, game.getPlayers().get(0).getPlayerID());
+        assertEquals(1, game.getPlayers().get(1).getPlayerID());
+        assertEquals(2, game.getPlayers().get(2).getPlayerID());
+        assertNotSame(singleAgent, game.getPlayers().get(0)); // should be a copy);
+        assertNotSame(game.getPlayers().get(0), game.getPlayers().get(1)); // should be a copy
+        assertNotSame(game.getPlayers().get(0), game.getPlayers().get(2)); // should be a copy
+        assertNotSame(game.getPlayers().get(1), game.getPlayers().get(2)); // should be a copy
+    }
+
+
+    @Test
+    public void basicMCTSPlayersCopiedCorrectly() {
+        config.put(RunArg.mode, "random");
+        config.put(RunArg.matchups, 1);
+        List<AbstractPlayer> singleAgent = Collections.singletonList(new BasicMCTSPlayer());
+        singleAgent.get(0).getParameters().setParameterValue("budgetType", BUDGET_TIME);
+        singleAgent.get(0).getParameters().setParameterValue("budget", 20);
+        tournament = new RoundRobinTournament(singleAgent, GameType.Poker, 3, null, config);
+        tournament.createAndRunMatchUp(List.of(0, 0, 0));
+
+        Game game = tournament.getGame();
+        assertEquals(3, game.getPlayers().size());
+        assertEquals(0, game.getPlayers().get(0).getPlayerID());
+        assertEquals(1, game.getPlayers().get(1).getPlayerID());
+        assertEquals(2, game.getPlayers().get(2).getPlayerID());
+        assertNotSame(singleAgent, game.getPlayers().get(0)); // should be a copy);
+        assertNotSame(game.getPlayers().get(0), game.getPlayers().get(1)); // should be a copy
+        assertNotSame(game.getPlayers().get(0), game.getPlayers().get(2)); // should be a copy
+        assertNotSame(game.getPlayers().get(1), game.getPlayers().get(2)); // should be a copy
+    }
+
 
 }

@@ -37,10 +37,8 @@ public class BuildStage extends AbstractAction {
         }
 
         // remove the card from the players hand to the playedDeck
-        boolean cardFound = wgs.getPlayerHand(player).remove(card);
-        if (!cardFound) {
-            throw new AssertionError("Card not found in player hand");
-        }
+        wgs.getPlayerHand(player).remove(card);
+
         // TODO: This is technically wrong - we should keep these as a separate set of cards (players know which ones they have played, but opponents do not)
         wgs.getDiscardPile().add(card);
 

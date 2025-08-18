@@ -8,6 +8,9 @@ import players.heuristics.LeaderHeuristic;
 import players.heuristics.LinearStateHeuristic;
 import players.heuristics.LogisticActionHeuristic;
 import players.simple.BoltzmannActionPlayer;
+
+import java.util.Arrays;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static players.mcts.MCTSEnums.RolloutTermination.END_ROUND;
@@ -35,9 +38,10 @@ public class LoadFromJSON {
         // Leader
         assertEquals(new LeaderHeuristic(), linearStateHeuristic.getDefaultHeuristic());
         // AutomatedFeatures with 6 features
-        assertEquals(6, linearStateHeuristic.names().length);
-        assertEquals(7, linearStateHeuristic.coefficients().length);
+        assertEquals(15, linearStateHeuristic.names().length);
+        assertEquals(16, linearStateHeuristic.coefficients().length);
         assertEquals(1, linearStateHeuristic.interactions().length);
+        assertEquals(7, Arrays.stream(linearStateHeuristic.coefficients()).filter(c -> c != 0.0).count());
 
         AbstractPlayer rolloutPolicy = params.getRolloutStrategy();
         assertEquals(BoltzmannActionPlayer.class, rolloutPolicy.getClass());
@@ -67,14 +71,16 @@ public class LoadFromJSON {
         // Leader
         assertEquals(new LeaderHeuristic(), linearStateHeuristic.getDefaultHeuristic());
         // AutomatedFeatures with 6 features
-        assertEquals(6, linearStateHeuristic.names().length);
-        assertEquals(7, linearStateHeuristic.coefficients().length);
+        assertEquals(15, linearStateHeuristic.names().length);
+        assertEquals(16, linearStateHeuristic.coefficients().length);
         assertEquals(1, linearStateHeuristic.interactions().length);
+        assertEquals(7, Arrays.stream(linearStateHeuristic.coefficients()).filter(c -> c != 0.0).count());
 
         LogisticActionHeuristic actionHeuristic = (LogisticActionHeuristic) params.actionHeuristic;
-        assertEquals(23, actionHeuristic.names().length); // 2 + 21
-        assertEquals(24, actionHeuristic.coefficients().length);
+        assertEquals(51, actionHeuristic.names().length); // 2 + 21
+        assertEquals(52, actionHeuristic.coefficients().length);
         assertEquals(1, actionHeuristic.interactions().length);
+        assertEquals(24, Arrays.stream(actionHeuristic.coefficients()).filter(c -> c != 0.0).count());
 
         AbstractPlayer rolloutPolicy = params.getRolloutStrategy();
         assertEquals(BoltzmannActionPlayer.class, rolloutPolicy.getClass());
@@ -84,9 +90,10 @@ public class LoadFromJSON {
 
 
         actionHeuristic = (LogisticActionHeuristic) boltzmannActionPlayer.getActionHeuristic();
-        assertEquals(23, actionHeuristic.names().length); // 2 + 21
-        assertEquals(24, actionHeuristic.coefficients().length);
+        assertEquals(51, actionHeuristic.names().length); // 2 + 21
+        assertEquals(52, actionHeuristic.coefficients().length);
         assertEquals(1, actionHeuristic.interactions().length);
+        assertEquals(24, Arrays.stream(actionHeuristic.coefficients()).filter(c -> c != 0.0).count());
 
     }
 }
