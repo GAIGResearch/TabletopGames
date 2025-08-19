@@ -57,8 +57,8 @@ public class GrabTest extends AttributeTest {
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof GrabTest ht) {
-            return super.equals(ht);
+        if (obj instanceof GrabTest test) {
+            return super.equals(test);
         } else {
             return false;
         }

@@ -59,8 +59,8 @@ public class HowlTest extends AttributeTest {
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof HowlTest ht) {
-            return super.equals(ht);
+        if (obj instanceof HowlTest test) {
+            return super.equals(test);
         } else {
             return false;
         }

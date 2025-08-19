@@ -56,8 +56,8 @@ public class EarthTest extends AttributeTest {
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof EarthTest ht) {
-            return super.equals(ht);
+        if (obj instanceof EarthTest test) {
+            return super.equals(test);
         } else {
             return false;
         }

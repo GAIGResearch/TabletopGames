@@ -17,7 +17,7 @@ import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTe
 
 public class Grab extends TriggerAttributeTest {
 
-    public Grab(int attackingFigure, Integer target) {
+    public Grab(int attackingFigure, int target) {
         super(attackingFigure, target);
     }
 

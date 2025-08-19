@@ -57,8 +57,8 @@ public class WaterTest extends AttributeTest {
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof WaterTest ht) {
-            return super.equals(ht);
+        if (obj instanceof WaterTest test) {
+            return super.equals(test);
         } else {
             return false;
         }

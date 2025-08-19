@@ -19,7 +19,7 @@ import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTe
 public class Throw extends TriggerAttributeTest {
 
     protected final int distance = 3; // How far the Monster can throw the target
-    public Throw(int attackingFigure, Integer target) {
+    public Throw(int attackingFigure, int target) {
         super(attackingFigure, target);
     }
 

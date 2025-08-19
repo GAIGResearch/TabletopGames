@@ -393,6 +393,12 @@ public class Figure extends Token {
                 this.attributes.put(a, new Counter(max, 0, max, a.name()));
                 if (a == MovePoints || a == Fatigue) this.setAttribute(a, 0);
             }
+            else {
+                if (a == Might || a == Willpower || a == Knowledge || a == Awareness) {
+                    // Non-Lieutenant Monsters lack Attributes for tests, so we set them here as -1 since they can never be achieved
+                    this.attributes.put(a, new Counter(-1, -1, -1, a.name()));
+                }
+            }
         }
     }
 

@@ -56,8 +56,8 @@ public class ThrowTest extends AttributeTest {
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof ThrowTest ht) {
-            return super.equals(ht);
+        if (obj instanceof ThrowTest test) {
+            return super.equals(test);
         } else {
             return false;
         }
