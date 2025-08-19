@@ -41,14 +41,14 @@ public class SeduceTest extends AttributeTest {
 
         if (result)
         {
-            System.out.println("Passed Seduce (Willpower) Test!");
+            //System.out.println("Passed Seduce (Willpower) Test!");
             Figure target = (Figure) dgs.getComponentById(targetFigure);
             target.setOffMap(true);
             target.getAttribute(Figure.Attribute.MovePoints).setValue(1);
         }
         else
         {
-            System.out.println("Failed Seduce (Willpower) Test!");
+            //System.out.println("Failed Seduce (Willpower) Test!");
         }
     }
 
