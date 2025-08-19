@@ -5,31 +5,37 @@ import core.AbstractPlayer;
 import core.Game;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 import java.util.Set;
 
-/**
- * <p>This class allows the visualisation of the game. The game components (accessible through {@link Game#getGameState()}
- * should be added into {@link javax.swing.JComponent} subclasses (e.g. {@link javax.swing.JLabel},
- * {@link javax.swing.JPanel}, {@link javax.swing.JScrollPane}; or custom subclasses such as those in {@link gui} package).
- * These JComponents should then be added to the <code>`parent`</code> object received in the class constructor.</p>
- *
- * <p>An appropriate layout should be set for the parent GamePanel as well, e.g. {@link javax.swing.BoxLayout} or
- * {@link java.awt.BorderLayout} or {@link java.awt.GridBagLayout}.</p>
- *
- * <p>Check the super class for methods that can be overwritten for a more custom look, or
- * {@link games.terraformingmars.gui.TMGUI} for an advanced game visualisation example.</p>
- *
- * <p>A simple implementation example can be found in {@link games.tictactoe.gui.TicTacToeGUIManager}.</p>
- */
 public class PenteGUIManager extends AbstractGUIManager {
+
+    PenteBoardView boardView;
+    static int penteWidth = 600;
+    static int penteHeight = 200;
 
     public PenteGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
         if (game == null) return;
 
-        // TODO: set up GUI components and add to `parent`
+        boardView = new PenteBoardView((PenteForwardModel) game.getForwardModel());
+
+        width = penteWidth;
+        height = penteHeight;
+
+        JPanel infoPanel = createGameStateInfoPanel("Pente Grammai", game.getGameState(), width, defaultInfoPanelHeight);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
+
+        parent.setLayout(new BorderLayout());
+        parent.add(boardView, BorderLayout.CENTER);
+        parent.add(infoPanel, BorderLayout.NORTH);
+        parent.add(actionPanel, BorderLayout.SOUTH);
+        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + 20));
     }
 
     /**
@@ -40,7 +46,6 @@ public class PenteGUIManager extends AbstractGUIManager {
      */
     @Override
     public int getMaxActionSpace() {
-        // TODO
         return 10;
     }
 
@@ -52,6 +57,29 @@ public class PenteGUIManager extends AbstractGUIManager {
      */
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
-        // TODO
+        if (gameState != null) {
+            boardView.update((PenteGameState) gameState);
+        }
+    }
+
+    @Override
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        PenteGameState state = (PenteGameState) gameState;
+        if (boardView.firstClick != -1 && boardView.secondClick != -1) {
+            int from = boardView.firstClick;
+            int to = boardView.secondClick;
+
+            List<core.actions.AbstractAction> actions = player.getForwardModel().computeAvailableActions(state);
+            for (core.actions.AbstractAction action : actions) {
+                if (action instanceof PenteMoveAction move) {
+                    if (move.from == from && move.to == to) {
+                        ac.addAction(move);
+                        break;
+                    }
+                }
+            }
+            boardView.firstClick = -1;
+            boardView.secondClick = -1;
+        }
     }
 }

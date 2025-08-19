@@ -16,7 +16,6 @@ public class PenteGameState extends AbstractGameState {
 
     // Board: 10 points, index 0-4 east, 5-9 west. Sacred points: 2 (east), 7 (west)
     protected List<List<Token>> board; // board.get(i) = list of tokens at point i
-    protected int[] playerStartEast = {0, 5}; // player 0 starts east (0-4), player 1 west (5-9)
     protected int[] playerGoal = {7, 2}; // for clarity, same as sacred
     protected int[] playerStart; // [0]=east, [1]=west
     protected Dice die; // single die for the game
@@ -25,8 +24,9 @@ public class PenteGameState extends AbstractGameState {
     public int dieSides;
     public int[] sacredPoints;
 
-    public PenteGameState(PenteParameters params, int nPlayers) {
-        super(params, nPlayers);
+    public PenteGameState(AbstractParameters parameters, int nPlayers) {
+        super(parameters, nPlayers);
+        PenteParameters params = (PenteParameters) parameters;
         playerStart = new int[]{0, 5};
         this.boardSize = params.boardSize;
         this.dieSides = params.dieSides;
@@ -166,15 +166,15 @@ public class PenteGameState extends AbstractGameState {
         // Only one piece per point (not sacred)
     }
 
-    public boolean isAtGoal(Token t, int playerId) {
-        return findTokenPosition(t) == playerGoal[playerId];
-    }
-
     public int getPiecesAtGoal(int playerId) {
         int goal = playerGoal[playerId];
+        return getPiecesAt(goal, playerId);
+    }
+
+    public int getPiecesAt(int from, int player) {
         int count = 0;
-        for (Token t : board.get(goal)) {
-            if (t.getOwnerId() == playerId) count++;
+        for (Token t : board.get(from)) {
+            if (t.getOwnerId() == player) count++;
         }
         return count;
     }
@@ -185,4 +185,5 @@ public class PenteGameState extends AbstractGameState {
     public void setDieValue(int value) {
         this.die.setValue(value);
     }
+
 }

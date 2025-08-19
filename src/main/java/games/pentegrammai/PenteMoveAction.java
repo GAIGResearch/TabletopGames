@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Token;
 
-class PenteMoveAction extends AbstractAction {
+public class PenteMoveAction extends AbstractAction {
     final int from, to;
 
     public PenteMoveAction(int from, int to) {

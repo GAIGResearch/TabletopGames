@@ -65,10 +65,9 @@ public class PenteForwardModel extends StandardForwardModel {
         int player = state.getCurrentPlayer();
 
         int dieValue = state.die.getValue();
-        for (Token t : state.getPlayerTokens(player)) {
-            int from = state.findTokenPosition(t);
+        for (int from = 0; from < state.boardSize; from++) {
             int to = (from + dieValue) % state.boardSize;
-            if (!state.isAtGoal(t, player) && (state.canPlace(to) || state.isSacred(to))) {
+            if (state.canPlace(to) && state.getPiecesAt(from, player) > 0) {
                 actions.add(new PenteMoveAction(from, to));
             }
         }
