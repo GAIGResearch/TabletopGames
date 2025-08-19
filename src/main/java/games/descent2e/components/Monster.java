@@ -211,6 +211,9 @@ public class Monster extends Figure {
             case "BLOODCALL":
                 surges.add(Surge.BLOOD_CALL);
                 break;
+            case "WITHER":
+                surges.add(Surge.WITHER);
+                break;
             default:
                 break;
         }

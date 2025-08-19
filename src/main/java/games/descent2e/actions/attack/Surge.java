@@ -37,7 +37,8 @@ public enum Surge {
     FIRE_BREATH(1, (a, s) -> a.addInterruptAttack("Fire Breath")),
 
     // Lieutenants' Surges
-    BLOOD_CALL(1, (a, s) -> a.setLeeching(true));
+    BLOOD_CALL(1, (a, s) -> a.setLeeching(true)),
+    WITHER(1, (a, s) -> a.addFatigueDamage(1));
 
     private final BiConsumer<MeleeAttack, DescentGameState> lambda;
     private final int surgesUsed;

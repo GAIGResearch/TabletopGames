@@ -32,7 +32,8 @@ public class MonsterAbilities {
         FIREBREATH,
         SACRIFICE,
         SEDUCE,
-        WAIL;
+        WAIL,
+        IGNITE;
     }
 
     public enum MonsterPassive {
@@ -44,7 +45,8 @@ public class MonsterAbilities {
         REACH,
         FLAIL,
         SHADOW,
-        AIR;
+        AIR,
+        AFTERSHOCK;
     }
 
     public static ArrayList<AbstractAction> getMonsterActions(DescentGameState dgs)
@@ -183,6 +185,7 @@ public class MonsterAbilities {
 
                     // --- LIEUTENANT ABILITIES ---
 
+                    // Lady Eliza Farrow
                     case SACRIFICE:
 
                         getAdjacentTargets(dgs, f, true).forEach(target -> {
@@ -215,6 +218,24 @@ public class MonsterAbilities {
                             if (wail.canExecute(dgs))
                                 actions.add(wail);
                         }
+                        break;
+
+                    // Lord Merick Fallow
+
+                    case IGNITE:
+
+                        // Don't even bother if he doesn't meet the HP requirement for this, save yourself the time.
+                        if (actingFigure.getAttribute(Figure.Attribute.Health).getValue() <= 1) break;
+
+                        // Merick's Ignite explicitly targets all figures - not just enemy Heroes
+                        // Another case of Friendly Fire!
+                        targets = getAdjacentTargets(dgs, f, true);
+                        if (!targets.isEmpty()) {
+                            DescentAction ignite = new Ignite(f.getComponentID(), targets);
+                            if (ignite.canExecute(dgs))
+                                actions.add(ignite);
+                        }
+
                         break;
 
                     default:

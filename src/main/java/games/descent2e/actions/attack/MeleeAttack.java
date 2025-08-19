@@ -437,6 +437,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         {
             attacker.decrementAttribute(Figure.Attribute.Fatigue, fatigueHeal);
         }
+        // Likewise, only Heroes can receive Fatigue penalties from a Monster's Surges
+        if(fatigueHeal < 0 && defender instanceof Hero)
+        {
+            defender.incrementAttribute(Figure.Attribute.Fatigue, -fatigueHeal);
+        }
     }
 
     public boolean attackMissed(DescentGameState state) {
@@ -700,6 +705,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void addFatigueHeal(int fatigueHealBonus) {
         fatigueHeal += fatigueHealBonus;
+    }
+    public void addFatigueDamage(int fatiguePenalty) {
+        fatigueHeal -= fatiguePenalty;
     }
     public void setDiseasing(boolean disease) {
         isDiseasing = disease;
