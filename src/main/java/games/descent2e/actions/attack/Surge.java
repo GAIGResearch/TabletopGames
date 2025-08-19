@@ -34,7 +34,10 @@ public enum Surge {
         s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
         a.addDamage(2);
     }),
-    FIRE_BREATH(1, (a, s) -> a.addInterruptAttack("Fire Breath"));
+    FIRE_BREATH(1, (a, s) -> a.addInterruptAttack("Fire Breath")),
+
+    // Lieutenants' Surges
+    BLOOD_CALL(1, (a, s) -> a.setLeeching(true));
 
     private final BiConsumer<MeleeAttack, DescentGameState> lambda;
     private final int surgesUsed;

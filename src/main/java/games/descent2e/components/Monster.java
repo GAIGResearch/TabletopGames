@@ -206,6 +206,11 @@ public class Monster extends Figure {
             case "FIREBREATH":
                 surges.add(Surge.FIRE_BREATH);
                 break;
+
+            // Lieutenants' Surges
+            case "BLOODCALL":
+                surges.add(Surge.BLOOD_CALL);
+                break;
             default:
                 break;
         }

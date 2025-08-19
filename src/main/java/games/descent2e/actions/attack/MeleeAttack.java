@@ -73,6 +73,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     boolean isImmobilizing;
     boolean isPoisoning;
     boolean isStunning;
+    boolean leeching = false;
     boolean hasShadow = false;
     boolean hitShadow = false;
 
@@ -422,6 +423,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
         }
 
+        if (leeching)
+        {
+            addMending(damage);
+        }
+
         if(mending > 0)
         {
             attacker.incrementAttribute(Figure.Attribute.Health, mending);
@@ -483,6 +489,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.isImmobilizing = isImmobilizing;
         retValue.isPoisoning = isPoisoning;
         retValue.isStunning = isStunning;
+        retValue.hasShadow = hasShadow;
+        retValue.hitShadow = hitShadow;
+        retValue.leeching = leeching;
         retValue.damage = damage;
         retValue.range = range;
         retValue.skip = skip;
@@ -522,7 +531,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     other.extraDefence == extraDefence && other.hasReach == hasReach &&
                     other.isDiseasing == isDiseasing && other.isImmobilizing == isImmobilizing &&
                     other.isPoisoning == isPoisoning && other.isStunning == isStunning &&
-                    other.extraRange == extraRange && other.pierce == pierce && other.mending == mending &&
+                    other.extraRange == extraRange && other.pierce == pierce &&
+                    other.mending == mending && other.leeching == leeching &&
+                    other.hasShadow == hasShadow && other.hitShadow == hitShadow &&
                     other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
                     other.fatigueHeal == fatigueHeal && other.surgesUsed.equals(surgesUsed) &&
                     other.defendingPlayer == defendingPlayer && other.phase == phase &&
@@ -536,7 +547,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce, hasReach,
-                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, fatigueHeal,
+                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, leeching, fatigueHeal, hasShadow, hitShadow,
                 surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, reduced, result);
     }
 
@@ -585,6 +596,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 + ". Immobilize: " + isImmobilizing
                 + ". Poison: " + isPoisoning
                 + ". Stun: " + isStunning
+                + ". Leeching: " + leeching
+                + ". Has Shadow: " + hasShadow
+                + ". Hit Shadow: " + hitShadow
                 + ". Damage: " + damage
                 + ". Range: " + range
                 + ". Skip: " + skip
@@ -698,6 +712,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void setStunning(boolean stun) {
         isStunning = stun;
+    }
+
+    public void setLeeching(boolean leech) {
+        leeching = leech;
     }
     public void setShadow(boolean shadow) {
         hitShadow = shadow;
