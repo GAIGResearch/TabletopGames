@@ -25,14 +25,9 @@ public class PenteGameState extends AbstractGameState {
     public int dieSides;
     public int[] sacredPoints;
 
-    /**
-     * @param gameParameters - game parameters.
-     * @param nPlayers       - number of players in the game
-     */
-    public PenteGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, nPlayers);
+    public PenteGameState(PenteParameters params, int nPlayers) {
+        super(params, nPlayers);
         playerStart = new int[]{0, 5};
-        PenteParameters params = (PenteParameters) gameParameters;
         this.boardSize = params.boardSize;
         this.dieSides = params.dieSides;
         this.sacredPoints = Arrays.copyOf(params.sacredPoints, params.sacredPoints.length);
@@ -44,8 +39,7 @@ public class PenteGameState extends AbstractGameState {
      */
     @Override
     protected GameType _getGameType() {
-        // TODO: replace with game-specific enum value declared in GameType
-        return GameType.GameTemplate;
+        return GameType.PenteGrammai;
     }
 
     /**
@@ -65,7 +59,7 @@ public class PenteGameState extends AbstractGameState {
 
     @Override
     protected PenteGameState _copy(int playerId) {
-        PenteGameState copy = new PenteGameState(gameParameters, getNPlayers());
+        PenteGameState copy = new PenteGameState((PenteParameters) getGameParameters(), getNPlayers());
         copy.board = new ArrayList<>();
         for (List<Token> tokens : this.board) {
             List<Token> newTokens = new ArrayList<>();
@@ -183,5 +177,12 @@ public class PenteGameState extends AbstractGameState {
             if (t.getOwnerId() == playerId) count++;
         }
         return count;
+    }
+
+    /**
+     * Helper method for tests: directly set the die value.
+     */
+    public void setDieValue(int value) {
+        this.die.setValue(value);
     }
 }
