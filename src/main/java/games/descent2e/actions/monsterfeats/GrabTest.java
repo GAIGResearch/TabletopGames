@@ -18,7 +18,13 @@ public class GrabTest extends AttributeTest {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
+        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
+
+        String testingName = f.getName().replace("Hero: ", "");
+        String sourceName = source.getName().replace("Hero: ", "");
+
+        return "Grab (Might) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
     }
 
     @Override

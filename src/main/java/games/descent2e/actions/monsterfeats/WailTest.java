@@ -15,7 +15,13 @@ public class WailTest extends AttributeTest {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
+        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
+
+        String testingName = f.getName().replace("Hero: ", "");
+        String sourceName = source.getName().replace("Hero: ", "");
+
+        return "Wail (Willpower) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
     }
 
     @Override
@@ -25,7 +31,7 @@ public class WailTest extends AttributeTest {
 
     @Override
     public String toStringWithResult() {
-        return this + " - " + getTestingName() + " (" + (result ? "Passed)" : "Failed; +1 Fatigue)");
+        return this + " - " + getTestingName() + " (" + (result ? "Passed)" : "Failed; +2 Fatigue)");
     }
 
     @Override

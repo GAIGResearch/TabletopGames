@@ -19,12 +19,18 @@ public class SeduceTest extends AttributeTest {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
+        Figure target = (Figure) gameState.getComponentById(this.getSourceFigure());
+
+        String testingName = f.getName().replace("Hero: ", "");
+        String targetName = target.getName().replace("Hero: ", "");
+
+        return "Seduce (Willpower) Test (" + super.getTestCount() + ") by " + testingName + " targeting " + targetName;
     }
 
     @Override
     public String toString() {
-        return "Seduce (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure();
+        return "Seduce (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " targeting " + targetFigure;
     }
 
     @Override

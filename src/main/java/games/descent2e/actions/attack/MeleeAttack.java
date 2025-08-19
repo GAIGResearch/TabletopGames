@@ -12,6 +12,7 @@ import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.items.Shield;
+import games.descent2e.actions.monsterfeats.AftershockTest;
 import games.descent2e.actions.monsterfeats.FireBreath;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
@@ -36,6 +37,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         PRE_ATTACK_ROLL(START_ATTACK, DEFENDER),
         POST_ATTACK_ROLL(ROLL_OWN_DICE, ATTACKER),
         SURGE_DECISIONS(SURGE_DECISION, ATTACKER),
+        ATTRIBUTE_TEST(FORCED, ATTACKER), // This is used for attribute tests that can be triggered by this attack
         PRE_DEFENCE_ROLL(ROLL_OTHER_DICE, DEFENDER),
         POST_DEFENCE_ROLL(ROLL_OWN_DICE, DEFENDER),
         PRE_DAMAGE(TAKE_DAMAGE, DEFENDER),
@@ -242,11 +244,19 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 // Any rerolls are executed via interrupts
                 // once done we see how many surges we have to spend
                 surgesToSpend = state.getAttackDicePool().getSurge();
-                phase = surgesToSpend > 0 ? SURGE_DECISIONS : PRE_DEFENCE_ROLL;
+                phase = surgesToSpend > 0 ? SURGE_DECISIONS : ATTRIBUTE_TEST;
                 break;
             case SURGE_DECISIONS:
                 // any surge decisions are executed via interrupts
                 surgesUsed.clear();
+                phase = ATTRIBUTE_TEST;
+                break;
+            case ATTRIBUTE_TEST:
+                // Yes, ordinarily, Attribute Tests are done either at the start of the attack (before dice are rolled)
+                // or at the end of the attack (when we know if we've hit or not).
+                // But because we delete the target upon killing them, if we kill the target we don't know if we have to perform the check.
+                // Likewise putting a single stage here saves us having to do two stages before and after.
+                // If it turns out to be that big of a deal I'll change it later, but for now it works well.
                 phase = PRE_DEFENCE_ROLL;
                 break;
             case PRE_DEFENCE_ROLL:
@@ -669,6 +679,20 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 // We don't have to make the attack if we don't want to
                 // e.g. if the only legal target for Fire Breath to hit is the Dragon itself
                 retValue.add(new EndCurrentPhase());
+            }
+        }
+
+        // We check for any attribute tests that must occur as consequence for this attack
+        if (phase == ATTRIBUTE_TEST) {
+            Figure attacker = (Figure) state.getComponentById(attackingFigure);
+            Figure defender = (Figure) state.getComponentById(defendingFigure);
+
+            if (defender instanceof Monster && ((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.AFTERSHOCK))
+            {
+                AftershockTest aftershock = new AftershockTest(attackingFigure, Figure.Attribute.Willpower, defendingFigure, attacker.getNActionsExecuted().getValue());
+                if (aftershock.canExecute(state)) {
+                    retValue.add(aftershock);
+                }
             }
         }
 

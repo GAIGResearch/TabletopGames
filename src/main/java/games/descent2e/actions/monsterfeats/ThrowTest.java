@@ -16,7 +16,13 @@ public class ThrowTest extends AttributeTest {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
+        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
+
+        String testingName = f.getName().replace("Hero: ", "");
+        String sourceName = source.getName().replace("Hero: ", "");
+
+        return "Throw (Might) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
     }
 
     @Override
