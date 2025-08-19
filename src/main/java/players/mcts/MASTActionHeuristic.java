@@ -1,10 +1,13 @@
 package players.mcts;
 
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
 import core.interfaces.IActionKey;
+import core.interfaces.ITunableParameters;
+import evaluation.optimisation.TunableParameters;
 import players.simple.BoltzmannActionPlayer;
 import utilities.Pair;
 
@@ -13,16 +16,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class MASTActionHeuristic implements IActionHeuristic {
+public class MASTActionHeuristic extends TunableParameters<MASTActionHeuristic> implements IActionHeuristic, IMASTUser {
 
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics;
-    IActionKey actionKey;
+    IActionKey actionKey; // null is fine; this indicates to use the Action as the Key
     double defaultValue;
 
-    public MASTActionHeuristic(List<Map<Object, Pair<Integer, Double>>> MASTStatistics, IActionKey actionKey, double defaultValue) {
+    public MASTActionHeuristic() {
+        addTunableParameter("actionKey",  IActionKey.class, (Object) null);
+        addTunableParameter("defaultValue",  0.0);
+    }
+    
+    public MASTActionHeuristic(IActionKey actionKey, double defaultValue) {
+        this();
+        setParameterValue("actionKey", actionKey);
+        setParameterValue("defaultValue", defaultValue);
+    }
+
+    @Override
+    public void _reset() {
+        actionKey = (IActionKey) getParameterValue("actionKey");
+        defaultValue = (double) getParameterValue("defaultValue");
+    }
+    
+    public void setMASTStats(List<Map<Object, Pair<Integer, Double>>> MASTStatistics) {
         this.MASTStatistics = MASTStatistics;
-        this.actionKey = actionKey;
-        this.defaultValue = defaultValue;
     }
 
     @Override
@@ -36,4 +54,21 @@ public class MASTActionHeuristic implements IActionHeuristic {
         }
         return defaultValue;
     }
+
+    @Override
+    protected AbstractParameters _copy() {
+        return null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        return o instanceof MASTActionHeuristic &&
+               Arrays.equals(MASTStatistics.toArray(), ((MASTActionHeuristic) o).MASTStatistics.toArray());
+    }
+
+    @Override
+    public MASTActionHeuristic instantiate() {
+        return this;
+    }
+
 }
