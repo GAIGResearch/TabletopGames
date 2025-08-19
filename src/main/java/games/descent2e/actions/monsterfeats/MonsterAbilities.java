@@ -29,7 +29,10 @@ public class MonsterAbilities {
         EARTH,
         FIRE,
         WATER,
-        FIREBREATH;
+        FIREBREATH,
+        SACRIFICE,
+        SEDUCE,
+        WAIL;
     }
 
     public enum MonsterPassive {
@@ -176,6 +179,42 @@ public class MonsterAbilities {
                                 actions.add(water);
                         }
 
+                        break;
+
+                    // --- LIEUTENANT ABILITIES ---
+
+                    case SACRIFICE:
+
+                        getAdjacentTargets(dgs, f, true).forEach(target -> {
+                            DescentAction sacrifice = new Sacrifice(actingFigure.getComponentID(), target);
+                            if (sacrifice.canExecute(dgs))
+                                actions.add(sacrifice);
+                        });
+                    case SEDUCE:
+
+                        for (Hero hero : heroes) {
+                            if (inRange(actingFigure.getPosition(), hero.getPosition(), 3) && !hero.isOffMap()) {
+                                DescentAction seduce = new Seduce(actingFigure.getComponentID(), hero.getComponentID());
+                                if (seduce.canExecute(dgs))
+                                    actions.add(seduce);
+                            }
+                        }
+
+                        break;
+
+                    case WAIL:
+
+                        for (Hero h : heroes) {
+                            if (inRange(actingFigure.getPosition(), h.getPosition(), 3)) {
+                                targets.add(h.getComponentID());
+                            }
+                        }
+
+                        if (!targets.isEmpty()) {
+                            DescentAction wail = new Wail(actingFigure.getComponentID(), targets);
+                            if (wail.canExecute(dgs))
+                                actions.add(wail);
+                        }
                         break;
 
                     default:
