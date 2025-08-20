@@ -15,6 +15,7 @@ import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.AftershockTest;
 import games.descent2e.actions.monsterfeats.FireBreath;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
+import games.descent2e.actions.monsterfeats.Subdue;
 import games.descent2e.components.*;
 
 import java.util.*;
@@ -76,6 +77,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     boolean isPoisoning;
     boolean isStunning;
     boolean leeching = false;
+    boolean subdue = false;
     boolean hasShadow = false;
     boolean hitShadow = false;
 
@@ -433,6 +435,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
         }
 
+        // If our attack is leeching, add the damage to our Mending
         if (leeching)
         {
             addMending(damage);
@@ -507,6 +510,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.hasShadow = hasShadow;
         retValue.hitShadow = hitShadow;
         retValue.leeching = leeching;
+        retValue.subdue = subdue;
         retValue.damage = damage;
         retValue.range = range;
         retValue.skip = skip;
@@ -547,7 +551,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     other.isDiseasing == isDiseasing && other.isImmobilizing == isImmobilizing &&
                     other.isPoisoning == isPoisoning && other.isStunning == isStunning &&
                     other.extraRange == extraRange && other.pierce == pierce &&
-                    other.mending == mending && other.leeching == leeching &&
+                    other.mending == mending && other.leeching == leeching && other.subdue == subdue &&
                     other.hasShadow == hasShadow && other.hitShadow == hitShadow &&
                     other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
                     other.fatigueHeal == fatigueHeal && other.surgesUsed.equals(surgesUsed) &&
@@ -562,7 +566,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce, hasReach,
-                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, leeching, fatigueHeal, hasShadow, hitShadow,
+                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, leeching, subdue, fatigueHeal, hasShadow, hitShadow,
                 surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, reduced, result);
     }
 
@@ -612,6 +616,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 + ". Poison: " + isPoisoning
                 + ". Stun: " + isStunning
                 + ". Leeching: " + leeching
+                + ". Subdue: " + subdue
                 + ". Has Shadow: " + hasShadow
                 + ". Hit Shadow: " + hitShadow
                 + ". Damage: " + damage
@@ -646,7 +651,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         DescentGameState state = (DescentGameState) gs;
         List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
         // now we filter this for any that have been used
+
         if (phase == SURGE_DECISIONS) {
+
             retValue.removeIf(a -> {
                if (a instanceof SurgeAttackAction) {
                    SurgeAttackAction surge = (SurgeAttackAction)a;
@@ -658,6 +665,22 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         }
         if (phase == POST_ATTACK_ROLL) {
             retValue.add(new EndRerollPhase());
+        }
+        if (phase == PRE_DEFENCE_ROLL) {
+            // Applying Subdue should override any subsequent actions
+            if (subdue)
+            {
+                List<AbstractAction> subdueActions = new ArrayList<>();
+                for (DescentTypes.DescentCondition condition : DescentTypes.DescentCondition.values())
+                {
+                    Subdue subdueAction = new Subdue(defendingFigure, condition);
+                    if (subdueAction.canExecute(state)) {
+                        subdueActions.add(subdueAction);
+                    }
+                }
+                if (!subdueActions.isEmpty())
+                    return subdueActions;
+            }
         }
         if (phase == POST_DEFENCE_ROLL || phase == PRE_DAMAGE) {
             retValue.add(new EndCurrentPhase());
@@ -748,6 +771,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     public void setLeeching(boolean leech) {
         leeching = leech;
+    }
+    public void setSubdue(boolean subdue) {
+        this.subdue = subdue;
+    }
+    public boolean isSubdue() {
+        return subdue;
     }
     public void setShadow(boolean shadow) {
         hitShadow = shadow;

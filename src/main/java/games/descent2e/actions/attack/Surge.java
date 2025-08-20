@@ -37,6 +37,7 @@ public enum Surge {
     FIRE_BREATH(1, (a, s) -> a.addInterruptAttack("Fire Breath")),
 
     // Lieutenants' Surges
+    SUBDUE(1, (a, s) -> a.setSubdue(true)),
     BLOOD_CALL(1, (a, s) -> a.setLeeching(true)),
     WITHER(1, (a, s) -> a.addFatigueDamage(1));
 

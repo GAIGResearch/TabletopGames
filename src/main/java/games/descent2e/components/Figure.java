@@ -212,13 +212,13 @@ public class Figure extends Token {
     public void addCondition(DescentTypes.DescentCondition condition) {
         // A Figure can only be affected by a condition once - they do not stack
         // Therefore we can only add the condition if it is not already on the list
-        if (!conditions.contains(condition)) {
+        if (!hasCondition(condition)) {
             conditions.add(condition);
         }
     }
 
     public void removeCondition(DescentTypes.DescentCondition condition) {
-        if (conditions.contains(condition))
+        if (hasCondition(condition))
             conditions.remove(condition);
     }
     public void removeAllConditions() {

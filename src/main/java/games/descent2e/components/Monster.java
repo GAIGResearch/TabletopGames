@@ -177,45 +177,23 @@ public class Monster extends Figure {
         surge = surge.replace("Surge: ", "");
         surge = surge.toUpperCase(Locale.ROOT).replaceAll( "[^A-Z]", "");
 
-        switch (surge)
-        {
-            case "RANGE":
-                surges.add(Surge.valueOf("RANGE_PLUS_" + number));
-                break;
-            case "HEART":
-                surges.add(Surge.valueOf("DAMAGE_PLUS_" + number));
-                break;
-            case "PIERCE":
-                surges.add(Surge.valueOf("PIERCE_"+ number));
-                break;
-            case "MEND":
-                surges.add(Surge.valueOf("MENDING_"+ number));
-                break;
-            case "DISEASE":
-                surges.add(Surge.DISEASE);
-                break;
-            case "POISON":
-                surges.add(Surge.POISON);
-                break;
-            case "IMMOBILIZE":
-                surges.add(Surge.IMMOBILIZE);
-                break;
-            case "STUN":
-                surges.add(Surge.STUN);
-                break;
-            case "FIREBREATH":
-                surges.add(Surge.FIRE_BREATH);
-                break;
+        switch (surge) {
+            case "RANGE" -> surges.add(Surge.valueOf("RANGE_PLUS_" + number));
+            case "HEART" -> surges.add(Surge.valueOf("DAMAGE_PLUS_" + number));
+            case "PIERCE" -> surges.add(Surge.valueOf("PIERCE_" + number));
+            case "MEND" -> surges.add(Surge.valueOf("MENDING_" + number));
+            case "DISEASE" -> surges.add(Surge.DISEASE);
+            case "POISON" -> surges.add(Surge.POISON);
+            case "IMMOBILIZE" -> surges.add(Surge.IMMOBILIZE);
+            case "STUN" -> surges.add(Surge.STUN);
+            case "FIREBREATH" -> surges.add(Surge.FIRE_BREATH);
 
             // Lieutenants' Surges
-            case "BLOODCALL":
-                surges.add(Surge.BLOOD_CALL);
-                break;
-            case "WITHER":
-                surges.add(Surge.WITHER);
-                break;
-            default:
-                break;
+            case "SUBDUE" -> surges.add(Surge.SUBDUE);
+            case "BLOODCALL" -> surges.add(Surge.BLOOD_CALL);
+            case "WITHER" -> surges.add(Surge.WITHER);
+            default -> {
+            }
         }
     }
     public void removeSurge (Surge surge)
