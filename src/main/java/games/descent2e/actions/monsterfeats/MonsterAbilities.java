@@ -30,6 +30,7 @@ public class MonsterAbilities {
         FIRE,
         WATER,
         FIREBREATH,
+        SHADOWBOLT,
         SACRIFICE,
         SEDUCE,
         WAIL,
@@ -184,6 +185,20 @@ public class MonsterAbilities {
                         break;
 
                     // --- LIEUTENANT ABILITIES ---
+
+                    // Baron Zachareth
+                    case SHADOWBOLT:
+
+                        targets = getRangedTargets(dgs, f);
+                        if (!targets.isEmpty()) {
+                            for (int target : targets) {
+                                DescentAction shadowBolt = new ShadowBolt(actingFigure.getComponentID(), target);
+                                if (shadowBolt.canExecute(dgs))
+                                    actions.add(shadowBolt);
+                            }
+                        }
+
+                        break;
 
                     // Lady Eliza Farrow
                     case SACRIFICE:
