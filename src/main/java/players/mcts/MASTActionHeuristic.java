@@ -11,14 +11,11 @@ import evaluation.optimisation.TunableParameters;
 import players.simple.BoltzmannActionPlayer;
 import utilities.Pair;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class MASTActionHeuristic extends TunableParameters<MASTActionHeuristic> implements IActionHeuristic, IMASTUser {
 
-    List<Map<Object, Pair<Integer, Double>>> MASTStatistics;
+    List<Map<Object, Pair<Integer, Double>>> MASTStatistics = new ArrayList<>();
     IActionKey actionKey; // null is fine; this indicates to use the Action as the Key
     double defaultValue;
 
@@ -56,8 +53,8 @@ public class MASTActionHeuristic extends TunableParameters<MASTActionHeuristic> 
     }
 
     @Override
-    protected AbstractParameters _copy() {
-        return null;
+    protected MASTActionHeuristic _copy() {
+        return this;
     }
 
     @Override

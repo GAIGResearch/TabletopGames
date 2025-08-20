@@ -116,7 +116,7 @@ public enum RunArg {
             "\tIf the mode is 'exhaustive', then this will be the maximum number of games run. TAG will divide\n" +
             "\this by the total number of permutations, and run an equal number of games for each permutation.\n" +
             "\tFor NTBEA/SkillLadder this will be used as a final tournament between the recommended agents from each run.",
-            1,
+            100,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder, Usage.ExpertIteration}),
     mode("exhaustive|exhaustiveSP|random|sequential|fixed\n" +
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +

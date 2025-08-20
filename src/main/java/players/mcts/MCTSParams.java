@@ -234,7 +234,7 @@ public class MCTSParams extends PlayerParameters {
             case RANDOM -> new RandomPlayer(new Random(getRandomSeed()));
             case MAST -> new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
             case CLASS ->
-                // we have a bespoke Class to instantiate
+                // we have a bespoke Class to instantiate (for anything other than an AbstractPlayer we could just rely on the core JSON loading)
                     JSONUtils.loadClass(details);
             case PARAMS -> throw new AssertionError("PolicyParameters have not been set");
             default -> throw new AssertionError("Unknown strategy type : " + type);
