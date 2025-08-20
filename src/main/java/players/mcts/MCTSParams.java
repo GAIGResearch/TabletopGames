@@ -21,6 +21,7 @@ import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
 import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
+import static  players.mcts.MCTSEnums.PerfectInformationPolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
@@ -75,6 +76,8 @@ public class MCTSParams extends PlayerParameters {
     public double backupLambda = 1.0;
     public int maxBackupThreshold = 1000000;
     public Class<?> instantiationClass;
+    public int numDeterminizations = 1;
+    public MCTSEnums.PerfectInformationPolicy perfectInformationPolicy = AverageValue;
 
     public MCTSParams() {
         addTunableParameter("K", 1.0, Arrays.asList(0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0));
@@ -124,6 +127,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("backupLambda", 1.0);
         addTunableParameter("maxBackupThreshold", 1000000);
         addTunableParameter("instantiationClass", "players.mcts.MCTSPlayer");
+        addTunableParameter("perfectInformationPolicy", AverageValue, Arrays.asList(MCTSEnums.PerfectInformationPolicy.values()));
+        addTunableParameter("numDeterminizations", 1, Arrays.asList(1, 10, 30, 100, 300, 1000));
     }
 
     @Override
@@ -141,6 +146,11 @@ public class MCTSParams extends PlayerParameters {
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
+        if(opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree && information == MCTSEnums.Information.Perfect_Information)
+        {
+            System.out.println("Setting Opponent Tree Policy to OneTree as Perfect Information does not currently support MultiTree");
+            opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
+        }
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
         MASTBoltzmann = (double) getParameterValue("MASTBoltzmann");
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
@@ -195,6 +205,11 @@ public class MCTSParams extends PlayerParameters {
             System.out.println("Setting MAST to Both instead of None given use of MAST in rollout or action heuristic");
             useMAST = true;
             MAST = Both;
+            }
+        numDeterminizations = (int) getParameterValue("numDeterminizations");
+        perfectInformationPolicy = (MCTSEnums.PerfectInformationPolicy) getParameterValue("perfectInformationPolicy");
+        if (information == Perfect_Information) {
+            budget = budget / numDeterminizations;
         }
     }
 
