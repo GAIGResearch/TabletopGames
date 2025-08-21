@@ -30,6 +30,7 @@ public class MonsterAbilities {
         FIRE,
         WATER,
         FIREBREATH,
+        DOMINION,
         SHADOWBOLT,
         SACRIFICE,
         SEDUCE,
@@ -187,6 +188,19 @@ public class MonsterAbilities {
                     // --- LIEUTENANT ABILITIES ---
 
                     // Baron Zachareth
+                    case DOMINION:
+
+                        for (Hero h : heroes)
+                        {
+                            if (hasLineOfSight(dgs, actingFigure.getPosition(), h.getPosition()) && !h.isOffMap()) {
+                                DescentAction dominion = new Dominion(actingFigure.getComponentID(), h.getComponentID());
+                                if (dominion.canExecute(dgs))
+                                    actions.add(dominion);
+                            }
+                        }
+
+                        break;
+
                     case SHADOWBOLT:
 
                         targets = getRangedTargets(dgs, f);
