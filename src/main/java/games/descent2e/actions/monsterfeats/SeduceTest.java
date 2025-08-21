@@ -3,7 +3,6 @@ package games.descent2e.actions.monsterfeats;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.AttributeTest;
-import games.descent2e.actions.attack.TriggerAttributeTest;
 import games.descent2e.components.Figure;
 
 import java.util.Objects;
@@ -46,7 +45,7 @@ public class SeduceTest extends AttributeTest {
 
         f.addAttributeTest(this);
 
-        if (!result)
+        if (result)
         {
             //System.out.println("Passed Seduce (Willpower) Test!");
             Figure target = (Figure) dgs.getComponentById(targetFigure);

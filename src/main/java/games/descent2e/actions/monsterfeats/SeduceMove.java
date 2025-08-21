@@ -10,12 +10,12 @@ import utilities.Vector2D;
 import static games.descent2e.DescentHelper.figureDeath;
 
 public class SeduceMove extends ForcedMove{
-    public SeduceMove(int target, int source, Vector2D whereTo) {
-        super(target, source, whereTo);
+    public SeduceMove(int target, int source, Vector2D startPosition, Vector2D whereTo) {
+        super(target, source, startPosition, whereTo, 1);
     }
 
-    public SeduceMove(int target, int source, Vector2D whereTo, Monster.Direction orientation) {
-        super(target, source, whereTo, orientation);
+    public SeduceMove(int target, int source, Vector2D startPosition, Vector2D whereTo, Monster.Direction orientation) {
+        super(target, source, startPosition, whereTo, orientation, 1);
     }
 
     @Override
@@ -34,13 +34,12 @@ public class SeduceMove extends ForcedMove{
         if (!super.canExecute(dgs)) {
             return false;
         }
-
         Figure f = (Figure) dgs.getComponentById(figureID);
-        return f.isOffMap() && (f.getAttribute(Figure.Attribute.MovePoints).getValue() == 1);
+        return f.isOffMap();
     }
 
     public SeduceMove copy() {
-        SeduceMove seduceMove = new SeduceMove(figureID, sourceID, whereTo, orientation);
+        SeduceMove seduceMove = new SeduceMove(figureID, sourceID, startPosition, whereTo, orientation);
         seduceMove.startPosition = startPosition.copy();
         seduceMove.directionID = directionID;
         return seduceMove;
