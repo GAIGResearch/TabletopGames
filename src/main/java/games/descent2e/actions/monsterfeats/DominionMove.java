@@ -7,13 +7,15 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import utilities.Vector2D;
 
+import java.util.Vector;
+
 public class DominionMove extends ForcedMove{
-    public DominionMove(int target, int source, Vector2D whereTo) {
-        super(target, source, whereTo);
+    public DominionMove(int target, int source, Vector2D startPosition, Vector2D whereTo) {
+        super(target, source, startPosition, whereTo, 2);
     }
 
-    public DominionMove(int target, int source, Vector2D whereTo, Monster.Direction orientation) {
-        super(target, source, whereTo, orientation);
+    public DominionMove(int target, int source, Vector2D startPosition, Vector2D whereTo, Monster.Direction orientation) {
+        super(target, source, startPosition, whereTo, orientation, 2);
     }
 
     @Override
@@ -32,14 +34,12 @@ public class DominionMove extends ForcedMove{
         if (!super.canExecute(dgs)) {
             return false;
         }
-
         Figure f = (Figure) dgs.getComponentById(figureID);
-        return f.isOffMap() && (f.getAttribute(Figure.Attribute.MovePoints).getValue() == 1);
+        return f.isOffMap();
     }
 
     public DominionMove copy() {
-        DominionMove dominionMove = new DominionMove(figureID, sourceID, whereTo, orientation);
-        dominionMove.startPosition = startPosition.copy();
+        DominionMove dominionMove = new DominionMove(figureID, sourceID, startPosition, whereTo, orientation);
         dominionMove.directionID = directionID;
         return dominionMove;
     }

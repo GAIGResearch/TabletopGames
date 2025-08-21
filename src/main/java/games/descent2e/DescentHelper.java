@@ -932,6 +932,18 @@ public class DescentHelper {
         return -1;
     }
 
+    public static List<Vector2D> getForcedMovePositions(DescentGameState dgs, Vector2D start, int distance)
+    {
+        List<Vector2D> forcedMovePositions = new ArrayList<>();
+        Set<BoardNode> targetSpaces = getNeighboursInRange(dgs, start, distance);
+
+        for (BoardNode space : targetSpaces) {
+            if (space == null) continue;
+            forcedMovePositions.add(((PropertyVector2D) space.getProperty("coordinates")).values);
+        }
+        return forcedMovePositions;
+    }
+
     public static boolean webbed(DescentGameState dgs, Figure f, Vector2D position)
     {
         // First, this only applies to Heroes present on the map

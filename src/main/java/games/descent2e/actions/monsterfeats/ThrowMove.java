@@ -9,12 +9,12 @@ import utilities.Vector2D;
 import static games.descent2e.DescentHelper.figureDeath;
 
 public class ThrowMove extends ForcedMove{
-    public ThrowMove(int target, int source, Vector2D whereTo) {
-        super(target, source, whereTo);
+    public ThrowMove(int target, int source, Vector2D startPosition, Vector2D whereTo) {
+        super(target, source, startPosition, whereTo, 3);
     }
 
-    public ThrowMove(int target, int source, Vector2D whereTo, Monster.Direction orientation) {
-        super(target, source, whereTo, orientation);
+    public ThrowMove(int target, int source, Vector2D startPosition, Vector2D whereTo, Monster.Direction orientation) {
+        super(target, source, startPosition, whereTo, orientation, 3);
     }
 
     @Override
@@ -35,14 +35,12 @@ public class ThrowMove extends ForcedMove{
         if (!super.canExecute(dgs)) {
             return false;
         }
-
         Figure f = (Figure) dgs.getComponentById(figureID);
-        return f.isOffMap() && (f.getAttribute(Figure.Attribute.MovePoints).getValue() == 3);
+        return f.isOffMap();
     }
 
     public ThrowMove copy() {
-        ThrowMove throwMove = new ThrowMove(figureID, sourceID, whereTo, orientation);
-        throwMove.startPosition = startPosition.copy();
+        ThrowMove throwMove = new ThrowMove(figureID, sourceID, startPosition, whereTo, orientation);
         throwMove.directionID = directionID;
         return throwMove;
     }

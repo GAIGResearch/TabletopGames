@@ -12,6 +12,8 @@ import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
 
+import java.util.Objects;
+
 import static core.CoreConstants.playersHash;
 import static games.descent2e.DescentHelper.figureDeath;
 import static games.descent2e.actions.Move.*;
@@ -19,28 +21,33 @@ import static games.descent2e.actions.Move.*;
 public class ForcedMove extends DescentAction {
 
     final Vector2D whereTo;
+    protected int maxDistance;
     final Monster.Direction orientation;
     int figureID;
     int sourceID;
     int directionID;
     Vector2D startPosition = new Vector2D(0, 0);
 
-    public ForcedMove(int target, int source, Vector2D whereTo) {
+    public ForcedMove(int target, int source, Vector2D startPosition, Vector2D whereTo, int maxDistance) {
         super(Triggers.MOVE_INTO_SPACE);
+        this.startPosition = startPosition;
         this.whereTo = whereTo;
         this.orientation = Monster.Direction.DOWN;
         this.directionID = -1;
         this.figureID = target;
         this.sourceID = source;
+        this.maxDistance = maxDistance;
     }
 
-    public ForcedMove(int target, int source, Vector2D whereTo, Monster.Direction orientation) {
+    public ForcedMove(int target, int source, Vector2D startPosition, Vector2D whereTo, Monster.Direction orientation, int maxDistance) {
         super(Triggers.MOVE_INTO_SPACE);
+        this.startPosition = startPosition;
         this.whereTo = whereTo;
         this.orientation = orientation;
         this.directionID = -1;
         this.figureID = target;
         this.sourceID = source;
+        this.maxDistance = maxDistance;
     }
 
     @Override
@@ -58,7 +65,6 @@ public class ForcedMove extends DescentAction {
 
     private static void forcedMove(DescentGameState dgs, Figure f, Vector2D position, Monster.Direction orientation) {
         // More or less copied from Move clas's place() function
-
 
         // Update location and orientation. Swap size if orientation is horizontal (relevant for medium monsters)
         f.setPosition(position.copy());
@@ -98,8 +104,7 @@ public class ForcedMove extends DescentAction {
 
     @Override
     public ForcedMove copy() {
-        ForcedMove retval = new ForcedMove(figureID, sourceID, whereTo, orientation);
-        retval.startPosition = startPosition.copy();
+        ForcedMove retval = new ForcedMove(figureID, sourceID, startPosition, whereTo, orientation, maxDistance);
         retval.directionID = directionID;
         return retval;
     }
@@ -112,12 +117,6 @@ public class ForcedMove extends DescentAction {
 
         String name = f.getName().replace("Hero: ", "");
         String sourceName = source.getName().replace("Hero: ", "");
-
-        if (startPosition.equals(new Vector2D(0,0)))
-        {
-            // If the Start Position has not been changed from initiation, we save it here
-            startPosition = f.getPosition();
-        }
 
         String movement = "Forced Move: " + sourceName + " forces " + name + " to move from " + startPosition.toString() + " to " + whereTo.toString();
 
@@ -137,6 +136,31 @@ public class ForcedMove extends DescentAction {
         BoardNode tile = dgs.getMasterBoard().getElement(whereTo);
         if (tile == null) return false;
         // Can only force move a figure onto an empty space
-        return (((PropertyInt) tile.getProperty(playersHash)).value == -1);
+        if (((PropertyInt) tile.getProperty(playersHash)).value != -1) return false;
+
+        Figure f = (Figure) dgs.getComponentById(figureID);
+        return f.getAttributeValue(Figure.Attribute.MovePoints) >= maxDistance;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ForcedMove forcedMove = (ForcedMove) o;
+        return figureID == forcedMove.figureID &&
+                sourceID == forcedMove.sourceID &&
+                maxDistance == forcedMove.maxDistance &&
+                directionID == forcedMove.directionID &&
+                Objects.equals(whereTo, forcedMove.whereTo) &&
+                orientation == forcedMove.orientation &&
+                Objects.equals(startPosition, forcedMove.startPosition);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(figureID, sourceID, whereTo, maxDistance, orientation, startPosition, directionID);
     }
 }
