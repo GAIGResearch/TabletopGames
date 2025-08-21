@@ -1,36 +1,39 @@
 package games.pentegrammai;
 
-import core.AbstractGameState;
-import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
 
 import java.util.Arrays;
+import java.util.List;
 
-/**
- * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
- * maximum number of rounds in the game etc.). These parameters should be used everywhere in the code instead of
- * local variables or hard-coded numbers, by accessing these parameters from the game state via {@link AbstractGameState#getGameParameters()}.</p>
- *
- * <p>It should then implement appropriate {@link #_copy()}, {@link #_equals(Object)} and {@link #hashCode()} functions.</p>
- *
- * <p>The class can optionally extend from {@link TunableParameters} instead, which allows to use
- * automatic game parameter optimisation tools in the framework.</p>
- */
-public class PenteParameters extends AbstractParameters {
+public class PenteParameters extends TunableParameters {
 
     public int boardSize = 10;
     public int dieSides = 6;
     public int[] sacredPoints = {2, 7};
+    public boolean kiddsVariant = false;
 
     public PenteParameters() {
-        // If using TunableParameters, addTunableParameter(...) here
+        addTunableParameter("boardSize", 10);
+        addTunableParameter("dieSides", 6, List.of(4, 6, 10));
+        addTunableParameter("kiddsVariant", false, List.of(false, true));
     }
 
     @Override
-    protected AbstractParameters _copy() {
+    public PenteParameters instantiate() {
+        return this;
+    }
+
+    @Override
+    public void _reset() {
+        boardSize = (int) getParameterValue("boardSize");
+        dieSides = (int) getParameterValue("dieSides");
+        kiddsVariant = (boolean) getParameterValue("kiddsVariant");
+        sacredPoints = new int[]{boardSize / 4, 3 * boardSize / 4}; // default sacred points
+    }
+
+    @Override
+    protected PenteParameters _copy() {
         PenteParameters copy = new PenteParameters();
-        copy.boardSize = this.boardSize;
-        copy.dieSides = this.dieSides;
         copy.sacredPoints = Arrays.copyOf(this.sacredPoints, this.sacredPoints.length);
         return copy;
     }
@@ -38,16 +41,11 @@ public class PenteParameters extends AbstractParameters {
     @Override
     protected boolean _equals(Object o) {
         if (!(o instanceof PenteParameters other)) return false;
-        return boardSize == other.boardSize &&
-                dieSides == other.dieSides &&
-                Arrays.equals(sacredPoints, other.sacredPoints);
+        return Arrays.equals(sacredPoints, other.sacredPoints);
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(boardSize);
-        result = 31 * result + Integer.hashCode(dieSides);
-        result = 31 * result + Arrays.hashCode(sacredPoints);
-        return result;
+        return super.hashCode() + 31 * Arrays.hashCode(sacredPoints);
     }
 }

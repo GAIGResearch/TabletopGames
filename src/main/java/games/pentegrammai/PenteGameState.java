@@ -16,22 +16,19 @@ public class PenteGameState extends AbstractGameState {
 
     // Board: 10 points, index 0-4 east, 5-9 west. Sacred points: 2 (east), 7 (west)
     protected List<List<Token>> board; // board.get(i) = list of tokens at point i
-    protected int[] playerGoal = {7, 2}; // for clarity, same as sacred
-    protected int[] playerStart; // [0]=east, [1]=west
+    int[] blotCount;
+    protected int[] playerGoal;
+    protected int[] playerEntry;
     protected Dice die; // single die for the game
+    List<Token> offBoard = new ArrayList<>(); // tokens that are off the board (due to blots)
 
-    public int boardSize;
-    public int dieSides;
     public int[] sacredPoints;
 
     public PenteGameState(AbstractParameters parameters, int nPlayers) {
         super(parameters, nPlayers);
         PenteParameters params = (PenteParameters) parameters;
-        playerStart = new int[]{0, 5};
-        this.boardSize = params.boardSize;
-        this.dieSides = params.dieSides;
         this.sacredPoints = Arrays.copyOf(params.sacredPoints, params.sacredPoints.length);
-        die = new Dice(dieSides);
+        die = new Dice(params.dieSides);
     }
 
     /**
@@ -59,7 +56,7 @@ public class PenteGameState extends AbstractGameState {
 
     @Override
     protected PenteGameState _copy(int playerId) {
-        PenteGameState copy = new PenteGameState((PenteParameters) getGameParameters(), getNPlayers());
+        PenteGameState copy = new PenteGameState(getGameParameters(), getNPlayers());
         copy.board = new ArrayList<>();
         for (List<Token> tokens : this.board) {
             List<Token> newTokens = new ArrayList<>();
@@ -68,14 +65,21 @@ public class PenteGameState extends AbstractGameState {
             }
             copy.board.add(newTokens);
         }
-        copy.playerStart = playerStart.clone();
         copy.die = die.copy();
-        copy.boardSize = boardSize;
-        copy.dieSides = dieSides;
+        copy.blotCount = Arrays.copyOf(blotCount, blotCount.length);
+        copy.playerGoal = Arrays.copyOf(playerGoal, playerGoal.length);
+        copy.playerEntry = Arrays.copyOf(playerEntry, playerEntry.length);
+        copy.offBoard = new ArrayList<>();
+        for (Token t : this.offBoard) {
+            copy.offBoard.add(t.copy());
+        }
         copy.sacredPoints = Arrays.copyOf(sacredPoints, sacredPoints.length);
         return copy;
     }
 
+    public PenteParameters getParams() {
+        return (PenteParameters) getGameParameters();
+    }
     /**
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
@@ -84,18 +88,18 @@ public class PenteGameState extends AbstractGameState {
     @Override
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal()) {
+            int boardSize = this.board.size();
             // Score: fraction of pieces at goal + fraction advanced
             double score = getPiecesAtGoal(playerId) / (double) (boardSize / 2);
             int totalAdvanced = 0;
-            for (Token t : getPlayerTokens(playerId)) {
-                int pos = findTokenPosition(t);
-                int dist = distanceToGoal(playerId, pos);
-                score += (boardSize - dist) / (double) (boardSize * (boardSize / 2));
+            for (int i = 0; i < boardSize; i++) {
+                int distanceToGoal = distanceToGoal(playerId, i);
+                totalAdvanced += getPiecesAt(i, playerId) * distanceToGoal;
             }
+            score += (double) totalAdvanced / boardSize / 2;
             return score;
         } else {
-            // The game finished, we can instead return the actual result of the game for the given player.
-            return getPlayerResults()[playerId].value;
+            return getGameScore(playerId);
         }
     }
 
@@ -112,40 +116,27 @@ public class PenteGameState extends AbstractGameState {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PenteGameState that)) return false;
-        return Objects.equals(board, that.board) &&
-                Arrays.equals(playerStart, that.playerStart) &&
+        return board.equals(that.board) && offBoard.equals(that.offBoard) &&
+                Arrays.equals(sacredPoints, that.sacredPoints) &&
+                Arrays.equals(blotCount, that.blotCount) &&
+                Arrays.equals(playerGoal, that.playerGoal) &&
+                Arrays.equals(playerEntry, that.playerEntry) &&
                 Objects.equals(die, that.die);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, Arrays.hashCode(playerStart), die, super.hashCode());
-    }
-
-    // --- Helper methods for game logic ---
-
-    public List<Token> getPlayerTokens(int playerId) {
-        List<Token> tokens = new ArrayList<>();
-        for (List<Token> point : board) {
-            for (Token t : point) {
-                if (t.getOwnerId() == playerId) tokens.add(t);
-            }
-        }
-        return tokens;
-    }
-
-    public int findTokenPosition(Token t) {
-        for (int i = 0; i < board.size(); i++) {
-            if (board.get(i).contains(t)) return i;
-        }
-        return -1;
+        return Objects.hash(board, offBoard, die, super.hashCode()) +
+                31 * Arrays.hashCode(sacredPoints) +
+                31 * 31 * Arrays.hashCode(playerGoal) +
+                31 * 31 * Arrays.hashCode(playerEntry) +
+                31 * 31 * 31 * Arrays.hashCode(blotCount);
     }
 
     public int distanceToGoal(int playerId, int pos) {
         int goal = playerGoal[playerId];
-        // All players move anti-clockwise (+1)
         if (pos <= goal) return goal - pos;
-        else return boardSize - pos + goal;
+        else return this.board.size() - pos + goal;
     }
 
     public boolean isSacred(int pos) {
@@ -161,9 +152,14 @@ public class PenteGameState extends AbstractGameState {
 
     public boolean canPlace(int pos) {
         // Only one piece per point except sacred points (can have any number, both players)
-        if (isSacred(pos)) return true;
-        return board.get(pos).isEmpty();
-        // Only one piece per point (not sacred)
+        if (getParams().kiddsVariant) {
+            // backgammon like rules
+            int otherPlayersPieces = getPiecesAt(pos, 1 - getCurrentPlayer());
+            return otherPlayersPieces < 2; // can place if less than 2 pieces of
+        } else {
+            return isSacred(pos) || board.get(pos).isEmpty();
+            // Only one piece per point (not sacred)
+        }
     }
 
     public int getPiecesAtGoal(int playerId) {
@@ -174,6 +170,18 @@ public class PenteGameState extends AbstractGameState {
     public int getPiecesAt(int from, int player) {
         int count = 0;
         for (Token t : board.get(from)) {
+            if (t.getOwnerId() == player) count++;
+        }
+        return count;
+    }
+
+
+    public void setOffBoard(Token removed) {
+        offBoard.add(removed);
+    }
+    public int getOffBoard(int player) {
+        int count = 0;
+        for (Token t : offBoard) {
             if (t.getOwnerId() == player) count++;
         }
         return count;

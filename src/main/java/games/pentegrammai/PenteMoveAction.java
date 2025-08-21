@@ -18,12 +18,16 @@ public class PenteMoveAction extends AbstractAction {
         int playerId = state.getCurrentPlayer();
 
         // Find a token belonging to the current player at 'from'
-        Token tokenToMove = null;
-        for (Token t : state.board.get(from)) {
-            if (t.getOwnerId() == playerId) {
-                tokenToMove = t;
-                break;
-            }
+        Token tokenToMove;
+        if (from == -1) {
+            tokenToMove = state.offBoard.stream().filter(t -> t.getOwnerId() == playerId)
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            tokenToMove = state.board.get(from).stream()
+                    .filter(t -> t.getOwnerId() == playerId)
+                    .findFirst()
+                    .orElse(null);
         }
         if (tokenToMove == null) {
             throw new IllegalArgumentException("No token belonging to player " + playerId + " at position " + from);
@@ -31,7 +35,24 @@ public class PenteMoveAction extends AbstractAction {
         if (!state.canPlace(to)) {
             throw new IllegalArgumentException("Cannot place token at position " + to + " (occupied and not sacred)");
         }
-        state.board.get(from).remove(tokenToMove);
+        if (from == -1)
+            state.offBoard.remove(tokenToMove);
+        else
+            state.board.get(from).remove(tokenToMove);
+
+        // Now check for blot
+        if (state.getParams().kiddsVariant) {
+            // In Kidd's variant, we can capture if the target is occupied by exactly one of the opponent's pieces
+            if (state.getPiecesAt(to, 1 - playerId) == 1) {
+                if (state.getPiecesAt(to, playerId) != 0) {
+                    throw new AssertionError("Both players cannot have pieces on the same point in Kidd's variant");
+                }
+                Token removed = state.board.get(to).remove(0); // Remove the opponent's piece
+                state.setOffBoard(removed);
+                state.blotCount[playerId]++;
+            }
+        }
+
         state.board.get(to).add(tokenToMove);
         return true;
     }

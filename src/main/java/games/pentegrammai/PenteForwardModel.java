@@ -35,21 +35,38 @@ public class PenteForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         PenteGameState state = (PenteGameState) firstState;
+        PenteParameters params = state.getParams();
+        state.playerGoal = new int[2];
+        state.blotCount = new int[2];
+        state.playerGoal[0] = params.sacredPoints[1];
+        state.playerGoal[1] = params.sacredPoints[0];
+        state.offBoard = new ArrayList<>();
+
+        // player entry only used in Kidd's variant
+        state.playerEntry = new int[2];
+        state.playerEntry[0] = 0;
+        state.playerEntry[1] = params.boardSize / 2;
+
         state.board = new ArrayList<>();
-        for (int i = 0; i < state.boardSize; i++) {
+        for (int i = 0; i < params.boardSize; i++) {
             state.board.add(new ArrayList<>());
         }
         // Place pieces for each player on their starting points
-        int piecesPerPlayer = state.boardSize / 2;
+        int piecesPerPlayer = params.boardSize / 2;
+        // in this case all Tokens start off the board
         for (int player = 0; player < 2; player++) {
-            int start = state.playerStart[player];
+            int entry = player == 0 ? 0 : params.boardSize / 2;
             for (int i = 0; i < piecesPerPlayer; i++) {
                 Token t = new Token("P" + player + "_T" + i);
                 t.setOwnerId(player);
-                state.board.get(start + i).add(t);
+                if (state.getParams().kiddsVariant) {
+                    state.setOffBoard(t);
+                } else {
+                    state.board.get(entry + i).add(t);
+                }
             }
         }
-        state.die = new Dice(state.dieSides);
+        state.die = new Dice(params.dieSides);
         state.die.roll(state.getRnd());
     }
 
@@ -63,12 +80,21 @@ public class PenteForwardModel extends StandardForwardModel {
         PenteGameState state = (PenteGameState) gameState;
         List<AbstractAction> actions = new ArrayList<>();
         int player = state.getCurrentPlayer();
-
         int dieValue = state.die.getValue();
-        for (int from = 0; from < state.boardSize; from++) {
-            int to = (from + dieValue) % state.boardSize;
-            if (state.canPlace(to) && state.getPiecesAt(from, player) > 0) {
+
+        if (!state.offBoard.isEmpty() && state.offBoard.stream().anyMatch(t -> t.getOwnerId() == player)) {
+            // we have to move pieces that are off the board first
+            int from = -1;
+            int to = (state.playerEntry[player] + dieValue - 1) % state.board.size();
+            if (state.canPlace(to)) {
                 actions.add(new PenteMoveAction(from, to));
+            }
+        } else {
+            for (int from = 0; from < state.board.size(); from++) {
+                int to = (from + dieValue) % state.board.size();
+                if (state.canPlace(to) && state.getPiecesAt(from, player) > 0) {
+                    actions.add(new PenteMoveAction(from, to));
+                }
             }
         }
         if (actions.isEmpty()) {
@@ -87,7 +113,7 @@ public class PenteForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         PenteGameState state = (PenteGameState) currentState;
-        int piecesPerPlayer = state.boardSize / 2;
+        int piecesPerPlayer = state.board.size() / 2;
         for (int player = 0; player < 2; player++) {
             if (state.getPiecesAtGoal(player) == piecesPerPlayer) {
                 endGame(state);
