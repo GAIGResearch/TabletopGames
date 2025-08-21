@@ -74,16 +74,7 @@ public class SeduceTest extends AttributeTest {
     }
 
     @Override
-    public boolean canExecute(DescentGameState dgs) {
-        Figure f = (Figure) dgs.getComponentById(this.getTestingFigure());
-
-        // We can only make each attribute test once per turn - if we have already taken it, we can't make another attempt
-        return !f.hasAttributeTest(this);
-    }
-
-    @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), targetFigure);
     }
-
 }

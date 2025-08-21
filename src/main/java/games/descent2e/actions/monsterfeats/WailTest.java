@@ -64,5 +64,4 @@ public class WailTest extends AttributeTest {
             return false;
         }
     }
-
 }
