@@ -3,6 +3,7 @@ package games.descent2e.actions.monsterfeats;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.AttributeTest;
+import games.descent2e.actions.attack.TriggerAttributeTest;
 import games.descent2e.components.Figure;
 
 import java.util.Objects;
@@ -10,11 +11,11 @@ import java.util.Objects;
 public class SeduceTest extends AttributeTest {
 
     int targetFigure;
-    public SeduceTest(int eliza, Figure.Attribute attribute, int targetFigure, int testCount) {
+    public SeduceTest(int eliza, Figure.Attribute attribute, int targetFigure) {
         // As this test targets the user, we count the source figure as itself
-        super(eliza, attribute, eliza, testCount);
+        super(eliza, attribute, eliza);
         this.targetFigure = targetFigure;
-        attributeTestName = "Seduce (Willpower) Test: " + eliza + "; Target: " + targetFigure + "-" + testCount;
+        attributeTestName = "Seduce (Willpower) Test: " + eliza + "; Target: " + targetFigure;
     }
 
     @Override
@@ -25,12 +26,12 @@ public class SeduceTest extends AttributeTest {
         String testingName = f.getName().replace("Hero: ", "");
         String targetName = target.getName().replace("Hero: ", "");
 
-        return "Seduce (Willpower) Test (" + super.getTestCount() + ") by " + testingName + " targeting " + targetName;
+        return "Seduce (Willpower) Test by " + testingName + " targeting " + targetName;
     }
 
     @Override
     public String toString() {
-        return "Seduce (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " targeting " + targetFigure;
+        return "Seduce (Willpower) Test by " + super.getSourceFigure() + " targeting " + targetFigure;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class SeduceTest extends AttributeTest {
 
         f.addAttributeTest(this);
 
-        if (result)
+        if (!result)
         {
             //System.out.println("Passed Seduce (Willpower) Test!");
             Figure target = (Figure) dgs.getComponentById(targetFigure);
@@ -60,7 +61,7 @@ public class SeduceTest extends AttributeTest {
 
     @Override
     public SeduceTest _copy() {
-        return new SeduceTest(sourceFigure, attribute, targetFigure, testCount);
+        return new SeduceTest(sourceFigure, attribute, targetFigure);
     }
 
     @Override

@@ -8,25 +8,21 @@ import games.descent2e.components.Figure;
 
 public class WaterTest extends AttributeTest {
 
-    public WaterTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
-        super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Water (Willpower) Test: " + sourceFigure + "-" + testCount;
+    public WaterTest(int testingFigure, Figure.Attribute attribute, int sourceFigure) {
+        super(testingFigure, attribute, sourceFigure);
+        attributeTestName = "Water (Willpower) Test: " + sourceFigure;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
-        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
-
-        String testingName = f.getName().replace("Hero: ", "");
-        String sourceName = source.getName().replace("Hero: ", "");
-
-        return "Water (Willpower) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
+        String retVal = super.getString(gameState);
+        return "Water (Willpower) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
     public String toString() {
-        return "Water (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        String retVal = super.toString();
+        return "Water (Willpower) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
@@ -57,7 +53,7 @@ public class WaterTest extends AttributeTest {
 
     @Override
     public WaterTest _copy() {
-        return new WaterTest(testingFigure, attribute, sourceFigure, testCount);
+        return new WaterTest(testingFigure, attribute, sourceFigure);
     }
 
     @Override

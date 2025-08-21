@@ -9,25 +9,21 @@ import static games.descent2e.DescentHelper.immobilize;
 
 public class ThrowTest extends AttributeTest {
 
-    public ThrowTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
-        super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Throw (Might) Test: " + sourceFigure + "-" + testCount;
+    public ThrowTest(int testingFigure, Figure.Attribute attribute, int sourceFigure) {
+        super(testingFigure, attribute, sourceFigure);
+        attributeTestName = "Throw (Might) Test: " + sourceFigure;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
-        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
-
-        String testingName = f.getName().replace("Hero: ", "");
-        String sourceName = source.getName().replace("Hero: ", "");
-
-        return "Throw (Might) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
+        String retVal = super.getString(gameState);
+        return "Throw (Might) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
     public String toString() {
-        return "Throw (Might) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        String retVal = super.toString();
+        return "Throw (Might) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
@@ -56,7 +52,7 @@ public class ThrowTest extends AttributeTest {
 
     @Override
     public ThrowTest _copy() {
-        return new ThrowTest(testingFigure, attribute, sourceFigure, testCount);
+        return new ThrowTest(testingFigure, attribute, sourceFigure);
     }
 
     @Override

@@ -14,8 +14,8 @@ import java.util.Objects;
 
 public class Poisoned extends AttributeTest {
     public Poisoned(int testingFigure, Figure.Attribute attribute) {
-        super(testingFigure, attribute, testingFigure, 0);
-        attributeTestName = "Poisoned Test: " + testingFigure + "-" + 0;
+        super(testingFigure, attribute, testingFigure);
+        attributeTestName = "Poisoned Test: " + testingFigure;
     }
 
     @Override

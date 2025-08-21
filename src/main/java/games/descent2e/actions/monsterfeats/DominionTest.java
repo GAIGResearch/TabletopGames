@@ -13,19 +13,19 @@ public class DominionTest extends AttributeTest {
     int targetFigure;
     boolean partTwo;
 
-    public DominionTest (int zachareth, Figure.Attribute attribute, int testCount)
+    public DominionTest (int zachareth, Figure.Attribute attribute)
     {
         // As this test targets the user, we count the source figure as itself
-        super(zachareth, attribute, zachareth, testCount);
+        super(zachareth, attribute, zachareth);
         this.targetFigure = zachareth;
         this.partTwo = false;
-        attributeTestName = "Dominion (Willpower) Test: " + zachareth + "-" + testCount;
+        attributeTestName = "Dominion (Willpower) Test: " + zachareth;
     }
-    public DominionTest(int zachareth, Figure.Attribute attribute, int targetFigure, int testCount) {
-        super(targetFigure, attribute, zachareth, testCount);
+    public DominionTest(int zachareth, Figure.Attribute attribute, int targetFigure) {
+        super(targetFigure, attribute, zachareth);
         this.targetFigure = targetFigure;
         this.partTwo = true;
-        attributeTestName = "Dominion (Willpower) Test: " + zachareth + "; Target: " + targetFigure + "-" + testCount;
+        attributeTestName = "Dominion (Willpower) Test: " + zachareth + "; Target: " + targetFigure;
     }
 
     @Override
@@ -36,12 +36,12 @@ public class DominionTest extends AttributeTest {
         String testingName = f.getName().replace("Hero: ", "");
         String targetName = target.getName().replace("Hero: ", "");
 
-        return "Dominion (Willpower) Test (" + super.getTestCount() + ") by " + testingName + " targeting " + targetName;
+        return "Dominion (Willpower) Test by " + testingName + " targeting " + targetName;
     }
 
     @Override
     public String toString() {
-        return "Dominion (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " targeting " + targetFigure;
+        return "Dominion (Willpower) Test by " + super.getSourceFigure() + " targeting " + targetFigure;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class DominionTest extends AttributeTest {
 
     @Override
     public DominionTest _copy() {
-        DominionTest retVal = new DominionTest(sourceFigure, attribute, targetFigure, testCount);
+        DominionTest retVal = new DominionTest(sourceFigure, attribute, targetFigure);
         retVal.partTwo = this.partTwo;
         return retVal;
     }

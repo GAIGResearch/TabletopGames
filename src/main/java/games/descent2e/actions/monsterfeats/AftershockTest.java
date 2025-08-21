@@ -8,25 +8,21 @@ import games.descent2e.components.Figure;
 
 public class AftershockTest extends AttributeTest {
 
-    public AftershockTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
-        super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Aftershock (Willpower) Test: " + sourceFigure + "-" + testCount;
+    public AftershockTest(int testingFigure, Figure.Attribute attribute, int sourceFigure) {
+        super(testingFigure, attribute, sourceFigure);
+        attributeTestName = "Aftershock (Willpower) Test: " + sourceFigure;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
-        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
-
-        String testingName = f.getName().replace("Hero: ", "");
-        String sourceName = source.getName().replace("Hero: ", "");
-
-        return "Aftershock (Willpower) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
+        String retVal = super.getString(gameState);
+        return "Aftershock (Willpower) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
     public String toString() {
-        return "Aftershock (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        String retVal = super.toString();
+        return "Aftershock (Willpower) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
@@ -55,7 +51,7 @@ public class AftershockTest extends AttributeTest {
 
     @Override
     public AftershockTest _copy() {
-        return new AftershockTest(testingFigure, attribute, sourceFigure, testCount);
+        return new AftershockTest(testingFigure, attribute, sourceFigure);
     }
 
     @Override

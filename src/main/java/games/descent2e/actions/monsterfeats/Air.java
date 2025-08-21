@@ -1,25 +1,11 @@
 package games.descent2e.actions.monsterfeats;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
-import core.components.Component;
-import core.components.GridBoard;
 import games.descent2e.DescentGameState;
-import games.descent2e.DescentHelper;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.actions.archetypeskills.Heal;
-import games.descent2e.actions.attack.TriggerAttributeTest;
 import games.descent2e.components.*;
-import utilities.Vector2D;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-
-import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTests.POST_TEST;
-import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTests.PRE_TEST;
-import static utilities.Utils.getNeighbourhood;
 
 public class Air extends DescentAction {
 

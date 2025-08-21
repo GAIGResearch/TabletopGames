@@ -3,34 +3,26 @@ package games.descent2e.actions.monsterfeats;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
-import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
 
-import java.util.Objects;
-import java.util.Set;
-
 public class HowlTest extends AttributeTest {
 
-    public HowlTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
-        super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Howl (Willpower) Test: " + sourceFigure + "-" + testCount;
+    public HowlTest(int testingFigure, Figure.Attribute attribute, int sourceFigure) {
+        super(testingFigure, attribute, sourceFigure);
+        attributeTestName = "Howl (Willpower) Test: " + sourceFigure;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
-        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
-
-        String testingName = f.getName().replace("Hero: ", "");
-        String sourceName = source.getName().replace("Hero: ", "");
-
-        return "Howl (Willpower) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
+        String retVal = super.getString(gameState);
+        return "Howl (Willpower) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
     public String toString() {
-        return "Howl (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        String retVal = super.toString();
+        return "Howl (Willpower) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
@@ -59,7 +51,7 @@ public class HowlTest extends AttributeTest {
 
     @Override
     public HowlTest _copy() {
-        return new HowlTest(testingFigure, attribute, sourceFigure, testCount);
+        return new HowlTest(testingFigure, attribute, sourceFigure);
     }
 
     @Override
@@ -71,13 +63,4 @@ public class HowlTest extends AttributeTest {
             return false;
         }
     }
-
-    @Override
-    public boolean canExecute(DescentGameState dgs) {
-        Figure f = (Figure) dgs.getComponentById(this.getTestingFigure());
-
-        // We can only make each attribute test once per turn - if we have already taken it, we can't make another attempt
-        return !f.hasAttributeTest(this);
-    }
-
 }

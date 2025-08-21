@@ -712,7 +712,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
             if (defender instanceof Monster && ((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.AFTERSHOCK))
             {
-                AftershockTest aftershock = new AftershockTest(attackingFigure, Figure.Attribute.Willpower, defendingFigure, attacker.getNActionsExecuted().getValue());
+                AftershockTest aftershock = new AftershockTest(attackingFigure, Figure.Attribute.Willpower, defendingFigure);
                 if (aftershock.canExecute(state)) {
                     retValue.add(aftershock);
                 }

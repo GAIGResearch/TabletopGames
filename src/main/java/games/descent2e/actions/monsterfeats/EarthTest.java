@@ -10,26 +10,21 @@ import static games.descent2e.DescentHelper.immobilize;
 
 public class EarthTest extends AttributeTest {
 
-    public EarthTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
-        super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Earth (Awareness) Test: " + sourceFigure + "-" + testCount;
+    public EarthTest(int testingFigure, Figure.Attribute attribute, int sourceFigure) {
+        super(testingFigure, attribute, sourceFigure);
+        attributeTestName = "Earth (Awareness) Test: " + sourceFigure;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-
-        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
-        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
-
-        String testingName = f.getName().replace("Hero: ", "");
-        String sourceName = source.getName().replace("Hero: ", "");
-
-        return "Earth (Awareness) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
+        String retVal = super.getString(gameState);
+        return "Earth (Awareness) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
     public String toString() {
-        return "Earth (Awareness) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        String retVal = super.toString();
+        return "Earth (Awareness) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
@@ -57,7 +52,7 @@ public class EarthTest extends AttributeTest {
 
     @Override
     public EarthTest _copy() {
-        return new EarthTest(testingFigure, attribute, sourceFigure, testCount);
+        return new EarthTest(testingFigure, attribute, sourceFigure);
     }
 
     @Override

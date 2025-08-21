@@ -47,7 +47,6 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
     protected int testingPlayer;
     protected String testingName;
     protected String attributeTestName;
-    protected int testCount = 0;
     protected int sourceFigure;
     protected AttributeTest.TestPhase phase = NOT_STARTED;
     protected int interruptPlayer;
@@ -61,19 +60,16 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
 
 
 
-    public AttributeTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
+    public AttributeTest(int testingFigure, Figure.Attribute attribute, int sourceFigure) {
         super(FORCED);
         this.testingFigure = testingFigure;
         this.attribute = attribute;
         this.sourceFigure = sourceFigure;
-        this.testCount = testCount;
     }
 
     @Override
     public boolean execute(DescentGameState state)
     {
-        state.setActionInProgress(this);
-
         testingPlayer = state.getComponentById(testingFigure).getOwnerId();
         phase = PRE_TEST_ROLL;
         interruptPlayer = testingPlayer;
@@ -81,7 +77,7 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
         setTestingName(tester.getName().replace("Hero: ", ""));
         attributeValue = tester.getAttributeValue(attribute);
 
-        //announceTestDebug(state);
+        state.setActionInProgress(this);
 
         movePhaseForward(state);
 
@@ -245,7 +241,6 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
     @Override
     public AttributeTest copy() {
         AttributeTest retValue = _copy();
-        retValue.testCount = testCount;
         retValue.testingPlayer = testingPlayer;
         retValue.phase = phase;
         retValue.interruptPlayer = interruptPlayer;
@@ -255,6 +250,9 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
         retValue.penaltyToRoll = penaltyToRoll;
         retValue.result = result;
         retValue.testingName = testingName;
+        retValue.attributeTestName = attributeTestName;
+        retValue.sourceFigure = sourceFigure;
+        retValue.skip = skip;
         return retValue;
     }
 
@@ -262,7 +260,7 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return true;  // TODO
+        return true;        // To be replaced by child classes
     }
 
     public Figure.Attribute getAttribute()
@@ -327,17 +325,9 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
     {
         return sourceFigure;
     }
-    public void setTestCount(int count)
-    {
-        testCount = count;
-    }
-    public int getTestCount()
-    {
-        return testCount;
-    }
 
     public String toString() {
-        return attribute + " Attribute Test by " + testingName;
+        return attribute + " Test by " + sourceFigure + " on " + testingFigure;
     }
 
     public String toStringWithResult() {
@@ -347,7 +337,13 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
+        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
+
+        String testingName = f.getName().replace("Hero: ", "");
+        String sourceName = source.getName().replace("Hero: ", "");
+
+        return attribute + " Test by " + sourceName + " on " + testingName;
     }
 
     public TestPhase getPhase() {
@@ -368,7 +364,7 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
         if (!super.equals(o)) return false;
         AttributeTest that = (AttributeTest) o;
         return testingFigure == that.testingFigure && testingPlayer == that.testingPlayer &&
-                testCount == that.testCount && sourceFigure == that.sourceFigure &&
+                sourceFigure == that.sourceFigure &&
                 interruptPlayer == that.interruptPlayer && attributeValue == that.attributeValue &&
                 penaltyToAttribute == that.penaltyToAttribute && penaltyToRoll == that.penaltyToRoll &&
                 result == that.result && skip == that.skip && Objects.equals(testingName, that.testingName) &&
@@ -378,7 +374,7 @@ public abstract class AttributeTest extends DescentAction implements IExtendedSe
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), testingFigure, testingPlayer, testingName, attributeTestName, testCount,
+        return Objects.hash(super.hashCode(), testingFigure, testingPlayer, testingName, attributeTestName,
                 sourceFigure, phase, interruptPlayer, attribute, attributeValue, penaltyToAttribute, penaltyToRoll,
                 result, skip);
     }

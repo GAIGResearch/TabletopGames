@@ -11,25 +11,21 @@ import static games.descent2e.DescentHelper.immobilize;
 
 public class GrabTest extends AttributeTest {
 
-    public GrabTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
-        super(testingFigure, attribute, sourceFigure, testCount);
-        attributeTestName = "Grab (Might) Test: " + sourceFigure + "-" + testCount;
+    public GrabTest(int testingFigure, Figure.Attribute attribute, int sourceFigure) {
+        super(testingFigure, attribute, sourceFigure);
+        attributeTestName = "Grab (Might) Test: " + sourceFigure;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
-        Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
-
-        String testingName = f.getName().replace("Hero: ", "");
-        String sourceName = source.getName().replace("Hero: ", "");
-
-        return "Grab (Might) Test (" + super.getTestCount() + ") by " + sourceName + " on " + testingName;
+        String retVal = super.getString(gameState);
+        return "Grab (Might) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
     public String toString() {
-        return "Grab (Might) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
+        String retVal = super.toString();
+        return "Grab (Might) Test by" + retVal.split("Test by")[1];
     }
 
     @Override
@@ -57,7 +53,7 @@ public class GrabTest extends AttributeTest {
 
     @Override
     public GrabTest _copy() {
-        return new GrabTest(testingFigure, attribute, sourceFigure, testCount);
+        return new GrabTest(testingFigure, attribute, sourceFigure);
     }
 
     @Override
