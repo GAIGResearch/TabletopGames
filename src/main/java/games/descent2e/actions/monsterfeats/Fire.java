@@ -29,6 +29,7 @@ public class Fire extends AttackAllAdjacent {
         if (defendingFigures.size() < 1) return false;
         Figure f = dgs.getActingFigure();
         if (f.getNActionsExecuted().isMaximum()) return false;
+        boolean atLeastOneHero = false;
         for (int defendingFigure : defendingFigures)
         {
             // We can only hit adjacent figures, none of our targets should be more than 1 space away
@@ -36,8 +37,14 @@ public class Fire extends AttackAllAdjacent {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
             if (target == null) return false;
             if(!checkAdjacent(dgs, f, target)) return false;
+            
+            if (atLeastOneHero) continue; // We already found a Hero, no need to keep checking
+            if (target instanceof Hero) {
+                atLeastOneHero = true;
+            }
         }
-        return true;
+        // Friendly Fire might be enabled, but that's no excuse to only torch your own Monsters
+        return atLeastOneHero;
     }
 
     public Fire copy() {

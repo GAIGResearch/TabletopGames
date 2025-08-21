@@ -24,7 +24,6 @@ public class DominionMove extends ForcedMove{
         Figure f = (Figure) dgs.getComponentById(this.figureID);
         f.getAttribute(Figure.Attribute.MovePoints).setToMin();
         f.setOffMap(false);
-        f.addCondition(DescentTypes.DescentCondition.Stun);
         return true;
     }
 

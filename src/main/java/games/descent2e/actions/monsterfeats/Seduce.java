@@ -47,7 +47,7 @@ public class Seduce extends TriggerAttributeTest {
 
         List<AbstractAction> retVal = new ArrayList<>();
 
-        // Seduce requires the Lady Eliza to have passed her test (result == 1) to proceed
+        // Seduce requires that Lady Eliza to have passed her test (result == 1) to proceed
         if (result == 1) {
             DescentGameState dgs = (DescentGameState) state;
             Vector2D startPos = ((Figure) dgs.getComponentById(target)).getPosition();

@@ -49,7 +49,7 @@ public class Dominion extends TriggerAttributeTest {
 
         List<AbstractAction> retVal = new ArrayList<>();
 
-        // Dominion requires the Baron Zachareth to have passed his test (result == 1) to proceed
+        // Dominion requires that Baron Zachareth to have passed his test (result == 1) to proceed
         if (result == 1) {
             DescentGameState dgs = (DescentGameState) state;
             Vector2D startPos = ((Figure) dgs.getComponentById(target)).getPosition();
