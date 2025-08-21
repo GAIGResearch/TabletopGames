@@ -169,6 +169,8 @@ public class DescentForwardModel extends StandardForwardModel {
             Vector2D position = heroStartingPositions.get(rnd.nextInt(heroStartingPositions.size()));
             figure.setPosition(position);
 
+            // System.out.println(position);
+
             // Tell the board there's a hero there
             PropertyInt prop = new PropertyInt("players", figure.getComponentID());
             dgs.masterBoard.getElement(position.getX(), position.getY()).setProperty(prop);
@@ -424,6 +426,10 @@ public class DescentForwardModel extends StandardForwardModel {
             if (dgs.monsterActingNext == -1) {
                 throw new AssertionError("No monsters to activate - game should be over");
             }
+
+            // Call for Regeneration for all monsters with that passive (realistically, only Sir Alric Farrow)
+            regeneration(dgs.getMonsters());
+
         } else {
             // Next Hero
             Figure nextActingFigure = dgs.heroes.get(dgs.heroActingNext);

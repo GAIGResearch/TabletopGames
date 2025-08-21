@@ -1003,6 +1003,18 @@ public class DescentHelper {
         return checkAdjacent(dgs, f, target);
     }
 
+    public static void regeneration(List<List<Monster>> monsters)
+    {
+        // Regeneration allows each Monster to recover 1 Health at the start of the Overlord's turn
+        for (List<Monster> monsterGroup : monsters) {
+            for (Monster m : monsterGroup) {
+                if (m.hasPassive(MonsterAbilities.MonsterPassive.REGENERATION)) {
+                    m.getAttribute(Figure.Attribute.Health).increment();
+                }
+            }
+        }
+    }
+
     public static Set<BoardNode> getNeighboursInRange(DescentGameState dgs, Vector2D position, int distance) {
 
         // Get all neighbours of neighbours of (etc.) from the starting position

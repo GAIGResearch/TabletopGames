@@ -48,7 +48,9 @@ public class MonsterAbilities {
         FLAIL,
         SHADOW,
         AIR,
-        AFTERSHOCK;
+        AFTERSHOCK,
+        REGENERATION,
+        UNMOVABLE;
     }
 
     public static ArrayList<AbstractAction> getMonsterActions(DescentGameState dgs)

@@ -139,6 +139,11 @@ public class ForcedMove extends DescentAction {
         if (((PropertyInt) tile.getProperty(playersHash)).value != -1) return false;
 
         Figure f = (Figure) dgs.getComponentById(figureID);
+
+        // Monsters with the Unmovable passive (Sir Alric Farrow) cannot be forced to move
+        if (f instanceof Monster)
+            if (((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.UNMOVABLE)) return false;
+
         return f.getAttributeValue(Figure.Attribute.MovePoints) >= maxDistance;
     }
 
