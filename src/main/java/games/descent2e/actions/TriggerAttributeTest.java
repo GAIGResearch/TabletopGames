@@ -112,6 +112,12 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     public int getResult() {
         return result;
     }
+
+    public void resetResult()
+    {
+        this.result = -1; // Reset to unresolved
+    }
+
     public boolean isFinished() {
         return finished;
     }

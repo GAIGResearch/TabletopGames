@@ -3,10 +3,13 @@ package games.descent2e.actions.monsterfeats;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
+import games.descent2e.actions.AttributeTest;
 import games.descent2e.actions.TriggerAttributeTest;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
+import utilities.Vector2D;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static games.descent2e.DescentHelper.*;
@@ -14,6 +17,7 @@ import static games.descent2e.DescentHelper.*;
 public class Dominion extends TriggerAttributeTest {
 
     protected final int distance = 2; // How far Zachareth can move the target
+    boolean partTwo = false;
     public Dominion(int attackingFigure, int target) {
         super(attackingFigure, List.of(target));
     }
@@ -37,7 +41,42 @@ public class Dominion extends TriggerAttributeTest {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         int target = currentTarget();
         int attacker = getAttackingFigure();
-        return List.of(new DominionTest(target, Figure.Attribute.Might, attacker));
+        // If we haven't made the test yet, get the test first
+        // Which test we call for depends upon whether this is the first test of the action (Zachareth testing himself)
+        // or the second test (Zachareth testing the target)
+        int result = getResult();
+        if (result == -1) return partTwo ? List.of(new DominionTest(target, Figure.Attribute.Willpower, attacker, true)) : List.of(new DominionTest(target, Figure.Attribute.Willpower, attacker));
+
+        List<AbstractAction> retVal = new ArrayList<>();
+
+        // Dominion requires the Baron Zachareth to have passed his test (result == 1) to proceed
+        if (result == 1) {
+            DescentGameState dgs = (DescentGameState) state;
+            Vector2D startPos = ((Figure) dgs.getComponentById(target)).getPosition();
+            List<Vector2D> spaces = getForcedMovePositions(dgs, startPos, distance);
+            for (Vector2D pos: spaces) {
+                DominionMove dominionMove = new DominionMove(target, attackingFigure, startPos, pos);
+                if (dominionMove.canExecute(dgs))
+                    retVal.add(dominionMove);
+            }
+        }
+
+        return retVal;
+    }
+
+    @Override
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (action instanceof AttributeTest) {
+            setResult(((AttributeTest) action).getResult());
+            // If Zachareth failed his test (result == 0), we finish here
+            // We also finish after the second test, regardless of result
+            if (getResult() == 0 || partTwo) setFinished(true);
+        }
+        if (action instanceof ForcedMove)
+        {
+            partTwo = true; // After the first move, we are now in the second part of the action
+            resetResult();
+        }
     }
 
     @Override
@@ -45,6 +84,12 @@ public class Dominion extends TriggerAttributeTest {
         Dominion retVal = new Dominion(getAttackingFigure(), getTargets());
         copyComponentTo(retVal);
         return retVal;
+    }
+
+    @Override
+    public void copyComponentTo(TriggerAttributeTest retVal) {
+        super.copyComponentTo(retVal);
+        ((Dominion) retVal).partTwo = this.partTwo;
     }
 
     @Override

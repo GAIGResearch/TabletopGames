@@ -13,19 +13,19 @@ public class DominionTest extends AttributeTest {
     int targetFigure;
     boolean partTwo;
 
-    public DominionTest (int zachareth, Figure.Attribute attribute)
+    public DominionTest (int targetFigure, Figure.Attribute attribute, int zachareth)
     {
         // As this test targets the user, we count the source figure as itself
         super(zachareth, attribute, zachareth);
-        this.targetFigure = zachareth;
+        this.targetFigure = targetFigure;
         this.partTwo = false;
         attributeTestName = "Dominion (Willpower) Test: " + zachareth;
     }
-    public DominionTest(int zachareth, Figure.Attribute attribute, int targetFigure) {
+    public DominionTest(int targetFigure, Figure.Attribute attribute, int zachareth, boolean partTwo) {
         super(targetFigure, attribute, zachareth);
         this.targetFigure = targetFigure;
-        this.partTwo = true;
-        attributeTestName = "Dominion (Willpower) Test: " + zachareth + "; Target: " + targetFigure;
+        this.partTwo = partTwo;
+        attributeTestName = "Dominion (Willpower) Test: " + zachareth;
     }
 
     @Override
@@ -36,12 +36,14 @@ public class DominionTest extends AttributeTest {
         String testingName = f.getName().replace("Hero: ", "");
         String targetName = target.getName().replace("Hero: ", "");
 
-        return "Dominion (Willpower) Test by " + testingName + " targeting " + targetName;
+        if (partTwo) return "Dominion (Willpower) Test by " + testingName + " on " + targetName;
+        else return "Dominion (Willpower) Test by " + testingName + " targeting " + targetName;
     }
 
     @Override
     public String toString() {
-        return "Dominion (Willpower) Test by " + super.getSourceFigure() + " targeting " + targetFigure;
+        if (partTwo) return "Dominion (Willpower) Test by " + super.getSourceFigure() + " on " + targetFigure;
+        else return "Dominion (Willpower) Test by " + super.getSourceFigure() + " targeting " + targetFigure;
     }
 
     @Override
@@ -85,8 +87,9 @@ public class DominionTest extends AttributeTest {
 
     @Override
     public DominionTest _copy() {
-        DominionTest retVal = new DominionTest(sourceFigure, attribute, targetFigure);
-        retVal.partTwo = this.partTwo;
+        DominionTest retVal;
+        if (partTwo) retVal = new DominionTest(targetFigure, attribute, sourceFigure, partTwo);
+        else retVal = new DominionTest(targetFigure, attribute, sourceFigure);
         return retVal;
     }
 
@@ -99,18 +102,8 @@ public class DominionTest extends AttributeTest {
             return false;
         }
     }
-
-    @Override
-    public boolean canExecute(DescentGameState dgs) {
-        Figure f = (Figure) dgs.getComponentById(this.getTestingFigure());
-
-        // We can only make each attribute test once per turn - if we have already taken it, we can't make another attempt
-        return !f.hasAttributeTest(this);
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), targetFigure);
+        return Objects.hash(super.hashCode(), targetFigure, partTwo);
     }
-
 }
