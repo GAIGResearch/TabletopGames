@@ -53,7 +53,6 @@ public class ForcedMove extends DescentAction {
     @Override
     public boolean execute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(this.figureID);
-        startPosition = f.getPosition();
 
         // We are just straight up picking up the figure off the board and placing it in its new position
         remove(dgs, f);
@@ -63,7 +62,7 @@ public class ForcedMove extends DescentAction {
         return true;
     }
 
-    private static void forcedMove(DescentGameState dgs, Figure f, Vector2D position, Monster.Direction orientation) {
+    protected static void forcedMove(DescentGameState dgs, Figure f, Vector2D position, Monster.Direction orientation) {
         // More or less copied from Move clas's place() function
 
         // Update location and orientation. Swap size if orientation is horizontal (relevant for medium monsters)

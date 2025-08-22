@@ -35,7 +35,8 @@ public class MonsterAbilities {
         SACRIFICE,
         SEDUCE,
         WAIL,
-        IGNITE;
+        IGNITE,
+        OVERPOWER;
     }
 
     public enum MonsterPassive {
@@ -63,6 +64,8 @@ public class MonsterAbilities {
             if (actingFigure.getActions().isEmpty()) return actions;
 
             List<Hero> heroes = dgs.getHeroes();
+
+            int range = 0;
 
             for (MonsterAbility action : actingFigure.getActions()) {
 
@@ -117,7 +120,7 @@ public class MonsterAbilities {
 
                     case HEAL:
 
-                        int range = 3;
+                        range = 3;
                         for (List<Monster> monsters : dgs.getMonsters()) {
                             for (Monster monster : monsters) {
                                 if (monster.getComponentID() == actingFigure.getComponentID() || checkAllSpaces(dgs, actingFigure, monster, 3, false)) {
@@ -224,6 +227,7 @@ public class MonsterAbilities {
                             if (sacrifice.canExecute(dgs))
                                 actions.add(sacrifice);
                         });
+
                     case SEDUCE:
 
                         for (Hero hero : heroes) {
@@ -267,6 +271,22 @@ public class MonsterAbilities {
                                 actions.add(ignite);
                         }
 
+                        break;
+
+                    // Sir Alric Farrow
+                    case OVERPOWER:
+                        // Because Overpower can be interrupted by ordinary Move actions if he already have MovePoints,
+                        // Alric's Overpower range is his maximum MovePoints plus his current MovePoints
+                        range = f.getAttributeMax(Figure.Attribute.MovePoints) + f.getAttributeValue(Figure.Attribute.MovePoints);
+                        for (Hero h : heroes)
+                        {
+                            if (inRange(actingFigure.getPosition(), h.getPosition(), range) && !h.isOffMap()) {
+                                targets.add(h.getComponentID());
+                            }
+                        }
+                        DescentAction overpower = new Overpower(actingFigure.getComponentID(), targets, range);
+                        if (overpower.canExecute(dgs))
+                            actions.add(overpower);
                         break;
 
                     default:
