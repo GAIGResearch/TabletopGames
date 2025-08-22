@@ -31,13 +31,20 @@ public class DominionTest extends AttributeTest {
     @Override
     public String getString(AbstractGameState gameState) {
         Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
-        Figure target = (Figure) gameState.getComponentById(this.getSourceFigure());
-
         String testingName = f.getName().replace("Hero: ", "");
-        String targetName = target.getName().replace("Hero: ", "");
 
-        if (partTwo) return "Dominion (Willpower) Test by " + testingName + " on " + targetName;
-        else return "Dominion (Willpower) Test by " + testingName + " targeting " + targetName;
+        if (partTwo)
+        {
+            Figure source = (Figure) gameState.getComponentById(this.getSourceFigure());
+            String sourceName = source.getName().replace("Hero: ", "");
+            return "Dominion (Willpower) Test by " + sourceName + " on " + testingName;
+        }
+
+        else {
+            Figure target = (Figure) gameState.getComponentById(targetFigure);
+            String targetName = target.getName().replace("Hero: ", "");
+            return "Dominion (Willpower) Test by " + testingName + " targeting " + targetName;
+        }
     }
 
     @Override

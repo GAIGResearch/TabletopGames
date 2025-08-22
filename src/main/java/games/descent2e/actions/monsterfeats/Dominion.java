@@ -11,6 +11,7 @@ import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.DescentHelper.*;
 
@@ -80,6 +81,14 @@ public class Dominion extends TriggerAttributeTest {
     }
 
     @Override
+    public int getCurrentPlayer(AbstractGameState state) {
+        // Dominion has two parts - the initial test and forced movement (Baron Zachareth) and the second test (the target Hero)
+        int id = partTwo ? currentTarget() : getAttackingFigure();
+        Figure f = (Figure) state.getComponentById(id);
+        return f.getOwnerId();
+    }
+
+    @Override
     public TriggerAttributeTest copy() {
         Dominion retVal = new Dominion(getAttackingFigure(), getTargets());
         copyComponentTo(retVal);
@@ -90,6 +99,20 @@ public class Dominion extends TriggerAttributeTest {
     public void copyComponentTo(TriggerAttributeTest retVal) {
         super.copyComponentTo(retVal);
         ((Dominion) retVal).partTwo = this.partTwo;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Dominion dominion) {
+            return super.equals(dominion) && this.partTwo == dominion.partTwo;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), partTwo);
     }
 
     @Override

@@ -76,6 +76,13 @@ public class Seduce extends TriggerAttributeTest {
     }
 
     @Override
+    public int getCurrentPlayer(AbstractGameState state) {
+        // As Seduce only tests Lady Eliza, this should always return the Overlord
+        Figure eliza = (Figure) state.getComponentById(attackingFigure);
+        return eliza.getOwnerId();
+    }
+
+    @Override
     public TriggerAttributeTest copy() {
         Seduce retVal = new Seduce(getAttackingFigure(), getTargets());
         copyComponentTo(retVal);

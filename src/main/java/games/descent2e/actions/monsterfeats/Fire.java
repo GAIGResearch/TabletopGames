@@ -37,7 +37,7 @@ public class Fire extends AttackAllAdjacent {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
             if (target == null) return false;
             if(!checkAdjacent(dgs, f, target)) return false;
-            
+
             if (atLeastOneHero) continue; // We already found a Hero, no need to keep checking
             if (target instanceof Hero) {
                 atLeastOneHero = true;

@@ -74,6 +74,14 @@ public class Throw extends TriggerAttributeTest {
     }
 
     @Override
+    public int getCurrentPlayer(AbstractGameState state) {
+        // Throw has two parts - the initial test (the target Hero) and the forced movement on a failure (the Monster)
+        int id = getResult() == 0 ? getAttackingFigure() : currentTarget();
+        Figure f = (Figure) state.getComponentById(id);
+        return f.getOwnerId();
+    }
+
+    @Override
     public TriggerAttributeTest copy() {
         Throw retVal = new Throw(getAttackingFigure(), getTargets());
         copyComponentTo(retVal);

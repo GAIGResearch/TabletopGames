@@ -20,7 +20,7 @@ public class SeduceTest extends AttributeTest {
     @Override
     public String getString(AbstractGameState gameState) {
         Figure f = (Figure) gameState.getComponentById(this.getTestingFigure());
-        Figure target = (Figure) gameState.getComponentById(this.getSourceFigure());
+        Figure target = (Figure) gameState.getComponentById(targetFigure);
 
         String testingName = f.getName().replace("Hero: ", "");
         String targetName = target.getName().replace("Hero: ", "");
