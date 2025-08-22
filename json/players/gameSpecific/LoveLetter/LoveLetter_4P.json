@@ -1,18 +1,17 @@
 {
   "budgetType" : "BUDGET_TIME",
-  "rolloutLengthPerPlayer" : true,
-  "rolloutLength" : 100,
-  "opponentTreePolicy" : "MultiTree",
+  "rolloutTermination" : "END_ROUND",
+  "rolloutLength" : 0,
+  "opponentTreePolicy" : "SelfOnly",
   "heuristic" : {
     "heuristicType" : "LEADER",
     "class" : "players.heuristics.CoarseTunableHeuristic"
   },
-  "FPU" : 1000000.0,
-  "exploreEpsilon" : 0.3,
+  "FPU" : 1.0,
   "maxTreeDepth" : 1,
-  "treePolicy" : "UCB_Tuned",
+  "treePolicy" : "AlphaGo",
+  "paranoid" : true,
   "reuseTree" : true,
-  "information" : "Open_Loop",
   "class" : "players.mcts.MCTSParams",
   "budget" : -999
 }

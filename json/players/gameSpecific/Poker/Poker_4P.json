@@ -1,14 +1,14 @@
 {
   "budgetType" : "BUDGET_TIME",
-  "rolloutLength" : 1000,
+  "rolloutLengthPerPlayer" : true,
+  "rolloutLength" : 3,
   "heuristic" : {
     "class" : "players.heuristics.WinOnlyHeuristic"
   },
   "FPU" : 100.0,
-  "maxTreeDepth" : 10,
-  "treePolicy" : "UCB_Tuned",
-  "reuseTree" : true,
-  "information" : "Open_Loop",
+  "K" : 100.0,
   "class" : "players.mcts.MCTSParams",
-  "budget" : -999
+  "budget" : -999,
+  "paranoid" : true,
+  "reuseTree" : true
 }

@@ -6,8 +6,6 @@
   "heuristic": {
     "class": "players.heuristics.LeaderHeuristic"
   },
-  "K": 1,
-  "exploreEpsilon": 0.1,
   "treePolicy": "UCB_Tuned",
   "MAST": "Both",
   "rolloutType": "RANDOM",

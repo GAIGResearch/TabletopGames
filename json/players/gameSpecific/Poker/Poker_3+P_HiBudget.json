@@ -9,9 +9,6 @@
     ],
     "class": "players.heuristics.WinPlusHeuristic"
   },
-  "K": 1,
-  "exploreEpsilon": 0.1,
-  "treePolicy": "UCB",
   "MAST": "Both",
   "rolloutType": "MAST",
   "information": "Information_Set",
