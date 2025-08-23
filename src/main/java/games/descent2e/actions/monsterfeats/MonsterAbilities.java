@@ -231,7 +231,7 @@ public class MonsterAbilities {
 
                         // Cry Havoc allows us to move up to our movement speed and attack everyone we pass through
                         // As the final space must be empty, our maximum number of targets is one less than our movement speed
-                        range = actingFigure.getAttributeValue(Figure.Attribute.MovePoints) - 1;
+                        range = actingFigure.getAttributeMax(Figure.Attribute.MovePoints) - 1;
                         CryHavoc cryHavoc = new CryHavoc(actingFigure.getComponentID(), range);
                         if (cryHavoc.canExecute(dgs)) {
                             actions.add(cryHavoc);
@@ -276,7 +276,6 @@ public class MonsterAbilities {
                         break;
 
                     // Lord Merick Fallow
-
                     case IGNITE:
 
                         // Don't even bother if he doesn't meet the HP requirement for this, save yourself the time.

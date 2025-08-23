@@ -37,7 +37,13 @@ public class Land extends DescentAction {
         f.setFlying(false);
         BoardNode tile = gs.getMasterBoard().getElement(f.getPosition());
         DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, tile.getComponentName());
-        Move.terrainPenalty(gs, f, terrain);
+
+        // We only interact with a Pit or Lava if we're landing on it
+        if (terrain == DescentTypes.TerrainType.Pit || terrain == DescentTypes.TerrainType.Lava) {
+            f.setAttributeToMin(Figure.Attribute.MovePoints);
+            Move.terrainPenalty(gs, f, terrain);
+        }
+
         return true;
     }
 
