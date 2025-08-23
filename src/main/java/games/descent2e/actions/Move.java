@@ -8,6 +8,7 @@ import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import utilities.Pair;
@@ -50,6 +51,13 @@ public class Move extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
         Figure f = (Figure) dgs.getComponentById(this.f);
+
+        if ((f instanceof Monster) && ((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.FLY))
+        {
+            // Flying Monsters can ignore terrain penalties, except for their final destination
+            ((Monster) f).setFlying(true);
+        }
+
         startPosition = f.getPosition();
 
         // Remove from old position
@@ -292,34 +300,28 @@ public class Move extends AbstractAction {
                         minTerrainOrdinal = terrain.ordinal();
                         minTerrain = terrain;
                     }
-                    if (terrain != DescentTypes.TerrainType.Pit) {
+                    if (isPit && terrain != DescentTypes.TerrainType.Pit) {
                         isPit = false;
                     }
-                    if (terrain != DescentTypes.TerrainType.Lava) {
+                    if (isLava && terrain != DescentTypes.TerrainType.Lava) {
                         isLava = false;
                     }
                 }
             }
         }
 
+        // Monsters with the Fly passive ignore terrain penalties except on their final movement (handled by Land())
+        if ((f instanceof Monster) && ((Monster) f).isFlying()) {
+            // Still airborne, treat everything as if it was a Plain tile
+            isPit = false;
+            isLava = false;
+            if (minTerrain != null) minTerrain = DescentTypes.TerrainType.Plain;
+        }
+
+        // Monsters with the Fly passive only apply terrain penalties to the tile they end their movement on
+
         // Ending movement in a Pit deals damage and stops us moving any further
-        if (isPit) {
-            f.setAttributeToMin(Figure.Attribute.MovePoints);
-            f.getAttribute(Figure.Attribute.Health).decrement(2);
-
-            if (f.getAttribute(Figure.Attribute.Health).isMinimum()) {
-                figureDeath(dgs, f);
-            }
-        }
-
-        // Entering Lava deals 1 damage
-        // Ending movement in Lava instantly defeats the figure if it only occupies Lava tiles
-        if (isLava) {
-            f.getAttribute(Figure.Attribute.Health).decrement(1);
-            if (f.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
-                figureDeath(dgs, f);
-            }
-        }
+        if (isPit || isLava) terrainPenalty(dgs, f, minTerrain);
 
         // Apply move costs and penalties
         // Large monsters pay the minimum cost only, other figures are 1 tile wide, looking at min terrain only
@@ -332,6 +334,29 @@ public class Move extends AbstractAction {
                 }
                 else
                     f.decrementAttribute(e.getKey(), e.getValue());
+            }
+        }
+    }
+
+    public static void terrainPenalty (DescentGameState dgs, Figure f, DescentTypes.TerrainType terrain) {
+
+        switch (terrain) {
+            case Pit -> {
+                // Ending movement in a Pit deals damage and stops us moving any further
+                f.setAttributeToMin(Figure.Attribute.MovePoints);
+                f.getAttribute(Figure.Attribute.Health).decrement(2);
+
+                if (f.getAttribute(Figure.Attribute.Health).isMinimum()) {
+                    figureDeath(dgs, f);
+                }
+            }
+            case Lava -> {
+                // Entering Lava deals 1 damage
+                // Ending movement in Lava instantly defeats the figure if it only occupies Lava tiles
+                f.getAttribute(Figure.Attribute.Health).decrement(1);
+                if (f.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
+                    figureDeath(dgs, f);
+                }
             }
         }
     }

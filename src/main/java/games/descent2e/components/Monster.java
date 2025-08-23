@@ -15,6 +15,7 @@ import java.util.Objects;
 public class Monster extends Figure {
 
     boolean lieutenant = false;
+    boolean flying = false;
     AttackType attackType = AttackType.NONE;
     public enum Direction {
         DOWN(new Vector2D()),
@@ -89,6 +90,7 @@ public class Monster extends Figure {
         copy.orientation = orientation;
         copy.attackType = attackType;
         copy.lieutenant = lieutenant;
+        copy.flying = flying;
         copy.surges = new ArrayList<>(surges);
         copy.passives = new ArrayList<>(passives);
         copy.actions = new ArrayList<>(actions);
@@ -123,6 +125,14 @@ public class Monster extends Figure {
 
     public boolean isLieutenant() {
         return lieutenant;
+    }
+
+    public void setFlying(boolean flying) {
+        this.flying = flying;
+    }
+
+    public boolean isFlying() {
+        return flying;
     }
 
     public void setPassivesAndSurges(String[] abilities) {
@@ -272,6 +282,7 @@ public class Monster extends Figure {
         if (!(o instanceof Monster monster)) return false;
         if (!super.equals(o)) return false;
         return lieutenant == monster.lieutenant &&
+                flying == monster.flying &&
                 orientation == monster.orientation &&
                 attackType == monster.attackType &&
                 surges.equals(monster.surges) &&
@@ -281,6 +292,6 @@ public class Monster extends Figure {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), lieutenant, orientation.ordinal(), attackType, surges, passives, actions);
+        return Objects.hash(super.hashCode(), lieutenant, flying, orientation.ordinal(), attackType, surges, passives, actions);
     }
 }

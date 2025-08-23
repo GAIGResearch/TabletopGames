@@ -16,6 +16,7 @@ import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
+import games.descent2e.actions.monsterfeats.Land;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
@@ -831,6 +832,16 @@ public class DescentForwardModel extends StandardForwardModel {
             }
         }
 
+        // Flying Monsters must declare they've landed before performing any other actions other than moving
+        if (actingFigure instanceof Monster && ((Monster) actingFigure).isFlying())
+        {
+            Land land = new Land();
+            if (land.canExecute(dgs)) {
+                actions.add(land);
+                actions.remove(endTurn); // We cannot end our turn while flying
+            }
+        }
+
         List<AbstractAction> attacks = new ArrayList<>();
 
         // Add actions that cost action points
@@ -840,6 +851,9 @@ public class DescentForwardModel extends StandardForwardModel {
             // Get movement points action
             GetMovementPoints movePoints = new GetMovementPoints();
             if (movePoints.canExecute(dgs)) actions.add(movePoints);
+
+            // Flying Monsters must land before taking non-movement actions
+            if (actions.contains(new Land())) return actions;
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
 
@@ -1949,7 +1963,7 @@ public class DescentForwardModel extends StandardForwardModel {
             Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
             tileCoords.remove(option);
             BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
-            if (position.getComponentName().equals("plain") &&
+            if (position != null && position.getComponentName().equals("plain") &&
                     ((PropertyInt) position.getProperty(playersHash)).value == -1) {
                 // TODO: some monsters want to spawn in lava/water.
                 // This can be top-left corner, check if the other tiles are valid too

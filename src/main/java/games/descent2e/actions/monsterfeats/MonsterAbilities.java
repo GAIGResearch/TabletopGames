@@ -30,8 +30,10 @@ public class MonsterAbilities {
         FIRE,
         WATER,
         FIREBREATH,
+        // --- LIEUTENANT ABILITIES ---
         DOMINION,
         SHADOWBOLT,
+        CRYHAVOC,
         SACRIFICE,
         SEDUCE,
         WAIL,
@@ -49,6 +51,8 @@ public class MonsterAbilities {
         FLAIL,
         SHADOW,
         AIR,
+        // --- LIEUTENANT PASSIVES ---
+        FLY,
         AFTERSHOCK,
         REGENERATION,
         UNMOVABLE;
@@ -215,6 +219,22 @@ public class MonsterAbilities {
                                 if (shadowBolt.canExecute(dgs))
                                     actions.add(shadowBolt);
                             }
+                        }
+
+                        break;
+
+                    // Belthir
+                    case CRYHAVOC:
+
+                        // This counts as an attack, so if he's already attacked this turn, he can't use this
+                        if (actingFigure.hasAttacked()) break;
+
+                        // Cry Havoc allows us to move up to our movement speed and attack everyone we pass through
+                        // As the final space must be empty, our maximum number of targets is one less than our movement speed
+                        range = actingFigure.getAttributeValue(Figure.Attribute.MovePoints) - 1;
+                        CryHavoc cryHavoc = new CryHavoc(actingFigure.getComponentID(), range);
+                        if (cryHavoc.canExecute(dgs)) {
+                            actions.add(cryHavoc);
                         }
 
                         break;
