@@ -12,11 +12,9 @@ import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.items.Shield;
-import games.descent2e.actions.monsterfeats.AftershockTest;
-import games.descent2e.actions.monsterfeats.FireBreath;
-import games.descent2e.actions.monsterfeats.MonsterAbilities;
-import games.descent2e.actions.monsterfeats.Subdue;
+import games.descent2e.actions.monsterfeats.*;
 import games.descent2e.components.*;
+import utilities.Vector2D;
 
 import java.util.*;
 
@@ -696,6 +694,21 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 if (!fireBreath.isEmpty()) interruptAttacks.addAll(fireBreath);
             }
 
+            if (Knockback.isEnabled()) {
+                Figure target = (Figure) state.getComponentById(defendingFigure);
+
+                target.setOffMap(true);
+                target.setAttribute(Figure.Attribute.MovePoints, Knockback.distance);
+
+                Vector2D startPos = target.getPosition();
+                List<Vector2D> spaces = getForcedMovePositions(state, startPos, Knockback.distance);
+                for (Vector2D pos : spaces) {
+                    Knockback knockback = new Knockback(defendingFigure, attackingFigure, startPos, pos);
+                    if (knockback.canExecute(state))
+                        interruptAttacks.add(knockback);
+                }
+            }
+
             if (!interruptAttacks.isEmpty())
             {
                 retValue.addAll(interruptAttacks);
@@ -839,18 +852,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     public void addInterruptAttack (String attack)
     {
-        // So far the only interrupt attack we have is Fire Breath
-        // But I'm sure as more Monsters are included beyond the base game
-        // more of these will be included
+        // Enables an Interrupt Attack based on the Surge spent
+        // In the base game, these are only the Shadow Dragon's Fire Breath, and Splig's Knockback
 
-        switch (attack)
-        {
-            case "Fire Breath":
-                FireBreath.increaseEnabled();
-                break;
-
-            default:
-                break;
+        switch (attack) {
+            case "Fire Breath" -> FireBreath.increaseEnabled();
+            case "Knockback" -> Knockback.increaseEnabled();
         }
     }
 
@@ -859,5 +866,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // Switch off all interrupt attacks that have been enabled
         // So that we don't accidentally enable them again for different attacks
         FireBreath.disable();
+        Knockback.disable();
     }
 }

@@ -39,7 +39,8 @@ public enum Surge {
     // Lieutenants' Surges
     SUBDUE(1, (a, s) -> a.setSubdue(true)),
     BLOOD_CALL(1, (a, s) -> a.setLeeching(true)),
-    WITHER(1, (a, s) -> a.addFatigueDamage(1));
+    WITHER(1, (a, s) -> a.addFatigueDamage(1)),
+    KNOCKBACK(1, (a, s) -> a.addInterruptAttack("Knockback"));
 
     private final BiConsumer<MeleeAttack, DescentGameState> lambda;
     private final int surgesUsed;
