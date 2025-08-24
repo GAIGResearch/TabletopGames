@@ -53,7 +53,7 @@ public class Throw extends TriggerAttributeTest {
             Vector2D startPos = ((Figure) dgs.getComponentById(target)).getPosition();
             List<Vector2D> spaces = getForcedMovePositions(dgs, startPos, distance);
             for (Vector2D pos: spaces) {
-                ThrowMove throwMove = new ThrowMove(target, attackingFigure, startPos, pos);
+                ThrowMove throwMove = new ThrowMove(target, attackingFigure, startPos, pos, distance);
                 if (throwMove.canExecute(dgs))
                     retVal.add(throwMove);
             }

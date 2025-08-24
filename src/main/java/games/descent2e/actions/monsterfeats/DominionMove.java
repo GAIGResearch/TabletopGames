@@ -10,12 +10,12 @@ import utilities.Vector2D;
 import java.util.Vector;
 
 public class DominionMove extends ForcedMove{
-    public DominionMove(int target, int source, Vector2D startPosition, Vector2D whereTo) {
-        super(target, source, startPosition, whereTo, 2);
+    public DominionMove(int target, int source, Vector2D startPosition, Vector2D whereTo, int distance) {
+        super(target, source, startPosition, whereTo, distance);
     }
 
-    public DominionMove(int target, int source, Vector2D startPosition, Vector2D whereTo, Monster.Direction orientation) {
-        super(target, source, startPosition, whereTo, orientation, 2);
+    public DominionMove(int target, int source, Vector2D startPosition, Vector2D whereTo, Monster.Direction orientation, int distance) {
+        super(target, source, startPosition, whereTo, orientation, distance);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class DominionMove extends ForcedMove{
     }
 
     public DominionMove copy() {
-        DominionMove dominionMove = new DominionMove(figureID, sourceID, startPosition, whereTo, orientation);
+        DominionMove dominionMove = new DominionMove(figureID, sourceID, startPosition, whereTo, orientation, maxDistance);
         dominionMove.directionID = directionID;
         return dominionMove;
     }

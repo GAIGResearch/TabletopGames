@@ -53,7 +53,7 @@ public class Seduce extends TriggerAttributeTest {
             Vector2D startPos = ((Figure) dgs.getComponentById(target)).getPosition();
             List<Vector2D> spaces = getForcedMovePositions(dgs, startPos, distance);
             for (Vector2D pos: spaces) {
-                SeduceMove seduceMove = new SeduceMove(target, attackingFigure, startPos, pos);
+                SeduceMove seduceMove = new SeduceMove(target, attackingFigure, startPos, pos, distance);
                 if (seduceMove.canExecute(dgs))
                     retVal.add(seduceMove);
             }

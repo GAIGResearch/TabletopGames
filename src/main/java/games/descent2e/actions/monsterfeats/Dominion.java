@@ -56,7 +56,7 @@ public class Dominion extends TriggerAttributeTest {
             Vector2D startPos = ((Figure) dgs.getComponentById(target)).getPosition();
             List<Vector2D> spaces = getForcedMovePositions(dgs, startPos, distance);
             for (Vector2D pos: spaces) {
-                DominionMove dominionMove = new DominionMove(target, attackingFigure, startPos, pos);
+                DominionMove dominionMove = new DominionMove(target, attackingFigure, startPos, pos, distance);
                 if (dominionMove.canExecute(dgs))
                     retVal.add(dominionMove);
             }
