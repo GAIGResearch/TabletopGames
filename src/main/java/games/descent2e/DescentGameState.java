@@ -302,7 +302,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         };
     }
 
-    DescentGameData getData() {
+    public DescentGameData getData() {
         return data;
     }
 

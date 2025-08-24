@@ -244,6 +244,20 @@ public class Monster extends Figure {
             actions.remove(action);
         }
     }
+
+    public void removeAll()
+    {
+        if (surges != null) {
+            surges = new ArrayList<>();
+        }
+        if (passives != null) {
+            passives = new ArrayList<>();
+        }
+        if (actions != null) {
+            actions = new ArrayList<>();
+        }
+    }
+
     public List<Surge> getSurges() {
         return surges;
     }

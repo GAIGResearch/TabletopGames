@@ -38,7 +38,8 @@ public class MonsterAbilities {
         SEDUCE,
         WAIL,
         IGNITE,
-        OVERPOWER;
+        OVERPOWER,
+        PROMOTION;
     }
 
     public enum MonsterPassive {
@@ -306,6 +307,18 @@ public class MonsterAbilities {
                         DescentAction overpower = new Overpower(actingFigure.getComponentID(), targets, range);
                         if (overpower.canExecute(dgs))
                             actions.add(overpower);
+                        break;
+
+                    // Splig
+                    case PROMOTION:
+
+                        targets.addAll(getAdjacentTargets(dgs, f, true));
+                        for (Integer target : targets) {
+                            DescentAction promotion = new Promotion(actingFigure.getComponentID(), target);
+                            if (promotion.canExecute(dgs))
+                                actions.add(promotion);
+                        }
+
                         break;
 
                     default:
