@@ -530,14 +530,10 @@ public class DescentHelper {
                         else if (figureType.equals(neighbourFigure.getTokenType())) {
                             isFriendly = true;
                         }
-                        // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
-                        else if (figureType == "Monster") {
-                            if ((((Monster) figure).hasPassive(MonsterAbilities.MonsterPassive.SCAMPER)) && neighbourFigure.getTokenType().equals("Hero"))
-                                isFriendly = true;
-                        }
                     }
-                    // If, for whatever reason, our Heroes are allowed to ignore enemies entirely when moving
-                    // We can move through all other figures as if they were friendly
+                    // If, for whatever reason, this figure is allowed to ignore enemies entirely when moving
+                    // We treat everything as though they were friendly
+                    // e.g. Scamper or Fly Monster passives, or Tomble's Heroic Feat
                     if (figure.canIgnoreEnemies())
                     {
                         isFriendly = true;

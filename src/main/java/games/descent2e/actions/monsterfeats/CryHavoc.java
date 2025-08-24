@@ -5,7 +5,9 @@ import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.interfaces.IExtendedSequence;
 import core.properties.PropertyInt;
+import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
@@ -13,14 +15,13 @@ import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
+import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
+import static core.CoreConstants.coordinateHash;
 import static core.CoreConstants.playersHash;
 import static games.descent2e.DescentHelper.*;
 
@@ -87,7 +88,7 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
         }
 
         // If Belthir has Move Points, we need to move him first
-        List<AbstractAction> movement = moveActions(dgs, belthir);
+        List<AbstractAction> movement = moveActions(dgs, belthir, belthir.getAttributeValue(Figure.Attribute.MovePoints));
         retVal.addAll(movement);
 
         // If he has flown over at least one target, we can land to trigger the attack
@@ -102,10 +103,117 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
         return retVal;
     }
 
+    private List<AbstractAction> moveActions(DescentGameState dgs, Figure figure, int distance)
+    {
+        // Modified from DescentHelper.getAllAdjacentNodes();
+
+        Vector2D figureLocation = figure.getPosition();
+        BoardNode figureNode = dgs.getMasterBoard().getElement(figureLocation.getX(), figureLocation.getY());
+        int figureID = figure.getComponentID();
+
+        //<Board Node, Cost to get there>
+        HashMap<BoardNode, Pair<Double,List<Vector2D>>> allAdjacentNodes = new HashMap<>();
+        List<List<Vector2D>> chains = new ArrayList<>();
+        Double chainCost;
+
+        int counter = 0;
+
+        for (BoardNode n1 : figureNode.getNeighbours().keySet())
+        {
+            int id = ((PropertyInt) n1.getProperty(playersHash)).value;
+            Vector2D pos1 = ((PropertyVector2D) n1.getProperty(coordinateHash)).values;
+            Double cost1 = figureNode.getNeighbourCost(n1);
+            chainCost = cost1;
+            if (chainCost > figure.getAttributeValue(Figure.Attribute.MovePoints)) continue;
+            if (id == -1 || id == figureID)
+            {
+                counter++;
+                List<Vector2D> chain = new ArrayList<>();
+                chain.add(pos1);
+                chains.add(chain);
+            }
+            else
+            {
+                for (BoardNode n2 : n1.getNeighbours().keySet())
+                {
+                    int id2 = ((PropertyInt) n2.getProperty(playersHash)).value;
+                    Vector2D pos2 = ((PropertyVector2D) n2.getProperty(coordinateHash)).values;
+                    Double cost2 = n1.getNeighbourCost(n2);
+                    chainCost = cost1 + cost2;
+                    if (chainCost > figure.getAttributeValue(Figure.Attribute.MovePoints)) continue;
+                    if (id2 == -1 || id2 == figureID)
+                    {
+                        counter++;
+                        List<Vector2D> chain = new ArrayList<>();
+                        chain.add(pos1);
+                        chain.add(pos2);
+                        chains.add(chain);
+                    }
+                    else
+                    {
+                        for (BoardNode n3 : n2.getNeighbours().keySet())
+                        {
+                            int id3 = ((PropertyInt) n3.getProperty(playersHash)).value;
+                            Vector2D pos3 = ((PropertyVector2D) n3.getProperty(coordinateHash)).values;
+                            Double cost3 = n2.getNeighbourCost(n3);
+                            chainCost = cost1 + cost2 + cost3;
+                            if (chainCost > figure.getAttributeValue(Figure.Attribute.MovePoints)) continue;
+                            if (id3 == -1 || id3 == figureID)
+                            {
+                                counter++;
+                                List<Vector2D> chain = new ArrayList<>();
+                                chain.add(pos1);
+                                chain.add(pos2);
+                                chain.add(pos3);
+                                chains.add(chain);
+                            }
+                            else
+                            {
+                                for (BoardNode n4 : n3.getNeighbours().keySet())
+                                {
+                                    int id4 = ((PropertyInt) n4.getProperty(playersHash)).value;
+                                    Vector2D pos4 = ((PropertyVector2D) n4.getProperty(coordinateHash)).values;
+                                    Double cost4 = n3.getNeighbourCost(n4);
+                                    chainCost = cost1 + cost2 + cost3 + cost4;
+                                    if (chainCost > figure.getAttributeValue(Figure.Attribute.MovePoints)) continue;
+                                    if (id4 == -1 || id4 == figureID)
+                                    {
+                                        counter++;
+                                        List<Vector2D> chain = new ArrayList<>();
+                                        chain.add(pos1);
+                                        chain.add(pos2);
+                                        chain.add(pos3);
+                                        chain.add(pos4);
+                                        chains.add(chain);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        List<Move> actions = new ArrayList<>();
+
+        for (List<Vector2D> move : chains)
+        {
+            Move myMoveAction = new Move(figure.getComponentID(), move, true);
+            myMoveAction.updateDirectionID(dgs);
+            if(myMoveAction.canExecute(dgs))
+                actions.add(myMoveAction);
+        }
+
+        // Sorts the movement actions to always be in the same order (Clockwise NW to W, One Space then Multiple Spaces)
+        actions.sort(Comparator.comparingInt(Move::getDirectionID));
+
+        return new ArrayList<>(actions);
+    }
+
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
         Figure belthir = (Figure) state.getComponentById(attackingFigure);
-        if (belthir == null) return ((DescentGameState) state).getOverlordPlayer();     // Only if Belthir got himself killed.
+        if (belthir == null) return ((DescentGameState) state).getOverlordPlayer();     // Only if Belthir got himself killed. Idiot.
         return belthir.getOwnerId();
     }
 

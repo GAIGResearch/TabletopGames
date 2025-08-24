@@ -27,6 +27,7 @@ public class Move extends AbstractAction {
     final List<Vector2D> positionsTraveled;
     final Monster.Direction orientation;
     private Vector2D startPosition;
+    boolean allowCycle = false;
 
     private int f;
 
@@ -45,6 +46,23 @@ public class Move extends AbstractAction {
         this.startPosition = new Vector2D(0,0);
         this.directionID = -1;
         this.f = f;
+    }
+
+    public Move(int f, List<Vector2D> whereTo, boolean allowCycle) {
+        this.positionsTraveled = whereTo;
+        this.orientation = Monster.Direction.DOWN;
+        this.startPosition = new Vector2D(0,0);
+        this.directionID = -1;
+        this.f = f;
+        this.allowCycle = allowCycle;
+    }
+    public Move(int f, List<Vector2D> whereTo, Monster.Direction finalOrientation, boolean allowCycle) {
+        this.positionsTraveled = whereTo;
+        this.orientation = finalOrientation;
+        this.startPosition = new Vector2D(0,0);
+        this.directionID = -1;
+        this.f = f;
+        this.allowCycle = allowCycle;
     }
 
     @Override
@@ -104,7 +122,8 @@ public class Move extends AbstractAction {
             // We also cannot move if we are Immobilized and on the map
             if (f.hasCondition(DescentTypes.DescentCondition.Immobilize)) return false;
         }
-        return finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();
+        // If we're allowing cycles, we can end on the same space we started on
+        return allowCycle || finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();
     }
 
     /**
@@ -367,7 +386,7 @@ public class Move extends AbstractAction {
         for (Vector2D pos: positionsTraveled) {
             posTraveledCopy.add(pos.copy());
         }
-        Move retval = new Move(f, posTraveledCopy, orientation);
+        Move retval = new Move(f, posTraveledCopy, orientation, allowCycle);
         retval.startPosition = startPosition.copy();
         retval.directionID = directionID;
         return retval;
@@ -377,14 +396,14 @@ public class Move extends AbstractAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Move move)) return false;
-        return f == move.f && orientation == move.orientation &&
+        return f == move.f && orientation == move.orientation && allowCycle == move.allowCycle &&
                 Objects.equals(positionsTraveled, move.positionsTraveled) && Objects.equals(startPosition, move.startPosition) &&
                 directionID == move.directionID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(f, positionsTraveled, orientation, startPosition, directionID);
+        return Objects.hash(f, positionsTraveled, orientation, allowCycle, startPosition, directionID);
     }
 
     @Override

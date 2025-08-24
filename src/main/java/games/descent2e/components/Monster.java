@@ -145,6 +145,10 @@ public class Monster extends Figure {
                     if (passive.name().equals(ability.toUpperCase()))
                     {
                         addPassive(passive);
+                        // Scamper or Fly allow us to ignore enemies whilst moving
+                        if (passive == MonsterAbilities.MonsterPassive.SCAMPER|| passive == MonsterAbilities.MonsterPassive.FLY) {
+                            setCanIgnoreEnemies(true);
+                        }
                         break;
                     }
                 }
