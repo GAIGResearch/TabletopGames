@@ -30,7 +30,7 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
     int attackingFigure;
     int range;
     int oldMovePoints = 0;
-    boolean attacking = false;
+    boolean attacked = false;
     boolean complete = false;
     List<Integer> targets = new ArrayList<>();
     public CryHavoc(int attackingFigure, int range) {
@@ -77,126 +77,52 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
 
         List<AbstractAction> retVal = new ArrayList<>();
 
-        if (attacking) {
-            // Enable the Multi Attack if he has landed
-
-            CryHavocAttack attack = new CryHavocAttack(attackingFigure, targets, range);
-            if (attack.canExecute(dgs)) {
-                retVal.add(attack);
+        if (attacked) {
+            // After attack, land
+            Land land = new Land();
+            if (land.canExecute(dgs)) {
+                retVal.add(land);
             }
             return retVal;
         }
 
         // If Belthir has Move Points, we need to move him first
-        List<AbstractAction> movement = moveActions(dgs, belthir, belthir.getAttributeValue(Figure.Attribute.MovePoints));
+        // We don't use the usual DescentHelper.moveActions() here
+        // because we want to have multiple movements with the same destination but different paths
+        // so that he can maximise the number of targets he flies over
+        List<AbstractAction> movement = moveActions(dgs, belthir);
         retVal.addAll(movement);
 
         // If he has flown over at least one target, we can land to trigger the attack
         if (!targets.isEmpty())
         {
-            Land land = new Land();
-            if (land.canExecute(dgs)) {
-                retVal.add(land);
+            // Enable the Multi Attack if we have targets
+
+            CryHavocAttack attack = new CryHavocAttack(attackingFigure, targets, range);
+            if (attack.canExecute(dgs)) {
+                retVal.add(attack);
             }
         }
 
         return retVal;
     }
 
-    private List<AbstractAction> moveActions(DescentGameState dgs, Figure figure, int distance)
+    private List<AbstractAction> moveActions(DescentGameState dgs, Figure figure)
     {
-        // Modified from DescentHelper.getAllAdjacentNodes();
-
         Vector2D figureLocation = figure.getPosition();
         BoardNode figureNode = dgs.getMasterBoard().getElement(figureLocation.getX(), figureLocation.getY());
-        int figureID = figure.getComponentID();
 
         //<Board Node, Cost to get there>
         HashMap<BoardNode, Pair<Double,List<Vector2D>>> allAdjacentNodes = new HashMap<>();
-        List<List<Vector2D>> chains = new ArrayList<>();
-        Double chainCost;
+        List<List<Vector2D>> paths = new ArrayList<>();
+        List<List<Integer>> targets = new ArrayList<>();
+        double chainCost = 0.0;
 
-        int counter = 0;
-
-        for (BoardNode n1 : figureNode.getNeighbours().keySet())
-        {
-            int id = ((PropertyInt) n1.getProperty(playersHash)).value;
-            Vector2D pos1 = ((PropertyVector2D) n1.getProperty(coordinateHash)).values;
-            Double cost1 = figureNode.getNeighbourCost(n1);
-            chainCost = cost1;
-            if (chainCost > figure.getAttributeValue(Figure.Attribute.MovePoints)) continue;
-            if (id == -1 || id == figureID)
-            {
-                counter++;
-                List<Vector2D> chain = new ArrayList<>();
-                chain.add(pos1);
-                chains.add(chain);
-            }
-            else
-            {
-                for (BoardNode n2 : n1.getNeighbours().keySet())
-                {
-                    int id2 = ((PropertyInt) n2.getProperty(playersHash)).value;
-                    Vector2D pos2 = ((PropertyVector2D) n2.getProperty(coordinateHash)).values;
-                    Double cost2 = n1.getNeighbourCost(n2);
-                    chainCost = cost1 + cost2;
-                    if (chainCost > figure.getAttributeValue(Figure.Attribute.MovePoints)) continue;
-                    if (id2 == -1 || id2 == figureID)
-                    {
-                        counter++;
-                        List<Vector2D> chain = new ArrayList<>();
-                        chain.add(pos1);
-                        chain.add(pos2);
-                        chains.add(chain);
-                    }
-                    else
-                    {
-                        for (BoardNode n3 : n2.getNeighbours().keySet())
-                        {
-                            int id3 = ((PropertyInt) n3.getProperty(playersHash)).value;
-                            Vector2D pos3 = ((PropertyVector2D) n3.getProperty(coordinateHash)).values;
-                            Double cost3 = n2.getNeighbourCost(n3);
-                            chainCost = cost1 + cost2 + cost3;
-                            if (chainCost > figure.getAttributeValue(Figure.Attribute.MovePoints)) continue;
-                            if (id3 == -1 || id3 == figureID)
-                            {
-                                counter++;
-                                List<Vector2D> chain = new ArrayList<>();
-                                chain.add(pos1);
-                                chain.add(pos2);
-                                chain.add(pos3);
-                                chains.add(chain);
-                            }
-                            else
-                            {
-                                for (BoardNode n4 : n3.getNeighbours().keySet())
-                                {
-                                    int id4 = ((PropertyInt) n4.getProperty(playersHash)).value;
-                                    Vector2D pos4 = ((PropertyVector2D) n4.getProperty(coordinateHash)).values;
-                                    Double cost4 = n3.getNeighbourCost(n4);
-                                    chainCost = cost1 + cost2 + cost3 + cost4;
-                                    if (chainCost > figure.getAttributeValue(Figure.Attribute.MovePoints)) continue;
-                                    if (id4 == -1 || id4 == figureID)
-                                    {
-                                        counter++;
-                                        List<Vector2D> chain = new ArrayList<>();
-                                        chain.add(pos1);
-                                        chain.add(pos2);
-                                        chain.add(pos3);
-                                        chain.add(pos4);
-                                        chains.add(chain);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        getMoves(figure, figureNode, new ArrayList<>(), new ArrayList<>(), chainCost, paths, targets, 0);
 
         List<Move> actions = new ArrayList<>();
 
-        for (List<Vector2D> move : chains)
+        for (List<Vector2D> move : paths)
         {
             Move myMoveAction = new Move(figure.getComponentID(), move, true);
             myMoveAction.updateDirectionID(dgs);
@@ -208,6 +134,70 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
         actions.sort(Comparator.comparingInt(Move::getDirectionID));
 
         return new ArrayList<>(actions);
+    }
+
+    private void getMoves(Figure figure, BoardNode node, List<Vector2D> path, List<Integer> target, double currentCost, List<List<Vector2D>> paths, List<List<Integer>> targets, int distance) {
+        int movement = figure.getAttributeValue(Figure.Attribute.MovePoints);
+        if (distance > movement) return;
+
+        int figureID = figure.getComponentID();
+
+        for (BoardNode neighbour : node.getNeighbours().keySet()) {
+            int neighbourID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
+            Vector2D pos = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+            double cost = node.getNeighbourCost(neighbour);
+            double totalCost = currentCost + cost;
+
+            if (totalCost > movement) continue;
+
+            List<Vector2D> newPath = new ArrayList<>(path);
+            List<Integer> newTarget = new ArrayList<>(target);
+            newPath.add(pos);
+            if (!newTarget.contains(neighbourID)) {
+                newTarget.add(neighbourID);
+            }
+            newTarget.sort(Comparator.comparingInt(Integer::intValue));
+
+            boolean skip = false;
+
+            // Only add the path if it ends on an empty tile or Belthir himself
+            if (neighbourID == -1 || neighbourID == figureID) {
+                List<Integer> prune = new ArrayList<>();
+                for (int i = 0; i < targets.size(); i++) {
+                    if (skip) break;
+
+                    // Check if the new target list is already in the list of targets
+                    if (newTarget.equals(targets.get(i)))
+                    {
+                        List<Vector2D> oldPath = paths.get(i);
+                        if (oldPath.get(oldPath.size() - 1).equals(newPath.get(newPath.size() - 1))) {
+                            // If the last position is the same, and the old path is shorter or equal, do not add this path
+                            if (oldPath.size() <= newPath.size()) skip = true;
+                            else prune.add(i); // Otherwise, prune the old path
+                        }
+                    }
+                }
+                if (skip) continue;
+                if (!prune.isEmpty())
+                {
+                    // Remove the old paths that are longer than the new one
+                    // and have the same targets and destination
+                    for (int i = prune.size() - 1; i >= 0; i--) {
+                        int index = prune.get(i);
+                        paths.remove(index);
+                        targets.remove(index);
+                    }
+                }
+
+                paths.add(newPath);
+                targets.add(newTarget);
+            }
+
+            // Only continue deeper if the tile contains an enemy
+            else {
+                getMoves(figure, neighbour, newPath, newTarget, totalCost, paths, targets, distance + 1);
+            }
+        }
     }
 
     @Override
@@ -265,7 +255,7 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
 
-        if (action instanceof CryHavocAttack) {
+        if (action instanceof Land) {
             complete = true;
         }
 
@@ -297,28 +287,28 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
             // Somehow, Belthir ended his movement in a pit or lava and defeated himself.
             // Idiot.
             complete = true;
-            attacking = false;
+            attacked = false;
             return;
         }
 
         if (!complete)
         {
             // If Belthir wants to stop moving to attack, do so now
-            if (action instanceof Land)
+            if (action instanceof CryHavocAttack)
             {
                 // Start the attack
                 belthir.setAttributeToMin(Figure.Attribute.MovePoints);
-                attacking = true;
+                attacked = true;
             }
 
             // Check if Belthir has, somehow, run out of Move Points without flying over any targets.
             // Idiot.
             if (belthir.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
-                if (targets.isEmpty()) complete = true;
+                if (targets.isEmpty()) attacked = true;
             }
         }
         if (complete) {
-            attacking = false;
+            attacked = false;
             belthir.setOffMap(false);
             belthir.setAttribute(Figure.Attribute.MovePoints, oldMovePoints); // Restore his original Move Points
         }
@@ -335,7 +325,7 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
         retVal.targets = new ArrayList<>();
         retVal.targets.addAll(targets);
         retVal.oldMovePoints = oldMovePoints;
-        retVal.attacking = attacking;
+        retVal.attacked = attacked;
         retVal.complete = complete;
         return retVal;
     }
@@ -347,7 +337,7 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
                     this.attackingFigure == cryHavoc.attackingFigure &&
                     this.range == cryHavoc.range &&
                     this.oldMovePoints == cryHavoc.oldMovePoints &&
-                    this.attacking == cryHavoc.attacking &&
+                    this.attacked == cryHavoc.attacked &&
                     this.complete == cryHavoc.complete &&
                     this.targets.equals(cryHavoc.targets);
         } else {
@@ -357,6 +347,6 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attackingFigure, range, oldMovePoints, attacking, complete, targets);
+        return Objects.hash(super.hashCode(), attackingFigure, range, oldMovePoints, attacked, complete, targets);
     }
 }
