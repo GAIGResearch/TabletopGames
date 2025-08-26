@@ -4,6 +4,7 @@ import core.components.Counter;
 import games.descent2e.DescentTypes.AttackType;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
+import games.descent2e.actions.monsterfeats.NotMe;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -149,6 +150,10 @@ public class Monster extends Figure {
                         if (passive == MonsterAbilities.MonsterPassive.SCAMPER|| passive == MonsterAbilities.MonsterPassive.FLY) {
                             setCanIgnoreEnemies(true);
                         }
+
+                        if (passive == MonsterAbilities.MonsterPassive.NOTME)
+                            addAbility(new NotMe(getComponentID()));
+
                         break;
                     }
                 }

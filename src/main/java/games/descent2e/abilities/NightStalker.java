@@ -34,13 +34,18 @@ public class NightStalker {
 
         // Apply Night Stalker ability if the attacker is not adjacent to the defender
         if (!checkAdjacent(state, attacker, defender)) {
-            List<DescentDice> dice = new ArrayList<>(state.getDefenceDicePool().getComponents());
-            dice.addAll(getNightStalkerDicePool().getComponents());
-            DicePool newPool = state.getDefenceDicePool().copy();
-            newPool.setDice(dice);
-            state.setDefenceDicePool(newPool);
+            addPool(state);
             //System.out.println("Night Stalker is active! " + defender.getComponentName() + " gains 1 " + getNightStalkerDicePool().getComponents().get(0).getColour() + " die against this attack!");
         }
+    }
+
+    public static void addPool(DescentGameState state)
+    {
+        List<DescentDice> dice = new ArrayList<>(state.getDefenceDicePool().getComponents());
+        dice.addAll(getNightStalkerDicePool().getComponents());
+        DicePool newPool = state.getDefenceDicePool().copy();
+        newPool.setDice(dice);
+        state.setDefenceDicePool(newPool);
     }
 
     @Override

@@ -65,6 +65,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     protected int defendingFigure;
     protected int defendingPlayer;
     protected String defenderName;
+
+    protected int substituteFigure;
+    protected int substitutePlayer;
+    protected String substituteName;
+    protected boolean substitute;
+
     protected AttackPhase phase = NOT_STARTED;
     protected int interruptPlayer;
     int surgesToSpend;
@@ -230,10 +236,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 defender.setCurrentAttack(this);
 
                 if (attacker instanceof Hero) getWeaponBonuses(state, attackingFigure, true, true);
-                if (defender instanceof Hero) getWeaponBonuses(state, defendingFigure, true, false);
-
                 // if (attacker instanceof Monster && ((Monster) attacker).isLieutenant()) getWeaponBonuses(state, attackingFigure, false, true);
-                // if (defender instanceof Monster && ((Monster) defender).isLieutenant()) getWeaponBonuses(state, defendingFigure, false, false);
 
                 // Roll dice
                 damageRoll(state);
@@ -260,6 +263,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 phase = PRE_DEFENCE_ROLL;
                 break;
             case PRE_DEFENCE_ROLL:
+
+                // Allow us to swap again for another attack if needs be
+                NotMe.setSwapped(false);
+
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                 {
                     //System.out.println(this.toString() + " (" + this.getString(state)  + ") missed!");
@@ -270,6 +277,13 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     phase = INTERRUPT_ATTACK;
                 }
                 else {
+
+                    // If an interrupt action has caused a target substitution, call it here
+                    checkSubstitute(state);
+
+                    if (defender instanceof Hero) getWeaponBonuses(state, defendingFigure, true, false);
+                    // if (defender instanceof Monster && ((Monster) defender).isLieutenant()) getWeaponBonuses(state, defendingFigure, false, false);
+
                     defenceRoll(state);
                     phase = POST_DEFENCE_ROLL;
                 }
@@ -291,6 +305,26 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 phase = ALL_DONE;
         }
         // and reset interrupts
+    }
+
+    protected void checkSubstitute(DescentGameState dgs)
+    {
+        if (substitute)
+        {
+            Figure attacker = (Figure) dgs.getComponentById(attackingFigure);
+            Figure oldDefender = (Figure) dgs.getComponentById(defendingFigure);
+            Figure newDefender = (Figure) dgs.getComponentById(substituteFigure);
+            DicePool defencePool = newDefender.getDefenceDice();
+            dgs.setDefenceDicePool(defencePool);
+            if(!checkAdjacent(dgs, attacker, oldDefender))
+                if ((newDefender instanceof Monster) && (((Monster) newDefender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)))
+                    NightStalker.addPool(dgs);
+
+            defendingFigure = substituteFigure;
+            defendingPlayer = substitutePlayer;
+            defenderName = substituteName;
+            result = getInitialResult(dgs);
+        }
     }
 
     protected void defenceRoll(DescentGameState state) {
@@ -318,34 +352,31 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                         if (s.contains("Effect:"))
                         {
                             String[] effect = s.split(":");
-                            switch(effect[1])
-                            {
-                                case "AdjacentFoeDamage":
-                                    if(isAttacker)
-                                        if (inRange(f.getPosition(), ((Figure) state.getComponentById(defendingFigure)).getPosition(), 1))
+                            switch (effect[1]) {
+                                case "AdjacentFoeDamage" -> {
+                                    if (isAttacker)
+                                        if (checkAdjacent(state, f, (Figure) state.getComponentById(defendingFigure)))
                                             addDamage(Integer.parseInt(effect[2]));
-                                    break;
-                                case "Damage":
-                                    if(isAttacker)
+                                }
+                                case "Damage" -> {
+                                    if (isAttacker)
                                         addDamage(Integer.parseInt(effect[2]));
-                                    break;
-                                case "Range":
-                                    if(isAttacker)
+                                }
+                                case "Range" -> {
+                                    if (isAttacker)
                                         addRange(Integer.parseInt(effect[2]));
-                                    break;
-                                case "Pierce":
-                                    if(isAttacker)
+                                }
+                                case "Pierce" -> {
+                                    if (isAttacker)
                                         addPierce(Integer.parseInt(effect[2]));
-                                    break;
-
-                                case "Shield":
-                                    if(!isAttacker)
-                                    {
+                                }
+                                case "Shield" -> {
+                                    if (!isAttacker) {
                                         DescentAction shield = new Shield(figure, equipment.getComponentID(), Integer.parseInt(effect[2]));
                                         if (!f.hasAbility(shield))
                                             f.addAbility(shield);
                                     }
-                                    break;
+                                }
                             }
                         }
                     }
@@ -491,6 +522,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public void copyComponentTo(MeleeAttack retValue) {
         retValue.attackingPlayer = attackingPlayer;
         retValue.defendingPlayer = defendingPlayer;
+        retValue.substituteFigure = substituteFigure;
+        retValue.substitutePlayer = substitutePlayer;
+        retValue.substituteName = substituteName;
+        retValue.substitute = substitute;
         retValue.phase = phase;
         retValue.interruptPlayer = interruptPlayer;
         retValue.surgesToSpend = surgesToSpend;
@@ -556,6 +591,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     other.defendingPlayer == defendingPlayer && other.phase == phase &&
                     other.damage == damage && other.range == range &&
                     other.interruptPlayer == interruptPlayer && other.skip == skip &&
+                    other.substitute == substitute && other.substituteFigure == substituteFigure &&
+                    other.substitutePlayer == substitutePlayer && other.substituteName == substituteName &&
                     other.reduced == reduced && other.result.equals(result);
         }
         return false;
@@ -563,7 +600,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce, hasReach,
+        return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce, hasReach, substitute, substituteFigure, substitutePlayer, substituteName,
                 extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, leeching, subdue, fatigueHeal, hasShadow, hitShadow,
                 surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, reduced, result);
     }
@@ -628,7 +665,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Melee Attack by %d on %d", attackingFigure, defendingFigure);
+        int target = substitute ? substituteFigure : defendingFigure;
+        return String.format("Melee Attack by %d on %d", attackingFigure, target);
     }
 
     public String toStringWithResult()
@@ -743,10 +781,40 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        // after the interrupt action has been taken, we can continue to see who interrupts next
-        //state.setActionInProgress(this);
+
+        if (action instanceof NotMe) {
+            DescentGameState dgs = (DescentGameState) state;
+            substituteFigure = ((NotMe) action).getVictim();
+
+            // Only swap if the defender chose to swap
+            if (((NotMe) action).getResult() == 1 && substituteFigure != -1 && defendingFigure != substituteFigure) {
+
+                substitute = true;
+
+                Figure attacker = (Figure) state.getComponentById(attackingFigure);
+                Figure splig = (Figure) state.getComponentById(defendingFigure);
+                Figure defender = (Figure) state.getComponentById(substituteFigure);
+                substitutePlayer = defender.getOwnerId();
+                substituteName = defender.getName().replace("Hero: ", "");
+
+                if (checkAdjacent(dgs, attacker, splig)) {
+                    SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
+                    if ((attacker instanceof Hero) && (defender instanceof Monster) &&
+                            (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.SHADOW))) {
+                        hasShadow = true;
+                        if (!attacker.getAbilities().contains(shadowSurge))
+                            attacker.addAbility(new SurgeAttackAction(Surge.SHADOW, attackingFigure));
+                    } else {
+                        hasShadow = false;
+                        if (attacker.getAbilities().contains(shadowSurge))
+                            attacker.removeAbility(shadowSurge);
+                    }
+                }
+            }
+        }
+
+        // After the interrupt action has been taken, we can continue to see who interrupts next
         movePhaseForward((DescentGameState) state);
-        //state.setActionInProgress(null);
     }
 
     @Override

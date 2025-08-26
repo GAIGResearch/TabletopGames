@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.components.Figure;
+import org.apache.spark.sql.streaming.Trigger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,14 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
 
     public TriggerAttributeTest(int attackingFigure, List<Integer> targets) {
         super(Triggers.ACTION_POINT_SPEND);
+        this.attackingFigure = attackingFigure;
+        this.targets = targets;
+        currentIndex = 0;
+        result = -1;
+    }
+
+    public TriggerAttributeTest(int attackingFigure, List<Integer> targets, Triggers trigger) {
+        super(trigger);
         this.attackingFigure = attackingFigure;
         this.targets = targets;
         currentIndex = 0;
@@ -67,7 +76,8 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
 
     @Override
     public TriggerAttributeTest copy() {
-        TriggerAttributeTest retVal = new TriggerAttributeTest(attackingFigure, getTargets());
+        List<Triggers> triggers = new ArrayList<>(getTriggers());
+        TriggerAttributeTest retVal = new TriggerAttributeTest(attackingFigure, getTargets(), triggers.get(0));
         copyComponentTo(retVal);
         return retVal;
     }

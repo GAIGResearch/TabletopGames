@@ -56,7 +56,8 @@ public class MonsterAbilities {
         FLY,
         AFTERSHOCK,
         REGENERATION,
-        UNMOVABLE;
+        UNMOVABLE,
+        NOTME;
     }
 
     public static ArrayList<AbstractAction> getMonsterActions(DescentGameState dgs)

@@ -1,11 +1,15 @@
 package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
+import games.descent2e.actions.monsterfeats.NotMe;
+import games.descent2e.actions.monsterfeats.NotMeSwap;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 
 import java.util.ArrayList;
@@ -23,6 +27,7 @@ public class MultiAttack extends RangedAttack {
 
     public List<Integer> defendingFigures;
     protected int index;
+    protected int swapIndex;
 
     public MultiAttack(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures.get(0));
@@ -65,11 +70,34 @@ public class MultiAttack extends RangedAttack {
         return true;
     }
 
+    @Override
+    protected void checkSubstitute(DescentGameState state)
+    {
+        // Everything we need to do is handled elsewhere in the code, except for the first defender
+        if (substitute)
+            if (swapIndex == 0)
+            {
+                defendingFigures.set(swapIndex, substituteFigure);
+                super.checkSubstitute(state);
+            }
+    }
+
     private void setNewTarget(DescentGameState state, int index)
     {
+        boolean swap = false;
+
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        Figure oldDefender = (Figure) state.getComponentById(defendingFigures.get(index));
+
+        if (substitute && index == swapIndex)
+        {
+            defendingFigures.set(swapIndex, substituteFigure);
+            swap = true;
+        }
         defendingFigure = defendingFigures.get(index);
-        super.setDefendingFigure(defendingFigures.get(index));
+        super.setDefendingFigure(defendingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
+        defendingPlayer = defender.getOwnerId();
 
         defender.setCurrentAttack(this);
 
@@ -77,9 +105,22 @@ public class MultiAttack extends RangedAttack {
         state.setDefenceDicePool(defencePool);
 
         // Check again for Night Stalker passive
-        if (!isMelee || hasReach) {
-            NightStalker.addNightStalker(state, ((Figure) state.getComponentById(attackingFigure)), defender);
+        if (!checkAdjacent(state, attacker, oldDefender)) {
+            if (!swap) {
+                NightStalker.addNightStalker(state, attacker, defender);
+            }
+            else
+            {
+                if ((defender instanceof Monster) && (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER)))
+                {
+                    NightStalker.addPool(state);
+                }
+            }
         }
+
+        if (defender instanceof Hero) getWeaponBonuses(state, defendingFigure, true, false);
+        // if (defender instanceof Monster && ((Monster) defender).isLieutenant()) getWeaponBonuses(state, defendingFigure, false, false);
+
 
         //System.out.println("Next target (" + (index+1) + "/" + defendingFigures.size() + "): " + defender.getComponentName());
     }
@@ -95,6 +136,12 @@ public class MultiAttack extends RangedAttack {
                 if(index < defendingFigures.size() - 1)
                 {
                     index++;
+
+                    // When dealing with substitutes for attacks, our targets might include an already defeated Figure
+                    // So, we skip it if so
+                    if (state.getComponentById(defendingFigures.get(index)) == null)
+                        break;
+
                     setNewTarget(state, index);
                     result += " | Result: ";
                     // For MultiAttacks, we use the same Attack dice results
@@ -111,6 +158,42 @@ public class MultiAttack extends RangedAttack {
                 super.executePhase(state);
                 break;
         }
+    }
+
+    @Override
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
+
+        if (action instanceof NotMe) {
+            DescentGameState dgs = (DescentGameState) state;
+            substituteFigure = ((NotMe) action).getVictim();
+
+            // Only swap if the defender chose to swap
+            if (((NotMe) action).getResult() == 1 && substituteFigure != -1 && defendingFigure != substituteFigure) {
+
+                substitute = true;
+
+                swapIndex = defendingFigures.indexOf(defendingFigure);
+
+                Figure attacker = (Figure) state.getComponentById(attackingFigure);
+                Figure splig = (Figure) state.getComponentById(defendingFigure);
+                Figure defender = (Figure) state.getComponentById(substituteFigure);
+                substitutePlayer = defender.getOwnerId();
+                substituteName = defender.getName().replace("Hero: ", "");
+
+                if (checkAdjacent(dgs, attacker, splig)) {
+                    if (!hasShadow)
+                        if ((attacker instanceof Hero) && (defender instanceof Monster) && (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.SHADOW))) {
+                            hasShadow = true;
+                            SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
+                            if (!attacker.getAbilities().contains(shadowSurge))
+                                attacker.addAbility(new SurgeAttackAction(Surge.SHADOW, attackingFigure));
+                        }
+                }
+            }
+        }
+
+        // After the interrupt action has been taken, we can continue to see who interrupts next
+        movePhaseForward((DescentGameState) state);
     }
 
     @Override
@@ -191,12 +274,12 @@ public class MultiAttack extends RangedAttack {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         MultiAttack that = (MultiAttack) o;
-        return index == that.index && Objects.equals(defendingFigures, that.defendingFigures);
+        return index == that.index && swapIndex == that.swapIndex && Objects.equals(defendingFigures, that.defendingFigures);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), defendingFigures, index);
+        return Objects.hash(super.hashCode(), defendingFigures, index, swapIndex);
     }
 
     @Override
@@ -208,6 +291,7 @@ public class MultiAttack extends RangedAttack {
 
     public void copyComponentTo(MultiAttack target) {
         target.index = index;
+        target.swapIndex = swapIndex;
         target.defendingFigure = defendingFigure;  // we also need to set this, as the constructor overrides it
         super.copyComponentTo(target);
     }
@@ -219,7 +303,9 @@ public class MultiAttack extends RangedAttack {
         // Remove final "; Result: " from result
         retVal = retVal.substring(0, retVal.length() - 10);
         for (int i = 1; i < defendingFigures.size(); i++) {
-            retVal += " & " + (dgs.getComponentById(defendingFigures.get(i)).getComponentName().replace("Hero: ", ""));
+            int target = defendingFigures.get(i);
+            if (substitute && i == swapIndex) target = substituteFigure;
+            retVal += " & " + dgs.getComponentById(target).getComponentName().replace("Hero: ", "");
         }
         retVal += "; Result: ";
         return retVal;
