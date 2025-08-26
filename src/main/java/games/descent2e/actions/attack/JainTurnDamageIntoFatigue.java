@@ -1,11 +1,15 @@
 package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
+import org.sparkproject.guava.collect.Iterables;
+import scala.collection.Iterable$;
+import utilities.Pair;
 
 import java.util.Objects;
 
@@ -45,6 +49,11 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
         Figure f = (Figure) dgs.getComponentById(jain);
         MeleeAttack currentAttack = f.getCurrentAttack();
         if (currentAttack == null)
+            return false;
+
+        // Can't reduce if we already did so
+        Pair<Integer, AbstractAction> lastAction = Iterables.getLast(dgs.getHistory());
+        if (lastAction.a == f.getOwnerId() && lastAction.b instanceof JainTurnDamageIntoFatigue)
             return false;
 
         // Can't reduce if we already did so
