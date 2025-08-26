@@ -31,7 +31,6 @@ public class Air extends DescentAction {
         Monster monster = (Monster) dgs.getComponentById(figureID);
         monster.addPassive(MonsterAbilities.MonsterPassive.AIR);
         monster.getNActionsExecuted().increment();
-        monster.setHasAttacked(true);
         monster.addActionTaken(getString(dgs));
 
         return true;
@@ -42,7 +41,7 @@ public class Air extends DescentAction {
 
         Figure f = (Figure) dgs.getComponentById(figureID);
         if (f.getNActionsExecuted().isMaximum()) return false;
-        if (f instanceof Monster && !f.hasAttacked())
+        if (f instanceof Monster)
         {
             // If the monster already has the Air Immunity passive from using this action, there is no point in using it again
             return !((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.AIR);

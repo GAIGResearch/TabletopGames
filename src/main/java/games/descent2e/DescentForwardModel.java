@@ -919,9 +919,8 @@ public class DescentForwardModel extends StandardForwardModel {
             }
 
             // Get Monster Unique Actions
-            // Monster Actions can only be taken once per turn, if they haven't already attacked yet
-            if (actingFigure instanceof Monster && !actingFigure.hasAttacked()) {
-                List<AbstractAction> monsterActions = monsterActions(dgs);
+            if (actingFigure instanceof Monster) {
+                List<AbstractAction> monsterActions = getMonsterActions(dgs);
                 if (!monsterActions.isEmpty()) {
                     actions.addAll(monsterActions);
                     attacks.addAll(monsterActions);
@@ -1017,8 +1016,8 @@ public class DescentForwardModel extends StandardForwardModel {
             }
         }
 
-        return new ArrayList<>(new HashSet<>(actions));
-        //return actions;
+        //return new ArrayList<>(new HashSet<>(actions));
+        return actions;
     }
 
     private List<DescentAction> heroicFeatAction(DescentGameState dgs) {
@@ -1135,10 +1134,6 @@ public class DescentForwardModel extends StandardForwardModel {
 //                break;
 //        }
 //        return heroicFeats;
-    }
-
-    private ArrayList<AbstractAction> monsterActions(DescentGameState dgs) {
-        return getMonsterActions(dgs);
     }
 
     private List<AbstractAction> meleeAttackActions(DescentGameState dgs, Figure f) {

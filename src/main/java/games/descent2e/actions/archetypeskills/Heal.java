@@ -84,10 +84,6 @@ public class Heal extends DescentAction {
         if (isAction)
         {
             f.getNActionsExecuted().increment();
-            if (f instanceof Monster)
-            {
-                f.setHasAttacked(true);
-            }
         }
 
         // Prayer of Healing
@@ -116,8 +112,6 @@ public class Heal extends DescentAction {
         if (isAction)
         {
             if (f.getNActionsExecuted().isMaximum())
-                return false;
-            if (f instanceof Monster && f.hasAttacked())
                 return false;
         }
 

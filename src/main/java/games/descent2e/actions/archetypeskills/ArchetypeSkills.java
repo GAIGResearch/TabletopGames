@@ -32,24 +32,21 @@ public class ArchetypeSkills {
             // If the skill is exhausted, skip it
             if(f.isExhausted(skill)) continue;
 
-            switch(skill.getProperty("name").toString())
-            {
+            switch (skill.getProperty("name").toString()) {
                 // Berserker
-                case "Rage":
-                    actions.addAll(rageAttackActions(dgs, f));
-                    break;
+                case "Rage" -> actions.addAll(rageAttackActions(dgs, f));
+
 
                 // Disciple
-                case "Prayer of Healing":
-                    for (Hero hero : dgs.getHeroes())
-                    {
+                case "Prayer of Healing" -> {
+                    for (Hero hero : dgs.getHeroes()) {
                         Heal heal = new Heal(hero.getComponentID(), skill.getComponentID());
                         if (heal.canExecute(dgs)) actions.add(heal);
                     }
-                    break;
+                }
 
-                    // Runemaster
-                case "Runic Knowledge":
+                // Runemaster
+                case "Runic Knowledge" -> {
                     SurgeAttackAction surge = new SurgeAttackAction(Surge.RUNIC_KNOWLEDGE, f.getComponentID());
                     // Can only use the surge if we have the Fatigue to spare
                     // and we have a Magic or Rune item equipped
@@ -74,10 +71,10 @@ public class ArchetypeSkills {
                         }
                     }
                     f.removeAbility(surge);
-                    break;
+                }
 
-                    // Thief
-                case "Greedy":
+                // Thief
+                case "Greedy" -> {
                     // Search for Search tokens within 3 spaces that we can see
                     for (DToken token : dgs.getTokens()) {
                         if (token.getDescentTokenType() == DescentTypes.DescentToken.Search
@@ -85,11 +82,11 @@ public class ArchetypeSkills {
                                 && (inRange(f.getPosition(), token.getPosition(), 3))
                                 && hasLineOfSight(dgs, f.getPosition(), token.getPosition())) {
                             for (DescentAction da : token.getEffects()) {
-                                if(da.canExecute(dgs)) actions.add(da.copy());
+                                if (da.canExecute(dgs)) actions.add(da.copy());
                             }
                         }
                     }
-                    break;
+                }
             }
 
         }

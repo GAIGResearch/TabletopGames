@@ -94,7 +94,6 @@ public class Sacrifice extends DescentAction implements IExtendedSequence {
 
             eliza.addActionTaken(getString(gs));
             eliza.getNActionsExecuted().increment();
-            eliza.setHasAttacked(true);
             //complete = true;
         }
         else
