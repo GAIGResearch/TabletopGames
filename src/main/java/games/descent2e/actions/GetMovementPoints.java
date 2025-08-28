@@ -21,9 +21,10 @@ public class GetMovementPoints extends DescentAction {
 
     @Override
     public boolean execute(DescentGameState gs) {
-        gs.getActingFigure().setAttributeToMax(Figure.Attribute.MovePoints);
-        gs.getActingFigure().getNActionsExecuted().increment();
-        gs.getActingFigure().addActionTaken(toString());
+        Figure f = gs.getActingFigure();
+        f.setAttributeToMax(Figure.Attribute.MovePoints);
+        f.getNActionsExecuted().increment();
+        f.addActionTaken(toString());
         return true;
     }
 

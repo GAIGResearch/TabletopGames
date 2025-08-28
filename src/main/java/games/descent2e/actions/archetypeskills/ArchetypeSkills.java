@@ -66,6 +66,11 @@ public class ArchetypeSkills {
                     }
                 }
 
+                case "Time of Need" -> {
+                    TimeOfNeed time = new TimeOfNeed(skill.getComponentID());
+                    if (time.canExecute(dgs)) actions.add(time);
+                }
+
                 case "Holy Power" -> {
                     for (AbstractAction action : actions) {
                         if (action instanceof PrayerOfHealing)
