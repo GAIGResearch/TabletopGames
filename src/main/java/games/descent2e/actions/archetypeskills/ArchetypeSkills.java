@@ -59,6 +59,17 @@ public class ArchetypeSkills {
                     }
                 }
 
+                case "Blessed Strike" -> {
+                    // Blessed Strike can still be used to heal only ourselves, so we don't check if we are the ally
+                    for (Hero hero : dgs.getHeroes()) {
+                        boolean reach = checkReach(dgs, f);
+                        BlessedStrike blessedStrike = new BlessedStrike(f.getComponentID(), hero.getComponentID(), reach);
+                        if (blessedStrike.canExecute(dgs))
+                            actions.add(blessedStrike);
+                    }
+
+                }
+
                 case "Divine Fury" -> {
                     for (AbstractAction action : actions) {
                         if (action instanceof PrayerOfHealing)

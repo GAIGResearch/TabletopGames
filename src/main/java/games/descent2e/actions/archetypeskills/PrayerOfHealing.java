@@ -57,6 +57,22 @@ public class PrayerOfHealing extends Heal {
         this.holyPower = holyPower;
     }
 
+    public boolean isArmorOfFaith() {
+        return armorOfFaith;
+    }
+
+    public boolean isCleansingTouch() {
+        return cleansingTouch;
+    }
+
+    public boolean isDivineFury() {
+        return divineFury;
+    }
+
+    public boolean isHolyPower() {
+        return holyPower;
+    }
+
     public static void removePrayerBonus(Hero hero)
     {
         hero.removeBonus(DescentTypes.SkillBonus.ArmorOfFaith);
