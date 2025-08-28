@@ -3,6 +3,7 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
+import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
@@ -35,6 +36,8 @@ public class FreeAttack extends RangedAttack {
         Figure f = dgs.getActingFigure();
         if (f == null) return false;
         if (f.getNActionsExecuted().isMaximum() && f.hasUsedExtraAction()) return false;
+
+        if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
 
         Figure target = (Figure) dgs.getComponentById(defendingFigure);
 

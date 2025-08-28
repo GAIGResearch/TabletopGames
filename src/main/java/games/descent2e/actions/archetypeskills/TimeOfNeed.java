@@ -34,8 +34,7 @@ public class TimeOfNeed extends GetMovementPoints {
         Figure f = gs.getActingFigure();
         int move = f.getAttributeValue(Figure.Attribute.MovePoints);
         f.setAttribute(Figure.Attribute.MovePoints, move + 2);
-        f.getAttribute(Figure.Attribute.Fatigue).decrement();
-        f.getAttribute(Figure.Attribute.Fatigue).decrement();
+        f.getAttribute(Figure.Attribute.Fatigue).decrement(2);
         f.getNActionsExecuted().increment();
         f.addActionTaken(toString());
         return true;

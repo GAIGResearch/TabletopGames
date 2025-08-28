@@ -60,12 +60,16 @@ public class ArchetypeSkills {
                 }
 
                 case "Blessed Strike" -> {
-                    // Blessed Strike can still be used to heal only ourselves, so we don't check if we are the ally
-                    for (Hero hero : dgs.getHeroes()) {
-                        boolean reach = checkReach(dgs, f);
-                        BlessedStrike blessedStrike = new BlessedStrike(f.getComponentID(), hero.getComponentID(), reach);
-                        if (blessedStrike.canExecute(dgs))
-                            actions.add(blessedStrike);
+                    // Blessed Strike requires a melee weapon equipped
+                    DescentTypes.AttackType attackType = getAttackType(f);
+                    if (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH) {
+                        // Blessed Strike can still be used to heal only ourselves, so we don't check if we are the ally
+                        for (Hero hero : dgs.getHeroes()) {
+                            boolean reach = checkReach(dgs, f);
+                            BlessedStrike blessedStrike = new BlessedStrike(f.getComponentID(), hero.getComponentID(), reach);
+                            if (blessedStrike.canExecute(dgs))
+                                actions.add(blessedStrike);
+                        }
                     }
 
                 }
@@ -75,6 +79,11 @@ public class ArchetypeSkills {
                         if (action instanceof PrayerOfHealing)
                             ((PrayerOfHealing) action).setDivineFury(true);
                     }
+                }
+
+                case "Prayer of Peace" -> {
+                    PrayerOfPeace peace = new PrayerOfPeace(skill.getComponentID());
+                    if (peace.canExecute(dgs)) actions.add(peace);
                 }
 
                 case "Time of Need" -> {

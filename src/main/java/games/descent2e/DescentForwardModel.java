@@ -11,6 +11,8 @@ import evaluation.metrics.Event;
 import games.descent2e.DescentTypes.*;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.*;
+import games.descent2e.actions.archetypeskills.PrayerOfHealing;
+import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.attack.*;
 import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
@@ -375,7 +377,8 @@ public class DescentForwardModel extends StandardForwardModel {
                 for (Hero hero : dgs.getHeroes())
                 {
                     // Remove all Skill Bonuses
-                    removePrayerBonus(hero);
+                    PrayerOfHealing.removePrayerBonus(hero);
+                    PrayerOfPeace.removePrayerBonus(hero);
                 }
             }
         }

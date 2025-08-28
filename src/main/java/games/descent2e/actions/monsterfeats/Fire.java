@@ -3,6 +3,7 @@ package games.descent2e.actions.monsterfeats;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
+import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.attack.MultiAttack;
 import games.descent2e.actions.herofeats.AttackAllAdjacent;
 import games.descent2e.components.Figure;
@@ -29,6 +30,9 @@ public class Fire extends AttackAllAdjacent {
         if (defendingFigures.size() < 1) return false;
         Figure f = dgs.getActingFigure();
         if (f.getNActionsExecuted().isMaximum()) return false;
+
+        if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
+
         boolean atLeastOneHero = false;
         for (int defendingFigure : defendingFigures)
         {

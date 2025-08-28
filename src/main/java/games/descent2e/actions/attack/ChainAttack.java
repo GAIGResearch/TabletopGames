@@ -2,6 +2,7 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
@@ -45,6 +46,8 @@ public class ChainAttack extends MultiAttack{
         if (!isFreeAttack) {
             if (f.getNActionsExecuted().isMaximum()) return false;
         }
+
+        if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
 
         // Figures can't end turn on an occupied space
         // Therefore, an attack cannot have more targets than the distance it can legally move

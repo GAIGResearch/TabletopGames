@@ -24,6 +24,7 @@ import java.util.*;
 import static core.CoreConstants.coordinateHash;
 import static core.CoreConstants.playersHash;
 import static games.descent2e.DescentHelper.*;
+import static games.descent2e.actions.archetypeskills.PrayerOfPeace.canAttackPrayer;
 
 public class CryHavoc extends DescentAction implements IExtendedSequence {
 
@@ -284,7 +285,7 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
         Figure belthir = (Figure) state.getComponentById(attackingFigure);
 
         if (belthir.getAttribute(Figure.Attribute.Health).isMinimum()) {
-            // Somehow, Belthir ended his movement in a pit or lava and defeated himself.
+            // Somehow, Belthir ended his movement in a pit or lava and defeated himself prematurely.
             // Idiot.
             complete = true;
             attacked = false;
@@ -302,9 +303,11 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
             }
 
             // Check if Belthir has, somehow, run out of Move Points without flying over any targets.
+            // Or worse, ended his movement next to a Disciple with Prayer of Peace and blocked his attack.
             // Idiot.
             if (belthir.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
                 if (targets.isEmpty()) attacked = true;
+                if (!canAttackPrayer((DescentGameState) state, belthir)) attacked = true;
             }
         }
         if (complete) {

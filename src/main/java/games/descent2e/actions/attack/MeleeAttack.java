@@ -12,6 +12,7 @@ import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.archetypeskills.PrayerOfHealing;
+import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.*;
 import games.descent2e.components.*;
@@ -566,7 +567,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         if (f.getNActionsExecuted().isMaximum()) return false;
+
         Figure target = (Figure) dgs.getComponentById(defendingFigure);
+
+        // Check for abilities that prevent attacking
+        if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
 
         if (target instanceof Monster)
         {

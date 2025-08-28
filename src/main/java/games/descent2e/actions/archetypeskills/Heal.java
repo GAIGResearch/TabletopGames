@@ -89,7 +89,7 @@ public class Heal extends DescentAction {
         Component card = dgs.getComponentById(cardID);
         if (card != null)
         {
-            f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
+            f.exhaustCard((DescentCard) card);
         }
 
         f.addActionTaken(getString(dgs));
@@ -109,7 +109,6 @@ public class Heal extends DescentAction {
                 return false;
         }
 
-        // Prayer of Healing
         if (!isAction && f instanceof Hero)
         {
             if (f.getAttribute(Figure.Attribute.Fatigue).isMaximum())
@@ -125,7 +124,7 @@ public class Heal extends DescentAction {
 
         if (card != null)
         {
-            if (f.isExhausted((DescentCard) dgs.getComponentById(cardID)))
+            if (f.isExhausted((DescentCard) card))
                 return false;
         }
 

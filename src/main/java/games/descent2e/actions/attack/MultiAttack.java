@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.NightStalker;
+import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.monsterfeats.NotMe;
 import games.descent2e.actions.monsterfeats.NotMeSwap;
@@ -232,6 +233,8 @@ public class MultiAttack extends RangedAttack {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
+
+        if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
 
         if (!isFreeAttack) {
             if (f.getNActionsExecuted().isMaximum()) return false;
