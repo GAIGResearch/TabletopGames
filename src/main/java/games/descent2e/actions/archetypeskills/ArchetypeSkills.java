@@ -11,6 +11,7 @@ import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
+import games.descent2e.components.Monster;
 import games.descent2e.components.tokens.DToken;
 
 import java.util.*;
@@ -96,6 +97,27 @@ public class ArchetypeSkills {
                         if (action instanceof PrayerOfHealing)
                             ((PrayerOfHealing) action).setHolyPower(true);
                     }
+                }
+                case "Radiant Light" -> {
+                    List<Integer> targets = new ArrayList<>();
+                    targets.add(f.getComponentID());
+
+                    // Check every single figure on the board for lines of sight
+                    for (Hero hero : dgs.getHeroes()) {
+                        if (hero.equals(f)) continue;
+                        if (hasLineOfSight(dgs, f.getPosition(), hero.getPosition()))
+                            targets.add(hero.getComponentID());
+                    }
+                    for (List<Monster> monsters : dgs.getMonsters()) {
+                        for (Monster monster : monsters) {
+                            if (hasLineOfSight(dgs, f.getPosition(), monster.getPosition()))
+                                targets.add(monster.getComponentID());
+                        }
+                    }
+
+                    RadiantLight radiantLight = new RadiantLight(targets, skill.getComponentID());
+                    if (radiantLight.canExecute(dgs))
+                        actions.add(radiantLight);
                 }
 
                 // Runemaster

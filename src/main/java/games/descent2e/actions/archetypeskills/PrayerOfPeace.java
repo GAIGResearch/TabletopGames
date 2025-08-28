@@ -80,7 +80,7 @@ public class PrayerOfPeace extends DescentAction {
         if (f.isExhausted((DescentCard) dgs.getComponentById(cardID))) return false;
 
         // This costs 2 Fatigue to use
-        return f.getAttribute(Figure.Attribute.Fatigue).getValue() + 2 <= f.getAttributeMax(Figure.Attribute.Fatigue);
+        return f.getAttributeValue(Figure.Attribute.Fatigue) + 2 <= f.getAttributeMax(Figure.Attribute.Fatigue);
     }
 
     public static boolean canAttackPrayer(DescentGameState dgs, Figure f) {

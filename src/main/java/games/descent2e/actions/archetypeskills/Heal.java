@@ -68,13 +68,12 @@ public class Heal extends DescentAction {
     public boolean execute(DescentGameState dgs) {
         Figure target = (Figure) dgs.getComponentById(targetID);
 
-        // Health recovery: roll 1 red die
+        // Health recovery: Roll 1 Red Die
         DicePool.heal.roll(dgs.getRnd());
 
         healthRecovered = DicePool.heal.getDamage();
 
         target.incrementAttribute(Figure.Attribute.Health, healthRecovered);
-        //System.out.println(target.getComponentName() + " healed for " + DicePool.heal.getDamage() + " health.");
 
         if (target instanceof Hero && ((Hero) target).isDefeated())
             ((Hero) target).setDefeated(dgs, false);
@@ -131,11 +130,12 @@ public class Heal extends DescentAction {
         // We can always heal ourselves
         if (target.equals(f)) return true;
 
+        // Otherwise, we need to check the range
+        // If range < 1 (e.g. Radiant Light), we handle it in the child's canExecute
         if (range == 1)
         {
             return DescentHelper.checkAdjacent(dgs, f, target);
         }
-
         if (range > 1)
         {
             return DescentHelper.checkAllSpaces(dgs, f, target, range, false);
