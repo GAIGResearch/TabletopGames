@@ -40,8 +40,36 @@ public class ArchetypeSkills {
                 // Disciple
                 case "Prayer of Healing" -> {
                     for (Hero hero : dgs.getHeroes()) {
-                        Heal heal = new Heal(hero.getComponentID(), skill.getComponentID());
+                        PrayerOfHealing heal = new PrayerOfHealing(hero.getComponentID(), skill.getComponentID());
                         if (heal.canExecute(dgs)) actions.add(heal);
+                    }
+                }
+
+                case "Armor of Faith" -> {
+                    for (AbstractAction action : actions) {
+                        if (action instanceof PrayerOfHealing)
+                            ((PrayerOfHealing) action).setArmorOfFaith(true);
+                    }
+                }
+
+                case "Cleansing Touch" -> {
+                    for (AbstractAction action : actions) {
+                        if (action instanceof PrayerOfHealing)
+                            ((PrayerOfHealing) action).setCleansingTouch(true);
+                    }
+                }
+
+                case "Divine Fury" -> {
+                    for (AbstractAction action : actions) {
+                        if (action instanceof PrayerOfHealing)
+                            ((PrayerOfHealing) action).setDivineFury(true);
+                    }
+                }
+
+                case "Holy Power" -> {
+                    for (AbstractAction action : actions) {
+                        if (action instanceof PrayerOfHealing)
+                            ((PrayerOfHealing) action).setHolyPower(true);
                     }
                 }
 

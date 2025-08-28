@@ -35,6 +35,7 @@ import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
 import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.archetypeskills.ArchetypeSkills.getArchetypeSkillActions;
+import static games.descent2e.actions.archetypeskills.PrayerOfHealing.removePrayerBonus;
 import static games.descent2e.actions.monsterfeats.Air.removeAirImmunity;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
@@ -365,6 +366,18 @@ public class DescentForwardModel extends StandardForwardModel {
         if (actingFigure instanceof Monster) {
             // Remove conditions that should be removed on activation
             removeAirImmunity(dgs, (Monster) actingFigure);
+        }
+
+        if (actingFigure instanceof Hero) {
+            String heroClass = ((PropertyString) actingFigure.getProperty("class")).value;
+            if (Objects.equals(heroClass, "Disciple"))
+            {
+                for (Hero hero : dgs.getHeroes())
+                {
+                    // Remove all Skill Bonuses
+                    removePrayerBonus(hero);
+                }
+            }
         }
 
         /*

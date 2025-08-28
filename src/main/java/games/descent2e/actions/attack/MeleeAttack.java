@@ -11,6 +11,7 @@ import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.archetypeskills.PrayerOfHealing;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.*;
 import games.descent2e.components.*;
@@ -20,6 +21,8 @@ import java.util.*;
 
 import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.Triggers.*;
+import static games.descent2e.actions.archetypeskills.PrayerOfHealing.addArmorOfFaithDice;
+import static games.descent2e.actions.archetypeskills.PrayerOfHealing.addDivineFuryDice;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 import static games.descent2e.actions.attack.MeleeAttack.Interrupters.*;
 
@@ -125,6 +128,14 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         {
             NightStalker.addNightStalker(state, attacker, defender);
         }
+
+        // Check for potential Archetype Skill bonuses
+        if (attacker.hasBonus(DescentTypes.SkillBonus.DivineFury)) {
+            addDivineFuryDice(state);
+            attacker.removeBonus(DescentTypes.SkillBonus.DivineFury);       // Only for the first attack made with it
+        }
+        if (defender.hasBonus(DescentTypes.SkillBonus.ArmorOfFaith))
+            addArmorOfFaithDice(state);
 
         // Check if the target has the Shadow passive and if we are adjacent to it
         // If we are, the Hero must spend a Surge on Shadow to hit it

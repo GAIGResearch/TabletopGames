@@ -41,10 +41,9 @@ public class NightStalker {
 
     public static void addPool(DescentGameState state)
     {
-        List<DescentDice> dice = new ArrayList<>(state.getDefenceDicePool().getComponents());
+        List<DescentDice> dice = new ArrayList<>(state.getDefenceDicePool().copy().getComponents());
         dice.addAll(getNightStalkerDicePool().getComponents());
-        DicePool newPool = state.getDefenceDicePool().copy();
-        newPool.setDice(dice);
+        DicePool newPool = new DicePool(dice);
         state.setDefenceDicePool(newPool);
     }
 

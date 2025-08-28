@@ -69,6 +69,7 @@ public class Figure extends Token {
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
+    Set<DescentTypes.SkillBonus> bonuses;
     boolean removedConditionThisTurn = false;
     List<AttributeTest> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
@@ -84,6 +85,7 @@ public class Figure extends Token {
         super(name);
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
+        bonuses = new HashSet<>();
         attributeTests = new ArrayList<>();
         attributes = new HashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
@@ -209,6 +211,8 @@ public class Figure extends Token {
         return conditions;
     }
 
+    public Set<DescentTypes.SkillBonus> getBonuses() { return bonuses; }
+
     public void addCondition(DescentTypes.DescentCondition condition) {
         // A Figure can only be affected by a condition once - they do not stack
         // Therefore we can only add the condition if it is not already on the list
@@ -238,6 +242,24 @@ public class Figure extends Token {
     public void setRemovedConditionThisTurn(boolean removedConditionThisTurn) {
         this.removedConditionThisTurn = removedConditionThisTurn;
     }
+
+    public void addBonus(DescentTypes.SkillBonus bonus) {
+        if (!hasBonus(bonus))
+            bonuses.add(bonus);
+    }
+
+    public void removeBonus(DescentTypes.SkillBonus bonus) {
+        if (hasBonus(bonus))
+            bonuses.remove(bonus);
+    }
+
+    public void removeAllBonuses() {
+        if (!bonuses.isEmpty()) {
+            bonuses.clear();
+        }
+    }
+
+    public boolean hasBonus(DescentTypes.SkillBonus bonus) { return bonuses.contains(bonus); }
 
     public List<AttributeTest> getAttributeTests() {
         return attributeTests;
@@ -289,8 +311,8 @@ public class Figure extends Token {
     public boolean hasAbility(DescentAction ability) {
         return abilities.contains(ability);
     }
-    public DicePool getAttackDice() { return attackDice;}
 
+    public DicePool getAttackDice() { return attackDice;}
     public DicePool getDefenceDice() {return defenceDice;}
 
     public String getName() { return componentName;}
@@ -341,6 +363,7 @@ public class Figure extends Token {
         copyTo.nActionsExecuted = nActionsExecuted.copy();
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
+        copyTo.bonuses = new HashSet<>(bonuses);
         copyTo.removedConditionThisTurn = removedConditionThisTurn;
         if (attributeTests != null) {
             copyTo.attributeTests = new ArrayList<>();
@@ -416,12 +439,12 @@ public class Figure extends Token {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Figure figure = (Figure) o;
-        return removedConditionThisTurn == figure.removedConditionThisTurn && hasMoved == figure.hasMoved && hasAttacked == figure.hasAttacked && hasRerolled == figure.hasRerolled && isOffMap == figure.isOffMap && canIgnoreEnemies == figure.canIgnoreEnemies && extraAction == figure.extraAction && Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(attributeTests, figure.attributeTests) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(exhausted, figure.exhausted) && Objects.equals(actionsTaken, figure.actionsTaken);
+        return removedConditionThisTurn == figure.removedConditionThisTurn && hasMoved == figure.hasMoved && hasAttacked == figure.hasAttacked && hasRerolled == figure.hasRerolled && isOffMap == figure.isOffMap && canIgnoreEnemies == figure.canIgnoreEnemies && extraAction == figure.extraAction && Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(bonuses, figure.bonuses) && Objects.equals(attributeTests, figure.attributeTests) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(exhausted, figure.exhausted) && Objects.equals(actionsTaken, figure.actionsTaken);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, removedConditionThisTurn, attributeTests, abilities, currentAttack, hasMoved, hasAttacked, hasRerolled, isOffMap, canIgnoreEnemies, extraAction, exhausted, actionsTaken);
+        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, bonuses, removedConditionThisTurn, attributeTests, abilities, currentAttack, hasMoved, hasAttacked, hasRerolled, isOffMap, canIgnoreEnemies, extraAction, exhausted, actionsTaken);
     }
 
     @Override

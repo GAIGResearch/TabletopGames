@@ -151,6 +151,11 @@ public class DescentTypes {
 //        Terrify
     }
 
+    public enum SkillBonus {
+        ArmorOfFaith,
+        DivineFury;
+    }
+
     public enum DescentToken {
         Search ("search.png", 1),
         Villager ("villager.png", 2),

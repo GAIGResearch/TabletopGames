@@ -86,12 +86,6 @@ public class Heal extends DescentAction {
             f.getNActionsExecuted().increment();
         }
 
-        // Prayer of Healing
-        if (!isAction && f instanceof Hero)
-        {
-            f.getAttribute(Figure.Attribute.Fatigue).increment();
-        }
-
         Component card = dgs.getComponentById(cardID);
         if (card != null)
         {
@@ -133,11 +127,6 @@ public class Heal extends DescentAction {
         {
             if (f.isExhausted((DescentCard) dgs.getComponentById(cardID)))
                 return false;
-            // Normally Prayer of Healing can be upgraded to have additional effects,
-            // so we would not care if the target is at full health if we are exhausting a card
-            // However, at this current level, we do not have such abilities, so we still need to check
-            if (target.getAttribute(Figure.Attribute.Health).getValue() >= target.getAttribute(Figure.Attribute.Health).getMaximum())
-                return false;
         }
 
         // We can always heal ourselves
@@ -145,15 +134,12 @@ public class Heal extends DescentAction {
 
         if (range == 1)
         {
-            Vector2D loc = f.getPosition();
-            GridBoard board = dgs.getMasterBoard();
-            List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-            return neighbours.contains(target.getPosition()) || target.getPosition().equals(loc);
+            return DescentHelper.checkAdjacent(dgs, f, target);
         }
 
         if (range > 1)
         {
-            return DescentHelper.inRange(f.getPosition(), target.getPosition(), range);
+            return DescentHelper.checkAllSpaces(dgs, f, target, range, false);
         }
 
         return false;
