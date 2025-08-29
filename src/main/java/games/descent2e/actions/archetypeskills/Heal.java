@@ -159,10 +159,14 @@ public class Heal extends DescentAction {
     }
 
     @Override
-    public DescentAction copy()
+    public Heal copy()
     {
         Heal heal = new Heal(targetID, range, isAction, cardID);
         heal.healthRecovered = healthRecovered;
         return heal;
+    }
+
+    public int getCardID(){
+        return cardID;
     }
 }

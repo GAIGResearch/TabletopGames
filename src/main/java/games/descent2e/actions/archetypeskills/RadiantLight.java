@@ -148,7 +148,7 @@ public class RadiantLight extends Heal {
     }
 
     @Override
-    public DescentAction copy()
+    public RadiantLight copy()
     {
         RadiantLight heal = new RadiantLight(targets, cardID);
         heal.healthRecovered = healthRecovered;

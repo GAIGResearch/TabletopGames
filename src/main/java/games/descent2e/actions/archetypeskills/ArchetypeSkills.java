@@ -93,11 +93,59 @@ public class ArchetypeSkills {
                 }
 
                 case "Holy Power" -> {
+                    // Holy Power allows us to target up to two adjacent Heroes with Prayer of Healing
+                    // So we need to find all possible pair combinations
+                    // then, take out the old options, and add in the new ones
+                    List<PrayerOfHealing> toRemove = new ArrayList<>();
+                    List<PrayerOfHealing> toAdd = new ArrayList<>();
                     for (AbstractAction action : actions) {
-                        if (action instanceof PrayerOfHealing)
+                        if (action instanceof PrayerOfHealing) {
                             ((PrayerOfHealing) action).setHolyPower(true);
+                            toRemove.add((PrayerOfHealing) action);
+                        }
                     }
+
+                    // If there were no Prayers of Healing to begin with, don't bother
+                    if (toRemove.isEmpty()) break;
+
+                    PrayerOfHealing example = toRemove.get(0);
+                    int cardID = example.getCardID();                   // Make sure we use Prayer of Healing here
+                    boolean armorOfFaith = example.isArmorOfFaith();
+                    boolean cleansingTouch = example.isCleansingTouch();
+                    boolean divineFury = example.isDivineFury();
+                    boolean holyPower = true;                           // It's this skill, of course it's going to be true.
+
+                    List<Integer> healTargets = new ArrayList<>();
+                    healTargets.add(f.getComponentID());
+                    healTargets.addAll(getAdjacentTargets(dgs, f, true));
+
+                    for (int i = 0; i < healTargets.size(); i++) {
+                        int targetA = healTargets.get(i);
+                        if (!(dgs.getComponentById(targetA) instanceof Hero)) continue;
+                        for (int j = i + 1; j < healTargets.size(); j++) {
+                            int targetB = healTargets.get(j);
+                            if (!(dgs.getComponentById(targetB) instanceof Hero)) continue;
+                            List<Integer> targetPair = new ArrayList<>();
+                            targetPair.add(targetA);
+                            targetPair.add(targetB);
+
+                            PrayerOfHealing healing = new PrayerOfHealing(targetPair, cardID);
+                            if (healing.canExecute(dgs))
+                            {
+                                healing.setArmorOfFaith(armorOfFaith);
+                                healing.setCleansingTouch(cleansingTouch);
+                                healing.setDivineFury(divineFury);
+                                healing.setHolyPower(holyPower);
+                                toAdd.add(healing);
+                            }
+                        }
+                    }
+                    // No point replacing the old actions if there's nothing new to replace them with
+                    if (toAdd.isEmpty()) break;
+                    actions.removeAll(toRemove);
+                    actions.addAll(toAdd);
                 }
+
                 case "Radiant Light" -> {
                     List<Integer> targets = new ArrayList<>();
                     targets.add(f.getComponentID());
