@@ -30,6 +30,7 @@ public enum Surge {
     SHADOW(1, (a, s) -> a.setShadow(true)),
     RECOVER_1_HEART(1, (a, s) -> a.addMending(1)),
     RECOVER_1_FATIGUE(1, (a, s) -> a.addFatigueHeal(1)),
+    RECOVER_2_FATIGUE(1, (a, s) -> a.addFatigueHeal(2)),
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
         a.addDamage(2);

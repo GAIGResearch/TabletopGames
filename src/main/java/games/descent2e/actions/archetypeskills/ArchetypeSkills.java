@@ -34,10 +34,8 @@ public class ArchetypeSkills {
             if(f.isExhausted(skill)) continue;
 
             switch (skill.getProperty("name").toString()) {
-                // Berserker
-                case "Rage" -> actions.addAll(rageAttackActions(dgs, f));
 
-
+                // --- HEALER SKILLS ---
                 // Disciple
                 case "Prayer of Healing" -> {
                     for (Hero hero : dgs.getHeroes()) {
@@ -168,6 +166,8 @@ public class ArchetypeSkills {
                         actions.add(radiantLight);
                 }
 
+                // --- MAGE SKILLS ---
+
                 // Runemaster
                 case "Runic Knowledge" -> {
                     SurgeAttackAction surge = new SurgeAttackAction(Surge.RUNIC_KNOWLEDGE, f.getComponentID());
@@ -196,6 +196,19 @@ public class ArchetypeSkills {
                     f.removeAbility(surge);
                 }
 
+                case "Iron Will" -> {
+                    SurgeAttackAction oldFatigue = new SurgeAttackAction(Surge.RECOVER_1_FATIGUE, f.getComponentID());
+                    if (f.getAbilities().contains(oldFatigue))
+                    {
+                        // Increase our max Fatigue by +1, and every Surge now recovers +2 Fatigue instead of +1
+                        f.getAttribute(Figure.Attribute.Fatigue).setMaximum(f.getAttributeMax(Figure.Attribute.Fatigue) + 1);
+                        f.removeAbility(oldFatigue);
+                        SurgeAttackAction newFatigue = new SurgeAttackAction(Surge.RECOVER_2_FATIGUE, f.getComponentID());
+                        f.addAbility(newFatigue);
+                    }
+                }
+
+                // - SCOUT SKILLS
                 // Thief
                 case "Greedy" -> {
                     // Search for Search tokens within 3 spaces that we can see
@@ -210,6 +223,10 @@ public class ArchetypeSkills {
                         }
                     }
                 }
+
+                // --- WARRIOR SKILLS ---
+                // Berserker
+                case "Rage" -> actions.addAll(rageAttackActions(dgs, f));
             }
 
         }
