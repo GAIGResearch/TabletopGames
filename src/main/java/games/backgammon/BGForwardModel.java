@@ -161,7 +161,7 @@ public class BGForwardModel extends StandardForwardModel {
                 // we cannot consider other actions until we have moved all pieces from the bar
                 if (actions.isEmpty())
                     actions.add(new DoNothing());
-                return actions;
+                return actions.stream().distinct().toList();
             }
             // else we can continue and add other actions
         }
@@ -194,7 +194,7 @@ public class BGForwardModel extends StandardForwardModel {
             // no moves available, so we can only do nothing
             actions.add(new DoNothing());
         }
-        return actions;
+        return actions.stream().distinct().toList();
     }
 
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {

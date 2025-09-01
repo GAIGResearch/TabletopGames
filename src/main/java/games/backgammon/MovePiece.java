@@ -2,6 +2,7 @@ package games.backgammon;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.descent2e.actions.Move;
 
 public class MovePiece extends AbstractAction {
 
@@ -77,9 +78,10 @@ public class MovePiece extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        MovePiece movePiece = (MovePiece) obj;
-        return from == movePiece.from && to == movePiece.to;
+        if (obj instanceof MovePiece mp) {
+            return from == mp.from && to == mp.to;
+        }
+        return false;
     }
 
     @Override
