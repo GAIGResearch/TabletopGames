@@ -1,5 +1,6 @@
 package games.descent2e.actions.attack;
 
+import com.sun.xml.bind.v2.model.annotation.Quick;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -12,6 +13,7 @@ import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
+import games.descent2e.actions.archetypeskills.QuickCasting;
 import games.descent2e.actions.archetypeskills.RunicSorceryStatus;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.*;
@@ -794,6 +796,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     if (knockback.canExecute(state))
                         interruptAttacks.add(knockback);
                 }
+            }
+
+            if (QuickCasting.isEnabled()) {
+                Set<QuickCasting> quickCastings = QuickCasting.constructQuickCasting(state, attackingFigure);
+                if (!quickCastings.isEmpty()) interruptAttacks.addAll(quickCastings);
             }
 
             if (!interruptAttacks.isEmpty())

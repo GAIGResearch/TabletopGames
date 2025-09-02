@@ -156,7 +156,8 @@ public class DescentTypes {
         DivineFury,
         PrayerOfPeace,
         InscribeRune,
-        IronWill;
+        IronWill,
+        QuickCasting;
     }
 
     public enum DescentToken {

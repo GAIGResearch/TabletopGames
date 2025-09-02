@@ -40,6 +40,7 @@ public class FreeAttack extends RangedAttack {
         if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
 
         Figure target = (Figure) dgs.getComponentById(defendingFigure);
+        if (target == null) return false;
 
         if (target instanceof Monster)
         {

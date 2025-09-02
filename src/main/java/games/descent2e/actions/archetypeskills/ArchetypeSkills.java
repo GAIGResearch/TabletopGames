@@ -240,8 +240,7 @@ public class ArchetypeSkills {
 
                     DescentTypes.AttackType attackType = getAttackType(f);
                     boolean reach = checkReach(dgs, f);
-
-                    List<Integer> targets = new ArrayList<>();
+                    List<Integer> targets;
 
                     if (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH)
                     {
@@ -252,7 +251,6 @@ public class ArchetypeSkills {
                                 actions.add(runicSorcery);
                         }
                     }
-
                     if (attackType == DescentTypes.AttackType.RANGED || attackType == DescentTypes.AttackType.BOTH)
                     {
                         targets = getRangedTargets(dgs, f);
@@ -262,8 +260,6 @@ public class ArchetypeSkills {
                                 actions.add(runicSorcery);
                         }
                     }
-
-
                 }
 
                 case "Iron Will" -> {
@@ -281,7 +277,6 @@ public class ArchetypeSkills {
                 }
 
                 case "Rune Mastery" -> {
-
                     Deck<DescentCard> hand = f.getHandEquipment();
                     if (hand == null) break;
                     boolean hasRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
@@ -295,7 +290,6 @@ public class ArchetypeSkills {
                             }
                         }
                     }
-
                     RuneMastery runeMastery = new RuneMastery(skill.getComponentID());
 
                     // Enable the ability only if we have a suitable weapon
@@ -305,7 +299,6 @@ public class ArchetypeSkills {
                     }
                     else if (f.hasAbility(runeMastery))
                         f.removeAbility(runeMastery);
-
                 }
 
                 case "Break the Rune" -> {
@@ -343,20 +336,23 @@ public class ArchetypeSkills {
                             targets.add(neighbourID);
                         }
                     }
-
                     if (!targets.isEmpty())
                     {
                         BreakTheRune breakRune = new BreakTheRune(f.getComponentID(), targets);
                         if (breakRune.canExecute(dgs))
                             actions.add(breakRune);
                     }
-
-
-
                 }
 
-                case "Quick Casting ->" -> {
+                case "Quick Casting" -> {
 
+                    // Enables us to make additional attacks immediately after attacking, once per turn
+                    if (!f.hasBonus(DescentTypes.SkillBonus.QuickCasting)) {
+                        f.addBonus(DescentTypes.SkillBonus.QuickCasting);
+                        QuickCasting.setCardID(skill.getComponentID());
+                    }
+                    if (!QuickCasting.isEnabled())
+                        QuickCasting.enable();
                 }
 
                 // - SCOUT SKILLS

@@ -9,6 +9,7 @@ import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
 
 import java.util.Objects;
 
@@ -78,8 +79,9 @@ public class RuneMastery extends DescentAction {
             if (action instanceof MeleeAttack melee) {
                 if (melee.getSkip()) return false;
                 Figure f = dgs.getActingFigure();
+                if (!(f instanceof Hero hero)) return false;
                 DescentCard card = (DescentCard) dgs.getComponentById(cardID);
-                return !f.isExhausted(card);
+                return hero.getSkills().contains(card) && !hero.isExhausted(card);
             }
         }
         return false;
