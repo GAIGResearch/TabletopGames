@@ -170,7 +170,7 @@ public class ForwardModelTestsWithMCTS {
     }
 
     @Test
-    public void testGPenteFGrammai() {
+    public void testPenteGrammai() {
         ForwardModelTester fmt = new ForwardModelTester("game=PenteGrammai", "nGames=2", "nPlayers=2", "agent=json\\players\\mcts.json");
     }
 }
