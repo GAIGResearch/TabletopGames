@@ -154,7 +154,8 @@ public class DescentTypes {
     public enum SkillBonus {
         ArmorOfFaith,
         DivineFury,
-        PrayerOfPeace;
+        PrayerOfPeace,
+        IronWill;
     }
 
     public enum DescentToken {

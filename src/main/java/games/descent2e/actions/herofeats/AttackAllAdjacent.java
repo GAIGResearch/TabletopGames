@@ -18,6 +18,7 @@ public class AttackAllAdjacent extends MultiAttack {
 
     public AttackAllAdjacent(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
+        this.minRange = Integer.MIN_VALUE;
     }
 
     @Override

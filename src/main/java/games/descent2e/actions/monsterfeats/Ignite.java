@@ -13,6 +13,7 @@ public class Ignite extends Fire {
 
     public Ignite(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
+        this.minRange = 0;
     }
 
     @Override

@@ -11,7 +11,6 @@ import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.actions.archetypeskills.PrayerOfHealing;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.*;
@@ -95,6 +94,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     boolean reduced = false;
     protected boolean isMelee = true;
     protected boolean isFreeAttack = false;
+
+    // Some attacks have the 'ignores range' feature - they override this such that minRange = Integer.MIN_VALUE
+    protected int minRange = 0;
 
     public String result = "";
 
@@ -502,7 +504,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         range = state.getAttackDicePool().getRange();
         damage = state.getAttackDicePool().getDamage();
         return state.getAttackDicePool().hasRolled() && (
-                range < 0 || damage == 0);
+                range < minRange || damage == 0);
     }
 
     public void applyConditions(Figure defender)

@@ -15,8 +15,10 @@ import static games.descent2e.DescentHelper.checkAdjacent;
 import static games.descent2e.DescentHelper.inRange;
 
 public class Fire extends AttackAllAdjacent {
+
     public Fire(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
+        this.minRange = 0;
     }
 
     @Override

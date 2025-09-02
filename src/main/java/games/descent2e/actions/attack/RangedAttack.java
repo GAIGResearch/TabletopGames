@@ -47,7 +47,7 @@ public class RangedAttack extends MeleeAttack {
         if (defender == null) {
             return true; // Somehow, we have an attack on a dead figure
         }
-        double distance = getDistanceFromFigures(attacker, defender);
+        double distance = getDistanceFromFigures(attacker, defender) + minRange;
         range = state.getAttackDicePool().getRange() + extraRange;
         return (range < distance);
     }
