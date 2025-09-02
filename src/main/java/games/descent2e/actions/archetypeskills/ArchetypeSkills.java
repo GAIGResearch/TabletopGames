@@ -1,13 +1,17 @@
 package games.descent2e.actions.archetypeskills;
 
 import core.actions.AbstractAction;
+import core.components.BoardNode;
 import core.components.Deck;
+import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
+import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.attack.SurgeAttackAction;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -16,6 +20,8 @@ import games.descent2e.components.tokens.DToken;
 
 import java.util.*;
 
+import static core.CoreConstants.coordinateHash;
+import static core.CoreConstants.playersHash;
 import static games.descent2e.DescentHelper.*;
 
 public class ArchetypeSkills {
@@ -176,13 +182,15 @@ public class ArchetypeSkills {
                     if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                         Deck<DescentCard> hand = f.getHandEquipment();
                         if (hand != null) {
-                            boolean hasMagicOrRuneItem = false;
-                            for (DescentCard item : hand.getComponents()) {
-                                String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
-                                if (equipmentType == null) continue;
-                                if (Arrays.asList(equipmentType).contains("Magic") || Arrays.asList(equipmentType).contains("Rune")) {
-                                    hasMagicOrRuneItem = true;
-                                    break;
+                            boolean hasMagicOrRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
+                            if (!hasMagicOrRuneItem) {
+                                for (DescentCard item : hand.getComponents()) {
+                                    String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                                    if (equipmentType == null) continue;
+                                    if (Arrays.asList(equipmentType).contains("Magic") || Arrays.asList(equipmentType).contains("Rune")) {
+                                        hasMagicOrRuneItem = true;
+                                        break;
+                                    }
                                 }
                             }
                             if (hasMagicOrRuneItem) {
@@ -196,16 +204,94 @@ public class ArchetypeSkills {
                     f.removeAbility(surge);
                 }
 
+                case "Ghost Armor" -> {
+                    GhostArmor ghostArmor = new GhostArmor(f.getComponentID(), skill.getComponentID());
+                    if (!f.hasAbility(ghostArmor))
+                        f.addAbility(ghostArmor);
+                }
+
+                case "Exploding Rune" -> {
+
+                }
+
+                case "Inscribe Rune" -> {
+                    // Most Runemaster abilities require a weapon with a Rune trait to use
+                    // This effectively enables the weapon to have the Rune even if it doesn't normally
+                    if (!f.hasBonus(DescentTypes.SkillBonus.InscribeRune))
+                        f.addBonus(DescentTypes.SkillBonus.InscribeRune);
+                }
+
+                case "Runic Sorcery" -> {
+
+                }
+
                 case "Iron Will" -> {
-                    SurgeAttackAction oldFatigue = new SurgeAttackAction(Surge.RECOVER_1_FATIGUE, f.getComponentID());
-                    if (f.getAbilities().contains(oldFatigue))
-                    {
-                        // Increase our max Fatigue by +1, and every Surge now recovers +2 Fatigue instead of +1
-                        f.getAttribute(Figure.Attribute.Fatigue).setMaximum(f.getAttributeMax(Figure.Attribute.Fatigue) + 1);
-                        f.removeAbility(oldFatigue);
-                        SurgeAttackAction newFatigue = new SurgeAttackAction(Surge.RECOVER_2_FATIGUE, f.getComponentID());
-                        f.addAbility(newFatigue);
+                    if (!f.hasBonus(DescentTypes.SkillBonus.IronWill)) {
+                        SurgeAttackAction oldFatigue = new SurgeAttackAction(Surge.RECOVER_1_FATIGUE, f.getComponentID());
+                        if (f.getAbilities().contains(oldFatigue)) {
+                            // Increase our max Fatigue by +1, and every Surge now recovers +2 Fatigue instead of +1
+                            f.getAttribute(Figure.Attribute.Fatigue).setMaximum(f.getAttributeMax(Figure.Attribute.Fatigue) + 1);
+                            f.removeAbility(oldFatigue);
+                            SurgeAttackAction newFatigue = new SurgeAttackAction(Surge.RECOVER_2_FATIGUE, f.getComponentID());
+                            f.addAbility(newFatigue);
+                            f.addBonus(DescentTypes.SkillBonus.IronWill);
+                        }
                     }
+                }
+
+                case "Rune Mastery" -> {
+
+                }
+
+                case "Break the Rune" -> {
+                    Deck<DescentCard> hand = f.getHandEquipment();
+                    if (hand == null) break;
+                    boolean hasRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
+                    if (!hasRuneItem) {
+                        for (DescentCard item : hand.getComponents()) {
+                            String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                            if (equipmentType == null) continue;
+                            if (Arrays.asList(equipmentType).contains("Rune")) {
+                                hasRuneItem = true;
+                                break;
+                            }
+                        }
+                    }
+                    // If we still don't have a legal Rune weapon, don't bother
+                    if (!hasRuneItem) break;
+
+                    List<Integer> targets = new ArrayList<>();
+                    Set<BoardNode> tiles = getNeighboursInRange(dgs, f.getPosition(), 3);
+                    for (BoardNode tile : tiles)
+                    {
+                        int neighbourID = ((PropertyInt) tile.getProperty(playersHash)).value;
+                        if (neighbourID == -1 || neighbourID == f.getComponentID()) continue;
+                        if (hasLineOfSight(dgs, f.getPosition(), ((PropertyVector2D) tile.getProperty(coordinateHash)).values)) {
+                            Figure target = (Figure) dgs.getComponentById(neighbourID);
+
+                            // Check if the target is an Air Elemental who just used the Air ability
+                            // If they are, do not add them to the list if we cannot target them
+                            if (target instanceof Monster)
+                                if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR))
+                                    if (!checkAdjacent(dgs, f, target))
+                                        continue;
+                            targets.add(neighbourID);
+                        }
+                    }
+
+                    if (!targets.isEmpty())
+                    {
+                        BreakTheRune breakRune = new BreakTheRune(f.getComponentID(), targets);
+                        if (breakRune.canExecute(dgs))
+                            actions.add(breakRune);
+                    }
+
+
+
+                }
+
+                case "Quick Casting ->" -> {
+
                 }
 
                 // - SCOUT SKILLS

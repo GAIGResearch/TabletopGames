@@ -155,6 +155,7 @@ public class DescentTypes {
         ArmorOfFaith,
         DivineFury,
         PrayerOfPeace,
+        InscribeRune,
         IronWill;
     }
 
