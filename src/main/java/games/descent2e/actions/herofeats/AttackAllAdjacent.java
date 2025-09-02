@@ -19,6 +19,8 @@ public class AttackAllAdjacent extends MultiAttack {
     public AttackAllAdjacent(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
         this.minRange = Integer.MIN_VALUE;
+        this.isMelee = true;
+        this.hasReach = false;
     }
 
     @Override
@@ -34,7 +36,7 @@ public class AttackAllAdjacent extends MultiAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        if (defendingFigures.size() < 1) return false;
+        if (defendingFigures.isEmpty()) return false;
         Figure f = dgs.getActingFigure();
         if (f.getNActionsExecuted().isMaximum()) return false;
         if (f instanceof Hero)

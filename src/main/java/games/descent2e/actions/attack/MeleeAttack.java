@@ -77,6 +77,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     protected AttackPhase phase = NOT_STARTED;
     protected int interruptPlayer;
     int surgesToSpend;
+    int extraSurges;
     int extraRange, pierce, extraDamage, extraDefence, mending, fatigueHeal;
     protected boolean hasReach;
     boolean isDiseasing;
@@ -260,7 +261,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             case POST_ATTACK_ROLL:
                 // Any rerolls are executed via interrupts
                 // once done we see how many surges we have to spend
-                surgesToSpend = state.getAttackDicePool().getSurge();
+                // If for whatever reason we must subtract Surges, clamp the minimum to 0
+                surgesToSpend = Math.max(0, state.getAttackDicePool().getSurge() + extraSurges);
                 phase = surgesToSpend > 0 ? SURGE_DECISIONS : ATTRIBUTE_TEST;
                 break;
             case SURGE_DECISIONS:
@@ -543,6 +545,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.phase = phase;
         retValue.interruptPlayer = interruptPlayer;
         retValue.surgesToSpend = surgesToSpend;
+        retValue.extraSurges = extraSurges;
         retValue.extraRange = extraRange;
         retValue.extraDamage = extraDamage;
         retValue.extraDefence = extraDefence;
@@ -596,8 +599,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof MeleeAttack) {
             MeleeAttack other = (MeleeAttack) obj;
-            return other.attackingFigure == attackingFigure &&
-                    other.surgesToSpend == surgesToSpend && other.extraDamage == extraDamage &&
+            return other.attackingFigure == attackingFigure && other.surgesToSpend == surgesToSpend &&
+                    other.extraSurges == extraSurges && other.extraDamage == extraDamage &&
                     other.extraDefence == extraDefence && other.hasReach == hasReach &&
                     other.isDiseasing == isDiseasing && other.isImmobilizing == isImmobilizing &&
                     other.isPoisoning == isPoisoning && other.isStunning == isStunning &&
@@ -620,7 +623,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public int hashCode() {
         return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce, hasReach, substitute, substituteFigure, substitutePlayer, substituteName,
                 extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, leeching, subdue, fatigueHeal, hasShadow, hitShadow,
-                surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, reduced, result);
+                surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, extraSurges, damage, range, skip, reduced, result);
     }
 
     @Override
@@ -657,6 +660,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 + ") on " + defenderName + "(" + defendingPlayer + "). "
                 + "Phase: " + phase + ". Interrupt player: " + interruptPlayer
                 + ". Surges to spend: " + surgesToSpend
+                + ". Extra Surges: " + extraSurges
                 + ". Has reach: " + hasReach
                 + ". Extra range: " + extraRange
                 + ". Pierce: " + pierce
@@ -718,7 +722,18 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             retValue.add(new EndSurgePhase());
         }
         if (phase == POST_ATTACK_ROLL) {
-            retValue.add(new EndRerollPhase());
+            boolean reroll = false;
+            for (AbstractAction action : retValue)
+            {
+                if (action instanceof TarhaAbilityReroll)
+                {
+                    reroll = true;
+                    break;
+                }
+            }
+            if (reroll)
+                retValue.add(new EndRerollPhase());
+            else retValue.add(new EndCurrentPhase());
         }
         if (phase == PRE_DEFENCE_ROLL) {
             // Applying Subdue should override any subsequent actions
@@ -915,6 +930,16 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public void setDefendingFigure(int d)
     {
         defendingFigure = d;
+    }
+
+    public void addExtraSurge(int s)
+    {
+        extraSurges += s;
+    }
+
+    public int getExtraSurge()
+    {
+        return extraSurges;
     }
 
     public AttackPhase getPhase() {

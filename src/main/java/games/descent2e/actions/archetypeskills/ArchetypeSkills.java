@@ -241,6 +241,30 @@ public class ArchetypeSkills {
 
                 case "Rune Mastery" -> {
 
+                    Deck<DescentCard> hand = f.getHandEquipment();
+                    if (hand == null) break;
+                    boolean hasRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
+                    if (!hasRuneItem) {
+                        for (DescentCard item : hand.getComponents()) {
+                            String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                            if (equipmentType == null) continue;
+                            if (Arrays.asList(equipmentType).contains("Rune")) {
+                                hasRuneItem = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    RuneMastery runeMastery = new RuneMastery(skill.getComponentID());
+
+                    // Enable the ability only if we have a suitable weapon
+                    if (hasRuneItem) {
+                        if (!f.hasAbility(runeMastery))
+                            f.addAbility(runeMastery);
+                    }
+                    else if (f.hasAbility(runeMastery))
+                        f.removeAbility(runeMastery);
+
                 }
 
                 case "Break the Rune" -> {
