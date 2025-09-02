@@ -12,8 +12,8 @@ import java.util.Objects;
 
 public class Subdue extends DescentAction {
 
-    int figureID;
-    DescentTypes.DescentCondition condition;
+    protected int figureID;
+    protected DescentTypes.DescentCondition condition;
     public Subdue(int figureID, DescentTypes.DescentCondition condition) {
         super(Triggers.END_ATTACK);
         this.figureID = figureID;
@@ -69,6 +69,11 @@ public class Subdue extends DescentAction {
         if (currentAttack == null)
             return false;
         if (!currentAttack.isSubdue()) return false;
+
+        // No point calling this if we missed our attack
+        if (currentAttack.attackMissed(dgs)) return false;
+
+        if (condition == null) return false;
 
         // We can only apply a condition from Subdue if we do not already have it
         Figure f = (Figure) dgs.getComponentById(figureID);

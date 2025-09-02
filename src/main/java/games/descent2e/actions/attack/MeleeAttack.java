@@ -12,6 +12,7 @@ import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
+import games.descent2e.actions.archetypeskills.RunicSorceryStatus;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.*;
 import games.descent2e.components.*;
@@ -514,18 +515,22 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // Applies the Diseased condition
         if (isDiseasing) {
             defender.addCondition(DescentTypes.DescentCondition.Disease);
+            result += "; Diseased";
         }
         // Applies the Immobilized condition
         if (isImmobilizing) {
             immobilize(defender);
+            result += "; Immobilized";
         }
         // Applies the Poisoned condition
         if (isPoisoning) {
             defender.addCondition(DescentTypes.DescentCondition.Poison);
+            result += "; Poisoned";
         }
         // Applies the Stunned condition
         if (isStunning) {
             defender.addCondition(DescentTypes.DescentCondition.Stun);
+            result += "; Stunned";
         }
     }
 
@@ -715,6 +720,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             retValue.removeIf(a -> {
                if (a instanceof SurgeAttackAction) {
                    SurgeAttackAction surge = (SurgeAttackAction)a;
+                   // Runic Knowledge shouldn't be usable if we don't have the Fatigue to use it
+                   if (surge.surge == Surge.RUNIC_KNOWLEDGE &&
+                           (((Figure) state.getComponentById(attackingFigure)).getAttribute(Figure.Attribute.Fatigue).isMaximum() && fatigueHeal < 1))
+                       return true;
                    return surgesUsed.contains(surge.surge);
                }
                return false;
@@ -742,7 +751,14 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 List<AbstractAction> subdueActions = new ArrayList<>();
                 for (DescentTypes.DescentCondition condition : DescentTypes.DescentCondition.values())
                 {
-                    Subdue subdueAction = new Subdue(defendingFigure, condition);
+                    Subdue subdueAction;
+
+                    // Baron Zachareth versus Runemaster Mage Hero
+                    // It's the same action, just a different toString()
+                    if (state.getComponentById(attackingFigure) instanceof Monster)
+                        subdueAction = new Subdue(defendingFigure, condition);
+                    else subdueAction = new RunicSorceryStatus(defendingFigure, condition);
+
                     if (subdueAction.canExecute(state)) {
                         subdueActions.add(subdueAction);
                     }
@@ -869,6 +885,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void addFatigueDamage(int fatiguePenalty) {
         fatigueHeal -= fatiguePenalty;
+    }
+    public int getFatigueHeal()
+    {
+        return fatigueHeal;
     }
     public void setDiseasing(boolean disease) {
         isDiseasing = disease;

@@ -222,6 +222,47 @@ public class ArchetypeSkills {
                 }
 
                 case "Runic Sorcery" -> {
+                    Deck<DescentCard> hand = f.getHandEquipment();
+                    if (hand == null) break;
+                    boolean hasRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
+                    if (!hasRuneItem) {
+                        for (DescentCard item : hand.getComponents()) {
+                            String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                            if (equipmentType == null) continue;
+                            if (Arrays.asList(equipmentType).contains("Rune")) {
+                                hasRuneItem = true;
+                                break;
+                            }
+                        }
+                    }
+                    // If we still don't have a legal Rune weapon, don't bother
+                    if (!hasRuneItem) break;
+
+                    DescentTypes.AttackType attackType = getAttackType(f);
+                    boolean reach = checkReach(dgs, f);
+
+                    List<Integer> targets = new ArrayList<>();
+
+                    if (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH)
+                    {
+                        targets = getMeleeTargets(dgs, f, reach);
+                        for (Integer target : targets) {
+                            RunicSorcery runicSorcery = new RunicSorcery(f.getComponentID(), target, true, reach);
+                            if (runicSorcery.canExecute(dgs))
+                                actions.add(runicSorcery);
+                        }
+                    }
+
+                    if (attackType == DescentTypes.AttackType.RANGED || attackType == DescentTypes.AttackType.BOTH)
+                    {
+                        targets = getRangedTargets(dgs, f);
+                        for (Integer target : targets) {
+                            RunicSorcery runicSorcery = new RunicSorcery(f.getComponentID(), target);
+                            if (runicSorcery.canExecute(dgs))
+                                actions.add(runicSorcery);
+                        }
+                    }
+
 
                 }
 

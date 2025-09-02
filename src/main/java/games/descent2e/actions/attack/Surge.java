@@ -32,8 +32,21 @@ public enum Surge {
     RECOVER_1_FATIGUE(1, (a, s) -> a.addFatigueHeal(1)),
     RECOVER_2_FATIGUE(1, (a, s) -> a.addFatigueHeal(2)),
     RUNIC_KNOWLEDGE(1, (a, s) -> {
-        s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
-        a.addDamage(2);
+        // Runic Knowledge can still be activated if we spent Fatigue to our maximum before we checked to remove it
+        // Thus, this disables its effect if we have maximum Fatigue
+        boolean canUse = false;
+        if(!s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+            canUse = true;
+            s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
+        }
+        // Even if we're already at maximum Fatigue, if we used another Surge to recover, we can still use it
+        if ((a.getFatigueHeal() > 0)) {
+            canUse = true;
+            a.addFatigueDamage(1);
+        }
+        if(canUse) {
+            a.addDamage(2);
+        }
     }),
     FIRE_BREATH(1, (a, s) -> a.addInterruptAttack("Fire Breath")),
 

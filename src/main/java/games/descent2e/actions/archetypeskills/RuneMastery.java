@@ -75,7 +75,8 @@ public class RuneMastery extends DescentAction {
         if (dgs.isActionInProgress()) {
             IExtendedSequence action = dgs.currentActionInProgress();
             // Ranged Attacks are instances of Melee Attacks, so both types are covered
-            if (action instanceof MeleeAttack) {
+            if (action instanceof MeleeAttack melee) {
+                if (melee.getSkip()) return false;
                 Figure f = dgs.getActingFigure();
                 DescentCard card = (DescentCard) dgs.getComponentById(cardID);
                 return !f.isExhausted(card);
