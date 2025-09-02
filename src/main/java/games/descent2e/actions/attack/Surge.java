@@ -1,6 +1,7 @@
 package games.descent2e.actions.attack;
 
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
 
@@ -33,18 +34,23 @@ public enum Surge {
     RECOVER_2_FATIGUE(1, (a, s) -> a.addFatigueHeal(2)),
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         // Runic Knowledge can still be activated if we spent Fatigue to our maximum before we checked to remove it
-        // Thus, this disables its effect if we have maximum Fatigue
-        boolean canUse = false;
-        if(!s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
-            canUse = true;
+        // Thus, this disables its effect if we have maximum Fatigue and cannot ForceFatigue
+        Figure f = s.getActingFigure();
+        if(!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
             s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
+            a.addDamage(2);
+            return;
         }
         // Even if we're already at maximum Fatigue, if we used another Surge to recover, we can still use it
         if ((a.getFatigueHeal() > 0)) {
-            canUse = true;
             a.addFatigueDamage(1);
+            a.addDamage(2);
+            return;
         }
-        if(canUse) {
+
+        // Worse comes to worst, so long as we have the Health for it, we can Force Fatigue
+        if ((f.getAttributeValue(Figure.Attribute.Health) - 1 > f.getAttributeMin(Figure.Attribute.Health))) {
+            DescentHelper.forcedFatigue(s, f, "Runic Knowledge Surge");
             a.addDamage(2);
         }
     }),

@@ -177,31 +177,30 @@ public class ArchetypeSkills {
                 // Runemaster
                 case "Runic Knowledge" -> {
                     SurgeAttackAction surge = new SurgeAttackAction(Surge.RUNIC_KNOWLEDGE, f.getComponentID());
-                    // Can only use the surge if we have the Fatigue to spare
+                    // Can only use the surge if we have the Fatigue to spare,
                     // and we have a Magic or Rune item equipped
-                    if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
-                        Deck<DescentCard> hand = f.getHandEquipment();
-                        if (hand != null) {
-                            boolean hasMagicOrRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
-                            if (!hasMagicOrRuneItem) {
-                                for (DescentCard item : hand.getComponents()) {
-                                    String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
-                                    if (equipmentType == null) continue;
-                                    if (Arrays.asList(equipmentType).contains("Magic") || Arrays.asList(equipmentType).contains("Rune")) {
-                                        hasMagicOrRuneItem = true;
-                                        break;
-                                    }
+                    Deck<DescentCard> hand = f.getHandEquipment();
+                    if (hand != null) {
+                        boolean hasMagicOrRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
+                        if (!hasMagicOrRuneItem) {
+                            for (DescentCard item : hand.getComponents()) {
+                                String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                                if (equipmentType == null) continue;
+                                if (Arrays.asList(equipmentType).contains("Magic") || Arrays.asList(equipmentType).contains("Rune")) {
+                                    hasMagicOrRuneItem = true;
+                                    break;
                                 }
-                            }
-                            if (hasMagicOrRuneItem) {
-                                if (!f.getAbilities().contains(surge)) {
-                                    f.addAbility(surge);
-                                }
-                                break;
                             }
                         }
+
+                        if (hasMagicOrRuneItem) {
+                            if (!f.getAbilities().contains(surge)) {
+                                f.addAbility(surge);
+                            }
+                        }
+                        else f.removeAbility(surge);
                     }
-                    f.removeAbility(surge);
+                    else f.removeAbility(surge);
                 }
 
                 case "Ghost Armor" -> {

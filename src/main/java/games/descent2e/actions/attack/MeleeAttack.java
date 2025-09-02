@@ -722,10 +722,17 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             retValue.removeIf(a -> {
                if (a instanceof SurgeAttackAction) {
                    SurgeAttackAction surge = (SurgeAttackAction)a;
-                   // Runic Knowledge shouldn't be usable if we don't have the Fatigue to use it
-                   if (surge.surge == Surge.RUNIC_KNOWLEDGE &&
-                           (((Figure) state.getComponentById(attackingFigure)).getAttribute(Figure.Attribute.Fatigue).isMaximum() && fatigueHeal < 1))
-                       return true;
+                   // Runic Knowledge shouldn't be usable if we don't have the Fatigue to use
+                   // It can be used for ForceFatigue, but we shouldn't use it if we only have 1 Health left
+                   // Thus, only allow it if it is the last Surge available, to prevent unnecessary self-damage
+                   if (surge.surge == Surge.RUNIC_KNOWLEDGE) {
+                       Figure attacker = (Figure) state.getComponentById(attackingFigure);
+                       if (attacker.getAttribute(Figure.Attribute.Fatigue).isMaximum())
+                           if (fatigueHeal < 1)
+                               if (attacker.getAttributeValue(Figure.Attribute.Health) - 1 <= attacker.getAttributeMin(Figure.Attribute.Health))
+                                   if (surgesToSpend > 1)
+                                       return true;
+                   }
                    return surgesUsed.contains(surge.surge);
                }
                return false;

@@ -18,17 +18,18 @@ import java.util.Objects;
 
 public class GhostArmor extends Shield {
 
+    // Ghost Armor can be used as many times as we'd like, so long as we have the Fatigue for it
     public GhostArmor(int figureID, int cardID) {
         super(figureID, cardID, 1);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Ghost Armor: Spend 1 Fatigue for +1 shield to defense roll";
+        return "Ghost Armor: +1 Shield";
     }
 
     public String toString() {
-        return "Ghost Armor";
+        return "Ghost Armor: +1 Shield";
     }
 
     @Override
@@ -54,11 +55,6 @@ public class GhostArmor extends Shield {
 
         DescentCard skill = (DescentCard) dgs.getComponentById(cardID);
         if (!(((Hero) f).getSkills().contains(skill))) return false;
-
-        // Make sure that we haven't used Ghost Armor before
-        Pair<Integer, AbstractAction> lastAction = Iterables.getLast(dgs.getHistory());
-        if (lastAction.a == f.getOwnerId() && lastAction.b instanceof GhostArmor)
-            return false;
 
         return canUse(dgs);
     }
