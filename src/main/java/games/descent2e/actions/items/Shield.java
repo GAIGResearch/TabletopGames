@@ -14,9 +14,9 @@ import java.util.Objects;
 
 public class Shield extends DescentAction {
 
-    int figureID;
-    int value = 1;
-    int cardID;
+    protected int figureID;
+    protected int value = 1;
+    protected int cardID;
     public Shield(int figureID, int cardID, int value) {
         super(Triggers.ROLL_OWN_DICE);
         this.figureID = figureID;
@@ -57,9 +57,14 @@ public class Shield extends DescentAction {
         {
             if (!((Hero) f).getHandEquipment().contains(card)) return false;
         }
+
+        return canUse(dgs);
+    }
+
+    protected boolean canUse(DescentGameState dgs)
+    {
         IExtendedSequence currentAction = dgs.currentActionInProgress();
-        if (!(currentAction instanceof MeleeAttack)) return false;
-        MeleeAttack melee = (MeleeAttack) currentAction;
+        if (!(currentAction instanceof MeleeAttack melee)) return false;
         if (!melee.getSkip() && melee.getDefendingFigure() == figureID && melee.getPhase() == MeleeAttack.AttackPhase.POST_DEFENCE_ROLL) {
 
             // If the defender already has enough defence to block the attack, there's no point in exhausting the shield

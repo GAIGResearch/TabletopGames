@@ -1,0 +1,79 @@
+package games.descent2e.actions.archetypeskills;
+
+import core.AbstractGameState;
+import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
+import games.descent2e.DescentGameState;
+import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.Triggers;
+import games.descent2e.actions.attack.MeleeAttack;
+import games.descent2e.actions.items.Shield;
+import games.descent2e.components.DescentCard;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+import org.sparkproject.guava.collect.Iterables;
+import utilities.Pair;
+
+import java.util.Objects;
+
+public class GhostArmor extends Shield {
+
+    public GhostArmor(int figureID, int cardID) {
+        super(figureID, cardID, 1);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Ghost Armor: Spend 1 Fatigue for +1 shield to defense roll";
+    }
+
+    public String toString() {
+        return "Ghost Armor";
+    }
+
+    @Override
+    public boolean execute(DescentGameState dgs) {
+        Figure f = (Figure) dgs.getComponentById(figureID);
+        f.getAttribute(Figure.Attribute.Fatigue).increment();
+        ((MeleeAttack) Objects.requireNonNull(dgs.currentActionInProgress())).addDefence(value);
+        f.addActionTaken(toString());
+        return true;
+    }
+
+    @Override
+    public DescentAction copy() {
+        return new GhostArmor(figureID, cardID);
+    }
+
+    @Override
+    public boolean canExecute(DescentGameState dgs) {
+        Figure f = (Figure) dgs.getComponentById(figureID);
+        if (f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) return false;
+
+        if (!(f instanceof Hero)) return false;
+
+        DescentCard skill = (DescentCard) dgs.getComponentById(cardID);
+        if (!(((Hero) f).getSkills().contains(skill))) return false;
+
+        // Make sure that we haven't used Ghost Armor before
+        Pair<Integer, AbstractAction> lastAction = Iterables.getLast(dgs.getHistory());
+        if (lastAction.a == f.getOwnerId() && lastAction.b instanceof GhostArmor)
+            return false;
+
+        return canUse(dgs);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        GhostArmor shield = (GhostArmor) o;
+        return figureID == shield.figureID && value == shield.value && cardID == shield.cardID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode());
+    }
+}
