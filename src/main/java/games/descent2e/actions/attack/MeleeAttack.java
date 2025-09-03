@@ -585,13 +585,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // Check for abilities that prevent attacking
         if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
 
-        if (target instanceof Monster)
-        {
-            if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
-                !checkAdjacent(dgs, f, target)) {
-                // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
-                return false;
-            }
+        if (Air.checkAir(dgs, f, target)) {
+            // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
+            return false;
         }
 
         return checkAllSpaces(dgs, f, target, getRange(), true);

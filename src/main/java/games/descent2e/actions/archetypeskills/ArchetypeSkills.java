@@ -11,6 +11,7 @@ import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.attack.SurgeAttackAction;
+import games.descent2e.actions.monsterfeats.Air;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
@@ -328,10 +329,8 @@ public class ArchetypeSkills {
 
                             // Check if the target is an Air Elemental who just used the Air ability
                             // If they are, do not add them to the list if we cannot target them
-                            if (target instanceof Monster)
-                                if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR))
-                                    if (!checkAdjacent(dgs, f, target))
-                                        continue;
+                            if (Air.checkAir(dgs, f, target))
+                                continue;
                             targets.add(neighbourID);
                         }
                     }

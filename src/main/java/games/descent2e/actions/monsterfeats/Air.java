@@ -2,6 +2,8 @@ package games.descent2e.actions.monsterfeats;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
+import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.*;
@@ -55,6 +57,16 @@ public class Air extends DescentAction {
         if (monster.hasPassive(MonsterAbilities.MonsterPassive.AIR)) {
             monster.removePassive(MonsterAbilities.MonsterPassive.AIR);
         }
+    }
+
+    // Check for Attacks if we can legally target the Monster
+    public static boolean checkAir(DescentGameState dgs, Figure attacker, Figure target)
+    {
+        // Must be a Monster, who used the Air ability, and not adjacent to the attacker
+        if ((target instanceof Monster))
+            if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR))
+                return !DescentHelper.checkAdjacent(dgs, attacker, target);
+        return false;
     }
 
     @Override

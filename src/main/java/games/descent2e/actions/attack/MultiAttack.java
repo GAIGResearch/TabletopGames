@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
+import games.descent2e.actions.monsterfeats.Air;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.monsterfeats.NotMe;
 import games.descent2e.actions.monsterfeats.NotMeSwap;
@@ -245,13 +246,9 @@ public class MultiAttack extends RangedAttack {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
             if (target == null) return false;
 
-            if (target instanceof Monster)
-            {
-                if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
-                        !checkAdjacent(dgs, f, target)) {
-                    // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
-                    return false;
-                }
+            if (Air.checkAir(dgs, f, target)) {
+                // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
+                return false;
             }
 
             if (!checkAllSpaces(dgs, f, target, getRange(), true)) return false;

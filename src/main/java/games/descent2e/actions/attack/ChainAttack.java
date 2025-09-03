@@ -3,6 +3,7 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
+import games.descent2e.actions.monsterfeats.Air;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
@@ -61,13 +62,9 @@ public class ChainAttack extends MultiAttack{
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
             if (target == null) return false;
 
-            if (target instanceof Monster)
-            {
-                if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
-                        !checkAdjacent(dgs, f, target)) {
-                    // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
-                    return false;
-                }
+            if (Air.checkAir(dgs, f, target)) {
+                // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
+                return false;
             }
 
             // We need to check from the initial target's position

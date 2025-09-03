@@ -10,6 +10,7 @@ import games.descent2e.DescentTypes;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.attack.ChainAttack;
 import games.descent2e.actions.attack.FreeAttack;
+import games.descent2e.actions.monsterfeats.Air;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.DicePool;
@@ -62,13 +63,9 @@ public class QuickCasting extends FreeAttack {
         Figure target = (Figure) dgs.getComponentById(defendingFigure);
         if (target == null) return false;
 
-        if (target instanceof Monster)
-        {
-            if (((Monster) target).hasPassive(MonsterAbilities.MonsterPassive.AIR) &&
-                    !checkAdjacent(dgs, f, target)) {
-                // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
-                return false;
-            }
+        if (Air.checkAir(dgs, f, target)) {
+            // If the target has the Air Immunity passive and we are not adjacent, we cannot attack them
+            return false;
         }
 
         return checkAllSpaces(dgs, f, target, getRange(), true);
