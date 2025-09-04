@@ -32,6 +32,7 @@ public enum Surge {
     RECOVER_1_HEART(1, (a, s) -> a.addMending(1)),
     RECOVER_1_FATIGUE(1, (a, s) -> a.addFatigueHeal(1)),
     RECOVER_2_FATIGUE(1, (a, s) -> a.addFatigueHeal(2)),
+    BLAST(1, (a, s) -> a.addInterruptAttack("Blast")),
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         // Runic Knowledge can still be activated if we spent Fatigue to our maximum before we checked to remove it
         // Thus, this disables its effect if we have maximum Fatigue and cannot ForceFatigue

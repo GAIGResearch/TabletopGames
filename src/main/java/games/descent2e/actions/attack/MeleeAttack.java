@@ -780,10 +780,18 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (phase == INTERRUPT_ATTACK)
         {
             List<AbstractAction> interruptAttacks = new ArrayList<>();
+            if (BlastAttack.isEnabled())
+            {
+                Set<BlastAttack> blastAttacks = BlastAttack.constructBlasts(state, attackingFigure, defendingFigure);
+                if (!blastAttacks.isEmpty())
+                    interruptAttacks.addAll(blastAttacks);
+            }
+
             if (FireBreath.isEnabled())
             {
                 Set<FireBreath> fireBreath = FireBreath.constructFireBreath(state, attackingFigure, defendingFigure);
-                if (!fireBreath.isEmpty()) interruptAttacks.addAll(fireBreath);
+                if (!fireBreath.isEmpty())
+                    interruptAttacks.addAll(fireBreath);
             }
 
             if (Knockback.isEnabled()) {
@@ -803,7 +811,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
             if (QuickCasting.isEnabled()) {
                 Set<QuickCasting> quickCastings = QuickCasting.constructQuickCasting(state, attackingFigure);
-                if (!quickCastings.isEmpty()) interruptAttacks.addAll(quickCastings);
+                if (!quickCastings.isEmpty())
+                    interruptAttacks.addAll(quickCastings);
             }
 
             if (!interruptAttacks.isEmpty())
@@ -997,6 +1006,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // In the base game, these are only the Shadow Dragon's Fire Breath, and Splig's Knockback
 
         switch (attack) {
+            case "Blast" -> BlastAttack.enable();
             case "Fire Breath" -> FireBreath.increaseEnabled();
             case "Knockback" -> Knockback.increaseEnabled();
         }
@@ -1008,5 +1018,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // So that we don't accidentally enable them again for different attacks
         FireBreath.disable();
         Knockback.disable();
+        BlastAttack.disable();
     }
 }
