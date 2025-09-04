@@ -1,19 +1,13 @@
 package games.descent2e.actions.archetypeskills;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
-import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
-import org.sparkproject.guava.collect.Iterables;
-import utilities.Pair;
-
 import java.util.Objects;
 
 public class GhostArmor extends Shield {

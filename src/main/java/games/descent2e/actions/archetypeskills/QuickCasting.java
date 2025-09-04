@@ -1,29 +1,21 @@
 package games.descent2e.actions.archetypeskills;
 
-import com.sun.xml.bind.v2.model.annotation.Quick;
 import core.AbstractGameState;
-import core.components.BoardNode;
-import core.properties.PropertyInt;
-import core.properties.PropertyVector2D;
+import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
-import games.descent2e.abilities.NightStalker;
-import games.descent2e.actions.attack.ChainAttack;
+import games.descent2e.actions.attack.EndCurrentPhase;
 import games.descent2e.actions.attack.FreeAttack;
 import games.descent2e.actions.monsterfeats.Air;
-import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DescentCard;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
-import games.descent2e.components.Monster;
-import utilities.Vector2D;
+import org.sparkproject.guava.collect.Iterables;
+import utilities.Pair;
 
 import java.util.*;
 
-import static core.CoreConstants.playersHash;
 import static games.descent2e.DescentHelper.*;
 import static games.descent2e.DescentHelper.checkReach;
-import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_DEFENCE_ROLL;
 
 public class QuickCasting extends FreeAttack {
 
@@ -56,6 +48,11 @@ public class QuickCasting extends FreeAttack {
         Figure f = (Figure) dgs.getComponentById(attackingFigure);
         if (f == null) return false;
         if (!f.hasBonus(DescentTypes.SkillBonus.QuickCasting)) return false;
+
+        Pair<Integer, AbstractAction> lastAction = Iterables.getLast(dgs.getHistory());
+        if (lastAction.a == f.getOwnerId() && lastAction.b instanceof EndCurrentPhase)
+            return false;
+
         DescentCard card = (DescentCard) dgs.getComponentById(cardID);
         if (card == null) return false;
         if (f.isExhausted(card)) return false;
