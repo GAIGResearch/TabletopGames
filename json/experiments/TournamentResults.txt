@@ -1,0 +1,264 @@
+Game: GoFish, Players: 2, Mode: EXHAUSTIVE, TotalGames: 600, GamesPerMatchup: 20
+Alpha calculations using Delta Ordinal
+Alpha: 10.0
+	0.092	mcts-500
+	0.329	mcts-1000
+	0.105	random
+	0.233	mcts-100
+	0.240	mcts-5000
+	0.000	osla
+
+Transition matrix for alpha = 10.0
+0.054	0.146	0.089	0.054	0.656	0.001	
+0.102	0.277	0.102	0.457	0.062	0.000	
+0.062	0.277	0.102	0.102	0.457	0.000	
+0.190	0.115	0.190	0.190	0.314	0.000	
+0.013	0.701	0.035	0.095	0.156	0.000	
+0.014	0.759	0.062	0.062	0.103	0.000	
+B matrix for alpha = 10.0
+0.520	0.215	0.417	0.354	0.347	0.188	
+0.215	1.565	0.332	0.476	0.716	0.253	
+0.417	0.332	0.380	0.331	0.462	0.271	
+0.354	0.476	0.331	0.491	0.348	0.146	
+0.347	0.716	0.462	0.348	1.303	0.557	
+0.188	0.253	0.271	0.146	0.557	0.594	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for mcts-500
+		mcts-500
+		random
+		mcts-100
+
+Alpha calculations using Win Rate
+Alpha: 10.0
+	0.092	mcts-500
+	0.329	mcts-1000
+	0.105	random
+	0.233	mcts-100
+	0.240	mcts-5000
+	0.000	osla
+
+Transition matrix for alpha = 10.0
+0.054	0.146	0.089	0.054	0.656	0.001	
+0.102	0.277	0.102	0.457	0.062	0.000	
+0.062	0.277	0.102	0.102	0.457	0.000	
+0.190	0.115	0.190	0.190	0.314	0.000	
+0.013	0.701	0.035	0.095	0.156	0.000	
+0.014	0.759	0.062	0.062	0.103	0.000	
+B matrix for alpha = 10.0
+0.520	0.215	0.417	0.354	0.347	0.188	
+0.215	1.565	0.332	0.476	0.716	0.253	
+0.417	0.332	0.380	0.331	0.462	0.271	
+0.354	0.476	0.331	0.491	0.348	0.146	
+0.347	0.716	0.462	0.348	1.303	0.557	
+0.188	0.253	0.271	0.146	0.557	0.594	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for mcts-500
+		mcts-500
+		random
+		mcts-100
+
+mcts-500 got 101.00 points. mcts-500 won 16.8% of the 600 games of the tournament. mcts-500 won 50.5% of the 200 games it played during the tournament.
+mcts-500 got a mean score of 6.59.
+mcts-500 won 45.0% of the 40 games against mcts-1000.
+mcts-500 won 47.5% of the 40 games against random.
+mcts-500 won 50.0% of the 40 games against mcts-100.
+mcts-500 won 37.5% of the 40 games against mcts-5000.
+mcts-500 won 72.5% of the 40 games against osla.
+
+mcts-1000 got 123.00 points. mcts-1000 won 20.5% of the 600 games of the tournament. mcts-1000 won 61.5% of the 200 games it played during the tournament.
+mcts-1000 got a mean score of 6.94.
+mcts-1000 won 55.0% of the 40 games against mcts-500.
+mcts-1000 won 55.0% of the 40 games against random.
+mcts-1000 won 47.5% of the 40 games against mcts-100.
+mcts-1000 won 57.5% of the 40 games against mcts-5000.
+mcts-1000 won 92.5% of the 40 games against osla.
+
+random got 108.00 points. random won 18.0% of the 600 games of the tournament. random won 54.0% of the 200 games it played during the tournament.
+random got a mean score of 6.68.
+random won 52.5% of the 40 games against mcts-500.
+random won 45.0% of the 40 games against mcts-1000.
+random won 50.0% of the 40 games against mcts-100.
+random won 42.5% of the 40 games against mcts-5000.
+random won 80.0% of the 40 games against osla.
+
+mcts-100 got 112.00 points. mcts-100 won 18.7% of the 600 games of the tournament. mcts-100 won 56.0% of the 200 games it played during the tournament.
+mcts-100 got a mean score of 6.65.
+mcts-100 won 50.0% of the 40 games against mcts-500.
+mcts-100 won 52.5% of the 40 games against mcts-1000.
+mcts-100 won 50.0% of the 40 games against random.
+mcts-100 won 47.5% of the 40 games against mcts-5000.
+mcts-100 won 80.0% of the 40 games against osla.
+
+mcts-5000 got 119.00 points. mcts-5000 won 19.8% of the 600 games of the tournament. mcts-5000 won 59.5% of the 200 games it played during the tournament.
+mcts-5000 got a mean score of 6.84.
+mcts-5000 won 62.5% of the 40 games against mcts-500.
+mcts-5000 won 42.5% of the 40 games against mcts-1000.
+mcts-5000 won 57.5% of the 40 games against random.
+mcts-5000 won 52.5% of the 40 games against mcts-100.
+mcts-5000 won 82.5% of the 40 games against osla.
+
+osla got 37.00 points. osla won 6.2% of the 600 games of the tournament. osla won 18.5% of the 200 games it played during the tournament.
+osla got a mean score of 5.31.
+osla won 27.5% of the 40 games against mcts-500.
+osla won 7.5% of the 40 games against mcts-1000.
+osla won 20.0% of the 40 games against random.
+osla won 20.0% of the 40 games against mcts-100.
+osla won 17.5% of the 40 games against mcts-5000.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+mcts-1000: Win rate 0.62 +/- 0.034	Mean Ordinal 1.39 +/- 0.03
+mcts-5000: Win rate 0.60 +/- 0.035	Mean Ordinal 1.41 +/- 0.03
+mcts-100: Win rate 0.56 +/- 0.035	Mean Ordinal 1.44 +/- 0.04
+random: Win rate 0.54 +/- 0.035	Mean Ordinal 1.46 +/- 0.04
+mcts-500: Win rate 0.51 +/- 0.035	Mean Ordinal 1.50 +/- 0.04
+osla: Win rate 0.19 +/- 0.027	Mean Ordinal 1.82 +/- 0.03
+
+Alpha-rank by Win Rate
+	mcts-1000                     	0.33
+	mcts-5000                     	0.24
+	mcts-100                      	0.23
+	random                        	0.11
+	mcts-500                      	0.09
+	osla                          	0.00
+
+Alpha-rank by Ordinal Position
+	mcts-1000                     	0.33
+	mcts-5000                     	0.24
+	mcts-100                      	0.23
+	random                        	0.11
+	mcts-500                      	0.09
+	osla                          	0.00
+
+Game: GoFish, Players: 2, Mode: EXHAUSTIVE, TotalGames: 600, GamesPerMatchup: 20
+Alpha calculations using Delta Ordinal
+Alpha: 10.0
+	0.268	mcts-500
+	0.161	mcts-1000
+	0.317	random
+	0.172	mcts-100
+	0.081	mcts-5000
+	0.002	osla
+
+Transition matrix for alpha = 10.0
+0.114	0.015	0.840	0.025	0.006	0.000	
+0.524	0.071	0.043	0.043	0.318	0.001	
+0.028	0.342	0.208	0.342	0.076	0.004	
+0.572	0.211	0.077	0.128	0.010	0.001	
+0.555	0.006	0.075	0.336	0.028	0.000	
+0.549	0.045	0.027	0.045	0.333	0.001	
+B matrix for alpha = 10.0
+1.944	0.297	0.417	0.456	0.508	0.091	
+0.297	0.553	0.192	0.479	0.384	0.402	
+0.417	0.192	1.046	0.279	0.197	0.078	
+0.456	0.479	0.279	0.645	0.433	0.337	
+0.508	0.384	0.197	0.433	0.646	0.332	
+0.091	0.402	0.078	0.337	0.332	0.417	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for mcts-1000
+		mcts-1000
+		mcts-100
+		mcts-5000
+		osla
+
+Alpha calculations using Win Rate
+Alpha: 10.0
+	0.268	mcts-500
+	0.161	mcts-1000
+	0.317	random
+	0.172	mcts-100
+	0.081	mcts-5000
+	0.002	osla
+
+Transition matrix for alpha = 10.0
+0.114	0.015	0.840	0.025	0.006	0.000	
+0.524	0.071	0.043	0.043	0.318	0.001	
+0.028	0.342	0.208	0.342	0.076	0.004	
+0.572	0.211	0.077	0.128	0.010	0.001	
+0.555	0.006	0.075	0.336	0.028	0.000	
+0.549	0.045	0.027	0.045	0.333	0.001	
+B matrix for alpha = 10.0
+1.944	0.297	0.417	0.456	0.508	0.091	
+0.297	0.553	0.192	0.479	0.384	0.402	
+0.417	0.192	1.046	0.279	0.197	0.078	
+0.456	0.479	0.279	0.645	0.433	0.337	
+0.508	0.384	0.197	0.433	0.646	0.332	
+0.091	0.402	0.078	0.337	0.332	0.417	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for mcts-1000
+		mcts-1000
+		mcts-100
+		mcts-5000
+		osla
+
+mcts-500 got 123.00 points. mcts-500 won 20.5% of the 600 games of the tournament. mcts-500 won 61.5% of the 200 games it played during the tournament.
+mcts-500 got a mean score of 6.94.
+mcts-500 won 60.0% of the 40 games against mcts-1000.
+mcts-500 won 40.0% of the 40 games against random.
+mcts-500 won 57.5% of the 40 games against mcts-100.
+mcts-500 won 65.0% of the 40 games against mcts-5000.
+mcts-500 won 85.0% of the 40 games against osla.
+
+mcts-1000 got 104.00 points. mcts-1000 won 17.3% of the 600 games of the tournament. mcts-1000 won 52.0% of the 200 games it played during the tournament.
+mcts-1000 got a mean score of 6.53.
+mcts-1000 won 40.0% of the 40 games against mcts-500.
+mcts-1000 won 52.5% of the 40 games against random.
+mcts-1000 won 52.5% of the 40 games against mcts-100.
+mcts-1000 won 42.5% of the 40 games against mcts-5000.
+mcts-1000 won 72.5% of the 40 games against osla.
+
+random got 112.00 points. random won 18.7% of the 600 games of the tournament. random won 56.0% of the 200 games it played during the tournament.
+random got a mean score of 6.68.
+random won 60.0% of the 40 games against mcts-500.
+random won 47.5% of the 40 games against mcts-1000.
+random won 47.5% of the 40 games against mcts-100.
+random won 55.0% of the 40 games against mcts-5000.
+random won 70.0% of the 40 games against osla.
+
+mcts-100 got 111.00 points. mcts-100 won 18.5% of the 600 games of the tournament. mcts-100 won 55.5% of the 200 games it played during the tournament.
+mcts-100 got a mean score of 6.82.
+mcts-100 won 42.5% of the 40 games against mcts-500.
+mcts-100 won 47.5% of the 40 games against mcts-1000.
+mcts-100 won 52.5% of the 40 games against random.
+mcts-100 won 62.5% of the 40 games against mcts-5000.
+mcts-100 won 72.5% of the 40 games against osla.
+
+mcts-5000 got 103.00 points. mcts-5000 won 17.2% of the 600 games of the tournament. mcts-5000 won 51.5% of the 200 games it played during the tournament.
+mcts-5000 got a mean score of 6.62.
+mcts-5000 won 35.0% of the 40 games against mcts-500.
+mcts-5000 won 57.5% of the 40 games against mcts-1000.
+mcts-5000 won 45.0% of the 40 games against random.
+mcts-5000 won 37.5% of the 40 games against mcts-100.
+mcts-5000 won 82.5% of the 40 games against osla.
+
+osla got 47.00 points. osla won 7.8% of the 600 games of the tournament. osla won 23.5% of the 200 games it played during the tournament.
+osla got a mean score of 5.42.
+osla won 15.0% of the 40 games against mcts-500.
+osla won 27.5% of the 40 games against mcts-1000.
+osla won 30.0% of the 40 games against random.
+osla won 27.5% of the 40 games against mcts-100.
+osla won 17.5% of the 40 games against mcts-5000.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+mcts-500: Win rate 0.62 +/- 0.034	Mean Ordinal 1.39 +/- 0.03
+random: Win rate 0.56 +/- 0.035	Mean Ordinal 1.44 +/- 0.04
+mcts-100: Win rate 0.56 +/- 0.035	Mean Ordinal 1.45 +/- 0.04
+mcts-1000: Win rate 0.52 +/- 0.035	Mean Ordinal 1.48 +/- 0.04
+mcts-5000: Win rate 0.52 +/- 0.035	Mean Ordinal 1.49 +/- 0.04
+osla: Win rate 0.24 +/- 0.030	Mean Ordinal 1.77 +/- 0.03
+
+Alpha-rank by Win Rate
+	random                        	0.32
+	mcts-500                      	0.27
+	mcts-100                      	0.17
+	mcts-1000                     	0.16
+	mcts-5000                     	0.08
+	osla                          	0.00
+
+Alpha-rank by Ordinal Position
+	random                        	0.32
+	mcts-500                      	0.27
+	mcts-100                      	0.17
+	mcts-1000                     	0.16
+	mcts-5000                     	0.08
+	osla                          	0.00
+
