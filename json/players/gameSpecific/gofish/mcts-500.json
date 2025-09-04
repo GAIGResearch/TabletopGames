@@ -1,0 +1,10 @@
+{
+  "name": "mcts-500",
+  "class": "players.mcts.MCTSPlayer",
+  "params": {
+    "budgetType": "ITERATIONS",
+    "iterations": 500,
+    "rolloutLength": 20,
+    "explorationConstant": 1.2
+  }
+}

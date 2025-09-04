@@ -13,15 +13,11 @@ import games.pandemic.PandemicForwardModel;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
-import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCParams;
-import players.rmhc.RMHCPlayer;
-import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -845,47 +841,21 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Chess");
-        boolean useGUI = Utils.getArg(args, "gui", false);
-        int turnPause = Utils.getArg(args, "turnPause", 0);
+        String gameType = Utils.getArg(args, "game", "GoFish");
+        boolean useGUI = Utils.getArg(args, "gui", true);
+        int turnPause = Utils.getArg(args, "turnPause", 500);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
-        /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+        players.add(new HumanGUIPlayer(ac));
         players.add(new RandomPlayer());
-    //    players.add(new RandomPlayer());
-    //    players.add(new BasicMCTSPlayer());
-//        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
 
-        // RMHCParams params = new RMHCParams();
-        // params.horizon = 15;
-        // params.discountFactor = 0.99;
-        // params.heuristic = AbstractGameState::getHeuristicScore;
-//        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
-//        players.add(rmhcPlayer);
-
-       MCTSParams mcts_params = new MCTSParams();
-       players.add(new MCTSPlayer(mcts_params));
-
-        // players.add(new HumanGUIPlayer(ac));
-        // players.add(new HumanGUIPlayer(ac));
-        // players.add(new HumanGUIPlayer(ac));
-    //    players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
-
-        /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;
 
-        /* Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+        System.out.println("Starting GoFish - You vs AI!");
 
-        /* Run multiple games */
-//        ArrayList<GameType> games = new ArrayList<>();
-//        games.add(Connect4);
-//        runMany(games, players, 100L, 5, false, false, null, turnPause);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
     }
 
 }

@@ -4,7 +4,6 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.explodingkittens.actions.*;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import games.hearts.actions.Play;
 import org.junit.Before;
 import org.junit.Test;
 
