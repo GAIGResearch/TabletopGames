@@ -15,7 +15,7 @@
         "budget" : 40,
         "epsilon" : 1e-6,
         "breakMS" : 0,
-        "rolloutTermination" : "DEFAULT",
+        "rolloutTermination" : "EXACT",
         "maintainMasterState" : false,
         "heuristic" : {
                 "class" : "players.heuristics.CoarseTunableHeuristic",

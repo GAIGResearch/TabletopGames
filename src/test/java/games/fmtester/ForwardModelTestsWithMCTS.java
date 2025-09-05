@@ -2,7 +2,10 @@ package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import games.catan.CatanParameters;
+import games.descent2e.DescentParameters;
 import org.junit.Test;
+
+import java.util.List;
 
 public class ForwardModelTestsWithMCTS {
 
@@ -28,7 +31,15 @@ public class ForwardModelTestsWithMCTS {
 
     @Test
     public void testDescent2e() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Descent2e", "nGames=2", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
+        DescentParameters params = new DescentParameters();
+        params.heroesToBePlayed = List.of("Widow Tarha", "Avric Albright");
+        ForwardModelTester fmt = new ForwardModelTester(params, "game=Descent2e", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
+        params.heroesToBePlayed = List.of("Leoric of the Book", "Ashrian");
+        fmt = new ForwardModelTester(params, "game=Descent2e", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
+        params.heroesToBePlayed = List.of("Syndrael", "Jain Fairwood");
+        fmt = new ForwardModelTester(params, "game=Descent2e", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
+        params.heroesToBePlayed = List.of("Tomble Burrowell", "Grisban the Thirsty");
+        fmt = new ForwardModelTester(params, "game=Descent2e", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Descent.json");
     }
 
     @Test
@@ -80,7 +91,7 @@ public class ForwardModelTestsWithMCTS {
 
     @Test
     public void testLoveLetter() {
-        new ForwardModelTester("game=LoveLetter", "nGames=2", "nPlayers=3", "agent=json\\players\\gameSpecific\\LoveLetter.json");
+        new ForwardModelTester("game=LoveLetter", "nGames=2", "nPlayers=3", "agent=json\\players\\gameSpecific\\LoveLetter_4P.json");
     }
 
     @Test
@@ -147,4 +158,13 @@ public class ForwardModelTestsWithMCTS {
     public void testChess() {
         new ForwardModelTester("game=Chess", "nGames=2", "nPlayers=2");
     }
+
+    @Test
+    public void testChineseCheckers() {
+        ForwardModelTester fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\ChineseCheckers.json");
+        fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\ChineseCheckers.json");
+        fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=4", "agent=json\\players\\gameSpecific\\ChineseCheckers.json");
+        fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=6", "agent=json\\players\\gameSpecific\\ChineseCheckers.json");
+    }
+
 }

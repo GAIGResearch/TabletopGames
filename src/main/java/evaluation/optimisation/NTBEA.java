@@ -11,7 +11,6 @@ import evaluation.optimisation.ntbea.functions.NTBEAFunction;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import evaluation.optimisation.ntbea.*;
-import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -75,24 +74,7 @@ public class NTBEA {
                 : PlayerFactory.createPlayers(params.opponentDescriptor);
 
         if (params.tuningGame) {
-            if (new File(params.evalMethod).exists()) {
-                // load from file
-                gameHeuristic = JSONUtils.loadClassFromFile(params.evalMethod);
-            } else {
-                if (params.evalMethod.contains(".json"))
-                    throw new AssertionError("File not found : " + params.evalMethod);
-                try {
-                    Class<?> evalClass = Class.forName("evaluation.heuristics." + params.evalMethod);
-                    gameHeuristic = (IGameHeuristic) evalClass.getConstructor().newInstance();
-                } catch (ClassNotFoundException e) {
-                    throw new AssertionError("evaluation.heuristics." + params.evalMethod + " not found");
-                } catch (NoSuchMethodException e) {
-                    throw new AssertionError("evaluation.heuristics." + params.evalMethod + " has no no-arg constructor");
-                } catch (ReflectiveOperationException e) {
-                    throw new AssertionError("evaluation.heuristics." + params.evalMethod + " reflection error");
-                }
-            }
-
+            gameHeuristic = JSONUtils.loadClass(params.evalMethod);
         } else {
             // Add check that the number of final matchups is reasonable given the number of repeats
             if (params.tournamentGames > 0) {
@@ -136,6 +118,24 @@ public class NTBEA {
     public void addElite(int[] settings) {
         // We use these settings as players in our final tournament
         elites.add(settings);
+    }
+
+    // Only works if the search space is an instance of ITPSearchSpace
+    // This sets a tunable parameter that is *NOT* in the search space itself to the specified value
+    // This will ensure that all agents in the run use this parameter
+    public void fixTunableParameter(String key, Object value) {
+        for (int i = 0; i < params.searchSpace.nDims(); i++) {
+            if (params.searchSpace.name(i).equals(key)) {
+                throw new IllegalArgumentException("Cannot set a tunable parameter that is in the search space. Use fixSearchDimension instead.");
+            }
+        }
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+            if (itp.itp instanceof TunableParameters<?> tp) {
+                tp.setParameterValue(key, value);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Cannot add to search space - not an ITPSearchSpace");
     }
 
     /**
@@ -256,12 +256,32 @@ public class NTBEA {
                     }
                 }
             }
+        } else {
+            // otherwise we use the evalGames results from each run to pick the best one (which is already in bestResult)
+            // However, if elites is not empty, then this means we are using the elite as the benchmark
+            // so if the best evalGames result is not better than the elite, then we should use the elite.
+            if (!elites.isEmpty()) {
+                // we assume (As the only supported use case as of April 2025) that the last
+                // element of the elite array is the one that was just used as a benchmark
+                if (params.evalMethod.equals("Ordinal")) {
+                    double maxLevel = (nPlayers + 1) / 2.0;
+                    if (bestResult.a.a > maxLevel) {
+                        // keep the elite agent as the winner
+                        System.out.format("Challenger only achieved %.3f against a maximum target of %.3f. Sticking with the current benchmark.",
+                                bestResult.a.a, maxLevel);
+                        bestResult = Pair.of(Pair.of(maxLevel, 0.0), elites.get(0));
+                    }
+                } else {
+                    double minLevel = 1.0 / nPlayers;
+                    if (bestResult.a.a < minLevel) {
+                        // keep the elite agent as the winner
+                        System.out.format("Challenger only achieved %.3f against a minimum target of %.3f. Sticking with the current benchmark.",
+                                bestResult.a.a, minLevel);
+                        bestResult = Pair.of(Pair.of(minLevel, 0.0), elites.get(0));
+                    }
+                }
+            }
         }
-        // otherwise we use the evalGames results from each run to pick the best one (which is already in bestResult)
-
-        // TODO: However, if elites is not empty, then this means we are using the elite as the benchmark
-        // so if the best evalGames result is not better than the elite, then we should use the elite.
-
         // Now we optionally apply one-step deviations to the best result
         if (params.OSDBudget > 0) {
             NTBEAParameters OSDParams = (NTBEAParameters) params.copy();
@@ -342,11 +362,8 @@ public class NTBEA {
                 .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
         Arrays.sort(results);
         double avg = Arrays.stream(results).average().orElse(0.0);
-        double quantileValue = results[(int) (results.length * params.quantile / 100.0)];
         double stdErr = Math.sqrt(Arrays.stream(results).map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
-        return (params.quantile > 0) ?
-                new Pair<>(quantileValue, avg) :
-                new Pair<>(avg, stdErr);
+        return new Pair<>(avg, stdErr);
     }
 
     /**

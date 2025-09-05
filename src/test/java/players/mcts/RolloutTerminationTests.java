@@ -70,7 +70,7 @@ public class RolloutTerminationTests {
 
     @Test
     public void test_MaxN_DEFAULT() {
-        params.rolloutTermination = MCTSEnums.RolloutTermination.DEFAULT;
+        params.rolloutTermination = MCTSEnums.RolloutTermination.EXACT;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
             Game game = createGame(params, gt);
@@ -82,7 +82,7 @@ public class RolloutTerminationTests {
     @Test
     public void test_rolloutPerPlayer() {
         params.rolloutLengthPerPlayer = true;
-        params.rolloutTermination = MCTSEnums.RolloutTermination.DEFAULT;
+        params.rolloutTermination = MCTSEnums.RolloutTermination.EXACT;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
             Game game = createGame(params, gt);
@@ -130,7 +130,7 @@ public class RolloutTerminationTests {
 
     @Test
     public void test_SelfOnly_DEFAULT() {
-        params.rolloutTermination = MCTSEnums.RolloutTermination.DEFAULT;
+        params.rolloutTermination = MCTSEnums.RolloutTermination.EXACT;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
@@ -181,7 +181,7 @@ public class RolloutTerminationTests {
     @Test
     public void test_MultiTree_DEFAULT() {
         params.rolloutLength = 20;
-        params.rolloutTermination = MCTSEnums.RolloutTermination.DEFAULT;
+        params.rolloutTermination = MCTSEnums.RolloutTermination.EXACT;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;

@@ -166,6 +166,15 @@ public class BGGameState extends AbstractGameState {
         return Arrays.copyOf(values, count);
     }
 
+    public int piecesOnHomeBoard(int playerId) {
+        BGParameters params = (BGParameters) getGameParameters();
+        int count = 0;
+        for (int i = 0; i < params.homeBoardSize; i++) {
+            count += piecesPerPoint[playerId][i];
+        }
+        return count;
+    }
+
     public boolean allPiecesOnHomeBoard(int playerId) {
         BGParameters params = (BGParameters) getGameParameters();
         if (piecesOnBar[playerId] > 0)

@@ -27,7 +27,8 @@ public class MCGSNode extends SingleTreeNode {
         MCGSNode graphRoot = (MCGSNode) root;
         if (graphRoot.transpositionMap.containsKey(key)) {
             if (graphRoot.transpositionMap.get(key) != node) {
-                throw new AssertionError("Unexpected?");
+                throw new AssertionError("We have found a clash in the transposition table for key: " + key +
+                        ". We are expanding a new node, and this key already exists in the transposition table, but it is not the same node.");
             }
         } else {
             graphRoot.transpositionMap.put(key, node);

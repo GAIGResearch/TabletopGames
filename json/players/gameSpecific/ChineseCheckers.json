@@ -1,0 +1,14 @@
+{
+  "budgetType": "BUDGET_TIME",
+  "rolloutLength": 100,
+  "maxTreeDepth" : 10,
+  "opponentTreePolicy": "OneTree",
+  "K": 1.0,
+  "FPU" : 100.0,
+  "treePolicy": "UCB_Tuned",
+  "rolloutType": "RANDOM",
+  "reuseTree" : true,
+  "information": "Open_Loop",
+  "class": "players.mcts.MCTSParams",
+  "budget": 40
+}

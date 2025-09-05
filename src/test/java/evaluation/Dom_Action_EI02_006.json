@@ -1,0 +1,53 @@
+{
+                "coefficients" : {
+                        "cardType_GOLD" : 0.0356,
+                        "treasureInHand:actionSize:cardType_GOLD" : -0.0519,
+                        "BIAS" : 1.05,
+                        "cardType_DUCHY" : -0.000549,
+                        "cardType_SILVER" : 0.0219,
+                        "actionSize:cardType_PROVINCE" : 0.496,
+                        "actionSize:cardType_GOLD" : 0.693,
+                        "provincesLeft" : -0.0612,
+                        "actionSize" : -0.295,
+                        "actionSize:cardType_DUCHY" : 0.278,
+                        "provincesLeft:cardType_SILVER" : 0.416,
+                        "treasureInHand" : -0.199,
+                        "cardType_PROVINCE" : -0.00521
+                },
+                "actionFeatures" : {
+                        "features" : [
+                                {
+                                        "enumValue" : "DUCHY",
+                                        "name" : "cardType_DUCHY",
+                                        "index" : 46,
+                                        "type" : "ENUM"
+                                },
+                                {
+                                        "enumValue" : "PROVINCE",
+                                        "name" : "cardType_PROVINCE",
+                                        "index" : 46,
+                                        "type" : "ENUM"
+                                },
+                                {
+                                        "enumValue" : "SILVER",
+                                        "name" : "cardType_SILVER",
+                                        "index" : 46,
+                                        "type" : "ENUM"
+                                },
+                                {
+                                        "enumValue" : "GOLD",
+                                        "name" : "cardType_GOLD",
+                                        "index" : 46,
+                                        "type" : "ENUM"
+                                }                       ],
+                        "defaultBuckets" : 1,
+                        "underlyingState" : {
+                                "class" : "games.dominion.metrics.DomStateFeaturesWithCardTypes"
+                        },
+                        "class" : "evaluation.features.AutomatedFeatures",
+                        "underlyingAction" : {
+                                "class" : "games.dominion.metrics.DomActionFeatures"
+                        }
+                },
+                "class" : "players.heuristics.LogisticActionHeuristic"
+        }

@@ -74,15 +74,6 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
     public ITPSearchSpace(ITunableParameters<T> tunableParameters, JSONObject json) {
         itp = tunableParameters;
         List<ParameterSettings> parameterTypes = extractRecursiveParameters("", json, itp);
-//        List<List<Object>> allPossibleValues = new ArrayList<>();
-//        List<Class<?>> parameterClasses = new ArrayList<>();
-//        List<String> parameterNames = new ArrayList<>();
-//        for (ParameterSettings settings : parameterTypes) {
-//            // Now get possible values from JSON
-//            parameterClasses.add(settings.clazz);
-//            allPossibleValues.add(settings.values);
-//            parameterNames.add(settings.name);
-//        }
         super.initialise(parameterTypes);
         if (tunableParameters instanceof TunableParameters tp) {
             tp.setRawJSON(json);
@@ -101,6 +92,11 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                 if (itp.getParameterNames().contains(baseKey)) {
                     Object data = json.get(baseKey);
                     String key = "".equals(nameSpace) ? (String) baseKey : nameSpace + "." + baseKey;
+                    // check to see if this is a json file
+                    if (data instanceof String str) {
+                        if (str.endsWith(".json"))
+                            data = JSONUtils.loadJSONFile(str);
+                    }
                     if (data instanceof JSONObject) {
                         // in this case we have nesting, and need to recurse to get all the relevant parameters
                         // we use key as the nameSpace
@@ -164,8 +160,8 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
     }
 
     /*
-    * This method returns the default settings for the search space.
-    * If the actual default value is not in the search space, then the value will be -1.
+     * This method returns the default settings for the search space.
+     * If the actual default value is not in the search space, then the value will be -1.
      */
     public int[] defaultSettings() {
         int[] settings = new int[searchDimensions.size()];
@@ -207,6 +203,13 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                 // we use the default value
                 value = itp.getDefaultParameterValue(fullParameterName);
             }
+            if (value instanceof String str) {
+                // if the value is a string, we need to check if it is a JSON file
+                if (str.endsWith(".json")) {
+                    // we load the JSON file and use that as the value
+                    value = JSONUtils.loadClassFromFile(str);
+                }
+            }
             // we need to find the index of the value in the list of possible values
             List<Object> possibleValues = values.get(i);
             int index = -1;
@@ -217,7 +220,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                 }
             }
             if (index == -1) {
-                throw new AssertionError("Value " + value + " not found in possible values for " + fullParameterName);
+                throw new AssertionError("Value " + value + " not found in possible values in search space for " + fullParameterName);
             }
             settings[i] = index;
         }
@@ -238,7 +241,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
             // slightly awkward...TunableParameters has a rawJSON set of data that should be used to provide local overrides to the
             // global defaults specific to the main parameter definition
             Object defaultValue = itp instanceof TunableParameters<?> tp ? tp.getDefaultOverride(keyName) : itp.getDefaultParameterValue(keyName);
-            if (!value.equals(defaultValue)) {
+            if (!JSONUtils.areValuesEqual(value, defaultValue)) {
                 throw new AssertionError("Value " + value + " for parameter " + keyName + " does not match default value " + defaultValue);
             }
         }
@@ -255,15 +258,11 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
 
     @SuppressWarnings("unchecked")
     public void writeAgentJSON(int[] settings, String fileName) {
-        try (FileWriter writer = new FileWriter(fileName)) {
-            JSONObject json = constructAgentJSON(settings);
-            int budget = (int) itp.getParameterValue("budget");
-            if (budget > 0)
-                json.put("budget", budget);
-            writer.write(JSONUtils.prettyPrint(json, 1));
-        } catch (IOException e) {
-            throw new AssertionError("Error writing agent settings to file " + fileName);
-        }
+        JSONObject json = constructAgentJSON(settings);
+        int budget = (int) itp.getParameterValue("budget");
+        if (budget > 0)
+            json.put("budget", budget);
+        JSONUtils.writeJSON(json, fileName);
     }
 
     private void setTo(int[] settings) {

@@ -23,13 +23,6 @@ public class EndCurrentPhase extends AbstractAction {
         if (action instanceof AttributeTest) {
             ((AttributeTest) action).setSkip(true);
         }
-        if (action instanceof DoubleMoveAttack) {
-            ((DoubleMoveAttack) action).setSkip(true);
-        }
-
-        if (action instanceof HeroicFeatExtraMovement) {
-            ((HeroicFeatExtraMovement) action).setSkip(true);
-        }
 
         ((DescentGameState) gs).getActingFigure().addActionTaken(toString());
         return true;

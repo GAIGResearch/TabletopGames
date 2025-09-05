@@ -30,7 +30,7 @@ public class ToadFeatures001 implements IStateFeatureVector {
     }
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerID) {
+    public double[] doubleVector(AbstractGameState gs, int playerID) {
         double[] features = new double[18];
         ToadGameState state = (ToadGameState) gs;
         features[0] = state.getGameTick();

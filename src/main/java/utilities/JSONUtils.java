@@ -1,7 +1,10 @@
 package utilities;
 
+import core.interfaces.IHasName;
+import core.interfaces.IToJSON;
 import evaluation.optimisation.TunableParameters;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.apache.hadoop.yarn.webapp.ToJSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -44,13 +47,6 @@ public class JSONUtils {
         }
     }
 
-    public static String readJSONFile(String fileName, Function<String, String> preprocessor) {
-        JSONObject json = loadJSONFile(fileName);
-        if (preprocessor != null)
-            return preprocessor.apply(json.toJSONString());
-        return json.toJSONString();
-    }
-
     /**
      * Given a JSONObject, this will load the instance of the class.
      * this assumes that the JSON object has:
@@ -72,7 +68,13 @@ public class JSONUtils {
                 Class<? extends Enum> enumClass = (Class<? extends Enum>) Class.forName(en);
                 return (T) Enum.valueOf(enumClass, val);
             }
+            // To instantiate an Object from JSON we run through three possibilities:
+            // 1. The class is a TunableParameters class, and we load it directly
+            // 2. The class has a constructor that takes a set of arguments (specified in the 'args' JSONArray in the JSON)
+            // 3. The class has a constructor that takes a JSONObject
             Class<T> outputClass = (Class<T>) Class.forName(cl);
+
+            // 1. check for TunableParameters
             if (TunableParameters.class.isAssignableFrom(outputClass)) {
                 // in this case we do not look for the Constructor arguments, as
                 // the parameters are defined directly as name-value pairs in JSON
@@ -83,75 +85,116 @@ public class JSONUtils {
                 TunableParameters.loadFromJSON((TunableParameters) t, json);
                 return t;
             }
-            JSONArray argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
-            Class<?>[] argClasses = new Class[argArray.size()];
-            Object[] args = new Object[argArray.size()];
-            for (int i = 0; i < argClasses.length; i++) {
-                Object arg = argArray.get(i);
-                if (arg instanceof JSONObject) {
-                    // we have recursion
-                    // we need to instantiate this, and then stick it in
-                    arg = loadClassFromJSON((JSONObject) arg);
-                    argClasses[i] = arg.getClass();
-                } else if (arg instanceof Long) {
-                    argClasses[i] = int.class;
-                    args[i] = ((Long) arg).intValue();
-                    arg = args[i];
-                } else if (arg instanceof Double) {
-                    argClasses[i] = double.class;
-                } else if (arg instanceof Boolean) {
-                    argClasses[i] = boolean.class;
-                } else if (arg instanceof String) {
-                    argClasses[i] = String.class;
-                } else if (arg instanceof JSONArray) {
-                    Object first = ((JSONArray) arg).get(0);
-                    if (first instanceof JSONObject) {
-                        Class<?> arrayClass = determineArrayClass((JSONArray) arg);
 
-                        T[] arr = (T[]) Array.newInstance(arrayClass, ((JSONArray) arg).size());
-                        argClasses[i] = arr.getClass();
-                        for (int j = 0; j < ((JSONArray) arg).size(); j++) {
-                            arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
-                        }
-                        arg = arr;
+            // 2. now look for a constructor that takes a set of args
+            if (json.containsKey("args") && json.get("args") instanceof JSONArray) {
+                // we have a set of args, so we need to find the constructor that matches
+                // first we need to get the args
+                // this is a JSONArray, so we need to convert it to an array of objects
+                // and then find the constructor that matches
+                JSONArray argArray = (JSONArray) json.get("args");
 
-                    } else if (first instanceof Long) {
-                        argClasses[i] = int[].class;
-                        args[i] = ((Long) first).intValue();
+                Class<?>[] argClasses = new Class[argArray.size()];
+                Object[] args = new Object[argArray.size()];
+                for (int i = 0; i < argClasses.length; i++) {
+                    Object arg = argArray.get(i);
+                    if (arg instanceof JSONObject) {
+                        // we have recursion
+                        // we need to instantiate this, and then stick it in
+                        arg = loadClassFromJSON((JSONObject) arg);
+                        argClasses[i] = arg.getClass();
+                    } else if (arg instanceof Long) {
+                        argClasses[i] = int.class;
+                        args[i] = ((Long) arg).intValue();
                         arg = args[i];
-                    } else if (first instanceof Double) {
-                        argClasses[i] = double[].class;
-                        arg = ((JSONArray) arg).toArray(new Double[0]);
-                    } else if (first instanceof Boolean) {
-                        argClasses[i] = boolean[].class;
-                        arg = ((JSONArray) arg).toArray(new Boolean[0]);
-                    } else if (first instanceof String) {
-                        argClasses[i] = String[].class;
-                        arg = ((JSONArray) arg).toArray(new String[0]);
+                    } else if (arg instanceof Double) {
+                        argClasses[i] = double.class;
+                    } else if (arg instanceof Boolean) {
+                        argClasses[i] = boolean.class;
+                    } else if (arg instanceof String str) {
+                        // if the string ends with .json, then we load this as a JSONObject
+                        // and then we load the class from that
+                        if (str.endsWith(".json")) {
+                            JSONObject subJSON = loadJSONFile(str);
+                            arg = loadClassFromJSON(subJSON);
+                            argClasses[i] = arg.getClass();
+                        } else if (str.equalsIgnoreCase("true") || str.equalsIgnoreCase("false")) {
+                            argClasses[i] = boolean.class;
+                        } else if (str.equalsIgnoreCase("null")) {
+                            argClasses[i] = String.class;
+                        } else {
+                            argClasses[i] = String.class;
+                        }
+                    } else if (arg instanceof JSONArray) {
+                        Object first = ((JSONArray) arg).get(0);
+                        if (first instanceof JSONObject) {
+                            Class<?> arrayClass = determineArrayClass((JSONArray) arg);
+
+                            T[] arr = (T[]) Array.newInstance(arrayClass, ((JSONArray) arg).size());
+                            argClasses[i] = arr.getClass();
+                            for (int j = 0; j < ((JSONArray) arg).size(); j++) {
+                                arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
+                            }
+                            arg = arr;
+
+                        } else if (first instanceof Long) {
+                            argClasses[i] = int[].class;
+                            args[i] = ((Long) first).intValue();
+                            arg = args[i];
+                        } else if (first instanceof Double) {
+                            argClasses[i] = double[].class;
+                            arg = ((JSONArray) arg).toArray(new Double[0]);
+                        } else if (first instanceof Boolean) {
+                            argClasses[i] = boolean[].class;
+                            arg = ((JSONArray) arg).toArray(new Boolean[0]);
+                        } else if (first instanceof String) {
+                            argClasses[i] = String[].class;
+                            arg = ((JSONArray) arg).toArray(new String[0]);
+                        }
+                    } else {
+                        throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
                     }
-                } else {
-                    throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
+                    args[i] = arg;
                 }
-                args[i] = arg;
+
+                Class<?> clazz = Class.forName(cl);
+                Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
+                if (constructor == null)
+                    throw new AssertionError("No matching Constructor found for " + clazz);
+                //   System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+                return (T) constructor.newInstance(args);
             }
 
-            Class<?> clazz = Class.forName(cl);
-            Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
-            if (constructor == null)
-                throw new AssertionError("No matching Constructor found for " + clazz);
-            //   System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
-            Object retValue = constructor.newInstance(args);
-            return outputClass.cast(retValue);
+            // 3. then look for a constructor that takes a JSONObject
+            try {
+                Constructor<?> constructor = outputClass.getConstructor(JSONObject.class);
+                return (T) constructor.newInstance(json);
+            } catch (NoSuchMethodException e) {
+                // continue to the next step
+            } catch (InvocationTargetException e) {
+                throw new AssertionError("Error constructing " + outputClass.getName() + " using JSON constructor.\n" +
+                        "JSON: " + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getTargetException().getMessage());
+            } catch (Exception e) {
+                throw new AssertionError(e.getClass().getSimpleName() + " Error constructing " + outputClass.getName() + " using JSON constructor.\n" +
+                        "JSON: " + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
+            }
+
+            // 4. And finally look for a constructor that takes no arguments
+            Constructor<?> constructor = outputClass.getConstructor();
+            return (T) constructor.newInstance();
 
         } catch (ClassNotFoundException e) {
-            throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
+            throw new AssertionError("Unknown class in JSON:\n" + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
         } catch (InvocationTargetException e) {
             System.out.println(e.getTargetException().getMessage());
-            throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
+            throw new AssertionError("Error constructing class using " +
+                    "\nJSON: " + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
         } catch (ReflectiveOperationException e) {
-            throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
+            throw new AssertionError("Reflections Error when constructing class using " +
+                    json.toJSONString() + " : " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
+            throw new AssertionError("Unknown argument in JSON:\n" +
+                    JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
         }
     }
 
@@ -177,42 +220,32 @@ public class JSONUtils {
         return loadClassFromJSON(first).getClass();
     }
 
-    /**
-     * Given a filename that contains only a single class, this will instantiate the class
-     * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to
-     * find and call the relevant constructor
-     *
-     * @param filename - the filename
-     * @param <T>      - the Class type that is to be instantiated
-     * @return
-     */
-    public static <T> T loadClassFromFile(String filename) {
-        try {
-            FileReader reader = new FileReader(filename);
-            JSONParser jsonParser = new JSONParser();
-            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
-            // We expect a class field to tell us the Class to use
-            // then a set of parameter values
-            return loadClassFromJSON(rawData);
-
-        } catch (FileNotFoundException e) {
-            throw new AssertionError("File not found to load : " + filename);
+    @SuppressWarnings("unchecked")
+    public static void writeJSON(JSONObject json, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            writer.write(JSONUtils.prettyPrint(json, 1));
         } catch (IOException e) {
-            throw new AssertionError("Problem reading file " + filename + " : " + e);
-        } catch (ParseException e) {
-            throw new AssertionError("Problem parsing JSON in " + filename);
+            throw new AssertionError("Error writing JSON to file " + fileName);
         }
     }
 
     /**
-     * Given a string that contains the JSON for a single class, this will instantiate the class
+     * General purpose method to load a class
+     * The order in which we check is:
+     * 1) if the string ends with ".json" then we assume this is a file name, and call loadFromFile
+     * 2) if the string contains a '{' then we assume this is a JSON object, and call loadFromJSON
+     * 3) Finally we assume this is a class name with a no-arg constructor
      *
-     * @param rawData - the JSON as a raw string
+     * @param rawData - see above
      * @param <T>     - the Class type that is to be instantiated
      * @return
      */
-    public static <T> T loadClassFromString(String rawData) {
+    public static <T> T loadClass(String rawData) {
         try {
+            if (rawData.endsWith(".json")) {
+                // we assume this is a file name
+                return loadClassFromFile(rawData);
+            }
             if (!rawData.contains("{")) {
                 // we assume this is a class name with a no-arg constructor as a special case
                 Class<?> clazz = Class.forName(rawData);
@@ -234,6 +267,46 @@ public class JSONUtils {
             throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
         }
     }
+
+    /**
+     * Given a filename that contains only a single class, this will instantiate the class
+     * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to
+     * find and call the relevant constructor
+     * z
+     *
+     * @param filename - the filename
+     * @param <T>      - the Class type that is to be instantiated
+     * @return
+     */
+    public static <T> T loadClassFromFile(String filename) {
+        try {
+            FileReader reader = new FileReader(filename);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
+            // We expect a class field to tell us the Class to use
+            // then a set of parameter values
+            T retValue = loadClassFromJSON(rawData);
+            if (retValue instanceof IHasName hasName) {
+                if (hasName.getName() == null || hasName.getName().isEmpty()) {
+                    // if the name is not set, we set it to the filename without the .json extension
+                    String name = new File(filename).getName();
+                    if (name.endsWith(".json")) {
+                        name = name.substring(0, name.length() - 5);
+                    }
+                    hasName.setName(name);
+                }
+            }
+            return retValue;
+
+        } catch (FileNotFoundException e) {
+            throw new AssertionError("File not found to load : " + filename);
+        } catch (IOException e) {
+            throw new AssertionError("Problem reading file " + filename + " : " + e);
+        } catch (ParseException e) {
+            throw new AssertionError("Problem parsing JSON in " + filename + "\n: " + e.getMessage());
+        }
+    }
+
 
     public static Map<String, Object> loadMapFromJSON(JSONObject json) {
         Map<String, Object> map = new HashMap<>();
@@ -295,7 +368,7 @@ public class JSONUtils {
                             .keySet().stream())
                     .distinct()
                     .sorted(String.CASE_INSENSITIVE_ORDER)
-                    .collect(toList()));
+                    .toList());
 
             writer.write(String.join("\t", headers) + "\n");
             for (String key : map.keySet()) {
@@ -373,22 +446,31 @@ public class JSONUtils {
                         sb.append(prettyPrint(subJSON, tabDepth + 1));
                     } else if (v instanceof String) {
                         sb.append("\"").append(v).append("\"");
-                    } else if (v instanceof Long || v instanceof Integer ||
-                            v instanceof Double || v instanceof Boolean) {
+                    } else if (v instanceof Long || v instanceof Integer || v instanceof Boolean) {
                         sb.append(v);
+                    } else if (v instanceof Number n) {
+                        sb.append(String.format("%.3g", n.doubleValue()));
                     }
                     if (index < array.size() - 1)
                         sb.append(",").append("\n");
                 }
                 sb.append("\t".repeat(Math.max(0, tabDepth - 1))).append("]");
                 tabDepth--;
+            } else if (value instanceof IToJSON toJSON) {
+                JSONObject subJSON = toJSON.toJSON();
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
             } else if (value instanceof String) {
                 sb.append("\"").append(value).append("\"");
             } else if (value instanceof Long || value instanceof Integer ||
-                    value instanceof Double || value instanceof Boolean) {
+                    value instanceof Boolean) {
                 sb.append(value);
+            } else if (value instanceof Number n) {
+                sb.append(String.format("%.3g", n.doubleValue()));
             } else {
-                throw new AssertionError("Unexpected value type in prettyPrint : " + value);
+                // In this case we just output the full class name
+                System.out.println("Unexpected value type in prettyPrint : " + value);
+                System.out.println("Using raw class name : " + value.getClass().getName());
+                sb.append(value.getClass().getName());
             }
             if (keyIndex < keys.length - 1)
                 sb.append(",");
@@ -410,7 +492,7 @@ public class JSONUtils {
         for (String key : partitioned.keySet()) {
             Map<String, String> subMap = partitioned.get(key).stream().map(k -> new AbstractMap.SimpleEntry<>(k, stuff.get(key.equals(k) ? k : key + "." + k)))
                     .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-            if (subMap.size() == 0)
+            if (subMap.isEmpty())
                 throw new AssertionError("Empty subMap for key " + key);
             if (subMap.size() == 1 && subMap.containsKey(key)) {
                 // this is a single entry, so we just add it as a String
@@ -462,6 +544,9 @@ public class JSONUtils {
             return possibleValue.toString().equals(value.toString());
         } else if (possibleValue instanceof Number && value instanceof Number) {
             return ((Number) possibleValue).doubleValue() == ((Number) value).doubleValue();
-        } else return possibleValue.equals(value);
+        } else if (possibleValue instanceof IHasName pName && value instanceof IHasName name) {
+            return pName.getName().equals(name.getName());
+        } else
+            return possibleValue.equals(value);
     }
 }

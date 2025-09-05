@@ -18,10 +18,9 @@ public class StateFeatureListener extends FeatureListener {
 
     IStateFeatureVector phiFn;
 
-    public StateFeatureListener(IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly, String fileName) {
+    public StateFeatureListener(IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly) {
         super(frequency, currentPlayerOnly);
         this.phiFn = phi;
-        logger = new FileStatsLogger(fileName);
     }
 
     @Override
@@ -30,12 +29,10 @@ public class StateFeatureListener extends FeatureListener {
     }
 
     @Override
-    public double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
-        return phiFn.featureVector(state, perspectivePlayer);
+    public double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+        return phiFn.doubleVector(state, perspectivePlayer);
     }
-
-    @Override
-    public String injectAgentAttributes(String raw) {
-        return raw.replaceAll(Pattern.quote("*PHI*"), phiFn.getClass().getCanonicalName());
+    public Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+        return phiFn.featureVector(state, perspectivePlayer);
     }
 }

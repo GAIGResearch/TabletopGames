@@ -23,11 +23,8 @@ public class NightStalker {
         return nightStalkerDicePool;
     }
 
-    public static void addNightStalker(DescentGameState state, int attackerID, int defenderID) {
-        Figure attacker = (Figure) state.getComponentById(attackerID);
-        Figure defender = (Figure) state.getComponentById(defenderID);
-        Vector2D position = attacker.getPosition();
-        Vector2D other = defender.getPosition();
+    public static void addNightStalker(DescentGameState state, Vector2D position, Vector2D other) {
+        // Apply Night Stalker ability if the attacker is not adjacent to the defender
         if (Math.abs(position.getX() - other.getX()) > 1 || Math.abs(position.getY() - other.getY()) > 1) {
             List<DescentDice> dice = new ArrayList<>(state.getDefenceDicePool().getComponents());
             dice.addAll(getNightStalkerDicePool().getComponents());

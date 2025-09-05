@@ -63,24 +63,19 @@
             <version>1.6.1</version>
         </dependency>
         <dependency>
-            <groupId>tw.edu.ntu.csie</groupId>
-            <artifactId>libsvm</artifactId>
-            <version>3.25</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.18.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.13</artifactId>
-            <version>3.5.1</version>
+            <version>3.5.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.13</artifactId>
-            <version>3.5.1</version>
+            <version>3.5.5</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -201,6 +196,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.2.0</version>
+                <configuration>
+                    <resources>
+                        <resource>
+                            <directory>data</directory>
+                        </resource>
+                    </resources>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -270,17 +272,36 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>JavaCoder</id>
+                        <id>OneStepDeviations</id>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>llm.JavaCoder</mainClass>
+                                    <mainClass>evaluation.optimisation.OneStepDeviations</mainClass>
                                 </manifest>
                             </archive>
-                            <finalName>JavaCoder</finalName>
+                            <finalName>OneStepDeviations</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>ExpertIteration</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass> evaluation.ExpertIteration</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>ExpertIteration</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>

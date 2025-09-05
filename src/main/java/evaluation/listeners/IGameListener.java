@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
+import static utilities.JSONUtils.loadClass;
+
 public interface IGameListener {
 
     /**
@@ -51,16 +53,7 @@ public interface IGameListener {
         // We must always have a listenerClas specified; a metrics class is optional
         if (listenerName == null || listenerName.isEmpty())
             throw new IllegalArgumentException("A listenerName must be specified");
-        // first we check to see if listenerName is a file or not
-        IGameListener listener;
-        File listenerDetails = new File(listenerName);
-        if (listenerDetails.exists()) {
-            // in this case we construct from file
-            listener = JSONUtils.loadClassFromFile(listenerName);
-        } else {
-           throw new IllegalArgumentException("Unable to find listener file: " + listenerName);
-        }
-        return listener;
+        return loadClass(listenerName);
     }
 
     default void reset() {

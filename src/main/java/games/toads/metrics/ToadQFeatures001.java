@@ -33,7 +33,7 @@ public class ToadQFeatures001 implements IActionFeatureVector {
     }
 
     @Override
-    public double[] featureVector(AbstractAction action, AbstractGameState ags, int playerID) {
+    public double[] doubleVector(AbstractAction action, AbstractGameState ags, int playerID) {
         double[] retValue = new double[names().length];
         ToadGameState state = (ToadGameState) ags;
         ToadCard oppField = state.getFieldCard(1 - playerID);

@@ -128,6 +128,10 @@ public class BGForwardModel extends StandardForwardModel {
                 // end of turn: switch player
                 bgs.rollDice();
                 endPlayerTurn(bgs);  // default is to move to next player
+                if (bgs.getCurrentPlayer() == 0) {
+                    // if we are back to player 0, we can end the round
+                    endRound(bgs);
+                }
             }
         }
     }

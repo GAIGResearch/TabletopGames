@@ -54,7 +54,7 @@ public class SkillLadder {
                 FileReader reader = new FileReader(setupFile);
                 JSONParser parser = new JSONParser();
                 JSONObject json = (JSONObject) parser.parse(reader);
-                config = parseConfig(json, List.of(Usage.ParameterSearch, Usage.SkillLadder));
+                config = parseConfig(json, List.of(Usage.ParameterSearch, Usage.SkillLadder), true);
             } catch (FileNotFoundException ignored) {
                 throw new AssertionError("Config file not found : " + setupFile);
             } catch (IOException | ParseException e) {

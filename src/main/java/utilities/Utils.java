@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.*;
 import java.util.List;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -98,12 +98,14 @@ public abstract class Utils {
     }
 
     public static int playerPermutations(int nPlayers, int nAgents, boolean selfPlay) {
+        if (nAgents == 1)
+            return 1;
         if (selfPlay) {
             return (int) Math.pow(nAgents, nPlayers);
         } else {
             // nAgents! / (nAgents - nPlayers)!, without having to compute large factorials which may overflow an integer.
             int ret = 1;
-            for (int i=0;i<nPlayers;i++) {
+            for (int i = 0; i < nPlayers; i++) {
                 ret *= nAgents - i;
             }
             return ret;
@@ -353,6 +355,51 @@ public abstract class Utils {
     }
 
     /**
+     *
+     * Loads in tab-delimitted data from a file, and returns the data as a List of the
+     *  raw data, plus a separate list of the header row
+     *
+     * @param files files to load (all must have same format)
+     * @return Pair<List<String>, List<double[]>> The first item is the header details, the second
+     * is the raw data
+     */
+    public static Pair<List<String>, List<List<String>>> loadDataWithHeader(String delimiter, String... files) {
+        List<List<String>> data = new ArrayList<>();
+        List<String> header = new ArrayList<>();
+        for (String file : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                header = Arrays.asList(reader.readLine().split(Pattern.quote(delimiter)));
+                while (reader.ready()) {
+                    List<String> datum = Arrays.stream(reader.readLine().split(Pattern.quote(delimiter)))
+                            .toList();
+                    data.add(datum);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new AssertionError("Problem reading file " + file);
+            }
+        }
+        return Pair.of(header, data);
+    }
+    public static void writeDataWithHeader(String delimiter, List<String> newFeatureNames, List<List<Object>> newDataRows, String outputFile) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+            // Write the header
+            writer.write(String.join(delimiter, newFeatureNames));
+            writer.newLine();
+
+            // Write the data rows
+            for (List<Object> row : newDataRows) {
+                List<String> stringRow = row.stream().map(Object::toString).collect(toList());
+                writer.write(String.join(delimiter, stringRow));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
      * Recursively computes combinations of numbers in an array, taken {r} at a time. Each combination is added into the
      * allData list.
      *
@@ -363,7 +410,8 @@ public abstract class Utils {
      * @param index - Current index in data
      * @param r     ---> Size of a combination
      */
-    public static void combinationUtil(int[] arr, int[] data, int start, int end, int index, int r, ArrayList<int[]> allData) {
+    public static void combinationUtil(int[] arr, int[] data, int start, int end, int index, int r, ArrayList<
+            int[]> allData) {
         if (index == r) {
             allData.add(data.clone());
             return;
@@ -376,7 +424,8 @@ public abstract class Utils {
         }
     }
 
-    public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
+    public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<
+            Object[]> allData) {
         if (index == r) {
             allData.add(data.clone());
             return;
@@ -466,10 +515,11 @@ public abstract class Utils {
     }
 
     /*
-        * Returns the standard error on the difference between two means.
-        * The inputs are the sums of the values, the sums of the squares of the values, and the number of values for each set of data.
+     * Returns the standard error on the difference between two means.
+     * The inputs are the sums of the values, the sums of the squares of the values, and the number of values for each set of data.
      */
-    public static double meanDiffStandardError(double sum1, double sum2, double sumSq1, double sumSq2, int n1, int n2) {
+    public static double meanDiffStandardError(double sum1, double sum2, double sumSq1, double sumSq2, int n1,
+                                               int n2) {
         double mean1 = sum1 / n1;
         double mean2 = sum2 / n2;
         double variance1 = sumSq1 / n1 - mean1 * mean1;
@@ -479,8 +529,8 @@ public abstract class Utils {
     }
 
     /*
-    * Given a required confidence level, alpha, and the number of (independent) tests that are being conducted, N, this function
-    * returns the standard z-score that should be used for each test individually to determine if a result is statistically significant.
+     * Given a required confidence level, alpha, and the number of (independent) tests that are being conducted, N, this function
+     * returns the standard z-score that should be used for each test individually to determine if a result is statistically significant.
      */
     public static double standardZScore(double alpha, int N) {
         double adjustedAlpha = 1.0 - Math.pow(1.0 - alpha, 1.0 / N);
@@ -550,24 +600,26 @@ public abstract class Utils {
      * 1 = 90 degrees
      * 2 = 180 degrees
      * 3 = 270 degrees
-     * @param image - image to rotate
+     *
+     * @param image             - image to rotate
      * @param scaledWidthHeight - desired width and height of image after scaling
-     * @param orientation - as described above
+     * @param orientation       - as described above
      * @return - new image, rotated and scaled (* does not modify original image)
      */
-    public static BufferedImage rotateImage(BufferedImage image, Pair<Integer, Integer> scaledWidthHeight, int orientation) {
-        final double rads = Math.toRadians(90*orientation);
+    public static BufferedImage rotateImage(BufferedImage image, Pair<Integer, Integer> scaledWidthHeight,
+                                            int orientation) {
+        final double rads = Math.toRadians(90 * orientation);
         final double sin = Math.abs(Math.sin(rads));
         final double cos = Math.abs(Math.cos(rads));
         final int w = (int) Math.floor(scaledWidthHeight.a * cos + scaledWidthHeight.b * sin);
         final int h = (int) Math.floor(scaledWidthHeight.b * cos + scaledWidthHeight.a * sin);
         AffineTransform at;
         if (orientation % 2 == 0) {
-            at = AffineTransform.getRotateInstance(rads, scaledWidthHeight.a/2., scaledWidthHeight.b/2.);
+            at = AffineTransform.getRotateInstance(rads, scaledWidthHeight.a / 2., scaledWidthHeight.b / 2.);
             at.scale(scaledWidthHeight.a * 1.0 / image.getWidth(), scaledWidthHeight.b * 1.0 / image.getHeight());
         } else {
-            at = AffineTransform.getTranslateInstance((scaledWidthHeight.b-scaledWidthHeight.a)/2., (scaledWidthHeight.a-scaledWidthHeight.b)/2.);
-            at.rotate(rads, scaledWidthHeight.a/2., scaledWidthHeight.b/2.);
+            at = AffineTransform.getTranslateInstance((scaledWidthHeight.b - scaledWidthHeight.a) / 2., (scaledWidthHeight.a - scaledWidthHeight.b) / 2.);
+            at.rotate(rads, scaledWidthHeight.a / 2., scaledWidthHeight.b / 2.);
             at.scale(scaledWidthHeight.a * 1.0 / image.getWidth(), scaledWidthHeight.b * 1.0 / image.getHeight());
         }
         final AffineTransformOp rotateOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
@@ -621,6 +673,5 @@ public abstract class Utils {
     public static List<String> enumNames(Enum<?> e) {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
-
 
 }

@@ -266,7 +266,7 @@ public class BasicMoves {
         assertEquals(15, gameState.getGameScore(1), 0.01);
         assertEquals(CoreConstants.GameResult.WIN_GAME, gameState.getPlayerResults()[1]);
         assertEquals(CoreConstants.GameResult.LOSE_GAME, gameState.getPlayerResults()[0]);
-        assertTrue(gameState.getTurnCounter() > 6);
+        assertTrue(gameState.getRoundCounter() > 6);
     }
 
     @Test
@@ -286,8 +286,19 @@ public class BasicMoves {
     @Test
     public void twoMovesPerTurn() {
         for (int t = 0; t < 10; t++) {
-            assertEquals(t, gameState.getTurnCounter());
+            assertEquals(t % 2, gameState.getTurnCounter());
             assertEquals(t % 2, gameState.getCurrentPlayer());
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+            assertEquals(1, gameState.getAvailableDiceValues().length);
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+            assertEquals(2, gameState.getAvailableDiceValues().length);
+        }
+    }
+
+    @Test
+    public void twoTurnsPerRound() {
+        for (int t = 0; t < 10; t++) {
+            assertEquals(t / 2, gameState.getRoundCounter());
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
             assertEquals(1, gameState.getAvailableDiceValues().length);
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));

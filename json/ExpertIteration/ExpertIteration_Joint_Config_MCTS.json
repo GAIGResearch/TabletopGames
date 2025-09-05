@@ -1,0 +1,23 @@
+{
+	"game" : "Backgammon",
+	"nPlayers" :  2,
+	"playerDirectory" : "MCTS.json",
+	"stateLearner" : "OLSLeaderLearner.json",
+	"stateFeatures" : "games.backgammon.BGStateFeatures",
+	"actionLearner" : "ActionAdvantageLearner.json",
+	"actionFeatures" : "games.backgammon.BGActionFeatures",
+	"stateForAction" : true,
+	"destDir" : "ExpertIteration/Backgammon",
+	"matchups" : 50,
+	"everyN" : 29,
+	"expert" : "MCTS",
+	"valueSS" : "ValueSearchSpace.json",
+	"actionSS" : "ActionSearchSpace.json",
+	"budget" : 32,
+	"bicMultiplier" : 3,
+	"expertTime" : 20,
+	"useNTuples" : false,
+	"kExplore" : 0.3,
+	"iterations" : 500,
+	"verbose" :  true
+}

@@ -53,7 +53,7 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
         if (step == Step.TargetPlayer) {
             // Actions to select player
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-                if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
+                if (targetPlayer == playerID || !gs.isCurrentlyActive(targetPlayer) || gs.isProtected(targetPlayer))
                     continue;
                 cardActions.add(new ChoosePlayer(targetPlayer));
             }

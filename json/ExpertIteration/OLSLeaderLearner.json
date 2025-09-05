@@ -1,0 +1,6 @@
+{
+	"class" : "players.learners.OLSLearner",
+	"args" : [
+		1.0, 0.1,
+		{"enum" : "players.learners.AbstractLearner$Target", "value" : "SCORE_DELTA"}	]
+}

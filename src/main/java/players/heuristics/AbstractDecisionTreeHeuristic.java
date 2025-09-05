@@ -19,6 +19,10 @@ public abstract class AbstractDecisionTreeHeuristic {
 
     protected DecisionTreeRegressionModel drModel;
 
+    public AbstractDecisionTreeHeuristic(DecisionTreeRegressionModel drModel) {
+        this.drModel = drModel;
+    }
+
     public AbstractDecisionTreeHeuristic(String directory) {
         // load in the Decision Tree model from the directory
         if (directory == null || directory.isEmpty()) {
