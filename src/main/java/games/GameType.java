@@ -372,8 +372,13 @@ public enum GameType {
             }
         }
 
-        DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
-        String rulesText = summariser.processText("game rules and strategy", 500);
+        String rulesText;
+        try {
+            DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
+            rulesText = summariser.processText("game rules and strategy", 500);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError("Error reading rulebook file: " + pdfFilePath, e);
+        }
         // Then write this to file
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));
