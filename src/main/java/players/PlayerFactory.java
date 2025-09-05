@@ -43,37 +43,6 @@ import static utilities.JSONUtils.parser;
  */
 public class PlayerFactory {
 
-    public static AbstractPlayer fromJSONString(String json) {
-        try {
-            return fromJSONObject((JSONObject) parser.parse(json));
-        } catch (ParseException e) {
-            throw new AssertionError("Error processing JSON string " + e.getMessage());
-        }
-    }
-
-    public static AbstractPlayer fromJSONObject(JSONObject json) {
-        // first of all we check for algorithm
-        Object algo = json.get("class");
-        if (!(algo instanceof String className))
-            throw new AssertionError("No valid class property in JSON file");
-
-        Object instantiatedObject;
-        try {
-            Class<?> clazz = Class.forName(className);
-            Constructor<?> constructor = clazz.getConstructor();
-            instantiatedObject = constructor.newInstance();
-        } catch (Exception e) {
-            System.out.println("Error loading class " + className + " : " + e.getMessage());
-            throw new AssertionError("Error loading Class");
-        }
-
-        if (instantiatedObject instanceof TunableParameters params) {
-            TunableParameters.loadFromJSON(params, json);
-            return (AbstractPlayer) params.instantiate();
-        }
-        return (AbstractPlayer) instantiatedObject;
-    }
-
     /**
      * This provides the main access point for generating a new AbstractPlayer
      * The input can be one of a few things:
@@ -84,28 +53,21 @@ public class PlayerFactory {
      * Anything else is interpreted as a class name that implements AbstractPlayer with a no-argument constructor
      */
     public static AbstractPlayer createPlayer(String data) {
-        return createPlayer(data, Function.identity());
-    }
-
-    /**
-     * This allows the raw file to be modified first
-     *
-     * @param preprocessor - a function to be applied to the raw JSON string before the player is instantiated from it
-     */
-    public static AbstractPlayer createPlayer(String data, Function<String, String> preprocessor) {
-        // The idea here is that we first check to see if data is a filename.
-        // If it is then we go the JSON route
-        // If not then we now support a short-hand method for some simple defaults
-
         File f = new File(data);
         if (f.exists()) {
-            String json = JSONUtils.readJSONFile(data, preprocessor);
-            AbstractPlayer retValue = fromJSONString(json);
+            Object instantiatedObject = JSONUtils.loadClassFromFile(data);
+            if (instantiatedObject instanceof TunableParameters<?> parameters) {
+                instantiatedObject = parameters.instantiate();
+            }
+            if (!(instantiatedObject instanceof AbstractPlayer)) {
+                throw new AssertionError("The file " + data + " does not contain a valid AbstractPlayer or TunableParameters class.");
+            }
+            AbstractPlayer retValue = (AbstractPlayer) instantiatedObject;
             retValue.setName(data.substring(0, data.indexOf(".")));
             return retValue;
         }
-        // if we get here then the file does not exist
 
+        // if we get here then the file does not exist, and check some hard-coded strings
         String input = data.toLowerCase();
         return switch (input) {
             case "random" -> new RandomPlayer();
@@ -118,17 +80,13 @@ public class PlayerFactory {
     }
 
     public static List<AbstractPlayer> createPlayers(String opponentDescriptor) {
-        return createPlayers(opponentDescriptor, Function.identity());
-    }
-
-    public static List<AbstractPlayer> createPlayers(String opponentDescriptor, Function<String, String> preprocessor) {
         List<AbstractPlayer> retValue = new ArrayList<>();
         File od = new File(opponentDescriptor);
         if (od.exists() && od.isDirectory()) {
             for (String fileName : Objects.requireNonNull(od.list())) {
                 if (!fileName.endsWith(".json"))
                     continue;
-                AbstractPlayer player = PlayerFactory.createPlayer(od.getAbsolutePath() + File.separator + fileName, preprocessor);
+                AbstractPlayer player = PlayerFactory.createPlayer(od.getAbsolutePath() + File.separator + fileName);
                 retValue.add(player);
                 player.setName(fileName.substring(0, fileName.indexOf(".")));
             }

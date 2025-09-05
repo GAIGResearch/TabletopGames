@@ -17,7 +17,7 @@ public class LoveLetterFeatures implements IStateFeatureVector {
     }
 
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractGameState state, int playerID) {
 
         // Schema
         // [0-7]: Player hand cards (per card type)

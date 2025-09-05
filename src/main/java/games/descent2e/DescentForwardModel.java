@@ -313,8 +313,7 @@ public class DescentForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DescentGameState dgs = (DescentGameState) currentState;
-        // Cleanses actionsInProgress to remove any that were considered completed but not previously removed
-        //    dgs.isActionInProgress();
+
         Figure actingFigure = dgs.getActingFigure();
 
         if (checkEndOfGame(dgs))

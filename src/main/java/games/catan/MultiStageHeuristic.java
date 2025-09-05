@@ -40,7 +40,7 @@ public class MultiStageHeuristic extends TunableParameters implements IStateHeur
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        double[] phi = features.featureVector(gs, playerId);
+        double[] phi = features.doubleVector(gs, playerId);
         if (phi[openingIndex] > 0.5)
             return opening.evaluateState(gs, playerId);
         if (phi[earlyIndex] > 0.5)

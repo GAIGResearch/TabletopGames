@@ -30,16 +30,16 @@ public class DiamantFeatures implements IStateFeatureVector, IStateFeatureJSON {
 
     @Override
     public String[] names(){
-        return new String[]{"TreasueChests", "GemsOnPath", "PlayersInCave", "Cave", "Explosions", "Poison", "Rockfalls", "Scorpions", "Snakes"};
+        return new String[]{"TreasureChests", "GemsOnPath", "PlayersInCave", "Cave", "Explosions", "Poison", "Rockfalls", "Scorpions", "Snakes"};
     }
 
     @Override
-    public double[] featureVector(AbstractGameState gameState, int playerId) {
+    public double[] doubleVector(AbstractGameState gameState, int playerId) {
         DiamantGameState gs = (DiamantGameState) gameState;
         double[] retVal = new double[getObservationSpace()];
         retVal[0] = gs.getTreasureChests().get(playerId).getValue();
         retVal[1] = gs.path.getComponents().get(gs.path.getSize()-1).getValue(); // nGemsOnPath;
-        retVal[2] = gs.playerInCave.size();
+        retVal[2] = gs.playerInCave.stream().filter(b -> b).count();
         retVal[3] = gs.nCave;
         Map< DiamantCard.HazardType, Long> hazardsOnPath = gs.getHazardsOnPath();
         retVal[4] = hazardsOnPath.get(DiamantCard.HazardType.Explosions) != null ? hazardsOnPath.get(DiamantCard.HazardType.Explosions) : 0;

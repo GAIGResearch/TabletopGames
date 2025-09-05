@@ -165,8 +165,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
                 Constructor<ITunableParameters<?>> constructor;
                 if (fileExists) {
                     // We import the file as a JSONObject
-                    String rawJSON = JSONUtils.readJSONFile(searchSpaceFile, Function.identity());
-                    json = (JSONObject) parser.parse(rawJSON);
+                    json = JSONUtils.loadJSONFile(searchSpaceFile);
                     className = (String) json.get("class");
                     if (className == null) {
                         System.out.println("No class property found in SearchSpaceJSON file. This is required to specify the ITunableParameters class that the file complements");

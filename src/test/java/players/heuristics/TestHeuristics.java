@@ -20,7 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestStateHeuristics {
+public class TestHeuristics {
 
     DomStateFeaturesReduced dominionFeaturedReduced = new DomStateFeaturesReduced();
     DominionGameState domState = new DominionGameState(new DominionFGParameters(), 4);
@@ -55,18 +55,20 @@ public class TestStateHeuristics {
         assertEquals(0.0, linearStateHeuristic.coefficients[0], 0.01);  // bias not in json
         assertEquals(0.1, linearStateHeuristic.coefficients[1], 0.01); // first actual feature
         // 3 VP = 0.3
-        // 7 Copper = 1.4
+        // 7 Copper = 0.7 * 20 = 14
         // estate:VP = 4.5
         // estate:AC = 0.0
+        // total:vp = -9.0
         // total:estate:buys = 30.0
-        assertEquals(36.2, linearStateHeuristic.evaluateState(domState, 0), 0.01);
+        assertEquals(0.3 + 14.0 + 4.5 - 9.0 + 30.0, linearStateHeuristic.evaluateState(domState, 0), 0.01);
 
         // then buy a card
         fm.next(domState, new EndPhase(DominionGameState.DominionGamePhase.Play));
         fm.next(domState, new BuyCard(CardType.SILVER, 0));
+        // this changes treasure value to 9 / 11.
         assertEquals(1, domState.getCurrentPlayer());
-        assertEquals(6.6, linearStateHeuristic.evaluateState(domState, 0), 0.01);
-        assertEquals(36.2, linearStateHeuristic.evaluateState(domState, 1), 0.01);
+        assertEquals(0.3 + 9.0 / 11.0 * 20.0 + 4.5 - 9.0 , linearStateHeuristic.evaluateState(domState, 0), 0.01);
+        assertEquals(0.3 + 14.0 + 4.5 - 9.0 + 30.0, linearStateHeuristic.evaluateState(domState, 1), 0.01);
     }
 
     @Test
@@ -77,23 +79,26 @@ public class TestStateHeuristics {
         assertEquals(logisticStateHeuristic.coefficients.length, logisticStateHeuristic.features.names().length + 1);
         assertEquals(-10.0, logisticStateHeuristic.coefficients[0], 0.01);  // bias
         assertEquals(0.1, logisticStateHeuristic.coefficients[1], 0.01); // first actual feature
+        // Bias = -10.0
         // 3 VP = 0.3
-        // 7 Copper = 1.4
-        // estate:VP = 4.5
+        // 7 Copper = 0.7 * 20 = 14.0
+        // estate:VP = -4.5
         // estate:AC = 0.0
         // total:estate:buys = 30.0
-        assertEquals(1.0, logisticStateHeuristic.evaluateState(domState, 0), 0.01);
+        double expectedValue = 1.0 / (1.0 + Math.exp(- (-10.0 + 0.3 + 20.0 * 0.7 - 4.5 + 30)));
+        assertEquals(expectedValue, logisticStateHeuristic.evaluateState(domState, 0), 0.01);
 
         // then buy a card
         fm.next(domState, new EndPhase(DominionGameState.DominionGamePhase.Play));
         fm.next(domState, new BuyCard(CardType.SILVER, 0));
-        double expectedValue = 1.0 / (1.0 + Math.exp(10.0 - 6.6));
+        double treasureValue = (7.0 + 2.0) / 11.0;
+        expectedValue = 1.0 / (1.0 + Math.exp(-(-10.0 + 0.3 + 20.0 * treasureValue - 4.5)));
         assertEquals(expectedValue, logisticStateHeuristic.evaluateState(domState, 0), 0.01);
         assertEquals(1.0, logisticStateHeuristic.evaluateState(domState, 1), 0.01);
     }
 
     @Test
-    public void testActionHeuristic() {
+    public void testActionHeuristicNonASF() {
         llState.getPlayerHandCards().get(0).clear();
         llState.getPlayerHandCards().get(0).add(new LoveLetterCard(games.loveletter.cards.CardType.Handmaid));
         llState.getPlayerHandCards().get(0).add(new LoveLetterCard(games.loveletter.cards.CardType.Guard));
@@ -133,6 +138,5 @@ public class TestStateHeuristics {
             else
                 throw new AssertionError("Unexpected action: " + action);
         }
-
     }
 }

@@ -1,0 +1,42 @@
+{
+	"budgetType" : "BUDGET_TIME",
+	"rolloutLengthPerPlayer" : true,
+	"rolloutTermination" : "END_ROUND",
+	"rolloutLength" : 3,
+	"heuristic" : {
+		"features" : {
+			"features" : [
+			],
+			"defaultBuckets" : 1,
+			"underlyingState" : {
+				"class" : "games.dominion.metrics.DomStateFeaturesReduced"
+			},
+			"class" : "evaluation.features.AutomatedFeatures"
+		},
+		"coefficients" : {
+			"treasureValue:actionCards" : 0.4113145574871149,
+			"provinceCount" : 5.8142400226572635,
+			"BIAS" : 1.5121807506973983,
+			"treasureValue" : 1.0546144127810797,
+			"duchyCount" : 0.27103652418857316,
+			"estateCount" : -1.8220652920079925,
+			"totalCards" : -0.648335853043478,
+			"actionCards" : -23.412390090451787
+		},
+		"class" : "players.heuristics.LinearStateHeuristic",
+		"defaultHeuristic" : {
+			"class" : "players.heuristics.LeaderHeuristic"
+		}
+	},
+	"rolloutPolicyParams" : {
+		"class" : "players.simple.BoltzmannActionParams"
+	},
+	"K" : 100.0,
+	"exploreEpsilon" : 0.3,
+	"maxTreeDepth" : 1,
+	"treePolicy" : "UCB_Tuned",
+	"reuseTree" : true,
+	"rolloutType" : "PARAMS",
+	"class" : "players.mcts.MCTSParams",
+	"budget" : -999
+}

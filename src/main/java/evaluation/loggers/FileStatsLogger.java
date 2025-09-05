@@ -58,7 +58,8 @@ public class FileStatsLogger implements IStatisticLogger {
 
     public void setOutPutDirectory(String... nestedDirectories) {
         if (writer != null) {
-            throw new AssertionError("Cannot set output directory after initialisation");
+            processDataAndFinish();
+            writer = null;
         }
         String folder = Utils.createDirectory(nestedDirectories);
         this.fileName = folder + File.separator + this.fileName;
@@ -192,5 +193,22 @@ public class FileStatsLogger implements IStatisticLogger {
         FileStatsLogger retValue = new FileStatsLogger(newFileName, delimiter, append);
         retValue.actionName = id;
         return retValue;
+    }
+
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getActionName() {
+        return actionName;
+    }
+
+    public boolean isAppend() {
+        return append;
+    }
+
+    public String getDelimiter() {
+        return delimiter;
     }
 }

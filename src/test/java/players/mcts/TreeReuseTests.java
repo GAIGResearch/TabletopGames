@@ -155,6 +155,20 @@ public class TreeReuseTests {
         runGame();
     }
 
+    @Test
+    public void treeReusedWithRegretMatchingAndLowBudget() {
+        paramsOne.treePolicy = MCTSEnums.TreePolicy.RegretMatching;
+        paramsOne.budget = 8;
+        paramsOne.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        paramsTwo.treePolicy = MCTSEnums.TreePolicy.RegretMatching;
+        paramsTwo.budget = 8;
+        paramsTwo.reuseTree = true;
+        for (int i = 0; i < 5; i++) {
+            initialiseCantStop();
+            runGame();
+        }
+    }
+
 
     private SingleTreeNode descendTree(SingleTreeNode startingNode, int[] actingPlayers, List<AbstractAction> actions) {
         if (actingPlayers.length != actions.size() + 1)

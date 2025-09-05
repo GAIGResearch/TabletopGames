@@ -12,8 +12,8 @@ import java.util.Objects;
 public class Diseased extends AttributeTest {
 
     public Diseased(int testingFigure, Figure.Attribute attribute) {
-        super(testingFigure, attribute, testingFigure, 0);
-        attributeTestName = "Diseased Test: " + testingFigure + "-" + 0;
+        super(testingFigure, attribute, testingFigure);
+        attributeTestName = "Diseased Test: " + testingFigure;
     }
 
     public void announceTestDebug (DescentGameState dgs)

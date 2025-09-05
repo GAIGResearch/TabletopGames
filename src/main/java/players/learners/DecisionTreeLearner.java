@@ -1,11 +1,13 @@
 package players.learners;
 
+import core.interfaces.IActionFeatureVector;
+import core.interfaces.IStateFeatureVector;
 import org.apache.spark.ml.feature.RFormula;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.regression.DecisionTreeRegressor;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import players.heuristics.DecisionTreeActionHeuristic;
+import players.heuristics.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -20,12 +22,27 @@ public class DecisionTreeLearner extends ApacheLearner {
     double minWeightFractionPerNode;
 
 
-    public DecisionTreeLearner(double gamma, Target target) {
-        this(gamma, target, 10, 1, 0.00, 0.005);
+    public DecisionTreeLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector) {
+        this(gamma, target, 10, 1, 0.00, 0.005, stateFeatureVector);
+    }
+    public DecisionTreeLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        this(gamma, target, 10, 1, 0.00, 0.005, stateFeatureVector, actionFeatureVector);
     }
 
-    public DecisionTreeLearner(double gamma, Target target, int maxDepth, int minInstancesPerNode, double minInfoGain, double minWeightFractionPerNode) {
-        super(gamma, target);
+    public DecisionTreeLearner(double gamma, Target target, int maxDepth, int minInstancesPerNode,
+                               double minInfoGain, double minWeightFractionPerNode,
+                               IStateFeatureVector stateFeatureVector) {
+        super(gamma, target, stateFeatureVector);
+        this.maxDepth = maxDepth;
+        this.minInstancesPerNode = minInstancesPerNode;
+        this.minInfoGain = minInfoGain;
+        this.minWeightFractionPerNode = minWeightFractionPerNode;
+    }
+    public DecisionTreeLearner(double gamma, Target target, int maxDepth, int minInstancesPerNode,
+                               double minInfoGain, double minWeightFractionPerNode,
+                               IStateFeatureVector stateFeatureVector,
+                               IActionFeatureVector actionFeatureVector) {
+        super(gamma, target, stateFeatureVector, actionFeatureVector);
         this.maxDepth = maxDepth;
         this.minInstancesPerNode = minInstancesPerNode;
         this.minInfoGain = minInfoGain;
@@ -34,7 +51,7 @@ public class DecisionTreeLearner extends ApacheLearner {
 
 
     @Override
-    public void learnFromApacheData() {
+    public Object learnFromApacheData() {
 
         RFormula formula = new RFormula()
                 .setFormula("target ~ " + String.join(" + ", descriptions))
@@ -61,9 +78,18 @@ public class DecisionTreeLearner extends ApacheLearner {
         if (debug)
             System.out.println(DecisionTreeActionHeuristic.prettifyDecisionTreeDescription(drModel, descriptions));
 
+        if (this.actionFeatureVector == null) {
+            return new DecisionTreeStateHeuristic(stateFeatureVector, drModel, switch (targetType) {
+                case ORDINAL, ORD_MEAN, ORD_SCALE, ORD_MEAN_SCALE -> new OrdinalPosition();
+                case SCORE -> new PureScoreHeuristic();
+                case SCORE_DELTA -> new LeaderHeuristic();
+                default -> new WinOnlyHeuristic();
+            });
+        } else {
+            return new DecisionTreeActionHeuristic(stateFeatureVector, actionFeatureVector, drModel);
+        }
     }
 
-    @Override
     public void writeToFile(String file) {
         try {
             drModel.write().overwrite().save(file);

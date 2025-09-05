@@ -33,7 +33,7 @@ public class ParameterSearch {
                 FileReader reader = new FileReader(setupFile);
                 JSONParser parser = new JSONParser();
                 JSONObject json = (JSONObject) parser.parse(reader);
-                config = parseConfig(json, RunArg.Usage.ParameterSearch);
+                config = parseConfig(json, RunArg.Usage.ParameterSearch, true);
             } catch (FileNotFoundException ignored) {
                 throw new AssertionError("Config file not found : " + setupFile);
                 //    parseConfig(runGames, args);

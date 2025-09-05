@@ -1,7 +1,9 @@
 package evaluation.optimisation.ntbea;
 
 import evaluation.optimisation.ITPSearchSpace;
+import utilities.JSONUtils;
 
+import java.io.File;
 import java.util.*;
 
 public abstract class AgentSearchSpace<T> implements SearchSpace {
@@ -19,7 +21,14 @@ public abstract class AgentSearchSpace<T> implements SearchSpace {
             List<Object> s = new ArrayList<>();
             for (int j = 0; j < parameterDetails.get(i).values().size(); j++) {
                 Object setting = parameterDetails.get(i).values().get(j);
-                if (setting.getClass() == Long.class || setting.getClass() == long.class) {
+                // account for special case that this is a json file
+                if (setting instanceof String str) {
+                    if (str.endsWith(".json")) {
+                        // we load from the file
+                        setting = JSONUtils.loadClassFromFile(str);
+                    }
+                }
+                if (setting.getClass() == Long.class) {
                     setting = ((Number) setting).intValue();
                 }
                 if (clazz == Double.class || clazz == double.class) {

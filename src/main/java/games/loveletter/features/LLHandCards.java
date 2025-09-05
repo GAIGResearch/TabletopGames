@@ -7,7 +7,7 @@ import games.loveletter.cards.LoveLetterCard;
 
 public class LLHandCards implements IStateFeatureVector {
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractGameState state, int playerID) {
         LoveLetterGameState llgs = (LoveLetterGameState) state;
         if (!llgs.isNotTerminalForPlayer(playerID)) {
             return new double[]{0.0, 0.0};

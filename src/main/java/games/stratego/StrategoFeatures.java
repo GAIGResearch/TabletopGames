@@ -21,7 +21,7 @@ public class StrategoFeatures implements IStateFeatureVector {
     // Index = position on board
     // Value = Piece Type
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractGameState state, int playerID) {
         /* Scheme
         * 1 Unknown Player Piece (I don't think this ever happens)
         * 2 - 13 Player Piece Type
