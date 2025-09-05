@@ -38,7 +38,7 @@ public class DiamantFeatures implements IStateFeatureVector, IStateFeatureJSON {
         DiamantGameState gs = (DiamantGameState) gameState;
         double[] retVal = new double[getObservationSpace()];
         retVal[0] = gs.getTreasureChests().get(playerId).getValue();
-        retVal[1] = gs.path.getComponents().get(gs.path.getSize()-1).getNumberOfGems(); // nGemsOnPath;
+        retVal[1] = gs.path.getComponents().get(gs.path.getSize()-1).getValue(); // nGemsOnPath;
         retVal[2] = gs.playerInCave.stream().filter(b -> b).count();
         retVal[3] = gs.nCave;
         Map< DiamantCard.HazardType, Long> hazardsOnPath = gs.getHazardsOnPath();
