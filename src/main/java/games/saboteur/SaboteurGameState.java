@@ -25,6 +25,8 @@ public class SaboteurGameState extends AbstractGameState
     PartialObservableGridBoard gridBoard;
     Deck<SaboteurCard> nuggetDeck;
 
+    boolean[] minersWinByRound = new boolean[3]; // track if miners win each of the 3 rounds
+
     Set<Vector2D> pathCardOptions;
     int centerOfGrid;
 
@@ -91,6 +93,7 @@ public class SaboteurGameState extends AbstractGameState
         copy.roleDeck = roleDeck.copy();
         copy.nuggetDeck = nuggetDeck.copy();
         copy.drawDeck = drawDeck.copy();
+        copy.minersWinByRound = Arrays.copyOf(minersWinByRound, minersWinByRound.length);
 
         // Board
         copy.gridBoard = gridBoard.emptyCopy();

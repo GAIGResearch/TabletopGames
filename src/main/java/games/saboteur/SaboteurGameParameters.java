@@ -3,7 +3,6 @@ package games.saboteur;
 import core.AbstractParameters;
 import games.saboteur.components.ActionCard;
 import games.saboteur.components.PathCard;
-import games.saboteur.components.RoleCard;
 import utilities.Pair;
 
 import java.util.Arrays;
@@ -11,10 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static games.saboteur.components.ActionCard.ActionCardType.*;
+import static games.saboteur.components.ActionCard.ToolCardType.*;
+
 public class SaboteurGameParameters extends AbstractParameters {
     public int nNuggets = 27;
     public int nGoalCards = 3;
-    public int nRounds = 3;
     public int gridSize = 500;
     public int goalSpacingX = 8;
     public int goalSpacingY = 1;
@@ -67,28 +68,18 @@ public class SaboteurGameParameters extends AbstractParameters {
         //All goal cards
         goalCardDeck.put(new Pair<>(PathCard.PathCardType.Goal, new boolean[]{true, true, true, true}), 5);
 
-        //All Actions Cards
-        ActionCard.ToolCardType mineCart = ActionCard.ToolCardType.MineCart;
-        ActionCard.ToolCardType lantern = ActionCard.ToolCardType.Lantern;
-        ActionCard.ToolCardType pickaxe = ActionCard.ToolCardType.Pickaxe;
+        toolCards.put(new Pair<>(BrokenTools, new ActionCard.ToolCardType[]{MineCart}), 3);
+        toolCards.put(new Pair<>(BrokenTools, new ActionCard.ToolCardType[]{Lantern}), 3);
+        toolCards.put(new Pair<>(BrokenTools, new ActionCard.ToolCardType[]{Pickaxe}), 3);
+        toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{MineCart}), 2);
+        toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{Lantern}), 2);
+        toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{Pickaxe}), 2);
+        toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{MineCart, Lantern}), 1);
+        toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{Lantern, Pickaxe}), 1);
+        toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{Pickaxe, MineCart}), 1);
 
-        ActionCard.ActionCardType brokenTools = ActionCard.ActionCardType.BrokenTools;
-        ActionCard.ActionCardType fixTools = ActionCard.ActionCardType.FixTools;
-        ActionCard.ActionCardType map = ActionCard.ActionCardType.Map;
-        ActionCard.ActionCardType rockFall = ActionCard.ActionCardType.RockFall;
-
-        toolCards.put(new Pair<>(brokenTools, new ActionCard.ToolCardType[]{mineCart}), 3);
-        toolCards.put(new Pair<>(brokenTools, new ActionCard.ToolCardType[]{lantern}), 3);
-        toolCards.put(new Pair<>(brokenTools, new ActionCard.ToolCardType[]{pickaxe}), 3);
-        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{mineCart}), 2);
-        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{lantern}), 2);
-        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{pickaxe}), 2);
-        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{mineCart, lantern}), 1);
-        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{lantern, pickaxe}), 1);
-        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{pickaxe, mineCart}), 1);
-
-        actionCards.put(map, 3);
-        actionCards.put(rockFall, 6);
+        actionCards.put(Map, 3);
+        actionCards.put(RockFall, 6);
 
         //Nugget cards
         goldNuggetDeck.put(3, 4);
@@ -101,7 +92,6 @@ public class SaboteurGameParameters extends AbstractParameters {
         SaboteurGameParameters sgp = new SaboteurGameParameters();
         sgp.nNuggets = nNuggets;
         sgp.nGoalCards = nGoalCards;
-        sgp.nRounds = nRounds;
         sgp.gridSize = gridSize;
         sgp.goalSpacingY = goalSpacingY;
         sgp.goalSpacingX = goalSpacingX;
@@ -128,7 +118,7 @@ public class SaboteurGameParameters extends AbstractParameters {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SaboteurGameParameters that = (SaboteurGameParameters) o;
-        return nNuggets == that.nNuggets && nGoalCards == that.nGoalCards && nRounds == that.nRounds &&
+        return nNuggets == that.nNuggets && nGoalCards == that.nGoalCards &&
                 gridSize == that.gridSize && goalSpacingX == that.goalSpacingX && goalSpacingY == that.goalSpacingY &&
                 nGoals == that.nGoals && nTreasures == that.nTreasures && nStartingCards == that.nStartingCards &&
                 Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(toolCards, that.toolCards) &&
@@ -138,7 +128,7 @@ public class SaboteurGameParameters extends AbstractParameters {
 
     @Override
     public int hashCode() {
-        return Objects.hash(nNuggets, nGoalCards, nRounds, gridSize, goalSpacingX, goalSpacingY, nGoals, nTreasures,
+        return Objects.hash(nNuggets, nGoalCards, gridSize, goalSpacingX, goalSpacingY, nGoals, nTreasures,
                 nStartingCards, pathCardDeck, toolCards, actionCards, goalCardDeck, goldNuggetDeck) + Arrays.hashCode(saboteursForPlayerCount);
     }
 }
