@@ -72,14 +72,17 @@ public class SaboteurPlayerView extends DeckView<SaboteurCard> {
 
         // Draw player role and number of nugget cards
         g.setColor(Color.black);
-        g.drawString("Role: " + gs.getRole(idx).name() + "; nuggetCards: " + gs.getPlayerNuggetDecks().get(idx).getSize(), 7, (int) (SaboteurBoardView.cellHeight * 1.5));
+        if (human)
+            g.drawString( gs.getRole(idx).name() + "; Nuggets: " + gs.getPlayerNuggetDecks().get(idx).getSize(), 7, (int) (SaboteurBoardView.cellHeight * 1.5));
+        else
+            g.drawString( "Nuggets: " + gs.getPlayerNuggetDecks().get(idx).getSize(), 7, (int) (SaboteurBoardView.cellHeight * 1.5));
 
         // Draw tool status
-        String tools = "";
+        StringBuilder tools = new StringBuilder();
         for (ActionCard.ToolCardType tt: ActionCard.ToolCardType.values()) {
-            tools += tt.name() + ": " + (gs.isToolFunctional(idx, tt) ? "ok" : "broken") + "   ";
+            tools.append(tt.shortString()).append(": ").append(gs.isToolFunctional(idx, tt) ? "ok" : "XX").append("   ");
         }
-        g.drawString(tools, 7, (int) (SaboteurBoardView.cellHeight * 1.5) + 20);
+        g.drawString(tools.toString(), 7, (int) (SaboteurBoardView.cellHeight * 1.5) + 20);
     }
 
     public void update(boolean front) {

@@ -19,7 +19,7 @@ public class ActionCard extends SaboteurCard
                 }
                 case Lantern -> { return "Lant";
                 }
-                case Pickaxe -> { return "PAxe";
+                case Pickaxe -> { return "Axe";
                 }
             }
             return "";
