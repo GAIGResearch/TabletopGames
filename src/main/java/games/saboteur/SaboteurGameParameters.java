@@ -40,7 +40,9 @@ public class SaboteurGameParameters extends AbstractParameters {
     //9	    6	3
     //10	7	3
     //11    7	4
-    public int[] saboteursForPlayerCount = new int[]{0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4};
+    public int[] saboteursForPlayerCount = new int[]{0, 0, 0, 1, 1, 2, 2, 3, 3, 3, 4};
+    public int[] minersForPlayerCount = new int[]{0, 0, 0, 3, 4, 4, 5, 5, 6, 7, 8};
+
 
     public SaboteurGameParameters() {
         //All Path type cards in a deck excluding goal and start card
@@ -99,6 +101,7 @@ public class SaboteurGameParameters extends AbstractParameters {
         sgp.nTreasures = nTreasures;
         sgp.nStartingCards = nStartingCards;
         sgp.saboteursForPlayerCount = saboteursForPlayerCount;
+        sgp.minersForPlayerCount = minersForPlayerCount;
         sgp.pathCardDeck = new HashMap<>();
         for (Map.Entry<Pair<PathCard.PathCardType, boolean[]>, Integer> entry : pathCardDeck.entrySet())
             sgp.pathCardDeck.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
@@ -123,12 +126,14 @@ public class SaboteurGameParameters extends AbstractParameters {
                 nGoals == that.nGoals && nTreasures == that.nTreasures && nStartingCards == that.nStartingCards &&
                 Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(toolCards, that.toolCards) &&
                 Objects.equals(actionCards, that.actionCards) && Objects.equals(goalCardDeck, that.goalCardDeck) &&
-                Objects.equals(goldNuggetDeck, that.goldNuggetDeck) && Arrays.equals(saboteursForPlayerCount, that.saboteursForPlayerCount);
+                Objects.equals(goldNuggetDeck, that.goldNuggetDeck) && Arrays.equals(saboteursForPlayerCount, that.saboteursForPlayerCount) &&
+                Arrays.equals(minersForPlayerCount, that.minersForPlayerCount);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(nNuggets, nGoalCards, gridSize, goalSpacingX, goalSpacingY, nGoals, nTreasures,
-                nStartingCards, pathCardDeck, toolCards, actionCards, goalCardDeck, goldNuggetDeck) + Arrays.hashCode(saboteursForPlayerCount);
+                nStartingCards, pathCardDeck, toolCards, actionCards, goalCardDeck, goldNuggetDeck) +
+                Arrays.hashCode(saboteursForPlayerCount) + 31 * Arrays.hashCode(minersForPlayerCount);
     }
 }

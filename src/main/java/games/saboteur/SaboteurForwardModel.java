@@ -30,7 +30,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
         sgs.roleDeck = new PartialObservableDeck<>("RoleDeck", sgs.getNPlayers(), new boolean[sgs.getNPlayers()]);
         int nSaboteurs = sgp.saboteursForPlayerCount[sgs.getNPlayers()];
-        int nMiners = sgs.getNPlayers() - nSaboteurs;
+        int nMiners = sgp.minersForPlayerCount[sgs.getNPlayers()];
         for (int i = 0; i < nSaboteurs; i++)
             sgs.roleDeck.add(new RoleCard(RoleCard.RoleCardType.Saboteur));
         for (int i = 0; i < nMiners; i++)
@@ -448,7 +448,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         return -1;
     }
 
-    //Distribute earnings for all saboteurs (if any exists)
+    //Distribute earnings for all miners
     private void distributeMinerEarnings(SaboteurGameState sgs) {
         Deck<SaboteurCard> winningPlayersNuggetDeck = sgs.playerNuggetDecks.get(sgs.getCurrentPlayer());
 
@@ -485,7 +485,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         setupRound(sgs, (SaboteurGameParameters) sgs.getGameParameters());
     }
 
-    //Distribute earnings for all miners
+    //Distribute earnings for all saboteurs
     private void distributeSaboteurEarnings(SaboteurGameState sgs) {
         int targetNuggetValue = 0;
         targetNuggetValue = switch (sgs.nOfSaboteurs) {
