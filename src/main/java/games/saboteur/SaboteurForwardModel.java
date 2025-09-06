@@ -100,7 +100,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
     private void setupStartingHand(SaboteurGameState sgs, SaboteurGameParameters sgp) {
         for (int i = 0; i < sgs.getNPlayers(); i++) {
-            for (int j = 0; j < sgp.nStartingCards; j++) {
+            for (int j = 0; j < sgp.cardsPerPlayer[sgs.getNPlayers()]; j++) {
                 sgs.playerDecks.get(i).add(sgs.drawDeck.draw());
             }
         }

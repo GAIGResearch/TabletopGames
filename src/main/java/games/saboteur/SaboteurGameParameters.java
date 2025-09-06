@@ -20,13 +20,14 @@ public class SaboteurGameParameters extends AbstractParameters {
     public int goalSpacingY = 1;
     public int nGoals = 3;
     public int nTreasures = 1;
-    public int nStartingCards = 5;
 
     //map combination of specific cards to number of cards in that deck
     public Map<Pair<PathCard.PathCardType, boolean[]>, Integer> pathCardDeck = new HashMap<>();
     public Map<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> toolCards = new HashMap<>();
     public Map<Integer, Integer> goldNuggetDeck = new HashMap<>();
 
+
+    // TODO: Map and Rockfall cards are not implemented (well, there is some code, but action cards are never added to the deck)
     //All RolesCards in a deck depending on number of players
     //nPlayers, nMiners, nSaboteurs
     //4	    3	1
@@ -39,6 +40,7 @@ public class SaboteurGameParameters extends AbstractParameters {
     //11    7	4
     public int[] saboteursForPlayerCount = new int[]{0, 0, 0, 1, 1, 2, 2, 3, 3, 3, 4};
     public int[] minersForPlayerCount = new int[]{0, 0, 0, 3, 4, 4, 5, 5, 6, 7, 8};
+    public int[] cardsPerPlayer = new int[]{0, 0, 0, 6, 6, 6, 5, 5, 4, 4, 4};
 
 
     public SaboteurGameParameters() {
@@ -89,9 +91,9 @@ public class SaboteurGameParameters extends AbstractParameters {
         sgp.goalSpacingX = goalSpacingX;
         sgp.nGoals = nGoals;
         sgp.nTreasures = nTreasures;
-        sgp.nStartingCards = nStartingCards;
         sgp.saboteursForPlayerCount = saboteursForPlayerCount;
         sgp.minersForPlayerCount = minersForPlayerCount;
+        sgp.cardsPerPlayer = cardsPerPlayer;
         sgp.pathCardDeck = new HashMap<>();
         for (Map.Entry<Pair<PathCard.PathCardType, boolean[]>, Integer> entry : pathCardDeck.entrySet())
             sgp.pathCardDeck.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
@@ -109,7 +111,7 @@ public class SaboteurGameParameters extends AbstractParameters {
         SaboteurGameParameters that = (SaboteurGameParameters) o;
         return nNuggets == that.nNuggets && nGoalCards == that.nGoalCards &&
                 goalSpacingX == that.goalSpacingX && goalSpacingY == that.goalSpacingY &&
-                nGoals == that.nGoals && nTreasures == that.nTreasures && nStartingCards == that.nStartingCards &&
+                nGoals == that.nGoals && nTreasures == that.nTreasures && Arrays.equals(cardsPerPlayer, that.cardsPerPlayer) &&
                 Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(toolCards, that.toolCards) &&
                 Objects.equals(goldNuggetDeck, that.goldNuggetDeck) && Arrays.equals(saboteursForPlayerCount, that.saboteursForPlayerCount) &&
                 Arrays.equals(minersForPlayerCount, that.minersForPlayerCount);
@@ -118,7 +120,8 @@ public class SaboteurGameParameters extends AbstractParameters {
     @Override
     public int hashCode() {
         return Objects.hash(nNuggets, nGoalCards, goalSpacingX, goalSpacingY, nGoals, nTreasures,
-                nStartingCards, pathCardDeck, toolCards, goldNuggetDeck) +
-                Arrays.hashCode(saboteursForPlayerCount) + 31 * Arrays.hashCode(minersForPlayerCount);
+                pathCardDeck, toolCards, goldNuggetDeck) +
+                Arrays.hashCode(saboteursForPlayerCount) + 31 * Arrays.hashCode(minersForPlayerCount) +
+                31 * 31 * Arrays.hashCode(cardsPerPlayer);
     }
 }
