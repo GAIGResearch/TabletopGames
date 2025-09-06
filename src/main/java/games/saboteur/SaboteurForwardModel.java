@@ -56,9 +56,13 @@ public class SaboteurForwardModel extends StandardForwardModel {
         }
 
         sgs.discardDeck = new Deck<>("DiscardDeck", sgs.getNPlayers(), HIDDEN_TO_ALL);
-        sgs.gridBoard = new PartialObservableGridBoard(sgp.gridSize, sgp.gridSize, sgs.getNPlayers(), true);
-        sgs.centerOfGrid = (int) Math.floor(sgp.gridSize / 2.0);
-        sgs.gridBoard.setElement(sgs.centerOfGrid, sgs.centerOfGrid, new PathCard(PathCard.PathCardType.Start, new boolean[]{true, true, true, true}));
+
+        // we now build a new grid board. To avoid silliness, we do not let the players build to the left
+        int spaceForGoals = (sgp.goalSpacingY + 1) * sgp.nGoals + 10;
+        sgs.startingSquare = new Vector2D(2, spaceForGoals / 2); // we start just in on the left edge, and half way down vertically
+
+        sgs.gridBoard = new PartialObservableGridBoard(sgp.goalSpacingX + 5, spaceForGoals, sgs.getNPlayers(), true);
+        sgs.gridBoard.setElement(sgs.startingSquare.getX(), sgs.startingSquare.getY(), new PathCard(PathCard.PathCardType.Start, new boolean[]{true, true, true, true}));
         sgs.nuggetDeck = new Deck<>("NuggetDeck", HIDDEN_TO_ALL);
         for (Map.Entry<Integer, Integer> entry : sgp.goldNuggetDeck.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++) {
@@ -104,10 +108,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
     private void resetBoard(SaboteurGameState sgs, SaboteurGameParameters sgp) {
         //Initialise GridBoard with starting card
-        sgs.centerOfGrid = (int) Math.floor(sgp.gridSize / 2.0);
         for (int x = 0; x < sgs.gridBoard.getWidth(); x++) {
             for (int y = 0; y < sgs.gridBoard.getHeight(); y++) {
-                if (x == sgs.centerOfGrid && y == sgs.centerOfGrid) {
+                if (x == sgs.startingSquare.getX() && y == sgs.startingSquare.getY()) {
                     continue;
                 }
                 PathCard card = (PathCard) sgs.gridBoard.getElement(x, y);
@@ -121,16 +124,14 @@ public class SaboteurForwardModel extends StandardForwardModel {
     }
 
     private void resetGoals(SaboteurGameState sgs, SaboteurGameParameters sgp) {
-        int totalLength = sgs.goalDeck.getSize() * (sgp.goalSpacingY + 1);
-        int startingY = (int) Math.floor(totalLength / 2.0) - 1;
-
-        assert sgp.goalSpacingX <= Math.floor(sgs.gridBoard.getWidth() / 2.0) : "Placing Goal card out of bounds for X";
+        int goalCards = sgs.goalDeck.getSize();
+        int verticalSpaceNeeded = goalCards * (sgp.goalSpacingY + 1) - 1;
+        int startingY = sgs.startingSquare.getY() - verticalSpaceNeeded / 2;
 
         for (SaboteurCard goalCard : sgs.goalDeck.getComponents()) {
-            assert startingY <= sgs.gridBoard.getHeight() : "Placing Goal card out of bounds for Y";
             PathCard currentCard = (PathCard) goalCard;
-            sgs.gridBoard.setElement(sgp.goalSpacingX + 1 + sgs.centerOfGrid, startingY + sgs.centerOfGrid, currentCard);
-            startingY -= (sgp.goalSpacingY + 1);
+            sgs.gridBoard.setElement(sgp.goalSpacingX + sgs.startingSquare.getX(), startingY, currentCard);
+            startingY += (sgp.goalSpacingY + 1);
         }
     }
 
@@ -171,10 +172,10 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
     private void resetPathCardOptions(SaboteurGameState sgs) {
         sgs.pathCardOptions.clear();
-        sgs.pathCardOptions.add(new Vector2D(sgs.centerOfGrid + 1, sgs.centerOfGrid));
-        sgs.pathCardOptions.add(new Vector2D(sgs.centerOfGrid - 1, sgs.centerOfGrid));
-        sgs.pathCardOptions.add(new Vector2D(sgs.centerOfGrid, sgs.centerOfGrid + 1));
-        sgs.pathCardOptions.add(new Vector2D(sgs.centerOfGrid, sgs.centerOfGrid - 1));
+        sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX() + 1, sgs.startingSquare.getY()));
+        sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX() - 1, sgs.startingSquare.getY()));
+        sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX(), sgs.startingSquare.getY() + 1));
+        sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX(), sgs.startingSquare.getY() - 1));
     }
     //endregion
 
@@ -242,8 +243,8 @@ public class SaboteurForwardModel extends StandardForwardModel {
     //Check if the path card can be placed at the location
     private boolean checkPathCardPlacement(PathCard card, SaboteurGameState sgs, Vector2D location) {
         if (location.getX() < 0 || location.getY() < 0
-                || location.getX() >= ((SaboteurGameParameters) sgs.getGameParameters()).gridSize
-                || location.getY() >= ((SaboteurGameParameters) sgs.getGameParameters()).gridSize) return false;
+                || location.getX() >= sgs.gridBoard.getWidth()
+                || location.getY() >= sgs.gridBoard.getHeight()) return false;
         boolean[] currentDirections = card.getDirections();
         for (int i = 0; i < 4; i++) {
             Vector2D offset = getCardOffset(i);
@@ -265,14 +266,14 @@ public class SaboteurForwardModel extends StandardForwardModel {
     //Recalculate all possible path card options via recursion
     private void recalculatePathCardOptions(SaboteurGameState sgs) {
         sgs.pathCardOptions.clear();
-        PathCard currentCard = (PathCard) sgs.gridBoard.getElement(sgs.centerOfGrid, sgs.centerOfGrid);
+        PathCard currentCard = (PathCard) sgs.gridBoard.getElement(sgs.startingSquare);
         Map<Vector2D, PathCard> previousCards = new HashMap<>();
-        previousCards.put(new Vector2D(sgs.centerOfGrid, sgs.centerOfGrid), currentCard);
-        recalculatePathCardOptionsRecursive(previousCards, sgs, new Vector2D(sgs.centerOfGrid, sgs.centerOfGrid));
+        previousCards.put(sgs.startingSquare.copy(), currentCard);
+        recalculatePathCardOptionsRecursive(previousCards, sgs, sgs.startingSquare.copy());
     }
 
     private void recalculatePathCardOptionsRecursive(Map<Vector2D, PathCard> previousCards, SaboteurGameState sgs, Vector2D location) {
-        PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location.getX(), location.getY());
+        PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location);
         if (currentCard == null) {
             sgs.pathCardOptions.add(location);
             return;
@@ -394,9 +395,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
             int goalDirection = hasGoalInPossibleDirection(sgs, currentPlacement);
             if (goalDirection != -1) {
                 Vector2D offset = getCardOffset(goalDirection);
-                PathCard goalCard = (PathCard) sgs.gridBoard.getElement(((PlacePathCard) action).getX() + offset.getX(), ((PlacePathCard) action).getY() + offset.getY());
+                PathCard goalCard = (PathCard) sgs.gridBoard.getElement(currentPlacement.getX() + offset.getX(), currentPlacement.getY() + offset.getY());
                 for (int i = 0; i < sgs.getNPlayers(); i++) {
-                    sgs.gridBoard.setElementVisibility(((PlacePathCard) action).getX() + offset.getX(), ((PlacePathCard) action).getY() + offset.getY(), i, true);
+                    sgs.gridBoard.setElementVisibility(currentPlacement.getX() + offset.getX(), currentPlacement.getY() + offset.getY(), i, true);
                 }
                 if (goalCard.hasTreasure()) {
                     distributeMinerEarnings(sgs);

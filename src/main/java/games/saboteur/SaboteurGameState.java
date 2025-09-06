@@ -28,7 +28,7 @@ public class SaboteurGameState extends AbstractGameState
     boolean[] minersWinByRound = new boolean[3]; // track if miners win each of the 3 rounds
 
     Set<Vector2D> pathCardOptions;
-    int centerOfGrid;
+    Vector2D startingSquare;
 
     int nOfMiners;
     int nOfSaboteurs;
@@ -85,7 +85,7 @@ public class SaboteurGameState extends AbstractGameState
             copy.pathCardOptions.add(pathCardOption.copy());
         }
 
-        copy.centerOfGrid = centerOfGrid;
+        copy.startingSquare = startingSquare.copy();
         copy.nOfMiners = nOfMiners;
         copy.nOfSaboteurs = nOfSaboteurs;
 
@@ -278,7 +278,7 @@ public class SaboteurGameState extends AbstractGameState
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SaboteurGameState that)) return false;
-        return centerOfGrid == that.centerOfGrid &&
+        return startingSquare.equals(that.startingSquare) &&
                 nOfMiners == that.nOfMiners &&
                 nOfSaboteurs == that.nOfSaboteurs &&
                 Objects.equals(playerDecks, that.playerDecks) &&
@@ -297,7 +297,7 @@ public class SaboteurGameState extends AbstractGameState
     public int hashCode() {
         return Objects.hash(playerDecks, toolDeck, roleDeck, playerNuggetDecks,
                 drawDeck, discardDeck, goalDeck, gridBoard, nuggetDeck, pathCardOptions,
-                centerOfGrid, nOfMiners, nOfSaboteurs);
+                startingSquare, nOfMiners, nOfSaboteurs);
     }
 
     @Override
@@ -306,7 +306,7 @@ public class SaboteurGameState extends AbstractGameState
         return String.format("%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s",
                 playerDecks.hashCode(), toolDeck.hashCode(), roleDeck.hashCode(), playerNuggetDecks.hashCode(),
                 drawDeck.hashCode(), discardDeck.hashCode(), goalDeck.hashCode(), gridBoard.hashCode(), nuggetDeck.hashCode(),
-                pathCardOptions.hashCode(), centerOfGrid, nOfMiners, nOfSaboteurs);
+                pathCardOptions.hashCode(), startingSquare, nOfMiners, nOfSaboteurs);
     }
 
 }
