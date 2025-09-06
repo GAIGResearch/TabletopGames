@@ -268,31 +268,35 @@ public class SaboteurForwardModel extends StandardForwardModel {
     //Recalculate all possible path card options via recursion
     private void recalculatePathCardOptions(SaboteurGameState sgs) {
         sgs.pathCardOptions.clear();
-        PathCard currentCard = (PathCard) sgs.gridBoard.getElement(sgs.startingSquare);
-        Map<Vector2D, PathCard> previousCards = new HashMap<>();
-        previousCards.put(sgs.startingSquare.copy(), currentCard);
-        recalculatePathCardOptionsRecursive(previousCards, sgs, sgs.startingSquare.copy());
+        //     PathCard currentCard = (PathCard) sgs.gridBoard.getElement(sgs.startingSquare);
+        //    Map<Vector2D, PathCard> previousCards = new HashMap<>();
+        //     previousCards.put(sgs.startingSquare, currentCard);
+        recalculatePathCardOptionsRecursive(new HashSet<>(), sgs, sgs.startingSquare);
     }
 
-    private void recalculatePathCardOptionsRecursive(Map<Vector2D, PathCard> previousCards, SaboteurGameState sgs, Vector2D location) {
+    private void recalculatePathCardOptionsRecursive(Set<Vector2D> checkedLocations, SaboteurGameState sgs, Vector2D location) {
         PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location);
+        checkedLocations.add(location);
         if (currentCard == null) {
             sgs.pathCardOptions.add(location);
-            return;
+            return; // no card for connectivity - but we can add one here in the future
         } else if (currentCard.type == PathCard.PathCardType.Edge) {
-            return;
-        } else if (previousCards.containsKey(location) && previousCards.size() != 1) {
-            return;
+            return; // Edge breaks connectivity
+        } else if (location.getX() < 0 || location.getY() < 0
+                || location.getX() >= sgs.gridBoard.getWidth()
+                || location.getY() >= sgs.gridBoard.getHeight()) {
+            return; // out of bounds
         }
+
         //check adjacent cards for path card
         for (int i = 0; i < 4; i++) {
-            Vector2D offset = getCardOffset(i);
-            int neighborX = location.getX() + offset.getX();
-            int neighborY = location.getY() + offset.getY();
-            PathCard neighbourCard = (PathCard) sgs.gridBoard.getElement(neighborX, neighborY);
-            if (currentCard.getDirections()[i] && neighbourCard != previousCards.get(location)) {
-                previousCards.put(new Vector2D(location.getX(), location.getY()), currentCard);
-                recalculatePathCardOptionsRecursive(previousCards, sgs, new Vector2D(neighborX, neighborY));
+            if (currentCard.getDirections()[i]) { // we can reach this space from currentCard
+                Vector2D offset = getCardOffset(i);
+                int neighborX = location.getX() + offset.getX();
+                int neighborY = location.getY() + offset.getY();
+                Vector2D neighborLocation = new Vector2D(neighborX, neighborY);
+                if (!checkedLocations.contains(neighborLocation))
+                    recalculatePathCardOptionsRecursive(checkedLocations, sgs, new Vector2D(neighborX, neighborY));
             }
         }
     }
@@ -408,7 +412,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
             }
             if (!roundOver) {
                 Vector2D location = new Vector2D(currentPlacement.getX(), currentPlacement.getY());
-                PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location.getX(), location.getY());
+                PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location);
                 if (currentCard == null) {
                     throw new AssertionError("Card should not be null");
                 }
