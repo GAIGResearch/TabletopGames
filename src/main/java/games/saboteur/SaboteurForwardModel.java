@@ -231,11 +231,13 @@ public class SaboteurForwardModel extends StandardForwardModel {
             }
 
             //check when its rotated
-            card.rotate();
-            if (checkPathCardPlacement(card, sgs, location)) {
-                actions.add(new PlacePathCard(sgs.gridBoard.getComponentID(), location.getX(), location.getY(), card.getComponentID(), true));
+            if (!card.isSymmetric()) {
+                card.rotate();
+                if (checkPathCardPlacement(card, sgs, location)) {
+                    actions.add(new PlacePathCard(sgs.gridBoard.getComponentID(), location.getX(), location.getY(), card.getComponentID(), true));
+                }
+                card.rotate();
             }
-            card.rotate();
         }
         return actions;
     }

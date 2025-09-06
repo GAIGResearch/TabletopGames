@@ -30,8 +30,8 @@ import java.util.Set;
 public class SaboteurGUIManager extends AbstractGUIManager {
     //all subjected to change
     final static int playerAreaWidth = 200;
-    final static int playerAreaHeight = 100;
-    final static int boardSize = 500;
+    final static int playerAreaHeight = 150;
+    final static int boardSize = 400;
 
     SaboteurGameState gs;
     SaboteurForwardModel fm;
