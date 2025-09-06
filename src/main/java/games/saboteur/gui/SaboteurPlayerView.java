@@ -88,6 +88,14 @@ public class SaboteurPlayerView extends DeckView<SaboteurCard> {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(SaboteurBoardView.cellWidth*8, SaboteurBoardView.cellHeight*3);
+        return new Dimension(SaboteurBoardView.cellWidth * 6, SaboteurGUIManager.playerAreaHeight);
+    }
+    @Override
+    public Dimension getMinimumSize() {
+        return getPreferredSize();
+    }
+    @Override
+    public Dimension getMaximumSize() {
+        return getPreferredSize();
     }
 }

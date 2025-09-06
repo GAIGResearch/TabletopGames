@@ -76,6 +76,8 @@ public class SaboteurGameParameters extends AbstractParameters {
         toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{Lantern, Pickaxe}), 1);
         toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{Pickaxe, MineCart}), 1);
 
+        // TODO: Add Map and Rockfall cards to the deck
+
         //Nugget cards
         goldNuggetDeck.put(3, 4);
         goldNuggetDeck.put(2, 8);
