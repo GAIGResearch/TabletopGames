@@ -172,6 +172,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
     private void resetPathCardOptions(SaboteurGameState sgs) {
         sgs.pathCardOptions.clear();
+        sgs.goalLocationsFound.clear();
         sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX() + 1, sgs.startingSquare.getY()));
         sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX() - 1, sgs.startingSquare.getY()));
         sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX(), sgs.startingSquare.getY() + 1));
@@ -268,9 +269,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
     //Recalculate all possible path card options via recursion
     private void recalculatePathCardOptions(SaboteurGameState sgs) {
         sgs.pathCardOptions.clear();
-        //     PathCard currentCard = (PathCard) sgs.gridBoard.getElement(sgs.startingSquare);
-        //    Map<Vector2D, PathCard> previousCards = new HashMap<>();
-        //     previousCards.put(sgs.startingSquare, currentCard);
+        sgs.goalLocationsFound.clear();
         recalculatePathCardOptionsRecursive(new HashSet<>(), sgs, sgs.startingSquare);
     }
 
@@ -286,6 +285,12 @@ public class SaboteurForwardModel extends StandardForwardModel {
                 || location.getX() >= sgs.gridBoard.getWidth()
                 || location.getY() >= sgs.gridBoard.getHeight()) {
             return; // out of bounds
+        } else if (currentCard.type == PathCard.PathCardType.Goal) {
+            // we have found a goal
+            for (int i = 0; i < sgs.getNPlayers(); i++) {
+                sgs.gridBoard.setElementVisibility(location.getX(), location.getY(), i, true);
+            }
+            sgs.goalLocationsFound.add(location);
         }
 
         //check adjacent cards for path card
@@ -397,20 +402,12 @@ public class SaboteurForwardModel extends StandardForwardModel {
             currentDeck.add(sgs.drawDeck.draw());
         }
         if (action instanceof PlacePathCard currentPlacement) {
-            boolean roundOver = false;
-            int goalDirection = hasGoalInPossibleDirection(sgs, currentPlacement);
-            if (goalDirection != -1) {
-                Vector2D offset = getCardOffset(goalDirection);
-                PathCard goalCard = (PathCard) sgs.gridBoard.getElement(currentPlacement.getX() + offset.getX(), currentPlacement.getY() + offset.getY());
-                for (int i = 0; i < sgs.getNPlayers(); i++) {
-                    sgs.gridBoard.setElementVisibility(currentPlacement.getX() + offset.getX(), currentPlacement.getY() + offset.getY(), i, true);
-                }
-                if (goalCard.hasTreasure()) {
-                    distributeMinerEarnings(sgs);
-                    roundOver = true;
-                }
-            }
-            if (!roundOver) {
+            boolean treasureFound = sgs.goalLocationsFound.stream()
+                    .map(loc -> (PathCard) sgs.gridBoard.getElement(loc))
+                    .filter(Objects::nonNull).anyMatch(PathCard::hasTreasure);
+            if (treasureFound) {
+                distributeMinerEarnings(sgs);
+            } else {
                 Vector2D location = new Vector2D(currentPlacement.getX(), currentPlacement.getY());
                 PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location);
                 if (currentCard == null) {
@@ -437,22 +434,6 @@ public class SaboteurForwardModel extends StandardForwardModel {
             distributeSaboteurEarnings(sgs);
         }
         endPlayerTurn(sgs);
-    }
-
-    //check if path card goes into a goal
-    private int hasGoalInPossibleDirection(SaboteurGameState sgs, PlacePathCard placePathCard) {
-        PathCard pathCard = (PathCard) sgs.gridBoard.getElement(placePathCard.getX(), placePathCard.getY());
-        boolean[] directions = pathCard.getDirections();
-        for (int i = 0; i < pathCard.getDirections().length; i++) {
-            if (directions[i]) {
-                getCardOffset(i);
-                PathCard currentCard = (PathCard) sgs.gridBoard.getElement(placePathCard.getX() + getCardOffset(i).getX(), placePathCard.getY() + getCardOffset(i).getY());
-                if (currentCard != null && currentCard.type == PathCard.PathCardType.Goal) {
-                    return i;
-                }
-            }
-        }
-        return -1;
     }
 
     //Distribute earnings for all miners
