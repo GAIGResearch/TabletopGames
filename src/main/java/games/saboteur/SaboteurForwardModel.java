@@ -30,13 +30,13 @@ public class SaboteurForwardModel extends StandardForwardModel {
         SaboteurGameParameters sgp = (SaboteurGameParameters) sgs.getGameParameters();
 
         sgs.roleDeck = new PartialObservableDeck<>("RoleDeck", sgs.getNPlayers(), new boolean[sgs.getNPlayers()]);
-        for (Map.Entry<RoleCard.RoleCardType, Integer> entry: sgp.roleCardDeck.entrySet())
-        {
-            for (int i = 0; i < entry.getValue(); i++)
-            {
-                sgs.roleDeck.add(new RoleCard(entry.getKey()));
-            }
-        }
+        int nSaboteurs = sgp.saboteursForPlayerCount[sgs.getNPlayers()];
+        int nMiners = sgs.getNPlayers() - nSaboteurs;
+        for (int i = 0; i < nSaboteurs; i++)
+            sgs.roleDeck.add(new RoleCard(RoleCard.RoleCardType.Saboteur));
+        for (int i = 0; i < nMiners; i++)
+            sgs.roleDeck.add(new RoleCard(RoleCard.RoleCardType.GoldMiner));
+
         sgs.goalDeck = new Deck<>("GoalDeck", HIDDEN_TO_ALL);
         int treasures = sgp.nTreasures;
         for(int i = 0; i < sgp.nGoals; i++)
@@ -73,7 +73,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
                 sgs.nuggetDeck.add(new SaboteurCard(entry.getKey()));
             }
         }
-        sgs.nuggetDeck.shuffle(new Random(sgs.getGameParameters().getRandomSeed()));
+        sgs.nuggetDeck.shuffle(sgs.getRnd());
         setupPlayerDecks(sgs);
 
         setupRound(sgs, sgp);
