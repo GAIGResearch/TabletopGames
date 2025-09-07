@@ -329,21 +329,28 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
         Map<AbstractAction, Map<String, Object>> retValue = new LinkedHashMap<>();
 
+        int players = root.state.getNPlayers();
         if (root != null && root.getVisits() > 1) {
             for (AbstractAction action : root.actionValues.keySet()) {
                 ActionStats stats = root.actionValues.get(action);
                 int visits = stats == null ? 0 : stats.nVisits;
                 double visitProportion = visits / (double) root.getVisits();
-                double meanValue = stats == null || visits == 0 ? 0.0 : stats.totValue[root.decisionPlayer] / visits;
-                double heuristicValue = getParameters().heuristic.evaluateState(root.state, root.decisionPlayer);
+                double[] meanValues = new double[players];
+                double[] heuristicValues = new double[players];
+                if (stats != null && visits > 0) {
+                    for (int p = 0; p < players; p++) {
+                        meanValues[p] = stats.totValue[p] / visits;
+                        heuristicValues[p] = getStateHeuristic().evaluateState(root.getState(), p);
+                    }
+                }
                 double actionValue = getParameters().actionHeuristic.evaluateAction(action, root.state, root.actionsFromOpenLoopState);
 
                 Map<String, Object> actionValues = new HashMap<>();
                 actionValues.put("visits", visits);
                 actionValues.put("visitProportion", visitProportion);
-                actionValues.put("meanValue", meanValue);
-                actionValues.put("heuristic", heuristicValue);
-                actionValues.put("actionValue", actionValue);
+                actionValues.put("meanValue", meanValues);
+                actionValues.put("heuristic", heuristicValues);
+                actionValues.put("actionHeuristic", actionValue);
                 retValue.put(action, actionValues);
             }
         }

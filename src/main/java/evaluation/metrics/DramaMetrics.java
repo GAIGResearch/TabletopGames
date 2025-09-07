@@ -21,6 +21,7 @@ public class DramaMetrics implements IMetricsCollection {
         private final MCTSPlayer oracle;
         private final AbstractForwardModel fm;
 
+        // TODO: Next I need to see if this will work with creation from Metrics json definition
 
         public StateEstimate(String gameType, String oracleDetails, Event.GameEvent... args) {
             super(args);
@@ -32,22 +33,24 @@ public class DramaMetrics implements IMetricsCollection {
 
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            double[] oracleActionValues = new double[e.state.getNPlayers()];
             if (oracle != null) {
                 // use oracle to calculate state values
-                int currentPlayer = e.state.getCurrentPlayer();
                 List<AbstractAction> actions = fm.computeAvailableActions(e.state);
                 AbstractAction oracleAction = oracle._getAction(e.state, actions);
                 records.put("OracleAction", oracleAction.getString(e.state));
+                Map<AbstractAction, Map<String, Object>> stats = oracle.getDecisionStats();
+                Map<String, Object> actionStats = stats.get(oracleAction);
+                oracleActionValues = (double[]) actionStats.get("meanValue");
             }
             for (int i = 0; i < e.state.getNPlayers(); i++) {
                 records.put("ScoreP" + i, e.state.getGameScore(i));
                 records.put("HeuristicP" + i, e.state.getHeuristicScore(i));
                 if (oracle != null) {
-                    // TODO: Refactor MCTSPlayer.getDecisionStats to also return the
-                    // values for players other than the decision player
-                    records.put("OracleP" + i, oracle.getDecisionStats());
+                    records.put("OracleP" + i, oracleActionValues[i]);
                 }
             }
+            return true;
         }
 
         @Override
