@@ -59,14 +59,13 @@ public class SaboteurGameState extends AbstractGameState {
             add(gridBoard);
             add(nuggetDeck);
             addAll(playerNuggetDecks);
-
         }};
     }
 
 
     @Override
     protected SaboteurGameState _copy(int playerId) {
-        SaboteurGameState copy = new SaboteurGameState(gameParameters.copy(), getNPlayers());
+        SaboteurGameState copy = new SaboteurGameState(gameParameters, getNPlayers());
 
         //copying brokenToolsDeck
         copy.toolDeck = new ArrayList<>();

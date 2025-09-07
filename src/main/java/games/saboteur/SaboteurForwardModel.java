@@ -424,8 +424,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         if (sgs.drawDeck.getSize() != 0) {
             currentDeck.add(sgs.drawDeck.draw());
         }
-        if (action instanceof PlacePathCard currentPlacement) {
-
+        if (action instanceof PlacePathCard) {
             recalculatePathCardOptions(sgs);
             boolean treasureFound = sgs.goalLocationsFound.stream()
                     .map(loc -> (PathCard) sgs.gridBoard.getElement(loc))

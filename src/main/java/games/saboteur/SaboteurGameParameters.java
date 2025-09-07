@@ -15,7 +15,7 @@ import static games.saboteur.components.ActionCard.ActionCardType.*;
 import static games.saboteur.components.ActionCard.ToolCardType.*;
 
 public class SaboteurGameParameters extends TunableParameters<SaboteurGameParameters> {
-    public int goalSpacingX = 8;
+    public int goalSpacingX = 5;
     public int goalSpacingY = 1;
     public int nGoals = 3;
     public int nTreasures = 1;
