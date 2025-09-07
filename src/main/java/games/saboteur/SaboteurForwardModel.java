@@ -200,7 +200,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
         //Check Each card in players deck
         //Switch Case for each type of card you would find in hand
-
+        boolean consideredRockfall = false;
         for (int i = 0; i < currentPlayersDeck.getSize(); i++) {
             SaboteurCard card = currentPlayersDeck.peek(i);
             switch (card.type) {
@@ -212,6 +212,16 @@ public class SaboteurForwardModel extends StandardForwardModel {
                     break;
 
                 case Action:
+                    // This code is for the special case that we have two Rockfall cards in hand.
+                    // In this case there is not distinction between the two cards, so we only consider one of them
+                    // this avoids the need for an expensive distinct() check when we return the final actions list
+                    ActionCard actionCard = (ActionCard) card;
+                    if (actionCard.actionType == RockFall) {
+                        if (consideredRockfall)
+                            break;
+                        else
+                            consideredRockfall = true;
+                    }
                     actions.addAll(computeActionAction((ActionCard) card, i, sgs));
                     break;
             }
@@ -223,7 +233,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         if (actions.isEmpty()) {
             actions.add(new DoNothing());
         }
-        return actions.stream().distinct().collect(Collectors.toList());
+        return actions;
     }
 
     //Updates the map of possible path card locations and directions whenever a path card is placed
