@@ -64,9 +64,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
         sgs.gridBoard = new PartialObservableGridBoard(sgp.goalSpacingX + 5, spaceForGoals, sgs.getNPlayers(), true);
         sgs.gridBoard.setElement(sgs.startingSquare.getX(), sgs.startingSquare.getY(), new PathCard(PathCard.PathCardType.Start, new boolean[]{true, true, true, true}));
         sgs.nuggetDeck = new Deck<>("NuggetDeck", HIDDEN_TO_ALL);
-        for (Map.Entry<Integer, Integer> entry : sgp.goldNuggetDeck.entrySet()) {
-            for (int i = 0; i < entry.getValue(); i++) {
-                sgs.nuggetDeck.add(new SaboteurCard(entry.getKey()));
+        for (int goldValue = 0; goldValue < sgp.goldSupply.length; goldValue++) {
+            for (int i = 0; i < sgp.goldSupply[goldValue]; i++) {
+                sgs.nuggetDeck.add(new SaboteurCard(goldValue));
             }
         }
         sgs.nuggetDeck.shuffle(sgs.getRnd());
@@ -402,32 +402,14 @@ public class SaboteurForwardModel extends StandardForwardModel {
             currentDeck.add(sgs.drawDeck.draw());
         }
         if (action instanceof PlacePathCard currentPlacement) {
+
+            recalculatePathCardOptions(sgs);
             boolean treasureFound = sgs.goalLocationsFound.stream()
                     .map(loc -> (PathCard) sgs.gridBoard.getElement(loc))
                     .filter(Objects::nonNull).anyMatch(PathCard::hasTreasure);
-            if (treasureFound) {
+            if (treasureFound)
                 distributeMinerEarnings(sgs);
-            } else {
-                Vector2D location = new Vector2D(currentPlacement.getX(), currentPlacement.getY());
-                PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location);
-                if (currentCard == null) {
-                    throw new AssertionError("Card should not be null");
-                }
-                boolean[] directions = currentCard.getDirections();
-                //add available options
-                if (currentCard.type == PathCard.PathCardType.Path) {
-                    for (int i = 0; i < 4; i++) {
-                        Vector2D offset = getCardOffset(i);
-                        int neighborX = location.getX() + offset.getX();
-                        int neighborY = location.getY() + offset.getY();
-                        if (sgs.gridBoard.getElement(neighborX, neighborY) == null && directions[i]) {
-                            sgs.pathCardOptions.add(new Vector2D(neighborX, neighborY));
-                        } else if (sgs.gridBoard.getElement(neighborX, neighborY) != null && directions[i]) {
-                            recalculatePathCardOptions(sgs);
-                        }
-                    }
-                }
-            }
+
         } else if (action instanceof PlayRockFallCard) {
             recalculatePathCardOptions(sgs);
         } else if (action instanceof DoNothing) {

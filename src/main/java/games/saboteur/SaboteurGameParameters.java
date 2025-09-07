@@ -1,6 +1,7 @@
 package games.saboteur;
 
 import core.AbstractParameters;
+import evaluation.optimisation.TunableParameters;
 import games.saboteur.components.ActionCard;
 import games.saboteur.components.PathCard;
 import utilities.Pair;
@@ -13,10 +14,8 @@ import java.util.Objects;
 import static games.saboteur.components.ActionCard.ActionCardType.*;
 import static games.saboteur.components.ActionCard.ToolCardType.*;
 
-public class SaboteurGameParameters extends AbstractParameters {
-    public int nNuggets = 27;
-    public int nGoalCards = 3;
-    public int goalSpacingX = 3;
+public class SaboteurGameParameters extends TunableParameters<SaboteurGameParameters> {
+    public int goalSpacingX = 8;
     public int goalSpacingY = 1;
     public int nGoals = 3;
     public int nTreasures = 1;
@@ -24,7 +23,6 @@ public class SaboteurGameParameters extends AbstractParameters {
     //map combination of specific cards to number of cards in that deck
     public Map<Pair<PathCard.PathCardType, boolean[]>, Integer> pathCardDeck = new HashMap<>();
     public Map<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> toolCards = new HashMap<>();
-    public Map<Integer, Integer> goldNuggetDeck = new HashMap<>();
 
 
     // TODO: Map and Rockfall cards are not implemented (well, there is some code, but action cards are never added to the deck)
@@ -41,9 +39,19 @@ public class SaboteurGameParameters extends AbstractParameters {
     public int[] saboteursForPlayerCount = new int[]{0, 0, 0, 1, 1, 2, 2, 3, 3, 3, 4};
     public int[] minersForPlayerCount = new int[]{0, 0, 0, 3, 4, 4, 5, 5, 6, 7, 8};
     public int[] cardsPerPlayer = new int[]{0, 0, 0, 6, 6, 6, 5, 5, 4, 4, 4};
+    public int[] goldSupply = new int[] {0, 16, 8, 4};
 
 
     public SaboteurGameParameters() {
+
+        addTunableParameter("nGoals", 3);
+        addTunableParameter("nTreasures", 1);
+        addTunableParameter("goalSpacingX", 8);
+        addTunableParameter("goalSpacingY", 1);
+        addTunableParameter("nuggets_1", 16);
+        addTunableParameter("nuggets_2", 8);
+        addTunableParameter("nuggets_3", 4);
+
         //All Path type cards in a deck excluding goal and start card
         PathCard.PathCardType edge = PathCard.PathCardType.Edge;
         PathCard.PathCardType path = PathCard.PathCardType.Path;
@@ -78,31 +86,33 @@ public class SaboteurGameParameters extends AbstractParameters {
 
         // TODO: Add Map and Rockfall cards to the deck
 
-        //Nugget cards
-        goldNuggetDeck.put(3, 4);
-        goldNuggetDeck.put(2, 8);
-        goldNuggetDeck.put(1, 16);
+    }
+
+
+    @Override
+    public void _reset() {
+        goldSupply[1] = (int) getParameterValue("nuggets_1");
+        goldSupply[2] = (int) getParameterValue("nuggets_2");
+        goldSupply[3] = (int) getParameterValue("nuggets_3");
+        nGoals = (int) getParameterValue("nGoals");
+        nTreasures = (int) getParameterValue("nTreasures");
+        goalSpacingX = (int) getParameterValue("goalSpacingX");
+        goalSpacingY = (int) getParameterValue("goalSpacingY");
     }
 
     @Override
-    protected AbstractParameters _copy() {
+    protected SaboteurGameParameters _copy() {
         SaboteurGameParameters sgp = new SaboteurGameParameters();
-        sgp.nNuggets = nNuggets;
-        sgp.nGoalCards = nGoalCards;
-        sgp.goalSpacingY = goalSpacingY;
-        sgp.goalSpacingX = goalSpacingX;
-        sgp.nGoals = nGoals;
-        sgp.nTreasures = nTreasures;
-        sgp.saboteursForPlayerCount = saboteursForPlayerCount;
-        sgp.minersForPlayerCount = minersForPlayerCount;
-        sgp.cardsPerPlayer = cardsPerPlayer;
+        sgp.saboteursForPlayerCount = saboteursForPlayerCount.clone();
+        sgp.minersForPlayerCount = minersForPlayerCount.clone();
+        sgp.goldSupply = goldSupply.clone();
+        sgp.cardsPerPlayer = cardsPerPlayer.clone();
         sgp.pathCardDeck = new HashMap<>();
         for (Map.Entry<Pair<PathCard.PathCardType, boolean[]>, Integer> entry : pathCardDeck.entrySet())
             sgp.pathCardDeck.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
         sgp.toolCards = new HashMap<>();
         for (Map.Entry<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> entry : toolCards.entrySet())
             sgp.toolCards.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
-        sgp.goldNuggetDeck = new HashMap<>(goldNuggetDeck);
         return sgp;
     }
 
@@ -111,19 +121,21 @@ public class SaboteurGameParameters extends AbstractParameters {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SaboteurGameParameters that = (SaboteurGameParameters) o;
-        return nNuggets == that.nNuggets && nGoalCards == that.nGoalCards &&
-                goalSpacingX == that.goalSpacingX && goalSpacingY == that.goalSpacingY &&
-                nGoals == that.nGoals && nTreasures == that.nTreasures && Arrays.equals(cardsPerPlayer, that.cardsPerPlayer) &&
+        return  Arrays.equals(cardsPerPlayer, that.cardsPerPlayer) &&
                 Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(toolCards, that.toolCards) &&
-                Objects.equals(goldNuggetDeck, that.goldNuggetDeck) && Arrays.equals(saboteursForPlayerCount, that.saboteursForPlayerCount) &&
+                Arrays.equals(saboteursForPlayerCount, that.saboteursForPlayerCount) &&
                 Arrays.equals(minersForPlayerCount, that.minersForPlayerCount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nNuggets, nGoalCards, goalSpacingX, goalSpacingY, nGoals, nTreasures,
-                pathCardDeck, toolCards, goldNuggetDeck) +
+        return Objects.hash(pathCardDeck, toolCards, super.hashCode()) +
                 Arrays.hashCode(saboteursForPlayerCount) + 31 * Arrays.hashCode(minersForPlayerCount) +
                 31 * 31 * Arrays.hashCode(cardsPerPlayer);
+    }
+
+    @Override
+    public SaboteurGameParameters instantiate() {
+        return this;
     }
 }
