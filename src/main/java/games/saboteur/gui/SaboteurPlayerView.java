@@ -59,7 +59,7 @@ public class SaboteurPlayerView extends DeckView<SaboteurCard> {
                     }
                 }
             } else if (component instanceof PathCard) {
-                drawPathCard(g, (PathCard) component, rect.x, rect.y);
+                drawPathCard(g, (PathCard) component, rect.x, rect.y, true);
             } else if (component instanceof RoleCard roleCard) {
                 g.drawString(""+roleCard.type.name().charAt(0), rect.x + 5, rect.y + 20);
             }
