@@ -19,6 +19,7 @@ import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_OWNER;
 import static games.saboteur.components.ActionCard.ActionCardType.BrokenTools;
 import static games.saboteur.components.ActionCard.ActionCardType.FixTools;
+import static games.saboteur.components.RoleCard.RoleCardType.Saboteur;
 
 public class SaboteurForwardModel extends StandardForwardModel {
 
@@ -32,7 +33,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         int nSaboteurs = sgp.saboteursForPlayerCount[sgs.getNPlayers()];
         int nMiners = sgp.minersForPlayerCount[sgs.getNPlayers()];
         for (int i = 0; i < nSaboteurs; i++)
-            sgs.roleDeck.add(new RoleCard(RoleCard.RoleCardType.Saboteur));
+            sgs.roleDeck.add(new RoleCard(Saboteur));
         for (int i = 0; i < nMiners; i++)
             sgs.roleDeck.add(new RoleCard(RoleCard.RoleCardType.GoldMiner));
 
@@ -55,7 +56,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
             }
         }
 
-        sgs.discardDeck = new Deck<>("DiscardDeck", sgs.getNPlayers(), HIDDEN_TO_ALL);
+        sgs.discardDeck = new PartialObservableDeck<>("DiscardDeck", -1, sgs.getNPlayers(), HIDDEN_TO_ALL);
 
         // we now build a new grid board. To avoid silliness, we do not let the players build to the left
         int spaceForGoals = (sgp.goalSpacingY + 1) * sgp.nGoals + 10;
@@ -162,7 +163,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         sgs.nOfMiners = 0;
         //does this remove the card?
         IntStream.range(0, sgs.getNPlayers()).mapToObj(i -> (RoleCard) sgs.roleDeck.get(i)).forEach(currentRole -> {
-            if (currentRole.type == RoleCard.RoleCardType.Saboteur) {
+            if (currentRole.type == Saboteur) {
                 sgs.nOfSaboteurs++;
             } else {
                 sgs.nOfMiners++;
@@ -337,7 +338,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
                 break;
 
             case RockFall:
-                actions.addAll(computeActionRockFall(sgs));
+                RoleCard currentPlayersRole = (RoleCard) sgs.roleDeck.get(sgs.getCurrentPlayer());
+                if (currentPlayersRole.type == Saboteur)
+                    actions.addAll(computeActionRockFall(sgs));
                 break;
         }
         return actions;
@@ -370,7 +373,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         for (int x = 0; x < gridBoard.getWidth(); x++) {
             for (int y = 0; y < gridBoard.getHeight(); y++) {
                 PathCard currentCard = (PathCard) gridBoard.getElement(x, y);
-                if (currentCard != null && currentCard.type == PathCard.PathCardType.Goal) {
+                if (currentCard != null && currentCard.type == PathCard.PathCardType.Goal && !gridBoard.getElementVisibility(x, y, sgs.getCurrentPlayer())) {
                     actions.add(new PlayMapCard(x, y));
                 }
             }
@@ -437,7 +440,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
         for (int player = 0; player < sgs.getNPlayers(); player++) {
             RoleCard currentPlayersRole = (RoleCard) sgs.roleDeck.get(player);
-            if (player == sgs.getCurrentPlayer() || currentPlayersRole.type == RoleCard.RoleCardType.Saboteur) {
+            if (player == sgs.getCurrentPlayer() || currentPlayersRole.type == Saboteur) {
                 continue;
             }
             Deck<SaboteurCard> currentPlayerNuggetDeck = sgs.playerNuggetDecks.get(player);

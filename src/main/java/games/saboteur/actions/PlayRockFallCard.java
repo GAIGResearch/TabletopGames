@@ -27,6 +27,9 @@ public class PlayRockFallCard extends SetGridValueAction
                 break;
             }
         }
+        // reveal identity to all players
+        for (int p = 0; p < sgs.getNPlayers(); p++)
+            sgs.getRoleDeck().setVisibilityOfComponent(sgs.getCurrentPlayer(), p, true);
         sgs.getDiscardDeck().add(currentDeck.pick(idx));
         return true;
     }

@@ -19,7 +19,7 @@ public class SaboteurGameState extends AbstractGameState {
     List<Deck<SaboteurCard>> playerNuggetDecks;
 
     Deck<SaboteurCard> drawDeck;
-    Deck<SaboteurCard> discardDeck;
+    PartialObservableDeck<SaboteurCard> discardDeck;
     Deck<SaboteurCard> goalDeck;
     PartialObservableGridBoard gridBoard;
     Deck<SaboteurCard> nuggetDeck;
@@ -116,6 +116,27 @@ public class SaboteurGameState extends AbstractGameState {
                     copy.playerDecks.get(i).clear();
                 }
             }
+
+            // Discards should only be shuffled if not known - and if not known, then they should
+            // be shuffled into the draw deck for redistribution and not just shuffled in place
+            List<SaboteurCard> knownDiscards = new ArrayList<>();
+            for (int i = 0; i < discardDeck.getSize(); i++) {
+                SaboteurCard c = discardDeck.peek(i);
+                boolean knownByPlayer = discardDeck.getVisibilityForPlayer(i, playerId);
+                if (knownByPlayer) {
+                    knownDiscards.add(c);
+                } else {
+                    copy.drawDeck.add(c);
+                }
+            }
+            // Add known discards back to discard pile (retaining visibility)
+            copy.discardDeck.clear();
+            boolean[] visibility = new boolean[getNPlayers()];
+            visibility[playerId] = true;
+            for (SaboteurCard c : knownDiscards) {
+                copy.discardDeck.add(c, visibility);
+            }
+
             copy.drawDeck.shuffle(redeterminisationRnd);
             for (int i = 0; i < playerDecks.size(); i++) {
                 if (i != playerId) {
@@ -124,6 +145,14 @@ public class SaboteurGameState extends AbstractGameState {
                     }
                 }
             }
+            // now add to discard deck
+            for (int i = copy.discardDeck.getSize(); i < discardDeck.getSize(); i++) {
+                copy.discardDeck.add(copy.drawDeck.draw()); // this loses information of who discarded it, which is fine
+            }
+            if (copy.discardDeck.getSize() != discardDeck.getSize())
+                throw new AssertionError("Discard deck size incorrect after redeterminisation");
+            if (copy.drawDeck.getSize() != drawDeck.getSize())
+                throw new AssertionError("Draw deck size incorrect after redeterminisation");
 
             // Nuggets
             copy.playerNuggetDecks = new ArrayList<>();
@@ -166,11 +195,7 @@ public class SaboteurGameState extends AbstractGameState {
                 }
             }
 
-            // TODO: Discards should only be shuffled if not known - and if not known, then they should
-            // TODO: be shuffled into the draw deck for redistribution and not just shuffled in place
-
-            // Shuffle discard and role deck to hide info. Current player should have same role
-            copy.discardDeck.shuffle(redeterminisationRnd);
+            // Shuffle role deck to hide info. Current player should have same role
             SaboteurCard rc = copy.roleDeck.pick(playerId);
             copy.roleDeck.shuffle(redeterminisationRnd);
             copy.roleDeck.add(rc, playerId);
@@ -192,7 +217,7 @@ public class SaboteurGameState extends AbstractGameState {
     }
 
 
-    public Deck<SaboteurCard> getDiscardDeck() {
+    public PartialObservableDeck<SaboteurCard> getDiscardDeck() {
         return discardDeck;
     }
 
