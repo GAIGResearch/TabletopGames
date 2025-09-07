@@ -8,6 +8,7 @@ import core.components.PartialObservableDeck;
 import core.components.PartialObservableGridBoard;
 import games.GameType;
 import games.saboteur.components.*;
+import utilities.DeterminisationUtilities;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -195,10 +196,9 @@ public class SaboteurGameState extends AbstractGameState {
                 }
             }
 
-            // Shuffle role deck to hide info. Current player should have same role
-            SaboteurCard rc = copy.roleDeck.pick(playerId);
-            copy.roleDeck.shuffle(redeterminisationRnd);
-            copy.roleDeck.add(rc, playerId);
+            // Shuffle role deck to hide info. Current player should have same role, and we keep any they know (if Saboteur has played Rockfall)
+            // DeterminisationUtils will automatically take into account partial observability of the deck
+            DeterminisationUtilities.reshuffle(playerId, List.of(copy.roleDeck), i -> true, redeterminisationRnd);
         } else {
             //copying playerDecks
             copy.playerDecks = new ArrayList<>();

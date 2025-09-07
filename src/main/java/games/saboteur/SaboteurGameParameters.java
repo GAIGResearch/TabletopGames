@@ -15,17 +15,18 @@ import static games.saboteur.components.ActionCard.ActionCardType.*;
 import static games.saboteur.components.ActionCard.ToolCardType.*;
 
 public class SaboteurGameParameters extends TunableParameters<SaboteurGameParameters> {
-    public int goalSpacingX = 8;
+    public int goalSpacingX = 5;
     public int goalSpacingY = 1;
     public int nGoals = 3;
     public int nTreasures = 1;
+    public int mapCardsInDeck = 6;
+    public int rockfallCardsInDeck = 3;
 
     //map combination of specific cards to number of cards in that deck
     public Map<Pair<PathCard.PathCardType, boolean[]>, Integer> pathCardDeck = new HashMap<>();
     public Map<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> toolCards = new HashMap<>();
 
 
-    // TODO: Map and Rockfall cards are not implemented (well, there is some code, but action cards are never added to the deck)
     //All RolesCards in a deck depending on number of players
     //nPlayers, nMiners, nSaboteurs
     //4	    3	1
@@ -51,6 +52,8 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
         addTunableParameter("nuggets_1", 16);
         addTunableParameter("nuggets_2", 8);
         addTunableParameter("nuggets_3", 4);
+        addTunableParameter("mapCardsInDeck", 6);
+        addTunableParameter("rockfallCardsInDeck", 3);
 
         //All Path type cards in a deck excluding goal and start card
         PathCard.PathCardType edge = PathCard.PathCardType.Edge;
@@ -84,8 +87,6 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
         toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{Lantern, Pickaxe}), 1);
         toolCards.put(new Pair<>(FixTools, new ActionCard.ToolCardType[]{Pickaxe, MineCart}), 1);
 
-        // TODO: Add Map and Rockfall cards to the deck
-
     }
 
 
@@ -98,6 +99,8 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
         nTreasures = (int) getParameterValue("nTreasures");
         goalSpacingX = (int) getParameterValue("goalSpacingX");
         goalSpacingY = (int) getParameterValue("goalSpacingY");
+        mapCardsInDeck = (int) getParameterValue("mapCardsInDeck");
+        rockfallCardsInDeck = (int) getParameterValue("rockfallCardsInDeck");
     }
 
     @Override

@@ -13,12 +13,12 @@ import utilities.Pair;
 import utilities.Vector2D;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_OWNER;
-import static games.saboteur.components.ActionCard.ActionCardType.BrokenTools;
-import static games.saboteur.components.ActionCard.ActionCardType.FixTools;
+import static games.saboteur.components.ActionCard.ActionCardType.*;
 import static games.saboteur.components.RoleCard.RoleCardType.Saboteur;
 
 public class SaboteurForwardModel extends StandardForwardModel {
@@ -54,6 +54,12 @@ public class SaboteurForwardModel extends StandardForwardModel {
             for (int i = 0; i < entry.getValue(); i++) {
                 sgs.drawDeck.add(new ActionCard(entry.getKey().a, entry.getKey().b.clone()));
             }
+        }
+        for (int i = 0; i < sgp.mapCardsInDeck; i++) {
+            sgs.drawDeck.add(new ActionCard(ActionCard.ActionCardType.Map, new ActionCard.ToolCardType[]{}));
+        }
+        for (int i = 0; i < sgp.rockfallCardsInDeck; i++) {
+            sgs.drawDeck.add(new ActionCard(RockFall, new ActionCard.ToolCardType[]{}));
         }
 
         sgs.discardDeck = new PartialObservableDeck<>("DiscardDeck", -1, sgs.getNPlayers(), HIDDEN_TO_ALL);
@@ -217,7 +223,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         if (actions.isEmpty()) {
             actions.add(new DoNothing());
         }
-        return actions;
+        return actions.stream().distinct().collect(Collectors.toList());
     }
 
     //Updates the map of possible path card locations and directions whenever a path card is placed
@@ -338,9 +344,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
                 break;
 
             case RockFall:
-                RoleCard currentPlayersRole = (RoleCard) sgs.roleDeck.get(sgs.getCurrentPlayer());
-                if (currentPlayersRole.type == Saboteur)
-                    actions.addAll(computeActionRockFall(sgs));
+                actions.addAll(computeActionRockFall(sgs));
                 break;
         }
         return actions;
@@ -382,12 +386,18 @@ public class SaboteurForwardModel extends StandardForwardModel {
     }
 
     private List<AbstractAction> computeActionRockFall(SaboteurGameState sgs) {
+        RoleCard currentPlayersRole = (RoleCard) sgs.roleDeck.get(sgs.getCurrentPlayer());
         List<AbstractAction> actions = new ArrayList<>();
         for (int x = 0; x < sgs.gridBoard.getWidth(); x++) {
             for (int y = 0; y < sgs.gridBoard.getHeight(); y++) {
                 PathCard currentCard = (PathCard) sgs.gridBoard.getElement(x, y);
-                if (currentCard != null && (currentCard.type == PathCard.PathCardType.Path || currentCard.type == PathCard.PathCardType.Edge)) {
-                    actions.add(new PlayRockFallCard(sgs.gridBoard.getComponentID(), x, y));
+                if (currentCard != null) {
+                    if (currentCard.type == PathCard.PathCardType.Path && currentPlayersRole.type == Saboteur) {
+                        actions.add(new PlayRockFallCard(sgs.gridBoard.getComponentID(), x, y));
+                    }
+                    if (currentCard.type == PathCard.PathCardType.Edge) {
+                        actions.add(new PlayRockFallCard(sgs.gridBoard.getComponentID(), x, y));
+                    }
                 }
             }
         }
