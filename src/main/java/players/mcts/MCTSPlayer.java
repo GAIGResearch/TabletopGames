@@ -348,9 +348,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
                 Map<String, Object> actionValues = new HashMap<>();
                 actionValues.put("visits", visits);
                 actionValues.put("visitProportion", visitProportion);
-                actionValues.put("meanValue", meanValues);
-                actionValues.put("heuristic", heuristicValues);
-                actionValues.put("actionHeuristic", actionValue);
+                actionValues.put("nodeValue", meanValues);
+                actionValues.put("heuristicValue", heuristicValues);
+                actionValues.put("actionHeuristicValue", actionValue);
                 retValue.put(action, actionValues);
             }
         }

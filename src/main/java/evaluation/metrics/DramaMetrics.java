@@ -21,32 +21,39 @@ public class DramaMetrics implements IMetricsCollection {
         private final MCTSPlayer oracle;
         private final AbstractForwardModel fm;
 
-        // TODO: Next I need to see if this will work with creation from Metrics json definition
-
-        public StateEstimate(String gameType, String oracleDetails, Event.GameEvent... args) {
-            super(args);
+        public StateEstimate(String gameType, MCTSParams oracleDetails) {
+            super(ACTION_CHOSEN);
             GameType game = GameType.valueOf(gameType);
-            oracle = JSONUtils.loadClassFromFile(oracleDetails);
+            oracle = oracleDetails.instantiate();
             fm = game.createForwardModel(null, 0);
+            oracle.setForwardModel(fm);
             // params and nPlayers are only used for Pandemic and the AbstractRuleForwardModel
         }
 
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             double[] oracleActionValues = new double[e.state.getNPlayers()];
+            double[] oracleHeuristicValues = new double[e.state.getNPlayers()];
             if (oracle != null) {
                 // use oracle to calculate state values
                 List<AbstractAction> actions = fm.computeAvailableActions(e.state);
-                AbstractAction oracleAction = oracle._getAction(e.state, actions);
-                records.put("OracleAction", oracleAction.getString(e.state));
-                Map<AbstractAction, Map<String, Object>> stats = oracle.getDecisionStats();
-                Map<String, Object> actionStats = stats.get(oracleAction);
-                oracleActionValues = (double[]) actionStats.get("meanValue");
+                if (actions.size() >1) {
+                    AbstractAction oracleAction = oracle._getAction(e.state, actions);
+                    records.put("OracleAction", oracleAction.toString());
+                    records.put("OracleActionDescription", oracleAction.getString(e.state));
+                    Map<AbstractAction, Map<String, Object>> stats = oracle.getDecisionStats();
+                    Map<String, Object> actionStats = stats.get(oracleAction);
+                    oracleActionValues = (double[]) actionStats.get("nodeValue");
+                    oracleHeuristicValues = (double[]) actionStats.get("heuristicValue");
+                } else {
+                    return true; // no choice to be made
+                }
             }
             for (int i = 0; i < e.state.getNPlayers(); i++) {
                 records.put("ScoreP" + i, e.state.getGameScore(i));
                 records.put("HeuristicP" + i, e.state.getHeuristicScore(i));
                 if (oracle != null) {
+                    records.put("HeuristicP" + i, oracleHeuristicValues[i]);  // overrides heuristic with oracle heuristic
                     records.put("OracleP" + i, oracleActionValues[i]);
                 }
             }
@@ -67,8 +74,10 @@ public class DramaMetrics implements IMetricsCollection {
                 if (oracle != null)
                     columns.put("OracleP" + i, Double.class);
             }
-            if (oracle != null)
+            if (oracle != null) {
                 columns.put("OracleAction", String.class);
+                columns.put("OracleActionDescription", String.class);
+            }
             return columns;
         }
     }
