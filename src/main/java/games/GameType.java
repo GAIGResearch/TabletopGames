@@ -88,6 +88,10 @@ import games.puertorico.PuertoRicoForwardModel;
 import games.puertorico.PuertoRicoGameState;
 import games.puertorico.PuertoRicoParameters;
 import games.puertorico.gui.PuertoRicoGUI;
+import games.powergrid.PowerGridForwardModel;
+import games.powergrid.PowerGridGameState;
+import games.powergrid.PowerGridParameters;
+import games.powergrid.gui.PowerGridGUI;
 import games.resistance.ResForwardModel;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
@@ -275,6 +279,10 @@ public enum GameType {
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
             PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
+    PowerGrid(2, 6,
+    		Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
+            Arrays.asList(EndGameBonus, TilePlacement, EngineBuilding),
+            PowerGridGameState.class, PowerGridForwardModel.class, PowerGridParameters.class, PowerGridGUI.class),
     Wonders7(3, 7,
             Arrays.asList(Strategy, Civilization, Ancient, Cards, CityBuilding, Economic),
             Arrays.asList(ClosedDrafting, HandManagement, NeighbourScope, SetCollection, SimultaneousActionSelection, VariablePlayerPowers),
