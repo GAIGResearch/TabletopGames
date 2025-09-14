@@ -49,8 +49,10 @@ public class DramaMetrics implements IMetricsCollection {
                     records.put("OracleActionDescription", oracleAction.getString(e.state));
                     Map<AbstractAction, Map<String, Object>> stats = oracle.getDecisionStats();
                     Map<String, Object> actionStats = stats.get(oracleAction);
-                    oracleActionValues = (double[]) actionStats.get("nodeValue");
-                    oracleHeuristicValues = (double[]) actionStats.get("heuristicValue");
+                    if (actionStats != null) {
+                        oracleActionValues = (double[]) actionStats.get("nodeValue");
+                        oracleHeuristicValues = (double[]) actionStats.get("heuristicValue");
+                    }
                 } else {
                     return true; // no choice to be made
                 }

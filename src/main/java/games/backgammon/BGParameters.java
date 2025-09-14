@@ -2,7 +2,9 @@ package games.backgammon;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.components.Dice;
 import evaluation.optimisation.TunableParameters;
+import utilities.JSONUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +14,7 @@ public class BGParameters extends TunableParameters<BGParameters> {
     public enum Route {
         Common, Counter, CommonHalfA
     }
+
     public enum EntryRule {
         None, Bar, Entry
         // None means that there are no rules - any piece can be moved even if there are some pieces on the bar.
@@ -31,6 +34,9 @@ public class BGParameters extends TunableParameters<BGParameters> {
     public int entryBoardSize = 0; // Number of points in the entry board (0 if not used)
     public int diceNumber = 2; // Number of dice used in the game
     public int diceSides = 6; // Number of sides on each die
+
+    public Dice customDie = null;
+
     public boolean doubleActions = true; // Whether doubles allow double actions
     public Route route = Route.Counter; // Route type for the game
     public EntryRule entryRule = EntryRule.Bar; // Entry rule for pieces
@@ -56,26 +62,33 @@ public class BGParameters extends TunableParameters<BGParameters> {
         addTunableParameter("startingAt24", 2);
         addTunableParameter("diceNumber", 2);
         addTunableParameter("diceSides", 6);
+        addTunableParameter("diceJSON", "");
         addTunableParameter("doubleActions", true, List.of(false, true));
         addTunableParameter("route", Route.Counter);
         addTunableParameter("entryRule", EntryRule.Bar);
+
         _reset();
     }
 
 
     @Override
     protected BGParameters _copy() {
-        return new BGParameters();
+        BGParameters params = new BGParameters();
+        if (this.customDie != null)
+            params.customDie = this.customDie.copy();
+        return params;
     }
 
     @Override
     protected boolean _equals(Object o) {
-        return o instanceof BGParameters;
+        return o instanceof BGParameters && super.equals(o)
+                && ((customDie == null && ((BGParameters) o).customDie == null)
+                || (customDie != null && customDie.equals(((BGParameters) o).customDie)));
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return super.hashCode() + (customDie == null ? 0 : customDie.hashCode());
     }
 
     @Override
@@ -96,6 +109,10 @@ public class BGParameters extends TunableParameters<BGParameters> {
         startingAtBar = (int) getParameterValue("startingAtBar");
         diceNumber = (int) getParameterValue("diceNumber");
         diceSides = (int) getParameterValue("diceSides");
+        String diceJSON = (String) getParameterValue("diceJSON");
+        if (!diceJSON.isBlank()) {
+            customDie = new Dice(diceJSON);
+        }
         doubleActions = (boolean) getParameterValue("doubleActions");
         route = (Route) getParameterValue("route");
         entryRule = (EntryRule) getParameterValue("entryRule");
