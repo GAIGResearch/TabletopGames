@@ -341,7 +341,7 @@ public abstract class Utils {
             folder = folder + nestedDir + File.separator;
             File outFolder = new File(folder);
             if (!outFolder.exists()) {
-                success = outFolder.mkdir();
+                success = outFolder.mkdirs();
             }
             if (!success)
                 throw new AssertionError("Unable to create output directory" + outFolder.getAbsolutePath());
