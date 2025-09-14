@@ -27,12 +27,10 @@ public class AuctionPowerPlant extends AbstractAction {
 	    if (plantNumber > pggs.getPlayersMoney(playerId)) {
 	        return false;
 	    }
-
         pggs.setAuctionPlantNumber(plantNumber);
 
-        // include opener at the end so they can re-enter later if they can afford a future raise
+        System.out.printf("Player %d opens auction on plant %d%n", playerId, plantNumber);
 
-        System.out.printf("Player %d opens auction on plant %d for %d%n", playerId, plantNumber);
         return true;
 
 	}
@@ -58,8 +56,9 @@ public class AuctionPowerPlant extends AbstractAction {
 
 	@Override
 	public String getString(AbstractGameState gameState) {
-	    return String.format("P%d bids %d on plant %d", playerId, plantNumber);
+	    return String.format("P%d opens auction on plant %d", playerId, plantNumber);
 	}
+
 
 
 }

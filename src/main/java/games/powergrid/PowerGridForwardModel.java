@@ -15,7 +15,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
-import games.powergrid.actions.PassBid;
+import games.powergrid.actions.PassAction;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
@@ -80,35 +80,25 @@ public class PowerGridForwardModel extends StandardForwardModel {
 	protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
 		PowerGridGameState s = (PowerGridGameState) gameState;
 	    int me = gameState.getCurrentPlayer();
-
 	    List<AbstractAction> actions = new ArrayList<>();
 
 	    switch (s.getPhase()) {
+	    //this will be deleted 
         case PLAYER_ORDER:
             break;
 
-        case AUCTION:
-        	
+        case AUCTION:        	
         	//if the auction is not live and the player is still eligible aka in the round order
-            if (!s.isAuctionLive()&& s.getRoundOrder().contains(me)) {
+            if (s.getRoundOrder().contains(me)) {
                 for (PowerGridCard c : s.getCurrentMarket().getComponents()) {
                     int minOpen = c.getNumber();
-                    System.out.println(minOpen);
-                    System.out.println(s.getPlayersMoney(me));
                     if (s.getPlayersMoney(me) >= minOpen) {
                         actions.add(new AuctionPowerPlant(me, c.getNumber()));
                     }
                 }
-                actions.add(new PassBid(me)); // decline to open an auction
-            } else {
-                int minRaise = Math.max(s.getCurrentBid() + 1, s.getAuctionPlantNumber());
-                if (s.getPlayersMoney(me) >= minRaise) {
-                    actions.add(new AuctionPowerPlant(me, s.getAuctionPlantNumber()));
-                }
-                actions.add(new PassBid(me));
+                actions.add(new PassAction(me));
             }
-            break;
-
+        
         case RESOURCE_BUY:
             break;
 
@@ -122,25 +112,11 @@ public class PowerGridForwardModel extends StandardForwardModel {
 }
 	@Override
 	protected void _afterAction(AbstractGameState gameState, AbstractAction actionTaken) {
-		//if the highest bidder is reached again end the auction and remove them 
 	    PowerGridGameState s = (PowerGridGameState) gameState;
+	    advanceToNextPlayer(s);
+	    return;
+	    
 
-	    if (s.getPhase() != PowerGridParameters.Phase.AUCTION) {
-	        advanceToNextPlayer(s);
-	        return;
-	    }
-
-	    if (!s.isAuctionLive()) {
-
-	        advanceAuctionPointerIfNeeded(s);
-	        return;
-	    }
-
-	    // Live auction path: either hand to next bidder or resolve if closed
-	    resolveAuctionIfClosed(s); // if 1 active left: award, clear, advanceToNextPlayer
-	    if (s.isAuctionLive()) {
-	        handToNextBidder(s);   // still live → move to next active bidder
-	    }
 	}
 
 	
@@ -265,33 +241,15 @@ public class PowerGridForwardModel extends StandardForwardModel {
             order.add(i);
         }
         Collections.shuffle(order, state.getRnd());  // reproducible shuffle
+        //turnOrder remains constant throughtout the turn 
         state.setTurnOrder(order);
+        //will be modified during a specific phase 
         state.setRoundOrder(order);
+        System.out.println("ROUND ORDER"); //for testing remove later
+        System.out.println(state.getRoundOrder());
     }
     
-    // ===== Auction resolution helpers =====
-    private void handToNextBidder(PowerGridGameState s) {
-        int nextBidder = s.nextActiveBidderAfter(s.getCurrentBidder()); // you implement this in state
-        s.setTurnOwner(nextBidder);
-    }
-
-    private void resolveAuctionIfClosed(PowerGridGameState s) {
-        if (s.getActiveBidders().size() == 1) {
-            int winner = s.getCurrentBidder();
-            int price  = s.getCurrentBid();
-            int plant  = s.getAuctionPlantNumber();
-            System.out.printf(
-                    "[AuctionClosed] Winner=P%d | Plant=%d | Price=%d | RemainingMoney=%d%n",
-                    winner, plant, price, s.getPlayersMoney(winner)
-                );
-            
-            awardPlantToWinner(s, winner, plant, price); // another FM helper
-            System.out.println("player money " + s.getPlayersMoney(winner));
-            s.clearAuction();
-            advanceToNextPlayer(s); // next player decides whether to start the next auction
-        }
-    }
-
+  
     private void awardPlantToWinner(PowerGridGameState s, int winner, int plant, int price) {
         s.decreasePlayerMoney(winner, price);
         // remove plant from market, add to player’s plant deck, refill market, etc.

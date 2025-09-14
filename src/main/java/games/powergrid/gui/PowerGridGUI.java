@@ -103,6 +103,7 @@ public class PowerGridGUI extends AbstractGUIManager {
 	@Override
 	protected void _update(AbstractPlayer player, AbstractGameState gameState) {
 	    PowerGridGameState gs = (PowerGridGameState) gameState;
+	    /*
 	    System.out.printf("[GUI::_update] current=P%d phase=%s live=%s bid=%d on %d money=%s%n",
 	            gameState.getCurrentPlayer(),
 	            gs.getPhase(),
@@ -111,7 +112,7 @@ public class PowerGridGUI extends AbstractGUIManager {
 	            gs.getAuctionPlantNumber(),
 	            Arrays.toString(IntStream.range(0, gameState.getNPlayers())
 	                    .map(p -> gs.getPlayersMoney(p)).toArray()));
-
+*/
 	    // refresh markets
 	    currentMarketView.updateComponent(gs.getCurrentMarket());
 	    futureMarketView.updateComponent(gs.getFutureMarket());

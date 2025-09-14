@@ -55,7 +55,6 @@ public class PowerGridGameState extends AbstractGameState {
     private int[] cityCountByPlayer;
     private int[][] citySlotsById;          // [cityId][slot] -> playerId or -1
     private PowerGridParameters.Phase currentPhase;
-    private List<Integer> activeBidders = new ArrayList<>();
     private Deck<PowerGridCard>[] ownedPlantsByPlayer;
     
     
@@ -125,12 +124,12 @@ public class PowerGridGameState extends AbstractGameState {
         // turn order
         copy.turnOrder = new ArrayList<>(this.turnOrder);
         copy.turnOrderIndex = this.turnOrderIndex;
+        copy.roundOrder = new ArrayList<>(this.roundOrder);
 
         // auction sub-state
         copy.auctionPlantNumber = this.auctionPlantNumber;
         copy.currentBid         = this.currentBid;
         copy.currentBidder      = this.currentBidder;
-        copy.activeBidders = new ArrayList<>(this.activeBidders);
         // current bids (Bid is immutable enough for shallow copy)
         copy.currentBids = new HashMap<>(this.currentBids);
 
@@ -239,6 +238,14 @@ public class PowerGridGameState extends AbstractGameState {
 		this.roundOrder = new ArrayList<>(roundOrder);
 	}
 	
+	//If a player elects to skip they are removed from the phase 
+	public void removeFromRound(int playerId) {
+	    int index = roundOrder.indexOf(playerId);   
+	    if (index != -1) {                          
+	        roundOrder.set(index, -1);             
+	    }
+	}
+	
 	void advanceTurn() {
 		turnOrderIndex = (turnOrderIndex + 1) % turnOrder.size(); 
 		}
@@ -342,53 +349,7 @@ public class PowerGridGameState extends AbstractGameState {
 	    return auctionPlantNumber != -1;
 	}
 
-	public int getAuctionPlantNumber() { return auctionPlantNumber; }
-	public void setAuctionPlantNumber(int number) { auctionPlantNumber = number; }
 
-	public int getCurrentBid() { return currentBid; }
-	public void setCurrentBid(int amount, int bidder) {
-	    currentBid = amount;
-	    currentBidder = bidder;
-	}
-	public int getCurrentBidder() { return currentBidder; }
-
-	public void clearAuction() {
-	    auctionPlantNumber = -1;
-	    currentBid = 0;
-	    currentBidder = -1;
-	}
-	
-	public void startAuction(List<Integer> cycle) {
-	    activeBidders.clear();
-	    activeBidders.addAll(cycle);
-	}
-
-	public List<Integer> getActiveBidders() { return activeBidders; }
-
-	public void passBid(int playerId) {
-	    activeBidders.remove(playerId);
-	}
-
-	public boolean isStillInAuction(int playerId) {
-	    return activeBidders.contains(playerId);
-	}
-	public void passOnAuction(int pid) {
-	    activeBidders.removeIf(p -> p == pid);
-
-	}
-
-	// Helper for cycling bidders
-	public int nextActiveBidderAfter(int pid) {
-	    if (activeBidders.isEmpty()) return -1;
-	    int idx = activeBidders.indexOf(pid);
-	    if (idx < 0) {
-	        // If pid isn't in list (e.g., currentBidder is the high bidder, not acting),
-	        // start from the beginning.
-	        return activeBidders.get(0);
-	    }
-	    return activeBidders.get((idx + 1) % activeBidders.size());
-	}
-	
 	// --- Ops ---
 	public Deck<PowerGridCard> getPlayerPlantDeck(int playerId) {
 	    return ownedPlantsByPlayer[playerId];
@@ -415,6 +376,12 @@ public class PowerGridGameState extends AbstractGameState {
 	public void setStep(int step) {
 		this.step = step;
 	}
+
+	public void setAuctionPlantNumber(int plantNumber) {
+		this.auctionPlantNumber = plantNumber; 
+		
+	}
+
 
 
 

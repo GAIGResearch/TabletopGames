@@ -6,25 +6,25 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.powergrid.PowerGridGameState;
 
-public class PassBid extends AbstractAction {
+public class PassAction extends AbstractAction {
     private final int playerId;
 
-    public PassBid(int playerId) {
+    public PassAction(int playerId) {
         this.playerId = playerId;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         PowerGridGameState pggs = (PowerGridGameState) gs;
-        pggs.passOnAuction(playerId);         // <-- drop from rotation
-        System.out.println("Player " + playerId + " Passed");
+        pggs.removeFromRound(playerId);
+        System.out.println("Player " + playerId + " Passed the option to auction");
         return true;
     }
 
     @Override
-    public AbstractAction copy() { return new PassBid(playerId); }
+    public AbstractAction copy() { return new PassAction(playerId); }
     @Override
-    public boolean equals(Object obj) { return obj instanceof PassBid && ((PassBid) obj).playerId == playerId; }
+    public boolean equals(Object obj) { return obj instanceof PassAction && ((PassAction) obj).playerId == playerId; }
     @Override
     public int hashCode() { return Objects.hash(playerId); }
     @Override

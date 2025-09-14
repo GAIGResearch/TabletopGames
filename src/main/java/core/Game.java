@@ -846,7 +846,7 @@ public class Game {
      */
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "PowerGrid");
-        boolean useGUI = Utils.getArg(args, "gui", true);
+        boolean useGUI = Utils.getArg(args, "gui", false);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
