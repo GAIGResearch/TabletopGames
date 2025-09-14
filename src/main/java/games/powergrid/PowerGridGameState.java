@@ -48,10 +48,12 @@ public class PowerGridGameState extends AbstractGameState {
     public Deck<PowerGridCard> futureMarket;
     private List<Integer> turnOrder = new ArrayList<>();
     private List<Integer> roundOrder = new ArrayList<>();
+    private List<Integer> bidOrder = new ArrayList<>();
     private int turnOrderIndex = 0;
     private int[] playerMoney;
     private int step;
-	private Map<Integer, Bid> currentBids = new HashMap<>();
+
+	
     private int[] cityCountByPlayer;
     private int[][] citySlotsById;          // [cityId][slot] -> playerId or -1
     private PowerGridParameters.Phase currentPhase;
@@ -125,13 +127,13 @@ public class PowerGridGameState extends AbstractGameState {
         copy.turnOrder = new ArrayList<>(this.turnOrder);
         copy.turnOrderIndex = this.turnOrderIndex;
         copy.roundOrder = new ArrayList<>(this.roundOrder);
+        copy.bidOrder = new ArrayList<>(this.bidOrder);
 
         // auction sub-state
         copy.auctionPlantNumber = this.auctionPlantNumber;
         copy.currentBid         = this.currentBid;
         copy.currentBidder      = this.currentBidder;
         // current bids (Bid is immutable enough for shallow copy)
-        copy.currentBids = new HashMap<>(this.currentBids);
 
         // fuel (you already do this)
         if (fuelByPlayer != null) {
@@ -239,11 +241,12 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 	
 	//If a player elects to skip they are removed from the phase 
-	public void removeFromRound(int playerId) {
+	public int removeFromRound(int playerId) {
 	    int index = roundOrder.indexOf(playerId);   
 	    if (index != -1) {                          
 	        roundOrder.set(index, -1);             
 	    }
+	    return index;
 	}
 	
 	void advanceTurn() {
@@ -314,26 +317,6 @@ public class PowerGridGameState extends AbstractGameState {
 	
 	// Bid helpers
 
-	public static class Bid {
-	    public final int plantNumber;
-	    public final int amount;
-	    public Bid(int plantNumber, int amount) {
-	        this.plantNumber = plantNumber;
-	        this.amount = amount;
-	    }
-	}
-
-	public void recordBid(int playerId, int plantNumber, int amount) {
-	    currentBids.put(playerId, new Bid(plantNumber, amount));
-	}
-
-	public Map<Integer, Bid> getCurrentBids() {
-	    return Collections.unmodifiableMap(currentBids);
-	}
-
-	public void clearBids() {
-	    currentBids.clear();
-	}
 	
 	public PowerGridParameters.Phase getPhase() {
 	    return currentPhase;
@@ -381,10 +364,93 @@ public class PowerGridGameState extends AbstractGameState {
 		this.auctionPlantNumber = plantNumber; 
 		
 	}
+	
+	public int getAuctionPlantNumber() {
+		return this.auctionPlantNumber; 
+	}
+
+	public List<Integer> getBidOrder() {
+		return bidOrder;
+	}
+
+	public void resetBidOrder() {
+		this.bidOrder = new ArrayList<Integer>(roundOrder);
+	}
+	
+	public void passBid(int playerId) {
+		int index = bidOrder.indexOf(playerId);   
+	    if (index != -1) {                          
+	        bidOrder.set(index, -1);             
+	    }
+	}
+	
+	public int getCurrentBid() {
+		return currentBid; 
+	}
+	
+	public void setCurrentBid(int newBid, int playerId) {
+		this.currentBid = newBid;
+		this.currentBidder = playerId; 
+						
+	}
+	
+	public void resetAuction() {
+		this.auctionPlantNumber = -1;
+		this.currentBid = 0;
+		this.currentBidder  =-1;
+	}
+	
+	//this might have to be moved 
+	public Integer checkNextBid(int playerID) {
+	    int startIndex = turnOrder.indexOf(playerID);
+	    if (startIndex == -1) {
+	    	System.out.println(bidOrder);
+	    	System.out.println("Player" + playerID +  "Not in BidOrder");
+	        return null; // player not in bidOrder
+	    }
+
+	    int size = bidOrder.size();
+
+	    // Scan forward, wrapping around
+	    for (int offset = 1; offset < size; offset++) {
+	        int nextIndex = (startIndex + offset) % size;
+	        int candidate = bidOrder.get(nextIndex);
+
+	        if (candidate != -1) {
+	            return candidate;  // first eligible player
+	        }
+	    }
+	    System.out.println("Current player " +  playerID);
+	    System.out.println(bidOrder);
+
+	    // If no eligible players found
+	    return playerID;
+	}
+	
+	
+	
+	public boolean isRoundOrderAllPassed() {
+	    return roundOrder.stream().allMatch(v -> v == -1);
+	}
+	
+	public int nextPlayerInRound() {
+	    for (int player : roundOrder) {
+	        if (player != -1) {
+	            return player;  // first valid player found
+	        }
+	    }
+	    // If all are -1, return -1 (or throw, depending on your game logic)
+	    return -1;
+	}
+
+
+	
+	
+	}
 
 
 
 
 
 
-}
+

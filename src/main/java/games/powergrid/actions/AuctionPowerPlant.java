@@ -28,9 +28,9 @@ public class AuctionPowerPlant extends AbstractAction {
 	        return false;
 	    }
         pggs.setAuctionPlantNumber(plantNumber);
-
+        pggs.resetBidOrder();
+        pggs.setCurrentBid(plantNumber, playerId);
         System.out.printf("Player %d opens auction on plant %d%n", playerId, plantNumber);
-
         return true;
 
 	}

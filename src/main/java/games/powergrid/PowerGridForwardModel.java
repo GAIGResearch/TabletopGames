@@ -15,7 +15,9 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
+import games.powergrid.actions.IncreaseBid;
 import games.powergrid.actions.PassAction;
+import games.powergrid.actions.PassBid;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
@@ -25,6 +27,7 @@ import static core.CoreConstants.VisibilityMode.*;
 
 public class PowerGridForwardModel extends StandardForwardModel {
 	//TEst PUSH
+    int i = 0;
 	@Override
 	protected void _setup(AbstractGameState firstState) {
 		PowerGridGameState state = (PowerGridGameState)firstState;
@@ -81,7 +84,6 @@ public class PowerGridForwardModel extends StandardForwardModel {
 		PowerGridGameState s = (PowerGridGameState) gameState;
 	    int me = gameState.getCurrentPlayer();
 	    List<AbstractAction> actions = new ArrayList<>();
-
 	    switch (s.getPhase()) {
 	    //this will be deleted 
         case PLAYER_ORDER:
@@ -89,14 +91,23 @@ public class PowerGridForwardModel extends StandardForwardModel {
 
         case AUCTION:        	
         	//if the auction is not live and the player is still eligible aka in the round order
-            if (s.getRoundOrder().contains(me)) {
+            if (s.getRoundOrder().contains(me) && s.isAuctionLive() == false) {
                 for (PowerGridCard c : s.getCurrentMarket().getComponents()) {
                     int minOpen = c.getNumber();
                     if (s.getPlayersMoney(me) >= minOpen) {
                         actions.add(new AuctionPowerPlant(me, c.getNumber()));
                     }
                 }
-                actions.add(new PassAction(me));
+                actions.add(new PassAction(me)); //player done for the round
+            }else{
+            	//System.out.println("AUCTION LIVE");
+            	actions.add(new IncreaseBid(me));
+            	actions.add(new PassBid(me));
+            	if(i ==50) {
+            		System.exit(0);
+            	}
+            	i ++;
+                  	
             }
         
         case RESOURCE_BUY:
@@ -111,13 +122,36 @@ public class PowerGridForwardModel extends StandardForwardModel {
     return actions;
 }
 	@Override
-	protected void _afterAction(AbstractGameState gameState, AbstractAction actionTaken) {
-	    PowerGridGameState s = (PowerGridGameState) gameState;
-	    advanceToNextPlayer(s);
-	    return;
-	    
+	protected void _afterAction(AbstractGameState gs, AbstractAction actionTaken) {
+	    PowerGridGameState s = (PowerGridGameState) gs;
+	    int me = gs.getCurrentPlayer();
 
+	    if (s.isAuctionLive()) {
+	        int next = s.checkNextBid(me);  // returns me if I'm the only bidder left
+
+	        if (next == me) { // I win the auction
+	            awardPlantToWinner(s, me, s.getAuctionPlantNumber(), s.getCurrentBid());
+	            s.resetAuction();
+	            s.removeFromRound(me);
+
+	            if (s.isRoundOrderAllPassed()) { endRound(); return; }
+	            s.setTurnOwner(s.nextPlayerInRound());
+	        } else {
+	            s.setTurnOwner(next);  // pass bidding turn to next bidder
+	        }
+	        return;
+	    }
+
+	    // No auction live: advance normal round turn
+	    if (s.isRoundOrderAllPassed()) { endRound(); return; }
+	    s.setTurnOwner(s.nextPlayerInRound());
 	}
+
+	private void endRound() {
+	    System.out.println("Everyone has went");
+	    System.exit(0); // consider transitioning phase instead of exiting in production
+	}
+
 
 	
 	
@@ -245,6 +279,8 @@ public class PowerGridForwardModel extends StandardForwardModel {
         state.setTurnOrder(order);
         //will be modified during a specific phase 
         state.setRoundOrder(order);
+        //bidOrder matches RoundOrder
+        state.resetBidOrder();
         System.out.println("ROUND ORDER"); //for testing remove later
         System.out.println(state.getRoundOrder());
     }
@@ -252,6 +288,7 @@ public class PowerGridForwardModel extends StandardForwardModel {
   
     private void awardPlantToWinner(PowerGridGameState s, int winner, int plant, int price) {
         s.decreasePlayerMoney(winner, price);
+        System.out.printf(">>> Player %d wins auction for plant %d at price %d%n", winner, plant, price);
         // remove plant from market, add to player’s plant deck, refill market, etc.
     }
     
@@ -264,6 +301,9 @@ public class PowerGridForwardModel extends StandardForwardModel {
         int next = s.getTurnOrder().get(s.getTurnOrderIndex());
         s.setTurnOwner(next);
     }
+    
+
+    
 
 }
 
