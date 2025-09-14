@@ -14,7 +14,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.powergrid.PowerGridParameters.Resource;
-import games.powergrid.actions.BidPowerPlant;
+import games.powergrid.actions.AuctionPowerPlant;
 import games.powergrid.actions.PassBid;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridGraphBoard;
@@ -33,6 +33,7 @@ public class PowerGridForwardModel extends StandardForwardModel {
 		state.resourceMarket = new PowerGridResourceMarket();
 		state.resourceMarket.setUpMarket(true);//Eventually change this when EU implemeted
 		state.initFuelStorage(); 
+		state.setStep(1);
 		state.drawPile = setupDecks(params,state.getNPlayers(), state.getRnd());
 		PowerGridCard cardA = state.drawPile.draw(); //test
 		PowerGridCard cardB = state.drawPile.draw();//test
@@ -87,20 +88,22 @@ public class PowerGridForwardModel extends StandardForwardModel {
             break;
 
         case AUCTION:
-            if (!s.isAuctionLive()) {
+        	
+        	//if the auction is not live and the player is still eligible aka in the round order
+            if (!s.isAuctionLive()&& s.getRoundOrder().contains(me)) {
                 for (PowerGridCard c : s.getCurrentMarket().getComponents()) {
                     int minOpen = c.getNumber();
                     System.out.println(minOpen);
                     System.out.println(s.getPlayersMoney(me));
                     if (s.getPlayersMoney(me) >= minOpen) {
-                        actions.add(new BidPowerPlant(me, c.getNumber(), minOpen));
+                        actions.add(new AuctionPowerPlant(me, c.getNumber()));
                     }
                 }
                 actions.add(new PassBid(me)); // decline to open an auction
             } else {
                 int minRaise = Math.max(s.getCurrentBid() + 1, s.getAuctionPlantNumber());
                 if (s.getPlayersMoney(me) >= minRaise) {
-                    actions.add(new BidPowerPlant(me, s.getAuctionPlantNumber(), minRaise));
+                    actions.add(new AuctionPowerPlant(me, s.getAuctionPlantNumber()));
                 }
                 actions.add(new PassBid(me));
             }
@@ -113,12 +116,13 @@ public class PowerGridForwardModel extends StandardForwardModel {
             break;
 
         case BUREAUCRACY:
-            break;
+            break; 
     }
     return actions;
 }
 	@Override
 	protected void _afterAction(AbstractGameState gameState, AbstractAction actionTaken) {
+		//if the highest bidder is reached again end the auction and remove them 
 	    PowerGridGameState s = (PowerGridGameState) gameState;
 
 	    if (s.getPhase() != PowerGridParameters.Phase.AUCTION) {
@@ -262,6 +266,7 @@ public class PowerGridForwardModel extends StandardForwardModel {
         }
         Collections.shuffle(order, state.getRnd());  // reproducible shuffle
         state.setTurnOrder(order);
+        state.setRoundOrder(order);
     }
     
     // ===== Auction resolution helpers =====

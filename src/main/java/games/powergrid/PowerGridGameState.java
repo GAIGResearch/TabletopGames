@@ -47,8 +47,10 @@ public class PowerGridGameState extends AbstractGameState {
     public Deck<PowerGridCard> currentMarket;
     public Deck<PowerGridCard> futureMarket;
     private List<Integer> turnOrder = new ArrayList<>();
+    private List<Integer> roundOrder = new ArrayList<>();
     private int turnOrderIndex = 0;
     private int[] playerMoney;
+    private int step;
 	private Map<Integer, Bid> currentBids = new HashMap<>();
     private int[] cityCountByPlayer;
     private int[][] citySlotsById;          // [cityId][slot] -> playerId or -1
@@ -225,8 +227,18 @@ public class PowerGridGameState extends AbstractGameState {
 		return turnOrderIndex; 
 		}
 	void setTurnOrder(List<Integer> newOrder) {
-		turnOrder = new ArrayList<>(newOrder); turnOrderIndex = 0; 
+		turnOrder = new ArrayList<>(newOrder);
+		turnOrderIndex = 0; 
 		}
+	
+	public List<Integer> getRoundOrder() {
+		return roundOrder;
+	}
+
+	public void setRoundOrder(List<Integer> roundOrder) {
+		this.roundOrder = new ArrayList<>(roundOrder);
+	}
+	
 	void advanceTurn() {
 		turnOrderIndex = (turnOrderIndex + 1) % turnOrder.size(); 
 		}
@@ -395,6 +407,16 @@ public class PowerGridGameState extends AbstractGameState {
 	    d.getComponents().set(indexToSell, newCard);
 	    d.getComponents().sort(Comparator.comparingInt(PowerGridCard::getNumber));
 	}
+
+	public int getStep() {
+		return step;
+	}
+
+	public void setStep(int step) {
+		this.step = step;
+	}
+
+
 
 
 
