@@ -13,6 +13,11 @@ import java.util.*;
 
 import static evaluation.metrics.Event.GameEvent.*;
 
+/**
+ * A collection of metrics that aims to extract data to characterise games on the lines of
+ * Browne and Maire (2010) "Evolutionary Game Design"
+ * Browne (2008) "Automatic Generation and Evaluation of Recombination Games"
+ */
 public class DramaMetrics implements IMetricsCollection {
 
 
@@ -20,6 +25,7 @@ public class DramaMetrics implements IMetricsCollection {
 
         private final MCTSPlayer oracle;
         private final AbstractForwardModel fm;
+        private double[] lastValues;
 
         public StateEstimate(String gameType, MCTSParams oracleDetails) {
             super(ACTION_CHOSEN);
@@ -55,8 +61,10 @@ public class DramaMetrics implements IMetricsCollection {
                 if (oracle != null) {
                     records.put("HeuristicP" + i, oracleHeuristicValues[i]);  // overrides heuristic with oracle heuristic
                     records.put("OracleP" + i, oracleActionValues[i]);
+                    records.put("OracleDiffP" + i, lastValues == null ? 0.0 : oracleActionValues[i] - lastValues[i]);
                 }
             }
+            lastValues = oracleActionValues;
             return true;
         }
 
@@ -71,8 +79,10 @@ public class DramaMetrics implements IMetricsCollection {
             for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("ScoreP" + i, Double.class);
                 columns.put("HeuristicP" + i, Double.class);
-                if (oracle != null)
+                if (oracle != null) {
                     columns.put("OracleP" + i, Double.class);
+                    columns.put("OracleDiffP" + i, Double.class);
+                }
             }
             if (oracle != null) {
                 columns.put("OracleAction", String.class);
