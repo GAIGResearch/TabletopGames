@@ -236,7 +236,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         return !_computeAvailableActions(state).isEmpty();
     }
 
-    void executePhase(DescentGameState state) {
+    protected void executePhase(DescentGameState state) {
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         // System.out.println("Executing phase " + phase);

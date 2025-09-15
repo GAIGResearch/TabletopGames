@@ -128,7 +128,7 @@ public class MultiAttack extends RangedAttack {
     }
 
     @Override
-    void executePhase(DescentGameState state) {
+    protected void executePhase(DescentGameState state) {
         switch (phase) {
             case POST_DAMAGE:
                 applyDamage(state);

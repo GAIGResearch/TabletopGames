@@ -371,32 +371,33 @@ public class ArchetypeSkills {
 
                 // --- WARRIOR SKILLS ---
                 // Berserker
-                case "Rage" -> actions.addAll(rageAttackActions(dgs, f));
+                case "Rage" -> {
+                    boolean reach = checkReach(dgs, f);
+                    List<Integer> targets = getMeleeTargets(dgs, f, reach);
+                    List<RageAttack> toSort = new ArrayList<>();
+                    for (Integer target : targets) {
+                        RageAttack rage = new RageAttack(f.getComponentID(), target, reach);
+                        if (rage.canExecute(dgs)) toSort.add(rage);
+                    }
+                    toSort.sort(Comparator.comparingInt(RageAttack::getDefendingFigure));
+                    actions.addAll(toSort);
+                }
+
+                case "Death Rage" -> {
+                    boolean reach = checkReach(dgs, f);
+                    List<Integer> targets = getMeleeTargets(dgs, f, reach);
+                    List<DeathRageAttack> toSort = new ArrayList<>();
+                    for (Integer target : targets) {
+                        DeathRageAttack deathRage = new DeathRageAttack(f.getComponentID(), target, reach);
+                        if (deathRage.canExecute(dgs)) toSort.add(deathRage);
+                    }
+                    toSort.sort(Comparator.comparingInt(DeathRageAttack::getDefendingFigure));
+                    actions.addAll(toSort);
+                }
             }
 
         }
 
         return actions;
-    }
-
-    private static List<AbstractAction> rageAttackActions(DescentGameState dgs, Figure f) {
-
-        boolean reach = checkReach(dgs, f);
-
-        List<Integer> targets = getMeleeTargets(dgs, f, reach);
-        List<RageAttack> actions = new ArrayList<>();
-
-        for (Integer target : targets) {
-            RageAttack rage = new RageAttack(f.getComponentID(), target, reach);
-            if (rage.canExecute(dgs)) actions.add(rage);
-        }
-
-        Collections.sort(actions, Comparator.comparingInt(RageAttack::getDefendingFigure));
-
-        List<AbstractAction> sortedActions = new ArrayList<>();
-
-        sortedActions.addAll(actions);
-
-        return sortedActions;
     }
 }

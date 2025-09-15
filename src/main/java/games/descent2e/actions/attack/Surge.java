@@ -38,7 +38,7 @@ public enum Surge {
         // Thus, this disables its effect if we have maximum Fatigue and cannot ForceFatigue
         Figure f = s.getActingFigure();
         if(!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
-            s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
+            f.getAttribute(Figure.Attribute.Fatigue).increment();
             a.addDamage(2);
             return;
         }
@@ -55,6 +55,14 @@ public enum Surge {
             a.addDamage(2);
         }
     }),
+
+    DEATH_RAGE(1, (a, s) -> {
+        // Add +1 Damage for every 2 Health we are missing
+        Figure f = s.getActingFigure();
+        int extraDamage = (f.getAttributeMax(Figure.Attribute.Health) - f.getAttributeValue(Figure.Attribute.Health)) / 2;
+        a.addDamage(extraDamage);
+    }),
+
     FIRE_BREATH(1, (a, s) -> a.addInterruptAttack("Fire Breath")),
 
     // Lieutenants' Surges
