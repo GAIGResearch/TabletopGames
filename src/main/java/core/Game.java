@@ -358,7 +358,11 @@ public class Game {
      * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
      */
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
+        // newRandomSeed = 755726;
+        // newRandomSeed = 101483;
+        newRandomSeed = 101480;
         if (debug) System.out.println("Game Seed: " + newRandomSeed);
+        System.out.println("Game Seed: " +newRandomSeed);
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
 
@@ -591,6 +595,7 @@ public class Game {
                     System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
                 if (!observedActions.contains(action)) {
+                    forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
                     throw new AssertionError("Action played that was not in the list of available actions: " + action);
                 }
 
@@ -845,15 +850,20 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Chess");
-        boolean useGUI = Utils.getArg(args, "gui", false);
+        String gameType = Utils.getArg(args, "game", "Descent2e");
+        boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new RandomPlayer());
+        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
+    //    players.add(new HumanGUIPlayer(ac));
+    //    players.add(new HumanGUIPlayer(ac));
+    //    players.add(new HumanGUIPlayer(ac));
+    //    players.add(new RandomPlayer());
     //    players.add(new RandomPlayer());
     //    players.add(new BasicMCTSPlayer());
 //        players.add(new OSLAPlayer());
@@ -866,8 +876,8 @@ public class Game {
 //        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
 //        players.add(rmhcPlayer);
 
-       MCTSParams mcts_params = new MCTSParams();
-       players.add(new MCTSPlayer(mcts_params));
+//       MCTSParams mcts_params = new MCTSParams();
+//       players.add(new MCTSPlayer(mcts_params));
 
         // players.add(new HumanGUIPlayer(ac));
         // players.add(new HumanGUIPlayer(ac));

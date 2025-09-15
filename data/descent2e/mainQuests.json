@@ -79,7 +79,7 @@
       }
     }],
     "boards": [
-      "acolyte-of-saradyn",
+      "acolyte-of-saradyn"
     ],
     "starting-locations": [
       [[1, 15],
@@ -87,13 +87,114 @@
       [2, 15],
       [2, 16]]
     ],
-    "next-quest": ["Rellegar's Rest", "Siege of Skytower"],
+    "next-quest": ["Rellegar's Rest 1", "Siege of Skytower"],
     "next-side-quests": [0, 1]
   },
   {
-    "id": "Rellegar's Rest"
+    "id": "Rellegar's Rest 1",
+    "act": 1,
+    "traits": ["Building", "Water", "Wilderness"],
+    "monsters": [
+      ["Barghest:group", "3A"],
+      ["Goblin Archer:group", "6A"]
+    ],
+    "tokens": [
+      ["Search", "Search action", "nHeroes", ["6A-1;2", "3A-5;4", "21A-1;4", "12A-5;1"], ""]
+    ],
+    "rules": [
+      ["overlord fatigue", "START_TURN", "AttributeModifier:Fatigue:+1"],
+      ["overlord reinforcements", "END_TURN", "SpawnMonster:Goblin Archer:1:entrance1A"]
+    ],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Barghest"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "Attribute",
+          "attribute": "Fatigue",
+          "figureNameContains": "Overlord"
+        },
+        "target": 6,
+        "comparison-type": "More",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      }
+    ],
+    "boards": [
+      "rellegars-rest-1"
+    ],
+    "starting-locations": [
+      [[3, 5],
+        [3, 6],
+        [4, 6],
+        [4, 3]]
+    ],
+    "next-quest": ["Rellegar's Rest 2"],
+    "next-side-quests": [0, 1]
   },
   {
-    "id": "Siege of Skytower"
+    "id": "Test",
+    "act": 1,
+    "traits": ["Building", "Water", "Wilderness"],
+    "monsters": [
+      ["Barghest:group", "4A-1"],
+      ["Goblin Archer:group", "4A-2"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Barghest"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "test"
+    ],
+    "starting-locations": [
+      [[3, 4],
+        [3, 5],
+        [3, 6],
+        [3, 7]]
+    ]
   }
 ]
