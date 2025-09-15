@@ -27,10 +27,10 @@ public class StandUp extends DescentAction{
     @Override
     public boolean execute(DescentGameState gs) {
         Hero hero = (Hero) gs.getActingFigure();
-        hero.setDefeated(gs,false);
         // Health recovery: roll 2 red dice
         DicePool.revive.roll(gs.getRnd());
-        hero.setAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
+        hero.incrementAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
+        hero.setDefeated(gs,false);
         hero.getNActionsExecuted().setToMax();   // Only thing they can do this turn
         hero.setUsedExtraAction(true);
         hero.addActionTaken(toString());

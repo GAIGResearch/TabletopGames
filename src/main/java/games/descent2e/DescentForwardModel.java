@@ -26,6 +26,7 @@ import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.HeroicFeat;
 import games.descent2e.concepts.Quest;
+import org.sparkproject.guava.collect.Iterables;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -774,6 +775,13 @@ public class DescentForwardModel extends StandardForwardModel {
         // But they will remove it from the list when required, instead of preventing it here
         EndFigureTurn endTurn = new EndFigureTurn();
         actions.add(endTurn);
+
+        // If our last action was StandUp, we end turn immediately
+        if(!dgs.getHistory().isEmpty()) {
+            Pair<Integer, AbstractAction> lastAction = Iterables.getLast(dgs.getHistory());
+            if (lastAction.a == actingFigure.getOwnerId() && lastAction.b instanceof StandUp)
+                return actions;
+        }
 
         // First, we must check if our Figure is a defeated Hero
         // Defeated Heroes can only perform the StandUp action

@@ -383,6 +383,20 @@ public class ArchetypeSkills {
                     actions.addAll(toSort);
                 }
 
+                case "Brute" -> {
+                    if (!f.hasBonus(DescentTypes.SkillBonus.Brute)) {
+                        // Increase our maximum Health by +4, and every time we are revived, we recover +2 extra Health
+                        int bruteBonus = 4;
+                        f.addBonus(DescentTypes.SkillBonus.Brute);
+                        f.getAttribute(Figure.Attribute.Health).setMaximum(f.getAttributeMax(Figure.Attribute.Health) + bruteBonus);
+                        f.incrementAttribute(Figure.Attribute.Health, bruteBonus);
+                    }
+                }
+
+                case "Execute" -> {
+
+                }
+
                 case "Death Rage" -> {
                     boolean reach = checkReach(dgs, f);
                     List<Integer> targets = getMeleeTargets(dgs, f, reach);

@@ -7,6 +7,7 @@ import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.Move;
 import games.descent2e.concepts.HeroicFeat;
@@ -172,6 +173,10 @@ public class Hero extends Figure {
             setOffMap(true);
         }
         else {
+            // If we have the Brute ability, every time we are revived we recover 2 extra health
+            if (hasBonus(DescentTypes.SkillBonus.Brute))
+                incrementAttribute(Figure.Attribute.Health, 2);
+
             Move.replace(dgs, this);
         }
     }
