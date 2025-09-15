@@ -344,6 +344,10 @@ public class PowerGridGameState extends AbstractGameState {
 	    d.add(card);
 	    d.getComponents().sort(Comparator.comparingInt(PowerGridCard::getNumber));
 	}
+	
+	public Deck<PowerGridCard>[] getOwnedPlantsByPlayer() {
+		return ownedPlantsByPlayer; 
+	}
 
 	public void replacePlant(int playerId, int indexToSell, PowerGridCard newCard) {
 	    Deck<PowerGridCard> d = ownedPlantsByPlayer[playerId];
@@ -421,7 +425,7 @@ public class PowerGridGameState extends AbstractGameState {
 	        }
 	    }
 	    System.out.println("Current player " +  playerID);
-	    System.out.println(bidOrder);
+	    
 
 	    // If no eligible players found
 	    return playerID;
@@ -444,7 +448,47 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 
 
-	
+	public void printOwnedPlants() {
+	    for (int i = 0; i < ownedPlantsByPlayer.length; i++) {
+	        Deck<PowerGridCard> deck = ownedPlantsByPlayer[i];
+	        System.out.print("Player " + i + ": ");
+	        if (deck == null) {
+	            System.out.println("No plants");
+	        } else {
+	            for (PowerGridCard c : deck.getComponents()) {
+	                System.out.print(c.getNumber() + " ");
+	            }
+	            System.out.println();
+	        }
+	    }
+	}
+	public void printMarkets() {
+	    Deck<PowerGridCard> current = getCurrentMarket();
+	    Deck<PowerGridCard> future  = getFutureMarket();
+
+	    System.out.print("Current Market: ");
+	    if (current.getSize() == 0) {
+	        System.out.println("[empty]");
+	    } else {
+	        current.getComponents().forEach(card ->
+	            System.out.print(card.getNumber() + " ")
+	        );
+	        System.out.println();
+	    }
+
+	    System.out.print("Future Market: ");
+	    if (future.getSize() == 0) {
+	        System.out.println("[empty]");
+	    } else {
+	        future.getComponents().forEach(card ->
+	            System.out.print(card.getNumber() + " ")
+	        );
+	        System.out.println();
+	    }
+	}
+
+
+
 	
 	}
 

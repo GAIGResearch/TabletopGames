@@ -26,8 +26,8 @@ import static core.CoreConstants.VisibilityMode.*;
 
 
 public class PowerGridForwardModel extends StandardForwardModel {
-	//TEst PUSH
-    int i = 0;
+
+	
 	@Override
 	protected void _setup(AbstractGameState firstState) {
 		PowerGridGameState state = (PowerGridGameState)firstState;
@@ -38,8 +38,7 @@ public class PowerGridForwardModel extends StandardForwardModel {
 		state.initFuelStorage(); 
 		state.setStep(1);
 		state.drawPile = setupDecks(params,state.getNPlayers(), state.getRnd());
-		PowerGridCard cardA = state.drawPile.draw(); //test
-		PowerGridCard cardB = state.drawPile.draw();//test
+
 		state.currentMarket = new Deck<>("currentMarket", VISIBLE_TO_ALL);
 		state.futureMarket = new Deck<>("futureMarket",  VISIBLE_TO_ALL);
 		initMarkets(state);
@@ -50,18 +49,12 @@ public class PowerGridForwardModel extends StandardForwardModel {
 		int first = state.getTurnOrder().get(0);
 		state.setTurnOwner(first);
 		state.initOwnedPlants();
-		
-		
-		System.out.println(state.fuelSummary());
-		state.addFuel(2, PowerGridParameters.Resource.URANIUM, 4);
+				
 		System.out.println(state.fuelSummary());
 		System.out.println(Arrays.deepToString(state.getCitygraph()));
 		System.out.println(state.getTurnOrder().toString());
 		System.out.println(state.resourceMarket);
-		state.resourceMarket.buy(PowerGridParameters.Resource.URANIUM, 1);
-		System.out.println(state.resourceMarket);
-		state.addPlantToPlayer(0, cardA);  // test
-		state.addPlantToPlayer(1, cardB);  // test
+
 
 		for (PowerGridCard c : state.currentMarket.getComponents()) {
 		    System.out.println(" - " + c);
@@ -100,15 +93,12 @@ public class PowerGridForwardModel extends StandardForwardModel {
                 }
                 actions.add(new PassAction(me)); //player done for the round
             }else{
-            	//System.out.println("AUCTION LIVE");
             	actions.add(new IncreaseBid(me));
             	actions.add(new PassBid(me));
-            	if(i ==50) {
-            		System.exit(0);
+
             	}
-            	i ++;
-                  	
-            }
+                            	
+            
         
         case RESOURCE_BUY:
             break;
@@ -149,7 +139,7 @@ public class PowerGridForwardModel extends StandardForwardModel {
 
 	private void endRound() {
 	    System.out.println("Everyone has went");
-	    System.exit(0); // consider transitioning phase instead of exiting in production
+	   // consider transitioning phase instead of exiting in production
 	}
 
 
@@ -281,26 +271,69 @@ public class PowerGridForwardModel extends StandardForwardModel {
         state.setRoundOrder(order);
         //bidOrder matches RoundOrder
         state.resetBidOrder();
-        System.out.println("ROUND ORDER"); //for testing remove later
-        System.out.println(state.getRoundOrder());
     }
     
   
-    private void awardPlantToWinner(PowerGridGameState s, int winner, int plant, int price) {
+    private void awardPlantToWinner(PowerGridGameState s, int winner, int plantNumber, int price) {
         s.decreasePlayerMoney(winner, price);
-        System.out.printf(">>> Player %d wins auction for plant %d at price %d%n", winner, plant, price);
-        // remove plant from market, add to player’s plant deck, refill market, etc.
+
+        // remove the bought plant from CURRENT and give it to the player
+        Deck<PowerGridCard> current = s.getCurrentMarket();
+        PowerGridCard bought = null;
+        for (PowerGridCard c : current.getComponents()) {
+            if (c.getNumber() == plantNumber) { bought = c; break; }
+        }
+        if (bought == null) {
+            System.err.printf("Plant %d not found in current market!%n", plantNumber);
+            return;
+        }
+        current.remove(bought);
+        s.addPlantToPlayer(winner, bought);
+
+        System.out.printf(">>> Player %d wins auction for plant %d at price %d%n",
+                winner, plantNumber, price);
+        s.printOwnedPlants();
+
+        // Proper refill
+        rebalanceMarkets(s);
     }
     
-    private void advanceAuctionPointerIfNeeded(PowerGridGameState s) {
-        advanceToNextPlayer(s);
+    private void rebalanceMarkets(PowerGridGameState s) {
+        Deck<PowerGridCard> current = s.getCurrentMarket();
+        Deck<PowerGridCard> future  = s.getFutureMarket();
+        Deck<PowerGridCard> drawPile    = s.getDrawPile();
+
+        PowerGridCard replacementPlant = drawPile.draw(); 
+        current.add(replacementPlant); //we have taken a card from the current market so we replace it here 
+        sortMarket(current); //sort the current market so the largest card is last
+        PowerGridCard firstFuture = future.peek(0);  
+        PowerGridCard lastCurrent = current.peek(current.getSize() - 1);
+        //compare the largest current market card to the smallest future market
+        if(firstFuture.getNumber() < lastCurrent.getNumber()) { //if the futrue has a smaller card then swap and resort 
+        	PowerGridCard A = future.draw();
+        	PowerGridCard B = current.pickLast();
+        	future.add(B);
+        	current.add(A);
+        }
+        sortMarket(current);
+        sortMarket(future);           
+        s.printMarkets();
     }
+
+
+    
+    
+    
+    
+
 
     private void advanceToNextPlayer(PowerGridGameState s) {
         s.advanceTurn();
         int next = s.getTurnOrder().get(s.getTurnOrderIndex());
         s.setTurnOwner(next);
     }
+    
+    
     
 
     
