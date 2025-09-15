@@ -12,7 +12,19 @@ public class PowerGridParameters extends TunableParameters {
 	public static final String CARD_ASSET_PATH = "data/powergrid";
 	public enum Resource { COAL,  GAS, OIL, URANIUM }
 	public enum PlantType { COAL, GAS, OIL, URANIUM, HYBRID, GREEN }
-    public enum Phase { PLAYER_ORDER, AUCTION, RESOURCE_BUY, BUILD, BUREAUCRACY }
+	public enum Phase {
+	    PLAYER_ORDER, AUCTION, RESOURCE_BUY, BUILD, BUREAUCRACY;
+
+	    public Phase next() {
+	        return switch (this) {
+	            case PLAYER_ORDER -> AUCTION;
+	            case AUCTION -> RESOURCE_BUY;
+	            case RESOURCE_BUY -> BUILD;
+	            case BUILD -> BUREAUCRACY;
+	            case BUREAUCRACY -> PLAYER_ORDER; 
+	        };
+	    }
+	}
     public enum Step { STEP1, STEP2, STEP3 }
     
     public int maxRounds = 100;
