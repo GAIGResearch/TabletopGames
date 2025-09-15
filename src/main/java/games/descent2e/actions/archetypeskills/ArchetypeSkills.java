@@ -394,6 +394,11 @@ public class ArchetypeSkills {
                 }
 
                 case "Execute" -> {
+                    for (int i = 0; i < f.getAttributeMax(Figure.Attribute.Fatigue); i++) {
+                        Execute execute = new Execute(f.getComponentID(), skill.getComponentID(), i+1);
+                        if (!f.hasAbility(execute))
+                            f.addAbility(execute);
+                    }
 
                 }
 
