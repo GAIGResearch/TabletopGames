@@ -383,6 +383,15 @@ public class ArchetypeSkills {
                     actions.addAll(toSort);
                 }
 
+                case "Cripple" -> {
+                    List<Integer> targets = getMeleeTargets(dgs, f, false);
+                    for (Integer target : targets) {
+                        Cripple cripple = new Cripple(f.getComponentID(), target, skill.getComponentID());
+                        if (cripple.canExecute(dgs))
+                            actions.add(cripple);
+                    }
+                }
+
                 case "Brute" -> {
                     if (!f.hasBonus(DescentTypes.SkillBonus.Brute)) {
                         // Increase our maximum Health by +4, and every time we are revived, we recover +2 extra Health

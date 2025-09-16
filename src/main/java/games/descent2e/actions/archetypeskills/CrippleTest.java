@@ -1,20 +1,22 @@
-package games.descent2e.actions.monsterfeats;
+package games.descent2e.actions.archetypeskills;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
+import games.descent2e.actions.Move;
 import games.descent2e.components.Figure;
 
 import java.util.Objects;
 
-public class PromotionTest extends AttributeTest {
+public class CrippleTest extends AttributeTest {
 
     int targetFigure;
-    public PromotionTest(int splig, Figure.Attribute attribute, int targetFigure) {
+    public CrippleTest(int hero, Figure.Attribute attribute, int targetFigure) {
         // As this test targets the user, we count the source figure as itself
-        super(splig, attribute, splig);
+        super(hero, attribute, hero);
         this.targetFigure = targetFigure;
-        attributeTestName = "Promotion (Willpower) Test: " + splig + "; Target: " + targetFigure;
+        attributeTestName = "Cripple (Might) Test: " + hero + "; Target: " + targetFigure;
     }
 
     @Override
@@ -25,17 +27,17 @@ public class PromotionTest extends AttributeTest {
         String testingName = f.getName().replace("Hero: ", "");
         String targetName = target.getName().replace("Hero: ", "");
 
-        return "Promotion (Willpower) Test by " + testingName + " targeting " + targetName;
+        return "Cripple (Might) Test by " + testingName + " targeting " + targetName;
     }
 
     @Override
     public String toString() {
-        return "Promotion (Willpower) Test by " + super.getSourceFigure() + " targeting " + targetFigure;
+        return "Cripple (Might) Test by " + super.getSourceFigure() + " targeting " + targetFigure;
     }
 
     @Override
     public String toStringWithResult() {
-        return this + " - " + getTestingName() + " (" + (result ? "Passed; Promote " + targetFigure + " to Master)" : "Failed)");
+        return this + " - " + getTestingName() + " (" + (result ? "Passed; Immobolize " + targetFigure + ")" : "Failed)");
     }
 
     @Override
@@ -47,23 +49,26 @@ public class PromotionTest extends AttributeTest {
 
         if (result)
         {
-            //System.out.println("Passed Promotion (Willpower) Test!");
+            //System.out.println("Passed Cripple (Might) Test!");
+            Figure target = (Figure) dgs.getComponentById(targetFigure);
+            target.addCondition(DescentTypes.DescentCondition.Immobilize);
+            target.setAttributeToMin(Figure.Attribute.MovePoints);
         }
         else
         {
-            //System.out.println("Failed Promotion (Willpower) Test!");
+            //System.out.println("Failed Cripple (Might) Test!");
         }
     }
 
     @Override
-    public PromotionTest _copy() {
-        return new PromotionTest(sourceFigure, attribute, targetFigure);
+    public CrippleTest _copy() {
+        return new CrippleTest(sourceFigure, attribute, targetFigure);
     }
 
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof PromotionTest test) {
+        if (obj instanceof CrippleTest test) {
             return super.equals(test) && this.targetFigure == test.targetFigure;
         } else {
             return false;
