@@ -19,7 +19,8 @@ public class PGStateFeatures implements IStateFeatureVector {
             "Doubletons", "Doubletons_Opp",
             "Triplets", "Triplets_Opp",
             "MeanToHoly", "MeanToHoly_Opp",
-            "DieToHoly", "DieToHoly_Opp"
+            "DieToHoly", "DieToHoly_Opp",
+            "OffBoard", "OffBoard_Opp"
     };
 
     @Override
@@ -101,6 +102,8 @@ public class PGStateFeatures implements IStateFeatureVector {
         features[12] = (double) sum[1] / params.boardSize / 2;
         features[13] = dieToHoly[0];
         features[14] = dieToHoly[1];
+        features[15] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == 0).count();
+        features[16] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == 1).count();
         return features;
 
     }
