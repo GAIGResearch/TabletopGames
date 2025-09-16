@@ -52,10 +52,17 @@ public class Dice extends Component {
         JSONObject data = JSONUtils.loadJSONFile(json);
         this.nSides = ((Long) data.get("nSides")).intValue();
         this.type = Type.sidesToType(nSides);
-        this.pdf = (double[]) data.get(pdf);
-        double total = Arrays.stream(pdf).sum();
-        if (Math.abs(total - 1.0) > 0.000001)
-            throw new IllegalArgumentException("Invalid PDF in Dice: " + Arrays.toString(pdf));
+        Object pdfObj = data.get("pdf");
+        if (pdfObj != null) {
+            org.json.simple.JSONArray arr = (org.json.simple.JSONArray) pdfObj;
+            pdf = new double[arr.size()];
+            for (int i = 0; i < arr.size(); i++) {
+                pdf[i] = ((Number) arr.get(i)).doubleValue();
+            }
+            double total = Arrays.stream(pdf).sum();
+            if (Math.abs(total - 1.0) > 0.000001)
+                throw new IllegalArgumentException("Invalid PDF in Dice: " + Arrays.toString(pdf));
+        }
     }
 
     private Dice(Type type, int nSides, int value, int ID) {
