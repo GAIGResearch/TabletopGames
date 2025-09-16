@@ -393,6 +393,41 @@ public class ArchetypeSkills {
                     }
                 }
 
+                case "Weapon Mastery" -> {
+                    WeaponMastery mastery = new WeaponMastery(f.getComponentID(), skill.getComponentID());
+
+                    Deck<DescentCard> hand = f.getHandEquipment();
+                    boolean hasOnlyMelee = (hand != null);
+                    if (hasOnlyMelee) {
+                        for (DescentCard item : hand.getComponents()) {
+                            if (item.getAttackType() != DescentTypes.AttackType.MELEE) {
+                                hasOnlyMelee = false;
+                                break;
+                            }
+                            if (hand.getComponents().size() == 1)
+                            {
+                                String[] equipSlots = ((PropertyStringArray) item.getProperty("equipSlots")).getValues();
+                                if (equipSlots.length < 2) {
+                                    hasOnlyMelee = false;
+                                    break;
+                                }
+                                if (!Arrays.stream(equipSlots).allMatch(i -> Objects.equals(i, "hand"))) {
+                                    hasOnlyMelee = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (hasOnlyMelee)
+                        if (!f.hasAbility(mastery))
+                            f.addAbility(mastery);
+                    else
+                        if (!f.hasAbility(mastery))
+                            f.addAbility(mastery);
+
+
+                }
+
                 case "Execute" -> {
                     for (int i = 0; i < f.getAttributeMax(Figure.Attribute.Fatigue); i++) {
                         Execute execute = new Execute(f.getComponentID(), skill.getComponentID(), i+1);
