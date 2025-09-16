@@ -88,7 +88,10 @@ public class BGForwardModel extends StandardForwardModel {
         gameState.piecesBorneOff = new int[2];
         gameState.dice = new Dice[bgp.diceNumber];
         for (int i = 0; i < bgp.diceNumber; i++) {
-            gameState.dice[i] = new Dice(bgp.diceSides);
+            if (bgp.customDie != null)
+                gameState.dice[i] = bgp.customDie.copy();
+            else
+                gameState.dice[i] = new Dice(bgp.diceSides);
         }
         gameState.rollDice();
 

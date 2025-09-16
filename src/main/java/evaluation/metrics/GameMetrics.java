@@ -98,29 +98,6 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
-    public static class RoundCounter extends AbstractMetric {
-
-        @Override
-        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            //records.put("RoundCounter: ", e.state.getRoundCounter());
-            System.out.println("Round: " + e.state.getRoundCounter());  // TODO just for debug
-            return true;
-        }
-
-        @Override
-        public Set<IGameEvent> getDefaultEventTypes() {
-            return Collections.singleton(ROUND_OVER);
-        }
-
-        @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            Map<String, Class<?>> columns = new HashMap<>();
-            columns.put("RoundCounter", Integer.class);
-            return columns;
-        }
-    }
-
-
     public static class StateSpace extends AbstractMetric {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -185,18 +162,17 @@ public class GameMetrics implements IMetricsCollection {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
+            return new HashMap<>() {{
                 put("Percentage", Double.class);
             }};
         }
     }
 
-
     public static class ComputationTimes extends AbstractMetric {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
+            return new HashMap<>() {{
                 put("Next (ms)", Double.class);
                 put("Copy (ms)", Double.class);
                 put("Actions Available Compute (ms)", Double.class);
@@ -258,7 +234,7 @@ public class GameMetrics implements IMetricsCollection {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
+            return new HashMap<>() {{
                 put("ActionsPerTurn (Sum)", Integer.class);
                 put("Decisions", Integer.class);
                 put("DecisionPoints (Mean)", Double.class);
@@ -429,8 +405,8 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public HashMap<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            return new HashMap<>() {{
                 put("PlayerIdx", String.class);
             }};
         }

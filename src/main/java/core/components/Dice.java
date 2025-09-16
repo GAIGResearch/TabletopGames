@@ -1,14 +1,10 @@
 package core.components;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 import core.CoreConstants;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import utilities.JSONUtils;
 
 import static core.components.Dice.Type.*;
 
@@ -31,19 +27,11 @@ public class Dice extends Component {
             return dCustom;
         }
     }
-    public static Map<Type, Dice> StandardDice = new HashMap<Type, Dice>() {{
-        put(d3, new Dice(d3));
-        put(d4, new Dice(d4));
-        put(d6, new Dice(d6));
-        put(d8, new Dice(d8));
-        put(d10, new Dice(d10));
-        put(d12, new Dice(d12));
-        put(d20, new Dice(d20));
-    }};
 
     public final Type type;
     public final int nSides; // Number of sides
     protected int value;  // Current value after last roll
+    private double[] pdf = null;
 
     public Dice() {
         this(d6);  // By default d6
@@ -58,6 +46,16 @@ public class Dice extends Component {
         super(CoreConstants.ComponentType.DICE);
         this.nSides = nSides;
         this.type = Type.sidesToType(nSides);
+    }
+    public Dice(String json) {
+        super(CoreConstants.ComponentType.DICE);
+        JSONObject data = JSONUtils.loadJSONFile(json);
+        this.nSides = ((Long) data.get("nSides")).intValue();
+        this.type = Type.sidesToType(nSides);
+        this.pdf = (double[]) data.get(pdf);
+        double total = Arrays.stream(pdf).sum();
+        if (Math.abs(total - 1.0) > 0.000001)
+            throw new IllegalArgumentException("Invalid PDF in Dice: " + Arrays.toString(pdf));
     }
 
     private Dice(Type type, int nSides, int value, int ID) {
@@ -93,51 +91,30 @@ public class Dice extends Component {
      * @param r - random generator.
      */
     public void roll(Random r) {
-        value = r.nextInt(this.nSides) + 1;
+        if (pdf == null) {
+            value = r.nextInt(this.nSides) + 1;
+        } else {
+            double p = r.nextDouble();
+            double cumulative = 0.0;
+            for (int i = 0; i < pdf.length; i++) {
+                cumulative += pdf[i];
+                if (p <= cumulative) {
+                    value = i + 1;
+                    return;
+                }
+            }
+            // Should never get here
+            throw new AssertionError("Error when rolling custom die, no value selected");
+        }
     }
 
     @Override
     public Dice copy() {
         Dice copy = new Dice(type, nSides, value, componentID);
+        if (pdf != null) copy.pdf = Arrays.copyOf(pdf, pdf.length);
         copyComponentTo(copy);
         return copy;
     }
-
-    /**
-     * Loads all dice from a JSON file.
-     *
-     * @param filename - path to file.
-     * @return - List of Dice objects.
-     */
-    public static List<Dice> loadDice(String filename) {
-        JSONParser jsonParser = new JSONParser();
-        ArrayList<Dice> dice = new ArrayList<>();
-
-        try (FileReader reader = new FileReader(filename)) {
-
-            JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for (Object o : data) {
-                dice.add(loadDie((JSONObject) o));
-            }
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-
-        return dice;
-    }
-
-    /**
-     * Creates a new Dice object with properties from a JSON object.
-     *
-     * @param dice - new Dice object parsed from JSON.
-     */
-    public static Dice loadDie(JSONObject dice) {
-        Dice newDice = new Dice(((Long) ((JSONArray) dice.get("count")).get(1)).intValue());
-        parseComponent(newDice, dice);
-        return newDice;
-    }
-
 
     @Override
     public final int hashCode() {
