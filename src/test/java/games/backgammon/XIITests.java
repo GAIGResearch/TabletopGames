@@ -306,4 +306,32 @@ public class XIITests {
 
     }
 
+    @Test
+    public void testBackgammonWithCustomDice() {
+        BGParameters params = new BGParameters();
+        params.setParameterValue("diceJSON", "src/test/resources/custom_d6.json");
+        params.setParameterValue("doubleActions", false);
+        BGGameState gameState = new BGGameState(params, 2);
+        forwardModel.setup(gameState);
+
+        int[] countsDie1 = new int[6];
+        int[] countsDie2 = new int[6];
+
+        for (int i = 0; i < 100; i++) {
+            gameState.rollDice();
+            int[] values = gameState.getDiceValues();
+            assertEquals(2, values.length);
+            assertTrue(values[0] >= 1 && values[0] <= 6);
+            assertTrue(values[1] >= 1 && values[1] <= 6);
+            countsDie1[values[0] - 1]++;
+            countsDie2[values[1] - 1]++;
+        }
+
+        int[] expected = new int[] {5, 10, 10, 20, 25, 30};
+        for (int i = 0; i < 6; i++) {
+            assertEquals("Die 1 side " + (i+1) + " count mismatch", expected[i], countsDie1[i], 8);
+            assertEquals("Die 2 side " + (i+1) + " count mismatch", expected[i], countsDie2[i], 8);
+        }
+    }
+
 }
