@@ -1,10 +1,8 @@
-package games.descent2e.actions.monsterfeats;
+package games.descent2e.actions.archetypeskills;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
-import games.descent2e.DescentHelper;
-import games.descent2e.actions.archetypeskills.PrayerOfPeace;
-import games.descent2e.actions.attack.MultiAttack;
+import games.descent2e.DescentTypes;
 import games.descent2e.actions.herofeats.AttackAllAdjacent;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -12,11 +10,11 @@ import games.descent2e.components.Hero;
 import java.util.List;
 
 import static games.descent2e.DescentHelper.checkAdjacent;
-import static games.descent2e.DescentHelper.inRange;
+import static games.descent2e.DescentHelper.getAttackType;
 
-public class Fire extends AttackAllAdjacent {
+public class Whirlwind extends AttackAllAdjacent {
 
-    public Fire(int attackingFigure, List<Integer> defendingFigures) {
+    public Whirlwind(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
         this.minRange = 0;
     }
@@ -29,13 +27,13 @@ public class Fire extends AttackAllAdjacent {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        if (defendingFigures.isEmpty()) return false;
-        Figure f = dgs.getActingFigure();
-        if (f.getNActionsExecuted().isMaximum()) return false;
+        // No point in using Whirlwind if we'd only hit one target - may as well use a regular attack instead
+        if (defendingFigures.size() < 2) return false;
+        Figure f = (Figure) dgs.getComponentById(attackingFigure);
+        if (f.getAttribute(Figure.Attribute.Fatigue).isMaximum() || f.getNActionsExecuted().isMaximum()) return false;
+        DescentTypes.AttackType attackType = getAttackType(f);
+        if (attackType != DescentTypes.AttackType.MELEE && attackType != DescentTypes.AttackType.BOTH) return false;
 
-        if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
-
-        boolean atLeastOneHero = false;
         for (int defendingFigure : defendingFigures)
         {
             // We can only hit adjacent figures, none of our targets should be more than 1 space away
@@ -43,33 +41,28 @@ public class Fire extends AttackAllAdjacent {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
             if (target == null) return false;
             if(!checkAdjacent(dgs, f, target)) return false;
-
-            if (atLeastOneHero) continue; // We already found a Hero, no need to keep checking
-            if (target instanceof Hero) {
-                atLeastOneHero = true;
-            }
         }
-        // Friendly Fire might be enabled, but that's no excuse to only torch your own Monsters
-        return atLeastOneHero;
+
+        return true;
     }
 
-    public Fire copy() {
-        Fire retValue = new Fire(attackingFigure, defendingFigures);
+    public Whirlwind copy() {
+        Whirlwind retValue = new Whirlwind(attackingFigure, defendingFigures);
         copyComponentTo(retValue);
         return retValue;
     }
 
-    public void copyComponentTo(Fire target) {
+    public void copyComponentTo(Whirlwind target) {
         super.copyComponentTo(target);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Fire: Attack all adjacent figures" + result;
+        return toString() + result;
     }
 
     @Override
     public String toString() {
-        return "Fire: Attack all adjacent figures";
+        return "Whirlwind: Attack all adjacent monsters";
     }
 }

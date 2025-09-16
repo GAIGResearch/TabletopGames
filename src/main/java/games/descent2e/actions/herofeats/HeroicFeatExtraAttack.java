@@ -22,7 +22,6 @@ public class HeroicFeatExtraAttack extends FreeAttack {
 
     @Override
     public boolean execute(DescentGameState state) {
-        state.setActionInProgress(this);
         Figure f = (Figure) state.getComponentById(attackingFigure);
         boolean hasExtraAction = f.hasUsedExtraAction();
         f.setUsedExtraAction(false);

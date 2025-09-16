@@ -47,7 +47,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         POST_DEFENCE_ROLL(ROLL_OWN_DICE, DEFENDER),
         PRE_DAMAGE(TAKE_DAMAGE, DEFENDER),
         POST_DAMAGE(ROLL_OWN_DICE, DEFENDER),
-        NEXT_TARGET,        // This is only used in MultiAttacks, where we repeat the attack on the next target
+        NEXT_TARGET(FORCED, ATTACKER),        // This is only used in MultiAttacks, where we repeat the attack on the next target
         INTERRUPT_ATTACK(ACTION_POINT_SPEND, ATTACKER),   // This is used for extra attacks (e.g. Fire Breath) that can trigger from Surges from this attack
         ALL_DONE;
 

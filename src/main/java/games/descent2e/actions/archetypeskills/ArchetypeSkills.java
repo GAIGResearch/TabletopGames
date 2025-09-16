@@ -428,6 +428,15 @@ public class ArchetypeSkills {
 
                 }
 
+                case "Whirlwind" -> {
+                    // Whirlwind exclusively targets adjacent monsters
+                    List<Integer> targets = getMeleeTargets(dgs, f, false);
+                    if (targets.isEmpty()) break;
+                    Whirlwind whirlwind = new Whirlwind(f.getComponentID(), targets);
+                    if (whirlwind.canExecute(dgs))
+                        actions.add(whirlwind);
+                }
+
                 case "Execute" -> {
                     for (int i = 0; i < f.getAttributeMax(Figure.Attribute.Fatigue); i++) {
                         Execute execute = new Execute(f.getComponentID(), skill.getComponentID(), i+1);

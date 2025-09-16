@@ -33,7 +33,7 @@ public class MagicAttackAll extends DescentAction {
     private DescentAction constructHeroicFeat(DescentGameState dgs) {
         List<Integer> monsters = getMeleeTargets(dgs, dgs.getActingFigure(), false);
         if (!monsters.isEmpty()) {
-            DescentAction heroicFeat = new AttackAllAdjacent(dgs.getActingFigure().getComponentID(), monsters);
+            DescentAction heroicFeat = new AttackAllAdjacent(dgs.getActingFigure().getComponentID(), monsters, true);
             if (heroicFeat.canExecute(dgs)) {
                 return heroicFeat;
             }

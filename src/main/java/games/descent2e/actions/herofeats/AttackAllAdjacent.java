@@ -11,25 +11,36 @@ import games.descent2e.components.Hero;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.DescentHelper.*;
 
 public class AttackAllAdjacent extends MultiAttack {
+
+    boolean heroicFeat;
 
     public AttackAllAdjacent(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
         this.minRange = Integer.MIN_VALUE;
         this.isMelee = true;
         this.hasReach = false;
+        this.heroicFeat = false;
+    }
+
+    public AttackAllAdjacent(int attackingFigure, List<Integer> defendingFigures, boolean heroicFeat) {
+        super(attackingFigure, defendingFigures);
+        this.minRange = Integer.MIN_VALUE;
+        this.isMelee = true;
+        this.hasReach = false;
+        this.heroicFeat = heroicFeat;
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        dgs.setActionInProgress(this);
         Figure hero = (Figure) dgs.getComponentById(attackingFigure);
-        if (hero instanceof Hero) {
-            ((Hero) hero).setFeatAvailable(false);
-        }
+        if (heroicFeat)
+            if (hero instanceof Hero)
+                ((Hero) hero).setFeatAvailable(false);
         super.execute(dgs);
         return true;
     }
@@ -41,7 +52,7 @@ public class AttackAllAdjacent extends MultiAttack {
         if (f.getNActionsExecuted().isMaximum()) return false;
         if (f instanceof Hero)
         {
-            if (!((Hero) f).isFeatAvailable()) return false;
+            if (heroicFeat && !((Hero) f).isFeatAvailable()) return false;
             Deck<DescentCard> hand = ((Hero) f).getHandEquipment();
             if (hand == null || hand.getSize() == 0) return false;
             boolean hasMagicItem = false;
@@ -66,7 +77,7 @@ public class AttackAllAdjacent extends MultiAttack {
     }
 
     public AttackAllAdjacent copy() {
-        AttackAllAdjacent retValue = new AttackAllAdjacent(attackingFigure, defendingFigures);
+        AttackAllAdjacent retValue = new AttackAllAdjacent(attackingFigure, defendingFigures, heroicFeat);
         copyComponentTo(retValue);
         return retValue;
     }
@@ -83,6 +94,19 @@ public class AttackAllAdjacent extends MultiAttack {
     @Override
     public String toString() {
         return "Heroic Feat: Attack all adjacent monsters";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AttackAllAdjacent that) {
+            return super.equals(obj) && this.heroicFeat == that.heroicFeat;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), heroicFeat);
     }
 
 }
