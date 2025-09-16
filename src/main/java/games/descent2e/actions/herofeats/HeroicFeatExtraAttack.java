@@ -23,7 +23,7 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     @Override
     public boolean execute(DescentGameState state) {
         state.setActionInProgress(this);
-        Figure f = state.getActingFigure();
+        Figure f = (Figure) state.getComponentById(attackingFigure);
         boolean hasExtraAction = f.hasUsedExtraAction();
         f.setUsedExtraAction(false);
         if (f instanceof Hero) {((Hero) f).setFeatAvailable(false);}
@@ -37,7 +37,7 @@ public class HeroicFeatExtraAttack extends FreeAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Figure f = dgs.getActingFigure();
+        Figure f = (Figure) dgs.getComponentById(attackingFigure);
         if (f == null) return false;
         if (!(f instanceof Hero) || ((Hero) f).isFeatAvailable()) {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
