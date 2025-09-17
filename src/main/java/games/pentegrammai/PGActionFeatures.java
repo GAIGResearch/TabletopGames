@@ -22,7 +22,7 @@ public class PGActionFeatures implements IActionFeatureVector {
         if (action instanceof PenteMoveAction move) {
             int from = move.from;
             int to = move.to;
-            int piecesFrom = pgState.board.get(from).size();
+            int piecesFrom = from == -1 ? 0 : pgState.board.get(from).size();
             int piecesTo = pgState.board.get(to).size();
             int distFromGoalBefore = (params.boardSize + pgState.playerGoal[playerID] - from) % params.boardSize;
             int distFromGoalAfter = (params.boardSize + pgState.playerGoal[playerID] - to) % params.boardSize;
