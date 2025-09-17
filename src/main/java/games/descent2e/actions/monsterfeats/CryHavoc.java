@@ -28,12 +28,12 @@ import static games.descent2e.actions.archetypeskills.PrayerOfPeace.canAttackPra
 
 public class CryHavoc extends DescentAction implements IExtendedSequence {
 
-    int attackingFigure;
-    int range;
-    int oldMovePoints = 0;
-    boolean attacked = false;
-    boolean complete = false;
-    List<Integer> targets = new ArrayList<>();
+    protected int attackingFigure;
+    protected int range;
+    protected int oldMovePoints = 0;
+    protected boolean attacked = false;
+    protected boolean complete = false;
+    protected List<Integer> targets = new ArrayList<>();
     public CryHavoc(int attackingFigure, int range) {
         super(Triggers.ACTION_POINT_SPEND);
         this.attackingFigure = attackingFigure;
@@ -108,7 +108,7 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
         return retVal;
     }
 
-    private List<AbstractAction> moveActions(DescentGameState dgs, Figure figure)
+    protected List<AbstractAction> moveActions(DescentGameState dgs, Figure figure)
     {
         Vector2D figureLocation = figure.getPosition();
         BoardNode figureNode = dgs.getMasterBoard().getElement(figureLocation.getX(), figureLocation.getY());
@@ -325,12 +325,17 @@ public class CryHavoc extends DescentAction implements IExtendedSequence {
     @Override
     public CryHavoc copy() {
         CryHavoc retVal = new CryHavoc(attackingFigure, range);
+        copyComponentsTo(retVal);
+        return retVal;
+    }
+
+    public void copyComponentsTo(CryHavoc retVal)
+    {
         retVal.targets = new ArrayList<>();
         retVal.targets.addAll(targets);
         retVal.oldMovePoints = oldMovePoints;
         retVal.attacked = attacked;
         retVal.complete = complete;
-        return retVal;
     }
 
     @Override

@@ -402,6 +402,14 @@ public class ArchetypeSkills {
                     }
                 }
 
+                case "Charge" -> {
+                    Charge charge = new Charge(f.getComponentID(), f.getAttributeMax(Figure.Attribute.MovePoints));
+                    if (charge.canExecute(dgs)) {
+                        charge.setTargets(dgs, f);
+                        actions.add(charge);
+                    }
+                }
+
                 case "Weapon Mastery" -> {
                     WeaponMastery mastery = new WeaponMastery(f.getComponentID(), skill.getComponentID());
 
