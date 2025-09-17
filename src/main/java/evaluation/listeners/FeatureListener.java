@@ -24,8 +24,8 @@ public abstract class FeatureListener implements IGameListener {
     boolean currentPlayerOnly;
     protected IStatisticLogger logger;
     protected Game game;
-    protected int everyN = 1;
-    protected int currentRecordCount = 0;
+    protected double sampleRate = 1.0; // what proportion of events to record
+    protected Random rnd = new Random();
 
     protected FeatureListener(Event.GameEvent frequency, boolean currentPlayerOnly) {
         this.currentPlayerOnly = currentPlayerOnly;
@@ -39,9 +39,9 @@ public abstract class FeatureListener implements IGameListener {
         this.logger = logger;
     }
 
-    // Set the frequency of the events to be recorded; only every Nth event will be recorded
-    public void setNth(int n) {
-        this.everyN = n;
+    public void setSampleRate(double rate) {
+        if (rate <= 0 || rate > 1.0) throw new IllegalArgumentException("Sample rate must be in the range (0,1]");
+        sampleRate = rate;
     }
 
     @Override
@@ -50,11 +50,10 @@ public abstract class FeatureListener implements IGameListener {
         if (event.type == frequency && frequency != Event.GameEvent.GAME_OVER) {
             // if GAME_OVER, then we cover this a few lines down
 
-            // we only record every Nth event. This is to (optionally) generate sparser and less correlated data
+            // we only sample rare events. This is to (optionally) generate sparser and less correlated data
             // If we record every event, then successive events are highly correlated (of course, sometimes we need the
             // complete trajectory)
-            currentRecordCount++;
-            if (currentRecordCount % everyN != 0) {
+            if (rnd.nextDouble() > sampleRate) {
                 return;
             }
             processState(event.state, event.action);
