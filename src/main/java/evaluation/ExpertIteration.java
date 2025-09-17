@@ -181,8 +181,6 @@ public class ExpertIteration {
             long iterationStartTime = System.currentTimeMillis();
             // learn the heuristics from the data
             finished = gatherDataAndCheckConvergence();
-            //  stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%02d.txt", prefix, 0);
-            //   actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%02d.txt", prefix, 0);
 
             long dataGatheringTime = System.currentTimeMillis() - iterationStartTime;
             if (finished)
