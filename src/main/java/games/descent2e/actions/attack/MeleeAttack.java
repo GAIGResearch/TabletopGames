@@ -12,6 +12,7 @@ import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.archetypeskills.CounterAttack;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.archetypeskills.QuickCasting;
 import games.descent2e.actions.archetypeskills.RunicSorceryStatus;
@@ -165,12 +166,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
         result = getInitialResult(state);
 
-        movePhaseForward(state);
-
         // Only count as an action if it is an Attack action, not a Free Attack action
         if (!isFreeAttack) attacker.getNActionsExecuted().increment();
 
         attacker.setHasAttacked(true);
+
+        movePhaseForward(state);
 
         removeInterruptAttacks();
 
@@ -707,8 +708,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        if (phase.interrupt == null)
+        if (phase.interrupt == null) {
+            System.out.println(phase + "; " + phase.interrupt);
             throw new AssertionError("Should not be reachable");
+        }
         DescentGameState state = (DescentGameState) gs;
         List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
         // now we filter this for any that have been used
@@ -779,6 +782,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // We check for any interrupt attacks that can be used after this attack has concluded
         if (phase == INTERRUPT_ATTACK)
         {
+            Figure target = (Figure) state.getComponentById(defendingFigure);
             List<AbstractAction> interruptAttacks = new ArrayList<>();
             if (BlastAttack.isEnabled())
             {
@@ -795,8 +799,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             }
 
             if (Knockback.isEnabled()) {
-                Figure target = (Figure) state.getComponentById(defendingFigure);
-
                 target.setOffMap(true);
                 target.setAttribute(Figure.Attribute.MovePoints, Knockback.distance);
 
@@ -813,6 +815,14 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 Set<QuickCasting> quickCastings = QuickCasting.constructQuickCasting(state, attackingFigure);
                 if (!quickCastings.isEmpty())
                     interruptAttacks.addAll(quickCastings);
+            }
+
+            if (target != null) {
+                if (target.hasBonus(DescentTypes.SkillBonus.CounterAttack)) {
+                    CounterAttack counterAttack = new CounterAttack(defendingFigure, attackingFigure);
+                    if (counterAttack.canExecute(state))
+                        interruptAttacks.add(counterAttack);
+                }
             }
 
             if (!interruptAttacks.isEmpty())

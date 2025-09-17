@@ -383,6 +383,13 @@ public class ArchetypeSkills {
                     actions.addAll(toSort);
                 }
 
+                case "Counter Attack" -> {
+                    if (!f.hasBonus(DescentTypes.SkillBonus.CounterAttack)) {
+                        f.addBonus(DescentTypes.SkillBonus.CounterAttack);
+                        CounterAttack.setCardID(skill.getComponentID());
+                    }
+                }
+
                 case "Cripple" -> {
                     List<Integer> targets = getMeleeTargets(dgs, f, false);
                     for (Integer target : targets) {

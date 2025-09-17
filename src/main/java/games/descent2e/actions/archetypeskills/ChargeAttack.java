@@ -78,6 +78,5 @@ public class ChargeAttack extends FreeAttack {
     }
     public void copyComponentTo(ChargeAttack target) {
         super.copyComponentTo(target);
-        target.isMelee = isMelee;
     }
 }

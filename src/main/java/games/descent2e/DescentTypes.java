@@ -158,6 +158,7 @@ public class DescentTypes {
         InscribeRune,
         IronWill,
         QuickCasting,
+        CounterAttack,
         Brute;
     }
 
