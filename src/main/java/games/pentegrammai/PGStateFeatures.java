@@ -88,22 +88,22 @@ public class PGStateFeatures implements IStateFeatureVector {
                 }
             }
         }
-        features[1] = singletons[0];
-        features[2] = singletons[1];
-        features[3] = stacks[0];
-        features[4] = stacks[1];
-        features[5] = holyLine[0];
-        features[6] = holyLine[1];
-        features[7] = doubletons[0];
-        features[8] = doubletons[1];
-        features[9] = triplets[0];
-        features[10] = triplets[1];
-        features[11] = (double) sum[0] / params.boardSize / 2;
-        features[12] = (double) sum[1] / params.boardSize / 2;
-        features[13] = dieToHoly[0];
-        features[14] = dieToHoly[1];
-        features[15] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == 0).count();
-        features[16] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == 1).count();
+        features[1] = singletons[playerID];
+        features[2] = singletons[1 - playerID];
+        features[3] = stacks[playerID];
+        features[4] = stacks[1 - playerID];
+        features[5] = holyLine[playerID];
+        features[6] = holyLine[1 - playerID];
+        features[7] = doubletons[playerID];
+        features[8] = doubletons[1 - playerID];
+        features[9] = triplets[playerID];
+        features[10] = triplets[1 - playerID];
+        features[11] = (double) sum[playerID] / params.boardSize / 2;
+        features[12] = (double) sum[1 - playerID] / params.boardSize / 2;
+        features[13] = dieToHoly[playerID];
+        features[14] = dieToHoly[1 - playerID];
+        features[15] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == playerID).count();
+        features[16] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == 1 - playerID).count();
         return features;
 
     }
