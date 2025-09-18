@@ -254,7 +254,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 attacker.setCurrentAttack(this);
                 defender.setCurrentAttack(this);
 
-                if (attacker instanceof Hero) getWeaponBonuses(state, attackingFigure, true, true);
+                if (attacker instanceof Hero)
+                    getWeaponBonuses(state, attackingFigure, true, true);
                 // if (attacker instanceof Monster && ((Monster) attacker).isLieutenant()) getWeaponBonuses(state, attackingFigure, false, true);
 
                 // Roll dice

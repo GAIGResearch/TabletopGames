@@ -368,7 +368,32 @@ public class ArchetypeSkills {
                     }
                 }
 
-                
+                case "Dirty Tricks" -> {
+                    DescentTypes.AttackType attackType = getAttackType(f);
+                    boolean reach = checkReach(dgs, f);
+                    List<Integer> targets;
+
+                    if (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH)
+                    {
+                        targets = getMeleeTargets(dgs, f, reach);
+                        for (Integer target : targets) {
+                            DirtyTricks dirtyTricks = new DirtyTricks(f.getComponentID(), target, true, reach);
+                            if (dirtyTricks.canExecute(dgs))
+                                actions.add(dirtyTricks);
+                        }
+                    }
+
+                    if (attackType == DescentTypes.AttackType.RANGED || attackType == DescentTypes.AttackType.BOTH)
+                    {
+                        targets = getRangedTargets(dgs, f);
+                        for (Integer target : targets) {
+                            DirtyTricks dirtyTricks = new DirtyTricks(f.getComponentID(), target);
+                            if (dirtyTricks.canExecute(dgs))
+                                actions.add(dirtyTricks);
+                        }
+                    }
+
+                }
 
                 case "Tumble" -> {
                     if (f.canIgnoreEnemies())
