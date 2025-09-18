@@ -410,7 +410,9 @@ public class ArchetypeSkills {
                 }
 
                 case "Charge" -> {
-                    Charge charge = new Charge(f.getComponentID(), f.getAttributeMax(Figure.Attribute.MovePoints));
+                    int range = f.getAttributeMax(Figure.Attribute.MovePoints) + 1
+                            + (checkReach(dgs, f) ? 1 : 0);
+                    Charge charge = new Charge(f.getComponentID(), range);
                     if (charge.canExecute(dgs)) {
                         charge.setTargets(dgs, f);
                         actions.add(charge);

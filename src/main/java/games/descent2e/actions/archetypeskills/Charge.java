@@ -68,6 +68,8 @@ public class Charge extends CryHavoc {
 
         List<AbstractAction> retVal = new ArrayList<>();
 
+        boolean reach = checkReach(dgs, f);
+
         if (!f.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
             List<AbstractAction> movement = DescentHelper.moveActions(dgs, f);
             for (AbstractAction move : movement) {
@@ -75,7 +77,9 @@ public class Charge extends CryHavoc {
                 for (int target : targets) {
                     if (retVal.contains(move)) break;
                     Figure monster = (Figure) dgs.getComponentById(target);
-                    int distance = f.getAttributeValue(Figure.Attribute.MovePoints) + 1 - positions.size();
+                    int distance = f.getAttributeValue(Figure.Attribute.MovePoints) + 1
+                            - positions.size()
+                            + (reach ? 1 : 0);
 
                     BoardNode destination = dgs.getMasterBoard().getElement(Iterables.getLast(positions));
 
@@ -103,7 +107,6 @@ public class Charge extends CryHavoc {
         }
 
         if (moved) {
-            boolean reach = checkReach(dgs, f);
             List<Integer> targets = getMeleeTargets(dgs, f, reach);
             if (!targets.isEmpty()) {
                 for (int target : targets) {
@@ -130,7 +133,7 @@ public class Charge extends CryHavoc {
         Figure f = (Figure) state.getComponentById(attackingFigure);
 
         if (f.getAttribute(Figure.Attribute.Health).isMinimum()) {
-            // Somehow, the Berserker ended their movement in a pit or lava and defeated himself prematurely.
+            // Somehow, the Berserker ended their movement in a pit or lava and defeated themselves prematurely.
             // Idiot.
             complete = true;
             return;
@@ -160,51 +163,10 @@ public class Charge extends CryHavoc {
         {
             for (Monster m : monster)
             {
-                int distance = getRangeAllSpaces(dgs, m, f);
-                if (distance > range) continue; // Skip Monsters that are too far away
-
-                Pair<Integer, Integer> size = m.getSize();
-                List<BoardNode> targetTiles = new ArrayList<>();
-
-                Vector2D currentLocation = m.getPosition();
-                GridBoard board = dgs.getMasterBoard();
-                BoardNode anchorTile = board.getElement(currentLocation);
-
-                if (size.a > 1 || size.b > 1) {
-                    targetTiles.addAll(getAttackingTiles(m.getComponentID(), anchorTile, targetTiles));
-                } else {
-                    targetTiles.add(anchorTile);
-                }
-
-                for (BoardNode tile : targetTiles)
-                {
-                    Set<BoardNode> neighbours = tile.getNeighbours().keySet();
-                    for (BoardNode node : neighbours)
-                    {
-                        int id = ((PropertyInt) node.getProperty(playersHash)).value;
-                        // We want a valid space to stop on, so it must be empty
-                        // If we already occupy the space, then we are moving to nowhere
-                        // In which case - why are you wasting Fatigue on Charge? Just make a regular attack
-                        if (id == -1)
-                        {
-                            DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, node.getComponentName());
-                            if (terrain != null) {
-                                // We really should not be ending this action in hazardous terrain, if we can avoid it
-                                if (terrain == DescentTypes.TerrainType.Pit ||
-                                        terrain == DescentTypes.TerrainType.Lava ||
-                                        terrain == DescentTypes.TerrainType.Hazard ||
-                                        terrain == DescentTypes.TerrainType.Block) {
-                                    continue;
-                                }
-                                if (inRange(f.getPosition(), ((PropertyVector2D) node.getProperty("coordinates")).values, range))
-                                    return true;
-                            }
-                        }
-                    }
-                }
+                if (checkValid(dgs, f, m))
+                    return true;
             }
         }
-
         return false;
     }
 
@@ -215,54 +177,57 @@ public class Charge extends CryHavoc {
         {
             for (Monster m : monster)
             {
-                int mID = m.getComponentID();
-                int distance = getRangeAllSpaces(dgs, m, f);
-                if (distance > range) continue; // Skip Monsters that are too far away
+                if (checkValid(dgs, f, m))
+                    targets.add(m.getComponentID());
+            }
+        }
+    }
 
-                Pair<Integer, Integer> size = m.getSize();
-                List<BoardNode> targetTiles = new ArrayList<>();
+    public boolean checkValid(DescentGameState dgs, Figure f, Monster m) {
+        int distance = getRangeAllSpaces(dgs, m, f);
+        if (distance > range) return false; // Skip Monsters that are too far away
 
-                Vector2D currentLocation = m.getPosition();
-                GridBoard board = dgs.getMasterBoard();
-                BoardNode anchorTile = board.getElement(currentLocation);
+        Pair<Integer, Integer> size = m.getSize();
+        List<BoardNode> targetTiles = new ArrayList<>();
 
-                if (size.a > 1 || size.b > 1) {
-                    targetTiles.addAll(getAttackingTiles(m.getComponentID(), anchorTile, targetTiles));
-                } else {
-                    targetTiles.add(anchorTile);
-                }
+        Vector2D currentLocation = m.getPosition();
+        GridBoard board = dgs.getMasterBoard();
+        BoardNode anchorTile = board.getElement(currentLocation);
 
-                for (BoardNode tile : targetTiles)
+        if (size.a > 1 || size.b > 1) {
+            targetTiles.addAll(getAttackingTiles(m.getComponentID(), anchorTile, targetTiles));
+        } else {
+            targetTiles.add(anchorTile);
+        }
+
+        for (BoardNode tile : targetTiles)
+        {
+            Set<BoardNode> neighbours = tile.getNeighbours().keySet();
+            for (BoardNode node : neighbours)
+            {
+                int id = ((PropertyInt) node.getProperty(playersHash)).value;
+                // We want a valid space to stop on, so it must be empty
+                // If we already occupy the space, then we are moving to nowhere
+                // In which case - why are you wasting Fatigue on Charge? Just make a regular attack
+                if (id == -1)
                 {
-                    if (targets.contains(mID))
-                        break;
-                    Set<BoardNode> neighbours = tile.getNeighbours().keySet();
-                    for (BoardNode node : neighbours)
-                    {
-                        if (targets.contains(mID))
-                            break;
-                        int id = ((PropertyInt) node.getProperty(playersHash)).value;
-                        // We want a valid space to stop on, so it must be empty
-                        // If we already occupy the space, then we are moving to nowhere
-                        // In which case - why are you wasting Fatigue on Charge? Just make a regular attack
-                        if (id == -1)
-                        {
-                            DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, node.getComponentName());
-                            if (terrain != null) {
-                                // We really should not be ending this action in hazardous terrain, if we can avoid it
-                                if (terrain == DescentTypes.TerrainType.Pit ||
-                                        terrain == DescentTypes.TerrainType.Lava ||
-                                        terrain == DescentTypes.TerrainType.Hazard ||
-                                        terrain == DescentTypes.TerrainType.Block) {
-                                    continue;
-                                }
-                                targets.add(m.getComponentID());
-                            }
+                    DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, node.getComponentName());
+                    if (terrain != null) {
+                        // We really should not be ending this action in hazardous terrain, if we can avoid it
+                        if (terrain == DescentTypes.TerrainType.Pit ||
+                                terrain == DescentTypes.TerrainType.Lava ||
+                                terrain == DescentTypes.TerrainType.Hazard ||
+                                terrain == DescentTypes.TerrainType.Block) {
+                            continue;
                         }
+                        if (inRange(f.getPosition(), ((PropertyVector2D) node.getProperty("coordinates")).values, range))
+                            if (hasLineOfSight(dgs, ((PropertyVector2D) node.getProperty("coordinates")).values, ((PropertyVector2D) tile.getProperty("coordinates")).values))
+                                return true;
                     }
                 }
             }
         }
+        return false;
     }
 
     public boolean hasMoved() {
