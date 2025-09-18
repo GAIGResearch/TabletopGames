@@ -356,14 +356,24 @@ public class ArchetypeSkills {
                 // Thief
                 case "Greedy" -> {
                     // Search for Search tokens within 3 spaces that we can see
+                    Set<BoardNode> greedySearch = getNeighboursInRange(dgs, f.getPosition(), 3);
                     for (DToken token : dgs.getTokens()) {
                         if (token.getDescentTokenType() == DescentTypes.DescentToken.Search
-                                && token.getPosition() != null
-                                && (inRange(f.getPosition(), token.getPosition(), 3))
-                                && hasLineOfSight(dgs, f.getPosition(), token.getPosition())) {
-                            for (DescentAction da : token.getEffects()) {
-                                if (da.canExecute(dgs)) actions.add(da.copy());
-                            }
+                                && token.getPosition() != null) {
+                            BoardNode target = dgs.getMasterBoard().getElement(token.getPosition());
+                            if (greedySearch.contains(target))
+                                for (DescentAction da : token.getEffects()) {
+
+                                    // If a default Search action is allowed, don't bother with Greedy
+                                    // as it has already been added to the list of actions earlier
+                                    if (!(da instanceof Greedy)) {
+                                        if (da.canExecute(dgs))
+                                            break;
+                                        continue;
+                                    }
+                                    if (da.canExecute(dgs))
+                                        actions.add(da.copy());
+                                }
                         }
                     }
                 }
@@ -409,6 +419,12 @@ public class ArchetypeSkills {
                     Unseen unseen = new Unseen(f.getComponentID(), skill.getComponentID());
                     if (unseen.canExecute(dgs))
                         actions.add(unseen);
+                }
+
+                case "Lurk" -> {
+                    if (f.hasBonus(DescentTypes.SkillBonus.Lurk))
+                        f.removeBonus(DescentTypes.SkillBonus.Lurk);
+                    Lurk.setCardID(skill.getComponentID());
                 }
 
                 case "Bushwhack" -> {

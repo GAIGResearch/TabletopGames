@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Objects;
 
 import static games.descent2e.DescentHelper.*;
+import static games.descent2e.actions.archetypeskills.Lurk.addLurkDice;
+import static games.descent2e.actions.archetypeskills.PrayerOfHealing.addArmorOfFaithDice;
+import static games.descent2e.actions.archetypeskills.PrayerOfHealing.addDivineFuryDice;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
@@ -128,6 +131,17 @@ public class MultiAttack extends RangedAttack {
                 }
             }
         }
+
+        // Check for potential Archetype Skill bonuses
+        if (attacker.hasBonus(DescentTypes.SkillBonus.DivineFury)) {
+            addDivineFuryDice(state);
+            attacker.removeBonus(DescentTypes.SkillBonus.DivineFury);       // Only for the first attack made with it
+        }
+        if (defender.hasBonus(DescentTypes.SkillBonus.ArmorOfFaith))
+            addArmorOfFaithDice(state);
+
+        if (defender.hasBonus(DescentTypes.SkillBonus.Lurk))
+            addLurkDice(state);
 
         if (defender instanceof Hero) getWeaponBonuses(state, defendingFigure, true, false);
         // if (defender instanceof Monster && ((Monster) defender).isLieutenant()) getWeaponBonuses(state, defendingFigure, false, false);

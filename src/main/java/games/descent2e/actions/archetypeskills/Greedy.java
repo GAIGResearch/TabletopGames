@@ -1,22 +1,22 @@
-package games.descent2e.actions.tokens;
+package games.descent2e.actions.archetypeskills;
 
-import core.AbstractGameState;
-import core.components.Card;
+import core.components.BoardNode;
 import core.components.Deck;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.tokens.SearchAction;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
-import games.descent2e.components.cards.SearchCard;
 import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
 
-import static games.descent2e.DescentHelper.hasLineOfSight;
-import static games.descent2e.DescentHelper.inRange;
+import java.util.Set;
 
-public class GreedyAction extends SearchAction {
-    public GreedyAction() {
+import static games.descent2e.DescentHelper.*;
+
+public class Greedy extends SearchAction {
+    public Greedy() {
         super();
     }
 
@@ -28,8 +28,8 @@ public class GreedyAction extends SearchAction {
     }
 
     @Override
-    public GreedyAction _copy() {
-        return new GreedyAction();
+    public Greedy _copy() {
+        return new Greedy();
     }
 
     @Override
@@ -46,6 +46,8 @@ public class GreedyAction extends SearchAction {
         Deck<DescentCard> skills = hero.getSkills();
         if (skills == null || skills.getSize() == 0) return false;
 
+        Set<BoardNode> greedySearch = getNeighboursInRange(gs, hero.getPosition(), 3);
+
         for (DescentCard skill : (hero.getSkills().getComponents())) {
             if (skill.getProperty("name").toString().equals("Greedy")) {
                 Vector2D loc = hero.getPosition();
@@ -53,8 +55,8 @@ public class GreedyAction extends SearchAction {
                     if (token.getDescentTokenType() == DescentTypes.DescentToken.Search) {
                         Vector2D tokenLoc = token.getPosition();
                         if (tokenLoc == null) continue;
-                        // hasLineOfSight is to stop the player from searching through walls
-                        if (inRange(loc, tokenLoc, 3) && hasLineOfSight(gs, loc, tokenLoc)) {
+                        BoardNode target = gs.getMasterBoard().getElement(token.getPosition());
+                        if (greedySearch.contains(target)) {
                             return true;
                         }
                     }
@@ -66,7 +68,7 @@ public class GreedyAction extends SearchAction {
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && o instanceof GreedyAction;
+        return super.equals(o) && o instanceof Greedy;
     }
 
     @Override

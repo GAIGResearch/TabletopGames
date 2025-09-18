@@ -21,6 +21,7 @@ import static utilities.Utils.getNeighbourhood;
  * Draw random search card and add to player
  */
 public class SearchAction extends TokenAction<SearchAction> {
+    protected boolean freeSearch = false;
     public SearchAction() {
         super(-1, Triggers.ACTION_POINT_SPEND);
     }
@@ -32,10 +33,9 @@ public class SearchAction extends TokenAction<SearchAction> {
 
     @Override
     public boolean canExecute(DescentGameState gs) {
-        if (gs.getActingFigure().getNActionsExecuted().isMaximum()) return false;
-
         // Can only execute if player adjacent to search token
         Hero hero = (Hero) gs.getActingFigure();
+        if (!freeSearch && hero.getNActionsExecuted().isMaximum()) return false;
         Vector2D loc = hero.getPosition();
         GridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
@@ -49,7 +49,7 @@ public class SearchAction extends TokenAction<SearchAction> {
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && o instanceof SearchAction;
+        return super.equals(o) && o instanceof SearchAction && ((SearchAction) o).freeSearch == freeSearch;
     }
 
     @Override
@@ -64,7 +64,11 @@ public class SearchAction extends TokenAction<SearchAction> {
 
     @Override
     public boolean execute(DescentGameState gs) {
-        gs.getActingFigure().getNActionsExecuted().increment();
+
+        Hero f = (Hero) gs.getActingFigure();
+
+        if (!freeSearch)
+            f.getNActionsExecuted().increment();
 
         Deck<Card> searchCards = gs.getSearchCards();
         DToken searchToken = (DToken) gs.getComponentById(tokenID);
@@ -76,7 +80,7 @@ public class SearchAction extends TokenAction<SearchAction> {
                 return true;
             }
             else if (!card.getComponentName().equals("Nothing")) {
-                boolean added = ((Hero) gs.getActingFigure()).getOtherEquipment().add(new DescentCard(card));
+                boolean added = f.getOtherEquipment().add(new DescentCard(card));
                 if (added) {
                     searchToken.setPosition(null);  // Take off the map
                 }

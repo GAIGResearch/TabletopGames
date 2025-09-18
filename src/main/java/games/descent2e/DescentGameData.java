@@ -229,7 +229,8 @@ public class DescentGameData extends AbstractGameData {
                             } else if (rule.contains("Effect")) {
                                 // An effect, needs a no-arg constructor
                                 try {
-                                    Class<?> clazz = Class.forName("games.descent2e.actions.tokens." + rule.split(":")[1]);
+                                    String location = rule.contains("Skill") ? "archetypeskills." : "tokens.";
+                                    Class<?> clazz = Class.forName("games.descent2e.actions." + location + rule.split(":")[1]);
                                     TokenAction effect = (TokenAction) clazz.getDeclaredConstructor().newInstance();
                                     effects.add(effect);
                                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
