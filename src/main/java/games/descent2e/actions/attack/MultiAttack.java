@@ -3,6 +3,7 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.monsterfeats.Air;
@@ -41,29 +42,37 @@ public class MultiAttack extends RangedAttack {
 
         // We need to check all defending figures to see if they are Monsters with the Shadow Passive
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        boolean unseen = false;
         for (int target : defendingFigures) {
+            Figure defender = (Figure) state.getComponentById(target);
             if (!hasShadow) {
-                Figure defender = (Figure) state.getComponentById(target);
                 if (checkShadow(state, attacker, defender)) {
                     hasShadow = true;
-                    SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
-                    if (!attacker.getAbilities().contains(shadowSurge)) {
-                        attacker.addAbility(new SurgeAttackAction(Surge.SHADOW, attackingFigure));
-                    }
                 }
             }
-            else break;
-        }
-
-        // If no targets have the Shadow Passive, remove the ability to use the Shadow Surge
-        if (!hasShadow)
-        {
-            // Only enable the Shadow Surge if the target has the Shadow passive
-            SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
-            if (attacker.getAbilities().contains(shadowSurge)) {
-                attacker.removeAbility(shadowSurge);
+            if (!unseen) {
+                if (defender.hasBonus(DescentTypes.SkillBonus.Unseen)) {
+                    unseen = true;
+                }
             }
         }
+
+        // Only enable the Shadow and Unseen surges if at least one target has them
+        SurgeAttackAction shadowSurge = new SurgeAttackAction(Surge.SHADOW, attackingFigure);
+        if (hasShadow)
+            if (!attacker.getAbilities().contains(shadowSurge))
+                attacker.addAbility(new SurgeAttackAction(Surge.SHADOW, attackingFigure));
+        else
+            if (attacker.getAbilities().contains(shadowSurge))
+                attacker.removeAbility(shadowSurge);
+
+        SurgeAttackAction unseenSurge = new SurgeAttackAction(Surge.UNSEEN, attackingFigure);
+        if (unseen)
+            if (!attacker.getAbilities().contains(unseenSurge))
+                attacker.addAbility(new SurgeAttackAction(Surge.UNSEEN, attackingFigure));
+        else
+            if (attacker.getAbilities().contains(unseenSurge))
+                attacker.removeAbility(unseenSurge);
 
         defendingFigure = defendingFigures.get(0);
         index = 0;

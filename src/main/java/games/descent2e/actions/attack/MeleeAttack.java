@@ -164,6 +164,24 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             }
         }
 
+        // Likewise, Thief Heroes using Unseen require a Surge to be hit
+        // So we check for that here
+        SurgeAttackAction unseenSurge = new SurgeAttackAction(Surge.UNSEEN, attackingFigure);
+        if (defender.hasBonus(DescentTypes.SkillBonus.Unseen))
+        {
+            if (!attacker.getAbilities().contains(unseenSurge))
+            {
+                attacker.addAbility(new SurgeAttackAction(Surge.UNSEEN, attackingFigure));
+            }
+        }
+        else
+        {
+            if (attacker.getAbilities().contains(unseenSurge))
+            {
+                attacker.removeAbility(unseenSurge);
+            }
+        }
+
         result = getInitialResult(state);
 
         // Only count as an action if it is an Attack action, not a Free Attack action
@@ -439,6 +457,16 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             if (hasShadow && !hitShadow) {
                 if (defender instanceof Monster && ((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.SHADOW) && !surgesUsed.contains(Surge.SHADOW)) {
                     //System.out.println("Missed due to Shadow passive, and no surge spent to counter.");
+                    result += "Missed; Damage: " + damage + "; Range: " + range;
+                    return;
+                }
+            }
+        }
+
+        if (defender.hasBonus(DescentTypes.SkillBonus.Unseen)) {
+            if (!hitShadow) {
+                if (!surgesUsed.contains(Surge.UNSEEN)) {
+                    //System.out.println("Missed due to Thief's Unseen, and no surge spent to counter.");
                     result += "Missed; Damage: " + damage + "; Range: " + range;
                     return;
                 }

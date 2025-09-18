@@ -403,6 +403,14 @@ public class ArchetypeSkills {
                         actions.add(tumble);
                 }
 
+                case "Unseen" -> {
+                    if (f.hasBonus(DescentTypes.SkillBonus.Unseen))
+                        f.removeBonus(DescentTypes.SkillBonus.Unseen);
+                    Unseen unseen = new Unseen(f.getComponentID(), skill.getComponentID());
+                    if (unseen.canExecute(dgs))
+                        actions.add(unseen);
+                }
+
                 case "Bushwhack" -> {
                     List<Integer> targets = getRangedTargets(dgs, f);
                     // Bushwhack can only be used if we only have one enemy in line of sight

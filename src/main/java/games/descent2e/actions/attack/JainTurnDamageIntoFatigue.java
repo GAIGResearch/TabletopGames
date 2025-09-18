@@ -3,6 +3,7 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
@@ -66,6 +67,10 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
         // Can't reduce if we chose not to
         if (currentAttack.skip)
+            return false;
+
+        // Can't reduce if we dodged the attack
+        if (f.hasBonus(DescentTypes.SkillBonus.Unseen) && !currentAttack.hitShadow)
             return false;
 
         // Can only reduce before damage is applied
