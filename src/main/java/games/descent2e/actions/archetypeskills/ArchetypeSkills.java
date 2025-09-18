@@ -368,6 +368,16 @@ public class ArchetypeSkills {
                     }
                 }
 
+                
+
+                case "Tumble" -> {
+                    if (f.canIgnoreEnemies())
+                        f.setCanIgnoreEnemies(false);
+                    Tumble tumble = new Tumble(f.getComponentID(), skill.getComponentID());
+                    if (tumble.canExecute(dgs))
+                        actions.add(tumble);
+                }
+
                 case "Bushwhack" -> {
                     List<Integer> targets = getRangedTargets(dgs, f);
                     // Bushwhack can only be used if we only have one enemy in line of sight
