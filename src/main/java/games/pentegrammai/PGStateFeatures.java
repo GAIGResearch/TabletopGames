@@ -20,8 +20,11 @@ public class PGStateFeatures implements IStateFeatureVector {
             "Triplets", "Triplets_Opp",
             "MeanToHoly", "MeanToHoly_Opp",
             "DieToHoly", "DieToHoly_Opp",
-            "OffBoard", "OffBoard_Opp"
+            "OffBoard", "OffBoard_Opp",
+            "ActionSize"
     };
+
+    private PenteForwardModel fm = new PenteForwardModel();
 
     @Override
     public double[] doubleVector(AbstractGameState state, int playerID) {
@@ -104,6 +107,8 @@ public class PGStateFeatures implements IStateFeatureVector {
         features[14] = dieToHoly[1 - playerID];
         features[15] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == playerID).count();
         features[16] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == 1 - playerID).count();
+
+        features[17] = fm.computeAvailableActions(pgState).size();
         return features;
 
     }

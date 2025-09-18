@@ -12,8 +12,11 @@ public class BGStateFeatures implements IStateFeatureVector {
             "Singletons", "Singletons_Opp",
             "MeanToHome", "MeanToHome_Opp",
             "PiecesOnBoard", "PiecesOnBoard_Opp",
-            "Stacks", "Stacks_Opp"
+            "Stacks", "Stacks_Opp",
+            "ActionSize"
     };
+
+    private BGForwardModel fm = new BGForwardModel();
 
     @Override
     public double[] doubleVector(AbstractGameState state, int playerID) {
@@ -71,6 +74,9 @@ public class BGStateFeatures implements IStateFeatureVector {
         features[9] = count > 0 ? (double) sum / count : 0.0;
         features[11] = sum;
         features[13] = stacks;
+
+        // ActionSize
+        features[14] = fm.computeAvailableActions(bgState).size();
 
         return features;
 
