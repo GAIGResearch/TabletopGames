@@ -72,7 +72,7 @@ public class Tumble extends DescentAction {
 
         // Only use this if we have chosen to move this turn
         // Otherwise we are wasting Fatigue to move through enemies when we are not moving
-        if (f.getAttribute(Figure.Attribute.MovePoints).isMinimum()) return false;
+        if (f.getAttributeValue(Figure.Attribute.MovePoints) <= 1) return false;
         return !f.canIgnoreEnemies();
     }
 }
