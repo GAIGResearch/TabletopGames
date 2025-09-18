@@ -96,6 +96,7 @@ public class FreeAttack extends RangedAttack {
         copyComponentTo(retValue);
         return retValue;
     }
+
     public void copyComponentTo(FreeAttack target) {
         super.copyComponentTo(target);
         target.isMelee = isMelee;

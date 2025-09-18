@@ -12,7 +12,6 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.monsterfeats.Air;
-import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -365,6 +364,30 @@ public class ArchetypeSkills {
                             for (DescentAction da : token.getEffects()) {
                                 if (da.canExecute(dgs)) actions.add(da.copy());
                             }
+                        }
+                    }
+                }
+
+                case "Bushwhack" -> {
+                    List<Integer> targets = getRangedTargets(dgs, f);
+                    // Bushwhack can only be used if we only have one enemy in line of sight
+                    if (targets.size() == 1) {
+                        DescentTypes.AttackType attackType = getAttackType(f);
+                        boolean reach = checkReach(dgs, f);
+                        BushwhackAttack bushwack;
+
+                        if (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH)
+                        {
+                            bushwack = new BushwhackAttack(f.getComponentID(), targets.get(0), true, reach, skill.getComponentID());
+                            if (bushwack.canExecute(dgs))
+                                actions.add(bushwack);
+                        }
+
+                        if (attackType == DescentTypes.AttackType.RANGED || attackType == DescentTypes.AttackType.BOTH)
+                        {
+                            bushwack = new BushwhackAttack(f.getComponentID(), targets.get(0), false, false, skill.getComponentID());
+                            if (bushwack.canExecute(dgs))
+                                actions.add(bushwack);
                         }
                     }
                 }
