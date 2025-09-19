@@ -12,11 +12,16 @@ import java.util.stream.IntStream;
 import com.google.iam.v1.AuditConfigDelta.Action;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Deck;
+<<<<<<< HEAD
 import games.powergrid.PowerGridParameters.Phase;
+=======
+import core.interfaces.ITreeActionSpace;
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
 import games.powergrid.actions.IncreaseBid;
@@ -25,13 +30,14 @@ import games.powergrid.actions.PassBid;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
+import utilities.ActionTreeNode;
 
 import static core.CoreConstants.VisibilityMode.*;
 
 
-public class PowerGridForwardModel extends StandardForwardModel {
+public class PowerGridForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
-	
+	int i = 0;
 	@Override
 	protected void _setup(AbstractGameState firstState) {
 		PowerGridGameState state = (PowerGridGameState)firstState;
@@ -81,6 +87,7 @@ public class PowerGridForwardModel extends StandardForwardModel {
 		PowerGridGameState s = (PowerGridGameState) gameState;
 	    int me = gameState.getCurrentPlayer();
 	    List<AbstractAction> actions = new ArrayList<>();
+
 	    switch (s.getPhase()) {
 	    //this will be deleted 
         case PLAYER_ORDER:
@@ -101,15 +108,28 @@ public class PowerGridForwardModel extends StandardForwardModel {
             	actions.add(new PassBid(me));
 
             	}
+<<<<<<< HEAD
             break; 
                             	     
+=======
+            break;
+                            	
+            
+        
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
         case RESOURCE_BUY:
+<<<<<<< HEAD
         	System.out.println("END");
         	System.out.println("== RESOURCE BUY reached, ending test game ==");
         	actions.add(new DoNothing());
         	endGame(s);
         	System.exit(0);
         	break;
+=======
+        	System.out.println("RESOURCE TIME");
+        	endGameNow(s,new int [] {1});
+            break;
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 
         case BUILD:
             break;
@@ -117,6 +137,7 @@ public class PowerGridForwardModel extends StandardForwardModel {
         case BUREAUCRACY:
             break; 
     }
+	
     return actions;
 }
 	@Override
@@ -125,16 +146,23 @@ public class PowerGridForwardModel extends StandardForwardModel {
 	    int me = gs.getCurrentPlayer();
 
 	    if (s.isAuctionLive()) {
-	        int next = s.checkNextBid(me);  // returns me if I'm the only bidder left
+	        int next = s.checkNextBid(me);  //get the next valid bidder 
 
-	        if (next == me) { // I win the auction
+	        if (next == me) { //if no one else is bidding then I have won the auction
 	            awardPlantToWinner(s, me, s.getAuctionPlantNumber(), s.getCurrentBid());
 	            s.resetAuction();
 	            s.removeFromRound(me);
 
 	            if (s.isRoundOrderAllPassed()) {
+<<<<<<< HEAD
 	            	advancePhase(s);
 	            	return; }
+=======
+	            	endPhase(s);
+	            	System.out.println("RAN1");
+	            	return; 
+	            	}
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 	            s.setTurnOwner(s.nextPlayerInRound());
 	        } else {
 	            s.setTurnOwner(next);  // pass bidding turn to next bidder
@@ -143,21 +171,39 @@ public class PowerGridForwardModel extends StandardForwardModel {
 	    }
 
 	    // No auction live: advance normal round turn
+<<<<<<< HEAD
 	    if (s.isRoundOrderAllPassed()) { 
 	    	advancePhase(s); 
 	    	return; }
+=======
+	    if (s.isRoundOrderAllPassed()) { //necessary if a player passed and they were the last one 
+	    	endPhase(s);
+	    	System.out.println("RAN2");
+        	return;
+	    }
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 	    s.setTurnOwner(s.nextPlayerInRound());
 	}
 
+<<<<<<< HEAD
 	//TODO outdated code make sure the new advance phase works 
 	private void endRound(PowerGridGameState state) {
+=======
+	private void endPhase(PowerGridGameState s) {
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 	    System.out.println("Everyone has went");
+<<<<<<< HEAD
 	    state.resetRoundOrderNextPhase();
 	    state.advancePhase();    
 	   // consider transitioning phase instead of exiting in production
+=======
+	    s.setPhase(s.getPhase().next());
+	   
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 	}
 
 
+<<<<<<< HEAD
 	private void onExitPhase(PowerGridGameState state, Phase phase) {
 	    switch (phase) {
 	        case BUILD -> { /* finalize builds */ }
@@ -188,6 +234,21 @@ public class PowerGridForwardModel extends StandardForwardModel {
 	}
 
 	
+=======
+	
+	private void endGameNow(AbstractGameState gs, int[] winners) {
+	    // Set everyone to LOSE by default (or DRAW if your game uses ties)
+	    for (int p = 0; p < gs.getNPlayers(); p++) {
+	        gs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, p);
+	    }
+	    // Mark winners
+	    for (int w : winners) {
+	        gs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, w);
+	    }
+	    // Mark the game as ended
+	    gs.setGameStatus(CoreConstants.GameResult.GAME_END);
+	}
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 	
 	
 	/**
@@ -366,12 +427,30 @@ public class PowerGridForwardModel extends StandardForwardModel {
 
     
     
+<<<<<<< HEAD
+=======
 
-    private void advanceToNextPlayer(PowerGridGameState s) {
-        s.advanceTurn();
-        int next = s.getTurnOrder().get(s.getTurnOrderIndex());
-        s.setTurnOwner(next);
-    }
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
+
+    //PYTAG ACTION TREES 
+	@Override
+	public ActionTreeNode initActionTree(AbstractGameState gameState) {
+		ActionTreeNode root = new ActionTreeNode(0, "root");
+
+        // AUCTION branches
+        root.addChild(0, "open_auction");   // leaves = AuctionPowerPlant(plantNo)
+        root.addChild(0, "pass_round");     // leaf = PassAction
+        root.addChild(0, "bid");            // leaves = IncreaseBid OR PlaceBid(amount)
+        root.addChild(0, "pass_bid");       // leaf = PassBid
+		return null;
+	}
+
+
+	@Override
+	public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
     
     

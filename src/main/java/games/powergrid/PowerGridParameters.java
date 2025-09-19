@@ -12,7 +12,13 @@ public class PowerGridParameters extends TunableParameters {
 	public static final String CARD_ASSET_PATH = "data/powergrid";
 	public enum Resource { COAL,  GAS, OIL, URANIUM }
 	public enum PlantType { COAL, GAS, OIL, URANIUM, HYBRID, GREEN }
+<<<<<<< HEAD
 	public enum Phase {PLAYER_ORDER, AUCTION,  RESOURCE_BUY,BUILD,BUREAUCRACY;
+=======
+	public enum Phase {
+	    PLAYER_ORDER, AUCTION, RESOURCE_BUY, BUILD, BUREAUCRACY;
+
+>>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 	    public Phase next() {
 	        return switch (this) {
 	            case PLAYER_ORDER -> AUCTION;

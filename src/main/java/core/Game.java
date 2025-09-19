@@ -847,7 +847,7 @@ public class Game {
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "PowerGrid");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 500);
+        int turnPause = Utils.getArg(args, "turnPause", 100);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
@@ -858,9 +858,10 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
     //    players.add(new RandomPlayer());
     //    players.add(new BasicMCTSPlayer());
-//        players.add(new OSLAPlayer());
+        //players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 
         // RMHCParams params = new RMHCParams();
@@ -870,8 +871,7 @@ public class Game {
 //        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
 //        players.add(rmhcPlayer);
 
-       MCTSParams mcts_params = new MCTSParams();
-       players.add(new MCTSPlayer(mcts_params));
+
 
         // players.add(new HumanGUIPlayer(ac));
         // players.add(new HumanGUIPlayer(ac));
