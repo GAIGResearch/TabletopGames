@@ -213,7 +213,7 @@ public class ArchetypeSkills {
                 }
 
                 case "Exploding Rune" -> {
-
+                    // TODO: Fix Blast
                 }
 
                 case "Inscribe Rune" -> {
@@ -393,7 +393,6 @@ public class ArchetypeSkills {
                         if (appraisal.canExecute(dgs))
                             actions.add(appraisal);
                     }
-
                 }
 
                 case "Dirty Tricks" -> {
@@ -421,6 +420,14 @@ public class ArchetypeSkills {
                         }
                     }
 
+                }
+
+                case "Sneaky" -> {
+                    if (!f.hasBonus(DescentTypes.SkillBonus.Sneaky))
+                        f.addBonus(DescentTypes.SkillBonus.Sneaky);
+                    if (!f.hasMoved() && f.getNActionsExecuted().isMinimum())
+                        Sneaky.setLinesOfSight(dgs, f);
+                    // TODO: Add Sneaky action to open/close doors freely
                 }
 
                 case "Tumble" -> {

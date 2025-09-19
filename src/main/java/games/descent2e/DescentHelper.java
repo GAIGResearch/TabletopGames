@@ -415,6 +415,35 @@ public class DescentHelper {
         return (counter > 0);
     }
 
+    public static List<Integer> getAllLinesOfSight(DescentGameState dgs, Figure f, String teamcheck)
+    {
+        List<Integer> targets = new ArrayList<>();
+        boolean getMonsters = teamcheck.equals("Monsters") || teamcheck.equals("Both");
+        boolean getHeroes = teamcheck.equals("Heroes") || teamcheck.equals("Both");
+
+        if (getHeroes)
+        {
+            for (Hero h : dgs.heroes) {
+                if (h.getPosition() == null || h.equals(f)) continue;
+                if (checkAllSpaces(dgs, f, h, Integer.MAX_VALUE, true)) {
+                    targets.add(h.getComponentID());
+                }
+            }
+        }
+        if (getMonsters)
+        {
+            for (List<Monster> monsterGroup : dgs.monsters) {
+                for (Monster m : monsterGroup) {
+                    if (m.getPosition() == null || m.equals(f)) continue;
+                    if (checkAllSpaces(dgs, f, m, Integer.MAX_VALUE, true)) {
+                        targets.add(m.getComponentID());
+                    }
+                }
+            }
+        }
+        return targets;
+    }
+
     public static List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
 
         Map<Vector2D, Pair<Double, List<Vector2D>>> allAdjacentNodes = getAllAdjacentNodes(dgs, f);

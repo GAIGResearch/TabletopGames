@@ -12,10 +12,7 @@ import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.actions.archetypeskills.CounterAttack;
-import games.descent2e.actions.archetypeskills.PrayerOfPeace;
-import games.descent2e.actions.archetypeskills.QuickCasting;
-import games.descent2e.actions.archetypeskills.RunicSorceryStatus;
+import games.descent2e.actions.archetypeskills.*;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.*;
 import games.descent2e.components.*;
@@ -438,6 +435,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
 
         damage = state.getAttackDicePool().getDamage() + extraDamage;
+
+        if (attacker.hasBonus(DescentTypes.SkillBonus.Sneaky))
+            damage += Sneaky.beSneaky(defendingFigure) ? 1 : 0;
+
         int defence = state.getDefenceDicePool().getShields() + extraDefence - pierce;
 
         // Leoric of the Book's Hero Ability
