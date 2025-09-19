@@ -430,6 +430,15 @@ public class ArchetypeSkills {
                     // TODO: Add Sneaky action to open/close doors freely
                 }
 
+                case "Caltrops" -> {
+                    if (!f.hasBonus(DescentTypes.SkillBonus.Caltrops)) {
+                        f.addBonus(DescentTypes.SkillBonus.Caltrops);
+                        Caltrops caltrops = new Caltrops(f.getComponentID(), skill.getComponentID());
+                        if (!f.hasAbility(caltrops))
+                            f.addAbility(caltrops);
+                    }
+                }
+
                 case "Tumble" -> {
                     if (f.canIgnoreEnemies())
                         f.setCanIgnoreEnemies(false);

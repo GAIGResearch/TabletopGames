@@ -159,6 +159,7 @@ public class DescentTypes {
         IronWill,
         QuickCasting,
         Sneaky,
+        Caltrops,
         Unseen,
         Lurk,
         CounterAttack,

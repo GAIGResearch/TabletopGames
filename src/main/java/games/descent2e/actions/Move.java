@@ -4,10 +4,13 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.GridBoard;
+import core.interfaces.IExtendedSequence;
 import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.archetypeskills.Caltrops;
+import games.descent2e.actions.attack.EndCurrentPhase;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
@@ -19,11 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static games.descent2e.DescentHelper.*;
 import static utilities.Utils.getNeighbourhood;
 
-public class Move extends AbstractAction {
+public class Move extends AbstractAction implements IExtendedSequence {
     final List<Vector2D> positionsTraveled;
     final Monster.Direction orientation;
     private Vector2D startPosition;
@@ -32,6 +36,9 @@ public class Move extends AbstractAction {
     private int f;
 
     public int directionID;
+
+    int interruptPlayer = 1;
+    boolean complete;
 
     public Move(int f, List<Vector2D> whereTo) {
         this.positionsTraveled = whereTo;
@@ -67,6 +74,7 @@ public class Move extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        gs.setActionInProgress(this);
         DescentGameState dgs = (DescentGameState) gs;
         Figure f = (Figure) dgs.getComponentById(this.f);
 
@@ -101,6 +109,9 @@ public class Move extends AbstractAction {
         f.addActionTaken(toString());
 
         //DescentHelper.gridCounter(dgs, f.getComponentID(), startPosition, positionsTraveled);
+
+        if (_computeAvailableActions(dgs).isEmpty())
+            complete = true;
 
         return true;
     }
@@ -218,7 +229,7 @@ public class Move extends AbstractAction {
         }
     }
 
-    public static void replace (DescentGameState dgs, Figure f)
+    public static void replace(DescentGameState dgs, Figure f)
     {
         f.setOffMap(false);
 
@@ -381,7 +392,60 @@ public class Move extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+
+        Triggers trigger = Triggers.MOVE_INTO_SPACE;
+
+        DescentGameState dgs = (DescentGameState) state;
+        List<AbstractAction> retVal = new ArrayList<>();
+
+        for (int i = interruptPlayer; i <= dgs.getNPlayers(); i++) {
+            interruptPlayer = i % dgs.getNPlayers();
+            if (interruptPlayer == dgs.getOverlordPlayer())
+                retVal = dgs.getInterruptActionsFor(interruptPlayer, trigger);
+
+                // We do this separately because we need to change how the Caltrops skill works
+                // Just doing getInterruptActionsFor() will autofail it for canExecute()
+            else {
+                List<DescentAction> descentActions = dgs.getHeroes().stream().filter(h -> h.getOwnerId() == interruptPlayer)
+                        .flatMap(h -> h.getAbilities().stream())
+                        .toList();
+                for (DescentAction a : descentActions) {
+
+                    if (a instanceof Caltrops caltrops) {
+                        caltrops.addTarget(f);
+                    }
+                    if (a.canExecute(trigger, dgs)) {
+                        retVal.add(a);
+                    }
+                }
+            }
+            if (!retVal.isEmpty()) {
+                retVal.add((new EndCurrentPhase()));
+                return retVal;
+            }
+        }
+        return retVal;
+    }
+
+    @Override
+    public int getCurrentPlayer(AbstractGameState state) {
+        return interruptPlayer;
+    }
+
+    @Override
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (_computeAvailableActions(state).isEmpty())
+            complete = true;
+    }
+
+    @Override
+    public boolean executionComplete(AbstractGameState state) {
+        return complete;
+    }
+
+    @Override
+    public Move copy() {
         List<Vector2D> posTraveledCopy = new ArrayList<>();
         for (Vector2D pos: positionsTraveled) {
             posTraveledCopy.add(pos.copy());
@@ -389,6 +453,8 @@ public class Move extends AbstractAction {
         Move retval = new Move(f, posTraveledCopy, orientation, allowCycle);
         retval.startPosition = startPosition.copy();
         retval.directionID = directionID;
+        retval.complete = complete;
+        retval.interruptPlayer = interruptPlayer;
         return retval;
     }
 
@@ -398,12 +464,12 @@ public class Move extends AbstractAction {
         if (!(o instanceof Move move)) return false;
         return f == move.f && orientation == move.orientation && allowCycle == move.allowCycle &&
                 Objects.equals(positionsTraveled, move.positionsTraveled) && Objects.equals(startPosition, move.startPosition) &&
-                directionID == move.directionID;
+                directionID == move.directionID && complete == move.complete && interruptPlayer == move.interruptPlayer;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(f, positionsTraveled, orientation, allowCycle, startPosition, directionID);
+        return Objects.hash(f, positionsTraveled, orientation, allowCycle, startPosition, directionID, complete, interruptPlayer);
     }
 
     @Override
@@ -443,29 +509,17 @@ public class Move extends AbstractAction {
         int xDif = currentPosition.getX() - newPosition.getX();
         int yDif = currentPosition.getY() - newPosition.getY();
 
-        switch (yDif) {
-            case -1:
-                northSouth = "S";
-                break;
-            case 1:
-                northSouth = "N";
-                break;
-            default:
-                northSouth = "";
-                break;
-        }
+        northSouth = switch (yDif) {
+            case -1 -> "S";
+            case 1 -> "N";
+            default -> "";
+        };
 
-        switch (xDif) {
-            case -1:
-                eastWest = "E";
-                break;
-            case 1:
-                eastWest = "W";
-                break;
-            default:
-                eastWest = "";
-                break;
-        }
+        eastWest = switch (xDif) {
+            case -1 -> "E";
+            case 1 -> "W";
+            default -> "";
+        };
         String direction = northSouth + eastWest;
         if (direction.isEmpty()) {
             direction = "Nowhere";

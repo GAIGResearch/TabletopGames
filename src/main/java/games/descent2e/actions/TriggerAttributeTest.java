@@ -22,7 +22,7 @@ import java.util.Objects;
  **/
 public class TriggerAttributeTest extends DescentAction implements IExtendedSequence {
 
-    protected final List<Integer> targets;
+    protected List<Integer> targets;
     protected final int attackingFigure;
     protected int currentIndex;
     protected int result;
