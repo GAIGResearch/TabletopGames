@@ -10,12 +10,14 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import games.GameType;
+import games.powergrid.PowerGridParameters.Phase;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridCity;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import static core.CoreConstants.VisibilityMode.*;
 
 /**
@@ -240,6 +242,9 @@ public class PowerGridGameState extends AbstractGameState {
 		this.roundOrder = new ArrayList<>(roundOrder);
 	}
 	
+	public void resetRoundOrderNextPhase() {
+		this.roundOrder = new ArrayList<>(turnOrder);
+	}
 	//If a player elects to skip they are removed from the phase 
 	public int removeFromRound(int playerId) {
 	    int index = roundOrder.indexOf(playerId);   
@@ -315,18 +320,24 @@ public class PowerGridGameState extends AbstractGameState {
 		return playerMoney[playerId];
 	}
 	
-	// Bid helpers
+	// Phase helpers
 
-	
+
 	public PowerGridParameters.Phase getPhase() {
 	    return currentPhase;
 	}
-
+	
+	public void advancePhase() {
+		    setPhase(getPhase().next());
+	}        // optional: initialize per-phase data
+	
+	
+	
 	public void setPhase(PowerGridParameters.Phase phase) {
 	    this.currentPhase = phase;
 	}
 	
-	
+
 	//Auction Helpers
 	public boolean isAuctionLive() {
 	    return auctionPlantNumber != -1;

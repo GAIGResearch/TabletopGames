@@ -9,10 +9,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import com.google.iam.v1.AuditConfigDelta.Action;
+
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Deck;
+import games.powergrid.PowerGridParameters.Phase;
 import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
 import games.powergrid.actions.IncreaseBid;
@@ -45,7 +49,7 @@ public class PowerGridForwardModel extends StandardForwardModel {
 		state.initCityStorageForBoard();//creates a 2d array which keeps track of which cities are bought 
 		randomizeTurnOrder(state);
 		state.setStartingMoney(params.startingMoney);
-		state.setPhase(PowerGridParameters.Phase.AUCTION); // or PLAYER_ORDER if you want that first
+		state.setPhase(PowerGridParameters.Phase.AUCTION); 
 		int first = state.getTurnOrder().get(0);
 		state.setTurnOwner(first);
 		state.initOwnedPlants();
@@ -97,11 +101,15 @@ public class PowerGridForwardModel extends StandardForwardModel {
             	actions.add(new PassBid(me));
 
             	}
-                            	
-            
-        
+            break; 
+                            	     
         case RESOURCE_BUY:
-            break;
+        	System.out.println("END");
+        	System.out.println("== RESOURCE BUY reached, ending test game ==");
+        	actions.add(new DoNothing());
+        	endGame(s);
+        	System.exit(0);
+        	break;
 
         case BUILD:
             break;
@@ -124,7 +132,9 @@ public class PowerGridForwardModel extends StandardForwardModel {
 	            s.resetAuction();
 	            s.removeFromRound(me);
 
-	            if (s.isRoundOrderAllPassed()) { endRound(); return; }
+	            if (s.isRoundOrderAllPassed()) {
+	            	advancePhase(s);
+	            	return; }
 	            s.setTurnOwner(s.nextPlayerInRound());
 	        } else {
 	            s.setTurnOwner(next);  // pass bidding turn to next bidder
@@ -133,17 +143,50 @@ public class PowerGridForwardModel extends StandardForwardModel {
 	    }
 
 	    // No auction live: advance normal round turn
-	    if (s.isRoundOrderAllPassed()) { endRound(); return; }
+	    if (s.isRoundOrderAllPassed()) { 
+	    	advancePhase(s); 
+	    	return; }
 	    s.setTurnOwner(s.nextPlayerInRound());
 	}
 
-	private void endRound() {
+	//TODO outdated code make sure the new advance phase works 
+	private void endRound(PowerGridGameState state) {
 	    System.out.println("Everyone has went");
+	    state.resetRoundOrderNextPhase();
+	    state.advancePhase();    
 	   // consider transitioning phase instead of exiting in production
 	}
 
 
-	
+	private void onExitPhase(PowerGridGameState state, Phase phase) {
+	    switch (phase) {
+	        case BUILD -> { /* finalize builds */ }
+	        case BUREAUCRACY -> { /* clear round markers */ }
+	        default -> {}
+	    }
+	}
+
+	private void onEnterPhase(PowerGridGameState state, Phase phase) {
+	    switch (phase) {
+	        //case PLAYER_ORDER -> recomputePlayerOrder(state);
+	        //case AUCTION -> prepareAuction(state);
+	        //case RESOURCE_BUY -> prepareResourceMarket(state);
+	        //case BUILD -> enableBuilding(state);
+	        //case BUREAUCRACY -> doBureaucracy(state);
+	        default -> {}
+	    }
+	}
+
+	public void advancePhase(PowerGridGameState state) {
+	    System.out.println("Everyone has went");
+	    state.resetRoundOrderNextPhase();
+	    Phase current = state.getPhase();
+	    onExitPhase(state, current);
+	    Phase next = current.next();
+	    state.setPhase(next);
+	    onEnterPhase(state, next);
+	}
+
 	
 	
 	
@@ -323,9 +366,6 @@ public class PowerGridForwardModel extends StandardForwardModel {
 
     
     
-    
-    
-
 
     private void advanceToNextPlayer(PowerGridGameState s) {
         s.advanceTurn();
