@@ -20,6 +20,7 @@ import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
 import games.descent2e.actions.monsterfeats.Land;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
+import games.descent2e.actions.tokens.SearchAction;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
@@ -931,6 +932,8 @@ public class DescentForwardModel extends StandardForwardModel {
                             && token.getPosition() != null
                             && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
                         for (DescentAction da : token.getEffects()) {
+                            if (da instanceof SearchAction search)
+                                search.setItemID(dgs);
                             if (da.canExecute(dgs))
                                 actions.add(da.copy());
                         }

@@ -1,5 +1,6 @@
 package games.descent2e.actions.archetypeskills;
 
+import com.google.common.collect.Iterables;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Deck;
@@ -12,11 +13,13 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.monsterfeats.Air;
+import games.descent2e.actions.tokens.SearchAction;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import games.descent2e.components.tokens.DToken;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -361,21 +364,36 @@ public class ArchetypeSkills {
                         if (token.getDescentTokenType() == DescentTypes.DescentToken.Search
                                 && token.getPosition() != null) {
                             BoardNode target = dgs.getMasterBoard().getElement(token.getPosition());
-                            if (greedySearch.contains(target))
+                            if (greedySearch.contains(target)) {
                                 for (DescentAction da : token.getEffects()) {
 
                                     // If a default Search action is allowed, don't bother with Greedy
                                     // as it has already been added to the list of actions earlier
-                                    if (!(da instanceof Greedy)) {
+                                    if (!(da instanceof Greedy search)) {
                                         if (da.canExecute(dgs))
                                             break;
                                         continue;
                                     }
+                                    search.setItemID(dgs);
                                     if (da.canExecute(dgs))
                                         actions.add(da.copy());
                                 }
+                            }
                         }
                     }
+                }
+
+                case "Appraisal" -> {
+                    if (dgs.getHistory().isEmpty()) break;
+                    Pair<Integer, AbstractAction> lastAction = Iterables.getLast(dgs.getHistory());
+                    if (lastAction.a == f.getOwnerId() && lastAction.b instanceof SearchAction search) {
+                        if (dgs.getSearchCards().getSize() == 0) break;
+                        String nextItem = dgs.getSearchCards().get(0).getComponentName();
+                        Appraisal appraisal = new Appraisal(search.getItemID(), nextItem);
+                        if (appraisal.canExecute(dgs))
+                            actions.add(appraisal);
+                    }
+
                 }
 
                 case "Dirty Tricks" -> {

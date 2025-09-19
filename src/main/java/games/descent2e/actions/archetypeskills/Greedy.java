@@ -29,7 +29,9 @@ public class Greedy extends SearchAction {
 
     @Override
     public Greedy _copy() {
-        return new Greedy();
+        Greedy greedy = new Greedy();
+        copyComponentsTo(greedy);
+        return greedy;
     }
 
     @Override

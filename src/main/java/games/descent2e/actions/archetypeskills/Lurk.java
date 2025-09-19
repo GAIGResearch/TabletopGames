@@ -37,7 +37,9 @@ public class Lurk extends SearchAction {
 
     @Override
     public Lurk _copy() {
-        return new Lurk();
+        Lurk lurk = new Lurk();
+        copyComponentsTo(lurk);
+        return lurk;
     }
 
     @Override

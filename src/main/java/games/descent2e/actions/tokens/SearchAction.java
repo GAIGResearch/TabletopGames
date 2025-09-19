@@ -22,13 +22,21 @@ import static utilities.Utils.getNeighbourhood;
  */
 public class SearchAction extends TokenAction<SearchAction> {
     protected boolean freeSearch = false;
+    String item;
     public SearchAction() {
         super(-1, Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
     public SearchAction _copy() {
-        return new SearchAction();
+        SearchAction search = new SearchAction();
+        copyComponentsTo(search);
+        return search;
+    }
+
+    public void copyComponentsTo(SearchAction action) {
+        action.freeSearch = freeSearch;
+        action.item = item;
     }
 
     @Override
@@ -49,7 +57,8 @@ public class SearchAction extends TokenAction<SearchAction> {
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && o instanceof SearchAction && ((SearchAction) o).freeSearch == freeSearch;
+        return super.equals(o) && o instanceof SearchAction
+                && ((SearchAction) o).freeSearch == freeSearch && ((SearchAction) o).item == item;
     }
 
     @Override
@@ -76,8 +85,11 @@ public class SearchAction extends TokenAction<SearchAction> {
             SearchCard card = (SearchCard) searchCards.draw();
             if (card.getComponentName().equals("Treasure Chest")) {
                 // TODO - when shop cards are added
-                searchToken.setPosition(null);  // Take off the map
-                return true;
+                boolean added = getShopItem(gs, f);
+                if (added) {
+                    searchToken.setPosition(null);  // Take off the map
+                }
+                return added;
             }
             else if (!card.getComponentName().equals("Nothing")) {
                 boolean added = f.getOtherEquipment().add(new DescentCard(card));
@@ -90,5 +102,19 @@ public class SearchAction extends TokenAction<SearchAction> {
             return true;
         }
         return false;
+    }
+
+    public String getItemID() {
+        return item;
+    }
+
+    public void setItemID(DescentGameState dgs) {
+        // Set to the next search card to be drawn
+        this.item = dgs.getSearchCards().get(0).getComponentName();
+    }
+
+    public static boolean getShopItem(DescentGameState dgs, Hero f)
+    {
+        return true;
     }
 }
