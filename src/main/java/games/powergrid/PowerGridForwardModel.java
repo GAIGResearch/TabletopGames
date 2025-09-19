@@ -17,11 +17,8 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Deck;
-<<<<<<< HEAD
 import games.powergrid.PowerGridParameters.Phase;
-=======
 import core.interfaces.ITreeActionSpace;
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
 import games.powergrid.actions.IncreaseBid;
@@ -108,28 +105,15 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             	actions.add(new PassBid(me));
 
             	}
-<<<<<<< HEAD
-            break; 
-                            	     
-=======
             break;
-                            	
-            
-        
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
+
         case RESOURCE_BUY:
-<<<<<<< HEAD
         	System.out.println("END");
         	System.out.println("== RESOURCE BUY reached, ending test game ==");
         	actions.add(new DoNothing());
         	endGame(s);
         	System.exit(0);
         	break;
-=======
-        	System.out.println("RESOURCE TIME");
-        	endGameNow(s,new int [] {1});
-            break;
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 
         case BUILD:
             break;
@@ -154,15 +138,9 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	            s.removeFromRound(me);
 
 	            if (s.isRoundOrderAllPassed()) {
-<<<<<<< HEAD
 	            	advancePhase(s);
 	            	return; }
-=======
-	            	endPhase(s);
-	            	System.out.println("RAN1");
-	            	return; 
-	            	}
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
+
 	            s.setTurnOwner(s.nextPlayerInRound());
 	        } else {
 	            s.setTurnOwner(next);  // pass bidding turn to next bidder
@@ -171,39 +149,16 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    }
 
 	    // No auction live: advance normal round turn
-<<<<<<< HEAD
+
 	    if (s.isRoundOrderAllPassed()) { 
 	    	advancePhase(s); 
 	    	return; }
-=======
-	    if (s.isRoundOrderAllPassed()) { //necessary if a player passed and they were the last one 
-	    	endPhase(s);
-	    	System.out.println("RAN2");
-        	return;
-	    }
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
+
 	    s.setTurnOwner(s.nextPlayerInRound());
 	}
 
-<<<<<<< HEAD
-	//TODO outdated code make sure the new advance phase works 
-	private void endRound(PowerGridGameState state) {
-=======
-	private void endPhase(PowerGridGameState s) {
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
-	    System.out.println("Everyone has went");
-<<<<<<< HEAD
-	    state.resetRoundOrderNextPhase();
-	    state.advancePhase();    
-	   // consider transitioning phase instead of exiting in production
-=======
-	    s.setPhase(s.getPhase().next());
-	   
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
-	}
 
 
-<<<<<<< HEAD
 	private void onExitPhase(PowerGridGameState state, Phase phase) {
 	    switch (phase) {
 	        case BUILD -> { /* finalize builds */ }
@@ -234,7 +189,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	}
 
 	
-=======
 	
 	private void endGameNow(AbstractGameState gs, int[] winners) {
 	    // Set everyone to LOSE by default (or DRAW if your game uses ties)
@@ -248,7 +202,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    // Mark the game as ended
 	    gs.setGameStatus(CoreConstants.GameResult.GAME_END);
 	}
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 	
 	
 	/**
@@ -426,11 +379,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 
     
-    
-<<<<<<< HEAD
-=======
 
->>>>>>> branch 'PowerGrid' of https://github.com/StephenHornish/TabletopGames.git
 
     //PYTAG ACTION TREES 
 	@Override
