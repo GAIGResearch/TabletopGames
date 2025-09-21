@@ -20,7 +20,6 @@ import static evaluation.metrics.Event.GameEvent.*;
  */
 public class DramaMetrics implements IMetricsCollection {
 
-
     public static class StateEstimate extends AbstractMetric {
 
         private final MCTSPlayer oracle;
@@ -28,7 +27,6 @@ public class DramaMetrics implements IMetricsCollection {
         private double[] lastValues;
 
         public StateEstimate(String gameType, MCTSParams oracleDetails) {
-            super(ACTION_CHOSEN);
             GameType game = GameType.valueOf(gameType);
             oracle = oracleDetails.instantiate();
             fm = game.createForwardModel(null, 0);
@@ -38,41 +36,46 @@ public class DramaMetrics implements IMetricsCollection {
 
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            double[] oracleActionValues = new double[e.state.getNPlayers()];
-            double[] oracleHeuristicValues = new double[e.state.getNPlayers()];
-            if (oracle != null) {
-                // use oracle to calculate state values
-                List<AbstractAction> actions = fm.computeAvailableActions(e.state);
-                if (actions.size() >1) {
-                    AbstractAction oracleAction = oracle._getAction(e.state, actions);
-                    records.put("OracleAction", oracleAction.toString());
-                    records.put("OracleActionDescription", oracleAction.getString(e.state));
-                    Map<AbstractAction, Map<String, Object>> stats = oracle.getDecisionStats();
-                    Map<String, Object> actionStats = stats.get(oracleAction);
-                    if (actionStats != null) {
-                        oracleActionValues = (double[]) actionStats.get("nodeValue");
-                        oracleHeuristicValues = (double[]) actionStats.get("heuristicValue");
-                    }
-                } else {
-                    return true; // no choice to be made
-                }
-            }
-            for (int i = 0; i < e.state.getNPlayers(); i++) {
-                records.put("ScoreP" + i, e.state.getGameScore(i));
-                records.put("HeuristicP" + i, e.state.getHeuristicScore(i));
+            if (e.type == GAME_OVER) {
+                // we just zero out the last values
+                lastValues = null;
+            } else {
+                double[] oracleActionValues = new double[e.state.getNPlayers()];
+                double[] oracleHeuristicValues = new double[e.state.getNPlayers()];
                 if (oracle != null) {
-                    records.put("HeuristicP" + i, oracleHeuristicValues[i]);  // overrides heuristic with oracle heuristic
-                    records.put("OracleP" + i, oracleActionValues[i]);
-                    records.put("OracleDiffP" + i, lastValues == null ? 0.0 : oracleActionValues[i] - lastValues[i]);
+                    // use oracle to calculate state values
+                    List<AbstractAction> actions = fm.computeAvailableActions(e.state);
+                    if (actions.size() > 1) {
+                        AbstractAction oracleAction = oracle._getAction(e.state, actions);
+                        records.put("OracleAction", oracleAction.toString());
+                        records.put("OracleActionDescription", oracleAction.getString(e.state));
+                        Map<AbstractAction, Map<String, Object>> stats = oracle.getDecisionStats();
+                        Map<String, Object> actionStats = stats.get(oracleAction);
+                        if (actionStats != null) {
+                            oracleActionValues = (double[]) actionStats.get("nodeValue");
+                            oracleHeuristicValues = (double[]) actionStats.get("heuristicValue");
+                        }
+                    } else {
+                        return true; // no choice to be made
+                    }
                 }
+                for (int i = 0; i < e.state.getNPlayers(); i++) {
+                    records.put("ScoreP" + i, e.state.getGameScore(i));
+                    records.put("HeuristicP" + i, e.state.getHeuristicScore(i));
+                    if (oracle != null) {
+                        records.put("HeuristicP" + i, oracleHeuristicValues[i]);  // overrides heuristic with oracle heuristic
+                        records.put("OracleP" + i, oracleActionValues[i]);
+                        records.put("OracleDiffP" + i, lastValues == null ? 0.0 : oracleActionValues[i] - lastValues[i]);
+                    }
+                }
+                lastValues = oracleActionValues;
             }
-            lastValues = oracleActionValues;
             return true;
         }
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
-            return Collections.singleton(ACTION_CHOSEN);
+            return Set.of(ACTION_CHOSEN, GAME_OVER);
         }
 
         @Override
