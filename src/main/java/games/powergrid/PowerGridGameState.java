@@ -415,6 +415,10 @@ public class PowerGridGameState extends AbstractGameState {
 		this.currentBidder  =-1;
 	}
 	
+	public PowerGridResourceMarket getResourceMarket() {
+		return this.resourceMarket;
+	}
+	
 	//this might have to be moved 
 	public Integer checkNextBid(int playerID) {
 	    int startIndex = turnOrder.indexOf(playerID);
