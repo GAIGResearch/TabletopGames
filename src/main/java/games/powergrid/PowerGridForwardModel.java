@@ -34,7 +34,6 @@ import static core.CoreConstants.VisibilityMode.*;
 
 public class PowerGridForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
-	int i = 0;
 	@Override
 	protected void _setup(AbstractGameState firstState) {
 		PowerGridGameState state = (PowerGridGameState)firstState;
@@ -161,6 +160,8 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 	private void onExitPhase(PowerGridGameState state, Phase phase) {
 	    switch (phase) {
+	    	case AUCTION ->{System.out.println(state.getRoundOrder());
+	    					System.out.println(state.getTurnOrder());}
 	        case BUILD -> { /* finalize builds */ }
 	        case BUREAUCRACY -> { /* clear round markers */ }
 	        default -> {}
@@ -171,25 +172,31 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    switch (phase) {
 	        //case PLAYER_ORDER -> recomputePlayerOrder(state);
 	        //case AUCTION -> prepareAuction(state);
-	        //case RESOURCE_BUY -> prepareResourceMarket(state);
+	        case RESOURCE_BUY ->{ Collections.reverse(state.getRoundOrder());
+	        System.out.println(state.getRoundOrder());}
 	        //case BUILD -> enableBuilding(state);
 	        //case BUREAUCRACY -> doBureaucracy(state);
 	        default -> {}
 	    }
 	}
+	
 
 	public void advancePhase(PowerGridGameState state) {
 	    System.out.println("Everyone has went");
-	    state.resetRoundOrderNextPhase();
-	    Phase current = state.getPhase();
-	    onExitPhase(state, current);
-	    Phase next = current.next();
-	    state.setPhase(next);
-	    onEnterPhase(state, next);
+	    state.resetRoundOrderNextPhase(); //rest the round turn order based on the global turn order
+	    Phase current = state.getPhase(); //get the current phase from the state 
+	    onExitPhase(state, current); //clean up actions for leaving a phase 
+	    Phase next = current.next(); // get the next phase by calling next on the phase class in parameters 
+	    state.setPhase(next); //set the phase in state to next 
+	    onEnterPhase(state, next); //perfroms ations that need to be taken prior to the next phase 
 	}
 
 	
 	
+	
+	
+	
+	//TODO might need to be deleted ot fully implemented yet 
 	private void endGameNow(AbstractGameState gs, int[] winners) {
 	    // Set everyone to LOSE by default (or DRAW if your game uses ties)
 	    for (int p = 0; p < gs.getNPlayers(); p++) {
@@ -298,23 +305,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         market.getComponents().sort(Comparator.comparingInt(PowerGridCard::getNumber));
     }
     
-    private void recomputeAuctionOrder(PowerGridGameState s) {
-        List<Integer> order = IntStream.range(0, s.getNPlayers())
-            .boxed()
-            .sorted(
-                Comparator.<Integer>comparingInt(s::getCityCount).reversed()
-                    .thenComparingInt(s::getHighestPlantNumber).reversed()
-                    .thenComparingInt(Integer::intValue) // stable tie-breaker by playerId
-            )
-            .collect(java.util.stream.Collectors.toList()); // use toList() if on JDK 16+
-        s.setTurnOrder(order);
-    }
 
-    private void recomputeReverseOrder(PowerGridGameState s) {
-        List<Integer> order = new ArrayList<>(s.getTurnOrder());
-        Collections.reverse(order);
-        s.setTurnOrder(order);
-    }
     
     private void randomizeTurnOrder(PowerGridGameState state) {
         List<Integer> order = new ArrayList<>();
