@@ -65,7 +65,7 @@ public class DramaMetrics implements IMetricsCollection {
                     if (oracle != null) {
                         records.put("HeuristicP" + i, oracleHeuristicValues[i]);  // overrides heuristic with oracle heuristic
                         records.put("OracleP" + i, oracleActionValues[i]);
-                        records.put("OracleDiffP" + i, lastValues == null ? 0.0 : oracleActionValues[i] - lastValues[i]);
+                        records.put("OracleDiffP" + i, lastValues == null ? oracleActionValues[i] : oracleActionValues[i] - lastValues[i]);
                     }
                 }
                 lastValues = oracleActionValues;

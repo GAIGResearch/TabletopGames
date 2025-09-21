@@ -66,7 +66,11 @@ public class PenteForwardModel extends StandardForwardModel {
                 }
             }
         }
-        state.die = new Dice(params.dieSides);
+        if (params.customDie != null) {
+            state.die = params.customDie.copy();
+        } else {
+            state.die = new Dice(params.dieSides);
+        }
         state.die.roll(state.getRnd());
     }
 
