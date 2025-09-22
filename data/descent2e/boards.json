@@ -74,6 +74,40 @@
     "verticesKey": "name",
     "neighboursKey": "neighbours",
     "maxNeighbours": -1,
+    "id": "rellegars-rest-1",
+    "nodes" :
+    [
+      {
+        "name": ["String", "entrance1A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["6A"]],
+        "connections": ["String[]", ["N-0"]]
+      },
+      {
+        "name": ["String", "6A"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["18A", "entrance1A"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "18A"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["6A", "3A"]],
+        "connections": ["String[]", ["S-0", "E-0"]]
+      },
+      {
+        "name": ["String", "3A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["18A"]],
+        "connections": ["String[]", ["W-0"]]
+      }
+    ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
     "id": "board2",
     "nodes" :
     [
@@ -99,6 +133,74 @@
         "name": ["String", "endcap1A-2"],
         "orientation": ["Integer", 3],
         "neighbours": ["String[]", ["28A"]],
+        "connections": ["String[]", ["W-0"]]
+      }
+    ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "test",
+    "nodes" :
+    [
+      {
+        "name": ["String", "4A-1"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["4A-2", "4A-4"]],
+        "connections": ["String[]", ["N-0", "W-0"]]
+      },
+      {
+        "name": ["String", "4A-2"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["4A-1", "4A-3"]],
+        "connections": ["String[]", ["S-0", "W-0"]]
+      },
+      {
+        "name": ["String", "4A-3"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["4A-2", "4A-4"]],
+        "connections": ["String[]", ["E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "4A-4"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["4A-1", "4A-3"]],
+        "connections": ["String[]", ["E-0", "N-0"]]
+      }
+    ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "test2",
+    "nodes" :
+    [
+      {
+        "name": ["String", "entrance1A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["6A"]],
+        "connections": ["String[]", ["N-0"]]
+      },
+      {
+        "name": ["String", "6A"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["18A", "entrance1A"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "18A"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["6A", "endcap1A"]],
+        "connections": ["String[]", ["S-0", "E-0"]]
+      },
+      {
+        "name": ["String", "endcap1A"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["18A"]],
         "connections": ["String[]", ["W-0"]]
       }
     ]

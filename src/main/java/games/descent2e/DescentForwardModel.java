@@ -159,6 +159,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
             // All Heroes have a Surge action of Recover 1 Fatigue
             figure.addAbility(new SurgeAttackAction(Surge.RECOVER_1_FATIGUE, figure.getComponentID()));
+            // figure.addAbility(new SurgeAttackAction(Surge.BLAST, figure.getComponentID()));
 
             // Set up abilities from other equipment
             List<DescentAction> passiveActions = getOtherEquipmentActions(figure);
@@ -1027,7 +1028,7 @@ public class DescentForwardModel extends StandardForwardModel {
         }
 
         // We should remove EndTurn to prevent premature ending of turn
-        if (actions.size() > 1) {
+        if (actions.size() > 100) {
             // Heroes can only End Turn if they have no more actions to take (including Free Actions for Two Heroes), or have moved this turn
             // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
             if (actingFigure instanceof Hero) {
@@ -1299,7 +1300,7 @@ public class DescentForwardModel extends StandardForwardModel {
             }
             GridBoard tile = _data.findGridBoard(tileName).copyNewID();
             if (tile != null) {
-                tile = tile.copyNewID();
+                //System.out.println(tile.getComponentName());
                 tile.setProperty(bn.getProperty(orientationHash));
                 tile.setComponentName(name);
                 dgs.tiles.put(tile.getComponentID(), tile);
@@ -1373,12 +1374,21 @@ public class DescentForwardModel extends StandardForwardModel {
             // This is the final master board!
             dgs.masterBoard = new GridBoard(trimBoard);
             // Init each node (cell) properties - not occupied ("players" int property), and its position in the master grid
+
+            List<Integer> existingIDs = new ArrayList<>();
+
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
                     BoardNode bn = dgs.masterBoard.getElement(j, i);
                     if (bn != null) {
                         bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
                         bn.setProperty(new PropertyInt("players", -1));
+
+                        if (existingIDs.contains(bn.getComponentID()))
+                        {
+                            System.out.println("Error! Existing ID: " + bn.getComponentID() + " at " + j + "," + i);
+                        }
+                        else existingIDs.add(bn.getComponentID());
                     }
                 }
             }
