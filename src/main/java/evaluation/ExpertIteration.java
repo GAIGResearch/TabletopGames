@@ -38,7 +38,8 @@ public class ExpertIteration {
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
     FeatureListener stateListener, actionListener;
-    int nPlayers, matchups, iterations, iter, bicMultiplier, bicTimer, everyN, expertTime;
+    int nPlayers, matchups, iterations, iter, bicMultiplier, bicTimer, expertTime;
+    double sampleRate;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     boolean useRounds, useStateInAction;
@@ -70,7 +71,7 @@ public class ExpertIteration {
         gameToPlay = GameType.valueOf((String) config.get(RunArg.game));
         bicMultiplier = (int) config.get(RunArg.bicMultiplier);
         bicTimer = (int) config.get(RunArg.bicTimer);
-        everyN = (int) config.get(RunArg.everyN);
+        sampleRate = (double) config.get(RunArg.sampleRate);
         expertTime = (int) config.get(RunArg.expertTime);
 
         params = AbstractParameters.createFromFile(gameToPlay, (String) config.get(RunArg.gameParams));
@@ -180,8 +181,6 @@ public class ExpertIteration {
             long iterationStartTime = System.currentTimeMillis();
             // learn the heuristics from the data
             finished = gatherDataAndCheckConvergence();
-            //  stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%02d.txt", prefix, 0);
-            //   actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%02d.txt", prefix, 0);
 
             long dataGatheringTime = System.currentTimeMillis() - iterationStartTime;
             if (finished)
@@ -257,7 +256,7 @@ public class ExpertIteration {
             String fileName = String.format("State_%s_%02d.txt", prefix, iter);
             stateDataFilesByIteration[iter] = dataDir + File.separator + fileName;
             if (stateListener != null) {
-                stateListener.setNth(everyN);
+                stateListener.setSampleRate(sampleRate);
                 stateListener.setLogger(new FileStatsLogger(fileName, "\t", false));
                 stateListener.setOutputDirectory(dataDir);
                 tournament.addListener(stateListener);
@@ -268,7 +267,6 @@ public class ExpertIteration {
             // For the oracle we set a high budget, and tweak parameters to ensure some exploration
             oracle.setName("Oracle");
             oracle.setBudget(budget * expertTime);
-            //           oracle.getParameters().setParameterValue("rolloutLength", 10);
             oracle.getParameters().setParameterValue("reuseTree", false); // we only look at occasional actions
             oracle.getParameters().setParameterValue("maxTreeDepth", 1000);
             if (((double) oracle.getParameters().getParameterValue("FPU")) < 1000.0)
@@ -285,7 +283,7 @@ public class ExpertIteration {
                         100, 0, false);
                 default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
             };
-            actionListener.setNth(everyN);
+            actionListener.setSampleRate(sampleRate);
             String fileName = String.format("Action_%s_%02d.txt", prefix, iter);
             actionListener.setLogger(new FileStatsLogger(fileName, "\t", false));
             actionListener.setOutputDirectory(dataDir);

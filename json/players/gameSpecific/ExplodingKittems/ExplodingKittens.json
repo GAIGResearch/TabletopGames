@@ -1,14 +1,10 @@
 {
   "budgetType": "BUDGET_TIME",
   "rolloutLength": 10,
-  "opponentTreePolicy": "OneTree",
   "MASTGamma": 0,
   "heuristic": {
     "class": "players.heuristics.OrdinalPosition"
   },
-  "K": 1,
-  "exploreEpsilon": 0.1,
-  "treePolicy": "UCB",
   "MAST": "Both",
   "rolloutType": "MAST",
   "information": "Information_Set",
