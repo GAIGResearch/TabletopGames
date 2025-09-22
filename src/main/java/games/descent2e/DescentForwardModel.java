@@ -1289,8 +1289,7 @@ public class DescentForwardModel extends StandardForwardModel {
             }
             GridBoard tile = _data.findGridBoard(tileName).copyNewID();
             if (tile != null) {
-                System.out.println(tile.getComponentName());
-                tile = tile.copyNewID();
+                //System.out.println(tile.getComponentName());
                 tile.setProperty(bn.getProperty(orientationHash));
                 tile.setComponentName(name);
                 dgs.tiles.put(tile.getComponentID(), tile);

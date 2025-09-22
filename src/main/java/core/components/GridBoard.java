@@ -274,7 +274,8 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 if (grid[i][j] != null) {
-                    gridCopy[i][j] = new BoardNode(grid[i][j]);
+                    gridCopy[i][j] = new BoardNode();
+                    grid[i][j].copyComponentTo(gridCopy[i][j]);
                     nodeCopies.put(gridCopy[i][j].componentID, gridCopy[i][j]);
                 }
             }
