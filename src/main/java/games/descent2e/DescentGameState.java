@@ -375,6 +375,14 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return searchCards;
     }
 
+    public Deck<Card> getAct1ShopCards() {
+        return data.act1ShopCards;
+    }
+
+    public Deck<Card> getAct2ShopCards() {
+        return data.act2ShopCards;
+    }
+
     /*
     This method is fine when we are circulating through each hero and monster in turn for taking their actions
     It will not necessarily suffice when we have interrupt actions. Consider the situation in which one player has two

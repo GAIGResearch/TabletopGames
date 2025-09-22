@@ -23,7 +23,7 @@
          "equipmentType": ["String[]", ["Magic", "Rune"]],
          "equipSlots": ["String[]", ["hand", "hand"]],
          "cost": ["Integer", 25],
-         "action": ["String", "Attack"]
+         "action": ["String", "Attack."]
        },
        {
          "name": ["String","Exploding Rune"],
@@ -51,7 +51,6 @@
          "XP": ["Integer", 2],
          "fatigue": ["Integer", 0],
          "exhaust": ["Boolean", false],
-         "bonus": ["String", "+1 stamina"],
          "passive": ["String", "Each time you spend 1 Surge during an attack to recover 1 Fatigue, you instead recover 2 Fatigue."]
        },
        {

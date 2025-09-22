@@ -14,10 +14,16 @@ public enum Surge {
     RANGE_PLUS_1(1, (a, s) -> a.addRange(1)),
     RANGE_PLUS_2(1, (a, s) -> a.addRange(2)),
     RANGE_PLUS_3(1, (a, s) -> a.addRange(3)),
+    DAMAGE_AND_RANGE_PLUS_1(1, (a, s) -> {
+        a.addDamage(1);
+        a.addRange(1);
+    }),
     DAMAGE_PLUS_1(1, (a, s) -> a.addDamage(1)),
     DAMAGE_PLUS_2(1, (a, s) -> a.addDamage(2)),
     DAMAGE_PLUS_3(1, (a, s) -> a.addDamage(3)),
+    DAMAGE_PLUS_5(2, (a, s) -> a.addDamage(5)),
     DAMAGE_PLUS_1_TWICE(2, (a, s) -> a.addDamage(2)),
+    DAMAGE_PLUS_2_TWICE(2, (a, s) -> a.addDamage(4)),
     PIERCE_1(1, (a, s) -> a.addPierce(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
     PIERCE_3(1, (a, s) -> a.addPierce(3)),

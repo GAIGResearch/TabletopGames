@@ -6,6 +6,7 @@ import core.properties.PropertyString;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.cards.SearchCard;
+import games.descent2e.components.cards.ShopCard;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
@@ -14,6 +15,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.io.File;
@@ -30,6 +32,8 @@ public class DescentGameData extends AbstractGameData {
     List<Hero> heroes;
     List<Deck<Card>> decks;
     Deck<Card> searchCards;
+    Deck<Card> act1ShopCards;
+    Deck<Card> act2ShopCards;
     List<Quest> quests;
     List<Quest> sideQuests;
     HashMap<String, HashMap<String, Monster>> monsters;
@@ -47,6 +51,10 @@ public class DescentGameData extends AbstractGameData {
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
 
         searchCards = SearchCard.loadCards(dataPath + "searchCards.json");
+        Pair<Deck<Card>, Deck<Card>> shopCards = ShopCard.loadCards(dataPath + "shopCards.json");
+        act1ShopCards = shopCards.a;
+        act2ShopCards = shopCards.b;
+
 
         decks = new ArrayList<>();
         // Read all class decks
@@ -375,12 +383,16 @@ public class DescentGameData extends AbstractGameData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DescentGameData that = (DescentGameData) o;
-        return Objects.equals(tiles, that.tiles) && Objects.equals(boardConfigurations, that.boardConfigurations) && Objects.equals(heroes, that.heroes) && Objects.equals(decks, that.decks) && Objects.equals(searchCards, that.searchCards) && Objects.equals(quests, that.quests) && Objects.equals(sideQuests, that.sideQuests) && Objects.equals(monsters, that.monsters);
+        return Objects.equals(tiles, that.tiles) && Objects.equals(boardConfigurations, that.boardConfigurations) &&
+                Objects.equals(heroes, that.heroes) && Objects.equals(decks, that.decks) &&
+                Objects.equals(searchCards, that.searchCards) && Objects.equals(quests, that.quests) &&
+                Objects.equals(act1ShopCards, that.act1ShopCards) && Objects.equals(act2ShopCards, that.act2ShopCards) &&
+                Objects.equals(sideQuests, that.sideQuests) && Objects.equals(monsters, that.monsters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tiles, boardConfigurations, heroes, decks, searchCards, quests, sideQuests, monsters);
+        return Objects.hash(tiles, boardConfigurations, heroes, decks, searchCards, act1ShopCards, act2ShopCards, quests, sideQuests, monsters);
     }
 
     public DescentGameData copy() {
@@ -402,6 +414,8 @@ public class DescentGameData extends AbstractGameData {
             copy.decks.add(d.copy());
         }
         copy.searchCards = searchCards.copy();
+        copy.act1ShopCards = act1ShopCards.copy();
+        copy.act2ShopCards = act2ShopCards.copy();
         copy.quests = new ArrayList<>();
         for (Quest q: quests) {
             copy.quests.add(q.copy());

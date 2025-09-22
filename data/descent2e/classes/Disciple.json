@@ -22,7 +22,7 @@
          "weaponSurges": ["String[]", ["STUN"]],
          "equipSlots": ["String[]", ["hand"]],
          "cost": ["Integer", 25],
-         "action": ["String", "Attack"]
+         "action": ["String", "Attack."]
        },
        {
          "name": ["String","Wooden Shield"],
@@ -32,7 +32,7 @@
          "equipmentType": ["String[]", ["Shield"]],
          "equipSlots": ["String[]", ["hand"]],
          "cost": ["Integer", 25],
-         "action": ["String", "Exhaust this card after rolling defense dice to add 1 Shield to the results; Effect:Shield:1"]
+         "action": ["String", "Exhaust this card after rolling defense dice to add 1 Shield to the results.; Effect:Shield:1"]
        },
        {
          "name": ["String","Armor of Faith"],

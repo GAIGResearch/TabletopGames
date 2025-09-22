@@ -10,6 +10,7 @@ import games.descent2e.actions.Triggers;
 import games.descent2e.components.Hero;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.cards.SearchCard;
+import games.descent2e.components.cards.ShopCard;
 import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
 
@@ -115,6 +116,15 @@ public class SearchAction extends TokenAction<SearchAction> {
 
     public static boolean getShopItem(DescentGameState dgs, Hero f)
     {
-        return true;
+        Deck<Card> shopCards;
+        if (dgs.getCurrentQuest().getAct() == 1)
+            shopCards = dgs.getAct1ShopCards();
+        else
+            shopCards = dgs.getAct2ShopCards();
+
+        if (shopCards.getSize() == 0)
+            return false;
+        ShopCard card = (ShopCard) shopCards.draw();
+        return f.getOtherEquipment().add(new DescentCard(card));
     }
 }

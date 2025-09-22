@@ -22,7 +22,7 @@
         "weaponSurges": ["String[]", ["DAMAGE_PLUS_1", "DAMAGE_PLUS_1_TWICE"]],
         "equipSlots": ["String[]", ["hand", "hand"]],
         "cost": ["Integer", 25],
-        "action": ["String", "Attack"]
+        "action": ["String", "Attack."]
       },
       {
         "name": ["String","Counter Attack"],
