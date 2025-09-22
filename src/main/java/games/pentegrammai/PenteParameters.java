@@ -20,6 +20,8 @@ public class PenteParameters extends TunableParameters {
         addTunableParameter("dieSides", 6, List.of(4, 6, 10));
         addTunableParameter("kiddsVariant", false, List.of(false, true));
         addTunableParameter("diceJSON", "");
+        addTunableParameter("maxRounds", 500);
+        maxRounds = 500;
     }
 
     @Override
@@ -37,6 +39,7 @@ public class PenteParameters extends TunableParameters {
         if (!diceJSON.isBlank()) {
             customDie = new Dice(diceJSON);
         }
+        maxRounds = (int) getParameterValue("maxRounds");
     }
 
     @Override

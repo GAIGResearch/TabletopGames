@@ -14,7 +14,7 @@ public abstract class AbstractParameters {
     long randomSeed;
     // Maximum number of rounds in the game - according to the rules
     // Once this is reached we end the game - and determine winners/losers in the normal way
-    int maxRounds = -1;
+    protected int maxRounds = -1;
     // Maximum number of rounds in the game before we timeout from boredom
     // If this is reached then we set the GameResult (and player results) to be TIMEOUT
     int timeoutRounds = -1;

@@ -143,7 +143,7 @@ public class BGGameState extends AbstractGameState {
     protected void updateAvailableDiceValues() {
         BGParameters params = (BGParameters) getGameParameters();
         if (params.doubleActions && Arrays.stream(dice).allMatch(d -> d.getValue() == dice[0].getValue())) {
-            // if doubles, we get double the actions
+            // if doubles, we get double the actions (doubles in this sense means, "all" dice have the same value)
             diceUsed = new boolean[dice.length * 2];
             availableDiceValues = new int[dice.length * 2];
             for (int i = 0; i < dice.length; i++) {
