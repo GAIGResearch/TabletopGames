@@ -1028,7 +1028,7 @@ public class DescentForwardModel extends StandardForwardModel {
         }
 
         // We should remove EndTurn to prevent premature ending of turn
-        if (actions.size() > 100) {
+        if (actions.size() > 1) {
             // Heroes can only End Turn if they have no more actions to take (including Free Actions for Two Heroes), or have moved this turn
             // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
             if (actingFigure instanceof Hero) {

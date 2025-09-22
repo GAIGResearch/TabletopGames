@@ -358,11 +358,7 @@ public class Game {
      * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
      */
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
-        // newRandomSeed = 755726;
-        // newRandomSeed = 101483;
-        newRandomSeed = 101480;
         if (debug) System.out.println("Game Seed: " + newRandomSeed);
-        System.out.println("Game Seed: " +newRandomSeed);
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
 
