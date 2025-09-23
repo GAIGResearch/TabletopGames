@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -21,10 +22,12 @@ import games.powergrid.PowerGridParameters.Phase;
 import core.interfaces.ITreeActionSpace;
 import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
+import games.powergrid.actions.BuyResource;
 import games.powergrid.actions.IncreaseBid;
 import games.powergrid.actions.PassAction;
 import games.powergrid.actions.PassBid;
 import games.powergrid.components.PowerGridCard;
+import games.powergrid.components.PowerGridCard.PlantInput;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
 import utilities.ActionTreeNode;
@@ -33,7 +36,7 @@ import static core.CoreConstants.VisibilityMode.*;
 
 
 public class PowerGridForwardModel extends StandardForwardModel implements ITreeActionSpace {
-
+	boolean passed = false; 
 	@Override
 	protected void _setup(AbstractGameState firstState) {
 		PowerGridGameState state = (PowerGridGameState)firstState;
@@ -75,6 +78,26 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		for (PowerGridCard c : state.drawPile.getComponents()) {
 		    System.out.println(" - " + c);
 		}
+		/*TESTING delete later
+		PowerGridCard cardA = PowerGridCard.plant(22, 5, Map.of(Resource.GAS, 3, Resource.OIL, 3));
+		 state.addPlantToPlayer(0,cardA);
+		 state.addPlantToPlayer(1,cardA);
+		 state.addPlantToPlayer(2,cardA);
+		 state.addPlantToPlayer(3,cardA);
+		 state.addPlantToPlayer(4,cardA);
+		 state.addPlantToPlayer(5,cardA);
+		 state.addFuel(0, PowerGridParameters.Resource.OIL, 4);
+		 state.addFuel(1, PowerGridParameters.Resource.OIL, 4);
+
+		 state.addFuel(2, PowerGridParameters.Resource.OIL, 4);
+
+		 state.addFuel(3, PowerGridParameters.Resource.OIL, 4);
+
+		 state.addFuel(4, PowerGridParameters.Resource.OIL, 4);
+
+		 state.addFuel(5, PowerGridParameters.Resource.OIL, 4);
+
+	*/
 	}
 	
 
@@ -107,24 +130,31 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             break;
 
         case RESOURCE_BUY:
-        	System.out.println("END");
-        	System.out.println("== RESOURCE BUY reached, ending test game ==");
+        	
         	//get the players current power plant cards
-        	int [] capacity = new int [] {0,0,0,0};
-        	Deck <PowerGridCard> playerHand = s.getOwnedPlantsByPlayer(); 
-        	for PowerGridCard card in Deck: 
-        		
-        	s.getFuel(me, )
-        	//get the players current stored resources 
-        	//calculate how many resources a player can have in the current state 
-        	//powerplant cards capacity - current stored resources 
-        	//build actions based on if the player has enough money to buy any resources 
-        	actions.add(new DoNothing());
-        	endGame(s);
-        	System.exit(0);
+        	System.out.println(me);
+        	EnumMap<PowerGridParameters.Resource, Integer> buyCapacity = playerBuyCapacity(s, me);
+        		System.out.println(buyCapacity); // {COAL=..., GAS=..., OIL=..., URANIUM=...}
+    		for (Map.Entry<Resource, Integer> e : buyCapacity.entrySet()) {
+    		    Resource r = e.getKey();
+    		    int amt = e.getValue(); 
+    		    if(amt == 0 )continue;    
+    		    for(int i = 1; i <= amt; i++) {
+    		    	if(s.getResourceMarket().costToBuy(r, i) > s.getPlayersMoney(me)) {
+    		    		continue;
+    		    	}
+    		    	actions.add(new BuyResource(r,i));
+    		    }
+    		    
+    		}
+    		actions.add(new PassAction(me));
+    		
+    		System.out.println(actions);
+        	
         	break;
 
         case BUILD:
+        	System.exit(0);
             break;
 
         case BUREAUCRACY:
@@ -133,6 +163,74 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	
     return actions;
 }
+	
+
+	
+	// How much the player can legally buy now (storage-only; ignores market availability)
+	// Return order: [COAL, GAS, OIL, URANIUM]
+	private EnumMap<PowerGridParameters.Resource, Integer>playerBuyCapacity(PowerGridGameState s, int playerId) {
+	    var R = PowerGridParameters.Resource.class;
+	    EnumMap<PowerGridParameters.Resource, Integer> canBuy = new EnumMap<>(R);
+	    // init zeros
+	    for (PowerGridParameters.Resource r : PowerGridParameters.Resource.values())
+	        canBuy.put(r, 0);
+
+	    Deck<PowerGridCard> hand = s.getOwnedPlantsByPlayer(playerId);
+	    if (hand == null) return canBuy;
+
+	    // 1) Sum capacities: dedicated + hybrid pool
+	    int coalCap = 0, gasCap = 0, oilCap = 0, urCap = 0, hybridCap = 0;
+
+	    // use getComponents() unless your Deck implements Iterable<PowerGridCard>
+	    for (PowerGridCard card : hand.getComponents()) {
+	        PowerGridCard.PlantInput in = card.getInput();
+	        int g = in.get(PowerGridParameters.Resource.GAS);
+	        int o = in.get(PowerGridParameters.Resource.OIL);
+
+	        // hybrid if it has BOTH GAS and OIL (and nothing else)
+	        var req = in.asMap();
+	        boolean hybrid = (g > 0 && o > 0 && req.size() == 2);
+	        // If you added card.isHybridGasOil(), use: boolean hybrid = card.isHybridGasOil();
+
+	        if (hybrid) {
+	            int units = Math.max(g, o);      // robust if data isn't symmetric
+	            hybridCap += 2 * units;          // shared pool for GAS+OIL
+	        } else {
+	            coalCap += 2 * in.get(PowerGridParameters.Resource.COAL);
+	            urCap   += 2 * in.get(PowerGridParameters.Resource.URANIUM);
+	            if (g > 0 && o == 0) gasCap += 2 * g;  // dedicated GAS-only
+	            if (o > 0 && g == 0) oilCap += 2 * o;  // dedicated OIL-only
+	        }
+	    }
+
+	    // 2) Subtract what the player already stores
+	    int cHave = s.getFuel(playerId, PowerGridParameters.Resource.COAL);
+	    int gHave = s.getFuel(playerId, PowerGridParameters.Resource.GAS);
+	    int oHave = s.getFuel(playerId, PowerGridParameters.Resource.OIL);
+	    int uHave = s.getFuel(playerId, PowerGridParameters.Resource.URANIUM);
+
+	    int coalFree = Math.max(0, coalCap - cHave);
+	    int urFree   = Math.max(0, urCap   - uHave);
+
+	    // 3) Dedicated first, overflow into hybrid pool (shared for GAS/OIL)
+	    int gasDedicatedUsed = Math.min(gHave, gasCap);
+	    int oilDedicatedUsed = Math.min(oHave, oilCap);
+	    int gasOverflow = Math.max(0, gHave - gasCap);
+	    int oilOverflow = Math.max(0, oHave - oilCap);
+	    int hybridUsed  = Math.min(hybridCap, gasOverflow + oilOverflow);
+	    int hybridFree  = Math.max(0, hybridCap - hybridUsed);
+
+	    int gasFree = Math.max(0, gasCap - gasDedicatedUsed) + hybridFree;
+	    int oilFree = Math.max(0, oilCap - oilDedicatedUsed) + hybridFree;
+
+	    canBuy.put(PowerGridParameters.Resource.COAL,    coalFree);
+	    canBuy.put(PowerGridParameters.Resource.GAS,     gasFree);
+	    canBuy.put(PowerGridParameters.Resource.OIL,     oilFree);
+	    canBuy.put(PowerGridParameters.Resource.URANIUM, urFree);
+	    return canBuy;
+	}
+	
+	
 	@Override
 	protected void _afterAction(AbstractGameState gs, AbstractAction actionTaken) {
 	    PowerGridGameState s = (PowerGridGameState) gs;
@@ -155,15 +253,16 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	            s.setTurnOwner(next);  // pass bidding turn to next bidder
 	        }
 	        return;
-	    }
-
+	    }  
 	    // No auction live: advance normal round turn
 	    if (s.isRoundOrderAllPassed()) { 
 	    	advancePhase(s); 
 	    	return; 
 	    }else {	    //else we advance the round 
+	    	if (actionTaken instanceof games.powergrid.actions.PassAction) {
 	    	s.setTurnOwner(s.nextPlayerInRound());
 	    	}
+	    }
 	}
 
 
@@ -183,10 +282,13 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        //case PLAYER_ORDER -> recomputePlayerOrder(state);
 	        //case AUCTION -> prepareAuction(state);
 	        case RESOURCE_BUY ->{
+	        	List<Integer> order = state.getRoundOrder();
 	        	Collections.reverse(state.getRoundOrder());
+	        	state.setTurnOwner(order.get(0));
 		        System.out.println(state.getRoundOrder());//delete when shown to work}
 
 	        }
+	        case BUILD ->{System.out.println("==== BUILDING PHASE ====");}
 	        //case BUILD -> enableBuilding(state);
 	        //case BUREAUCRACY -> doBureaucracy(state);
 	        default -> {}

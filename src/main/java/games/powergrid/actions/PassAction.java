@@ -17,7 +17,7 @@ public class PassAction extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         PowerGridGameState pggs = (PowerGridGameState) gs;
         pggs.removeFromRound(playerId);
-        System.out.println("Player " + playerId + " Passed the option to auction");
+        System.out.println("Player " + playerId + " has elected to pass");
         return true;
     }
 

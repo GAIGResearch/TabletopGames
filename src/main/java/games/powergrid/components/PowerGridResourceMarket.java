@@ -50,7 +50,7 @@ public class PowerGridResourceMarket extends Component {
     public int costToBuy(PowerGridParameters.Resource r, int amount) {
         int available = avail.get(r);
         if (amount < 0) throw new IllegalArgumentException("amount < 0");
-        if (amount > available) throw new IllegalArgumentException("Not enough " + r + " available");
+        if (amount > available) return 100000;
 
         int[] prices = priceCurveFor(r);
 

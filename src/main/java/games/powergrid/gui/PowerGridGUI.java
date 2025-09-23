@@ -113,6 +113,11 @@ public class PowerGridGUI extends AbstractGUIManager {
 	    for (int i = 0; i < playerViews.length; i++) {
 	        playerViews[i].setMoney(gs.getPlayersMoney(i));
 	        playerViews[i].setPlantDeck(gs.getPlayerPlantDeck(i));
+	        playerViews[i].setResources(
+	        		gs.getFuel(i, PowerGridParameters.Resource.COAL),
+	        		gs.getFuel(i, PowerGridParameters.Resource.OIL),
+	        		gs.getFuel(i, PowerGridParameters.Resource.GAS),
+	        		gs.getFuel(i, PowerGridParameters.Resource.URANIUM));
 	    }
 
 	    setActivePlayer(gameState.getCurrentPlayer());

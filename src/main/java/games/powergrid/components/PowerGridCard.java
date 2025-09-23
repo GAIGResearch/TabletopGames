@@ -31,6 +31,8 @@ public class PowerGridCard extends Card {
         public int totalUnits() { return req.values().stream().mapToInt(Integer::intValue).sum(); } //sets the number of units that can be on a card 
         public int get(Resource t) { return req.getOrDefault(t, 0); }
         public EnumMap<Resource,Integer> asMap() { return new EnumMap<>(req); }
+        public boolean hasMultipleTypes() { return req.size() > 1; }
+
 
         @Override
         public String toString() { return req.toString(); }
@@ -60,6 +62,9 @@ public class PowerGridCard extends Card {
     }
     public int getNumber() {
     	return this.number;
+    }
+    public PlantInput getInput() {
+    	return this.input;
     }
     @Override
     public Card copy() { return this; } // immutable
