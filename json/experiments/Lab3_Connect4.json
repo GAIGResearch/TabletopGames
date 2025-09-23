@@ -3,6 +3,6 @@
   "nPlayers" : 2,
   "mode" : "random",
   "matchups" : 100,
-  "verbose" : tru,
+  "verbose" : true,
   "seed" : 740234
 }
