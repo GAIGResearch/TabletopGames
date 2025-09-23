@@ -109,6 +109,16 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         case RESOURCE_BUY:
         	System.out.println("END");
         	System.out.println("== RESOURCE BUY reached, ending test game ==");
+        	//get the players current power plant cards
+        	int [] capacity = new int [] {0,0,0,0};
+        	Deck <PowerGridCard> playerHand = s.getOwnedPlantsByPlayer(); 
+        	for PowerGridCard card in Deck: 
+        		
+        	s.getFuel(me, )
+        	//get the players current stored resources 
+        	//calculate how many resources a player can have in the current state 
+        	//powerplant cards capacity - current stored resources 
+        	//build actions based on if the player has enough money to buy any resources 
         	actions.add(new DoNothing());
         	endGame(s);
         	System.exit(0);
@@ -128,7 +138,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    PowerGridGameState s = (PowerGridGameState) gs;
 	    int me = gs.getCurrentPlayer();
 
-	    if (s.isAuctionLive()) {
+	    if (s.isAuctionLive() && s.getPhase() == PowerGridParameters.Phase.AUCTION) {
 	        int next = s.checkNextBid(me);  //get the next valid bidder 
 
 	        if (next == me) { //if no one else is bidding then I have won the auction
@@ -148,12 +158,12 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    }
 
 	    // No auction live: advance normal round turn
-
 	    if (s.isRoundOrderAllPassed()) { 
 	    	advancePhase(s); 
-	    	return; }
-
-	    s.setTurnOwner(s.nextPlayerInRound());
+	    	return; 
+	    }else {	    //else we advance the round 
+	    	s.setTurnOwner(s.nextPlayerInRound());
+	    	}
 	}
 
 
@@ -172,8 +182,11 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    switch (phase) {
 	        //case PLAYER_ORDER -> recomputePlayerOrder(state);
 	        //case AUCTION -> prepareAuction(state);
-	        case RESOURCE_BUY ->{ Collections.reverse(state.getRoundOrder());
-	        System.out.println(state.getRoundOrder());}
+	        case RESOURCE_BUY ->{
+	        	Collections.reverse(state.getRoundOrder());
+		        System.out.println(state.getRoundOrder());//delete when shown to work}
+
+	        }
 	        //case BUILD -> enableBuilding(state);
 	        //case BUREAUCRACY -> doBureaucracy(state);
 	        default -> {}

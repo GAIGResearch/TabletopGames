@@ -356,8 +356,8 @@ public class PowerGridGameState extends AbstractGameState {
 	    d.getComponents().sort(Comparator.comparingInt(PowerGridCard::getNumber));
 	}
 	
-	public Deck<PowerGridCard>[] getOwnedPlantsByPlayer() {
-		return ownedPlantsByPlayer; 
+	public Deck<PowerGridCard> getOwnedPlantsByPlayer(int playerId) {
+		return ownedPlantsByPlayer[playerId]; 
 	}
 
 	public void replacePlant(int playerId, int indexToSell, PowerGridCard newCard) {
