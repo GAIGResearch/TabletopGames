@@ -1,0 +1,9 @@
+{
+  "class": "evaluation.listeners.StateFeatureListener",
+  "args" : [
+                {"class" : "games.dominion.metrics.DomStateFeaturesReduced"},
+                {"enum" : "evaluation.metrics.Event$GameEvent", "value" : "ROUND_OVER"},
+                false,
+                "DomStateFeatures001.txt"
+        ]
+}
