@@ -1,0 +1,8 @@
+{
+  "game" : "Connect4",
+  "nPlayers" : 2,
+  "mode" : "random",
+  "matchups" : 100,
+  "verbose" : tru,
+  "seed" : 740234
+}
