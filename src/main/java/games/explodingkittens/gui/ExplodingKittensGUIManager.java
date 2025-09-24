@@ -67,8 +67,11 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 String[] locations = new String[]{BorderLayout.NORTH, BorderLayout.EAST, BorderLayout.SOUTH, BorderLayout.WEST};
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
+                int humanPlayer = humanPlayerIds.isEmpty() ? -1 : humanPlayerIds.iterator().next();
                 for (int i = 0; i < nPlayers; i++) {
-                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(humanPlayerIds.iterator().next(), ekgs.getPlayerHand(i), false, ekgp.getDataPath());
+                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(
+                            humanPlayer,
+                            ekgs.getPlayerHand(i), false, ekgp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -94,7 +97,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
                 discardPile = new ExplodingKittensDiscardView(ekgs.getDiscardPile(), true, ekgp.getDataPath());
                 inPlayPile = new ExplodingKittensDiscardView(ekgs.getInPlay(), true, ekgp.getDataPath());
-                drawPile = new ExplodingKittensDeckView(humanPlayerIds.iterator().next(), ekgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, ekgp.getDataPath());
+                drawPile = new ExplodingKittensDeckView(humanPlayer, ekgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, ekgp.getDataPath());
                 centerArea.add(drawPile);
                 centerArea.add(discardPile);
                 centerArea.add(inPlayPile);
