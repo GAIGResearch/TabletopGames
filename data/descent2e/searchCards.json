@@ -2,61 +2,85 @@
   {
     "name": ["String", "Health Potion"],
     "type": ["String", "Potion"],
-    "value": ["Integer", 25]
+    "value": ["Integer", 25],
+    "used": ["Boolean", false],
+    "action": ["String", "Flip this card over to choose your hero or an adjacent hero. The hero recovers all Health."]
   },
   {
     "name": ["String", "Health Potion"],
     "type": ["String", "Potion"],
-    "value": ["Integer", 25]
+    "value": ["Integer", 25],
+    "used": ["Boolean", false],
+    "action": ["String", "Flip this card over to choose your hero or an adjacent hero. The hero recovers all Health."]
   },
   {
     "name": ["String", "Health Potion"],
     "type": ["String", "Potion"],
-    "value": ["Integer", 25]
+    "value": ["Integer", 25],
+    "used": ["Boolean", false],
+    "action": ["String", "Flip this card over to choose your hero or an adjacent hero. The hero recovers all Health."]
   },
   {
     "name": ["String", "Stamina Potion"],
     "type": ["String", "Potion"],
-    "value": ["Integer", 25]
+    "value": ["Integer", 25],
+    "used": ["Boolean", false],
+    "action": ["String", "Flip this card over during your turn to choose your hero or an adjacent hero. The hero recovers all Stamina."]
   },
   {
     "name": ["String", "Stamina Potion"],
     "type": ["String", "Potion"],
-    "value": ["Integer", 25]
+    "value": ["Integer", 25],
+    "used": ["Boolean", false],
+    "action": ["String", "Flip this card over during your turn to choose your hero or an adjacent hero. The hero recovers all Stamina."]
   },
   {
     "name": ["String", "Stamina Potion"],
     "type": ["String", "Potion"],
-    "value": ["Integer", 25]
+    "value": ["Integer", 25],
+    "used": ["Boolean", false],
+    "action": ["String", "Flip this card over during your turn to choose your hero or an adjacent hero. The hero recovers all Stamina."]
   },
   {
     "name": ["String", "Power Potion"],
     "type": ["String", "Potion"],
-    "value": ["Integer", 50]
+    "value": ["Integer", 50],
+    "used": ["Boolean", false],"action": ["String", "Flip this card over to reroll some or all of your dice after performing an attack."]
   },
   {
     "name": ["String", "Warding Talisman"],
     "type": ["String", "Item"],
-    "value": ["Integer", 50]
+    "value": ["Integer", 50],
+    "used": ["Boolean", false],
+    "action": ["String", "Flip this card after rolling defense dice to add 2 Shields to your result."]
   },
   {
     "name": ["String", "Curse Doll"],
     "type": ["String", "Item"],
-    "value": ["Integer", 50]
+    "value": ["Integer", 50],
+    "used": ["Boolean", false],
+    "action": ["String", "Flip this card over to discard any 1 Condition card from yourself or an adjacent hero."]
   },
   {
     "name": ["String", "Fire Flask"],
     "type": ["String", "Item"],
-    "value": ["Integer", 50]
+    "value": ["Integer", 50],
+    "used": ["Boolean", false],
+    "attackType": ["String", "ranged"],
+    "attackPower": ["String[]", ["blue", "yellow"]],
+    "weaponSurges": ["String[]", ["BLAST"]],
+    "action": ["String", "Flip this card over to make a Ranged attack with this item."]
   },
   {
     "name": ["String", "Treasure Chest"],
     "type": ["String", "Special"],
-    "value": ["Integer", 0]
+    "value": ["Integer", 0],
+    "used": ["Boolean", false]
   },
   {
     "name": ["String", "Nothing"],
     "type": ["String", "Special"],
-    "value": ["Integer", 0]
+    "value": ["Integer", 0],
+    "used": ["Boolean", false]
   }
 ]

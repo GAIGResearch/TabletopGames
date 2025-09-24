@@ -181,6 +181,7 @@ public class DescentHeroView extends ComponentView {
             }
         }
         xy = drawDeckOfCards(g, hero.getOtherEquipment(), xy.a, xy.b, cardWidth, cardHeight);
+        xy = drawDeckOfCards(g, hero.getInventory(), xy.a, xy.b, cardWidth, cardHeight);
         xy = drawDeckOfCards(g, hero.getSkills(), xy.a, xy.b, cardWidth, cardHeight);
     }
 

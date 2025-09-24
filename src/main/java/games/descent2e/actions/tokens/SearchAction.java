@@ -93,7 +93,7 @@ public class SearchAction extends TokenAction<SearchAction> {
                 return added;
             }
             else if (!card.getComponentName().equals("Nothing")) {
-                boolean added = f.getOtherEquipment().add(new DescentCard(card));
+                boolean added = f.getInventory().add(new DescentCard(card));
                 if (added) {
                     searchToken.setPosition(null);  // Take off the map
                 }
@@ -125,6 +125,6 @@ public class SearchAction extends TokenAction<SearchAction> {
         if (shopCards.getSize() == 0)
             return false;
         ShopCard card = (ShopCard) shopCards.draw();
-        return f.getOtherEquipment().add(new DescentCard(card));
+        return f.getInventory().add(new DescentCard(card));
     }
 }

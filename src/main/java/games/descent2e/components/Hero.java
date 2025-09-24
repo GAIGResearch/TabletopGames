@@ -31,6 +31,7 @@ public class Hero extends Figure {
     Deck<DescentCard> handEquipment;
     DescentCard armor;
     Deck<DescentCard> otherEquipment;
+    Deck<DescentCard> inventory;
     Map<String, Integer> equipSlotsAvailable;
 
     // TODO: reset fatigue every quest to max fatigue
@@ -48,6 +49,7 @@ public class Hero extends Figure {
         skills = new Deck<>("Skills", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         handEquipment = new Deck<>("Hands", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         otherEquipment = new Deck<>("OtherItems", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        inventory = new Deck<>("Inventory", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
         equipSlotsAvailable = new HashMap<>();
         equipSlotsAvailable.put("hand", 2);
@@ -96,6 +98,14 @@ public class Hero extends Figure {
 
     public void setOtherEquipment(Deck<DescentCard> otherEquipment) {
         this.otherEquipment = otherEquipment;
+    }
+
+    public Deck<DescentCard> getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(Deck<DescentCard> inventory) {
+        this.inventory = inventory;
     }
 
     public Map<String, Integer> getEquipSlotsAvailable() {
@@ -245,14 +255,14 @@ public class Hero extends Figure {
         return usedHeroAbility == hero.usedHeroAbility && featAvailable == hero.featAvailable &&
                 rested == hero.rested && defeated == hero.defeated &&
                 Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) &&
-                Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) &&
+                Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(inventory, hero.inventory) &&
                 Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Objects.equals(heroicFeatStr, hero.heroicFeatStr) &&
                 heroicFeat == hero.heroicFeat && heroAbility == hero.heroAbility && Objects.equals(abilityStr, hero.abilityStr);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment,
+        return Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, inventory,
                 equipSlotsAvailable, heroicFeatStr, heroicFeat.ordinal(), usedHeroAbility, featAvailable,
                 rested, defeated, heroAbility.ordinal(), abilityStr);
     }
@@ -277,6 +287,7 @@ public class Hero extends Figure {
         if (handEquipment != null) copy.handEquipment = handEquipment.copy();
         if (otherEquipment != null) copy.otherEquipment = otherEquipment.copy();
         if (armor != null) copy.armor = armor.copy();
+        if (inventory != null) copy.inventory = inventory.copy();
         copy.heroicFeatStr = this.heroicFeatStr;
         copy.heroicFeat = this.heroicFeat;
         copy.usedHeroAbility = this.usedHeroAbility;
