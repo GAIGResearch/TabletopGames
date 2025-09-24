@@ -875,7 +875,7 @@ public class DescentForwardModel extends StandardForwardModel {
                             case "Health Potion" -> {
                                 for (Hero h : dgs.getHeroes())
                                 {
-                                    UseHealthPotion healthPotion = new UseHealthPotion(h.getComponentID());
+                                    UseHealthPotion healthPotion = new UseHealthPotion(h.getComponentID(), item.getComponentID());
                                     if (healthPotion.canExecute(dgs))
                                         actions.add(healthPotion);
                                 }
@@ -884,7 +884,7 @@ public class DescentForwardModel extends StandardForwardModel {
                             case "Stamina Potion" -> {
                                 for (Hero h : dgs.getHeroes())
                                 {
-                                    UseStaminaPotion staminaPotion = new UseStaminaPotion(h.getComponentID());
+                                    UseStaminaPotion staminaPotion = new UseStaminaPotion(h.getComponentID(), item.getComponentID());
                                     if (staminaPotion.canExecute(dgs))
                                         actions.add(staminaPotion);
                                 }
@@ -893,12 +893,19 @@ public class DescentForwardModel extends StandardForwardModel {
                             case "Curse Doll" -> {
                                 for (Hero h : dgs.getHeroes()) {
                                     for (DescentCondition condition : h.getConditions()) {
-                                        UseCurseDoll useCurseDoll = new UseCurseDoll(h.getComponentID(), condition);
-                                        if (useCurseDoll.canExecute(dgs))
-                                            actions.add(useCurseDoll);
+                                        UseCurseDoll curseDoll = new UseCurseDoll(h.getComponentID(), item.getComponentID(), condition);
+                                        if (curseDoll.canExecute(dgs))
+                                            actions.add(curseDoll);
                                     }
                                 }
                             }
+
+                            /*case "Fire Flask" -> {
+
+                            }*/
+
+                            // Power Potion and Warding Talisman are tried as Abilities and thus are handled when obtained
+
                         }
                     }
                 }

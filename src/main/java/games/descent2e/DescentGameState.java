@@ -111,6 +111,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             components.addAll(hero.getHandEquipment().getComponents());
             components.add(hero.getArmor());
             components.addAll(hero.getOtherEquipment().getComponents());
+            components.addAll(hero.getInventory().getComponents());
         }
         monsters.forEach(components::addAll);
         monstersOriginal.forEach(components::addAll);

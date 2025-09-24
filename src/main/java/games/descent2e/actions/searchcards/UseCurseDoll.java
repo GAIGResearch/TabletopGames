@@ -27,12 +27,14 @@ import static utilities.Utils.getNeighbourhood;
 public class UseCurseDoll extends DescentAction {
 
     int toCureID;
+    int itemID;
     DescentTypes.DescentCondition conditionToCure;
     private final String name = "Curse Doll";
 
-    public UseCurseDoll(int toCureID, DescentTypes.DescentCondition conditionToCure) {
+    public UseCurseDoll(int toCureID, int itemID, DescentTypes.DescentCondition conditionToCure) {
         super(Triggers.ACTION_POINT_SPEND);
         this.toCureID = toCureID;
+        this.itemID = itemID;
         this.conditionToCure = conditionToCure;
     }
 
@@ -54,21 +56,15 @@ public class UseCurseDoll extends DescentAction {
         Hero user = (Hero) dgs.getActingFigure();
         user.getNActionsExecuted().increment();
         user.addActionTaken(toString());
-        for (Card c : user.getInventory().getComponents()) {
-            if (((PropertyString) c.getProperty("name")).value.equals(name)) {
-                if (((PropertyBoolean) c.getProperty("used")).value.equals(false))
-                {
-                    c.setProperty(new PropertyBoolean("used", true));
-                    break;
-                }
-            }
-        }
+
+        DescentCard card = (DescentCard) dgs.getComponentById(itemID);
+        card.setProperty(new PropertyBoolean("used", true));
         return true;
     }
 
     @Override
     public UseCurseDoll copy() {
-        return new UseCurseDoll(toCureID, conditionToCure);
+        return new UseCurseDoll(toCureID, itemID, conditionToCure);
     }
 
     @Override
@@ -85,12 +81,11 @@ public class UseCurseDoll extends DescentAction {
                 return false;
 
         Deck<DescentCard> heroInventory = user.getInventory();
-        for (Card c : heroInventory.getComponents()) {
-            if (((PropertyString) c.getProperty("name")).value.equals(name)) {
-                if (((PropertyBoolean) c.getProperty("used")).value.equals(false))
-                    return true;
-            }
-        }
+        DescentCard card = (DescentCard) dgs.getComponentById(itemID);
+        if (card == null) return false;
+        if (heroInventory.contains(card))
+            if (((PropertyString) card.getProperty("name")).value.equals(name))
+                return (((PropertyBoolean) card.getProperty("used")).value.equals(false));
         return false;
     }
 
@@ -98,11 +93,11 @@ public class UseCurseDoll extends DescentAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UseCurseDoll that)) return false;
-        return toCureID == that.toCureID && conditionToCure == that.conditionToCure;
+        return toCureID == that.toCureID && itemID == that.itemID && conditionToCure == that.conditionToCure;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(toCureID, conditionToCure);
+        return Objects.hash(toCureID, itemID, conditionToCure, name);
     }
 }

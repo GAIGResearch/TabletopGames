@@ -21,17 +21,20 @@ import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static core.CoreConstants.playersHash;
 import static utilities.Utils.getNeighbourhood;
 
 public class UseHealthPotion extends DescentAction {
     int toHealID;
+    int itemID;
     private final String name = "Health Potion";
 
-    public UseHealthPotion(int toHealID) {
+    public UseHealthPotion(int toHealID, int itemID) {
         super(Triggers.ACTION_POINT_SPEND);
         this.toHealID = toHealID;
+        this.itemID = itemID;
     }
 
     @Override
@@ -46,28 +49,21 @@ public class UseHealthPotion extends DescentAction {
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        // Heal hero
         Hero hero = (Hero) dgs.getComponentById(toHealID);
         hero.setAttributeToMax(Figure.Attribute.Health);
 
         Hero user = (Hero) dgs.getActingFigure();
         user.getNActionsExecuted().increment();
         user.addActionTaken(toString());
-        for (Card c : user.getInventory().getComponents()) {
-            if (((PropertyString) c.getProperty("name")).value.equals(name)) {
-                if (((PropertyBoolean) c.getProperty("used")).value.equals(false))
-                {
-                    c.setProperty(new PropertyBoolean("used", true));
-                    break;
-                }
-            }
-        }
+
+        DescentCard card = (DescentCard) dgs.getComponentById(itemID);
+        card.setProperty(new PropertyBoolean("used", true));
         return true;
     }
 
     @Override
     public UseHealthPotion copy() {
-        return new UseHealthPotion(toHealID);
+        return new UseHealthPotion(toHealID, itemID);
     }
 
     @Override
@@ -84,12 +80,11 @@ public class UseHealthPotion extends DescentAction {
                 return false;
 
         Deck<DescentCard> heroInventory = user.getInventory();
-        for (Card c : heroInventory.getComponents()) {
-            if (((PropertyString) c.getProperty("name")).value.equals(name)) {
-                if (((PropertyBoolean) c.getProperty("used")).value.equals(false))
-                    return true;
-            }
-        }
+        DescentCard card = (DescentCard) dgs.getComponentById(itemID);
+        if (card == null) return false;
+        if (heroInventory.contains(card))
+            if (((PropertyString) card.getProperty("name")).value.equals(name))
+                return (((PropertyBoolean) card.getProperty("used")).value.equals(false));
         return false;
     }
 
@@ -97,11 +92,11 @@ public class UseHealthPotion extends DescentAction {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof UseHealthPotion other)) return false;
-        return toHealID == other.toHealID;
+        return toHealID == other.toHealID && itemID == other.itemID;
     }
 
     @Override
     public int hashCode() {
-        return toHealID - 789793 + 31;
+        return Objects.hash(super.hashCode(), toHealID, itemID, name);
     }
 }
