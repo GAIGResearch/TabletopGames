@@ -4,8 +4,11 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IExtendedSequence;
+import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
+import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
@@ -21,17 +24,11 @@ import java.util.Objects;
 import static core.CoreConstants.playersHash;
 import static utilities.Utils.getNeighbourhood;
 
-public class UseCurseDoll extends DescentAction implements IExtendedSequence {
+public class UseCurseDoll extends DescentAction {
 
     int toCureID;
     DescentTypes.DescentCondition conditionToCure;
-    boolean complete;
-
-    public UseCurseDoll() {
-        super(Triggers.ACTION_POINT_SPEND);
-        this.toCureID = -1;
-        this.conditionToCure = null;
-    }
+    private final String name = "Curse Doll";
 
     public UseCurseDoll(int toCureID, DescentTypes.DescentCondition conditionToCure) {
         super(Triggers.ACTION_POINT_SPEND);
@@ -41,119 +38,71 @@ public class UseCurseDoll extends DescentAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "Use Curse Doll on " + gameState.getComponentById(toCureID).getComponentName().replace("Hero: ", "") + " to cure " + conditionToCure;
     }
 
     @Override
     public String toString() {
-        return toCureID != 1 && conditionToCure != null? "Curing " + conditionToCure + " from " + toCureID : "Use Curse Doll";
+        return "Use Curse Doll on " + toCureID + " to cure " + conditionToCure;
     }
 
     @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+    public boolean execute(DescentGameState dgs) {
+        Hero hero = (Hero) dgs.getComponentById(toCureID);
+        hero.getConditions().remove(conditionToCure);
 
-        // Data Def
-        List<AbstractAction> actions = new ArrayList<>();
-        DescentGameState dgs = (DescentGameState) state;
-
-        //Player Actions
-        Hero playerHero = (Hero) dgs.getActingFigure();
-        if (!playerHero.getConditions().isEmpty()) {
-            for (DescentTypes.DescentCondition condition : playerHero.getConditions()) {
-                actions.add(new UseCurseDoll(playerHero.getComponentID(), condition));
-            }
-        }
-
-        //Neighbour Actions
-        if (playerHero.getOwnerId() == ((DescentGameState) state).getActingFigure().getOwnerId()) {
-            Vector2D loc = playerHero.getPosition();
-            GridBoard board = dgs.getMasterBoard();
-            List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-            for (Vector2D n : neighbours) {
-                BoardNode bn = board.getElement(n.getX(), n.getY());
-                if (bn != null) {
-                    PropertyInt figureAtNode = ((PropertyInt) bn.getProperty(playersHash));
-                    if (figureAtNode != null && figureAtNode.value != -1) {
-                        Figure f = (Figure) dgs.getComponentById(figureAtNode.value);
-                        if (f instanceof Hero && !f.getConditions().isEmpty()) {
-                            for (DescentTypes.DescentCondition condition : f.getConditions()) {
-                                actions.add(new UseCurseDoll(f.getComponentID(), condition));
-                            }
-                        }
-                    }
+        Hero user = (Hero) dgs.getActingFigure();
+        user.getNActionsExecuted().increment();
+        user.addActionTaken(toString());
+        for (Card c : user.getInventory().getComponents()) {
+            if (((PropertyString) c.getProperty("name")).value.equals(name)) {
+                if (((PropertyBoolean) c.getProperty("used")).value.equals(false))
+                {
+                    c.setProperty(new PropertyBoolean("used", true));
+                    break;
                 }
             }
-        }
-
-        return actions;
-    }
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        DescentGameState dgs = (DescentGameState) state;
-        return dgs.getActingFigure().getOwnerId();
-    }
-
-    @Override
-    public void _afterAction(AbstractGameState state, AbstractAction action) {
-        complete = true;
-    }
-
-    @Override
-    public boolean executionComplete(AbstractGameState state) {
-        return complete;
-    }
-
-    @Override
-    public boolean execute(DescentGameState gs) {
-        if (toCureID != -1 && conditionToCure != null) {
-            Hero hero = (Hero) gs.getComponentById(toCureID);
-            hero.getConditions().remove(conditionToCure);
-
-            // Remove Card
-            Deck<DescentCard> heroEquipment = ((Hero) gs.getActingFigure()).getOtherEquipment();
-            DescentCard card = heroEquipment.stream()
-                    .filter(a -> a.getComponentName().equals("Curse Doll"))
-                    .findAny().orElseThrow(() -> new AssertionError("Card not found: Curse Doll"));
-            heroEquipment.remove(card);
-
-            hero.getNActionsExecuted().increment();
-
-            hero.addActionTaken(toString());
-        }
-        else {
-            gs.setActionInProgress(this);
         }
         return true;
     }
 
     @Override
     public UseCurseDoll copy() {
-        UseCurseDoll retValue = new UseCurseDoll(toCureID, conditionToCure);
-        retValue.complete = complete;
-        return retValue;
+        return new UseCurseDoll(toCureID, conditionToCure);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        if (dgs.getActingFigure().getNActionsExecuted().isMaximum()) return false;
+        Hero target = (Hero) dgs.getComponentById(toCureID);
+        if (target == null || !target.hasCondition(conditionToCure)) return false;
+        Hero user = (Hero) dgs.getActingFigure();
+        if (user == null) return false;
+        if (user.getNActionsExecuted().isMaximum()) return false;
 
-        Deck<DescentCard> heroEquipment = ((Hero) dgs.getActingFigure()).getOtherEquipment();
-        return heroEquipment.stream()
-                .anyMatch(a -> a.getComponentName().equals("Curse Doll"));
+        // If not self, check adjacency
+        if (target != user)
+            if(!DescentHelper.checkAdjacent(dgs, user, target))
+                return false;
+
+        Deck<DescentCard> heroInventory = user.getInventory();
+        for (Card c : heroInventory.getComponents()) {
+            if (((PropertyString) c.getProperty("name")).value.equals(name)) {
+                if (((PropertyBoolean) c.getProperty("used")).value.equals(false))
+                    return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UseCurseDoll that)) return false;
-        return toCureID == that.toCureID &&
-                conditionToCure == that.conditionToCure &&
-                complete == that.complete;
+        return toCureID == that.toCureID && conditionToCure == that.conditionToCure;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(toCureID, conditionToCure, complete);
+        return Objects.hash(toCureID, conditionToCure);
     }
 }

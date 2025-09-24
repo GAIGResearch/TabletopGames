@@ -20,6 +20,9 @@ import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
 import games.descent2e.actions.monsterfeats.Land;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
+import games.descent2e.actions.searchcards.UseCurseDoll;
+import games.descent2e.actions.searchcards.UseHealthPotion;
+import games.descent2e.actions.searchcards.UseStaminaPotion;
 import games.descent2e.actions.tokens.SearchAction;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
@@ -43,6 +46,7 @@ import static games.descent2e.actions.archetypeskills.PrayerOfHealing.removePray
 import static games.descent2e.actions.monsterfeats.Air.removeAirImmunity;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
+import static games.descent2e.components.DicePool.heal;
 import static games.descent2e.components.Figure.Attribute.Health;
 import static utilities.Utils.getNeighbourhood;
 
@@ -850,12 +854,56 @@ public class DescentForwardModel extends StandardForwardModel {
             actions.addAll(moveActions(dgs, actingFigure));
         }
 
-        // If a hero has stamina to spare, add move actions that cost fatigue
-        if (actingFigure instanceof Hero && !actingFigure.isOffMap()) {
+        // Hero Specific Actions
+        if (actingFigure instanceof Hero hero && !actingFigure.isOffMap()) {
+            // If a hero has stamina to spare, add move actions that cost fatigue
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
                 if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
             }
+
+            Deck<DescentCard> inventory = hero.getInventory();
+            // Use Inventory Items
+            if (!inventory.getComponents().isEmpty())
+            {
+                for (Card item : inventory.getComponents())
+                {
+                    if (item.getProperty("used") != null)
+                    {
+                        switch(((PropertyString) item.getProperty("name")).value)
+                        {
+                            case "Health Potion" -> {
+                                for (Hero h : dgs.getHeroes())
+                                {
+                                    UseHealthPotion healthPotion = new UseHealthPotion(h.getComponentID());
+                                    if (healthPotion.canExecute(dgs))
+                                        actions.add(healthPotion);
+                                }
+                            }
+
+                            case "Stamina Potion" -> {
+                                for (Hero h : dgs.getHeroes())
+                                {
+                                    UseStaminaPotion staminaPotion = new UseStaminaPotion(h.getComponentID());
+                                    if (staminaPotion.canExecute(dgs))
+                                        actions.add(staminaPotion);
+                                }
+                            }
+
+                            case "Curse Doll" -> {
+                                for (Hero h : dgs.getHeroes()) {
+                                    for (DescentCondition condition : h.getConditions()) {
+                                        UseCurseDoll useCurseDoll = new UseCurseDoll(h.getComponentID(), condition);
+                                        if (useCurseDoll.canExecute(dgs))
+                                            actions.add(useCurseDoll);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         // Flying Monsters must declare they've landed before performing any other actions other than moving

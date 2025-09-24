@@ -3,11 +3,15 @@ package games.descent2e.actions.searchcards;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.components.Card;
 import core.components.Deck;
 import core.components.GridBoard;
 import core.interfaces.IExtendedSequence;
+import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
+import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.DescentCard;
@@ -21,8 +25,9 @@ import java.util.List;
 import static core.CoreConstants.playersHash;
 import static utilities.Utils.getNeighbourhood;
 
-public class UseHealthPotion extends DescentAction implements IExtendedSequence {
+public class UseHealthPotion extends DescentAction {
     int toHealID;
+    private final String name = "Health Potion";
 
     public UseHealthPotion(int toHealID) {
         super(Triggers.ACTION_POINT_SPEND);
@@ -31,68 +36,33 @@ public class UseHealthPotion extends DescentAction implements IExtendedSequence 
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Use health potion on " + gameState.getComponentById(toHealID).getComponentName();
+        return "Use Health Potion on " + gameState.getComponentById(toHealID).getComponentName().replace("Hero: ", "");
     }
 
     @Override
     public String toString() {
-        return "Use health potion";
+        return "Use Health Potion on " + toHealID;
     }
 
     @Override
-    public boolean execute(DescentGameState gs) {
+    public boolean execute(DescentGameState dgs) {
         // Heal hero
-        Hero hero = (Hero) gs.getComponentById(toHealID);
+        Hero hero = (Hero) dgs.getComponentById(toHealID);
         hero.setAttributeToMax(Figure.Attribute.Health);
-        hero.addActionTaken(toString());
-        return true;
-    }
 
-    @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-
-        // Data definition
-        List<AbstractAction> actions = new ArrayList<>();
-        DescentGameState dgs = (DescentGameState) state;
-
-        // Add Hero to Actions
-        Hero executer = (Hero) dgs.getActingFigure();
-        actions.add(new UseHealthPotion(executer.getComponentID()));
-        
-        // Get Neighbours
-        if (executer.getOwnerId() == ((DescentGameState) state).getActingFigure().getOwnerId()) {
-            Vector2D loc = executer.getPosition();
-            GridBoard board = dgs.getMasterBoard();
-            List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-            for (Vector2D n : neighbours) {
-                BoardNode bn = board.getElement(n.getX(), n.getY());
-                if (bn != null) {
-                    PropertyInt figureAtNode = ((PropertyInt) bn.getProperty(playersHash));
-                    if (figureAtNode != null && figureAtNode.value != -1) {
-                        Figure f = (Figure) dgs.getComponentById(figureAtNode.value);
-                        if (f instanceof Hero) {
-                            actions.add(new UseHealthPotion(f.getComponentID()));
-                        }
-                    }
+        Hero user = (Hero) dgs.getActingFigure();
+        user.getNActionsExecuted().increment();
+        user.addActionTaken(toString());
+        for (Card c : user.getInventory().getComponents()) {
+            if (((PropertyString) c.getProperty("name")).value.equals(name)) {
+                if (((PropertyBoolean) c.getProperty("used")).value.equals(false))
+                {
+                    c.setProperty(new PropertyBoolean("used", true));
+                    break;
                 }
             }
         }
-        return actions;
-    }
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        return state.getCurrentPlayer();
-    }
-
-    @Override
-    public void _afterAction(AbstractGameState state, AbstractAction action) {
-
-    }
-
-    @Override
-    public boolean executionComplete(AbstractGameState state) {
-        return toHealID != -1;
+        return true;
     }
 
     @Override
@@ -102,9 +72,25 @@ public class UseHealthPotion extends DescentAction implements IExtendedSequence 
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Deck<DescentCard> heroEquipment = ((Hero) dgs.getActingFigure()).getOtherEquipment();
-        return heroEquipment.stream()
-                .anyMatch(a -> a.getComponentName().equals("Health Potion"));
+        Hero target = (Hero) dgs.getComponentById(toHealID);
+        if (target == null || target.getAttribute(Figure.Attribute.Health).isMaximum()) return false;
+        Hero user = (Hero) dgs.getActingFigure();
+        if (user == null) return false;
+        if (user.getNActionsExecuted().isMaximum()) return false;
+
+        // If not self, check adjacency
+        if (target != user)
+            if(!DescentHelper.checkAdjacent(dgs, user, target))
+                return false;
+
+        Deck<DescentCard> heroInventory = user.getInventory();
+        for (Card c : heroInventory.getComponents()) {
+            if (((PropertyString) c.getProperty("name")).value.equals(name)) {
+                if (((PropertyBoolean) c.getProperty("used")).value.equals(false))
+                    return true;
+            }
+        }
+        return false;
     }
 
     @Override
