@@ -4,9 +4,12 @@ import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
 import core.components.GridBoard;
+import core.properties.PropertyBoolean;
+import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.searchcards.UseWardingTalisman;
 import games.descent2e.components.Hero;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.cards.SearchCard;
@@ -85,7 +88,6 @@ public class SearchAction extends TokenAction<SearchAction> {
         if (searchCards != null) {
             SearchCard card = (SearchCard) searchCards.draw();
             if (card.getComponentName().equals("Treasure Chest")) {
-                // TODO - when shop cards are added
                 boolean added = getShopItem(gs, f);
                 if (added) {
                     searchToken.setPosition(null);  // Take off the map
@@ -93,9 +95,11 @@ public class SearchAction extends TokenAction<SearchAction> {
                 return added;
             }
             else if (!card.getComponentName().equals("Nothing")) {
-                boolean added = f.getInventory().add(new DescentCard(card));
+                DescentCard c = new DescentCard(card);
+                boolean added = f.getInventory().add(c);
                 if (added) {
                     searchToken.setPosition(null);  // Take off the map
+                    setItemAbilities(gs, f, c);
                 }
                 return added;
             }
@@ -126,5 +130,23 @@ public class SearchAction extends TokenAction<SearchAction> {
             return false;
         ShopCard card = (ShopCard) shopCards.draw();
         return f.getInventory().add(new DescentCard(card));
+    }
+
+    public static void setItemAbilities(DescentGameState dgs, Hero hero, DescentCard card)
+    {
+        switch (((PropertyString) card.getProperty("name")).value) {
+
+            /*case "Power Potion" -> {
+                UsePowerPotion powerPotion = new UsePowerPotion(hero.getComponentID(), card.getComponentID());
+                if (!hero.getAbilities().contains(powerPotion))
+                    hero.addAbility(powerPotion);
+            }*/
+
+            case "Warding Talisman" -> {
+                UseWardingTalisman talisman = new UseWardingTalisman(hero.getComponentID(), card.getComponentID());
+                if (!hero.getAbilities().contains(talisman))
+                    hero.addAbility(talisman);
+            }
+        }
     }
 }

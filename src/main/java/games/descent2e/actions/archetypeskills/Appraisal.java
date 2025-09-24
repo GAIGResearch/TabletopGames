@@ -17,6 +17,7 @@ import utilities.Pair;
 import java.util.Objects;
 
 import static games.descent2e.actions.tokens.SearchAction.getShopItem;
+import static games.descent2e.actions.tokens.SearchAction.setItemAbilities;
 
 public class Appraisal extends DescentAction {
 
@@ -50,7 +51,10 @@ public class Appraisal extends DescentAction {
             return getShopItem(dgs, hero);
         }
         else if (!card.getComponentName().equals("Nothing")) {
-            return hero.getOtherEquipment().add(new DescentCard(card));
+            DescentCard c = new DescentCard(card);
+            boolean added = hero.getInventory().add(c);
+            setItemAbilities(dgs, hero, c);
+            return added;
         }
         return true;
     }
