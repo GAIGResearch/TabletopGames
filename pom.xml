@@ -10,7 +10,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.test.skip>true</maven.test.skip>
+        <maven.test.skip>false</maven.test.skip>
         <build.documentation>www.tabletopgames.ai/wiki/maven</build.documentation>
     </properties>
 
@@ -63,24 +63,19 @@
             <version>1.6.1</version>
         </dependency>
         <dependency>
-            <groupId>tw.edu.ntu.csie</groupId>
-            <artifactId>libsvm</artifactId>
-            <version>3.25</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.18.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.13</artifactId>
-            <version>3.5.1</version>
+            <version>3.5.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.13</artifactId>
-            <version>3.5.1</version>
+            <version>3.5.5</version>
         </dependency>
         <dependency>
             <groupId>com.formdev</groupId>
@@ -141,32 +136,37 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
-            <version>0.35.0</version>
+            <version>1.0.0-rc1</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-vertex-ai-gemini</artifactId>
-            <version>0.35.0</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-vertex-ai</artifactId>
-            <version>0.35.0</version>
+            <version>1.0.0-beta4</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-mistral-ai</artifactId>
-            <version>0.35.0</version>
+            <version>1.0.0-beta4</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
-            <version>0.35.0</version>
+            <version>1.0.0-rc1</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-anthropic</artifactId>
-            <version>0.35.0</version>
+            <version>1.0.0-beta4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-vertexai</artifactId>
+            <version>1.23.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.21.0</version>
         </dependency>
     </dependencies>
 
@@ -186,11 +186,23 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.2.0</version>
+                <configuration>
+                    <resources>
+                        <resource>
+                            <directory>data</directory>
+                        </resource>
+                    </resources>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -214,6 +226,7 @@
                                 </manifest>
                             </archive>
                             <finalName>FrontEnd</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -232,6 +245,7 @@
                                 </manifest>
                             </archive>
                             <finalName>RunGames</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -250,6 +264,7 @@
                                 </manifest>
                             </archive>
                             <finalName>ParameterSearch</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -257,17 +272,37 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>ProgressiveLearner</id>
+                        <id>OneStepDeviations</id>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.ProgressiveLearner</mainClass>
+                                    <mainClass>evaluation.optimisation.OneStepDeviations</mainClass>
                                 </manifest>
                             </archive>
-                            <finalName>ProgressiveLearner</finalName>
+                            <finalName>OneStepDeviations</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>ExpertIteration</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass> evaluation.ExpertIteration</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>ExpertIteration</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -286,6 +321,7 @@
                                 </manifest>
                             </archive>
                             <finalName>SkillLadder</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>

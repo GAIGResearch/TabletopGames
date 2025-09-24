@@ -1,0 +1,65 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLength" : 0,
+  "actionHeuristic" : {
+    "coefficients" : {
+      "BIAS" : -5.69,
+      "ToPosition" : 0.0471,
+      "Stacks" : 0.208,
+      "FromOccupancy" : -0.257,
+      "ToPosition:ToHome" : -0.0464,
+      "ToOccupancy" : 0.138,
+      "ToHome" : 0.100
+    },
+    "actionFeatures" : {
+      "features" : [
+      ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.backgammon.BGStateFeatures"
+      },
+      "class" : "evaluation.features.AutomatedFeatures",
+      "underlyingAction" : {
+        "class" : "games.backgammon.BGActionFeatures"
+      }
+    },
+    "class" : "players.heuristics.LogisticActionHeuristic"
+  },
+  "heuristic" : {
+    "features" : {
+      "features" : [
+      ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.backgammon.BGStateFeatures"
+      },
+      "class" : "evaluation.features.AutomatedFeatures"
+    },
+    "coefficients" : {
+      "BIAS" : -5.08e-12,
+      "PiecesOnBoard_Opp" : -0.0563,
+      "Stacks:BorneOff:Stacks_Opp" : 0.00127,
+      "PiecesOnBoard" : 0.0563,
+      "BorneOff_Opp" : -0.676,
+      "BorneOff:Stacks_Opp" : 0.0313,
+      "Bar" : -2.67,
+      "BorneOff" : 0.676,
+      "BorneOff_Opp:Stacks" : -0.0313,
+      "Stacks_Opp:BorneOff_Opp:Stacks" : -0.00127,
+      "Bar_Opp" : 2.67,
+      "Stacks" : 0.559,
+      "Stacks_Opp" : -0.559
+    },
+    "class" : "players.heuristics.LinearStateHeuristic",
+    "defaultHeuristic" : {
+      "class" : "players.heuristics.LeaderHeuristic"
+    }
+  },
+  "maxTreeDepth" : 10,
+  "treePolicy" : "Uniform",
+  "reuseTree" : true,
+  "backupPolicy" : "MaxMC",
+  "maxBackupThreshold" : 3,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

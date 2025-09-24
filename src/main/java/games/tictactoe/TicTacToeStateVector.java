@@ -15,7 +15,7 @@ public class TicTacToeStateVector implements IStateFeatureVector {
     ).toArray(String[]::new);
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerID) {
+    public double[] doubleVector(AbstractGameState gs, int playerID) {
         TicTacToeGameState state = (TicTacToeGameState) gs;
         String playerChar = TicTacToeConstants.playerMapping.get(playerID).getComponentName();
 

@@ -169,7 +169,7 @@ public class PyTAG {
     public double[] getObservationVector() throws Exception {
         AbstractGameState gs = gameState.copy(gameState.getCurrentPlayer());
         if (stateVectoriser != null){
-            return stateVectoriser.featureVector(gs, gs.getCurrentPlayer());
+            return stateVectoriser.doubleVector(gs, gs.getCurrentPlayer());
         }
         else throw new Exception("Observation vectoriser function is not implemented");
     }

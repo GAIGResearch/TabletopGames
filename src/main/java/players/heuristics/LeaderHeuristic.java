@@ -22,4 +22,21 @@ public class LeaderHeuristic implements IStateHeuristic {
             score *= 1.5;
         return score;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof LeaderHeuristic;
+    }
+    @Override
+    public int hashCode() {
+        return 8;
+    }
+    @Override
+    public double minValue() {
+        return Double.NEGATIVE_INFINITY;
+    }
+    @Override
+    public double maxValue() {
+        return Double.POSITIVE_INFINITY;
+    }
 }

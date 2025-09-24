@@ -28,7 +28,7 @@ public class STNRollout extends SingleTreeNode {
 
         assertEquals(staticRolloutDepth, rolloutActions.size());
         switch (params.rolloutTermination) {
-            case DEFAULT:
+            case EXACT:
                 // in this case we just check that we have expected actions in the rollout
                 assertEquals(expectedRolloutLength, staticRolloutDepth);
                 break;

@@ -10,7 +10,7 @@
         "paranoid" : false,
         "opponentTreePolicy" : ["OneTree", "MultiTree", "SelfOnly"],
         "rolloutType" : "MAST",
-        "oppModelType" : ["RANDOM", "MAST"],
+        "oppModelType" : ["DEFAULT", "RANDOM", "MAST"],
         "MAST" : ["Tree", "Rollout", "Both"],
         "MASTGamma" : [0.0, 0.5, 0.9, 1.0],
         "MASTDefaultValue" : [-100.0, -10.0, 0.0, 10.0, 100.0],
@@ -19,13 +19,13 @@
         "epsilon" : 1e-6,
         "breakMS" : 0,
         "exploreEpsilon" : 0.30,
-        "rolloutTermination" : "DEFAULT",
+        "rolloutTermination" : "EXACT",
         "maintainMasterState" : false,
         "heuristic" : [{
                 "class" : "players.heuristics.WinOnlyHeuristic"
         },
         {
-                "class" : "players.heuristics.ScorePlusHeuristic"
+                "class" : "players.heuristics.ScoreHeuristic"
         },
         {
                 "class" : "players.heuristics.LeaderHeuristic"

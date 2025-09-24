@@ -31,7 +31,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected List<IGameListener> listeners = new ArrayList<>();
     private boolean verbose;
     public boolean alphaRankDetails = true;
-    double[] pointsPerPlayer, winsPerPlayer;
+    double[] pointsPerPlayer, winsPerPlayer, scorePerPlayer;
     int[] nGamesPlayed;
     int[][] nGamesPlayedPerOpponent;
     int[][] winsPerPlayerPerOpponent;
@@ -48,6 +48,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected boolean randomGameParams;
     public String name;
     public boolean byTeam;
+    protected String evalMethod;
 
     protected long randomSeed;
     List<Integer> gameSeeds = new ArrayList<>();
@@ -81,6 +82,7 @@ public class RoundRobinTournament extends AbstractTournament {
         if (tournamentMode == FIXED && this.agents.size() != playersPerGame) {
             throw new IllegalArgumentException("In FIXED mode, the number of agents must match the number of players per game.");
         }
+        this.evalMethod = (String) config.getOrDefault(RunArg.evalMethod, "Win");
 
         this.allAgentIds = new LinkedList<>();
         for (int i = 0; i < this.agents.size(); i++)
@@ -98,6 +100,7 @@ public class RoundRobinTournament extends AbstractTournament {
         }
         this.pointsPerPlayer = new double[agents.size()];
         this.pointsPerPlayerSquared = new double[agents.size()];
+        this.scorePerPlayer = new double[agents.size()];
         this.winsPerPlayer = new double[agents.size()];
         this.nGamesPlayed = new int[agents.size()];
         this.nGamesPlayedPerOpponent = new int[agents.size()][];
@@ -211,11 +214,15 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     public int getWinnerIndex() {
-        if (finalWinRanking == null || finalWinRanking.isEmpty())
+        Map<Integer, Pair<Double, Double>> ranking = switch (evalMethod) {
+            case "Ordinal", "Score" -> finalOrdinalRanking;
+            default -> finalWinRanking;
+        };
+        if (ranking == null || ranking.isEmpty())
             throw new UnsupportedOperationException("Cannot get winner before results have been calculated");
 
         // The winner is the first key in finalRanking
-        for (Integer key : finalWinRanking.keySet()) {
+        for (Integer key : ranking.keySet()) {
             return key;
         }
         throw new AssertionError("Should not be reachable");
@@ -233,6 +240,9 @@ public class RoundRobinTournament extends AbstractTournament {
     public void createAndRunMatchUp(List<Integer> matchUp) {
 
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
+        if (gameSeeds == null || gameSeeds.isEmpty()) {
+            gameSeeds = IntStream.range(0, gamesPerMatchup).mapToObj(i -> seedRnd.nextInt()).collect(toList());
+        }
         switch (tournamentMode) {
             case FIXED:
                 // we add the agents to the matchUp in the order they are in the list
@@ -417,6 +427,8 @@ public class RoundRobinTournament extends AbstractTournament {
             }
         }
 
+        scorePerPlayer[j] += game.getGameState().getGameScore(player);
+
         if (results[player] == GameResult.WIN_GAME) {
             pointsPerPlayer[j] += 1;
             winsPerPlayer[j] += 1;
@@ -499,6 +511,10 @@ public class RoundRobinTournament extends AbstractTournament {
                     agents.get(i), 100.0 * winsPerPlayer[i] / nGamesPlayed[i], nGamesPlayed[i]);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
+            str = String.format("%s got a mean score of %.2f.\n", agents.get(i), scorePerPlayer[i] / nGamesPlayed[i]);
+            if (toFile) dataDump.add(str);
+            if (verbose) System.out.print(str);
+
 
             for (int j = 0; j < this.agents.size(); j++) {
                 if (i != j) {
@@ -530,31 +546,34 @@ public class RoundRobinTournament extends AbstractTournament {
             // now report alpha-rank as long as we have more agents than players
             // otherwise the Transition matrix is singular and we get no additional information
             // compared the the simple win rates
-            str = "\nAlpha-rank by Win Rate\n";
-            if (toFile) dataDump.add(str);
-            if (verbose) System.out.print(str);
-            List<Pair<String, Double>> sortedAlphaRank = IntStream.range(0, agents.size())
-                    .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByWin[i]))
-                    .sorted((o1, o2) -> o2.b.compareTo(o1.b))
-                    .toList();
-            for (Pair<String, Double> pair : sortedAlphaRank) {
-                str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+            if (alphaRankByWin != null) {
+                str = "\nAlpha-rank by Win Rate\n";
                 if (toFile) dataDump.add(str);
                 if (verbose) System.out.print(str);
+                List<Pair<String, Double>> sortedAlphaRank = IntStream.range(0, agents.size())
+                        .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByWin[i]))
+                        .sorted((o1, o2) -> o2.b.compareTo(o1.b))
+                        .toList();
+                for (Pair<String, Double> pair : sortedAlphaRank) {
+                    str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+                    if (toFile) dataDump.add(str);
+                    if (verbose) System.out.print(str);
+                }
             }
-
-            // and then by ordinal
-            str = "\nAlpha-rank by Ordinal Position\n";
-            if (toFile) dataDump.add(str);
-            if (verbose) System.out.print(str);
-            sortedAlphaRank = IntStream.range(0, agents.size())
-                    .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByOrdinal[i]))
-                    .sorted((o1, o2) -> o2.b.compareTo(o1.b))
-                    .toList();
-            for (Pair<String, Double> pair : sortedAlphaRank) {
-                str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+            if (alphaRankByOrdinal != null) {
+                // and then by ordinal
+                str = "\nAlpha-rank by Ordinal Position\n";
                 if (toFile) dataDump.add(str);
                 if (verbose) System.out.print(str);
+                List<Pair<String, Double>> sortedAlphaRank = IntStream.range(0, agents.size())
+                        .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByOrdinal[i]))
+                        .sorted((o1, o2) -> o2.b.compareTo(o1.b))
+                        .toList();
+                for (Pair<String, Double> pair : sortedAlphaRank) {
+                    str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+                    if (toFile) dataDump.add(str);
+                    if (verbose) System.out.print(str);
+                }
             }
         }
         // To file
@@ -563,7 +582,8 @@ public class RoundRobinTournament extends AbstractTournament {
                 File resultsFile = new File(this.resultsFile);
                 if (!resultsFile.exists()) {
                     File dir = resultsFile.getParentFile();
-                    dir.mkdirs();
+                    if (dir != null && !dir.exists())
+                        dir.mkdirs();
                 }
                 FileWriter writer = new FileWriter(resultsFile, true);
                 for (String line : dataDump)
@@ -632,7 +652,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 }
             } catch (Exception e) {
                 System.out.println("Error in eigen decomposition - unable to calculate alpha-rank.");
-                return new double[agents.size()];
+                return null;
             }
 
             // print the transition matrix
@@ -714,7 +734,6 @@ public class RoundRobinTournament extends AbstractTournament {
 
             // print the cluster membership
             if (alphaRankDetails && Arrays.stream(clusterMembership).anyMatch(Objects::nonNull)) {
-
                 String str = "The following agents cluster together, and may be considered equivalent: ";
                 dataDump.add(str + "\n");
                 if (verbose) System.out.println(str);
@@ -746,12 +765,77 @@ public class RoundRobinTournament extends AbstractTournament {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).a;
     }
 
+    // Returns a list of agents that are clearly dominated by all other agents
+    public List<Integer> getDominatedAgents() {
+        List<Integer> dominated = new ArrayList<>();
+        double significanceLevel = Utils.standardZScore(0.10, agents.size() * (agents.size() - 1) / 2);
+
+        for (int i = 0; i < agents.size(); i++) {
+            // for each agent, i, we see if it is dominated but the other agents
+            for (int j = 0; j < agents.size(); j++) {
+                if (i != j && winsPerPlayerPerOpponent[j][i] > winsPerPlayerPerOpponent[i][j]) {
+                    // Now check for significance (very approximately... the idea is to avoid discarding agents based on a low sample size
+                    double winRateJ = (double) winsPerPlayerPerOpponent[j][i] / nGamesPlayedPerOpponent[j][i];
+                    double winRateI = (double) winsPerPlayerPerOpponent[i][j] / nGamesPlayedPerOpponent[i][j];
+                    double stdErr = sqrt((winRateJ * (1 - winRateJ)) / nGamesPlayedPerOpponent[j][i]);
+                    if (winRateJ - winRateI < significanceLevel * stdErr) {
+                        // not dominated
+                        break;
+                    }
+                }
+            }
+            // all other agents have been checked and i is dominated by all of them
+            dominated.add(i);
+        }
+        return dominated;
+    }
+
+    public double getWinRateAlphaRank(int agentID) {
+        if (alphaRankByWin == null)
+            return getWinRate(agentID);
+        return alphaRankByWin[agentID];
+    }
+
+    public int getAlphaRankWinnerByWinRate() {
+        if (alphaRankByWin == null)
+            return -1;
+        return getBestAgentInArray(alphaRankByWin);
+    }
+
+    public int getAlphaRankWinnerByOrdinal() {
+        if (alphaRankByOrdinal == null)
+            return -1;
+        return getBestAgentInArray(alphaRankByOrdinal);
+    }
+
+    private int getBestAgentInArray(double[] arrayIndexedByAgent) {
+        int winnerIndex = 0;
+        double max = arrayIndexedByAgent[0];
+        for (int i = 1; i < arrayIndexedByAgent.length; i++) {
+            if (arrayIndexedByAgent[i] > max) {
+                max = arrayIndexedByAgent[i];
+                winnerIndex = i;
+            }
+        }
+        return winnerIndex;
+    }
+
     public double getWinStdErr(int agentID) {
-        return finalWinRanking.get(agentID) == null ? 0.0 :  finalWinRanking.get(agentID).b;
+        return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).b;
+    }
+
+    public double getSumOfSquares(int agentID, String type) {
+        return type.equals("Win") ? pointsPerPlayerSquared[agentID] : rankPerPlayerSquared[agentID];
     }
 
     public double getOrdinalRank(int agentID) {
         return finalOrdinalRanking.get(agentID).a;
+    }
+
+    public double getOrdinalAlphaRank(int agentID) {
+        if (alphaRankByOrdinal == null)
+            return -getOrdinalRank(agentID);
+        return alphaRankByOrdinal[agentID];
     }
 
     public double getOrdinalStdErr(int agentID) {
@@ -765,6 +849,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public int getNumberOfAgents() {
         return agents.size();
     }
+
     public int[] getNGamesPlayed() {
         return nGamesPlayed;
     }

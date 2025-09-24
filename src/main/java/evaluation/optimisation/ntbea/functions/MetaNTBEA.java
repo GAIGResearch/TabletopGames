@@ -34,7 +34,7 @@ public class MetaNTBEA {
                 FileReader reader = new FileReader(setupFile);
                 JSONParser parser = new JSONParser();
                 JSONObject json = (JSONObject) parser.parse(reader);
-                config = parseConfig(json, Usage.ParameterSearch);
+                config = parseConfig(json, Usage.ParameterSearch, true);
             } catch (FileNotFoundException ignored) {
                 throw new AssertionError("Config file not found : " + setupFile);
                 //    parseConfig(runGames, args);
@@ -71,6 +71,7 @@ public class MetaNTBEA {
                 landscapeModel.logResults(params);
 
             // we now use evalGames to get a better estimate of the value
+            // the NTBEAEvaluator here returns the actual underlying value of the single recommended setting
             double[] results = IntStream.range(0, params.evalGames)
                     .mapToDouble(answer -> evaluator.evaluate(landscapeModel.getBestSampled())).toArray();
             Arrays.sort(results);

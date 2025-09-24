@@ -1,29 +1,14 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
-import players.heuristics.AbstractStateFeature;
+import core.interfaces.IStateFeatureVector;
 
-public class DBStateFeatures extends AbstractStateFeature {
+public class DBStateFeatures implements IStateFeatureVector {
 
     String[] localNames = new String[]{"NO_BOXES", "ONE_BOXES", "TWO_BOXES", "THREE_BOXES", "OPPONENTS_FILLED_BOXES", "OWNED_FILLED_BOXES"};
 
     @Override
-    protected double maxScore() {
-        return 20.0;
-    }
-
-    @Override
-    protected double maxRounds() {
-        return 100.0;
-    }
-
-    @Override
-    protected String[] localNames() {
-        return localNames;
-    }
-
-    @Override
-    protected double[] localFeatureVector(AbstractGameState gs, int playerID) {
+    public double[] doubleVector(AbstractGameState gs, int playerID) {
         DBGameState state = (DBGameState) gs;
         double[] retValue = new double[localNames.length];
 
@@ -44,4 +29,8 @@ public class DBStateFeatures extends AbstractStateFeature {
         return retValue;
     }
 
+    @Override
+    public String[] names() {
+        return localNames;
+    }
 }

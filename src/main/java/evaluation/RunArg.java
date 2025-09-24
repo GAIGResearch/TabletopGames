@@ -22,7 +22,7 @@ public enum RunArg {
             "This is useful for games with strong positional or random seed effects to reduce variance.\n" +
             "MultiNTBEA is deprecated and should not be used.",
             "NTBEA",
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     addTimeStamp("(Optional) If true (default is false), then the results will be written to a subdirectory of destDir.\n" +
             "\t This may be useful if you want to use the same destDir for multiple experiments.",
             false,
@@ -30,20 +30,20 @@ public enum RunArg {
     budget("The budget to be used by all agent (if they support the IAnyTime interface). \n" +
             "\t If non-zero then this will override the value in any JSON definitions.\n",
             0,
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     byTeam("If true (the default) and the game supports teams, then one player type will be assigned to all players on a team.\n" +
             "\t If false, then each player will be assigned a player type independently.",
             true,
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     config("The location of a JSON file from which to read the configuration. \n" +
             "\t If this is specified, then all other arguments are ignored.",
             "",
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     destDir("The directory to which the results will be written. Defaults to 'metrics/out'.\n" +
             "\t If (and only if) this is being run for multiple games/player counts, then a subdirectory\n" +
             "\t will be created for each game, and then within that for  each player count combination.",
             "metrics" + File.separator + "out",
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
             "\t For tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
             "\t If a seedFile is specified, then this is ignored.",
@@ -57,10 +57,10 @@ public enum RunArg {
             "\tmust be provided, or the a json-format file that provides the requisite details. \n" +
             "\tThe json-format file is needed if non-default settings for the IGameHeuristic are used.",
             "Win",
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.RunGames, Usage.ExpertIteration}),
     evalsPerTrial("The number of games to run per NTBEA trial (default is 1)",
             1,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     finalPercent("The proportion of the tuningBudget used to determine the best agent across each iteration. \n" +
             "\t The remainder is divided amongst the iterations.\n",
             0.5,
@@ -76,13 +76,13 @@ public enum RunArg {
             "\t The default is 'all' to indicate that all games should be analysed.\n" +
             "\t Specifying all|-name1|-name2... will run all games except for name1, name2...",
             "all",
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     function("The name of the function to be used for the NTBEA process.",
             new TestFunction001(),
             new Usage[]{Usage.ParameterSearch}),
     gameParams("(Optional) A JSON file from which the game parameters will be initialised.",
             "",
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     grid("If true, then we compare the current best agent against all previous budget levels. \n" +
             "\t If false, then we just compare against the previous budget level.\n",
             false,
@@ -100,11 +100,11 @@ public enum RunArg {
             new Usage[]{Usage.SkillLadder}),
     iterations("The number of iterations of NTBEA to run (default is 1000)",
             1000,
-            new Usage[]{Usage.ParameterSearch, Usage.SkillLadder}),
+            new Usage[]{Usage.ParameterSearch, Usage.SkillLadder, Usage.ExpertIteration}),
     kExplore("The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
             "\tFor scores with larger ranges, we recommend scaling kExplore appropriately.",
             1.0,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     listener("The full class name of an IGameListener implementation. Or, better, the location\n" +
             "\t of a json file from which a listener can be instantiated.\n" +
             "\t Defaults to evaluation.metrics.MetricsGameListener. \n" +
@@ -114,10 +114,10 @@ public enum RunArg {
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     matchups("The total number of matchups to run in a tournament.\n" +
             "\tIf the mode is 'exhaustive', then this will be the maximum number of games run. TAG will divide\n" +
-            "\tthis by the total number of permutations, and run an equal number of games for each permutation.\n" +
-            "\tFor NTBEA this will be used as a final tournament between the recommended agents from each run.",
-            1,
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder}),
+            "\this by the total number of permutations, and run an equal number of games for each permutation.\n" +
+            "\tFor NTBEA/SkillLadder this will be used as a final tournament between the recommended agents from each run.",
+            100,
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder, Usage.ExpertIteration}),
     mode("exhaustive|exhaustiveSP|random|sequential|fixed\n" +
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +
             "\t every possible player in every possible position, and run an equal number of games'\n" +
@@ -137,13 +137,13 @@ public enum RunArg {
             new Usage[]{Usage.SkillLadder}),
     nPlayers("The number of players in each game. Overrides playerRange.",
             -1,
-            new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
+            new Usage[]{Usage.ParameterSearch, Usage.RunGames, Usage.ExpertIteration}),
     discretisation("The number of discretisation levels to use in NTBEAFunctions. Default is 10.",
             10,
             new Usage[]{Usage.ParameterSearch}),
     neighbourhood("The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) ",
             50,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     opponent("The json specification of the opponent to be used. \n" +
             "\t If not specified, then a random player will be used.",
             "random",
@@ -151,7 +151,7 @@ public enum RunArg {
     playerDirectory("The directory containing agent JSON files for the competing Players\n" +
             "\t If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.",
             "",
-            new Usage[]{Usage.RunGames}),
+            new Usage[]{Usage.RunGames, Usage.ExpertIteration}),
     playerRange("The total number of players in each game (the default is 'all') \n " +
             "\t A range can also be specified, for example 3-5. \n " +
             "\t Different player counts can be specified for each game in pipe-delimited format.\n" +
@@ -172,10 +172,52 @@ public enum RunArg {
     searchSpace("The json-format file of the search space to use. No default.",
             "",
             new Usage[]{Usage.ParameterSearch}),
+    valueSS("The json search space to use for tuning with a value heuristic.",
+            "",
+            new Usage[]{Usage.ExpertIteration}),
+    actionSS("The json search space to use for tuning with an action heuristic.",
+            "",
+            new Usage[]{Usage.ExpertIteration}),
+    stateLearner("The JSON file that specifies an ILearner implementation for an IStateFeatureVector implementation.",
+            "",
+            new Usage[]{Usage.ExpertIteration}),
+    actionLearner("The JSON file that specifies an ILearner implementation for an IActionFeatureVector implementation.",
+            "",
+            new Usage[]{Usage.ExpertIteration}),
+    useRounds("Whether to use rounds (true) or turns (false). Defaults to false.",
+            false,
+            new Usage[]{Usage.ExpertIteration}),
+    stateFeatures("The name of a class that implements IStateFeatureVector.",
+            "",
+            new Usage[]{Usage.ExpertIteration}),
+    actionFeatures("The name of a class that implements IActionFeatureVector.",
+            "",
+            new Usage[]{Usage.ExpertIteration}),
+    stateForAction("Whether to use the state features when learning the action heuristic. Defaults to true.",
+            true,
+            new Usage[]{Usage.ExpertIteration}),
+    bicMultiplier("The multiplier for the BIC regulariser when selecting features. Default is 3.0.",
+            3,
+            new Usage[]{Usage.ExpertIteration}),
+    bicTimer("The number of minutes to wait before increasing the BIC multiplier by bicMultiplier.",
+            30,
+            new Usage[]{Usage.ExpertIteration}),
+    sampleRate("We only record data every with this sample rate to reduce correlation in training data generated.",
+            0.02,
+            new Usage[]{Usage.ExpertIteration}),
+    expert("An expert player to use for the ExpertIteration process. Either BASE, MCTS or MCTSAction.",
+            "BASE",
+            new Usage[]{Usage.ExpertIteration}),
+    expertTime("The multiplier to use for the expert's budget (if MCTS). Default is 10.",
+            10,
+            new Usage[]{Usage.ExpertIteration}),
+    maxRecords("The maximum number of records to use for learning. Default is 10000.",
+            10000,
+            new Usage[]{Usage.ExpertIteration}),
     seed("(Optional) Random seed to use for process. This is not the seed used for games, but the seed of \n" +
             "\t the random number generator used to generate these.",
             System.currentTimeMillis(),
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     seedFile("(Optional) A file containing a list of random seeds to use for individual games. \n" +
             "\t If this is specified, then the 'seed' and `distinctRandomSeed` arguments are ignored. \n" +
             "\t Each seed will be used in turn for a full tournament run, as defined by the other parameters.",
@@ -194,22 +236,32 @@ public enum RunArg {
             new Usage[]{Usage.SkillLadder}),
     useNTuples("If true we use N-tuples; this can add extra noise for optimisation",
             true,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     useTwoTuples("If true then we use 2-tuples as well as 1-tuples",
             true,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     useThreeTuples("If true then we use 3-tuples as well as 1-tuples",
             false,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     simpleRegret("If true (default is false), then we use sqrt(N)/1+n for exploration instead of \n" +
             "sqrt(log(N)/n). The latter is derived in a cumulative regret situation, which we are less worried about.",
             false,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     noiseCombination("Defines the exponent in the generalised mean used to combine exploration terms\n" +
             "across tuples. 1 is equivalent to a simple mean, higher values will overweight larger values until \n" +
             "a value approaching infinity is equivalent to a Max function.",
             1.0,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
+    OSDBudget("Budget of games to be used for a one step deviation analysis of the final recommended agent",
+            0,
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
+    OSDTournament("If true then a tournament between all one-step-devation agents will be run instead of\n" +
+            "using the evaluation method of NTBEA (default is false).",
+            false,
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
+    OSDConfidence("The confidence level to use for the one-step deviation analysis. Default is 0.9",
+            0.9,
+            new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
     quantile("The target quantile for NTBEA evaluation overall. The default (-1) will use the mean\n" +
             "of the evalGame results. A value of 50 will use the median, and 10 the figure below which 10% of the results lie.\n" +
             "This only makes sense if evalGames is greater than 0, and for an evalMethod that is score-based.",
@@ -217,7 +269,7 @@ public enum RunArg {
             new Usage[]{Usage.ParameterSearch}),
     verbose("If true, then the result of each game is reported. Default is false.",
             false,
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch});
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration});
 
     public final String helpText;
     public final Object defaultValue;
@@ -226,7 +278,7 @@ public enum RunArg {
 
 
     public enum Usage {
-        RunGames, ParameterSearch, SkillLadder
+        RunGames, ParameterSearch, SkillLadder, ExpertIteration
     }
 
     RunArg(String helpText, Object defaultValue, Usage[] when) {
@@ -278,7 +330,7 @@ public enum RunArg {
                 FileReader reader = new FileReader(setupFile);
                 JSONParser parser = new JSONParser();
                 JSONObject json = (JSONObject) parser.parse(reader);
-                Map<RunArg, Object> configFileArgs = parseConfig(json, usages);
+                Map<RunArg, Object> configFileArgs = parseConfig(json, usages, checkUnknownArgs);
                 for (RunArg key : configFileArgs.keySet()) {
                     // we check if the key is already in the command line arguments (we check args directly as
                     // parseConfig populates all the Map with the default value if not present in the array)
@@ -309,18 +361,20 @@ public enum RunArg {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<RunArg, Object> parseConfig(JSONObject json, Usage usage) {
+    public static Map<RunArg, Object> parseConfig(JSONObject json, Usage usage, boolean checkUnknownArgs) {
         String[] keyNames = (String[]) json.keySet().stream().map(Object::toString).toArray(String[]::new);
-        checkUnknownArgs(keyNames, Collections.singletonList(usage));
+        if (checkUnknownArgs)
+            checkUnknownArgs(keyNames, Collections.singletonList(usage));
         return Arrays.stream(RunArg.values())
                 .filter(arg -> arg.isUsedIn(usage))
                 .collect(toMap(arg -> arg, arg -> arg.parse(json)));
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<RunArg, Object> parseConfig(JSONObject json, List<Usage> usages) {
+    public static Map<RunArg, Object> parseConfig(JSONObject json, List<Usage> usages, boolean checkUnknownArgs) {
         String[] keyNames = (String[]) json.keySet().stream().map(Object::toString).toArray(String[]::new);
-        checkUnknownArgs(keyNames, usages);
+        if (checkUnknownArgs)
+            checkUnknownArgs(keyNames, usages);
         return Arrays.stream(RunArg.values())
                 .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .collect(toMap(arg -> arg, arg -> arg.parse(json)));

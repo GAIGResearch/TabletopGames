@@ -5,6 +5,8 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
 import core.rules.AbstractRuleBasedForwardModel;
+import dev.langchain4j.agent.tool.P;
+import games.backgammon.*;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameParameters;
 import games.battlelore.BattleloreGameState;
@@ -25,6 +27,10 @@ import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
 import games.chinesecheckers.gui.CCGUIManager;
+import games.chess.ChessForwardModel;
+import games.chess.ChessGameState;
+import games.chess.ChessParameters;
+import games.chess.ChessGUIManager;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -41,6 +47,7 @@ import games.diamant.*;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
+import games.diamant.gui.DiamantGUIManager;
 import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
@@ -220,8 +227,12 @@ public enum GameType {
     Diamant(2, 6,
             Arrays.asList(Adventure, Bluffing, Exploration),
             Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
-            DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, null),
+            DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, DiamantGUIManager.class),
     Dominion(2, 4,
+            Arrays.asList(Cards, Strategy),
+            Collections.singletonList(DeckManagement),
+            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+    DominionFG(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
             DominionGameState.class, DominionForwardModel.class, DominionFGParameters.class, DominionGUIManager.class),
@@ -285,11 +296,15 @@ public enum GameType {
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
-            Arrays.asList(GridMovement),
+            List.of(GridMovement),
             CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Backgammon(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement, DiceRolling),
+            BGGameState.class, BGForwardModel.class, BGParameters.class, BGGUIManager.class),
     Mastermind(1,1,
-            Arrays.asList(Simple, Abstract, CodeBreaking),
-            Arrays.asList(),
+            Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
+            List.of(PatternBuilding),
             MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
     WarOfTheToads(2, 2,
             Arrays.asList(Strategy, Abstract, Cards),
@@ -301,7 +316,12 @@ public enum GameType {
     Saboteur(3, 10,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(TakeThat, VariablePlayerPowers),
-            SaboteurGameState.class, SaboteurForwardModel.class, SaboteurGameParameters.class, SaboteurGUIManager.class);
+            SaboteurGameState.class, SaboteurForwardModel.class, SaboteurGameParameters.class, SaboteurGUIManager.class),
+    Chess(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement),
+            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),;
+
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
@@ -360,8 +380,13 @@ public enum GameType {
             }
         }
 
-        DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
-        String rulesText = summariser.processText("game rules and strategy", 500);
+        String rulesText;
+        try {
+            DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
+            rulesText = summariser.processText("game rules and strategy", 500);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError("Error reading rulebook file: " + pdfFilePath, e);
+        }
         // Then write this to file
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));

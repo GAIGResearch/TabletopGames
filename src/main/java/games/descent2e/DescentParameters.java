@@ -3,8 +3,7 @@ package games.descent2e;
 import core.AbstractParameters;
 import games.descent2e.components.DiceType;
 
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 import static games.descent2e.DescentTypes.Campaign.HeirsOfBlood;
 import static games.descent2e.components.DiceType.RED;
@@ -15,12 +14,15 @@ public class DescentParameters extends AbstractParameters {
     public DescentTypes.Campaign campaign = HeirsOfBlood;
 
     public int nActionsPerFigure = 2;
-    public HashMap<DiceType, Integer> reviveDice = new HashMap<>() {{
+    public Map<DiceType, Integer> reviveDice = new HashMap<>() {{
         put(RED, 2);
     }};
-    public HashMap<DiceType, Integer> healDice = new HashMap<>() {{
+    public Map<DiceType, Integer> healDice = new HashMap<>() {{
         put(RED, 1);
     }};
+
+    // can be used to define which heroes to play (e.g. for testing purposes)
+    public List<String> heroesToBePlayed = Collections.emptyList();
 
     public String getDataPath() {
         return dataPath;
@@ -32,6 +34,7 @@ public class DescentParameters extends AbstractParameters {
         copy.nActionsPerFigure = nActionsPerFigure;
         copy.campaign = campaign;
         copy.dataPath = dataPath;
+        copy.heroesToBePlayed = new ArrayList<>(heroesToBePlayed);
         return copy;
     }
 

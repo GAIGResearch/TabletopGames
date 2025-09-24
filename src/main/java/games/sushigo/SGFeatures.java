@@ -38,7 +38,7 @@ public class SGFeatures implements IStateFeatureVector, IStateFeatureJSON {
     }
 
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractGameState state, int playerID) {
         /* Normalised by default */
         // todo would be better in SGParameters -> at least generating a list of strings
         SGGameState sggs = (SGGameState) state;

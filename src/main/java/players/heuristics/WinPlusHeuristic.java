@@ -27,4 +27,13 @@ public class WinPlusHeuristic implements IStateHeuristic {
     public double maxValue() {
         return 1.0;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof WinPlusHeuristic;
+    }
+    @Override
+    public int hashCode() {
+        return 5;
+    }
 }

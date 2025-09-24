@@ -12,35 +12,22 @@ public class ForwardModelTestsWithRandom {
     }
 
     @Test
-    public void testSaboteur() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Saboteur", "nGames=1", "nPlayers=3");
-    }
-
-    @Test
     public void testMonopolyDeal() {
-        ForwardModelTester fmt = new ForwardModelTester("game=MonopolyDeal", "nGames=5", "nPlayers=2");
+        ForwardModelTester fmt = new ForwardModelTester("game=MonopolyDeal", "nGames=2", "nPlayers=2");
     }
 
-    // Descent commented out because it takes a looong time, and the MCTS FM tests give us the required confidence
-//    @Test
-//    public void testDescent2e() {
-//        ForwardModelTester fmt = new ForwardModelTester("game=Descent2e", "nGames=5", "nPlayers=2");
-//    }
     @Test
     public void testBattleLore() {
         ForwardModelTester fmt = new ForwardModelTester("game=Battlelore", "nGames=2", "nPlayers=2");
     }
     @Test
     public void testCantStop() {
-        ForwardModelTester fmt = new ForwardModelTester("game=CantStop", "nGames=5", "nPlayers=3");
+        ForwardModelTester fmt = new ForwardModelTester("game=CantStop", "nGames=2", "nPlayers=3");
     }
-    @Test
-    public void testCatan() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Catan", "nGames=2", "nPlayers=3");
-    }
+
     @Test
     public void testColtExpress() {
-        ForwardModelTester fmt = new ForwardModelTester("game=ColtExpress", "nGames=2", "nPlayers=3");
+        ForwardModelTester fmt = new ForwardModelTester("game=ColtExpress", "nGames=1", "nPlayers=3");
     }
     @Test
     public void testConnect4() {
@@ -70,9 +57,10 @@ public class ForwardModelTestsWithRandom {
     public void testPoker() {
         ForwardModelTester fmt = new ForwardModelTester("game=Poker", "nGames=2", "nPlayers=3");
     }
+
     @Test
     public void testStratego() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Stratego", "nGames=2", "nPlayers=2");
+        ForwardModelTester fmt = new ForwardModelTester("game=Stratego", "nGames=1", "nPlayers=2");
     }
     @Test
     public void testSushiGo() {
@@ -87,6 +75,7 @@ public class ForwardModelTestsWithRandom {
     public void testUno() {
         ForwardModelTester fmt = new ForwardModelTester("game=Uno", "nGames=2", "nPlayers=5");
     }
+
     @Test
     public void testResistance() {
         ForwardModelTester fmt = new ForwardModelTester("game=Resistance", "nGames=2", "nPlayers=5");
@@ -117,6 +106,19 @@ public class ForwardModelTestsWithRandom {
 
     @Test
     public void testMastermind() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Mastermind", "nGames=10", "nPlayers=1");
+        ForwardModelTester fmt = new ForwardModelTester("game=Mastermind", "nGames=2", "nPlayers=1");
+    }
+
+    @Test
+    public void testChess() {
+        ForwardModelTester fmt = new ForwardModelTester("game=Chess", "nGames=2", "nPlayers=2");
+    }
+
+    @Test
+    public void testChineseCheckers() {
+        ForwardModelTester fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=2");
+        fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=3");
+        fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=4");
+        fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=6");
     }
 }

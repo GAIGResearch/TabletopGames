@@ -99,24 +99,25 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         // We retain this, but update the root nodes
         // We could have run through the history once...but more robust to do this once per player
         // and reuse the code for SelfOnly
+        SingleTreeNode[] newRoots = new SingleTreeNode[state.getNPlayers()];
+
         for (int p = 0; p < state.getNPlayers(); p++) {
             SingleTreeNode oldRoot = mtRoot.roots[p];
             if (oldRoot == null)
                 continue;
             if (debug)
                 System.out.println("\tBacktracking for player " + mtRoot.roots[p].decisionPlayer);
-            mtRoot.roots[p] = backtrack(mtRoot.roots[p], state);
-            if (mtRoot.roots[p] != null) {
+            newRoots[p] = backtrack(mtRoot.roots[p], state);
+            if (newRoots[p] != null) {
                 // here we do not do a full rootification as that would set the turnOwner and currentPlayer
                 // to the decision player, which we want to avoid
-                // TODO: Make this more elegant
-                mtRoot.roots[p].rootify(oldRoot, null);
-                mtRoot.roots[p].resetDepth(mtRoot.roots[p]);
-                mtRoot.roots[p].state = state.copy();
+                newRoots[p].rootify(oldRoot, null);
+                newRoots[p].resetDepth(newRoots[p]);
+                newRoots[p].state = state.copy();
             }
         }
+        mtRoot.roots = newRoots;
         mtRoot.state = state.copy();
-        // TODO: Also set decisionPlayer....as this may have changed (which it won't do with oneTree)
         return mtRoot;
     }
 
@@ -257,10 +258,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
                     .collect(Collectors.toList());
 
         if (getParameters().getRolloutStrategy() instanceof IMASTUser) {
-            ((IMASTUser) getParameters().getRolloutStrategy()).setStats(root.MASTStatistics);
+            ((IMASTUser) getParameters().getRolloutStrategy()).setMASTStats(root.MASTStatistics);
         }
         if (getParameters().getOpponentModel() instanceof IMASTUser) {
-            ((IMASTUser) getParameters().getOpponentModel()).setStats(root.MASTStatistics);
+            ((IMASTUser) getParameters().getOpponentModel()).setMASTStats(root.MASTStatistics);
         }
     }
 

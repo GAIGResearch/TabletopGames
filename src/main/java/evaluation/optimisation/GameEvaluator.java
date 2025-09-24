@@ -129,9 +129,8 @@ public class GameEvaluator implements SolutionEvaluator {
             }
             if (tuningPlayer && playerOnTeam == -1)
                 throw new AssertionError("No Player found on team " + thisTeamIndex);
-            retValue += tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerOnTeam);
+            retValue += (tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerOnTeam)) / gamesToRun;
         }
-        //    System.out.println("GameEvaluator: " + retValue);
 
         nEvals++;
         return retValue;

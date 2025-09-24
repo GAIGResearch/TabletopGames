@@ -35,8 +35,8 @@ public class WonderAbilities {
     @Test
     public void olympiaLevel2BuildsFirstCardOfColourForFree() {
         state.playerWonderBoard[0] = new Wonder7Board(Wonder7Board.Wonder.TheStatueOfZeusInOlympia, 0);
-        state.getPlayerHand(0).add(Wonder7Card.factory(Palace));
-        state.getPlayerHand(0).add(Wonder7Card.factory(University));
+        state.getPlayerHand(0).add(Wonder7Card.factory(Palace, state.getParams()));
+        state.getPlayerHand(0).add(Wonder7Card.factory(University, state.getParams()));
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertFalse(actions.contains(new ChooseCard(new PlayCard(0, Palace, true))));
         assertFalse(actions.contains(new ChooseCard(new PlayCard(0, University, true))));
@@ -55,7 +55,7 @@ public class WonderAbilities {
         assertFalse(actions.contains(new ChooseCard(new PlayCard(0, Palace, false))));
         assertFalse(actions.contains(new ChooseCard(new PlayCard(0, University, false))));
 
-        state.getPlayedCards(0).add(Wonder7Card.factory(Altar));
+        state.getPlayedCards(0).add(Wonder7Card.factory(Altar, state.getParams()));
         actions = fm.computeAvailableActions(state);
         assertFalse(actions.contains(new ChooseCard(new PlayCard(0, Palace, true))));
         assertTrue(actions.contains(new ChooseCard(new PlayCard(0, University, true))));
@@ -67,7 +67,7 @@ public class WonderAbilities {
     public void halicarnassusLevel2BuildsForFreeFromDiscardPileAtEndOfTurn() {
         state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus, 0);
         // at the end of the Age (and only then), if the second stage is built then the player can build a card from the discard pile for free
-        state.getDiscardPile().add(Wonder7Card.factory(Arena));
+        state.getDiscardPile().add(Wonder7Card.factory(Arena, state.getParams()));
         for (int i = 0; i < 7; i++) { // take 7 actions (2 turns minus 1)
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             int index = rnd.nextInt(actions.size());
@@ -119,7 +119,7 @@ public class WonderAbilities {
     @Test
     public void halicarnassusNightSideResetsEffectUsed() {
         state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus, 1);
-        state.getDiscardPile().add(Wonder7Card.factory(Arena));
+        state.getDiscardPile().add(Wonder7Card.factory(Arena, state.getParams()));
         for (int i = 0; i < 7; i++) { // take 7 actions (2 turns minus 1)
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             int index = rnd.nextInt(actions.size());
@@ -175,10 +175,10 @@ public class WonderAbilities {
         do {
             if (state.getRoundCounter() % 6 == 0 && state.getCurrentPlayer() == 0 && !state.isActionInProgress()) {
                 // before the first action of each Age
-                assertEquals(state.playerHands.get(2).getSize(), 7);
+                assertEquals(7, state.playerHands.get(2).getSize());
                 for (int p = 0; p < 4; p++) {
                     state.getPlayerHand(p).remove(6);  // remove random card, add expensive one
-                    state.getPlayerHand(p).add(Wonder7Card.factory(Palace));
+                    state.getPlayerHand(p).add(Wonder7Card.factory(Palace, state.getParams()));
                 }
             }
             // we build the wonder during the first Age (so we can check it does not apply for the first card)
@@ -214,7 +214,7 @@ public class WonderAbilities {
                 // before the last action of each Age
                 for (int p = 0; p < 4; p++) {
                     state.getPlayerHand(p).remove(1);  // remove random card, add expensive one
-                    state.getPlayerHand(p).add(Wonder7Card.factory(Palace));
+                    state.getPlayerHand(p).add(Wonder7Card.factory(Palace, state.getParams()));
                 }
             }
             // we build the wonder during the second Age (so we can check it does not apply for the first card)
@@ -263,6 +263,39 @@ public class WonderAbilities {
         } while (state.isNotTerminal());
 
         assertEquals(3, checks);
+    }
+
+    @Test
+    public void halicarnassusOnLastRoundOfAge() {
+        // we trigger Halicarnassus on the last round of an age...and check the age still ends correctly
+        state.playerWonderBoard[3] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus, 1);
+        for (int i = 0; i < 20; i++) { // take 20 actions (6 rounds)
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+        }
+        assertEquals(1, state.getCurrentAge());
+        for (int p = 0; p < 4; p++) {
+            assertEquals(2, state.getPlayerHand(p).getSize()); // for the last round
+        }
+        state.playerWonderBoard[3].changeStage();  // stage one;  should allow building from discard pile
+
+        for (int i = 0; i < 4; i++) { // take 4 actions
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+        }
+        assertTrue(state.isActionInProgress());
+        assertEquals(3, state.getCurrentPlayer());
+        assertTrue(state.currentActionInProgress() instanceof BuildFromDiscard);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        fm.next(state, actions.get(0));
+
+        assertEquals(2, state.getCurrentAge());
+        for (int p = 0; p < 4; p++) {
+            assertEquals(7, state.getPlayerHand(p).getSize());
+        }
+
     }
 
 }

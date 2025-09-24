@@ -1,0 +1,18 @@
+{
+        "budgetType" : "BUDGET_TIME",
+        "rolloutLengthPerPlayer" : true,
+        "MASTBoltzmann" : 0.3,
+        "rolloutLength" : 100,
+        "MASTGamma" : 0.5,
+        "useMASTAsActionHeuristic" : true,
+        "heuristic" : {
+                "class" : "players.heuristics.LeaderHeuristic"
+        },
+        "FPU" : 1.0,
+        "maxTreeDepth" : 10,
+        "treePolicy" : "AlphaGo",
+        "MAST" : "Both",
+        "rolloutType" : "MAST",
+        "class" : "players.mcts.MCTSParams",
+        "budget" : -999
+}

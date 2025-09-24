@@ -10,7 +10,6 @@ import games.descent2e.DescentGameState;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.Move;
 import games.descent2e.concepts.HeroicFeat;
-import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -264,7 +263,6 @@ public class Hero extends Figure {
         return copyTo(copy);
     }
 
-    @NotNull
     private Hero copyTo(Hero copy) {
         copy.equipSlotsAvailable = new HashMap<>();
         copy.equipSlotsAvailable.putAll(equipSlotsAvailable);

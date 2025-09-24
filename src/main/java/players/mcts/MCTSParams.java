@@ -12,20 +12,19 @@ import utilities.JSONUtils;
 import java.util.Arrays;
 import java.util.Random;
 
-import static java.util.Collections.emptyList;
 import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.MASTType.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutIncrement.*;
-import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
+import static players.mcts.MCTSEnums.RolloutTermination.EXACT;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
 import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
-    public double K = Math.sqrt(2);
-    public int rolloutLength = 10; // assuming we have a good heuristic
+    public double K = 1.0;
+    public int rolloutLength = 1000; // effectively to end of game
     public boolean rolloutLengthPerPlayer = false;  // if true, then rolloutLength is multiplied by the number of players
     public int maxTreeDepth = 1000; // effectively no limit
     public MCTSEnums.Information information = Information_Set;  // this should be the default in TAG, given that most games have hidden information
@@ -55,12 +54,12 @@ public class MCTSParams extends PlayerParameters {
     // It also means that at the end of the game (when rewards are possibly closer to each other, they are still scaled to [0, 1]
     public boolean maintainMasterState = false;
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
-    public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
+    public MCTSEnums.RolloutTermination rolloutTermination = EXACT;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
-    public double firstPlayUrgency = 1000000000.0;
+    public double firstPlayUrgency = 1e6;
     @NotNull public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
     public int actionHeuristicRecalculationThreshold = 20;
     public boolean pUCT = false;  // in this case we multiply the exploration value in UCB by the probability that the action heuristic would take the action
@@ -77,19 +76,19 @@ public class MCTSParams extends PlayerParameters {
     public Class<?> instantiationClass;
 
     public MCTSParams() {
-        addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
+        addTunableParameter("K", 1.0, Arrays.asList(0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0));
         addTunableParameter("MASTBoltzmann", 0.1);
         addTunableParameter("exp3Boltzmann", 0.1);
-        addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
+        addTunableParameter("rolloutLength", 1000, Arrays.asList(0, 3, 10, 30, 100, 1000));
         addTunableParameter("rolloutLengthPerPlayer", false);
-        addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100));
+        addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100, 1000));
         addTunableParameter("rolloutIncrementType", TICK, Arrays.asList(MCTSEnums.RolloutIncrement.values()));
         addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
-        addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
+        addTunableParameter("oppModelType", DEFAULT, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("rolloutClass", "");
         addTunableParameter("oppModelClass", "");
         addTunableParameter("rolloutPolicyParams", ITunableParameters.class);
-        addTunableParameter("rolloutTermination", DEFAULT, Arrays.asList(MCTSEnums.RolloutTermination.values()));
+        addTunableParameter("rolloutTermination", EXACT, Arrays.asList(MCTSEnums.RolloutTermination.values()));
         addTunableParameter("opponentModelParams", ITunableParameters.class);
         addTunableParameter("opponentModel", new RandomPlayer());
         addTunableParameter("information", Information_Set, Arrays.asList(MCTSEnums.Information.values()));
@@ -112,7 +111,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MASTDefaultValue", 0.0);
         addTunableParameter("MCGSStateKey", IStateKey.class);
         addTunableParameter("MCGSExpandAfterClash", true);
-        addTunableParameter("FPU", 1000000000.0);
+        addTunableParameter("FPU", 1e6);
         addTunableParameter("actionHeuristic", IActionHeuristic.class,  IActionHeuristic.nullReturn);
         addTunableParameter("progressiveBias", 0.0);
         addTunableParameter("pUCT", false);
@@ -235,14 +234,15 @@ public class MCTSParams extends PlayerParameters {
             case RANDOM -> new RandomPlayer(new Random(getRandomSeed()));
             case MAST -> new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
             case CLASS ->
-                // we have a bespoke Class to instantiate
-                    JSONUtils.loadClassFromString(details);
+                // we have a bespoke Class to instantiate (for anything other than an AbstractPlayer we could just rely on the core JSON loading)
+                    JSONUtils.loadClass(details);
             case PARAMS -> throw new AssertionError("PolicyParameters have not been set");
             default -> throw new AssertionError("Unknown strategy type : " + type);
         };
     }
 
-    public IStateHeuristic getHeuristic() {
+    @Override
+    public IStateHeuristic getStateHeuristic() {
         return heuristic;
     }
 

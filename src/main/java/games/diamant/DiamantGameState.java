@@ -7,28 +7,37 @@ import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.interfaces.IStateFeatureJSON;
-import core.interfaces.IStateFeatureNormVector;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import org.apache.spark.internal.config.R;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 
 public class DiamantGameState extends AbstractGameState implements IPrintable {
     Deck<DiamantCard>          mainDeck;
     Deck<DiamantCard>          discardDeck;
     Deck<DiamantCard>          path;
+    Deck<DiamantCard>          relicDeck;
 
     List<Counter> treasureChests;
     List<Counter> hands;
     List<Boolean> playerInCave;
+
+    public List<Integer> getPlayersInCave() {
+        return IntStream.range(0, getNPlayers())
+                .filter(i -> playerInCave.get(i))
+                .boxed()
+                .collect(Collectors.toList());
+    }
 
     // helper data class to store interesting information
     static class PlayerTurnRecord {
@@ -45,12 +54,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
     List<PlayerTurnRecord> recordOfPlayerActions = new ArrayList<>();
 
-    int nGemsOnPath             = 0;
-    int nHazardPoissonGasOnPath = 0;
-    int nHazardScorpionsOnPath  = 0;
-    int nHazardSnakesOnPath     = 0;
-    int nHazardRockfallsOnPath  = 0;
-    int nHazardExplosionsOnPath = 0;
+    // List of gems on each card in the path (same length as path)
+    List<Integer> gemsOnPath = new ArrayList<>();
 
     int nCave = 0;
 
@@ -79,6 +84,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
             add(mainDeck);
             add(discardDeck);
             add(path);
+            if (relicDeck != null) add(relicDeck);
             addAll(treasureChests);
             addAll(hands);
             add(actionsPlayed);
@@ -93,14 +99,10 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.mainDeck    = mainDeck.copy();
         dgs.discardDeck = discardDeck.copy();
         dgs.path        = path.copy();
+        if (relicDeck != null) dgs.relicDeck = relicDeck.copy();
         dgs.actionsPlayed  = (ActionsPlayed) actionsPlayed.copy();
 
-        dgs.nGemsOnPath             = nGemsOnPath;
-        dgs.nHazardPoissonGasOnPath = nHazardPoissonGasOnPath;
-        dgs.nHazardScorpionsOnPath  = nHazardScorpionsOnPath;
-        dgs.nHazardSnakesOnPath     = nHazardSnakesOnPath;
-        dgs.nHazardRockfallsOnPath  = nHazardRockfallsOnPath;
-        dgs.nHazardExplosionsOnPath = nHazardExplosionsOnPath;
+        dgs.gemsOnPath = new ArrayList<>(gemsOnPath);
 
         dgs.nCave          = nCave;
         dgs.hands          = new ArrayList<>();
@@ -172,15 +174,23 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         hands          = new ArrayList<>();
         playerInCave   = new ArrayList<>();
 
-        nGemsOnPath             = 0;
-        nHazardPoissonGasOnPath = 0;
-        nHazardScorpionsOnPath  = 0;
-        nHazardSnakesOnPath     = 0;
-        nHazardRockfallsOnPath  = 0;
-        nHazardExplosionsOnPath = 0;
-
+        gemsOnPath = new ArrayList<>();
         nCave = 0;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                mainDeck,
+                discardDeck,
+                path,
+                treasureChests,
+                hands,
+                playerInCave,
+                nCave,
+                actionsPlayed,
+                gemsOnPath
+        );
     }
 
     @Override
@@ -192,12 +202,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
         DiamantGameState that = (DiamantGameState) o;
 
-        return nGemsOnPath             == that.nGemsOnPath             &&
-               nHazardExplosionsOnPath == that.nHazardExplosionsOnPath &&
-               nHazardPoissonGasOnPath == that.nHazardPoissonGasOnPath &&
-               nHazardRockfallsOnPath  == that.nHazardRockfallsOnPath  &&
-               nHazardScorpionsOnPath  == that.nHazardScorpionsOnPath  &&
-               nHazardSnakesOnPath     == that.nHazardSnakesOnPath     &&
+        return
                nCave                   == that.nCave                   &&
                Objects.equals(mainDeck,       that.mainDeck)           &&
                Objects.equals(discardDeck,    that.discardDeck)        &&
@@ -205,7 +210,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                Objects.equals(treasureChests, that.treasureChests)     &&
                Objects.equals(path,           that.path)               &&
                Objects.equals(playerInCave,   that.playerInCave)       &&
-               Objects.equals(actionsPlayed,  that.actionsPlayed);
+               Objects.equals(actionsPlayed,  that.actionsPlayed) &&
+               Objects.equals(gemsOnPath, that.gemsOnPath);
     }
 
     /**
@@ -239,34 +245,41 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
             else   str_playersOnCave.append("F");
         }
 
+        Map<DiamantCard.HazardType, Long> hazardsOnPath = getHazardsOnPath();
+        Map<DiamantCard.HazardType, Long> hazardsInDeck = getNHazardCardsInMainDeck();
         strings[0]  = "----------------------------------------------------";
         strings[1]  = "Cave:                       " + nCave;
-        strings[2]  = "Players on Cave:            " + str_playersOnCave.toString();
+        strings[2]  = "Players on Cave:            " + str_playersOnCave;
         strings[3]  = "Path:                       " + path.toString();
-        strings[4]  = "Gems on Path:               " + nGemsOnPath;
-        strings[5]  = "Gems on hand:               " + str_gemsOnHand.toString();
-        strings[6]  = "Gems on treasure chest:     " + str_gemsOnTreasureChest.toString();
-        strings[7]  = "Hazard scorpions in Path:   " + nHazardScorpionsOnPath  + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Scorpions);
-        strings[8]  = "Hazard snakes in Path:      " + nHazardSnakesOnPath     + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Snakes);
-        strings[9]  = "Hazard rockfalls in Path:   " + nHazardRockfallsOnPath  + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Rockfalls);
-        strings[10] = "Hazard poisson gas in Path: " + nHazardPoissonGasOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.PoissonGas);
-        strings[11] = "Hazard explosions in Path:  " + nHazardExplosionsOnPath + ", in Main deck: " + getNHazardCardsInMainDeck(DiamantCard.HazardType.Explosions);
-        strings[12] = "----------------------------------------------------";
+        strings[4]  = "Gems on Path:               " + gemsOnPath.stream().map(String::valueOf).collect(Collectors.joining());
+        strings[5]  = "Gems on hand:               " + str_gemsOnHand;
+        strings[6]  = "Gems on treasure chest:     " + str_gemsOnTreasureChest;
+        // then iterate over the possivble hazard values, and show the number in path and deck
+        int count = 0;
+        for (DiamantCard.HazardType hazardType : DiamantCard.HazardType.values()) {
+            long pathCount = hazardsOnPath.getOrDefault(hazardType, 0L);
+            long deckCount = hazardsInDeck.getOrDefault(hazardType, 0L);
+            strings[7 + count] = "Hazard " + hazardType + " on path: " + pathCount + ", in deck: " + deckCount;
+            count++;
+        }
+
+        strings[7 + count] = "----------------------------------------------------";
 
         for (String s : strings){
             System.out.println(s);
         }
     }
 
-    public int getNHazardCardsInMainDeck(DiamantCard.HazardType ht)
-    {
-        int n = 0;
-        for (int i=0; i<mainDeck.getSize(); i++)
-        {
-            if (mainDeck.get(i).getHazardType() == ht)
-                n ++;
-        }
-        return n;
+    public Map<DiamantCard.HazardType, Long> getHazardsOnPath() {
+        return path.stream()
+                .filter(c -> c.getCardType() == DiamantCard.DiamantCardType.Hazard)
+                .collect(groupingBy(DiamantCard::getHazardType, counting()));
+    }
+
+    public Map<DiamantCard.HazardType, Long> getNHazardCardsInMainDeck() {
+        return mainDeck.stream()
+                .filter(c -> c.getCardType() == DiamantCard.DiamantCardType.Hazard)
+                .collect(groupingBy(DiamantCard::getHazardType, counting()));
     }
 
     public Deck<DiamantCard> getMainDeck()       { return mainDeck;       }
@@ -275,7 +288,32 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     public List<Counter>     getTreasureChests() { return treasureChests; }
     public Deck<DiamantCard> getPath()           { return path;           }
     public ActionsPlayed     getActionsPlayed()  { return actionsPlayed;  }
+    public Deck<DiamantCard> getRelicDeck()      { return relicDeck;      }
     public void setActionPlayed(int player, AbstractAction action) {
         actionsPlayed.put(player, action);
+    }
+
+    // Helper: get total gems on path
+    public int getTotalGemsOnPath() {
+        return gemsOnPath.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    // Helper: get gems on a specific path index
+    public int getGemsOnPathIndex(int idx) {
+        return gemsOnPath.get(idx);
+    }
+
+    // Helper: set gems on a specific path index
+    public void setGemsOnPathIndex(int idx, int value) {
+        gemsOnPath.set(idx, value);
+    }
+
+    // Helper: clear gems on path
+    public void clearGemsOnPath() {
+        gemsOnPath.clear();
+    }
+
+    public List<Integer> getGemsOnPathList() {
+        return gemsOnPath;
     }
 }
