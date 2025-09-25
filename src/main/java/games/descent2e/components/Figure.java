@@ -308,12 +308,21 @@ public class Figure extends Token {
     public List<DescentAction> getAbilities() {
         return abilities;
     }
+    public void setAbilities(List<DescentAction> abilities) {
+        this.abilities = abilities;
+    }
     public boolean hasAbility(DescentAction ability) {
         return abilities.contains(ability);
     }
 
     public DicePool getAttackDice() { return attackDice;}
     public DicePool getDefenceDice() {return defenceDice;}
+    public void setAttackDice(DicePool attackDice){
+        this.attackDice = attackDice;
+    }
+    public void setDefenceDice(DicePool defenceDice){
+        this.defenceDice = defenceDice;
+    }
 
     public String getName() { return componentName;}
     public MeleeAttack getCurrentAttack() { return currentAttack;}

@@ -21,6 +21,7 @@ import games.descent2e.actions.herofeats.*;
 import games.descent2e.actions.monsterfeats.Land;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.searchcards.UseCurseDoll;
+import games.descent2e.actions.searchcards.UseFireFlask;
 import games.descent2e.actions.searchcards.UseHealthPotion;
 import games.descent2e.actions.searchcards.UseStaminaPotion;
 import games.descent2e.actions.tokens.SearchAction;
@@ -900,9 +901,16 @@ public class DescentForwardModel extends StandardForwardModel {
                                 }
                             }
 
-                            /*case "Fire Flask" -> {
-
-                            }*/
+                            case "Fire Flask" -> {
+                                if (hero.getNActionsExecuted().isMaximum()) break;
+                                List<Integer> targets = getRangedTargets(dgs, hero);
+                                for (Integer target : targets)
+                                {
+                                    UseFireFlask fireFlask = new UseFireFlask(hero.getComponentID(), target, item.getComponentID());
+                                    if (fireFlask.canExecute(dgs))
+                                        actions.add(fireFlask);
+                                }
+                            }
 
                             // Power Potion and Warding Talisman are tried as Abilities and thus are handled when obtained
 
@@ -1083,7 +1091,7 @@ public class DescentForwardModel extends StandardForwardModel {
         }
 
         // We should remove EndTurn to prevent premature ending of turn
-        if (actions.size() > 1) {
+        if (actions.size() > 100) {
             // Heroes can only End Turn if they have no more actions to take (including Free Actions for Two Heroes), or have moved this turn
             // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
             if (actingFigure instanceof Hero) {
