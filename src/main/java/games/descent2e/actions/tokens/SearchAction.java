@@ -9,6 +9,7 @@ import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.searchcards.UsePowerPotion;
 import games.descent2e.actions.searchcards.UseWardingTalisman;
 import games.descent2e.components.Hero;
 import games.descent2e.components.DescentCard;
@@ -136,11 +137,11 @@ public class SearchAction extends TokenAction<SearchAction> {
     {
         switch (((PropertyString) card.getProperty("name")).value) {
 
-            /*case "Power Potion" -> {
+            case "Power Potion" -> {
                 UsePowerPotion powerPotion = new UsePowerPotion(hero.getComponentID(), card.getComponentID());
                 if (!hero.getAbilities().contains(powerPotion))
                     hero.addAbility(powerPotion);
-            }*/
+            }
 
             case "Warding Talisman" -> {
                 UseWardingTalisman talisman = new UseWardingTalisman(hero.getComponentID(), card.getComponentID());

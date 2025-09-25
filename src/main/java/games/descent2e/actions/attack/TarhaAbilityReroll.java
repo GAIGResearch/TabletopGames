@@ -44,7 +44,8 @@ public class TarhaAbilityReroll extends DescentAction {
             // Ranged Attacks are instances of Melee Attacks, so both types are covered
             if (action instanceof MeleeAttack) {
                 Figure f = dgs.getActingFigure();
-                if (f instanceof Hero) return ((Hero) f).getAbility().equals(HeroAbilities.HeroAbility.RerollOnce) && !((Hero) f).hasUsedHeroAbility() && !f.hasRerolled();
+                if (f instanceof Hero)
+                    return ((Hero) f).getAbility().equals(HeroAbilities.HeroAbility.RerollOnce) && !((Hero) f).hasUsedHeroAbility() && !f.hasRerolled();
             }
         }
         return false;
@@ -66,7 +67,7 @@ public class TarhaAbilityReroll extends DescentAction {
     @Override
     public String getString(AbstractGameState gameState) {
         DescentDice dice = ((DescentGameState) gameState).getAttackDicePool().getDice(this.dice);
-        return "Hero Ability: Reroll " + dice.getColour() + " dice (Face: " + dice.getFace() +", Range: " + dice.getRange() + ", Damage: " + dice.getDamage() + ", Surge: " + dice.getSurge() + ")";
+        return "Hero Ability: Reroll Dice: " + dice.getColour() + " (Face: " + dice.getFace() +", Range: " + dice.getRange() + ", Damage: " + dice.getDamage() + ", Surge: " + dice.getSurge() + ")";
     }
 
     public String toString() {
