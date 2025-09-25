@@ -93,8 +93,10 @@ public class SingleTreeNode {
         retValue.MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             retValue.MASTStatistics.add(new HashMap<>());
-        if (retValue.params.useMASTAsActionHeuristic)
-            retValue.params.actionHeuristic = new MASTActionHeuristic(retValue.MASTStatistics, retValue.params.MASTActionKey, retValue.params.MASTDefaultValue);
+        if (retValue.params.useMASTAsActionHeuristic) {
+            retValue.params.actionHeuristic = new MASTActionHeuristic(retValue.params.MASTActionKey, retValue.params.MASTDefaultValue);
+            ((MASTActionHeuristic) retValue.params.actionHeuristic).setMASTStats(retValue.MASTStatistics);
+        }
         retValue.instantiate(null, null, state);
         return retValue;
     }

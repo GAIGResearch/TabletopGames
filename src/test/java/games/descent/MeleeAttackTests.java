@@ -8,7 +8,7 @@ import games.descent2e.DescentParameters;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.*;
-import games.descent2e.actions.monsterfeats.Howl;
+import games.descent2e.actions.monsterfeats.TriggerAttributeTest;
 import games.descent2e.actions.monsterfeats.HowlTest;
 import games.descent2e.components.*;
 import org.junit.Before;
@@ -358,7 +358,7 @@ public class MeleeAttackTests {
         advanceToMonsterAction(attacker);
         assertEquals(state.getActingFigure(), attacker);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertFalse(actions.stream().noneMatch(a -> a instanceof Howl));
+        assertFalse(actions.stream().noneMatch(a -> a instanceof TriggerAttributeTest));
 
         // Force the dice to roll a result that goes all the way to the end without interruptions
         DicePool attackDice = attacker.getAttackDice().copy();
@@ -384,7 +384,7 @@ public class MeleeAttackTests {
         actions = fm.computeAvailableActions(state);
 
         assertTrue(actions.stream().noneMatch(a -> a instanceof MeleeAttack));
-        assertTrue(actions.stream().noneMatch(a -> a instanceof Howl));
+        assertTrue(actions.stream().noneMatch(a -> a instanceof TriggerAttributeTest));
     }
 
     private void advanceToMonsterAction(Monster attacker) {
@@ -430,8 +430,8 @@ public class MeleeAttackTests {
         advanceToMonsterAction(attacker);
         assertEquals(state.getActingFigure(), attacker);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertTrue(actions.stream().anyMatch(a -> a instanceof Howl));
-        Howl howl = (Howl) actions.stream().filter(a -> a instanceof Howl).findFirst().orElseThrow();
+        assertTrue(actions.stream().anyMatch(a -> a instanceof TriggerAttributeTest));
+        TriggerAttributeTest howl = (TriggerAttributeTest) actions.stream().filter(a -> a instanceof TriggerAttributeTest).findFirst().orElseThrow();
         assertEquals(2, howl.getTargets().size());
         assertTrue(howl.getTargets().contains(victim1.getComponentID()));
         assertTrue(howl.getTargets().contains(victim2.getComponentID()));
@@ -458,7 +458,7 @@ public class MeleeAttackTests {
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(attacker, state.getActingFigure());
         // Howl is an action, not an Attack, so can be used twice
-        assertTrue(actions.stream().anyMatch(a -> a instanceof Howl));
+        assertTrue(actions.stream().anyMatch(a -> a instanceof TriggerAttributeTest));
     }
 
     @Test

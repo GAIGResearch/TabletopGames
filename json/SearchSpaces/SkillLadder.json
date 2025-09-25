@@ -1,0 +1,29 @@
+{
+  "class":"players.mcts.MCTSParams",
+  "K" : [0.01, 1.0, 100.0],
+  "rolloutLength" : [0, 1, 3, 10, 30, 1000],
+  "rolloutLengthPerPlayer" : true,
+  "rolloutTermination" : ["EXACT", "END_TURN", "END_ROUND"],
+  "maxTreeDepth" : [1, 3, 10, 1000],
+  "rolloutType" : ["RANDOM", "MAST"],
+  "paranoid" : [false, true],
+  "MAST" : "Both",
+  "MASTGamma" : 0.2,
+  "budgetType" : "BUDGET_TIME",
+  "information" : "Information_Set",
+  "selectionPolicy" : "SIMPLE",
+  "treePolicy" : ["UCB_Tuned", "UCB", "AlphaGo", "RegretMatching", "NoAveragingRM", "Uniform"],
+  "opponentTreePolicy" : ["SelfOnly", "MultiTree", "OneTree"],
+  "reuseTree" : [false, true],
+  "FPU" : [0.5, 1.0, 10.0, 1000000.0],
+  "maxBackupThreshold" : [3, 10, 30, 1000000],
+  "backupPolicy" : "MaxMC",
+  "budget" : -999,
+  "epsilon" : 1e-6,
+  "breakMS" : 0,
+  "exploreEpsilon" : 0.30,
+  "heuristic" : {
+    "class" : "players.heuristics.CoarseTunableHeuristic",
+    "heuristicType" : ["WIN_ONLY", "SCORE_ONLY", "SCORE_PLUS", "LEADER", "WIN_PLUS", "HEURISTIC"]
+  }
+}

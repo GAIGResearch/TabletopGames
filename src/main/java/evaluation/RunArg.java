@@ -116,7 +116,7 @@ public enum RunArg {
             "\tIf the mode is 'exhaustive', then this will be the maximum number of games run. TAG will divide\n" +
             "\this by the total number of permutations, and run an equal number of games for each permutation.\n" +
             "\tFor NTBEA/SkillLadder this will be used as a final tournament between the recommended agents from each run.",
-            1,
+            100,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder, Usage.ExpertIteration}),
     mode("exhaustive|exhaustiveSP|random|sequential|fixed\n" +
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +
@@ -202,8 +202,8 @@ public enum RunArg {
     bicTimer("The number of minutes to wait before increasing the BIC multiplier by bicMultiplier.",
             30,
             new Usage[]{Usage.ExpertIteration}),
-    everyN("We only record data every Nth tick to reduce correlation in training data generated.",
-            17,
+    sampleRate("We only record data every with this sample rate to reduce correlation in training data generated.",
+            0.02,
             new Usage[]{Usage.ExpertIteration}),
     expert("An expert player to use for the ExpertIteration process. Either BASE, MCTS or MCTSAction.",
             "BASE",

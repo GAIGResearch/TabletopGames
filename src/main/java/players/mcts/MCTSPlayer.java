@@ -258,10 +258,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
                     .collect(Collectors.toList());
 
         if (getParameters().getRolloutStrategy() instanceof IMASTUser) {
-            ((IMASTUser) getParameters().getRolloutStrategy()).setStats(root.MASTStatistics);
+            ((IMASTUser) getParameters().getRolloutStrategy()).setMASTStats(root.MASTStatistics);
         }
         if (getParameters().getOpponentModel() instanceof IMASTUser) {
-            ((IMASTUser) getParameters().getOpponentModel()).setStats(root.MASTStatistics);
+            ((IMASTUser) getParameters().getOpponentModel()).setMASTStats(root.MASTStatistics);
         }
     }
 

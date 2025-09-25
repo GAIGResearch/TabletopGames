@@ -3,12 +3,8 @@ package games.descent2e.actions.monsterfeats;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
-import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
-
-import java.util.Objects;
-import java.util.Set;
 
 public class HowlTest extends AttributeTest {
 

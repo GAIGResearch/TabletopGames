@@ -25,6 +25,19 @@ public class JSONUtils {
 
     public static final JSONParser parser = new JSONParser();
 
+    public static JSONObject fromString(String jsonString) {
+        try {
+            Object result = parser.parse(jsonString);
+            if (result instanceof JSONObject) {
+                return (JSONObject) result;
+            } else {
+                throw new AssertionError("Expected a JSONObject but got " + result.getClass() + " \n" + result);
+            }
+        } catch (ParseException e) {
+            throw new AssertionError("Error parsing JSON string : " + e.getMessage());
+        }
+    }
+
     public static JSONObject loadJSONFile(String fileName) {
         try {
             FileReader reader = new FileReader(fileName);
