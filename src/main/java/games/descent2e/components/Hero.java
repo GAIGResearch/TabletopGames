@@ -38,7 +38,7 @@ public class Hero extends Figure {
 
     String heroicFeatStr;
     HeroicFeat.HeroFeat heroicFeat;
-    boolean usedHeroAbility, featAvailable, rested, defeated;
+    boolean usedHeroAbility, featAvailable, canTrade, rested, defeated;
 
     HeroAbilities.HeroAbility heroAbility;
     String abilityStr;
@@ -195,6 +195,14 @@ public class Hero extends Figure {
         return defeated;
     }
 
+    public void setTrade(boolean canTrade) {
+        this.canTrade = canTrade;
+    }
+
+    public boolean canTrade() {
+        return canTrade;
+    }
+
     public boolean equip(DescentCard c) {
         // Check if equipment
         Property cost = c.getProperty(costHash);
@@ -253,7 +261,7 @@ public class Hero extends Figure {
         if (!super.equals(o)) return false;
         Hero hero = (Hero) o;
         return usedHeroAbility == hero.usedHeroAbility && featAvailable == hero.featAvailable &&
-                rested == hero.rested && defeated == hero.defeated &&
+                rested == hero.rested && defeated == hero.defeated && hero.canTrade == canTrade &&
                 Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) &&
                 Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(inventory, hero.inventory) &&
                 Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Objects.equals(heroicFeatStr, hero.heroicFeatStr) &&
@@ -264,7 +272,7 @@ public class Hero extends Figure {
     public int hashCode() {
         return Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, inventory,
                 equipSlotsAvailable, heroicFeatStr, heroicFeat.ordinal(), usedHeroAbility, featAvailable,
-                rested, defeated, heroAbility.ordinal(), abilityStr);
+                canTrade, rested, defeated, heroAbility.ordinal(), abilityStr);
     }
 
     @Override
@@ -296,6 +304,7 @@ public class Hero extends Figure {
         copy.heroAbility = this.heroAbility;
         copy.rested = this.rested;
         copy.defeated = this.defeated;
+        copy.canTrade = this.canTrade;
         super.copyComponentTo(copy);
         return copy;
     }

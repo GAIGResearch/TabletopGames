@@ -18,6 +18,7 @@ import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
+import games.descent2e.actions.items.TradeItem;
 import games.descent2e.actions.monsterfeats.Land;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.searchcards.UseCurseDoll;
@@ -861,6 +862,15 @@ public class DescentForwardModel extends StandardForwardModel {
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
                 if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
+            }
+
+            if (hero.canTrade()) {
+                for (Hero target : dgs.getHeroes()) {
+                    if (target.equals(hero)) continue;
+                    TradeItem trade = new TradeItem(hero.getComponentID(), target.getComponentID());
+                    if (trade.canExecute(dgs))
+                        actions.add(trade);
+                }
             }
 
             Deck<DescentCard> inventory = hero.getInventory();

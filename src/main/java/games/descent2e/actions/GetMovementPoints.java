@@ -5,6 +5,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 
 public class GetMovementPoints extends DescentAction {
@@ -24,6 +25,11 @@ public class GetMovementPoints extends DescentAction {
         Figure f = gs.getActingFigure();
         f.setAttributeToMax(Figure.Attribute.MovePoints);
         f.getNActionsExecuted().increment();
+
+        // Heroes are allowed to make Trade actions if they make a Move action
+        if (f instanceof Hero hero)
+            hero.setTrade(true);
+
         f.addActionTaken(toString());
         return true;
     }

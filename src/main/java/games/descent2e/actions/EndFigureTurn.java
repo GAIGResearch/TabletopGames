@@ -46,22 +46,25 @@ public class EndFigureTurn extends DescentAction{
         // If we are Immobilized, remove that condition now
         if(f.hasCondition(DescentTypes.DescentCondition.Immobilize)) { f.removeCondition(DescentTypes.DescentCondition.Immobilize); }
 
-        if (f instanceof Hero)
+        if (f instanceof Hero hero)
         {
             // If the Hero has rested, restore their Fatigue
-            if (((Hero) f).hasRested()) {
+            if (hero.hasRested()) {
                 f.getAttribute(Figure.Attribute.Fatigue).setValue(0);
                 ((Hero) f).setRested(false);
             }
 
             // Syndrael's Hero Ability
             // If Syndrael has not moved this turn, recover 2 Fatigue
-            if (((Hero) f).getAbility().equals(HeroAbilities.HeroAbility.HealFatigueOnWait))
+            if (hero.getAbility().equals(HeroAbilities.HeroAbility.HealFatigueOnWait))
                 HeroAbilities.syndrael(dgs);
 
             // Some Heroes can only use their Hero Ability once per turn
             // If they have used their Hero Ability this turn, refresh it
-            ((Hero) f).setUsedHeroAbility(false);
+            hero.setUsedHeroAbility(false);
+
+            // Disable Trading
+            hero.setTrade(false);
         }
 
         f.setHasMoved(false);
