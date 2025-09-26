@@ -37,6 +37,7 @@ public class CoarseTunableHeuristic extends TunableParameters implements IStateH
     }
 
     public CoarseTunableHeuristic() {
+        // a random comment
         addTunableParameter("heuristicType", HeuristicType.WIN_ONLY);
     }
 
