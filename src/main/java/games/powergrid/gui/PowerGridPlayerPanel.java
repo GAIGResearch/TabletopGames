@@ -38,7 +38,7 @@ public class PowerGridPlayerPanel extends JPanel {
 
 
         setOpaque(true);
-        setBackground(bgColor);   // <-- use the color passed in
+        setBackground(bgColor);   
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(4, 6, 4, 6),
                 BorderFactory.createLineBorder(new Color(0, 0, 0, 40))
@@ -70,7 +70,6 @@ public class PowerGridPlayerPanel extends JPanel {
         left.add(resourceRow("URANIUM", uraniumLbl));
         left.add(Box.createVerticalGlue());
 
-        // ---- RIGHT column (cards) inside a horizontal scroll
         rightCardHolder.setOpaque(false);
         add(left, BorderLayout.WEST);
         add(rightCardHolder, BorderLayout.CENTER);
@@ -102,7 +101,6 @@ public class PowerGridPlayerPanel extends JPanel {
         repaint();
     }
 
-    /** Show/update the player’s owned plant cards on the right */
     public void setPlantDeck(Deck<PowerGridCard> plantDeck) {
         Rectangle area = new Rectangle(0, 0, 3 * 100, 110); // ~3 cards visible
         rightCardHolder.removeAll();
