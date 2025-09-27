@@ -12,7 +12,7 @@ public class PowerGridParameters extends TunableParameters {
 	public static final String CARD_ASSET_PATH = "data/powergrid";
 	public enum Resource { COAL,  GAS, OIL, URANIUM }
 	public enum PlantType { COAL, GAS, OIL, URANIUM, HYBRID, GREEN }
-
+	/*
 	public enum Phase {
 	    PLAYER_ORDER, AUCTION, RESOURCE_BUY, BUILD, BUREAUCRACY;
 
@@ -26,6 +26,7 @@ public class PowerGridParameters extends TunableParameters {
 	        };
 	    }
 	}
+	*/
     public enum Step { STEP1, STEP2, STEP3 }
     
     public int maxRounds = 100;
@@ -58,10 +59,14 @@ public class PowerGridParameters extends TunableParameters {
     public int[][] resourceRefreshEU_5P = new int[][] {{3,3,4,2},{8,5,3,3},{4,7,5,3}};
     public int[][] resourceRefreshEU_6P = new int[][] {{5,4,4,2},{10,6,5,3},{5,8,6,4}};
     
-    public static final int[] coalPrice = new int[] {9,9,8,8,7,7,6,6,6,5,5,5,4,4,4,3,3,3,3,3,3,3,3,1,1,1,1};
-    public static final int[] gasPrice = new int[] {8,8,8,7,7,7,6,6,6,5,5,5,4,4,4,3,3,3,2,2,2,1,1,1};
-    public static final int[] oilPrice = new int[] {9,9,9,9,8,8,7,7,6,6,5,5,4,4,3,3,2,2,1,1};
-    public static final int[] uraniumPrice = new int[] {9,9,8,8,7,7,6,5,4,3,2,1};
+    public static final int[] coalPrice = new int[] {1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,5,6,6,6,7,7,8,8,9,9};
+
+    public static final int[] gasPrice = new int[] {1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8};
+
+    public static final int[] oilPrice = new int[] {1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,9,9};
+
+    public static final int[] uraniumPrice = new int[] {1,2,3,4,5,6,7,7,8,8,9,9};
+
     public static final int[] INCOME_TRACK = {
     	     0,  10,  82, 129,
     	    22,   7,  90, 134,

@@ -56,7 +56,7 @@ public class AuctionPowerPlant extends AbstractAction {
 
 	@Override
 	public String getString(AbstractGameState gameState) {
-	    return String.format("P%d opens auction on plant %d", playerId, plantNumber);
+	    return String.format("Opens auction on plant " +  plantNumber);
 	}
 
 

@@ -6,7 +6,7 @@ import java.awt.Image;
 import javax.swing.JComponent;
 
 import utilities.ImageIO;
-
+//TODO implement Scaling
 public class PowerGridMapPannel extends JComponent {
 	
 	private final Image backgroundImage;
@@ -18,14 +18,12 @@ public class PowerGridMapPannel extends JComponent {
         if (backgroundImage != null) {
             drawImage(g, backgroundImage, 0, 0, 1100, 1000);
         } else {
-//            System.out.println("NO IMAGE");
         }
     }
     @Override
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
         drawBackgroundImage(g);
-        //drawGraph(g, gameState);
     }
     
     private void drawImage(Graphics g, Image img, int x, int y, int width, int height) {
@@ -35,5 +33,13 @@ public class PowerGridMapPannel extends JComponent {
         double scaleH = height * 1.0 / h;
         g.drawImage(img, x, y, (int) (w * scaleW), (int) (h * scaleH), null);
     }
+	public double getScaleX() {
+		return 1.0;
+	}
+	public double getScaleY() {
+		
+		return 1.0;
+	}
+  
 
 }

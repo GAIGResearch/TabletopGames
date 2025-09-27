@@ -10,7 +10,6 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import games.GameType;
-import games.powergrid.PowerGridParameters.Phase;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridCity;
 import games.powergrid.components.PowerGridGraphBoard;
@@ -48,9 +47,14 @@ public class PowerGridGameState extends AbstractGameState {
     public Deck<PowerGridCard> drawPile;
     public Deck<PowerGridCard> currentMarket;
     public Deck<PowerGridCard> futureMarket;
+    
+    
     private List<Integer> turnOrder = new ArrayList<>();
     private List<Integer> roundOrder = new ArrayList<>();
     private List<Integer> bidOrder = new ArrayList<>();
+    
+    
+    
     private int turnOrderIndex = 0;
     private int[] playerMoney;
     private int step;
@@ -58,10 +62,24 @@ public class PowerGridGameState extends AbstractGameState {
 	
     private int[] cityCountByPlayer;
     private int[][] citySlotsById;          // [cityId][slot] -> playerId or -1
-    private PowerGridParameters.Phase currentPhase;
     private Deck<PowerGridCard>[] ownedPlantsByPlayer;
     
-    
+    public enum PowerGridGamePhase implements IGamePhase{
+    	PLAYER_ORDER,
+    	AUCTION,
+    	RESOURCE_BUY,
+    	BUILD,
+    	BUREAUCRACY;
+    	public PowerGridGamePhase next() {
+	        return switch (this) {
+	            case PLAYER_ORDER -> AUCTION;
+	            case AUCTION -> RESOURCE_BUY;
+	            case RESOURCE_BUY -> BUILD;
+	            case BUILD -> BUREAUCRACY;
+	            case BUREAUCRACY -> PLAYER_ORDER; 
+	        };
+	    }
+    }
 
  // Track which plant is currently being auctioned (-1 means none)
     private int auctionPlantNumber = -1;
@@ -111,7 +129,7 @@ public class PowerGridGameState extends AbstractGameState {
 
         // === NEW: copy all scalar/array/list fields you read later ===
         // phase
-        copy.currentPhase = this.currentPhase;
+        copy.gamePhase = gamePhase; 
 
         // money & cities
         copy.playerMoney       = (this.playerMoney == null) ? null : this.playerMoney.clone();
@@ -320,23 +338,8 @@ public class PowerGridGameState extends AbstractGameState {
 		return playerMoney[playerId];
 	}
 	
-	// Phase helpers
 
 
-	public PowerGridParameters.Phase getPhase() {
-	    return currentPhase;
-	}
-	
-	public void advancePhase() {
-		    setPhase(getPhase().next());
-	}        // optional: initialize per-phase data
-	
-	
-	
-	public void setPhase(PowerGridParameters.Phase phase) {
-	    this.currentPhase = phase;
-	}
-	
 
 	//Auction Helpers
 	public boolean isAuctionLive() {

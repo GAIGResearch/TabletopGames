@@ -45,6 +45,6 @@ public class PassBid extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return String.format("P%d passes bid", playerId);
+        return String.format("Has elected to not bid");
     }
 }

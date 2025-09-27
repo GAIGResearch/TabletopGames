@@ -8,17 +8,15 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.IntStream;
 
-import com.google.iam.v1.AuditConfigDelta.Action;
 
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
+
 import core.components.Deck;
-import games.powergrid.PowerGridParameters.Phase;
+import games.powergrid.PowerGridGameState.PowerGridGamePhase;
 import core.interfaces.ITreeActionSpace;
 import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
@@ -27,7 +25,7 @@ import games.powergrid.actions.IncreaseBid;
 import games.powergrid.actions.PassAction;
 import games.powergrid.actions.PassBid;
 import games.powergrid.components.PowerGridCard;
-import games.powergrid.components.PowerGridCard.PlantInput;
+
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
 import utilities.ActionTreeNode;
@@ -43,7 +41,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 		state.gameMap = PowerGridGraphBoard.northAmerica();;
 		state.resourceMarket = new PowerGridResourceMarket();
-		state.resourceMarket.setUpMarket(true);//Eventually change this when EU implemeted
+		state.resourceMarket.setUpMarket(true);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
 		state.initFuelStorage(); 
 		state.setStep(1);
 		state.drawPile = setupDecks(params,state.getNPlayers(), state.getRnd());
@@ -54,7 +52,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.initCityStorageForBoard();//creates a 2d array which keeps track of which cities are bought 
 		randomizeTurnOrder(state);
 		state.setStartingMoney(params.startingMoney);
-		state.setPhase(PowerGridParameters.Phase.AUCTION); 
+		state.setGamePhase(PowerGridGameState.PowerGridGamePhase.AUCTION); 
 		int first = state.getTurnOrder().get(0);
 		state.setTurnOwner(first);
 		state.initOwnedPlants();
@@ -78,26 +76,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		for (PowerGridCard c : state.drawPile.getComponents()) {
 		    System.out.println(" - " + c);
 		}
-		/*TESTING delete later
-		PowerGridCard cardA = PowerGridCard.plant(22, 5, Map.of(Resource.GAS, 3, Resource.OIL, 3));
-		 state.addPlantToPlayer(0,cardA);
-		 state.addPlantToPlayer(1,cardA);
-		 state.addPlantToPlayer(2,cardA);
-		 state.addPlantToPlayer(3,cardA);
-		 state.addPlantToPlayer(4,cardA);
-		 state.addPlantToPlayer(5,cardA);
-		 state.addFuel(0, PowerGridParameters.Resource.OIL, 4);
-		 state.addFuel(1, PowerGridParameters.Resource.OIL, 4);
-
-		 state.addFuel(2, PowerGridParameters.Resource.OIL, 4);
-
-		 state.addFuel(3, PowerGridParameters.Resource.OIL, 4);
-
-		 state.addFuel(4, PowerGridParameters.Resource.OIL, 4);
-
-		 state.addFuel(5, PowerGridParameters.Resource.OIL, 4);
-
-	*/
+		
 	}
 	
 
@@ -106,8 +85,9 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		PowerGridGameState s = (PowerGridGameState) gameState;
 	    int me = gameState.getCurrentPlayer();
 	    List<AbstractAction> actions = new ArrayList<>();
+	    PowerGridGameState.PowerGridGamePhase phase= (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase();
 
-	    switch (s.getPhase()) {
+	    switch (phase) {
 	    //this will be deleted 
         case PLAYER_ORDER:
             break;
@@ -236,7 +216,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    PowerGridGameState s = (PowerGridGameState) gs;
 	    int me = gs.getCurrentPlayer();
 
-	    if (s.isAuctionLive() && s.getPhase() == PowerGridParameters.Phase.AUCTION) {
+	    if (s.isAuctionLive() && gs.getGamePhase() == PowerGridGamePhase.AUCTION) {
 	        int next = s.checkNextBid(me);  //get the next valid bidder 
 
 	        if (next == me) { //if no one else is bidding then I have won the auction
@@ -244,11 +224,10 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	            s.resetAuction();
 	            s.removeFromRound(me);
 
-	            if (s.isRoundOrderAllPassed()) {
+	            if (s.isRoundOrderAllPassed()) { //You are the last player and you win
 	            	advancePhase(s);
 	            	return; }
-
-	            s.setTurnOwner(s.nextPlayerInRound());
+	            endPlayerTurn(s, s.nextPlayerInRound());
 	        } else {
 	            s.setTurnOwner(next);  // pass bidding turn to next bidder
 	        }
@@ -260,14 +239,15 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    	return; 
 	    }else {	    //else we advance the round 
 	    	if (actionTaken instanceof games.powergrid.actions.PassAction) {
-	    	s.setTurnOwner(s.nextPlayerInRound());
+	    	s.removeFromRound(me);
+	    	endPlayerTurn(s, s.nextPlayerInRound());
 	    	}
 	    }
 	}
 
 
 
-	private void onExitPhase(PowerGridGameState state, Phase phase) {
+	private void onExitPhase(PowerGridGameState state, PowerGridGamePhase phase) {
 	    switch (phase) {
 	    	case AUCTION ->{System.out.println(state.getRoundOrder());
 	    					System.out.println(state.getTurnOrder());}
@@ -277,7 +257,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    }
 	}
 
-	private void onEnterPhase(PowerGridGameState state, Phase phase) {
+	private void onEnterPhase(PowerGridGameState state, PowerGridGamePhase phase) {
 	    switch (phase) {
 	        //case PLAYER_ORDER -> recomputePlayerOrder(state);
 	        //case AUCTION -> prepareAuction(state);
@@ -296,14 +276,18 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	}
 	
 
-	public void advancePhase(PowerGridGameState state) {
+	public void advancePhase(AbstractGameState gameState) {
+		PowerGridGameState s = (PowerGridGameState) gameState;
 	    System.out.println("Everyone has went");
-	    state.resetRoundOrderNextPhase(); //rest the round turn order based on the global turn order
-	    Phase current = state.getPhase(); //get the current phase from the state 
-	    onExitPhase(state, current); //clean up actions for leaving a phase 
-	    Phase next = current.next(); // get the next phase by calling next on the phase class in parameters 
-	    state.setPhase(next); //set the phase in state to next 
-	    onEnterPhase(state, next); //perfroms ations that need to be taken prior to the next phase 
+	    s.resetRoundOrderNextPhase(); //rest the round turn order based on the global turn order
+	    endPlayerTurn(s, s.getCurrentPlayer()); //
+	    PowerGridGameState.PowerGridGamePhase current = (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase(); //get the current phase from the state 
+	    onExitPhase(s, current); //clean up actions for leaving a phase 
+	    PowerGridGameState.PowerGridGamePhase next = current.next(); // get the next phase by calling next on the phase class in parameters 
+	    gameState.setGamePhase(next); //set the phase in state to next 
+	    onEnterPhase(s, next); //perfroms ations that need to be taken prior to the next phase 
+	    
+	   
 	}
 
 	

@@ -24,8 +24,10 @@ public class BuyResource extends AbstractAction {
         
         try {
         	int playerId = pggs.getCurrentPlayer();
+            int purchase_price = resourceMarket.costToBuy(this.resource, this.amount);
             resourceMarket.buy(this.resource, this.amount);
-            pggs.decreasePlayerMoney(playerId, this.amount);
+            pggs.decreasePlayerMoney(playerId, purchase_price);
+            System.out.println("Player " + playerId + " bought " + this.amount + " " + this.resource + " for "  + purchase_price);
             pggs.addFuel(playerId, this.resource,this.amount);
             return true;
         } catch (IllegalArgumentException e) {
@@ -55,7 +57,7 @@ public class BuyResource extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "BuyResource(" + resource + " x" + amount + ")";
+        return "Buys " + amount  + " " + resource;
     }
 
     @Override

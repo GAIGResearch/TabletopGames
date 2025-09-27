@@ -25,7 +25,7 @@ public class PowerGridResourceMarket extends Component {
 		avail.put(PowerGridParameters.Resource.GAS, 18);
 		if(northAmerica){
 			avail.put(PowerGridParameters.Resource.OIL, 14);
-			avail.put(PowerGridParameters.Resource.URANIUM, 2);		
+			avail.put(PowerGridParameters.Resource.URANIUM, 2);
 		}else {
 			avail.put(PowerGridParameters.Resource.OIL, 16);
 			avail.put(PowerGridParameters.Resource.URANIUM, 4);
@@ -88,7 +88,6 @@ public class PowerGridResourceMarket extends Component {
 	    return europeMap ? p.resourceRefreshEU_6P : p.resourceRefreshNA_6P;
 	}
 	private int capacityFor(PowerGridParameters.Resource r) {
-	    // Typical capacities (adjust to your board): COAL/GAS/OIL ~ 24, URANIUM ~ 12
 	    return switch (r) {
 	        case COAL -> 27;
 	        case GAS -> 24;
@@ -99,13 +98,13 @@ public class PowerGridResourceMarket extends Component {
 	public void refill(PowerGridParameters params, Step step, int nPlayers, boolean europeMap) {
 	    int[][] table = pickTable(params, step, nPlayers, europeMap);
 	    int row = stepIndex(step); // 0..2
-	    PowerGridParameters.Resource[] R = PowerGridParameters.Resource.values(); // COAL,GAS,OIL,URANIUM (your order)
+	    PowerGridParameters.Resource[] R = PowerGridParameters.Resource.values(); // COAL,GAS,OIL,URANIUM 
 
 	    for (int i = 0; i < R.length; i++) {
 	        int add = table[row][i];                  // how many cubes to add of R[i]
 	        int now = avail.get(R[i]);
 	        int cap = capacityFor(R[i]);
-	        int next = Math.min(cap, now + add);      // clamp to capacity (optional)
+	        int next = Math.min(cap, now + add);      // clamp to capacity 
 	        avail.put(R[i], next);
 	    }
 	}

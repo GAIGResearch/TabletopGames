@@ -17,7 +17,7 @@ public class PassAction extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         PowerGridGameState pggs = (PowerGridGameState) gs;
         pggs.removeFromRound(playerId);
-        System.out.println("Player " + playerId + " has elected to pass");
+        System.out.println("Has elected to pass this Round");
         return true;
     }
 
@@ -28,6 +28,6 @@ public class PassAction extends AbstractAction {
     @Override
     public int hashCode() { return Objects.hash(playerId); }
     @Override
-    public String getString(AbstractGameState gameState) { return "P" + playerId + " passes"; }
+    public String getString(AbstractGameState gameState) { return "Has elected to pass this Round"; }
 }
 
