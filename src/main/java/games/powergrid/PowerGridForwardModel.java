@@ -8,7 +8,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
+import java.util.Set;
+import java.util.stream.IntStream;
 
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -29,8 +30,16 @@ import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
 import utilities.ActionTreeNode;
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.LinkedHashSet;
 
+import static core.CoreConstants.GameResult.DRAW_GAME;
+import static core.CoreConstants.GameResult.GAME_END;
+import static core.CoreConstants.GameResult.LOSE_GAME;
+import static core.CoreConstants.GameResult.WIN_GAME;
 import static core.CoreConstants.VisibilityMode.*;
+import static games.root.RootParameters.VictoryCondition.Score;
 
 
 public class PowerGridForwardModel extends StandardForwardModel implements ITreeActionSpace {
@@ -39,7 +48,10 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	protected void _setup(AbstractGameState firstState) {
 		PowerGridGameState state = (PowerGridGameState)firstState;
 		PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
-		state.gameMap = PowerGridGraphBoard.northAmerica();;
+		state.setActiveRegions(RegionPicker.randomContiguousSetDFS(state));		
+		state.gameMap = PowerGridGraphBoard.northAmerica().filterRegions(state.getActiveRegions());
+		System.out.println("Subset board cities = " + state.gameMap.cities().size());
+		state.gameMap.cities().forEach(System.out::println);
 		state.resourceMarket = new PowerGridResourceMarket();
 		state.resourceMarket.setUpMarket(true);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
 		state.initFuelStorage(); 
@@ -134,7 +146,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         	break;
 
         case BUILD:
-        	System.exit(0);
+        	
             break;
 
         case BUREAUCRACY:
@@ -146,6 +158,89 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	
 
 	
+	
+	@Override
+	protected void _afterAction(AbstractGameState gs, AbstractAction actionTaken) {
+	    PowerGridGameState s = (PowerGridGameState) gs;
+	    int me = gs.getCurrentPlayer();
+
+	    if (s.isAuctionLive() && gs.getGamePhase() == PowerGridGamePhase.AUCTION) {
+	        int next = s.checkNextBid(me);  //get the next valid bidder 
+
+	        if (next == me) { //if no one else is bidding then I have won the auction
+	            awardPlantToWinner(s, me, s.getAuctionPlantNumber(), s.getCurrentBid());
+	            s.resetAuction();
+	            s.removeFromRound(me);
+
+	            if (s.isRoundOrderAllPassed()) { //You are the last player and you win
+	            	advancePhase(s);
+	            	return; }
+	            endPlayerTurn(s, s.nextPlayerInRound());
+	        } else {
+	            s.setTurnOwner(next);  // pass bidding turn to next bidder
+	        }
+	        return;
+	    }  
+	    // No auction live: advance normal round turn
+	    if (s.isRoundOrderAllPassed()) { 
+	    	advancePhase(s); 
+	    	return; 
+	    }else {	    //else we advance the round 
+	    	if (actionTaken instanceof games.powergrid.actions.PassAction) {
+	    	s.removeFromRound(me);
+	    	endPlayerTurn(s, s.nextPlayerInRound());
+	    	}
+	    }
+	}
+
+
+
+	private void onExitPhase(PowerGridGameState state, PowerGridGamePhase phase) {
+	    switch (phase) {
+	    	case AUCTION ->{System.out.println(state.getRoundOrder());
+	    					System.out.println(state.getTurnOrder());}
+	    	case RESOURCE_BUY->{}
+	        case BUILD -> { /* finalize builds */ }
+	        case BUREAUCRACY -> { /* clear round markers */ }
+	        default -> {}
+	    }
+	}
+
+	private void onEnterPhase(PowerGridGameState state, PowerGridGamePhase phase) {
+	    switch (phase) {
+	        //case PLAYER_ORDER -> recomputePlayerOrder(state);
+	        //case AUCTION -> prepareAuction(state);
+	        case RESOURCE_BUY ->{List<Integer> order = state.getRoundOrder();
+					        	Collections.reverse(state.getRoundOrder());
+					        	state.setTurnOwner(order.get(0));
+						        System.out.println(state.getRoundOrder());//delete when shown to work}
+
+	        }
+	        case BUILD ->{List<Integer> order = state.getRoundOrder();
+			        	Collections.reverse(state.getRoundOrder());
+			        	state.setTurnOwner(order.get(0));
+				        System.out.println(state.getRoundOrder());//delete when shown to work}
+	        	System.out.println("==== BUILDING PHASE ====");}
+	        //case BUREAUCRACY -> doBureaucracy(state);
+	        default -> {}
+	    }
+	}
+	
+
+	public void advancePhase(AbstractGameState gameState) {
+		PowerGridGameState s = (PowerGridGameState) gameState;
+	    System.out.println("Everyone has went");
+	    s.resetRoundOrderNextPhase(); //rest the round turn order based on the global turn order
+	    endPlayerTurn(s, s.getCurrentPlayer()); //
+	    PowerGridGameState.PowerGridGamePhase current = (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase(); //get the current phase from the state 
+	    onExitPhase(s, current); //clean up actions for leaving a phase 
+	    PowerGridGameState.PowerGridGamePhase next = current.next(); // get the next phase by calling next on the phase class in parameters 
+	    gameState.setGamePhase(next); //set the phase in state to next 
+	    onEnterPhase(s, next); //perfroms ations that need to be taken prior to the next phase 
+	    
+	   
+	}
+
 	// How much the player can legally buy now (storage-only; ignores market availability)
 	// Return order: [COAL, GAS, OIL, URANIUM]
 	private EnumMap<PowerGridParameters.Resource, Integer>playerBuyCapacity(PowerGridGameState s, int playerId) {
@@ -211,104 +306,18 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	}
 	
 	
-	@Override
-	protected void _afterAction(AbstractGameState gs, AbstractAction actionTaken) {
-	    PowerGridGameState s = (PowerGridGameState) gs;
-	    int me = gs.getCurrentPlayer();
-
-	    if (s.isAuctionLive() && gs.getGamePhase() == PowerGridGamePhase.AUCTION) {
-	        int next = s.checkNextBid(me);  //get the next valid bidder 
-
-	        if (next == me) { //if no one else is bidding then I have won the auction
-	            awardPlantToWinner(s, me, s.getAuctionPlantNumber(), s.getCurrentBid());
-	            s.resetAuction();
-	            s.removeFromRound(me);
-
-	            if (s.isRoundOrderAllPassed()) { //You are the last player and you win
-	            	advancePhase(s);
-	            	return; }
-	            endPlayerTurn(s, s.nextPlayerInRound());
-	        } else {
-	            s.setTurnOwner(next);  // pass bidding turn to next bidder
-	        }
-	        return;
-	    }  
-	    // No auction live: advance normal round turn
-	    if (s.isRoundOrderAllPassed()) { 
-	    	advancePhase(s); 
-	    	return; 
-	    }else {	    //else we advance the round 
-	    	if (actionTaken instanceof games.powergrid.actions.PassAction) {
-	    	s.removeFromRound(me);
-	    	endPlayerTurn(s, s.nextPlayerInRound());
-	    	}
-	    }
-	}
-
-
-
-	private void onExitPhase(PowerGridGameState state, PowerGridGamePhase phase) {
-	    switch (phase) {
-	    	case AUCTION ->{System.out.println(state.getRoundOrder());
-	    					System.out.println(state.getTurnOrder());}
-	        case BUILD -> { /* finalize builds */ }
-	        case BUREAUCRACY -> { /* clear round markers */ }
-	        default -> {}
-	    }
-	}
-
-	private void onEnterPhase(PowerGridGameState state, PowerGridGamePhase phase) {
-	    switch (phase) {
-	        //case PLAYER_ORDER -> recomputePlayerOrder(state);
-	        //case AUCTION -> prepareAuction(state);
-	        case RESOURCE_BUY ->{
-	        	List<Integer> order = state.getRoundOrder();
-	        	Collections.reverse(state.getRoundOrder());
-	        	state.setTurnOwner(order.get(0));
-		        System.out.println(state.getRoundOrder());//delete when shown to work}
-
-	        }
-	        case BUILD ->{System.out.println("==== BUILDING PHASE ====");}
-	        //case BUILD -> enableBuilding(state);
-	        //case BUREAUCRACY -> doBureaucracy(state);
-	        default -> {}
-	    }
-	}
-	
-
-	public void advancePhase(AbstractGameState gameState) {
-		PowerGridGameState s = (PowerGridGameState) gameState;
-	    System.out.println("Everyone has went");
-	    s.resetRoundOrderNextPhase(); //rest the round turn order based on the global turn order
-	    endPlayerTurn(s, s.getCurrentPlayer()); //
-	    PowerGridGameState.PowerGridGamePhase current = (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase(); //get the current phase from the state 
-	    onExitPhase(s, current); //clean up actions for leaving a phase 
-	    PowerGridGameState.PowerGridGamePhase next = current.next(); // get the next phase by calling next on the phase class in parameters 
-	    gameState.setGamePhase(next); //set the phase in state to next 
-	    onEnterPhase(s, next); //perfroms ations that need to be taken prior to the next phase 
-	    
-	   
-	}
-
 	
 	
-	
-	
-	
+	/*
 	//TODO might need to be deleted ot fully implemented yet 
-	private void endGameNow(AbstractGameState gs, int[] winners) {
-	    // Set everyone to LOSE by default (or DRAW if your game uses ties)
-	    for (int p = 0; p < gs.getNPlayers(); p++) {
-	        gs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, p);
-	    }
-	    // Mark winners
-	    for (int w : winners) {
-	        gs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, w);
-	    }
-	    // Mark the game as ended
-	    gs.setGameStatus(CoreConstants.GameResult.GAME_END);
-	}
-	
+    @Override
+    protected void endGame(AbstractGameState gs) {
+        PowerGridGameState state = (PowerGridGameState) gs;
+        gs.setGameStatus(CoreConstants.GameResult.GAME_END);
+        gs.setPlayerResult(WIN_GAME, 1);
+        
+    }
+	*/
 	
 	/**
 	 * Sets up the initial Power Grid deck according to the game parameters and number of players.
@@ -491,11 +500,56 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		return null;
 	}
     
-    
-    
 
     
+    public final class RegionPicker {
+        // Universe of regions present in the map (keys of the adjacency map)
+        private static final List<Integer> ALL_REGIONS = new ArrayList<>(PowerGridGraphBoard.REGION_ADJ_NA.keySet());
 
+        /** Returns a random contiguous set of size k using DFS from a random start. */
+        public static Set<Integer> randomContiguousSetDFS( AbstractGameState gs) {
+        	int k = gs.getNPlayers();
+        	if(gs.getNPlayers() >=5) k =5;
+            Random rnd = (gs != null) ? gs.getRnd() : new Random();
+            if (k <= 0) throw new IllegalArgumentException("k must be >= 1");
+            if (k > ALL_REGIONS.size())
+                throw new IllegalArgumentException("k > number of regions (" + ALL_REGIONS.size() + ")");
+
+            // Try a few random starts in case some starts can’t reach k nodes (shouldn’t happen on your NA graph)
+            for (int attempt = 0; attempt < 20; attempt++) {
+                int start = ALL_REGIONS.get(rnd.nextInt(ALL_REGIONS.size()));
+                Set<Integer> chosen = dfsGrow(start, k, rnd);
+                if (chosen.size() == k) return chosen;
+            }
+            throw new IllegalStateException("Could not find contiguous set of size " + k + " after several attempts");
+        }
+
+        /** DFS that grows a connected set up to size k, randomizing neighbor order to avoid bias. */
+        private static Set<Integer> dfsGrow(int start, int k, Random rnd) {
+            Set<Integer> chosen = new LinkedHashSet<>();
+            Deque<Integer> stack = new ArrayDeque<>();
+            stack.push(start);
+
+            while (!stack.isEmpty() && chosen.size() < k) {
+                int u = stack.pop();
+                if (!chosen.add(u)) continue;
+
+                // Randomize neighbor order
+                List<Integer> nbrs = new ArrayList<>(PowerGridGraphBoard.REGION_ADJ_NA.getOrDefault(u, Set.of()));
+                Collections.shuffle(nbrs, rnd);
+
+                // Push neighbors that aren’t chosen yet
+                for (int v : nbrs) {
+                    if (chosen.size() >= k) break;
+                    if (!chosen.contains(v)) stack.push(v);
+                }
+            }
+            return chosen;
+        }
+
+   
+
+}
 }
 
 

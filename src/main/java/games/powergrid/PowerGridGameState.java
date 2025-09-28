@@ -1,8 +1,5 @@
 package games.powergrid;
 
-import java.util.HashMap;
-import java.util.List;
-
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
@@ -14,21 +11,15 @@ import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridCity;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static core.CoreConstants.VisibilityMode.*;
 
 /**
  * Power Grid Game State (TAG-friendly)
  * Keep rules out of here; this is just data + cheap helpers.
  */
+import java.util.*;
+import java.util.stream.Collectors;
 
-
-
-
-import java.util.ArrayList;
-import java.util.List;
+import static core.CoreConstants.VisibilityMode.*;
 
 /**
  * Minimal Power Grid Game State for early testing.
@@ -87,6 +78,7 @@ public class PowerGridGameState extends AbstractGameState {
     // Track the current highest bid and who holds it
     private int currentBid = 0;
     private int currentBidder = -1;
+	public Set<Integer> activeRegions;
   
 
     
@@ -154,6 +146,12 @@ public class PowerGridGameState extends AbstractGameState {
         copy.currentBid         = this.currentBid;
         copy.currentBidder      = this.currentBidder;
         // current bids (Bid is immutable enough for shallow copy)
+     // active regions
+        if (this.activeRegions != null) {
+            copy.activeRegions = new HashSet<>(this.activeRegions);
+        } else {
+            copy.activeRegions = null;
+        }
 
         // fuel (you already do this)
         if (fuelByPlayer != null) {
@@ -504,7 +502,25 @@ public class PowerGridGameState extends AbstractGameState {
 	        System.out.println();
 	    }
 	}
+	public Set<Integer> getDisabledRegions() {
+	    // assume regions are numbered 1 through 7
+	    Set<Integer> all = new HashSet<>(Arrays.asList(1,2,3,4,5,6,7));
 
+	    if (activeRegions == null) {
+	        // if never set, treat all as disabled
+	        return all;
+	    }
+
+	    all.removeAll(activeRegions);
+	    return all;
+	}
+	
+	public void setActiveRegions(Set<Integer> activeRegions){
+		this.activeRegions = activeRegions; 
+	}
+	public Set<Integer>  getActiveRegions(){
+		return this.activeRegions; 
+	}
 
 
 	

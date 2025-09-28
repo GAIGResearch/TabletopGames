@@ -35,7 +35,9 @@ public final class PowerGridCity extends Component {
     public boolean isDouble() { return doubleCity; }
 
     @Override public PowerGridCity copy() { return this; } // immutable
-    
+    public int getRegion() {
+    	return this.region();
+    }
     @Override
     public String toString() {
         return String.format("%s (id=%d, region=%d%s)", 

@@ -116,6 +116,9 @@ public class PowerGridGUI extends AbstractGUIManager {
         mapPanel = new PowerGridMapPannel();
         mapPanel.setBounds(0, 0, 1100, 1120);
         layered.add(mapPanel, JLayeredPane.DEFAULT_LAYER);
+        mapPanel.setDisabledRegions(gs.getDisabledRegions());
+        System.out.println(gs.getDisabledRegions());
+
         
         // Turn order overlay 
         turnOverlay = new TurnOrderOverlay();      
@@ -177,7 +180,7 @@ public class PowerGridGUI extends AbstractGUIManager {
         parent.add(infoPanel, BorderLayout.NORTH);
 
 	     // (Optional) If you also want the default action buttons bar at the bottom:
-	     JComponent actionPanel = createActionPanel(new IScreenHighlight[0], topWidth, defaultActionPanelHeight);
+	     JComponent actionPanel = createActionPanel(new IScreenHighlight[0], topWidth, defaultActionPanelHeight,false,true,null,null,null);
 	     parent.add(actionPanel, BorderLayout.SOUTH);
 	
 	     // Make sure the overall preferred size accounts for the new bars
@@ -215,7 +218,7 @@ public class PowerGridGUI extends AbstractGUIManager {
 	@Override
 	public int getMaxActionSpace() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 200;
 	}
 
 	//called whenever the state changes

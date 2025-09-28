@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import core.CoreConstants;
@@ -14,6 +17,15 @@ public final class PowerGridGraphBoard extends Component {
 
     private final Map<Integer, PowerGridCity> citiesById;
     private final Map<Integer, List<Edge>> adj;
+    public static final Map<Integer, Set<Integer>> REGION_ADJ_NA = Map.of(
+    	    1, Set.of(2),      
+    	    2, Set.of(1,3, 4),
+    	    3, Set.of(2, 4, 7),
+    	    4, Set.of(2, 3, 5, 6, 7),
+    	    5, Set.of(6,4),
+    	    6, Set.of(4, 5, 7),
+    	    7, Set.of(3,4, 6)
+    	);
 
     // inner static class for clarity
     public static final class Edge {
@@ -256,4 +268,27 @@ public final class PowerGridGraphBoard extends Component {
                          .max()
                          .orElse(0);
     }
+    
+    public PowerGridGraphBoard filterRegions(Set<Integer> keepRegions) {
+        Map<Integer, PowerGridCity> keptCities =
+            this.citiesById.values().stream()
+                .filter(c -> keepRegions.contains(c.getRegion()))
+                .collect(Collectors.toMap(
+                    c -> Integer.valueOf(c.getComponentID()),
+                    c -> c,
+                    (a, b) -> a,
+                    HashMap::new
+                ));
+
+        List<Edge> keptEdges =
+            this.adj.entrySet().stream()
+                .flatMap(e -> e.getValue().stream())
+                .filter(e -> keptCities.containsKey(e.from) && keptCities.containsKey(e.to))
+                .filter(e -> e.from < e.to)
+                .collect(Collectors.toList());
+
+        return new PowerGridGraphBoard(this.getComponentName(), keptCities, keptEdges);
+    }
+    
+
 }
