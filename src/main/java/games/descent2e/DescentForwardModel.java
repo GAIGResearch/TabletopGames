@@ -44,11 +44,9 @@ import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
 import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.archetypeskills.ArchetypeSkills.getArchetypeSkillActions;
-import static games.descent2e.actions.archetypeskills.PrayerOfHealing.removePrayerBonus;
 import static games.descent2e.actions.monsterfeats.Air.removeAirImmunity;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
-import static games.descent2e.components.DicePool.heal;
 import static games.descent2e.components.Figure.Attribute.Health;
 import static utilities.Utils.getNeighbourhood;
 
@@ -968,6 +966,23 @@ public class DescentForwardModel extends StandardForwardModel {
                     actions.addAll(rangedAttackActions(dgs, actingFigure));
                     attacks.addAll(rangedAttackActions(dgs, actingFigure));
                 }
+
+                // Heroes can still make basic Melee Attacks if they have no equipped items
+                if (attackType == AttackType.NONE && actingFigure instanceof Hero) {
+                    List<Integer> targets = getMeleeTargets(dgs, actingFigure, false);
+                    List<BareHandAttack> bareHands = new ArrayList<>();
+                    for (int target : targets) {
+                        BareHandAttack bareHand = new BareHandAttack(actingFigure.getComponentID(), target);
+                        if (bareHand.canExecute(dgs))
+                            bareHands.add(bareHand);
+                    }
+                    if (!bareHands.isEmpty())
+                    {
+                        Collections.sort(bareHands, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
+                        actions.addAll(bareHands);
+                        attacks.addAll(bareHands);
+                    }
+                }
             }
 
             // - Open/close a door TODO
@@ -1074,7 +1089,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 // Free Attack
                 AttackType attackType = getAttackType(actingFigure);
 
-                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH || attackType == AttackType.NONE) {
                     boolean reach = checkReach(dgs, actingFigure);
                     List<Integer> targets = getMeleeTargets(dgs, actingFigure, reach);
                     for (Integer target : targets) {

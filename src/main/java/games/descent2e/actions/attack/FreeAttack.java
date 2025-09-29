@@ -3,6 +3,7 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
+import games.descent2e.DescentTypes;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.monsterfeats.Air;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
@@ -68,18 +69,21 @@ public class FreeAttack extends RangedAttack {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        attackerName = gameState.getComponentById(attackingFigure).getComponentName();
-        defenderName = gameState.getComponentById(defendingFigure).getComponentName();
+        Figure attacker = (Figure) gameState.getComponentById(attackingFigure);
+        Figure defender = (Figure) gameState.getComponentById(defendingFigure);
+
+        attackerName = attacker.getComponentName();
+        defenderName = defender.getComponentName();
         attackerName = attackerName.replace("Hero: ", "");
         defenderName = defenderName.replace("Hero: ", "");
 
         if (isMelee)
         {
+            if (getAttackType(attacker) == DescentTypes.AttackType.NONE)
+                return String.format("Free Bare Hand Melee Attack by " + attackerName + " on " + defenderName + "; " + result);
             return String.format("Free Melee Attack by " + attackerName + " on " + defenderName + "; " + result);
         }
 
-        Figure attacker = (Figure) gameState.getComponentById(attackingFigure);
-        Figure defender = (Figure) gameState.getComponentById(defendingFigure);
         String distance = Double.toString(getDistanceFromFigures(attacker, defender));
 
         return String.format("Free Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + "); " + result);
