@@ -1,6 +1,5 @@
 package games.descent2e.actions.items;
 
-import com.google.common.collect.Iterables;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
@@ -8,10 +7,8 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.actions.tokens.SearchAction;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Hero;
-import utilities.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +16,7 @@ import java.util.Objects;
 
 public class TradeItem extends DescentAction implements IExtendedSequence {
 
-    public static List<DescentCard> traded = new ArrayList<>();
+    public List<Integer> traded = new ArrayList<>();
 
     public int userID = -1;
     public int targetID = -1;
@@ -36,11 +33,12 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
         this.targetID = targetID;
     }
 
-    public TradeItem(int userID, int targetID, int itemID) {
+    public TradeItem(int userID, int targetID, int itemID, List<Integer> traded) {
         super(Triggers.ANYTIME);
         this.userID = userID;
         this.targetID = targetID;
         this.itemID = itemID;
+        this.traded = new ArrayList<>(traded);
     }
 
     @Override
@@ -53,13 +51,13 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
         Hero target = (Hero) dgs.getComponentById(targetID);
 
         for (DescentCard item : user.getInventory()) {
-            TradeItem trade = new TradeItem(userID, targetID, item.getComponentID());
+            TradeItem trade = new TradeItem(userID, targetID, item.getComponentID(), traded);
             if (trade.canExecute(dgs))
                 trades.add(trade);
         }
 
         for (DescentCard item : target.getInventory()) {
-            TradeItem trade = new TradeItem(userID, targetID, item.getComponentID());
+            TradeItem trade = new TradeItem(userID, targetID, item.getComponentID(), traded);
             if (trade.canExecute(dgs))
                 trades.add(trade);
         }
@@ -81,8 +79,10 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
         if (action instanceof TradeItem trade) {
             if (trade.isEndTrade()) {
                 complete = true;
-                resetTrade();
             }
+            DescentCard item = (DescentCard) state.getComponentById(trade.itemID);
+            if (item != null)
+                traded.add(trade.itemID);
         }
     }
 
@@ -104,7 +104,6 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
 
         if (itemID != -1) {
             DescentCard item = (DescentCard) dgs.getComponentById(itemID);
-            traded.add(item);
 
             Hero target = (Hero) dgs.getComponentById(targetID);
 
@@ -130,7 +129,7 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
 
     @Override
     public TradeItem copy() {
-        TradeItem trade = new TradeItem(userID, targetID, itemID);
+        TradeItem trade = new TradeItem(userID, targetID, itemID, traded);
         trade.complete = complete;
         return trade;
     }
@@ -140,12 +139,13 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
         if (this == obj) return true;
         if (!(obj instanceof TradeItem other)) return false;
         return userID == other.userID && targetID == other.targetID &&
-                itemID == other.itemID && complete == other.complete;
+                itemID == other.itemID && complete == other.complete &&
+                Objects.equals(traded, other.traded);
     }
 
     @Override
     public int hashCode(){
-        return Objects.hash(super.hashCode(), userID, targetID, itemID, complete);
+        return Objects.hash(super.hashCode(), userID, targetID, itemID, complete, traded);
     }
 
     @Override
@@ -209,9 +209,5 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
 
     public boolean isEndTrade(){
         return userID == itemID;
-    }
-
-    public void resetTrade(){
-        traded.clear();
     }
 }
