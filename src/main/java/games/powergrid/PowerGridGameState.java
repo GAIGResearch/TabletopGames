@@ -4,40 +4,27 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.powergrid.components.PowerGridCard;
-import games.powergrid.components.PowerGridCity;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
 
-/**
- * Power Grid Game State (TAG-friendly)
- * Keep rules out of here; this is just data + cheap helpers.
- */
+
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static core.CoreConstants.VisibilityMode.*;
 
-/**
- * Minimal Power Grid Game State for early testing.
- * Only includes fields used by your current ForwardModel:
- * - gameMap
- * - drawPile
- * - currentMarket
- * - futureMarket
- */
+
 public class PowerGridGameState extends AbstractGameState {
 
-    // Keep these public for now to match your ForwardModel's direct field access.
-    public PowerGridGraphBoard gameMap;
-    public PowerGridResourceMarket resourceMarket; 
-    public EnumMap<PowerGridParameters.Resource, Integer>[] fuelByPlayer;
-    public Deck<PowerGridCard> drawPile;
-    public Deck<PowerGridCard> currentMarket;
-    public Deck<PowerGridCard> futureMarket;
+  
+    protected PowerGridGraphBoard gameMap;
+    protected PowerGridResourceMarket resourceMarket; 
+    protected EnumMap<PowerGridParameters.Resource, Integer>[] fuelByPlayer;
+    protected Deck<PowerGridCard> drawPile;
+    protected Deck<PowerGridCard> currentMarket;
+    protected Deck<PowerGridCard> futureMarket;
     
     
     private List<Integer> turnOrder = new ArrayList<>();
@@ -52,7 +39,7 @@ public class PowerGridGameState extends AbstractGameState {
 
 	
     private int[] cityCountByPlayer;
-    private int[][] citySlotsById;          // [cityId][slot] -> playerId or -1
+    private int[][] citySlotsById;          // [cityId][slot] -> playerId or -1 if empty
     private Deck<PowerGridCard>[] ownedPlantsByPlayer;
     
     public enum PowerGridGamePhase implements IGamePhase{
@@ -72,11 +59,12 @@ public class PowerGridGameState extends AbstractGameState {
 	    }
     }
 
- // Track which plant is currently being auctioned (-1 means none)
+    // Track which plant is currently being auctioned (-1 means none)
     private int auctionPlantNumber = -1;
 
-    // Track the current highest bid and who holds it
+    // Track the current highest bid 
     private int currentBid = 0;
+    // Tracks the current highest bidder
     private int currentBidder = -1;
 	private Set<Integer> activeRegions;
 	private Set<Integer> invalidCities; 
@@ -95,7 +83,6 @@ public class PowerGridGameState extends AbstractGameState {
 
     @Override
     protected GameType _getGameType() {
-        // Ensure GameType.PowerGrid exists in your enum; if not, add it or return a placeholder.
         return GameType.PowerGrid;
     }
 
@@ -121,15 +108,11 @@ public class PowerGridGameState extends AbstractGameState {
         copy.futureMarket   = (this.futureMarket == null) ? null : this.futureMarket.copy();
         copy.resourceMarket = (this.resourceMarket == null) ? null : this.resourceMarket.copy();
 
-        // === NEW: copy all scalar/array/list fields you read later ===
-        // phase
         copy.gamePhase = gamePhase; 
 
-        // money & cities
         copy.playerMoney       = (this.playerMoney == null) ? null : this.playerMoney.clone();
         copy.cityCountByPlayer = (this.cityCountByPlayer == null) ? null : this.cityCountByPlayer.clone();
 
-        // city slots deep copy
         if (this.citySlotsById != null) {
             copy.citySlotsById = new int[this.citySlotsById.length][];
             for (int i = 0; i < this.citySlotsById.length; i++) {
@@ -137,20 +120,18 @@ public class PowerGridGameState extends AbstractGameState {
             }
         }
 
-        // turn order
         copy.turnOrder = new ArrayList<>(this.turnOrder);
         copy.turnOrderIndex = this.turnOrderIndex;
         copy.roundOrder = new ArrayList<>(this.roundOrder);
         copy.bidOrder = new ArrayList<>(this.bidOrder);
+        
 
-        // auction sub-state
         copy.auctionPlantNumber = this.auctionPlantNumber;
         copy.currentBid         = this.currentBid;
         copy.currentBidder      = this.currentBidder;
         
         copy.step = this.step;
-        // current bids (Bid is immutable enough for shallow copy)
-     // active regions
+
         if (this.activeRegions != null) {
             copy.activeRegions = new HashSet<>(this.activeRegions);
         } else {
@@ -169,7 +150,6 @@ public class PowerGridGameState extends AbstractGameState {
             copy.invalidCities = null;
         }
 
-        // fuel (you already do this)
         if (fuelByPlayer != null) {
             @SuppressWarnings("unchecked")
             EnumMap<PowerGridParameters.Resource, Integer>[] fbCopy =
@@ -181,13 +161,12 @@ public class PowerGridGameState extends AbstractGameState {
             copy.fuelByPlayer = fbCopy;
         }
         
-     // owned plants by player (deep copy each Deck)
         if (this.ownedPlantsByPlayer != null) {
             @SuppressWarnings("unchecked")
             Deck<PowerGridCard>[] opCopy = (Deck<PowerGridCard>[]) new Deck<?>[this.ownedPlantsByPlayer.length];
             for (int p = 0; p < this.ownedPlantsByPlayer.length; p++) {
                 Deck<PowerGridCard> src = this.ownedPlantsByPlayer[p];
-                opCopy[p] = (src == null) ? null : src.copy();  // TAG Deck.copy() does a safe component copy
+                opCopy[p] = (src == null) ? null : src.copy();  
             }
             copy.ownedPlantsByPlayer = opCopy;
         }
@@ -196,12 +175,19 @@ public class PowerGridGameState extends AbstractGameState {
     }
 
 
-    // ---------- (Optional) convenience getters ----------
+
 
     public PowerGridGraphBoard getGameMap() { return gameMap; }
+    public PowerGridResourceMarket getResourceMarket() {return resourceMarket;}
     public Deck<PowerGridCard> getDrawPile() { return drawPile; }
     public Deck<PowerGridCard> getCurrentMarket() { return currentMarket; }
     public Deck<PowerGridCard> getFutureMarket() { return futureMarket; }
+    
+    public void setGameMap(PowerGridGraphBoard gameMap) {this.gameMap = gameMap;}
+    public void setResourceMarket(PowerGridResourceMarket resourceMarket) {this.resourceMarket = resourceMarket;}
+    public void setDrawPile(Deck<PowerGridCard> drawPile) {this.drawPile = drawPile;}
+    public void setCurrentMarket(Deck<PowerGridCard> currentMarket) {this.currentMarket = currentMarket;}
+    public void setFutureMarket(Deck<PowerGridCard> futureMarket) {this.futureMarket = futureMarket;}
 
 	@Override
 	protected double _getHeuristicScore(int playerId) {
@@ -232,6 +218,7 @@ public class PowerGridGameState extends AbstractGameState {
 	            fuelByPlayer[p].put(r, 0);
 	    }
 	}
+	
 	@SuppressWarnings("unchecked")
 	public void initOwnedPlants() {
 	    int n = getNPlayers();
@@ -241,8 +228,6 @@ public class PowerGridGameState extends AbstractGameState {
 	    }
 	}
 
-
-	// helpers
 	public int getFuel(int playerId, PowerGridParameters.Resource r) {
 	    return fuelByPlayer[playerId].get(r);
 	}
@@ -299,7 +284,7 @@ public class PowerGridGameState extends AbstractGameState {
 	    return cityCountByPlayer[playerId];
 	}
 	
-	public int[] getCityCountByPlayer() {    
+	public int[] getCityCountByPlayer() {	    
 	    return cityCountByPlayer;
 	}
 
@@ -326,9 +311,15 @@ public class PowerGridGameState extends AbstractGameState {
     }
 	
 	public int getHighestPlantNumber(int playerId) {
-	    // TODO: return the highest-numbered plant owned by playerId.
-	    // If you haven't modeled ownership yet, return 0 as a safe default.
-	    return 0;
+		Deck<PowerGridCard> deck = getPlayerPlantDeck(playerId);
+		int highest = -1;
+		for (PowerGridCard card : deck) {
+		    int value = card.getNumber(); 
+		    if (value > highest) {
+		        highest = value;
+		    }
+		}
+		return highest;
 	}
 	
 	public String fuelSummary() {
@@ -364,15 +355,11 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 	
 
-
-
-	//Auction Helpers
 	public boolean isAuctionLive() {
 	    return auctionPlantNumber != -1;
 	}
 
 
-	// --- Ops ---
 	public Deck<PowerGridCard> getPlayerPlantDeck(int playerId) {
 	    return ownedPlantsByPlayer[playerId];
 	}
@@ -443,11 +430,8 @@ public class PowerGridGameState extends AbstractGameState {
 		this.currentBidder  =-1;
 	}
 	
-	public PowerGridResourceMarket getResourceMarket() {
-		return this.resourceMarket;
-	}
-	
-	//this might have to be moved 
+
+	//TODO this might have to be moved 
 	public Integer checkNextBid(int playerID) {
 	    int startIndex = turnOrder.indexOf(playerID);
 	    if (startIndex == -1) {
@@ -505,30 +489,7 @@ public class PowerGridGameState extends AbstractGameState {
 	        }
 	    }
 	}
-	public void printMarkets() {
-	    Deck<PowerGridCard> current = getCurrentMarket();
-	    Deck<PowerGridCard> future  = getFutureMarket();
 
-	    System.out.print("Current Market: ");
-	    if (current.getSize() == 0) {
-	        System.out.println("[empty]");
-	    } else {
-	        current.getComponents().forEach(card ->
-	            System.out.print(card.getNumber() + " ")
-	        );
-	        System.out.println();
-	    }
-
-	    System.out.print("Future Market: ");
-	    if (future.getSize() == 0) {
-	        System.out.println("[empty]");
-	    } else {
-	        future.getComponents().forEach(card ->
-	            System.out.print(card.getNumber() + " ")
-	        );
-	        System.out.println();
-	    }
-	}
 	public Set<Integer> getDisabledRegions() {
 	    // assume regions are numbered 1 through 7
 	    Set<Integer> all = new HashSet<>(Arrays.asList(1,2,3,4,5,6,7));
@@ -573,7 +534,30 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 
 
-	
+	public void printMarkets() {
+	    Deck<PowerGridCard> current = getCurrentMarket();
+	    Deck<PowerGridCard> future  = getFutureMarket();
+
+	    System.out.print("Current Market: ");
+	    if (current.getSize() == 0) {
+	        System.out.println("[empty]");
+	    } else {
+	        current.getComponents().forEach(card ->
+	            System.out.print(card.getNumber() + " ")
+	        );
+	        System.out.println();
+	    }
+
+	    System.out.print("Future Market: ");
+	    if (future.getSize() == 0) {
+	        System.out.println("[empty]");
+	    } else {
+	        future.getComponents().forEach(card ->
+	            System.out.print(card.getNumber() + " ")
+	        );
+	        System.out.println();
+	    }
+	}
 	}
 
 

@@ -48,29 +48,28 @@ import static games.root.RootParameters.VictoryCondition.Score;
 
 
 public class PowerGridForwardModel extends StandardForwardModel implements ITreeActionSpace {
-	boolean passed = false; 
 	@Override
 	protected void _setup(AbstractGameState firstState) {
 		PowerGridGameState state = (PowerGridGameState)firstState;
 		PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 		state.setActiveRegions(RegionPicker.randomContiguousSetDFS(state));		
-		state.gameMap = PowerGridGraphBoard.northAmerica().penalizeRegions(state.getActiveRegions(),10000);//creates a board where the cost to go to invalid region is 100000
+		state.setGameMap( PowerGridGraphBoard.northAmerica().penalizeRegions(state.getActiveRegions(),10000));//creates a board where the cost to go to invalid region is 100000
 		state.setInvalidCities(state.gameMap.invalidCities(state.getActiveRegions()));//creates a set of invalid cities based on the current legal board 
 		state.setValidCities(state.gameMap.validCities(state.getActiveRegions()));//creates a set of valid cities based on the current legal board 
-		state.resourceMarket = new PowerGridResourceMarket();
+		state.setResourceMarket(new PowerGridResourceMarket());
 		state.resourceMarket.setUpMarket(true);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
 		state.initFuelStorage(); 
 		state.setStep(1);
-		state.drawPile = setupDecks(params,state.getNPlayers(), state.getRnd());
-		state.currentMarket = new Deck<>("currentMarket", VISIBLE_TO_ALL);
-		state.futureMarket = new Deck<>("futureMarket",  VISIBLE_TO_ALL);
+		state.setDrawPile(setupDecks(params,state.getNPlayers(), state.getRnd()));
+		state.setCurrentMarket(new Deck<>("currentMarket", VISIBLE_TO_ALL));
+		state.setFutureMarket(new Deck<>("futureMarket",  VISIBLE_TO_ALL));
 		initMarkets(state);
 		state.initCityStorageForBoard();//creates a 2d array which keeps track of which cities are bought 
 		randomizeTurnOrder(state);
 		state.setStartingMoney(params.startingMoney);
 		state.setGamePhase(PowerGridGameState.PowerGridGamePhase.AUCTION); 
-		int first = state.getTurnOrder().get(0);
-		state.setTurnOwner(first);
+		int first_player = state.getTurnOrder().get(0);
+		state.setTurnOwner(first_player);
 		state.initOwnedPlants();
 				
 		System.out.println(state.fuelSummary());

@@ -13,6 +13,7 @@ import utilities.ImageIO;
 public class PowerGridMapPannel extends JComponent {
 	
 	private final Image backgroundImage;
+	private final Image resourceImage;
 	private final Map<Integer, Image> regionMasks = Map.of(
 			1, ImageIO.GetInstance().getImage("data/powergrid/region_1.png"),
 			2, ImageIO.GetInstance().getImage("data/powergrid/region_2.png"),
@@ -128,12 +129,22 @@ public class PowerGridMapPannel extends JComponent {
 	}
 
 	
-	public PowerGridMapPannel() {
+	public PowerGridMapPannel(int numberPlayers) {
 		backgroundImage = ImageIO.GetInstance().getImage("data/powergrid/us_map.png");
+		resourceImage = ImageIO.GetInstance().getImage("data/powergrid/na_resource_card_" + numberPlayers + ".png");
 	}
+	
+
     private void drawBackgroundImage(Graphics g) {
         if (backgroundImage != null) {
             drawImage(g, backgroundImage, 0, 0, 1100, 1000);
+        } else {
+        }
+    }
+    
+    private void drawResourceCard(Graphics g) {
+        if (backgroundImage != null) {
+            drawImage(g, resourceImage, 106,  875 , 120, 120);
         } else {
         }
     }
@@ -141,6 +152,7 @@ public class PowerGridMapPannel extends JComponent {
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
         drawBackgroundImage(g);
+        drawResourceCard(g);
 
         for (int r : disabledRegions) {
             Image mask = regionMasks.get(r);

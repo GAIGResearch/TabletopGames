@@ -61,7 +61,7 @@ public class PowerGridGUI extends AbstractGUIManager {
         parent.add(layered, BorderLayout.CENTER);
 
         // Background map
-        mapPanel = new PowerGridMapPannel();
+        mapPanel = new PowerGridMapPannel(gs.getNPlayers());
         mapPanel.setBounds(0, 0, 1100, 1120);
         layered.add(mapPanel, JLayeredPane.DEFAULT_LAYER);
         java.util.Map<Integer, Color> colorMap = new java.util.HashMap<>();
@@ -183,7 +183,7 @@ public class PowerGridGUI extends AbstractGUIManager {
 	    // refresh markets
 	    currentMarketView.updateComponent(gs.getCurrentMarket());
 	    futureMarketView.updateComponent(gs.getFutureMarket());
-	    marketOverlay.updateComponent(gs.resourceMarket.snapshot());
+	    marketOverlay.updateComponent(gs.getResourceMarket().snapshot());
 	    turnOverlay.setTurnOrder(buildTurnEntries(gs));
 
 	    // update each player panel with its own data
