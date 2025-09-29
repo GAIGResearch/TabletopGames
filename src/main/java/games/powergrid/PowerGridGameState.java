@@ -78,7 +78,9 @@ public class PowerGridGameState extends AbstractGameState {
     // Track the current highest bid and who holds it
     private int currentBid = 0;
     private int currentBidder = -1;
-	public Set<Integer> activeRegions;
+	private Set<Integer> activeRegions;
+	private Set<Integer> invalidCities; 
+	private Set<Integer> validCities; 
   
 
     
@@ -145,12 +147,26 @@ public class PowerGridGameState extends AbstractGameState {
         copy.auctionPlantNumber = this.auctionPlantNumber;
         copy.currentBid         = this.currentBid;
         copy.currentBidder      = this.currentBidder;
+        
+        copy.step = this.step;
         // current bids (Bid is immutable enough for shallow copy)
      // active regions
         if (this.activeRegions != null) {
             copy.activeRegions = new HashSet<>(this.activeRegions);
         } else {
             copy.activeRegions = null;
+        }
+        
+        if (this.validCities != null) {
+            copy.validCities = new HashSet<>(this.validCities);
+        } else {
+            copy.validCities = null;
+        }
+        
+        if (this.invalidCities != null) {
+            copy.invalidCities = new HashSet<>(this.invalidCities);
+        } else {
+            copy.invalidCities = null;
         }
 
         // fuel (you already do this)
@@ -274,14 +290,25 @@ public class PowerGridGameState extends AbstractGameState {
 		turnOrderIndex = (turnOrderIndex + 1) % turnOrder.size(); 
 		}
 	
-	public int getCityCount(int playerId) {
+
+	
+	public int getCityCountByPlayer(int playerId) {
+	    if (playerId < 0 || playerId >= cityCountByPlayer.length) {
+	        throw new IllegalArgumentException("Invalid playerId: " + playerId);
+	    }
 	    return cityCountByPlayer[playerId];
 	}
 	
-	public int [][] getCitygraph() {
+	public int[] getCityCountByPlayer() {    
+	    return cityCountByPlayer;
+	}
+
+	
+	public int [][] getCitySlotsById() {
 		return citySlotsById;
 	
 	}
+	
 	
 	public void claimCitySlot(int playerId, int cityId, int slotIndex) {
 	    if (citySlotsById[cityId][slotIndex] != -1)
@@ -520,6 +547,29 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 	public Set<Integer>  getActiveRegions(){
 		return this.activeRegions; 
+	}
+
+	public Set<Integer> getInvalidCities() {
+		return invalidCities;
+	}
+
+	public void setInvalidCities(Set<Integer> invalidCities) {
+		this.invalidCities = invalidCities;
+	}
+
+	public Set<Integer> getValidCities() {
+		return validCities;
+	}
+
+	public void setValidCities(Set<Integer> validCities) {
+		this.validCities = validCities;
+	}
+
+
+	public void incrementCityCount(int playerId) {
+	    if (playerId < 0 || playerId >= cityCountByPlayer.length)
+	        throw new IllegalArgumentException("Invalid playerId " + playerId);
+	    cityCountByPlayer[playerId]++;
 	}
 
 

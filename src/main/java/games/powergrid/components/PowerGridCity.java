@@ -16,22 +16,19 @@ import core.components.Component;
 public final class PowerGridCity extends Component {
     private final String name;
     private final int region;
-    private final int x, y;          // UI coordinates
     private final boolean doubleCity; // true = 2 slots per step (Deluxe metropolises)
 
-    public PowerGridCity(int id, String name, int region, int x, int y, boolean doubleCity) {
+    public PowerGridCity(int id, String name, int region, boolean doubleCity) {
         super(CoreConstants.ComponentType.TOKEN, name, id);
         this.name = name;
         this.region = region;
-        this.x = x; this.y = y;
         this.doubleCity = doubleCity;
     }
 
 
 	public String name()      { return name; }
     public int region()       { return region; }
-    public int uiX()          { return x; }
-    public int uiY()          { return y; }
+
     public boolean isDouble() { return doubleCity; }
 
     @Override public PowerGridCity copy() { return this; } // immutable

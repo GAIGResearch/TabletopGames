@@ -1,5 +1,6 @@
 package games.powergrid;
 
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +12,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import com.google.iam.v1.AuditConfigDelta.Action;
+
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
@@ -21,11 +24,13 @@ import games.powergrid.PowerGridGameState.PowerGridGamePhase;
 import core.interfaces.ITreeActionSpace;
 import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
+import games.powergrid.actions.BuildGenerator;
 import games.powergrid.actions.BuyResource;
 import games.powergrid.actions.IncreaseBid;
 import games.powergrid.actions.PassAction;
 import games.powergrid.actions.PassBid;
 import games.powergrid.components.PowerGridCard;
+import java.util.HashSet;
 
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
@@ -49,15 +54,14 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		PowerGridGameState state = (PowerGridGameState)firstState;
 		PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 		state.setActiveRegions(RegionPicker.randomContiguousSetDFS(state));		
-		state.gameMap = PowerGridGraphBoard.northAmerica().filterRegions(state.getActiveRegions());
-		System.out.println("Subset board cities = " + state.gameMap.cities().size());
-		state.gameMap.cities().forEach(System.out::println);
+		state.gameMap = PowerGridGraphBoard.northAmerica().penalizeRegions(state.getActiveRegions(),10000);//creates a board where the cost to go to invalid region is 100000
+		state.setInvalidCities(state.gameMap.invalidCities(state.getActiveRegions()));//creates a set of invalid cities based on the current legal board 
+		state.setValidCities(state.gameMap.validCities(state.getActiveRegions()));//creates a set of valid cities based on the current legal board 
 		state.resourceMarket = new PowerGridResourceMarket();
 		state.resourceMarket.setUpMarket(true);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
 		state.initFuelStorage(); 
 		state.setStep(1);
 		state.drawPile = setupDecks(params,state.getNPlayers(), state.getRnd());
-
 		state.currentMarket = new Deck<>("currentMarket", VISIBLE_TO_ALL);
 		state.futureMarket = new Deck<>("futureMarket",  VISIBLE_TO_ALL);
 		initMarkets(state);
@@ -70,7 +74,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.initOwnedPlants();
 				
 		System.out.println(state.fuelSummary());
-		System.out.println(Arrays.deepToString(state.getCitygraph()));
+		System.out.println(Arrays.deepToString(state.getCitySlotsById()));
 		System.out.println(state.getTurnOrder().toString());
 		System.out.println(state.resourceMarket);
 
@@ -95,6 +99,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	@Override
 	protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
 		PowerGridGameState s = (PowerGridGameState) gameState;
+		PowerGridParameters params = (PowerGridParameters) s.getGameParameters();
 	    int me = gameState.getCurrentPlayer();
 	    List<AbstractAction> actions = new ArrayList<>();
 	    PowerGridGameState.PowerGridGamePhase phase= (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase();
@@ -139,15 +144,47 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     		    }
     		    
     		}
-    		actions.add(new PassAction(me));
-    		
+    		actions.add(new PassAction(me));  		
     		System.out.println(actions);
         	
         	break;
 
-        case BUILD:
-        	
+        case BUILD: {
+            final Set<Integer> citiesInPlay = s.gameMap.validCities(s.getActiveRegions());
+            final Set<Integer> playerValid = new HashSet<>();
+            final Set<Integer> playerOwned = new HashSet<>();
+            final int[][] citySlotsById = s.getCitySlotsById();
+            final int step = s.getStep();
+
+            for (int cityId : citiesInPlay) {
+                boolean alreadyHere = Arrays.stream(citySlotsById[cityId])
+                                            .anyMatch(slot -> slot == me);
+                if (alreadyHere) {
+                    playerOwned.add(cityId);
+                    // IMPORTANT: you cannot build another house in the same city
+                    continue;
+                }
+                // city has an open slot allowed by the current step?
+                if (step >= 1 && citySlotsById[cityId][0] == -1) playerValid.add(cityId);
+                else if (step >= 2 && citySlotsById[cityId][1] == -1) playerValid.add(cityId);
+                else if (step >= 3 && citySlotsById[cityId][2] == -1) playerValid.add(cityId);
+            }
+
+            Map<Integer, Integer> cityCost = citiesToBuildIn(playerValid, playerOwned, s, params.citySlotPrices);
+
+            // Use the actual API name:
+            int myMoney = s.getPlayersMoney(me);
+
+            for (Map.Entry<Integer, Integer> e : cityCost.entrySet()) {
+                int cityId = e.getKey();
+                int totalCost = e.getValue();
+                if (totalCost <= myMoney) {
+                    actions.add(new BuildGenerator(cityId, totalCost));
+                }
+            }
+            actions.add(new PassAction(me));
             break;
+        }
 
         case BUREAUCRACY:
             break; 
@@ -155,6 +192,31 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	
     return actions;
 }
+	public Map<Integer, Integer> citiesToBuildIn(Set<Integer> playerValidCities,Set<Integer> playerOwnedCities,PowerGridGameState s, int[] citySlotPrices) {
+				PowerGridGraphBoard gameMap = s.getGameMap();
+				int[][] citySlotsById = s.getCitySlotsById(); 
+				int step = s.getStep();		
+				Map<Integer,Integer> costMap = new HashMap<>(gameMap.shortestPathCosts(playerValidCities, playerOwnedCities));
+				for (Map.Entry<Integer, Integer> entry : costMap.entrySet()) {
+				    int cityId = entry.getKey();
+				    int[] citySlot = citySlotsById[cityId];
+				    for(int i = 0;i < step; i++){
+				    	if(citySlot[i] == -1){
+				    		int total = entry.getValue() + citySlotPrices[i];
+				            entry.setValue(total);			    		
+				    		break;
+				    	}
+				    }
+				}
+				return costMap;
+				
+			}
+	
+
+
+
+	
+
 	
 
 	
@@ -213,13 +275,13 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        case RESOURCE_BUY ->{List<Integer> order = state.getRoundOrder();
 					        	Collections.reverse(state.getRoundOrder());
 					        	state.setTurnOwner(order.get(0));
-						        System.out.println(state.getRoundOrder());//delete when shown to work}
+						        System.out.println(state.getRoundOrder());//delete when shown to work
 
 	        }
 	        case BUILD ->{List<Integer> order = state.getRoundOrder();
 			        	Collections.reverse(state.getRoundOrder());
 			        	state.setTurnOwner(order.get(0));
-				        System.out.println(state.getRoundOrder());//delete when shown to work}
+				        System.out.println(state.getRoundOrder());//delete when shown to work
 	        	System.out.println("==== BUILDING PHASE ====");}
 	        //case BUREAUCRACY -> doBureaucracy(state);
 	        default -> {}
@@ -241,8 +303,22 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	   
 	}
 
-	// How much the player can legally buy now (storage-only; ignores market availability)
-	// Return order: [COAL, GAS, OIL, URANIUM]
+	/**
+	 * Computes how much of each resource type a player can legally purchase
+	 * based on the storage capacity of their owned power plants, ignoring
+	 * market availability.
+	 *
+	 * <p>Storage capacity is calculated as twice the input requirement of
+	 * each plant. Hybrid Gas/Oil plants contribute to a shared pool. Current
+	 * player fuel holdings are subtracted, and Gas/Oil overflow can use the
+	 * hybrid pool.</p>
+	 *
+	 * @param s        current game state
+	 * @param playerId ID of the player to evaluate
+	 * @return an {@link EnumMap} mapping each {@link PowerGridParameters.Resource}
+	 *         (COAL, GAS, OIL, URANIUM) to the maximum additional units that
+	 *         player can buy; values are non-negative
+	 */
 	private EnumMap<PowerGridParameters.Resource, Integer>playerBuyCapacity(PowerGridGameState s, int playerId) {
 	    var R = PowerGridParameters.Resource.class;
 	    EnumMap<PowerGridParameters.Resource, Integer> canBuy = new EnumMap<>(R);
@@ -266,9 +342,8 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        var req = in.asMap();
 	        boolean hybrid = (g > 0 && o > 0 && req.size() == 2);
 	        // If you added card.isHybridGasOil(), use: boolean hybrid = card.isHybridGasOil();
-
 	        if (hybrid) {
-	            int units = Math.max(g, o);      // robust if data isn't symmetric
+	            int units = Math.max(g, o);      
 	            hybridCap += 2 * units;          // shared pool for GAS+OIL
 	        } else {
 	            coalCap += 2 * in.get(PowerGridParameters.Resource.COAL);
@@ -414,14 +489,14 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     }
     
 
-    
+    //TODO this will be changed to both handle a randomize on the intial set up and handle in Phase1 basing it on #of generators if tied then highest plant number
     private void randomizeTurnOrder(PowerGridGameState state) {
         List<Integer> order = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++) {
             order.add(i);
         }
         Collections.shuffle(order, state.getRnd());  // reproducible shuffle
-        //turnOrder remains constant throughtout the turn 
+        //turnOrder remains constant throughtout the round 
         state.setTurnOrder(order);
         //will be modified during a specific phase 
         state.setRoundOrder(order);
@@ -429,7 +504,21 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         state.resetBidOrder();
     }
     
-  
+    /**
+     * Awards a power plant to the winning player after an auction.
+     * <p>
+     * This method deducts the purchase price from the winner, removes the
+     * specified plant from the current market, and adds it to the player's
+     * owned plants. If the plant is not found in the current market, the
+     * method logs an error and returns without changes. After a successful
+     * transfer, the power plant markets are rebalanced.
+     * </p>
+     *
+     * @param s           the current {@link PowerGridGameState}
+     * @param winner      ID of the player who won the auction
+     * @param plantNumber number of the plant that was purchased
+     * @param price       final price paid for the plant
+     */
     private void awardPlantToWinner(PowerGridGameState s, int winner, int plantNumber, int price) {
         s.decreasePlayerMoney(winner, price);
 
@@ -450,9 +539,22 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
                 winner, plantNumber, price);
         s.printOwnedPlants();
 
-        // Proper refill
+        // handles the markets once a card has been bought 
         rebalanceMarkets(s);
     }
+    
+    /**
+     * Rebalances the power plant markets after a purchase.
+     * <p>
+     * Draws a replacement plant from the draw pile into the current market,
+     * ensures the current market is sorted, and swaps cards between the
+     * current and future markets if ordering rules are violated
+     * (i.e., the largest current market card is greater than the smallest
+     * future market card). Both markets are re-sorted afterwards.
+     * </p>
+     *
+     * @param s the current {@link PowerGridGameState} containing markets to rebalance
+     */
     
     private void rebalanceMarkets(PowerGridGameState s) {
         Deck<PowerGridCard> current = s.getCurrentMarket();
@@ -479,7 +581,55 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
     
 
+    /**
+     * Utility for selecting a random contiguous set of map regions.
+     * <p>
+     * Uses a single depth-first search (DFS) over
+     * {@link PowerGridGraphBoard#REGION_ADJ_NA} to collect {@code k} regions,
+     * where {@code k = min(nPlayers, 5)}. The RNG is taken from
+     * {@link AbstractGameState#getRnd()} so results are reproducible under a fixed seed.
+     * </p>
+     * <implNote>
+     * Assumes the region-adjacency graph is such that from any start node
+     * a connected set of size {@code k} is reachable.
+     * </implNote>
+     */
+    public final class RegionPicker {
+        private static final List<Integer> ALL_REGIONS =
+                new ArrayList<>(PowerGridGraphBoard.REGION_ADJ_NA.keySet());
 
+        /** Returns a random contiguous set of size k via a single DFS. */
+        public static Set<Integer> randomContiguousSetDFS(AbstractGameState gs) {
+            int k = Math.min(gs.getNPlayers(), 5); //if its less than 5 players we just use the number of players else its 5 regions
+            Random rnd =  gs.getRnd();
+            int start = ALL_REGIONS.get(rnd.nextInt(ALL_REGIONS.size()));
+            return dfsGrow(start, k, rnd);
+        }
+
+        private static Set<Integer> dfsGrow(int start, int k, Random rnd) {
+            Set<Integer> chosen = new LinkedHashSet<>(k);
+            Deque<Integer> stack = new ArrayDeque<>();
+            stack.push(start);
+
+            while (!stack.isEmpty() && chosen.size() < k) {
+                int u = stack.pop();
+                if (!chosen.add(u)) continue;
+
+                // Randomize neighbor order to avoid bias
+                List<Integer> nbrs = new ArrayList<>(PowerGridGraphBoard.REGION_ADJ_NA.get(u));
+                Collections.shuffle(nbrs, rnd);
+                for (int v : nbrs) {
+                    if (chosen.size() >= k) break;
+                    if (!chosen.contains(v)) stack.push(v);
+                }
+            }
+            return chosen; // guaranteed to have size k by your assumption
+        }
+    }
+    
+    
+    
+    
     //PYTAG ACTION TREES 
 	@Override
 	public ActionTreeNode initActionTree(AbstractGameState gameState) {
@@ -499,57 +649,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		// TODO Auto-generated method stub
 		return null;
 	}
-    
-
-    
-    public final class RegionPicker {
-        // Universe of regions present in the map (keys of the adjacency map)
-        private static final List<Integer> ALL_REGIONS = new ArrayList<>(PowerGridGraphBoard.REGION_ADJ_NA.keySet());
-
-        /** Returns a random contiguous set of size k using DFS from a random start. */
-        public static Set<Integer> randomContiguousSetDFS( AbstractGameState gs) {
-        	int k = gs.getNPlayers();
-        	if(gs.getNPlayers() >=5) k =5;
-            Random rnd = (gs != null) ? gs.getRnd() : new Random();
-            if (k <= 0) throw new IllegalArgumentException("k must be >= 1");
-            if (k > ALL_REGIONS.size())
-                throw new IllegalArgumentException("k > number of regions (" + ALL_REGIONS.size() + ")");
-
-            // Try a few random starts in case some starts can’t reach k nodes (shouldn’t happen on your NA graph)
-            for (int attempt = 0; attempt < 20; attempt++) {
-                int start = ALL_REGIONS.get(rnd.nextInt(ALL_REGIONS.size()));
-                Set<Integer> chosen = dfsGrow(start, k, rnd);
-                if (chosen.size() == k) return chosen;
-            }
-            throw new IllegalStateException("Could not find contiguous set of size " + k + " after several attempts");
-        }
-
-        /** DFS that grows a connected set up to size k, randomizing neighbor order to avoid bias. */
-        private static Set<Integer> dfsGrow(int start, int k, Random rnd) {
-            Set<Integer> chosen = new LinkedHashSet<>();
-            Deque<Integer> stack = new ArrayDeque<>();
-            stack.push(start);
-
-            while (!stack.isEmpty() && chosen.size() < k) {
-                int u = stack.pop();
-                if (!chosen.add(u)) continue;
-
-                // Randomize neighbor order
-                List<Integer> nbrs = new ArrayList<>(PowerGridGraphBoard.REGION_ADJ_NA.getOrDefault(u, Set.of()));
-                Collections.shuffle(nbrs, rnd);
-
-                // Push neighbors that aren’t chosen yet
-                for (int v : nbrs) {
-                    if (chosen.size() >= k) break;
-                    if (!chosen.contains(v)) stack.push(v);
-                }
-            }
-            return chosen;
-        }
-
-   
-
-}
 }
 
 
