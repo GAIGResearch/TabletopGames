@@ -13,25 +13,49 @@ import java.util.Map;
 public class PowerGridResourceMarket extends Component {
 	
 	private final EnumMap<PowerGridParameters.Resource, Integer> avail = new EnumMap<>(PowerGridParameters.Resource.class);
+	private final EnumMap<PowerGridParameters.Resource, Integer> discard = new EnumMap<>(PowerGridParameters.Resource.class);
+	public static final int[] discardStart = new int[]{27, 24, 20,12};
 	
 	public PowerGridResourceMarket() {
 		super(CoreConstants.ComponentType.BOARD, "ResourceMarket");
+		for (PowerGridParameters.Resource r : PowerGridParameters.Resource.values())//maps Resource type -> amount in teh discard start
+	           discard.put(r, 0);
 		for (PowerGridParameters.Resource r : PowerGridParameters.Resource.values())//maps Resource type -> zero
 	           avail.put(r, 0);
 	}
 	
-	public void setUpMarket(boolean northAmerica){
-		avail.put(PowerGridParameters.Resource.COAL, 23);
-		avail.put(PowerGridParameters.Resource.GAS, 18);
-		if(northAmerica){
-			avail.put(PowerGridParameters.Resource.OIL, 14);
-			avail.put(PowerGridParameters.Resource.URANIUM, 2);
-		}else {
-			avail.put(PowerGridParameters.Resource.OIL, 16);
-			avail.put(PowerGridParameters.Resource.URANIUM, 4);
-		}
+	public void setUpMarket(int [] startingResources){
+		discard.put(PowerGridParameters.Resource.COAL, 27);
+		discard.put(PowerGridParameters.Resource.GAS, 24);
+		discard.put(PowerGridParameters.Resource.OIL, 20);
+		discard.put(PowerGridParameters.Resource.URANIUM, 12);
 		
+		
+		replenishMarket(startingResources);	
 	}
+	
+	public void replenishMarket(int [] replenishAmount) {
+		replenishResource(PowerGridParameters.Resource.COAL, replenishAmount[0]);
+		replenishResource(PowerGridParameters.Resource.GAS, replenishAmount[1]);
+		replenishResource(PowerGridParameters.Resource.OIL, replenishAmount[2]);
+		replenishResource(PowerGridParameters.Resource.URANIUM, replenishAmount[3]);
+	}
+	
+	
+	private void replenishResource(PowerGridParameters.Resource resource, int amount) {
+	    int inDiscard = discard.getOrDefault(resource, 0);
+	    int toMove = Math.min(amount, inDiscard);
+	    if (toMove <= 0) return; // nothing to move
+	    discard.put(resource, inDiscard - toMove);
+	    int inAvail = avail.getOrDefault(resource, 0);
+	    avail.put(resource, inAvail + toMove);
+	}
+	
+	public void returnToDiscardPile(PowerGridParameters.Resource resource, int amount) {
+		int inDiscard = discard.getOrDefault(resource, 0);
+		discard.put(resource, inDiscard + amount);
+	}
+	
 
     @Override
     public PowerGridResourceMarket copy() {

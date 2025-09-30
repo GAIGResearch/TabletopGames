@@ -57,7 +57,7 @@ public class BuyResource extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Buys " + amount  + " " + resource;
+        return "Buys " + amount  + " " + resource ;
     }
 
     @Override

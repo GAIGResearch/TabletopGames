@@ -29,6 +29,7 @@ import games.powergrid.actions.BuyResource;
 import games.powergrid.actions.IncreaseBid;
 import games.powergrid.actions.PassAction;
 import games.powergrid.actions.PassBid;
+import games.powergrid.actions.RunPowerPlant;
 import games.powergrid.components.PowerGridCard;
 import java.util.HashSet;
 
@@ -57,7 +58,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.setInvalidCities(state.gameMap.invalidCities(state.getActiveRegions()));//creates a set of invalid cities based on the current legal board 
 		state.setValidCities(state.gameMap.validCities(state.getActiveRegions()));//creates a set of valid cities based on the current legal board 
 		state.setResourceMarket(new PowerGridResourceMarket());
-		state.resourceMarket.setUpMarket(true);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
+		state.resourceMarket.setUpMarket(params.startinResources);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
 		state.initFuelStorage(); 
 		state.setStep(1);
 		state.setDrawPile(setupDecks(params,state.getNPlayers(), state.getRnd()));
@@ -73,7 +74,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.initOwnedPlants();
 				
 		System.out.println(state.fuelSummary());
-		System.out.println(Arrays.deepToString(state.getCitySlotsById()));
+		//System.out.println(Arrays.deepToString(state.getCitySlotsById()));
 		System.out.println(state.getTurnOrder().toString());
 		System.out.println(state.resourceMarket);
 
@@ -104,7 +105,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    PowerGridGameState.PowerGridGamePhase phase= (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase();
 
 	    switch (phase) {
-	    //this will be deleted 
+	    //this will be deleted since there are no actions available to player here 
         case PLAYER_ORDER:
             break;
 
@@ -154,13 +155,11 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             final Set<Integer> playerOwned = new HashSet<>();
             final int[][] citySlotsById = s.getCitySlotsById();
             final int step = s.getStep();
-
             for (int cityId : citiesInPlay) {
                 boolean alreadyHere = Arrays.stream(citySlotsById[cityId])
                                             .anyMatch(slot -> slot == me);
                 if (alreadyHere) {
-                    playerOwned.add(cityId);
-                    // IMPORTANT: you cannot build another house in the same city
+                    playerOwned.add(cityId);                 
                     continue;
                 }
                 // city has an open slot allowed by the current step?
@@ -170,14 +169,10 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             }
 
             Map<Integer, Integer> cityCost = citiesToBuildIn(playerValid, playerOwned, s, params.citySlotPrices);
-
-            // Use the actual API name:
-            int myMoney = s.getPlayersMoney(me);
-
             for (Map.Entry<Integer, Integer> e : cityCost.entrySet()) {
                 int cityId = e.getKey();
                 int totalCost = e.getValue();
-                if (totalCost <= myMoney) {
+                if (totalCost <= s.getPlayersMoney(me)) {
                     actions.add(new BuildGenerator(cityId, totalCost));
                 }
             }
@@ -185,8 +180,33 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             break;
         }
 
-        case BUREAUCRACY:
-            break; 
+        case BUREAUCRACY:{
+            Deck<PowerGridCard> playerHand = s.getPlayerPlantDeck(me);
+            for (PowerGridCard card : playerHand) { //generates all possible resource spending combos 
+                if(s.hasPlantRun(card.getNumber()))continue; //cards already been ran cant run a second time 
+            	List<EnumMap<Resource, Integer>> reqs = card.generatePossibleCombos();
+            	for (EnumMap<Resource, Integer> combo : reqs) {
+            	    boolean feasible = true;
+            	    for (Map.Entry<Resource, Integer> entry : combo.entrySet()) {
+            	        Resource resource = entry.getKey();
+            	        int amount = entry.getValue();
+            	        if (s.getFuel(me, resource) < amount) {
+            	            feasible = false;
+            	            break;
+            	        }
+            	    }
+            	    if (feasible) {
+            	        actions.add(new RunPowerPlant(card.getNumber(),combo));
+            	    }
+            	}
+            }
+            actions.add(new PassAction(me));
+            break;
+        }
+
+            
+            
+            //filter out ones you dont have the resources for 
     }
 	
     return actions;

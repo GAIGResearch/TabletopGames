@@ -10,7 +10,7 @@ import games.powergrid.components.PowerGridCard;
 
 public class PowerGridParameters extends TunableParameters {
 	public static final String CARD_ASSET_PATH = "data/powergrid";
-	public enum Resource { COAL,  GAS, OIL, URANIUM }
+	public enum Resource { COAL,  GAS, OIL, URANIUM} //TODO implement None Type resource
 	public enum PlantType { COAL, GAS, OIL, URANIUM, HYBRID, GREEN }
 	/*
 	public enum Phase {
@@ -33,6 +33,7 @@ public class PowerGridParameters extends TunableParameters {
     public int startingMoney = 50;
     
     public int[] citySlotPrices = new int[]{10, 15, 20};
+    public int[] startinResources = new int[]{23, 18, 14,2};
     
     // Step 2 Trigger
     public int step2Trigger = 7;
@@ -78,6 +79,7 @@ public class PowerGridParameters extends TunableParameters {
     	};
     
     public List<PowerGridCard> plantsIncludedInGame = List.of(
+    		//NOTE RENEWABLES RESOURCE COAL BUT COST NONE
     		//initial cards
     	    PowerGridCard.plant(3, 1, Map.of(Resource.COAL, 2)),
     	    PowerGridCard.plant(4, 1, Map.of(Resource.COAL, 2)),
@@ -87,39 +89,39 @@ public class PowerGridParameters extends TunableParameters {
     	    PowerGridCard.plant(8, 2, Map.of(Resource.GAS, 3, Resource.OIL, 3)),
     	    PowerGridCard.plant(9, 2, Map.of(Resource.COAL, 3)),
     	    PowerGridCard.plant(10, 2, Map.of(Resource.OIL, 2)),
-    	    PowerGridCard.plant(11, 1, Map.of()), // renewable, no fuel cost
+    	    PowerGridCard.plant(11, 1, Map.of(Resource.COAL, 0)), 
     	    PowerGridCard.plant(12, 2, Map.of(Resource.COAL, 2)),
     	    PowerGridCard.plant(13, 2, Map.of(Resource.URANIUM, 1)),
     	    PowerGridCard.plant(14, 2, Map.of(Resource.GAS, 1)),
     	    PowerGridCard.plant(15, 2, Map.of(Resource.COAL, 1)),
     	    //rest of deck
     	    PowerGridCard.plant(16, 3, Map.of(Resource.GAS, 2)),
-    	    PowerGridCard.plant(17, 2, Map.of()),
+    	    PowerGridCard.plant(17, 2, Map.of(Resource.COAL, 0)),
     	    PowerGridCard.plant(18, 3, Map.of(Resource.OIL, 2)),
     	    PowerGridCard.plant(19, 3, Map.of(Resource.GAS, 1)),
     	    PowerGridCard.plant(20, 4, Map.of(Resource.COAL, 3)),
     	    PowerGridCard.plant(21, 3, Map.of(Resource.URANIUM, 1)),
     	    PowerGridCard.plant(22, 5, Map.of(Resource.GAS, 3, Resource.OIL, 3)),
     	    PowerGridCard.plant(23, 4,  Map.of(Resource.OIL, 2)),
-    	    PowerGridCard.plant(24, 3, Map.of()),
+    	    PowerGridCard.plant(24, 3, Map.of(Resource.COAL, 0)),
     	    PowerGridCard.plant(25, 5, Map.of(Resource.COAL, 2)),
     	    PowerGridCard.plant(26, 4, Map.of(Resource.GAS, 1)),
     	    PowerGridCard.plant(27, 4, Map.of(Resource.COAL, 1)),
-    	    PowerGridCard.plant(28, 3,  Map.of()),
+    	    PowerGridCard.plant(28, 3,  Map.of(Resource.COAL, 0)),
     	    PowerGridCard.plant(29, 5, Map.of(Resource.COAL, 2)),
     	    PowerGridCard.plant(30, 5, Map.of(Resource.OIL, 2)),
-    	    PowerGridCard.plant(31, 4, Map.of()),
+    	    PowerGridCard.plant(31, 4, Map.of(Resource.COAL, 0)),
     	    PowerGridCard.plant(32, 5, Map.of(Resource.URANIUM, 2)),
     	    PowerGridCard.plant(33, 6, Map.of(Resource.COAL, 3)),
     	    PowerGridCard.plant(34, 6, Map.of(Resource.GAS, 3)),
     	    PowerGridCard.plant(35, 5, Map.of(Resource.OIL, 2, Resource.GAS, 2)),
-    	    PowerGridCard.plant(36, 5,  Map.of()),
+    	    PowerGridCard.plant(36, 5,  Map.of(Resource.COAL, 0)),
     	    PowerGridCard.plant(37, 6, Map.of(Resource.URANIUM, 2)),
     	    PowerGridCard.plant(38, 6, Map.of(Resource.OIL, 3)),
     	    PowerGridCard.plant(39, 6, Map.of(Resource.GAS, 2)),
     	    PowerGridCard.plant(40, 6, Map.of(Resource.COAL, 3)),
     	    PowerGridCard.plant(42, 6, Map.of(Resource.OIL, 2)),
-    	    PowerGridCard.plant(44, 6,  Map.of()),
+    	    PowerGridCard.plant(44, 6,  Map.of(Resource.COAL, 0)),
     	    PowerGridCard.plant(46, 7, Map.of(Resource.GAS, 2)),
     	    PowerGridCard.plant(50, 7, Map.of(Resource.URANIUM, 2))
     	);

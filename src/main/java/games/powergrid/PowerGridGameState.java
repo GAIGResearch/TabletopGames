@@ -6,10 +6,11 @@ import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
 import games.GameType;
+import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
-
+import games.powergrid.components.PowerGridCard.PlantInput;
 
 import java.util.*;
 
@@ -21,6 +22,7 @@ public class PowerGridGameState extends AbstractGameState {
   
     protected PowerGridGraphBoard gameMap;
     protected PowerGridResourceMarket resourceMarket; 
+    protected HashMap<Resource,Integer> resourceDiscardPile; 
     protected EnumMap<PowerGridParameters.Resource, Integer>[] fuelByPlayer;
     protected Deck<PowerGridCard> drawPile;
     protected Deck<PowerGridCard> currentMarket;
@@ -30,11 +32,12 @@ public class PowerGridGameState extends AbstractGameState {
     private List<Integer> turnOrder = new ArrayList<>();
     private List<Integer> roundOrder = new ArrayList<>();
     private List<Integer> bidOrder = new ArrayList<>();
-    
+    private Set<Integer> plantsRan = new HashSet<>();
     
     
     private int turnOrderIndex = 0;
     private int[] playerMoney;
+    private int[] citiesRan; 
     private int step;
 
 	
@@ -77,6 +80,7 @@ public class PowerGridGameState extends AbstractGameState {
         super(gameParameters, nPlayers);
         this.cityCountByPlayer = new int[nPlayers];
         this.playerMoney = new int[nPlayers];
+        this.citiesRan = new int[nPlayers];
     }
 
     // ---------- Required TAG overrides ----------
@@ -112,6 +116,7 @@ public class PowerGridGameState extends AbstractGameState {
 
         copy.playerMoney       = (this.playerMoney == null) ? null : this.playerMoney.clone();
         copy.cityCountByPlayer = (this.cityCountByPlayer == null) ? null : this.cityCountByPlayer.clone();
+        copy.citiesRan       = (this.citiesRan  == null) ? null : this.citiesRan .clone();
 
         if (this.citySlotsById != null) {
             copy.citySlotsById = new int[this.citySlotsById.length][];
@@ -149,6 +154,13 @@ public class PowerGridGameState extends AbstractGameState {
         } else {
             copy.invalidCities = null;
         }
+        
+        if (this.plantsRan != null) {
+            copy.plantsRan = new HashSet<>(this.plantsRan);
+        } else {
+            copy.plantsRan = null;
+        }
+
 
         if (fuelByPlayer != null) {
             @SuppressWarnings("unchecked")
@@ -558,7 +570,52 @@ public class PowerGridGameState extends AbstractGameState {
 	        System.out.println();
 	    }
 	}
+	public void generateResourceDiscardPile(int [] startValues) {
+		HashMap<Resource, Integer> resourceMap = new HashMap<>();
+        resourceMap.put(Resource.COAL, startValues[0]);
+        resourceMap.put(Resource.GAS, startValues[1]);
+        resourceMap.put(Resource.OIL, startValues[2]);
+        resourceMap.put(Resource.URANIUM, startValues[3]);
+        this.resourceDiscardPile = resourceMap;
 	}
+	
+	public boolean playerOwnsPlant(int playerId, int plantId) {
+	    Deck<PowerGridCard> playerHand = this.ownedPlantsByPlayer[playerId];
+	    for (PowerGridCard card : playerHand) {
+	        if (card.getNumber() == plantId) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	public void markPlantRun(int plantId) {
+        plantsRan.add(plantId);
+    }
+
+    public boolean hasPlantRun(int plantId) {
+        return plantsRan.contains(plantId);
+    }
+
+    public void resetPlantsRan() {
+        plantsRan.clear();
+    }
+    
+    public int numberOfCitiesRan(int playerId) {
+        return this.citiesRan[playerId];
+    }
+
+    public void clearCitiesRan() {
+        Arrays.fill(this.citiesRan, 0);
+    }
+
+    public void addCitiesRan(int playerId, int numberOfCities) {
+    	int totalCities = citiesRan[playerId] + numberOfCities;
+        int maxCities = cityCountByPlayer[playerId];
+        citiesRan[playerId] = Math.min(totalCities, maxCities);
+    }
+
+    
+}
 
 
 

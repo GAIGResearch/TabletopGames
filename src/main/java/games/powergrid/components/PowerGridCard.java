@@ -5,8 +5,11 @@ import core.components.Card;
 import games.powergrid.PowerGridParameters.Resource;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Power Plant card definition for Power Grid.
@@ -66,6 +69,10 @@ public class PowerGridCard extends Card {
     public PlantInput getInput() {
     	return this.input;
     }
+    public int getCapacity() {
+    	return this.capacity;
+    }
+    
     @Override
     public Card copy() { return this; } // immutable
 
@@ -88,5 +95,36 @@ public class PowerGridCard extends Card {
         return type == Type.PLANT
                 ? "#" + number + " cap=" + capacity + " req=" + input.asMap()
                 : "STEP3";
+    }
+    
+    public List<EnumMap<Resource, Integer>> generatePossibleCombos() {
+        List<EnumMap<Resource, Integer>> combos = new ArrayList<>();
+        EnumMap<Resource, Integer> req = input.asMap();
+
+        if (req.size() == 1) {
+            // Only one resource → just return the requirement
+            combos.add(req);
+            return combos;
+        }
+
+        if (req.size() == 2) {
+            // Hybrid: both values should be the same (e.g. GAS=2, OIL=2)
+            Iterator<Map.Entry<Resource,Integer>> it = req.entrySet().iterator();
+            Map.Entry<Resource,Integer> first = it.next();
+            Map.Entry<Resource,Integer> second = it.next();
+
+            Resource r1 = first.getKey();
+            Resource r2 = second.getKey();
+            int k = first.getValue();  // assume both values equal
+
+            for (int i = 0; i <= k; i++) {
+                EnumMap<Resource,Integer> option = new EnumMap<>(Resource.class);
+                option.put(r1, i);
+                option.put(r2, k - i);
+                combos.add(option);
+            }
+            return combos;
+        }
+        throw new UnsupportedOperationException("More than 2 resource types not handled yet");
     }
 }
