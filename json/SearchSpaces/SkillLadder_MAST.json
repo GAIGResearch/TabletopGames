@@ -5,7 +5,12 @@
   "rolloutLengthPerPlayer" : true,
   "rolloutTermination" : ["EXACT", "END_TURN", "END_ROUND"],
   "maxTreeDepth" : [1, 3, 10, 1000],
+  "rolloutType" : ["RANDOM", "MAST"],
+  "useMASTAsActionHeuristic" : [false, true],
+  "oppModelType" : ["DEFAULT", "RANDOM"],
   "paranoid" : [false, true],
+  "MAST" : "Both",
+  "MASTGamma" : 0.2,
   "budgetType" : "BUDGET_TIME",
   "information" : "Information_Set",
   "selectionPolicy" : "SIMPLE",
@@ -18,7 +23,7 @@
   "budget" : -999,
   "epsilon" : 1e-6,
   "breakMS" : 0,
-  "exploreEpsilon" : 0.30,
+  "exploreEpsilon" : [0.00, 0.10, 0.30],
   "heuristic" : {
     "class" : "players.heuristics.CoarseTunableHeuristic",
     "heuristicType" : ["WIN_ONLY", "SCORE_ONLY", "SCORE_PLUS", "LEADER", "WIN_PLUS", "HEURISTIC"]
