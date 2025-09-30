@@ -64,11 +64,16 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
         sgs.discardDeck = new PartialObservableDeck<>("DiscardDeck", -1, sgs.getNPlayers(), HIDDEN_TO_ALL);
 
-        // we now build a new grid board. To avoid silliness, we do not let the players build to the left
-        int spaceForGoals = (sgp.goalSpacingY + 1) * sgp.nGoals + 10;
-        sgs.startingSquare = new Vector2D(2, spaceForGoals / 2); // we start just in on the left edge, and half way down vertically
+        // we now build a new grid board. This is not infinite to void silliness.
+        // We have a start space on the left, the number of treasure cards goalSpacingX to the right, plus the defined horizontal padding on each side
+        // and enough vertical space to fit all the goals with the required spacing, plus the defined vertical padding
+        int verticalSize = (sgp.goalSpacingY + 1) * sgp.nGoals + sgp.verticalPadding * 2;
+        int horizontalSize = sgp.goalSpacingX + 2 + sgp.horizontalPadding * 2;
 
-        sgs.gridBoard = new PartialObservableGridBoard(sgp.goalSpacingX + 5, spaceForGoals, sgs.getNPlayers(), true);
+        sgs.gridBoard = new PartialObservableGridBoard(horizontalSize, verticalSize, sgs.getNPlayers(), true);
+
+        sgs.startingSquare = new Vector2D(sgp.horizontalPadding, verticalSize / 2); // we start just in on the left edge, and half way down vertically
+
         sgs.gridBoard.setElement(sgs.startingSquare.getX(), sgs.startingSquare.getY(), new PathCard(PathCard.PathCardType.Start, new boolean[]{true, true, true, true}));
         sgs.nuggetDeck = new Deck<>("NuggetDeck", HIDDEN_TO_ALL);
         for (int goldValue = 0; goldValue < sgp.goldSupply.length; goldValue++) {

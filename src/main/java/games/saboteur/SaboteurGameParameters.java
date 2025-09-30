@@ -15,8 +15,12 @@ import static games.saboteur.components.ActionCard.ActionCardType.*;
 import static games.saboteur.components.ActionCard.ToolCardType.*;
 
 public class SaboteurGameParameters extends TunableParameters<SaboteurGameParameters> {
-    public int goalSpacingX = 5;
-    public int goalSpacingY = 1;
+    public int goalSpacingX = 8; // the distance from start to goal cards (9 means there are 8 empty spaces between them)
+    // the standard game has this set to 8, but 6 works better with general MCTS agents
+    public int goalSpacingY = 1; // the gap between goal cards (1 means there is one empty space between them)
+    int horizontalPadding = 2; // the number of spaces to left of start, and to right of goal cards
+    int verticalPadding = 3; // the number of spaces above/below the top/bottom goal cards
+
     public int nGoals = 3;
     public int nTreasures = 1;
     public int mapCardsInDeck = 6;
@@ -54,6 +58,8 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
         addTunableParameter("nuggets_3", 4);
         addTunableParameter("mapCardsInDeck", 6);
         addTunableParameter("rockfallCardsInDeck", 3);
+        addTunableParameter("horizontalPadding", 2);
+        addTunableParameter("verticalPadding", 3);
 
         //All Path type cards in a deck excluding goal and start card
         PathCard.PathCardType edge = PathCard.PathCardType.Edge;
@@ -101,6 +107,8 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
         goalSpacingY = (int) getParameterValue("goalSpacingY");
         mapCardsInDeck = (int) getParameterValue("mapCardsInDeck");
         rockfallCardsInDeck = (int) getParameterValue("rockfallCardsInDeck");
+        horizontalPadding = (int) getParameterValue("horizontalPadding");
+        verticalPadding = (int) getParameterValue("verticalPadding");
     }
 
     @Override
