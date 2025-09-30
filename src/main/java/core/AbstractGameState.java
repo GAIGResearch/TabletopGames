@@ -717,14 +717,4 @@ public abstract class AbstractGameState {
     public boolean isGameOver() {
         return gameStatus.equals(GAME_END);
     }
-
-    public int getWinner() {
-        if (gameStatus.equals(GAME_END)) {
-            for (int playerId = 0; playerId < nPlayers; playerId++)
-                if (playerResults[playerId] == WIN_GAME)
-                    return playerId;
-        }
-        return -1;
-    }
-
 }

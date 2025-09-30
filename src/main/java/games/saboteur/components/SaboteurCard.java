@@ -55,4 +55,9 @@ public class SaboteurCard extends BoardNode
     public int hashCode() {
         return Objects.hash(super.hashCode(), type, nOfNuggets);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s (%d)", type.name(), nOfNuggets);
+    }
 }
