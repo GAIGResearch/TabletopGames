@@ -38,7 +38,7 @@ public class Hero extends Figure {
 
     String heroicFeatStr;
     HeroicFeat.HeroFeat heroicFeat;
-    boolean usedHeroAbility, featAvailable, canTrade, rested, defeated;
+    boolean usedHeroAbility, featAvailable, equipped, canTrade, rested, defeated;
 
     HeroAbilities.HeroAbility heroAbility;
     String abilityStr;
@@ -106,6 +106,20 @@ public class Hero extends Figure {
 
     public void setInventory(Deck<DescentCard> inventory) {
         this.inventory = inventory;
+    }
+
+    public boolean hasEquipment() {
+        // First, check that we actually have any items in our inventory that can be equipped
+        if (!inventory.getComponents().isEmpty())
+            for (DescentCard item : inventory.getComponents())
+                if (canEquip(item)) return true;
+
+        // Next, check that we have any armour, weapons, or other items already equipped
+        // Only allow if we have at least one weapon equipped (and thus have more than the basic Blue attack die)
+        if (armor != null) return true;
+        if (!handEquipment.getComponents().isEmpty())
+            if (attackDice.getSize() > 1) return true;
+        return !otherEquipment.getComponents().isEmpty();
     }
 
     public Map<String, Integer> getEquipSlotsAvailable() {
@@ -203,11 +217,17 @@ public class Hero extends Figure {
         return canTrade;
     }
 
-    public boolean equip(DescentCard c) {
-        // Check if equipment
+    public void setEquipped(boolean equipped) {
+        this.equipped = equipped;
+    }
+
+    public boolean isEquipped() {
+        return equipped;
+    }
+
+    public boolean canEquip(DescentCard c) {
         Property cost = c.getProperty(costHash);
         if (cost != null) {
-            // Equipment! Check if it's legal to equip
             String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
             boolean canEquip = true;
             Map<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
@@ -219,7 +239,28 @@ public class Hero extends Figure {
                     equipSlots.put(e, equipSlots.get(e) - 1);
                 }
             }
-            if (canEquip) {
+            return canEquip;
+        }
+        return false;
+    }
+
+    public boolean equip(DescentCard c) {
+        // Check if equipment
+        Property cost = c.getProperty(costHash);
+        if (cost != null) {
+
+            // Equipment! Check if it's legal to equip
+            if (canEquip(c)) {
+
+                String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
+                Map<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
+
+                for (String e : equip)
+                    equipSlots.put(e, equipSlots.get(e) - 1);
+
+                if (inventory.contains(c))
+                    inventory.remove(c);
+
                 equipSlotsAvailable = equipSlots;
                 switch (equip[0]) {
                     case "armor":
@@ -242,6 +283,59 @@ public class Hero extends Figure {
         }
     }
 
+    public boolean canUnequip(DescentCard c) {
+        Property cost = c.getProperty(costHash);
+        if (cost != null) {
+            String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
+            switch (equip[0]) {
+                case "armor":
+                    return armor.equals(c);
+                case "hand":
+                    return handEquipment.contains(c);
+                case "other":
+                    return otherEquipment.contains(c);
+            }
+        }
+        return false;
+    }
+
+    public boolean unequip(DescentCard c) {
+        // Check if equipment
+        Property cost = c.getProperty(costHash);
+        if (cost != null) {
+
+            // Equipment! Check if it's legal to unequip
+            if (canUnequip(c)) {
+
+                String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
+                Map<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
+
+                for (String e : equip)
+                    equipSlots.put(e, equipSlots.get(e) + 1);
+
+                equipSlotsAvailable = equipSlots;
+                inventory.add(c);
+                switch (equip[0]) {
+                    case "armor":
+                        armor = null;
+                        break;
+                    case "hand":
+                        handEquipment.remove(c);
+                        break;
+                    case "other":
+                        otherEquipment.remove(c);
+                        break;
+                }
+                return true;
+            }
+            return false;
+        } else {
+            // A skill
+            skills.add(c);
+            return true;
+        }
+    }
+
     public List<DescentCard> getWeapons() {
         return handEquipment.stream().filter(DescentCard::isAttack).collect(Collectors.toList());
     }
@@ -251,7 +345,8 @@ public class Hero extends Figure {
         Optional<DescentCard> wpn = getWeapons().stream().findFirst();
         if (wpn.isPresent())
             return wpn.get().getDicePool();
-        return DicePool.empty;
+        // Bare Hands are allowed to attack - but they only use the default Blue die
+        return attackDice;
     }
 
     @Override
@@ -261,7 +356,8 @@ public class Hero extends Figure {
         if (!super.equals(o)) return false;
         Hero hero = (Hero) o;
         return usedHeroAbility == hero.usedHeroAbility && featAvailable == hero.featAvailable &&
-                rested == hero.rested && defeated == hero.defeated && hero.canTrade == canTrade &&
+                rested == hero.rested && defeated == hero.defeated &&
+                canTrade == hero.canTrade && equipped == hero.equipped &&
                 Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) &&
                 Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(inventory, hero.inventory) &&
                 Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Objects.equals(heroicFeatStr, hero.heroicFeatStr) &&
@@ -272,7 +368,7 @@ public class Hero extends Figure {
     public int hashCode() {
         return Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, inventory,
                 equipSlotsAvailable, heroicFeatStr, heroicFeat.ordinal(), usedHeroAbility, featAvailable,
-                canTrade, rested, defeated, heroAbility.ordinal(), abilityStr);
+                canTrade, equipped, rested, defeated, heroAbility.ordinal(), abilityStr);
     }
 
     @Override
@@ -305,6 +401,7 @@ public class Hero extends Figure {
         copy.rested = this.rested;
         copy.defeated = this.defeated;
         copy.canTrade = this.canTrade;
+        copy.equipped = this.equipped;
         super.copyComponentTo(copy);
         return copy;
     }

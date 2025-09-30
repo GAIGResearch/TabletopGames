@@ -164,8 +164,8 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
 
         boolean receiving = target.getInventory().contains(item);
         if (receiving)
-            return "Receive " + item.getComponentName() + " from " + targetName;
-        return "Give " + item.getComponentName() + " to " + targetName;
+            return "Receive " + item.toString() + " from " + targetName;
+        return "Give " + item.toString() + " to " + targetName;
     }
 
     @Override

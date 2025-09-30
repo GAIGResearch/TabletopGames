@@ -18,6 +18,7 @@ import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
+import games.descent2e.actions.items.EquipItem;
 import games.descent2e.actions.items.TradeItem;
 import games.descent2e.actions.monsterfeats.Land;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
@@ -377,7 +378,8 @@ public class DescentForwardModel extends StandardForwardModel {
             removeAirImmunity(dgs, (Monster) actingFigure);
         }
 
-        if (actingFigure instanceof Hero) {
+        if (actingFigure instanceof Hero h) {
+            h.setEquipped(false);
             String heroClass = ((PropertyString) actingFigure.getProperty("class")).value;
             if (Objects.equals(heroClass, "Disciple"))
             {
@@ -758,6 +760,20 @@ public class DescentForwardModel extends StandardForwardModel {
         // Init action list
         List<AbstractAction> actions = new ArrayList<>();
         Figure actingFigure = dgs.getActingFigure();
+
+        // Equipment Initialisation
+        // This is only for Heroes who have items available in their inventories
+        if (actingFigure instanceof Hero hero) {
+            if (!hero.isEquipped()) {
+                EquipItem startEquip = new EquipItem(actingFigure.getComponentID());
+                EquipItem stopEquip = new EquipItem();
+                if (startEquip.canExecute(dgs) && stopEquip.canExecute(dgs)) {
+                    actions.add(startEquip);
+                    actions.add(stopEquip);
+                    return actions;
+                }
+            }
+        }
 
         // End Of Turn Actions
         // We only access this when there is nothing else to do
