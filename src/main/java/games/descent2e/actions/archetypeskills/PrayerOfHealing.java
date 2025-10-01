@@ -214,16 +214,15 @@ public class PrayerOfHealing extends Heal implements IExtendedSequence {
 
         string += " for 1 Red Power Die";
         if (healthRecovered > 0)
-            string += " (" + healthRecovered + " Health";
+            string += " (" + healthRecovered + " Health)";
         if (surges > 0)
-            string += " + 1 Fatigue";
+            string = string.replace(")"," + 1 Stamina)");
         if (armorOfFaith)
-            string += ", Armor of Faith";
+            string = string.replace(")",", Armor of Faith)");
         if (cleansingTouch)
-            string += ", Cleansing Touch";
+            string = string.replace(")",", Cleansing Touch)");
         if (divineFury)
-            string += ", Divine Fury";
-        string += ")";
+            string = string.replace(")",", Divine Fury)");
         return string;
     }
 

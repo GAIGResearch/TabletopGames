@@ -11,6 +11,7 @@ import evaluation.metrics.Event;
 import games.descent2e.DescentTypes.*;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.*;
+import games.descent2e.actions.archetypeskills.Heal;
 import games.descent2e.actions.archetypeskills.PrayerOfHealing;
 import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.attack.*;
@@ -888,6 +889,28 @@ public class DescentForwardModel extends StandardForwardModel {
                     TradeItem trade = new TradeItem(hero.getComponentID(), target.getComponentID());
                     if (trade.canExecute(dgs))
                         actions.add(trade);
+                }
+            }
+
+            Deck<DescentCard> equipment = hero.getAllEquipment();
+            for (Card item : equipment.getComponents())
+            {
+                PropertyString action = (PropertyString) item.getProperty("action");
+                if (action == null) {
+                    action = (PropertyString) item.getProperty("passive");
+                    if (action == null) continue;
+                }
+                String[] effects = action.value.split(";");
+
+                for (String effect : effects) {
+                    if (Objects.equals(effect, effects[0])) continue;
+                    String[] split = effect.split(":");
+
+                    if (split[1].contains("Heal")) {
+                        Heal heal = new Heal(hero.getComponentID(), 0, true, item.getComponentID());
+                        if (heal.canExecute(dgs))
+                            actions.add(heal);
+                    }
                 }
             }
 

@@ -380,7 +380,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (hero)
         {
             Hero f = (Hero) state.getComponentById(figure);
-            Deck<DescentCard> myEquipment = f.getHandEquipment();
+            Deck<DescentCard> myEquipment = f.getAllEquipment();
             for (DescentCard equipment : myEquipment.getComponents())
             {
                 String action = String.valueOf(equipment.getProperty("action"));
@@ -744,6 +744,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         if (phase.interrupt == null) {
             System.out.println(phase + "; " + phase.interrupt);
+            //return new ArrayList<>();
             throw new AssertionError("Should not be reachable");
         }
         DescentGameState state = (DescentGameState) gs;

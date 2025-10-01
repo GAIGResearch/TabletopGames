@@ -61,7 +61,10 @@ public class Heal extends DescentAction {
 
     @Override
     public String toString() {
-        return "Heal " + targetID + " (" + cardID + ")";
+        String string = "Heal " + targetID;
+        if (cardID != -1)
+            return string + " (" + cardID + ")";
+        return string;
     }
 
     @Override
@@ -123,8 +126,13 @@ public class Heal extends DescentAction {
 
         if (card != null)
         {
+            // If we have exhausted this ability or item, or if the target has full Health, don't bother
             if (f.isExhausted((DescentCard) card))
                 return false;
+            if (f instanceof Hero hero)
+                if (hero.getAllEquipment().contains((DescentCard) card))
+                    if (target.getAttribute(Figure.Attribute.Health).isMaximum())
+                        return false;
         }
 
         // We can always heal ourselves

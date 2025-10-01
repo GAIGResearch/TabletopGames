@@ -81,7 +81,7 @@ public class Hero extends Figure {
 
     public Deck<DescentCard> getAllEquipment() {
         Deck<DescentCard> all = handEquipment.copy();
-        all.add(armor);
+        if (armor != null) all.add(armor);
         all.add(otherEquipment);
         return all;
     }
