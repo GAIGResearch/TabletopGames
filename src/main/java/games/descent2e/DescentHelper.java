@@ -1235,12 +1235,14 @@ public class DescentHelper {
                     int penalty = Integer.parseInt(split[2]);
                     if (equipping) {
                         if (penalty == 1)
-                            if (!f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty_1))
-                                f.addBonus(DescentTypes.SkillBonus.DoubleMovePenalty_1);
+                            if (!f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty)) {
+                                f.addBonus(DescentTypes.SkillBonus.DoubleMovePenalty);
+                            }
                     } else {
                         if (penalty == 1)
-                            if (f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty_1))
-                                f.removeBonus(DescentTypes.SkillBonus.DoubleMovePenalty_1);
+                            if (f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty)) {
+                                f.removeBonus(DescentTypes.SkillBonus.DoubleMovePenalty);
+                            }
                     }
                 }
 

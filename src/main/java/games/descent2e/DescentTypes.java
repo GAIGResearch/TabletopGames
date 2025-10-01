@@ -167,7 +167,8 @@ public class DescentTypes {
         NoRunes,
         SpeedLimit_3,
         SpeedLimit_4,
-        DoubleMovePenalty_1;
+        DoubleMovePenalty,
+        FatiguePenalty;
     }
 
     public enum DescentToken {

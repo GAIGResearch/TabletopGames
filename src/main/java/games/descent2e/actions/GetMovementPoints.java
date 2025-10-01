@@ -27,8 +27,16 @@ public class GetMovementPoints extends DescentAction {
         f.getNActionsExecuted().increment();
 
         // Heroes are allowed to make Trade actions if they make a Move action
-        if (f instanceof Hero hero)
+        if (f instanceof Hero hero) {
+
+            // If we have already made a Movement action this turn, and we have the Demonhide Leather
+            // we take a Fatigue penalty at the end of our turn
+            if (hero.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty))
+                if (hero.canTrade() && hero.hasMoved())
+                    hero.addBonus(DescentTypes.SkillBonus.FatiguePenalty);
+
             hero.setTrade(true);
+        }
 
         f.addActionTaken(toString());
         return true;

@@ -1,12 +1,16 @@
 package games.descent2e.actions;
 
 import core.AbstractGameState;
+import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.components.Figure;
 
 import games.descent2e.components.Hero;
+
+import static games.descent2e.DescentTypes.SkillBonus.*;
 
 public class EndFigureTurn extends DescentAction{
 
@@ -65,6 +69,14 @@ public class EndFigureTurn extends DescentAction{
 
             // Disable Trading
             hero.setTrade(false);
+
+            // Demonhide Leather Double Movement Penalty
+            if(hero.getBonuses().contains(FatiguePenalty)) {
+                hero.removeBonus(FatiguePenalty);
+                int penalty = Integer.parseInt(((PropertyString) hero.getArmor().getProperty("action")).value.split(";Effect:DoubleMovePenalty:")[1]);
+                for (int i = 0; i < penalty; i++)
+                    DescentHelper.forcedFatigue(dgs, hero, hero.getArmor().toString() + " Double Movement Penalty");
+            }
         }
 
         f.setHasMoved(false);
