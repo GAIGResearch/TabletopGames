@@ -33,7 +33,7 @@ public class PowerGridDeckView extends DeckView<PowerGridCard> {
 
     private Image getCardImage(PowerGridCard card) {
         // STEP3 uses image card_0.png; plants use their plant number.
-        int n = (card.type == PowerGridCard.Type.STEP3) ? 0 : card.number;
+        int n = (card.type == PowerGridCard.Type.STEP3) ? 2 : card.number;
         String fileName = "card_" + n + ".png";
         return ImageIO.GetInstance().getImage(dataPath + fileName);
     }

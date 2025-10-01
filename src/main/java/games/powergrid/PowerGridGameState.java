@@ -37,7 +37,7 @@ public class PowerGridGameState extends AbstractGameState {
     
     private int turnOrderIndex = 0;
     private int[] playerMoney;
-    private int[] citiesRan; 
+    private int[] poweredCities; 
     private int step;
 
 	
@@ -80,7 +80,7 @@ public class PowerGridGameState extends AbstractGameState {
         super(gameParameters, nPlayers);
         this.cityCountByPlayer = new int[nPlayers];
         this.playerMoney = new int[nPlayers];
-        this.citiesRan = new int[nPlayers];
+        this.poweredCities = new int[nPlayers];
     }
 
     // ---------- Required TAG overrides ----------
@@ -116,7 +116,7 @@ public class PowerGridGameState extends AbstractGameState {
 
         copy.playerMoney       = (this.playerMoney == null) ? null : this.playerMoney.clone();
         copy.cityCountByPlayer = (this.cityCountByPlayer == null) ? null : this.cityCountByPlayer.clone();
-        copy.citiesRan       = (this.citiesRan  == null) ? null : this.citiesRan .clone();
+        copy.poweredCities       = (this.poweredCities  == null) ? null : this.poweredCities .clone();
 
         if (this.citySlotsById != null) {
             copy.citySlotsById = new int[this.citySlotsById.length][];
@@ -299,6 +299,14 @@ public class PowerGridGameState extends AbstractGameState {
 	public int[] getCityCountByPlayer() {	    
 	    return cityCountByPlayer;
 	}
+	public int getMaxCitiesOwned() {
+		return Arrays.stream(cityCountByPlayer).max().getAsInt();
+	}
+	
+	public boolean stepTwoTrigger() {
+		int trigger = (getNPlayers() > 5) ? 6 : 7; //TODO make this dynamic with the parameters 
+		return Arrays.stream(cityCountByPlayer).anyMatch(v -> v > trigger);		
+	}
 
 	
 	public int [][] getCitySlotsById() {
@@ -376,11 +384,27 @@ public class PowerGridGameState extends AbstractGameState {
 	    return ownedPlantsByPlayer[playerId];
 	}
 
-	public void addPlantToPlayer(int playerId, PowerGridCard card) {
-	    Deck<PowerGridCard> d = ownedPlantsByPlayer[playerId];
-	    if (d.getSize() >= 3) throw new IllegalStateException("Must replace when already at 3 plants.");
-	    d.add(card);
-	    d.getComponents().sort(Comparator.comparingInt(PowerGridCard::getNumber));
+	public PowerGridCard addPlantToPlayer(int playerId, PowerGridCard newCard) {
+	    if (newCard == null) throw new IllegalArgumentException("newCard is null");
+
+	    Deck<PowerGridCard> deck = ownedPlantsByPlayer[playerId];
+
+	    PowerGridCard removed = null;
+	    if (deck.getSize() >= 3) {
+	        // remove the lowest-numbered existing plant (keep the new one)
+	        java.util.List<PowerGridCard> comps = deck.getComponents();
+	        int idxLowest = 0;
+	        for (int i = 1; i < comps.size(); i++) {
+	            if (comps.get(i).getNumber() < comps.get(idxLowest).getNumber()) {
+	                idxLowest = i;
+	            }
+	        }
+	        removed = comps.remove(idxLowest);
+	    }
+
+	    deck.add(newCard);
+	    deck.getComponents().sort(java.util.Comparator.comparingInt(PowerGridCard::getNumber));
+	    return removed; // return what was replaced (or null if none)
 	}
 	
 	public Deck<PowerGridCard> getOwnedPlantsByPlayer(int playerId) {
@@ -600,19 +624,43 @@ public class PowerGridGameState extends AbstractGameState {
         plantsRan.clear();
     }
     
-    public int numberOfCitiesRan(int playerId) {
-        return this.citiesRan[playerId];
+    public int numberOfPoweredCities(int playerId) {
+        return this.poweredCities[playerId];
     }
 
-    public void clearCitiesRan() {
-        Arrays.fill(this.citiesRan, 0);
+    public void clearPoweredCities() {
+        Arrays.fill(this.poweredCities, 0);
     }
 
-    public void addCitiesRan(int playerId, int numberOfCities) {
-    	int totalCities = citiesRan[playerId] + numberOfCities;
+    public void addPoweredCities(int playerId, int numberOfCities) {
+    	int totalCities = poweredCities[playerId] + numberOfCities;
         int maxCities = cityCountByPlayer[playerId];
-        citiesRan[playerId] = Math.min(totalCities, maxCities);
+        poweredCities[playerId] = Math.min(totalCities, maxCities);
     }
+
+    public List<Integer> getComputedTurnOrder() {
+        int n = getNPlayers();
+        List<Integer> order = new ArrayList<>(n);
+        for (int p = 0; p < n; p++) order.add(p);
+
+        order.sort(
+            Comparator.<Integer>comparingInt(p -> cityCountByPlayer[p]).reversed()
+                .thenComparingInt(p -> highestPlantNumber(ownedPlantsByPlayer[p])).reversed()
+                .thenComparingInt(p -> p)
+        );
+        return java.util.Collections.unmodifiableList(order);
+    }
+
+    private static int highestPlantNumber(Deck<PowerGridCard> deck) {
+        int max = -1;
+        if (deck != null) {
+            for (PowerGridCard c : deck.getComponents()) {
+                if (c != null) max = Math.max(max, c.getNumber());
+            }
+        }
+        return max;  // -1 if no plants owned
+    }
+    
 
     
 }

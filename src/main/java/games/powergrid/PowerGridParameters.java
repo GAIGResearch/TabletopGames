@@ -12,21 +12,7 @@ public class PowerGridParameters extends TunableParameters {
 	public static final String CARD_ASSET_PATH = "data/powergrid";
 	public enum Resource { COAL,  GAS, OIL, URANIUM} //TODO implement None Type resource
 	public enum PlantType { COAL, GAS, OIL, URANIUM, HYBRID, GREEN }
-	/*
-	public enum Phase {
-	    PLAYER_ORDER, AUCTION, RESOURCE_BUY, BUILD, BUREAUCRACY;
 
-	    public Phase next() {
-	        return switch (this) {
-	            case PLAYER_ORDER -> AUCTION;
-	            case AUCTION -> RESOURCE_BUY;
-	            case RESOURCE_BUY -> BUILD;
-	            case BUILD -> BUREAUCRACY;
-	            case BUREAUCRACY -> PLAYER_ORDER; 
-	        };
-	    }
-	}
-	*/
     public enum Step { STEP1, STEP2, STEP3 }
     
     public int maxRounds = 100;
@@ -40,11 +26,8 @@ public class PowerGridParameters extends TunableParameters {
     public int step2Trigger_6P = 6;
     
     // end-game trigger 
-    public static final int CITIES_TO_TRIGGER_END_2P = 17;
-    public static final int CITIES_TO_TRIGGER_END_3P = 17;
-    public static final int CITIES_TO_TRIGGER_END_4P = 17;
-    public static final int CITIES_TO_TRIGGER_END_5P = 15;
-    public static final int CITIES_TO_TRIGGER_END_6P = 14;
+    public  int [] citiesToTriggerEnd = new int [] {0,0,17,17,15,14};
+
     
     //Resource Refresh Rates 
     //Coal,Gas,Oil,Uranium 
@@ -68,15 +51,7 @@ public class PowerGridParameters extends TunableParameters {
 
     public static final int[] uraniumPrice = new int[] {1,2,3,4,5,6,7,7,8,8,9,9};
 
-    public static final int[] INCOME_TRACK = {
-    	     0,  10,  82, 129,
-    	    22,   7,  90, 134,
-    	    33,   9,  98, 138,
-    	    44,  10, 105, 142,
-    	    54,  11, 112, 145,
-    	    64,  12, 118, 148,
-    	    73,  13, 120, 150
-    	};
+    public static final int[] INCOME_TRACK = {10,22,33,44,54,64,73,82,90,98,105,112,118,124,129,134,138,42,145,148,150};
     
     public List<PowerGridCard> plantsIncludedInGame = List.of(
     		//NOTE RENEWABLES RESOURCE COAL BUT COST NONE
@@ -148,8 +123,7 @@ public class PowerGridParameters extends TunableParameters {
 
 	@Override
 	protected AbstractParameters _copy() {
-		// TODO Auto-generated method stub
-		return null;
+		return this; //The current version does not support changing any of the parameters
 	}
 
 }

@@ -14,6 +14,8 @@ public class PowerGridMapPannel extends JComponent {
 	
 	private final Image backgroundImage;
 	private final Image resourceImage;
+	private final Image incomeImage;
+	private Image stepImage;
 	private final Map<Integer, Image> regionMasks = Map.of(
 			1, ImageIO.GetInstance().getImage("data/powergrid/region_1.png"),
 			2, ImageIO.GetInstance().getImage("data/powergrid/region_2.png"),
@@ -132,6 +134,7 @@ public class PowerGridMapPannel extends JComponent {
 	public PowerGridMapPannel(int numberPlayers) {
 		backgroundImage = ImageIO.GetInstance().getImage("data/powergrid/us_map.png");
 		resourceImage = ImageIO.GetInstance().getImage("data/powergrid/na_resource_card_" + numberPlayers + ".png");
+		incomeImage = ImageIO.GetInstance().getImage("data/powergrid/na_income_card.png");
 	}
 	
 
@@ -144,21 +147,42 @@ public class PowerGridMapPannel extends JComponent {
     
     private void drawResourceCard(Graphics g) {
         if (backgroundImage != null) {
-            drawImage(g, resourceImage, 106,  875 , 120, 120);
+            drawImage(g, resourceImage, 55,  860 , 160, 140);
         } else {
         }
+    }
+    
+    private void drawincomeCard(Graphics g) {
+        if (incomeImage != null) {
+            drawImage(g, incomeImage, 55, 670, 160, 190);
+        } else {
+        }
+    }
+    
+    
+    private void drawStepCard(Graphics g) {
+        if (stepImage != null) { // check the actual image, not backgroundImage
+            drawImage(g, stepImage, 338, 8, 110, 110);
+        }
+    }
+    
+    public void setStepCard(int step) {
+        String path = "data/powergrid/card_" + (step-1) + ".png";
+        this.stepImage = ImageIO.GetInstance().getImage(path);
+        repaint();
     }
     @Override
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
         drawBackgroundImage(g);
         drawResourceCard(g);
+        drawStepCard(g);
 
         for (int r : disabledRegions) {
             Image mask = regionMasks.get(r);
             if (mask != null) g.drawImage(mask, 0, 0, 1100, 1000, null);
         }
-
+        drawincomeCard(g);
         // Draw ownership markers (no scaling)
         drawOwnershipSquares((Graphics2D) g);
         drawGeneratorTrack((Graphics2D)g);

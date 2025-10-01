@@ -56,7 +56,7 @@ public class PowerGridCard extends Card {
 
     // determines the step3 card which is a unique card in the game 
     public static PowerGridCard step3() {
-        return new PowerGridCard(Type.STEP3, -1, 0, new PlantInput(Map.of()));
+        return new PowerGridCard(Type.STEP3, 1000, 0, new PlantInput(Map.of()));
     }
 
 

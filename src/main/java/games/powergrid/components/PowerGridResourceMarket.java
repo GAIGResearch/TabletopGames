@@ -95,15 +95,9 @@ public class PowerGridResourceMarket extends Component {
 	    };
 	}
 	
-	private int stepIndex(Step s) {
-	    return switch (s) {
-	        case STEP1 -> 0;
-	        case STEP2 -> 1;
-	        case STEP3 -> 2;
-	    };
-	}
+
 	
-	private int[][] pickTable(PowerGridParameters p, Step step, int nPlayers, boolean europeMap) {
+	private int[][] pickTable(PowerGridParameters p, int step, int nPlayers, boolean europeMap) {
 	    if (nPlayers <= 2) return europeMap ? p.resourceRefreshEU_2P : p.resourceRefreshNA_2P;
 	    if (nPlayers == 3) return europeMap ? p.resourceRefreshEU_3P : p.resourceRefreshNA_3P;
 	    if (nPlayers == 4) return europeMap ? p.resourceRefreshEU_4P : p.resourceRefreshNA_4P;
@@ -111,27 +105,21 @@ public class PowerGridResourceMarket extends Component {
 	    /* nPlayers >= 6 */
 	    return europeMap ? p.resourceRefreshEU_6P : p.resourceRefreshNA_6P;
 	}
-	private int capacityFor(PowerGridParameters.Resource r) {
-	    return switch (r) {
-	        case COAL -> 27;
-	        case GAS -> 24;
-	        case OIL -> 20;
-	        case URANIUM -> 12;
-	    };
-	}
-	public void refill(PowerGridParameters params, Step step, int nPlayers, boolean europeMap) {
+
+	public void refill(PowerGridParameters params, int step, int nPlayers, boolean europeMap) {
 	    int[][] table = pickTable(params, step, nPlayers, europeMap);
-	    int row = stepIndex(step); // 0..2
-	    PowerGridParameters.Resource[] R = PowerGridParameters.Resource.values(); // COAL,GAS,OIL,URANIUM 
+	    PowerGridParameters.Resource[] R = PowerGridParameters.Resource.values();
+
+	    // guard if your table is 0-based and step is 1..3
+	    if (step < 1 || step >= table.length + 1)
+	        throw new IllegalArgumentException("Invalid step: " + step);
 
 	    for (int i = 0; i < R.length; i++) {
-	        int add = table[row][i];                  // how many cubes to add of R[i]
-	        int now = avail.get(R[i]);
-	        int cap = capacityFor(R[i]);
-	        int next = Math.min(cap, now + add);      // clamp to capacity 
-	        avail.put(R[i], next);
+	        int add = table[step - 1][i];     // cubes to add for resource R[i]
+	        replenishResource(R[i], add); // pulls from discard up to capacity
 	    }
 	}
+
     public int getAvailable(PowerGridParameters.Resource r) { return avail.get(r); }
     public Map<PowerGridParameters.Resource, Integer> snapshot() { return new EnumMap<>(avail); }
     

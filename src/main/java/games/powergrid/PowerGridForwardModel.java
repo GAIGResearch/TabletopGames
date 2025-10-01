@@ -23,6 +23,7 @@ import core.components.Deck;
 import games.powergrid.PowerGridGameState.PowerGridGamePhase;
 import core.interfaces.ITreeActionSpace;
 import games.powergrid.PowerGridParameters.Resource;
+import games.powergrid.PowerGridParameters.Step;
 import games.powergrid.actions.AuctionPowerPlant;
 import games.powergrid.actions.BuildGenerator;
 import games.powergrid.actions.BuyResource;
@@ -31,6 +32,8 @@ import games.powergrid.actions.PassAction;
 import games.powergrid.actions.PassBid;
 import games.powergrid.actions.RunPowerPlant;
 import games.powergrid.components.PowerGridCard;
+import games.powergrid.components.PowerGridCard.Type;
+
 import java.util.HashSet;
 
 import games.powergrid.components.PowerGridGraphBoard;
@@ -66,7 +69,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.setFutureMarket(new Deck<>("futureMarket",  VISIBLE_TO_ALL));
 		initMarkets(state);
 		state.initCityStorageForBoard();//creates a 2d array which keeps track of which cities are bought 
-		randomizeTurnOrder(state);
+		buildTurnOrder(state);
 		state.setStartingMoney(params.startingMoney);
 		state.setGamePhase(PowerGridGameState.PowerGridGamePhase.AUCTION); 
 		int first_player = state.getTurnOrder().get(0);
@@ -105,26 +108,45 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    PowerGridGameState.PowerGridGamePhase phase= (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase();
 
 	    switch (phase) {
-	    //this will be deleted since there are no actions available to player here 
-        case PLAYER_ORDER:
-            break;
 
-        case AUCTION:        	
-        	//if the auction is not live and the player is still eligible aka in the round order
-            if (s.getRoundOrder().contains(me) && s.isAuctionLive() == false) {
-                for (PowerGridCard c : s.getCurrentMarket().getComponents()) {
-                    int minOpen = c.getNumber();
-                    if (s.getPlayersMoney(me) >= minOpen) {
-                        actions.add(new AuctionPowerPlant(me, c.getNumber()));
-                    }
-                }
-                actions.add(new PassAction(me)); //player done for the round
-            }else{
-            	actions.add(new IncreaseBid(me));
-            	actions.add(new PassBid(me));
 
-            	}
-            break;
+	    case AUCTION: {
+	        // Player can start an auction only if they're still in the round and no auction is live
+	        final boolean canStartAuction = s.getRoundOrder().contains(me) && !s.isAuctionLive();
+	        final int money = s.getPlayersMoney(me);
+
+	        if (canStartAuction) {
+	            // Current market
+	            for (PowerGridCard card : s.getCurrentMarket().getComponents()) {
+	                int minBid = card.getNumber(); // plant cost is minimum opening bid
+	                if (money >= minBid) {
+	                    actions.add(new AuctionPowerPlant(me, minBid));
+	                }
+	            }
+
+	            // Future market only in Step 3
+	            if (s.getStep() == 3) {
+	                for (PowerGridCard card : s.getFutureMarket().getComponents()) {
+	                	if(card.type == Type.STEP3)continue;
+	                    int minBid = card.getNumber();
+	                    if (money >= minBid) {
+	                        actions.add(new AuctionPowerPlant(me, minBid));
+	                    }
+	                }
+	            }
+
+	            // Player may also pass (done for the round)
+	            actions.add(new PassAction(me));
+	        } else {
+	            // Auction is live (or player not eligible to start) → bidding choices
+	            if (money > s.getCurrentBid()) {
+	                actions.add(new IncreaseBid(me));
+	            }
+	            actions.add(new PassBid(me));
+	        }
+
+	        break;
+	    }
 
         case RESOURCE_BUY:
         	
@@ -203,10 +225,8 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             actions.add(new PassAction(me));
             break;
         }
-
-            
-            
-            //filter out ones you dont have the resources for 
+		default:
+			break;
     }
 	
     return actions;
@@ -235,10 +255,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 
 	
-
-	
-
-	
 	
 	@Override
 	protected void _afterAction(AbstractGameState gs, AbstractAction actionTaken) {
@@ -262,34 +278,28 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        }
 	        return;
 	    }  
-	    // No auction live: advance normal round turn
+	    // No auction live advance normal round turn
 	    if (s.isRoundOrderAllPassed()) { 
 	    	advancePhase(s); 
 	    	return; 
 	    }else {	    //else we advance the round 
-	    	if (actionTaken instanceof games.powergrid.actions.PassAction) {
-	    	s.removeFromRound(me);
-	    	endPlayerTurn(s, s.nextPlayerInRound());
+	    	if (actionTaken instanceof PassAction) {
+		    	s.removeFromRound(me);
+		    	endPlayerTurn(s, s.nextPlayerInRound());
 	    	}
 	    }
 	}
 
 
 
-	private void onExitPhase(PowerGridGameState state, PowerGridGamePhase phase) {
-	    switch (phase) {
-	    	case AUCTION ->{System.out.println(state.getRoundOrder());
-	    					System.out.println(state.getTurnOrder());}
-	    	case RESOURCE_BUY->{}
-	        case BUILD -> { /* finalize builds */ }
-	        case BUREAUCRACY -> { /* clear round markers */ }
-	        default -> {}
-	    }
-	}
+
 
 	private void onEnterPhase(PowerGridGameState state, PowerGridGamePhase phase) {
 	    switch (phase) {
-	        //case PLAYER_ORDER -> recomputePlayerOrder(state);
+	        case PLAYER_ORDER -> {buildTurnOrder(state);
+	        						advancePhase(state);
+	        						endRound(state, state.getTurnOwner());
+	        }
 	        //case AUCTION -> prepareAuction(state);
 	        case RESOURCE_BUY ->{List<Integer> order = state.getRoundOrder();
 					        	Collections.reverse(state.getRoundOrder());
@@ -301,12 +311,61 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 			        	Collections.reverse(state.getRoundOrder());
 			        	state.setTurnOwner(order.get(0));
 				        System.out.println(state.getRoundOrder());//delete when shown to work
-	        	System.out.println("==== BUILDING PHASE ====");}
-	        //case BUREAUCRACY -> doBureaucracy(state);
+	        	}
+	        case BUREAUCRACY ->{state.resetPlantsRan();;
+	        					if(state.getStep() == 1 && state.stepTwoTrigger()){//no plants have been run yet 
+	        						state.setStep(2);
+	        						state.getCurrentMarket().draw(); //remove lowest card 
+	        						rebalanceMarkets(state);	        						
+	        					}
+	        	
+	        			
+	        }
 	        default -> {}
 	    }
 	}
+
+
+
+	private void onExitPhase(PowerGridGameState state, PowerGridGamePhase phase) {
+	    switch (phase) {
+	    	case AUCTION ->{System.out.println(state.getRoundOrder());
+	    					System.out.println(state.getTurnOrder());}
+	    	case RESOURCE_BUY->{}
+	        case BUILD -> { PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
+	        				if(state.getMaxCitiesOwned() >= params.citiesToTriggerEnd[state.getNPlayers()-1]) {
+	        					state.setGameStatus(CoreConstants.GameResult.GAME_END); }
+	        }
+	        case BUREAUCRACY -> { 
+	        					if(state.getGameStatus() == CoreConstants.GameResult.GAME_END) {
+	        						endGame(state);
+	        					}
+	        					awardIncome(state);
+	        					PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
+	        					state.getResourceMarket().refill(params, state.getStep(), state.getNPlayers(), false);
+	        					if(state.getStep()!=3) {
+	        						PowerGridCard largestCard = state.getFutureMarket().pickLast();
+	        						Deck<PowerGridCard> drawPile = state.getDrawPile(); 
+	        						drawPile.addToBottom(largestCard);
+	        						
+	        					}else {
+	        						state.getCurrentMarket().pick(0);	        						
+	        					}
+	        					rebalanceMarkets(state);
+	        					
+	        					
+		
+	        
+	        	
+	        }
+	        default -> {}
+	    }
+	}
+
+
 	
+	
+
 
 	public void advancePhase(AbstractGameState gameState) {
 		PowerGridGameState s = (PowerGridGameState) gameState;
@@ -320,6 +379,14 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    onEnterPhase(s, next); //perfroms ations that need to be taken prior to the next phase 
 	    
 	   
+	}
+	
+	private static void awardIncome(PowerGridGameState s) {
+	    for (int p = 0; p < s.getNPlayers(); p++) {    	
+	        int powered = Math.min(s.numberOfPoweredCities(p), PowerGridParameters.INCOME_TRACK.length - 1);
+	        System.out.println("Powered Cities" + powered + "by $" + PowerGridParameters.INCOME_TRACK[powered]);
+	        s.increasePlayerMoney(p, PowerGridParameters.INCOME_TRACK[powered]);
+	    }
 	}
 
 	/**
@@ -402,16 +469,37 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	
 	
 	
-	/*
-	//TODO might need to be deleted ot fully implemented yet 
+	
     @Override
     protected void endGame(AbstractGameState gs) {
         PowerGridGameState state = (PowerGridGameState) gs;
-        gs.setGameStatus(CoreConstants.GameResult.GAME_END);
-        gs.setPlayerResult(WIN_GAME, 1);
-        
+        int winner = 0;
+        int highestCities = -1;
+        int highestMoney = -1;
+
+        for (int i = 0; i < state.getNPlayers(); i++) {
+            int poweredCities = state.numberOfPoweredCities(i);
+            int money = state.getPlayersMoney(i);  // Assuming you have this method
+
+            if (poweredCities > highestCities ||
+                (poweredCities == highestCities && money > highestMoney)) {
+                
+                winner = i;
+                highestCities = poweredCities;
+                highestMoney = money;
+            }
+        }
+
+        // Mark all players as lost first
+        for (int i = 0; i < state.getNPlayers(); i++) {
+            gs.setPlayerResult(LOSE_GAME, i);
+        }
+
+        // Then mark the winner
+        gs.setPlayerResult(WIN_GAME, winner);
     }
-	*/
+
+
 	
 	/**
 	 * Sets up the initial Power Grid deck according to the game parameters and number of players.
@@ -509,12 +597,17 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     
 
     //TODO this will be changed to both handle a randomize on the intial set up and handle in Phase1 basing it on #of generators if tied then highest plant number
-    private void randomizeTurnOrder(PowerGridGameState state) {
+    private void buildTurnOrder(PowerGridGameState state) {
         List<Integer> order = new ArrayList<>();
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            order.add(i);
+        if(state.getTurnCounter() == 0) {
+	        for (int i = 0; i < state.getNPlayers(); i++) {
+	            order.add(i);
+	        }
+	        Collections.shuffle(order, state.getRnd());
+        }else {
+        	order = state.getComputedTurnOrder();
         }
-        Collections.shuffle(order, state.getRnd());  // reproducible shuffle
+	        // reproducible shuffle
         //turnOrder remains constant throughtout the round 
         state.setTurnOrder(order);
         //will be modified during a specific phase 
@@ -541,26 +634,45 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     private void awardPlantToWinner(PowerGridGameState s, int winner, int plantNumber, int price) {
         s.decreasePlayerMoney(winner, price);
 
-        // remove the bought plant from CURRENT and give it to the player
         Deck<PowerGridCard> current = s.getCurrentMarket();
+        Deck<PowerGridCard> future  = s.getFutureMarket();
+
         PowerGridCard bought = null;
+        Deck<PowerGridCard> source = null;
+
+        // Try CURRENT market first
         for (PowerGridCard c : current.getComponents()) {
-            if (c.getNumber() == plantNumber) { bought = c; break; }
+            if (c.getNumber() == plantNumber) {
+                bought = c;
+                source = current;
+                break;
+            }
         }
+        // If not found, try FUTURE market (needed in Step 3 where auctions can start from future)
         if (bought == null) {
-            System.err.printf("Plant %d not found in current market!%n", plantNumber);
+            for (PowerGridCard c : future.getComponents()) {
+                if (c.getNumber() == plantNumber) {
+                    bought = c;
+                    source = future;
+                    break;
+                }
+            }
+        }
+
+        if (bought == null) {
+            System.err.printf("Plant %d not found in current or future market!%n", plantNumber);
             return;
         }
-        current.remove(bought);
+
+        source.remove(bought);
         s.addPlantToPlayer(winner, bought);
 
-        System.out.printf(">>> Player %d wins auction for plant %d at price %d%n",
-                winner, plantNumber, price);
+        System.out.printf(">>> Player %d wins auction for plant %d at price %d (from %s market)%n",
+                winner, plantNumber, price, (source == current ? "current" : "future"));
         s.printOwnedPlants();
-
-        // handles the markets once a card has been bought 
         rebalanceMarkets(s);
     }
+
     
     /**
      * Rebalances the power plant markets after a purchase.
@@ -576,26 +688,54 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
      */
     
     private void rebalanceMarkets(PowerGridGameState s) {
-        Deck<PowerGridCard> current = s.getCurrentMarket();
-        Deck<PowerGridCard> future  = s.getFutureMarket();
-        Deck<PowerGridCard> drawPile    = s.getDrawPile();
+        Deck<PowerGridCard> current  = s.getCurrentMarket();
+        Deck<PowerGridCard> future   = s.getFutureMarket();
+        Deck<PowerGridCard> drawPile = s.getDrawPile();
 
-        PowerGridCard replacementPlant = drawPile.draw(); 
-        current.add(replacementPlant); //we have taken a card from the current market so we replace it here 
-        sortMarket(current); //sort the current market so the largest card is last
-        PowerGridCard firstFuture = future.peek(0);  
-        PowerGridCard lastCurrent = current.peek(current.getSize() - 1);
-        //compare the largest current market card to the smallest future market
-        if(firstFuture.getNumber() < lastCurrent.getNumber()) { //if the futrue has a smaller card then swap and resort 
-        	PowerGridCard A = future.draw();
-        	PowerGridCard B = current.pickLast();
-        	future.add(B);
-        	current.add(A);
+        if (current == null || future == null || drawPile == null) {
+            System.err.println("Market rebalance aborted: a deck was null.");
+            return;
         }
+
+        PowerGridCard drawn = drawPile.draw();
+
+        if (drawn != null) {
+            if (drawn.type == Type.STEP3) {
+                s.setStep(3);
+                sortMarket(current);
+                if (current.getSize() > 0) {
+                    current.draw(); 
+                }
+            } else {
+                int targetCurrent = (s.getStep() == 3) ? 3 : 4;
+                if (current.getSize() < targetCurrent) {
+                    current.add(drawn);
+                } else {
+                    future.add(drawn);
+                }
+            }
+        }
+
         sortMarket(current);
-        sortMarket(future);           
+        sortMarket(future);
+
+        PowerGridCard largestCurrent = current.getSize() > 0 ? current.peek(current.getSize() - 1) : null;
+        PowerGridCard smallestFuture = future.getSize() > 0 ? future.peek(0) : null;
+
+        if (largestCurrent != null && smallestFuture != null
+                && smallestFuture.getNumber() < largestCurrent.getNumber()) {
+            
+            PowerGridCard a = future.draw();      
+            PowerGridCard b = current.pickLast(); 
+            future.add(b);
+            current.add(a);
+            sortMarket(current);
+            sortMarket(future);
+        }
+
         s.printMarkets();
     }
+
 
 
     

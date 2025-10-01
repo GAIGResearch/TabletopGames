@@ -48,7 +48,7 @@ public class RunPowerPlant extends AbstractAction {
 	            s.removeFuel(player, r, amount);              
 	            
 	        }
-	        s.addCitiesRan(player, capacity);
+	        s.addPoweredCities(player, capacity);
 
 	        return true;
 	    }

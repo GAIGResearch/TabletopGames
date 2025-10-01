@@ -198,6 +198,7 @@ public class PowerGridGUI extends AbstractGUIManager {
 	    }
 	    mapPanel.setCitySlotsById(gs.getCitySlotsById());
 	    mapPanel.setCityCountByPlayer(gs.getCityCountByPlayer());
+	    mapPanel.setStepCard(gs.getStep());
 	    setActivePlayer(gameState.getCurrentPlayer());
 	    
 	}

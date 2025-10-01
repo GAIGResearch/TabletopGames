@@ -342,6 +342,12 @@ public final class PowerGridGraphBoard extends Component {
     public boolean hasCity(int id) {
         return citiesById.containsKey(id);
     }
+    
+    public String cityName(int id) {
+        PowerGridCity c = citiesById.get(id);
+        if (c == null) throw new IllegalArgumentException("Unknown city id: " + id);
+        return c.getComponentName(); // or c.getName() if your class has that
+    }
 
    
     /** Cheapest cost from ANY source to target.

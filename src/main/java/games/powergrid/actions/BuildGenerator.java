@@ -5,6 +5,8 @@ import java.util.Objects;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.powergrid.PowerGridGameState;
+import games.powergrid.components.PowerGridCity;
+import games.powergrid.components.PowerGridGraphBoard;
 
 public class BuildGenerator extends AbstractAction {
     private final int cityId;
@@ -66,16 +68,23 @@ public class BuildGenerator extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        try {
-            PowerGridGameState s = (PowerGridGameState) gameState;
-            int[][] slots = s.getCitySlotsById();
+        PowerGridGameState s = (PowerGridGameState) gameState;
+        PowerGridGraphBoard board = s.getGameMap();
+
+        PowerGridCity c = (board != null) ? board.city(cityId) : null;
+        String cityName = (c != null) ? c.getComponentName() : String.valueOf(cityId);
+        cityName = cityName.replace('_', ' ');
+
+        String slotStr = "none";
+        int[][] slots = s.getCitySlotsById();
+        if (slots != null && cityId >= 0 && cityId < slots.length) {
             int slot = getFirstOpenSlot(slots[cityId], s.getStep());
-            String slotStr = (slot >= 0) ? String.valueOf(slot) : "none";
-            return String.format("BuildGenerator(city=%d, slot=%s, cost=%d)", cityId, slotStr, cost);
-        } catch (Exception e) {
-            return String.format("BuildGenerator(city=%d, cost=%d)", cityId, cost);
+            if (slot >= 0) slotStr = String.valueOf(slot + 1);
         }
+
+        return String.format("BuildGenerator(city=%s, slot=%s, cost=%d)", cityName, slotStr, cost);
     }
+
 
     private int getFirstOpenSlot(int[] citySlot, int step) {
         int limit = Math.min(step, citySlot.length);
