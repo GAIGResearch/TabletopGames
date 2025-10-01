@@ -18,6 +18,7 @@ import java.util.Objects;
 public class EquipItem extends DescentAction implements IExtendedSequence {
 
     public List<Integer> equipped = new ArrayList<>();
+    public List<Integer> unequipped = new ArrayList<>();
 
     public int userID = -1;
     public int itemID = -1;
@@ -39,12 +40,13 @@ public class EquipItem extends DescentAction implements IExtendedSequence {
         this.unequip = unequip;
     }
 
-    public EquipItem(int userID, int itemID, boolean unequip, List<Integer> equipped) {
+    public EquipItem(int userID, int itemID, boolean unequip, List<Integer> equipped, List<Integer> unequipped) {
         super(Triggers.ANYTIME);
         this.userID = userID;
         this.itemID = itemID;
         this.unequip = unequip;
         this.equipped = new ArrayList<>(equipped);
+        this.unequipped = new ArrayList<>(unequipped);
     }
 
     @Override
@@ -56,25 +58,25 @@ public class EquipItem extends DescentAction implements IExtendedSequence {
         Hero user = (Hero) dgs.getComponentById(userID);
 
         for (DescentCard item : user.getInventory()) {
-            EquipItem equip = new EquipItem(userID, item.getComponentID(), false, equipped);
+            EquipItem equip = new EquipItem(userID, item.getComponentID(), false, equipped, unequipped);
             if (equip.canExecute(dgs))
                 equips.add(equip);
         }
 
         for (DescentCard item : user.getHandEquipment()) {
-            EquipItem equip = new EquipItem(userID, item.getComponentID(), true, equipped);
+            EquipItem equip = new EquipItem(userID, item.getComponentID(), true, equipped, unequipped);
             if (equip.canExecute(dgs))
                 equips.add(equip);
         }
 
         if (user.getArmor() != null) {
-            EquipItem equip = new EquipItem(userID, user.getArmor().getComponentID(), true, equipped);
+            EquipItem equip = new EquipItem(userID, user.getArmor().getComponentID(), true, equipped, unequipped);
             if (equip.canExecute(dgs))
                 equips.add(equip);
         }
 
         for (DescentCard item : user.getOtherEquipment()) {
-            EquipItem equip = new EquipItem(userID, item.getComponentID(), true, equipped);
+            EquipItem equip = new EquipItem(userID, item.getComponentID(), true, equipped, unequipped);
             if (equip.canExecute(dgs))
                 equips.add(equip);
         }
@@ -99,8 +101,12 @@ public class EquipItem extends DescentAction implements IExtendedSequence {
                 ((Hero) state.getComponentById(userID)).setEquipped(true);
             }
             DescentCard item = (DescentCard) state.getComponentById(equip.itemID);
-            if (item != null)
-                equipped.add(equip.itemID);
+            if (item != null) {
+                if (equip.unequip)
+                    unequipped.add(equip.itemID);
+                else
+                    equipped.add(equip.itemID);
+            }
         }
     }
 
@@ -143,7 +149,7 @@ public class EquipItem extends DescentAction implements IExtendedSequence {
 
     @Override
     public EquipItem copy() {
-        EquipItem trade = new EquipItem(userID, itemID, unequip, equipped);
+        EquipItem trade = new EquipItem(userID, itemID, unequip, equipped, unequipped);
         trade.complete = complete;
         return trade;
     }
@@ -158,7 +164,7 @@ public class EquipItem extends DescentAction implements IExtendedSequence {
 
     @Override
     public int hashCode(){
-        return Objects.hash(super.hashCode(), userID, itemID, complete, unequip, equipped);
+        return Objects.hash(super.hashCode(), userID, itemID, complete, unequip, equipped, unequipped);
     }
 
     @Override
@@ -201,8 +207,14 @@ public class EquipItem extends DescentAction implements IExtendedSequence {
             if (item == null) return false;
 
             if (unequip) {
+                // Stop constant cycling
+                if (unequipped.contains(itemID))
+                    return false;
                 return user.canUnequip(item);
             }
+            // Either you're equipping it of you're unequipping it, end of story
+            if (equipped.contains(itemID))
+                return false;
             return user.getInventory().contains(item) &&
                     user.canEquip(item);
         }

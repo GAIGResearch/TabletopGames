@@ -34,6 +34,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     boolean initData;
 
     Deck<Card> searchCards;
+    Deck<Card> act1ShopCards;
+    Deck<Card> act2ShopCards;
     GridBoard masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
@@ -172,6 +174,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             copy.tokens.add(t.copy());
         }
         copy.searchCards = searchCards.copy();
+        copy.act1ShopCards = act1ShopCards.copy();
+        copy.act2ShopCards = act2ShopCards.copy();
         copy.currentQuest = currentQuest;  // TODO does this need to be deep? it (should be) read-only after data parsing
         copy.defeatedFigures = new ArrayList<>();
         for (Pair<String, String> p : defeatedFigures) {
@@ -248,6 +252,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 Arrays.deepEquals(tileReferences, that.tileReferences) &&
                 Objects.equals(gridReferences, that.gridReferences) &&
                 Objects.equals(searchCards, that.searchCards) &&
+                Objects.equals(act1ShopCards, that.act1ShopCards) &&
+                Objects.equals(act2ShopCards, that.act2ShopCards) &&
                 Objects.equals(masterBoard, that.masterBoard) &&
                 Objects.equals(attackDicePool, that.attackDicePool) &&
                 Objects.equals(defenceDicePool, that.defenceDicePool) &&
@@ -267,7 +273,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
+        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards, act1ShopCards, act2ShopCards,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
                 monsters, monstersOriginal, monstersPerGroup, monsterGroups, webMonstersIDs, overlordPlayer, tokens, currentQuest,
                 defeatedFigures, monsterActingNext, heroActingNext, monsterGroupActingNext);
@@ -283,6 +289,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 gridReferences.hashCode(),
                 initData ? 1 : 0,
                 searchCards.hashCode(),
+                act1ShopCards.hashCode(),
+                act2ShopCards.hashCode(),
                 masterBoard.hashCode(),
                 attackDicePool.hashCode(),
                 defenceDicePool.hashCode(),
@@ -377,11 +385,11 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     }
 
     public Deck<Card> getAct1ShopCards() {
-        return data.act1ShopCards;
+        return act1ShopCards;
     }
 
     public Deck<Card> getAct2ShopCards() {
-        return data.act2ShopCards;
+        return act2ShopCards;
     }
 
     /*

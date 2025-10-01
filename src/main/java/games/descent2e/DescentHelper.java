@@ -1117,19 +1117,19 @@ public class DescentHelper {
     public static void applyEquipment (Hero f, DescentCard item, boolean equipping) {
         // Weapons and Shields are handled differently to Armour and Other Equipment
 
-        if (item.getProperty("equipSlots") == null) return;;
-        String type = ((PropertyStringArray) item.getProperty("equipSlots")).getValues()[0];
+        PropertyStringArray type = ((PropertyStringArray) item.getProperty("equipSlots"));
+        if (type == null) return;
 
-        switch (type) {
+        switch (type.getValues()[0]) {
 
             case "hand" -> {
 
             }
 
             case "armor" -> {
-                String[] defense = ((PropertyStringArray) item.getProperty("defensePower")).getValues();
+                PropertyStringArray defense = ((PropertyStringArray) item.getProperty("defensePower"));
                 if (defense != null) {
-                    DicePool defDice = DicePool.constructDicePool(defense);
+                    DicePool defDice = DicePool.constructDicePool(defense.getValues());
                     List<DescentDice> dice = new ArrayList<>(f.getDefenceDice().copy().getComponents());
 
                     if (equipping) {
@@ -1146,12 +1146,12 @@ public class DescentHelper {
             }
         }
 
-        if (item.getProperty("action") == null) return;
-        String action = ((PropertyString) item.getProperty("action")).value;
+        PropertyString action = (PropertyString) item.getProperty("action");
+        if (action == null) return;
 
-        if (!action.contains(";Effect")) return;
+        if (!action.value.contains(";Effect")) return;
 
-        String[] effects = action.split(";");
+        String[] effects = action.value.split(";");
 
         for (String effect : effects) {
             if (Objects.equals(effect, effects[0])) continue;

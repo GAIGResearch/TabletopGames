@@ -300,7 +300,19 @@ public class Hero extends Figure {
                 case "armor":
                     return armor.equals(c);
                 case "hand":
-                    return handEquipment.contains(c);
+                    // Hand items like shields we can unequip freely
+                    if (c.getProperty("attackPower") == null)
+                        return handEquipment.contains(c);
+                    // For weapons, prevent unequipping if they are the only weapon in our inventory
+                    // Yes, you can go Bare Hand, but why would you want to do that?
+                    else {
+                        for (DescentCard item : inventory)
+                        {
+                            if (item.getProperty("attackPower") != null)
+                                return true;
+                        }
+                        return false;
+                    }
                 case "other":
                     return otherEquipment.contains(c);
             }

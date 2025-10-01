@@ -306,6 +306,10 @@ public class DescentForwardModel extends StandardForwardModel {
         // Shuffle search cards deck
         dgs.searchCards = _data.searchCards;
         dgs.searchCards.shuffle(rnd);
+        dgs.act1ShopCards = _data.act1ShopCards;
+        dgs.act1ShopCards.shuffle(rnd);
+        dgs.act2ShopCards = _data.act2ShopCards;
+        dgs.act2ShopCards.shuffle(rnd);
 
         // Announce all figures in play, including their stats and starting positions
         // Primarily for debug purposes
