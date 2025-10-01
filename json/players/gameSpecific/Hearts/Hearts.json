@@ -3,7 +3,6 @@
   "rolloutLengthPerPlayer" : true,
   "rolloutTermination" : "END_ROUND",
   "rolloutLength" : 0,
-  "MASTGamma" : 0.200,
   "heuristic" : {
     "class" : "players.heuristics.LeaderHeuristic"
   },
@@ -14,7 +13,6 @@
   "paranoid" : true,
   "reuseTree" : true,
   "backupPolicy" : "MaxMC",
-  "MAST" : "Both",
   "maxBackupThreshold" : 30,
   "class" : "players.mcts.MCTSParams",
   "budget" : -999
