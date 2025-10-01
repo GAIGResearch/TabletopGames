@@ -1146,8 +1146,12 @@ public class DescentHelper {
             }
         }
 
+        // Obtain the action, or passive, property of the Item
         PropertyString action = (PropertyString) item.getProperty("action");
-        if (action == null) return;
+        if (action == null) {
+            action = (PropertyString) item.getProperty("passive");
+            if (action == null) return;
+        }
 
         if (!action.value.contains(";Effect")) return;
 
@@ -1275,6 +1279,14 @@ public class DescentHelper {
             }
 
         }
+
+        if (List.of(((PropertyStringArray) item.getProperty("equipmentType")).getValues()).contains("Helmet")) {
+            if (equipping)
+                f.addBonus(DescentTypes.SkillBonus.Helmet);
+            else
+                f.removeBonus(DescentTypes.SkillBonus.Helmet);
+        }
+
 
     }
 }
