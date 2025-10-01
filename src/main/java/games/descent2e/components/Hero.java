@@ -79,6 +79,13 @@ public class Hero extends Figure {
         this.skills = skills;
     }
 
+    public Deck<DescentCard> getAllEquipment() {
+        Deck<DescentCard> all = handEquipment.copy();
+        all.add(armor);
+        all.add(otherEquipment);
+        return all;
+    }
+
     public Deck<DescentCard> getHandEquipment() {
         return handEquipment;
     }
@@ -295,6 +302,26 @@ public class Hero extends Figure {
     public boolean canUnequip(DescentCard c) {
         Property cost = c.getProperty(costHash);
         if (cost != null) {
+
+            if (getBonuses().contains(DescentTypes.SkillBonus.NoRunes)) {
+                PropertyStringArray types = (PropertyStringArray) c.getProperty("equipmentType");
+                if (types != null) {
+                    if (List.of(types.getValues()).contains("Rune"))
+                        return false;
+                }
+            }
+
+            if (c.getProperty("action") != null) {
+                if (((PropertyString) c.getProperty("action")).value.contains("NoRunes"))
+                    for (DescentCard item : getAllEquipment()) {
+                        PropertyStringArray types = (PropertyStringArray) item.getProperty("equipmentType");
+                        if (types != null) {
+                            if (List.of(types.getValues()).contains("Rune"))
+                                return false;
+                        }
+                    }
+            }
+
             String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
             switch (equip[0]) {
                 case "armor":
