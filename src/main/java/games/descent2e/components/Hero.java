@@ -246,6 +246,34 @@ public class Hero extends Figure {
     public boolean canEquip(DescentCard c) {
         Property cost = c.getProperty(costHash);
         if (cost != null) {
+
+            Set<DescentTypes.SkillBonus> bonuses = getBonuses();
+            // Can only equip one Helmet at a time
+            if(bonuses.contains(DescentTypes.SkillBonus.Helmet))
+                if (List.of(((PropertyStringArray) c.getProperty("equipmentType")).getValues()).contains("Helmet"))
+                    return false;
+
+            // Can't wield a Rune item if No Runes allowed
+            if (bonuses.contains(DescentTypes.SkillBonus.NoRunes)) {
+                PropertyStringArray types = (PropertyStringArray) c.getProperty("equipmentType");
+                if (types != null) {
+                    if (List.of(types.getValues()).contains("Rune"))
+                        return false;
+                }
+            }
+
+            // Can't wear a No Runes armour if we are wielding Runes
+            if (c.getProperty("action") != null) {
+                if (((PropertyString) c.getProperty("action")).value.contains("NoRunes"))
+                    for (DescentCard item : getAllEquipment()) {
+                        PropertyStringArray types = (PropertyStringArray) item.getProperty("equipmentType");
+                        if (types != null) {
+                            if (List.of(types.getValues()).contains("Rune"))
+                                return false;
+                        }
+                    }
+            }
+
             String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
             boolean canEquip = true;
             Map<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
@@ -302,25 +330,6 @@ public class Hero extends Figure {
     public boolean canUnequip(DescentCard c) {
         Property cost = c.getProperty(costHash);
         if (cost != null) {
-
-            if (getBonuses().contains(DescentTypes.SkillBonus.NoRunes)) {
-                PropertyStringArray types = (PropertyStringArray) c.getProperty("equipmentType");
-                if (types != null) {
-                    if (List.of(types.getValues()).contains("Rune"))
-                        return false;
-                }
-            }
-
-            if (c.getProperty("action") != null) {
-                if (((PropertyString) c.getProperty("action")).value.contains("NoRunes"))
-                    for (DescentCard item : getAllEquipment()) {
-                        PropertyStringArray types = (PropertyStringArray) item.getProperty("equipmentType");
-                        if (types != null) {
-                            if (List.of(types.getValues()).contains("Rune"))
-                                return false;
-                        }
-                    }
-            }
 
             String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
             switch (equip[0]) {
