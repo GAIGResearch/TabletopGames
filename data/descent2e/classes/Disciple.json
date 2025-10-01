@@ -9,7 +9,7 @@
         "XP": ["Integer", 0],
         "fatigue": ["Integer", 1],
         "exhaust": ["Boolean", true],
-        "passive": ["String", "Exhaust this card during your turn and choose yourself or an adjacent hero. Roll 1 red power die. The chosen hero recovers Heart equal to the Heart rolled."]
+        "action": ["String", "Exhaust this card during your turn and choose yourself or an adjacent hero. Roll 1 red power die. The chosen hero recovers Heart equal to the Heart rolled."]
       },
        {
          "name": ["String","Iron Mace"],

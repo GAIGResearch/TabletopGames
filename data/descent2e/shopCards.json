@@ -147,7 +147,7 @@
     "equipmentType": ["String[]", ["Shield"]],
     "equipSlots": ["String[]", ["hand"]],
     "cost": ["Integer", 50],
-    "action": ["String", "Exhaust this card after rolling defense dice to either reroll 1 die or add 1 Shield to the results.; Effect:ShieldOrReroll:1"],
+    "action": ["String", "Exhaust this card after rolling defense dice to either reroll 1 die or add 1 Shield to the results.;Effect:ShieldOrReroll:1"],
     "act": ["Integer", 1]
   },
   {
@@ -158,7 +158,7 @@
     "equipmentType": ["String[]", ["Shield"]],
     "equipSlots": ["String[]", ["hand"]],
     "cost": ["Integer", 50],
-    "action": ["String", "Exhaust this card after rolling defense dice to either reroll 1 die or add 1 Shield to the results.; Effect:ShieldOrReroll:1"],
+    "action": ["String", "Exhaust this card after rolling defense dice to either reroll 1 die or add 1 Shield to the results.;Effect:ShieldOrReroll:1"],
     "act": ["Integer", 1]
   },
   {
@@ -169,7 +169,7 @@
     "equipmentType": ["String[]", ["Cloak"]],
     "equipSlots": ["String[]", ["armor"]],
     "cost": ["Integer", 75],
-    "action": ["String", "Exhaust this card after the dice are rolled to cancel 1 Surge on an attack that targets you.; Effect:CancelSurge:1"],
+    "action": ["String", "Exhaust this card after the dice are rolled to cancel 1 Surge on an attack that targets you.;Effect:CancelSurge:1"],
     "act": ["Integer", 1]
   },
   {
@@ -181,7 +181,7 @@
     "equipmentType": ["String[]", ["Light Armor"]],
     "equipSlots": ["String[]", ["armor"]],
     "cost": ["Integer", 75],
-    "action": ["String", "You gain +1 Health.; Effect:HealthPlus:1"],
+    "action": ["String", "You gain +1 Health.;Effect:HealthPlus:1"],
     "act": ["Integer", 1]
   },
   {
@@ -193,7 +193,7 @@
     "equipmentType": ["String[]", ["Light Armor"]],
     "equipSlots": ["String[]", ["armor"]],
     "cost": ["Integer", 75],
-    "action": ["String", "You gain +1 Health.; Effect:HealthPlus:1"],
+    "action": ["String", "You gain +1 Health.;Effect:HealthPlus:1"],
     "act": ["Integer", 1]
   },
   {
@@ -372,7 +372,7 @@
     "equipmentType": ["String[]", ["Shield"]],
     "equipSlots": ["String[]", ["hand"]],
     "cost": ["Integer", 100],
-    "action": ["String", "Exhaust this card after rolling defense dice to either reroll 1 defense die and add 1 Shield to the results.; Effect:ShieldAndReroll:1"],
+    "action": ["String", "Exhaust this card after rolling defense dice to either reroll 1 defense die and add 1 Shield to the results.;Effect:ShieldAndReroll:1"],
     "act": ["Integer", 2]
   },
   {
@@ -383,7 +383,7 @@
     "equipmentType": ["String[]", ["Cloak"]],
     "equipSlots": ["String[]", ["armor"]],
     "cost": ["Integer", 225],
-    "action": ["String", "Exhaust this card after rolling defense dice to replace the results with a number of Shields equal to your Awareness.; Effect:ReplaceDefense:Awareness"],
+    "action": ["String", "Exhaust this card after rolling defense dice to replace the results with a number of Shields equal to your Awareness.;Effect:ReplaceDefense:Awareness"],
     "act": ["Integer", 2]
   },
   {

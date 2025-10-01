@@ -163,7 +163,11 @@ public class DescentTypes {
         Unseen,
         Lurk,
         CounterAttack,
-        Brute;
+        Brute,
+        NoRunes,
+        SpeedLimit_3,
+        SpeedLimit_4,
+        DoubleMovePenalty_1;
     }
 
     public enum DescentToken {

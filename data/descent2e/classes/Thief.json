@@ -32,7 +32,7 @@
         "equipmentType": ["String[]", ["Trinket"]],
         "equipSlots": ["String[]", ["other"]],
         "cost": ["Integer", 25],
-        "passive": ["String", "Exhaust this card to reroll an attribute test. You must keep the new results.;Effect:Reroll:AttributeTest"]
+        "action": ["String", "Exhaust this card to reroll an attribute test. You must keep the new results.;Effect:Reroll:AttributeTest"]
       },
       {
         "name": ["String","Appraisal"],
@@ -53,35 +53,35 @@
         "XP": ["Integer", 1],
         "fatigue": ["Integer", 0],
         "exhaust": ["Boolean", true],
-        "passive": ["String", "You gain +1 Heart on attacks against monsters that did not have a line of sight of you at the start of your turn (even if this card is exhausted).\nYou may exhaust this card to perform an open or close a door action without using an action."]
+        "action": ["String", "You gain +1 Heart on attacks against monsters that did not have a line of sight of you at the start of your turn (even if this card is exhausted).\nYou may exhaust this card to perform an open or close a door action without using an action."]
       },
       {
         "name": ["String","Caltrops"],
         "XP": ["Integer", 2],
         "fatigue": ["Integer", 1],
         "exhaust": ["Boolean", true],
-        "passive": ["String", "When a monster moves into an empty space adjacent to you, exhaust this card to test Awareness. If you pass, the monster suffers 1 Heart and is Immobilized."]
+        "action": ["String", "When a monster moves into an empty space adjacent to you, exhaust this card to test Awareness. If you pass, the monster suffers 1 Heart and is Immobilized."]
       },
       {
         "name": ["String","Tumble"],
         "XP": ["Integer", 2],
         "fatigue": ["Integer", 1],
         "exhaust": ["Boolean", true],
-        "passive": ["String", "Exhaust this card during your turn. While this card is exhausted, you may move through enemy figures."]
+        "action": ["String", "Exhaust this card during your turn. While this card is exhausted, you may move through enemy figures."]
       },
       {
         "name": ["String","Unseen"],
         "XP": ["Integer", 2],
         "fatigue": ["Integer", 2],
         "exhaust": ["Boolean", true],
-        "passive": ["String", "Exhaust this card during your turn. While this card is exhausted, each attack that targets you misses unless the attacker spends 1 Surge."]
+        "action": ["String", "Exhaust this card during your turn. While this card is exhausted, each attack that targets you misses unless the attacker spends 1 Surge."]
       },
       {
         "name": ["String","Lurk"],
         "XP": ["Integer", 3],
         "fatigue": ["Integer", 1],
         "exhaust": ["Boolean", true],
-        "passive": ["String", "Exhaust this card during your turn to perform a search action; this does not require an action. While this card is exhausted, add 1 addtional brown die to your defense pool."]
+        "action": ["String", "Exhaust this card during your turn to perform a search action; this does not require an action. While this card is exhausted, add 1 addtional brown die to your defense pool."]
       },
       {
         "name": ["String","Bushwhack"],

@@ -27,6 +27,7 @@ public enum Surge {
     PIERCE_1(1, (a, s) -> a.addPierce(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
     PIERCE_3(1, (a, s) -> a.addPierce(3)),
+    PIERCE_5(1, (a, s) -> a.addPierce(5)),
     MENDING_1(1, (a,s) -> a.addMending(1)),
     MENDING_2(1, (a,s) -> a.addMending(2)),
     MENDING_3(1, (a,s) -> a.addMending(3)),

@@ -58,7 +58,7 @@
          "XP": ["Integer", 2],
          "fatigue": ["Integer", 0],
          "exhaust": ["Boolean", true],
-         "passive": ["String", "When you attack with a Rune weapon, you may exhaust this card to add 1 Surge to the result."]
+         "action": ["String", "When you attack with a Rune weapon, you may exhaust this card to add 1 Surge to the result."]
        },
        {
          "name": ["String","Runic Sorcery"],
@@ -79,7 +79,7 @@
          "XP": ["Integer", 3],
          "fatigue": ["Integer", 2],
          "exhaust": ["Boolean", true],
-         "passive": ["String", "After you perform an attack with a Rune weapon, exhaust this card to immediately perform an additional attack."]
+         "action": ["String", "After you perform an attack with a Rune weapon, exhaust this card to immediately perform an additional attack."]
        }
      ]
    }

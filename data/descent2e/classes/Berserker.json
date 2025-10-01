@@ -29,7 +29,7 @@
         "XP": ["Integer", 1],
         "fatigue": ["Integer", 1],
         "exhaust": ["Boolean", true],
-        "passive": ["String", "After an adjacent monster resolves an attack that affects you, exhaust this card to perform an attack with a Melee weapon against the attacking monster. After this attack is resolved, if the monster was not defeated, it may continue its activation."]
+        "action": ["String", "After an adjacent monster resolves an attack that affects you, exhaust this card to perform an attack with a Melee weapon against the attacking monster. After this attack is resolved, if the monster was not defeated, it may continue its activation."]
       },
       {
         "name": ["String","Cripple"],
@@ -71,7 +71,7 @@
         "XP": ["Integer", 3],
         "fatigue": ["Integer", 0],
         "exhaust": ["Boolean", true],
-        "passive": ["String", "When performing an attack with a Melee weapon, after the dice are rolled, exhaust this card to gain +X Heart, where X is the amount of Fatigue suffered to use this skill."]
+        "action": ["String", "When performing an attack with a Melee weapon, after the dice are rolled, exhaust this card to gain +X Heart, where X is the amount of Fatigue suffered to use this skill."]
       },
       {
         "name": ["String","Death Rage"],

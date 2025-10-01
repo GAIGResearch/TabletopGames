@@ -5,10 +5,7 @@ import core.components.BoardNode;
 import core.components.Component;
 import core.components.Deck;
 import core.components.GridBoard;
-import core.properties.Property;
-import core.properties.PropertyInt;
-import core.properties.PropertyStringArray;
-import core.properties.PropertyVector2D;
+import core.properties.*;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.RangedAttack;
@@ -24,7 +21,7 @@ import java.util.*;
 
 import static core.CoreConstants.coordinateHash;
 import static core.CoreConstants.playersHash;
-import static games.descent2e.components.Figure.Attribute.MovePoints;
+import static games.descent2e.components.Figure.Attribute.*;
 
 public class DescentHelper {
 
@@ -1115,5 +1112,167 @@ public class DescentHelper {
                 monsterGroup.remove(m);
             }
         }
+    }
+
+    public static void applyEquipment (Hero f, DescentCard item, boolean equipping) {
+        // Weapons and Shields are handled differently to Armour and Other Equipment
+
+        if (item.getProperty("equipSlots") == null) return;;
+        String type = ((PropertyStringArray) item.getProperty("equipSlots")).getValues()[0];
+
+        switch (type) {
+
+            case "hand" -> {
+
+            }
+
+            case "armor" -> {
+                String[] defense = ((PropertyStringArray) item.getProperty("defensePower")).getValues();
+                if (defense != null) {
+                    DicePool defDice = DicePool.constructDicePool(defense);
+                    List<DescentDice> dice = new ArrayList<>(f.getDefenceDice().copy().getComponents());
+
+                    if (equipping) {
+                        dice.addAll(defDice.getComponents());
+                        f.setDefenceDice(new DicePool(dice));
+                    }
+
+                    else {
+                        dice.removeAll(defDice.getComponents());
+                        f.setDefenceDice(new DicePool(dice));
+                    }
+
+                }
+            }
+        }
+
+        if (item.getProperty("action") == null) return;
+        String action = ((PropertyString) item.getProperty("action")).value;
+
+        if (!action.contains(";Effect")) return;
+
+        String[] effects = action.split(";");
+
+        for (String effect : effects) {
+            if (Objects.equals(effect, effects[0])) continue;
+            String[] split = effect.split(":");
+
+            switch (split[1]) {
+
+                case "CancelSurge" -> {
+
+                }
+
+                case "HealthPlus" -> {
+                    int increase = Integer.parseInt(split[2]);
+                    if (equipping) {
+                        f.getAttribute(Health).setMaximum(f.getAttributeMax(Health) + increase);
+                        f.getAttribute(Health).increment(increase);
+                    } else {
+                        f.getAttribute(Health).setMaximum(f.getAttributeMax(Health) - increase);
+                        f.getAttribute(Health).decrement(increase);
+                    }
+                }
+
+                case "StaminaPlus" -> {
+                    int increase = Integer.parseInt(split[2]);
+                    if (equipping)
+                        f.getAttribute(Fatigue).setMaximum(f.getAttributeMax(Fatigue) + increase);
+                    else
+                        f.getAttribute(Fatigue).setMaximum(f.getAttributeMax(Fatigue) - increase);
+                }
+
+                case "NoRunes" -> {
+                    // Only Armour can apply this penality, so there's no need to fear for overlaps
+                    if (equipping)
+                        if (!f.hasBonus(DescentTypes.SkillBonus.NoRunes))
+                            f.addBonus(DescentTypes.SkillBonus.NoRunes);
+                        else if (f.hasBonus(DescentTypes.SkillBonus.NoRunes))
+                            f.removeBonus(DescentTypes.SkillBonus.NoRunes);
+                }
+
+                case "SpeedLimit" -> {
+                    int limit = Integer.parseInt(split[2]);
+                    if (equipping) {
+                        if (limit == 3 && !f.hasBonus(DescentTypes.SkillBonus.SpeedLimit_3))
+                            f.addBonus(DescentTypes.SkillBonus.SpeedLimit_3);
+                        if (limit == 4 && !f.hasBonus(DescentTypes.SkillBonus.SpeedLimit_4))
+                            f.addBonus(DescentTypes.SkillBonus.SpeedLimit_4);
+
+                        // Save the old Speed
+                        int current = f.getAttributeMax(MovePoints);
+
+                        if (current > limit) {
+                            f.setOldMaxMovement(current);
+                            f.getAttribute(MovePoints).setMaximum(limit);
+                        }
+                    }
+
+                    else {
+                        if (limit == 3 && f.hasBonus(DescentTypes.SkillBonus.SpeedLimit_3))
+                            f.removeBonus(DescentTypes.SkillBonus.SpeedLimit_3);
+                        if (limit == 4 && f.hasBonus(DescentTypes.SkillBonus.SpeedLimit_4))
+                            f.removeBonus(DescentTypes.SkillBonus.SpeedLimit_4);
+
+                        // Load the old Speed
+                        int old = f.getOldMaxMovement();
+
+                        if (f.getAttributeMax(MovePoints) < old) {
+                            f.getAttribute(MovePoints).setMaximum(old);
+                        }
+                    }
+                }
+
+                case "Reroll" -> {
+
+                }
+
+                case "Surge" -> {
+
+                }
+
+                case "DoubleMovePenalty" -> {
+                    int penalty = Integer.parseInt(split[2]);
+                    if (equipping) {
+                        if (penalty == 1)
+                            if (!f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty_1))
+                                f.addBonus(DescentTypes.SkillBonus.DoubleMovePenalty_1);
+                    } else {
+                        if (penalty == 1)
+                            if (f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty_1))
+                                f.removeBonus(DescentTypes.SkillBonus.DoubleMovePenalty_1);
+                    }
+                }
+
+                case "ReplaceDefense" ->  {
+                    switch(split[2]) {
+                        case "Might" -> {
+                            // Might
+                        }
+                        case "Knowledge" -> {
+                            // Knowledge
+                        }
+
+                        case "Awareness" -> {
+                            // Awareness
+                        }
+
+                        case "Willpower" -> {
+                            // Willpower
+                        }
+                    }
+                }
+
+                case "ShieldMinimum" -> {
+
+                }
+
+                case "Heal" -> {
+
+                }
+            }
+
+        }
+
     }
 }

@@ -7,6 +7,7 @@ import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.Move;
@@ -23,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static games.descent2e.DescentConstants.*;
+import static games.descent2e.DescentHelper.applyEquipment;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Hero extends Figure {
@@ -42,6 +44,7 @@ public class Hero extends Figure {
 
     HeroAbilities.HeroAbility heroAbility;
     String abilityStr;
+    int maxMovement;
 
     public Hero(String name, int nActionsPossible) {
         super(name, nActionsPossible);
@@ -128,6 +131,14 @@ public class Hero extends Figure {
 
     public void setEquipSlotsAvailable(HashMap<String, Integer> equipSlotsAvailable) {
         this.equipSlotsAvailable = equipSlotsAvailable;
+    }
+
+    public int getOldMaxMovement() {
+        return maxMovement;
+    }
+
+    public void setOldMaxMovement(int maxMovement) {
+        this.maxMovement = maxMovement;
     }
 
     public String getHeroicFeatStr() {
@@ -244,7 +255,7 @@ public class Hero extends Figure {
         return false;
     }
 
-    public boolean equip(DescentCard c) {
+    public void equip(DescentCard c) {
         // Check if equipment
         Property cost = c.getProperty(costHash);
         if (cost != null) {
@@ -273,13 +284,11 @@ public class Hero extends Figure {
                         otherEquipment.add(c);
                         break;
                 }
-                return true;
+                applyEquipment(this, c, true);
             }
-            return false;
         } else {
             // A skill
             skills.add(c);
-            return true;
         }
     }
 
@@ -299,7 +308,7 @@ public class Hero extends Figure {
         return false;
     }
 
-    public boolean unequip(DescentCard c) {
+    public void unequip(DescentCard c) {
         // Check if equipment
         Property cost = c.getProperty(costHash);
         if (cost != null) {
@@ -326,13 +335,11 @@ public class Hero extends Figure {
                         otherEquipment.remove(c);
                         break;
                 }
-                return true;
+                applyEquipment(this, c, false);
             }
-            return false;
         } else {
             // A skill
             skills.add(c);
-            return true;
         }
     }
 
@@ -361,14 +368,15 @@ public class Hero extends Figure {
                 Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) &&
                 Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(inventory, hero.inventory) &&
                 Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Objects.equals(heroicFeatStr, hero.heroicFeatStr) &&
-                heroicFeat == hero.heroicFeat && heroAbility == hero.heroAbility && Objects.equals(abilityStr, hero.abilityStr);
+                heroicFeat == hero.heroicFeat && heroAbility == hero.heroAbility &&
+                Objects.equals(abilityStr, hero.abilityStr) && maxMovement == hero.maxMovement;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, inventory,
                 equipSlotsAvailable, heroicFeatStr, heroicFeat.ordinal(), usedHeroAbility, featAvailable,
-                canTrade, equipped, rested, defeated, heroAbility.ordinal(), abilityStr);
+                canTrade, equipped, rested, defeated, heroAbility.ordinal(), abilityStr, maxMovement);
     }
 
     @Override
@@ -402,6 +410,7 @@ public class Hero extends Figure {
         copy.defeated = this.defeated;
         copy.canTrade = this.canTrade;
         copy.equipped = this.equipped;
+        copy.maxMovement = this.maxMovement;
         super.copyComponentTo(copy);
         return copy;
     }
@@ -442,6 +451,8 @@ public class Hero extends Figure {
                 break;
             }
         }
+
+        maxMovement = getAttributeMax(Attribute.MovePoints);
     }
 
     /**
