@@ -374,6 +374,8 @@ public class DescentHelper {
         BoardNode targetTile = dgs.masterBoard.getElement(endPoint.getX(), endPoint.getY());
         int target = ((PropertyInt) targetTile.getProperty(playersHash)).value;
 
+        boolean ignoreAdjacent = ((Figure) dgs.getComponentById(start)).hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+
         // For each coordinate in the line, check:
         // 1) Does the coordinate have its board node
         // 2) Is the board node empty (no character on location)
@@ -394,9 +396,13 @@ public class DescentHelper {
             // Check 2) Is the board node empty (or, if either figure is large, not occupied by itself or the target)
             int owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
             if (owner != -1 && i != containedPoints.size() - 1){
-                if (owner != target && owner != start){
-                    hasLineOfSight = false;
-                    break;
+                if (owner != target && owner != start) {
+                    // Skip this check if we can ignore adjacent targets
+                    if (!(ignoreAdjacent &&
+                            checkAdjacent(dgs, (Figure) dgs.getComponentById(start), (Figure) dgs.getComponentById(owner)))) {
+                        hasLineOfSight = false;
+                        break;
+                    }
                 }
             }
 
@@ -1164,6 +1170,16 @@ public class DescentHelper {
             String[] split = effect.split(":");
 
             switch (split[1]) {
+
+                case "AdjacentLOS" -> {
+                    if (equipping) {
+                        if (!f.hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight))
+                            f.addBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+                    } else {
+                        if (f.hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight))
+                            f.removeBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+                    }
+                }
 
                 case "CancelSurge" -> {
                     AddSurge removeSurge = new AddSurge(Triggers.CHANGE_SURGE, f.getComponentID(), item.getComponentID(), -1);
