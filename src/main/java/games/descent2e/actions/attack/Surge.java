@@ -21,12 +21,15 @@ public enum Surge {
     DAMAGE_PLUS_1(1, (a, s) -> a.addDamage(1)),
     DAMAGE_PLUS_2(1, (a, s) -> a.addDamage(2)),
     DAMAGE_PLUS_3(1, (a, s) -> a.addDamage(3)),
-    DAMAGE_PLUS_5(2, (a, s) -> a.addDamage(5)),
+    DAMAGE_PLUS_4(1, (a, s) -> a.addDamage(4)),
+    DAMAGE_PLUS_5(1, (a, s) -> a.addDamage(5)),
+    DAMAGE_PLUS_5_COST_2(2, (a, s) -> a.addDamage(5)),
     DAMAGE_PLUS_1_TWICE(2, (a, s) -> a.addDamage(2)),
     DAMAGE_PLUS_2_TWICE(2, (a, s) -> a.addDamage(4)),
     PIERCE_1(1, (a, s) -> a.addPierce(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
     PIERCE_3(1, (a, s) -> a.addPierce(3)),
+    PIERCE_4(1, (a, s) -> a.addPierce(4)),
     PIERCE_5(1, (a, s) -> a.addPierce(5)),
     MENDING_1(1, (a,s) -> a.addMending(1)),
     MENDING_2(1, (a,s) -> a.addMending(2)),
@@ -41,6 +44,14 @@ public enum Surge {
     RECOVER_1_FATIGUE(1, (a, s) -> a.addFatigueHeal(1)),
     RECOVER_2_FATIGUE(1, (a, s) -> a.addFatigueHeal(2)),
     BLAST(1, (a, s) -> a.addInterruptAttack("Blast")),
+
+    KNOCKBACK_DAMAGE_PLUS_1(1, (a, s) -> {
+        a.addInterruptAttack("Knockback");
+        a.addDamage(1);
+    }),
+    DAMAGE_1_AWAY_3(1, (a, s) -> a.addInterruptAttack("Distant Attack:3;1")),
+    DAMAGE_1_ADJACENT(1, (a, s) -> a.addInterruptAttack("Adjacent:1")),
+
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         // Runic Knowledge can still be activated if we spent Fatigue to our maximum before we checked to remove it
         // Thus, this disables its effect if we have maximum Fatigue and cannot ForceFatigue
