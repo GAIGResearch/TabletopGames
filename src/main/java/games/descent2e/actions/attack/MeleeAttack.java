@@ -5,6 +5,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
+import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
@@ -442,6 +443,23 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
         if (attacker.hasBonus(DescentTypes.SkillBonus.Sneaky))
             damage += Sneaky.beSneaky(defendingFigure) ? 1 : 0;
+
+        Figure defender = (Figure) state.getComponentById(defendingFigure);
+        if (defender.hasBonus(DescentTypes.SkillBonus.ShieldMinimum)) {
+            if (defender instanceof Hero hero)
+                for (DescentDice dice : state.getDefenceDicePool().getComponents())
+                    if (dice.getShielding() == 0) {
+                        for (DescentCard item : hero.getAllEquipment()) {
+                            PropertyString action = (PropertyString) item.getProperty("action");
+                            if (action == null) {
+                                action = (PropertyString) item.getProperty("passive");
+                                if (action == null) continue;
+                            }
+                            if (action.value.contains("ShieldMinimum:"))
+                                addDefence(Integer.parseInt(action.value.split("ShieldMinimum:")[1]));
+                        }
+                }
+        }
 
         int defence = state.getDefenceDicePool().getShields() + extraDefence - pierce;
 

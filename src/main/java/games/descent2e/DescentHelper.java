@@ -1255,16 +1255,13 @@ public class DescentHelper {
                 }
 
                 case "DoubleMovePenalty" -> {
-                    int penalty = Integer.parseInt(split[2]);
                     if (equipping) {
-                        if (penalty == 1)
-                            if (!f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty)) {
-                                f.addBonus(DescentTypes.SkillBonus.DoubleMovePenalty);
+                        if (!f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty)) {
+                            f.addBonus(DescentTypes.SkillBonus.DoubleMovePenalty);
                             }
                     } else {
-                        if (penalty == 1)
-                            if (f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty)) {
-                                f.removeBonus(DescentTypes.SkillBonus.DoubleMovePenalty);
+                        if (f.hasBonus(DescentTypes.SkillBonus.DoubleMovePenalty)) {
+                            f.removeBonus(DescentTypes.SkillBonus.DoubleMovePenalty);
                             }
                     }
                 }
@@ -1289,7 +1286,15 @@ public class DescentHelper {
                 }
 
                 case "ShieldMinimum" -> {
-
+                    if (equipping) {
+                        if (!f.hasBonus(DescentTypes.SkillBonus.ShieldMinimum)) {
+                            f.addBonus(DescentTypes.SkillBonus.ShieldMinimum);
+                        }
+                    } else {
+                        if (f.hasBonus(DescentTypes.SkillBonus.ShieldMinimum)) {
+                            f.removeBonus(DescentTypes.SkillBonus.ShieldMinimum);
+                        }
+                    }
                 }
 
                 // Heal is covered by ForwardModel

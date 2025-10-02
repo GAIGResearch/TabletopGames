@@ -166,6 +166,7 @@ public class DescentTypes {
         Brute,
         AdjacentLineOfSight,
         Helmet,
+        ShieldMinimum,
         NoRunes,
         SpeedLimit_3,
         SpeedLimit_4,
