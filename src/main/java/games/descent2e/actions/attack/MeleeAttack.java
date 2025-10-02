@@ -416,6 +416,14 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                                     if (isAttacker)
                                         addPierce(Integer.parseInt(effect[2]));
                                 }
+                                case "EmptyHand" -> {
+                                    if (isAttacker) {
+                                        Deck<DescentCard> hand = f.getHandEquipment();
+                                        if (hand.getSize() == 1)
+                                            if (hand.get(0).equals(equipment))
+                                                addDamage(Integer.parseInt(effect[2]));
+                                    }
+                                }
                                 case "Shield" -> {
                                     if (!isAttacker) {
                                         DescentAction shield = new Shield(figure, equipment.getComponentID(), Integer.parseInt(effect[2]));
