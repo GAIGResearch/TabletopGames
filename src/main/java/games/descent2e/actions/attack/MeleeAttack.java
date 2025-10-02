@@ -83,6 +83,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     int surgesToSpend;
     int extraSurges;
     int extraRange, pierce, extraDamage, extraDefence, mending, fatigueHeal;
+    int swapDefence = 0;
     protected boolean hasReach;
     boolean isDiseasing;
     boolean isImmobilizing;
@@ -461,7 +462,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 }
         }
 
-        int defence = state.getDefenceDicePool().getShields() + extraDefence - pierce;
+        int defence = swapDefence > 0 ? swapDefence : state.getDefenceDicePool().getShields();
+        defence += extraDefence - pierce;
 
         // Leoric of the Book's Hero Ability
         // If a Monster is within 3 spaces of Leoric, its attacks deal -1 Heart (to a minimum of 1)
@@ -613,6 +615,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.extraRange = extraRange;
         retValue.extraDamage = extraDamage;
         retValue.extraDefence = extraDefence;
+        retValue.swapDefence = swapDefence;
         retValue.mending = mending;
         retValue.fatigueHeal = fatigueHeal;
         retValue.surgesUsed = new HashSet<>(surgesUsed);
@@ -661,7 +664,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             MeleeAttack other = (MeleeAttack) obj;
             return other.attackingFigure == attackingFigure && other.surgesToSpend == surgesToSpend &&
                     other.extraSurges == extraSurges && other.extraDamage == extraDamage &&
-                    other.extraDefence == extraDefence && other.hasReach == hasReach &&
+                    other.extraDefence == extraDefence && other.swapDefence == swapDefence && other.hasReach == hasReach &&
                     other.isDiseasing == isDiseasing && other.isImmobilizing == isImmobilizing &&
                     other.isPoisoning == isPoisoning && other.isStunning == isStunning &&
                     other.extraRange == extraRange && other.pierce == pierce &&
@@ -682,7 +685,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce, hasReach, substitute, substituteFigure, substitutePlayer, substituteName,
-                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, leeching, subdue, fatigueHeal, hasShadow, hitShadow,
+                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, swapDefence, mending, leeching, subdue, fatigueHeal, hasShadow, hitShadow,
                 surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, extraSurges, damage, range, skip, reduced, result);
     }
 
@@ -726,6 +729,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 + ". Pierce: " + pierce
                 + ". Extra damage: " + extraDamage
                 + ". Extra defence: " + extraDefence
+                + ". Swapped defence: " + swapDefence
                 + ". Mending: " + mending
                 + ". Fatigue Heal: " + fatigueHeal
                 + ". Disease: " + isDiseasing
@@ -1022,6 +1026,13 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public int getDamage() {
         return damage;
+    }
+    public void swapDefence(int swap) {
+        swapDefence = swap;
+    }
+
+    public int getSwapDefence() {
+        return swapDefence;
     }
 
     public int getExtraDamage() {

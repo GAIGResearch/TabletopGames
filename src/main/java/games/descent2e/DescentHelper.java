@@ -11,6 +11,7 @@ import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.RangedAttack;
 import games.descent2e.actions.items.AddSurge;
+import games.descent2e.actions.items.ReplaceDefence;
 import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
@@ -460,7 +461,7 @@ public class DescentHelper {
         Map<Pair<Vector2D, Monster.Direction>, Pair<Double, List<Vector2D>>> allPossibleRotations = getPossibleRotationsForMoveActions(allAdjacentNodes, dgs, f);
         List<Move> actions = new ArrayList<>();
         for (Pair<Vector2D, Monster.Direction> loc : allPossibleRotations.keySet()) {
-            if (allPossibleRotations.get(loc).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
+            if (allPossibleRotations.get(loc).a <= f.getAttributeValue(MovePoints)) {
                 Move myMoveAction = new Move(f.getComponentID(), allPossibleRotations.get(loc).b, loc.b);
                 myMoveAction.updateDirectionID(dgs);
                 if(myMoveAction.canExecute(dgs))
@@ -1039,7 +1040,7 @@ public class DescentHelper {
         for (List<Monster> monsterGroup : monsters) {
             for (Monster m : monsterGroup) {
                 if (m.hasPassive(MonsterAbilities.MonsterPassive.REGENERATION)) {
-                    m.getAttribute(Figure.Attribute.Health).increment();
+                    m.getAttribute(Health).increment();
                 }
             }
         }
@@ -1078,12 +1079,12 @@ public class DescentHelper {
     }
 
     public static void forcedFatigue(DescentGameState dgs, Figure f, String source) {
-        if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
-            f.getAttribute(Figure.Attribute.Fatigue).increment();
+        if (!f.getAttribute(Fatigue).isMaximum()) {
+            f.getAttribute(Fatigue).increment();
         }
         else {
-            f.getAttribute(Figure.Attribute.Health).decrement();
-            if (f.getAttribute(Figure.Attribute.Health).isMinimum()) {
+            f.getAttribute(Health).decrement();
+            if (f.getAttribute(Health).isMinimum()) {
                 int index = getFigureIndex(dgs, f);
                 figureDeath(dgs, f);
                 dgs.addDefeatedFigure(f, index, source);
@@ -1106,7 +1107,7 @@ public class DescentHelper {
             // A monster
             Monster m = (Monster) f;
 
-            m.setAttributeToMin(Figure.Attribute.Health);
+            m.setAttributeToMin(Health);
 
             // Remove from board
             Move.remove(dgs, m);
@@ -1283,20 +1284,34 @@ public class DescentHelper {
                 }
 
                 case "ReplaceDefense" ->  {
+
+                    Figure.Attribute attribute = null;
+
                     switch(split[2]) {
                         case "Might" -> {
-                            // Might
+                            attribute = Might;
                         }
                         case "Knowledge" -> {
-                            // Knowledge
-                        }
-
-                        case "Awareness" -> {
-                            // Awareness
+                            attribute = Knowledge;
                         }
 
                         case "Willpower" -> {
-                            // Willpower
+                            attribute = Willpower;
+                        }
+
+                        case "Awareness" -> {
+                            attribute = Awareness;
+                        }
+                    }
+
+                    if (attribute != null) {
+                        ReplaceDefence replace = new ReplaceDefence(f.getComponentID(), item.getComponentID(), attribute);
+                        if (equipping) {
+                            if (!f.hasAbility(replace))
+                                f.addAbility(replace);
+                        } else {
+                            if (f.hasAbility(replace))
+                                f.removeAbility(replace);
                         }
                     }
                 }

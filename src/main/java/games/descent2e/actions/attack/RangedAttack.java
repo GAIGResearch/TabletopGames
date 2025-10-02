@@ -99,6 +99,7 @@ public class RangedAttack extends MeleeAttack {
                 + ". Pierce: " + pierce
                 + ". Extra damage: " + extraDamage
                 + ". Extra defence: " + extraDefence
+                + ". Swapped defence: " + swapDefence
                 + ". Mending: " + mending
                 + ". Disease: " + isDiseasing
                 + ". Immobilize: " + isImmobilizing

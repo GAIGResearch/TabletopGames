@@ -12,25 +12,26 @@ import games.descent2e.components.Hero;
 
 import java.util.Objects;
 
-public class Shield extends DescentAction {
+public class ReplaceDefence extends DescentAction {
 
     protected int figureID;
-    protected int value = 1;
+    protected Figure.Attribute attribute;
     protected int cardID;
-    public Shield(int figureID, int cardID, int value) {
+    public ReplaceDefence(int figureID, int cardID, Figure.Attribute attribute) {
         super(Triggers.ROLL_OWN_DICE);
         this.figureID = figureID;
         this.cardID = cardID;
-        this.value = value;
+        this.attribute = attribute;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return gameState.getComponentById(cardID).getProperty("name") + ": Add +" + value + " Shield to defense roll";
+        Figure f = (Figure) gameState.getComponentById(figureID);
+        return gameState.getComponentById(cardID).getProperty("name") + ": Set defence result to " + f.getAttribute(attribute).getValue() + " (" + attribute.toString() + ")";
     }
 
     public String toString() {
-        return "Exhaust card " + cardID;
+        return cardID + ": Set defence result to " + attribute.toString() + " score";
     }
 
     @Override
@@ -38,14 +39,14 @@ public class Shield extends DescentAction {
         Figure f = (Figure) dgs.getComponentById(figureID);
         //System.out.println("Exhausting shield!");
         f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
-        ((MeleeAttack) Objects.requireNonNull(dgs.currentActionInProgress())).addDefence(value);
+        ((MeleeAttack) Objects.requireNonNull(dgs.currentActionInProgress())).swapDefence(f.getAttributeValue(attribute));
         f.addActionTaken(toString());
         return true;
     }
 
     @Override
     public DescentAction copy() {
-        return new Shield(figureID, cardID, value);
+        return new ReplaceDefence(figureID, cardID, attribute);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class Shield extends DescentAction {
         if (f.isExhausted(card)) return false;
         if (f instanceof Hero)
         {
-            if (!((Hero) f).getHandEquipment().contains(card)) return false;
+            if (!((Hero) f).getAllEquipment().contains(card)) return false;
         }
 
         return canUse(dgs);
@@ -67,9 +68,14 @@ public class Shield extends DescentAction {
         if (!(currentAction instanceof MeleeAttack melee)) return false;
         if (!melee.getSkip() && melee.getDefendingFigure() == figureID && melee.getPhase() == MeleeAttack.AttackPhase.POST_DEFENCE_ROLL) {
 
-            // If the defender already has enough defence to block the attack, there's no point in exhausting the shield
+            // If we already rolled higher than our attribute score, don't replace the result with a lower number
+            int defence = dgs.getDefenceDicePool().getShields();
+            int score = ((Figure) dgs.getComponentById(figureID)).getAttributeValue(attribute);
+            if (defence > score) return false;
+
+            // If the defender already has enough defence to block the attack, there's no point exhausting this either
             int damage = dgs.getAttackDicePool().getDamage() + melee.getExtraDamage();
-            int defence = dgs.getDefenceDicePool().getShields() + melee.getExtraDefence() - melee.getPierce();
+            defence += melee.getExtraDefence() - melee.getPierce();
             return damage > defence;
         }
         return false;
@@ -80,12 +86,12 @@ public class Shield extends DescentAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        Shield shield = (Shield) o;
-        return figureID == shield.figureID && value == shield.value && cardID == shield.cardID;
+        ReplaceDefence swap = (ReplaceDefence) o;
+        return figureID == swap.figureID && attribute == swap.attribute && cardID == swap.cardID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), figureID, value, cardID);
+        return Objects.hash(super.hashCode(), figureID, attribute, cardID);
     }
 }
