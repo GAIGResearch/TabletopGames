@@ -36,7 +36,7 @@ public class GhostArmor extends Shield {
     }
 
     @Override
-    public DescentAction copy() {
+    public GhostArmor copy() {
         return new GhostArmor(figureID, cardID);
     }
 

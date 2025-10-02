@@ -44,7 +44,7 @@ public class UseWardingTalisman extends Shield {
     }
 
     @Override
-    public DescentAction copy() {
+    public UseWardingTalisman copy() {
         return this;
     }
 

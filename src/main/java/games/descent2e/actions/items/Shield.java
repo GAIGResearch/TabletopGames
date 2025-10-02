@@ -26,25 +26,26 @@ public class Shield extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return gameState.getComponentById(cardID).getProperty("name") + ": Add +" + value + " Shield to defense roll";
+        return gameState.getComponentById(cardID).toString() + ": Add +" + value + " Shield to defense roll";
     }
 
+    @Override
     public String toString() {
-        return "Exhaust card " + cardID;
+        return "Shield " + cardID + ": Add +" + value + " to defense roll";
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(figureID);
-        //System.out.println("Exhausting shield!");
         f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
-        ((MeleeAttack) Objects.requireNonNull(dgs.currentActionInProgress())).addDefence(value);
+        if (value > 0)
+            ((MeleeAttack) Objects.requireNonNull(dgs.currentActionInProgress())).addDefence(value);
         f.addActionTaken(toString());
         return true;
     }
 
     @Override
-    public DescentAction copy() {
+    public Shield copy() {
         return new Shield(figureID, cardID, value);
     }
 
@@ -55,7 +56,7 @@ public class Shield extends DescentAction {
         if (f.isExhausted(card)) return false;
         if (f instanceof Hero)
         {
-            if (!((Hero) f).getHandEquipment().contains(card)) return false;
+            if (!((Hero) f).getAllEquipment().contains(card)) return false;
         }
 
         return canUse(dgs);
@@ -87,5 +88,9 @@ public class Shield extends DescentAction {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), figureID, value, cardID);
+    }
+
+    public int getCardID() {
+        return cardID;
     }
 }

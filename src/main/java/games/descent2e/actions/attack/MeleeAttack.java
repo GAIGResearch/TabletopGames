@@ -426,9 +426,30 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                                 }
                                 case "Shield" -> {
                                     if (!isAttacker) {
-                                        DescentAction shield = new Shield(figure, equipment.getComponentID(), Integer.parseInt(effect[2]));
+                                        Shield shield = new Shield(figure, equipment.getComponentID(), Integer.parseInt(effect[2]));
                                         if (!f.hasAbility(shield))
                                             f.addAbility(shield);
+                                    }
+                                }
+                                case "ShieldOrReroll" -> {
+                                    if (!isAttacker) {
+                                        Shield shield = new Shield(figure, equipment.getComponentID(), Integer.parseInt(effect[2]));
+                                        if (!f.hasAbility(shield))
+                                            f.addAbility(shield);
+                                        for (int i = 0; i < state.getDefenceDicePool().getSize(); i++) {
+                                            RerollShield rerollShield = new RerollShield(figure, equipment.getComponentID(), i);
+                                            if (!f.hasAbility(rerollShield))
+                                                f.addAbility(rerollShield);
+                                        }
+                                    }
+                                }
+                                case "ShieldAndReroll" -> {
+                                    if (!isAttacker) {
+                                        for (int i = 0; i < state.getDefenceDicePool().getSize(); i++) {
+                                            RerollShield rerollShield = new RerollShield(figure, equipment.getComponentID(), Integer.parseInt(effect[2]), i);
+                                            if (!f.hasAbility(rerollShield))
+                                                f.addAbility(rerollShield);
+                                        }
                                     }
                                 }
                             }
