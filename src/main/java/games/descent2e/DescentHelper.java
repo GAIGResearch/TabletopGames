@@ -1273,9 +1273,7 @@ public class DescentHelper {
 
                 }
 
-                case "Heal" -> {
-
-                }
+                // Heal is covered by ForwardModel
             }
 
         }

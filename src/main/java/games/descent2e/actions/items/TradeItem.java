@@ -199,8 +199,11 @@ public class TradeItem extends DescentAction implements IExtendedSequence {
         if (itemID != -1) {
             DescentCard item = (DescentCard) dgs.getComponentById(itemID);
             if (item == null) return false;
+            // Can't trade starting equipment
+            if (item.getProperty("XP") != null) return false;
+
             // Can't trade something if we've already traded it this action
-            if (traded.contains(item)) return false;
+            if (traded.contains(itemID)) return false;
             return user.getInventory().contains(item) || target.getInventory().contains(item);
         }
 

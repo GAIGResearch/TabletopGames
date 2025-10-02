@@ -1,7 +1,6 @@
 [
   {
     "name": ["String","Light Hammer"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "melee"],
@@ -15,7 +14,6 @@
   },
   {
     "name": ["String","Iron Spear"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "melee"],
@@ -29,7 +27,6 @@
   },
   {
     "name": ["String","Iron Battleaxe"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "melee"],
@@ -43,7 +40,6 @@
   },
   {
     "name": ["String","Steel Broadsword"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "melee"],
@@ -57,7 +53,6 @@
   },
   {
     "name": ["String","Sling"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -71,7 +66,6 @@
   },
   {
     "name": ["String","Elm Greatbow"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -85,7 +79,6 @@
   },
   {
     "name": ["String","Crossbow"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -99,7 +92,6 @@
   },
   {
     "name": ["String","Sunburst"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -113,7 +105,6 @@
   },
   {
     "name": ["String","Immolation"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -127,7 +118,6 @@
   },
   {
     "name": ["String","Magic Staff"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -141,7 +131,6 @@
   },
   {
     "name": ["String","Iron Shield"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", true],
     "equipmentType": ["String[]", ["Shield"]],
@@ -152,7 +141,6 @@
   },
   {
     "name": ["String","Iron Shield"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", true],
     "equipmentType": ["String[]", ["Shield"]],
@@ -163,7 +151,6 @@
   },
   {
     "name": ["String","Heavy Cloak"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", true],
     "equipmentType": ["String[]", ["Cloak"]],
@@ -174,7 +161,6 @@
   },
   {
     "name": ["String","Leather Armor"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "defensePower": ["String[]", ["brown"]],
@@ -186,7 +172,6 @@
   },
   {
     "name": ["String","Leather Armor"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "defensePower": ["String[]", ["brown"]],
@@ -198,7 +183,6 @@
   },
   {
     "name": ["String","Chainmail"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "defensePower": ["String[]", ["grey"]],
@@ -210,7 +194,6 @@
   },
   {
     "name": ["String","Scorpion Helm"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "equipmentType": ["String[]", ["Helmet"]],
@@ -221,7 +204,6 @@
   },
   {
     "name": ["String","Lucky Charm"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", true],
     "equipmentType": ["String[]", ["Trinket"]],
@@ -232,7 +214,6 @@
   },
   {
     "name": ["String","Mana Weave"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", true],
     "equipmentType": ["String[]", ["Rune"]],
@@ -243,7 +224,6 @@
   },
   {
     "name": ["String","Ring of Power"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "equipmentType": ["String[]", ["Ring"]],
@@ -254,7 +234,6 @@
   },
   {
     "name": ["String","Mace of Kellos"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "melee"],
@@ -268,7 +247,6 @@
   },
   {
     "name": ["String","Dragontooth Hammer"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "melee"],
@@ -282,7 +260,6 @@
   },
   {
     "name": ["String","Grinding Axe"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "melee"],
@@ -296,7 +273,6 @@
   },
   {
     "name": ["String","Steel Greatsword"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "melee"],
@@ -310,7 +286,6 @@
   },
   {
     "name": ["String","Dwarven Firebomb"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -324,7 +299,6 @@
   },
   {
     "name": ["String","Latari Longbow"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -338,7 +312,6 @@
   },
   {
     "name": ["String","Ice Storm"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -352,7 +325,6 @@
   },
   {
     "name": ["String","Lightning Strike"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "attackType": ["String", "ranged"],
@@ -366,7 +338,6 @@
   },
   {
     "name": ["String","Heavy Steel Shield"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", true],
     "equipmentType": ["String[]", ["Shield"]],
@@ -377,7 +348,6 @@
   },
   {
     "name": ["String","Elven Cloak"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", true],
     "equipmentType": ["String[]", ["Cloak"]],
@@ -388,7 +358,6 @@
   },
   {
     "name": ["String","Demonhide Leather"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "defensePower": ["String[]", ["grey"]],
@@ -400,7 +369,6 @@
   },
   {
     "name": ["String","Platemail"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "defensePower": ["String[]", ["black"]],
@@ -412,7 +380,6 @@
   },
   {
     "name": ["String","Iron-Bound Ring"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "equipmentType": ["String[]", ["Ring"]],
@@ -423,13 +390,12 @@
   },
   {
     "name": ["String","Tival Crystal"],
-    "XP": ["Integer", 0],
     "fatigue": ["Integer", 0],
     "exhaust": ["Boolean", false],
     "equipmentType": ["String[]", ["Trinket"]],
     "equipSlots": ["String[]", ["other"]],
     "cost": ["Integer", 175],
-    "action": ["String", "Exhaust this card to roll 1 red power die. You recover Hearts equal to the Hearts rolled.;Effect:Heal:1"],
+    "action": ["String", "Exhaust this card to roll 1 red power die. You recover Hearts equal to the Hearts rolled.;Effect:Heal"],
     "act": ["Integer", 2]
   }
 ]

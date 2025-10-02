@@ -212,7 +212,7 @@ public class EquipItem extends DescentAction implements IExtendedSequence {
                     return false;
                 return user.canUnequip(item);
             }
-            // Either you're equipping it of you're unequipping it, end of story
+            // Either you're equipping it or you're unequipping it, end of story
             if (equipped.contains(itemID))
                 return false;
             return user.getInventory().contains(item) &&

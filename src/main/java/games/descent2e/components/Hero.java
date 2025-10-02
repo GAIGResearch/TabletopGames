@@ -331,6 +331,11 @@ public class Hero extends Figure {
         Property cost = c.getProperty(costHash);
         if (cost != null) {
 
+            // We can't unequip starting equipment if there's nothing to replace it with
+            if (c.getProperty("XP") != null)
+                if (inventory.getComponents().isEmpty())
+                    return false;
+
             String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
             switch (equip[0]) {
                 case "armor":
@@ -353,6 +358,7 @@ public class Hero extends Figure {
                     return otherEquipment.contains(c);
             }
         }
+        // Can't unequip skills
         return false;
     }
 
