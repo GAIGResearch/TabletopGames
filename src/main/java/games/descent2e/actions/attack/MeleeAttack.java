@@ -40,6 +40,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         NOT_STARTED,
         PRE_ATTACK_ROLL(START_ATTACK, DEFENDER),
         POST_ATTACK_ROLL(ROLL_OWN_DICE, ATTACKER),
+        PRE_SURGE(CHANGE_SURGE, OTHERS),
         SURGE_DECISIONS(SURGE_DECISION, ATTACKER),
         ATTRIBUTE_TEST(FORCED, ATTACKER), // This is used for attribute tests that can be triggered by this attack
         PRE_DEFENCE_ROLL(ROLL_OTHER_DICE, DEFENDER),
@@ -283,6 +284,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 phase = POST_ATTACK_ROLL;
                 break;
             case POST_ATTACK_ROLL:
+                phase = PRE_SURGE;
+                break;
+            case PRE_SURGE:
                 // Any rerolls are executed via interrupts
                 // once done we see how many surges we have to spend
                 // If for whatever reason we must subtract Surges, clamp the minimum to 0
@@ -750,6 +754,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         DescentGameState state = (DescentGameState) gs;
         List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
         // now we filter this for any that have been used
+
+        if (phase == PRE_SURGE) {
+            if (!retValue.isEmpty())
+                retValue.add(new EndCurrentPhase());
+        }
 
         if (phase == SURGE_DECISIONS) {
 

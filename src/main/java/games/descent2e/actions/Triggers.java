@@ -21,5 +21,6 @@ public enum Triggers {
     FORCED,
     ANYTIME,
     ROLL_DEFENCE_DICE,
-    TAKE_DAMAGE
+    TAKE_DAMAGE,
+    CHANGE_SURGE
 }

@@ -8,7 +8,9 @@ import core.components.GridBoard;
 import core.properties.*;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.actions.items.AddSurge;
 import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
@@ -1164,7 +1166,15 @@ public class DescentHelper {
             switch (split[1]) {
 
                 case "CancelSurge" -> {
-
+                    AddSurge removeSurge = new AddSurge(Triggers.CHANGE_SURGE, f.getComponentID(), item.getComponentID(), -1);
+                    if (equipping) {
+                        if (!f.hasAbility(removeSurge))
+                            f.addAbility(removeSurge);
+                    }
+                    else {
+                        if (f.hasAbility(removeSurge))
+                            f.removeAbility(removeSurge);
+                    }
                 }
 
                 case "HealthPlus" -> {
@@ -1188,11 +1198,13 @@ public class DescentHelper {
 
                 case "NoRunes" -> {
                     // Only Armour can apply this penality, so there's no need to fear for overlaps
-                    if (equipping)
+                    if (equipping) {
                         if (!f.hasBonus(DescentTypes.SkillBonus.NoRunes))
                             f.addBonus(DescentTypes.SkillBonus.NoRunes);
-                        else if (f.hasBonus(DescentTypes.SkillBonus.NoRunes))
+                    } else {
+                        if (f.hasBonus(DescentTypes.SkillBonus.NoRunes))
                             f.removeBonus(DescentTypes.SkillBonus.NoRunes);
+                    }
                 }
 
                 case "SpeedLimit" -> {
@@ -1232,7 +1244,14 @@ public class DescentHelper {
                 }
 
                 case "Surge" -> {
-
+                    AddSurge addSurge = new AddSurge(f.getComponentID(), item.getComponentID());
+                    if (equipping) {
+                        if (!f.hasAbility(addSurge))
+                            f.addAbility(addSurge);
+                    } else {
+                        if (f.hasAbility(addSurge))
+                            f.removeAbility(addSurge);
+                    }
                 }
 
                 case "DoubleMovePenalty" -> {
