@@ -1121,36 +1121,11 @@ public class DescentHelper {
     }
 
     public static void applyEquipment (Hero f, DescentCard item, boolean equipping) {
-        // Weapons and Shields are handled differently to Armour and Other Equipment
+
+        // Some passives, like Weapons, Shields or Armour dice, are handled by MeleeAttack, and are called mid-attack
 
         PropertyStringArray type = ((PropertyStringArray) item.getProperty("equipSlots"));
         if (type == null) return;
-
-        switch (type.getValues()[0]) {
-
-            case "hand" -> {
-
-            }
-
-            case "armor" -> {
-                PropertyStringArray defense = ((PropertyStringArray) item.getProperty("defensePower"));
-                if (defense != null) {
-                    DicePool defDice = DicePool.constructDicePool(defense.getValues());
-                    List<DescentDice> dice = new ArrayList<>(f.getDefenceDice().copy().getComponents());
-
-                    if (equipping) {
-                        dice.addAll(defDice.getComponents());
-                        f.setDefenceDice(new DicePool(dice));
-                    }
-
-                    else {
-                        dice.removeAll(defDice.getComponents());
-                        f.setDefenceDice(new DicePool(dice));
-                    }
-
-                }
-            }
-        }
 
         // Obtain the action, or passive, property of the Item
         PropertyString action = (PropertyString) item.getProperty("action");
@@ -1169,13 +1144,14 @@ public class DescentHelper {
 
             switch (split[1]) {
 
-                case "AdjacentLOS" -> {
+                case "Surge" -> {
+                    AddSurge addSurge = new AddSurge(f.getComponentID(), item.getComponentID());
                     if (equipping) {
-                        if (!f.hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight))
-                            f.addBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+                        if (!f.hasAbility(addSurge))
+                            f.addAbility(addSurge);
                     } else {
-                        if (f.hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight))
-                            f.removeBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+                        if (f.hasAbility(addSurge))
+                            f.removeAbility(addSurge);
                     }
                 }
 
@@ -1208,6 +1184,16 @@ public class DescentHelper {
                         f.getAttribute(Fatigue).setMaximum(f.getAttributeMax(Fatigue) + increase);
                     else
                         f.getAttribute(Fatigue).setMaximum(f.getAttributeMax(Fatigue) - increase);
+                }
+
+                case "AdjacentLOS" -> {
+                    if (equipping) {
+                        if (!f.hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight))
+                            f.addBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+                    } else {
+                        if (f.hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight))
+                            f.removeBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+                    }
                 }
 
                 case "NoRunes" -> {
@@ -1250,17 +1236,6 @@ public class DescentHelper {
                         if (f.getAttributeMax(MovePoints) < old) {
                             f.getAttribute(MovePoints).setMaximum(old);
                         }
-                    }
-                }
-
-                case "Surge" -> {
-                    AddSurge addSurge = new AddSurge(f.getComponentID(), item.getComponentID());
-                    if (equipping) {
-                        if (!f.hasAbility(addSurge))
-                            f.addAbility(addSurge);
-                    } else {
-                        if (f.hasAbility(addSurge))
-                            f.removeAbility(addSurge);
                     }
                 }
 
@@ -1367,8 +1342,6 @@ public class DescentHelper {
                         }
                     }
                 }
-
-                // Heal is covered by ForwardModel
             }
 
         }

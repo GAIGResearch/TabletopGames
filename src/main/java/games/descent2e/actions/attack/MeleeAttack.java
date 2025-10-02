@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import core.properties.PropertyString;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
@@ -391,6 +392,20 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             Deck<DescentCard> myEquipment = f.getAllEquipment();
             for (DescentCard equipment : myEquipment.getComponents())
             {
+                // Apply Armour dice
+                if (!isAttacker) {
+                    if (equipment.equals(f.getArmor())) {
+                        PropertyStringArray defense = ((PropertyStringArray) equipment.getProperty("defensePower"));
+                        if (defense != null) {
+                            List<DescentDice> dice = new ArrayList<>(state.getDefenceDicePool().copy().getComponents());
+                            dice.addAll(DicePool.constructDicePool(defense.getValues()).getComponents());
+                            DicePool newPool = new DicePool(dice);
+                            state.setDefenceDicePool(newPool);
+                        }
+                    }
+                }
+
+
                 String action = String.valueOf(equipment.getProperty("action"));
                 if(action.contains(";"))
                 {
