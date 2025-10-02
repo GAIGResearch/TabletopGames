@@ -1,20 +1,14 @@
 package games.descent2e;
 
 import core.actions.AbstractAction;
-import core.components.BoardNode;
-import core.components.Component;
-import core.components.Deck;
-import core.components.GridBoard;
+import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.archetypeskills.GhostArmor;
 import games.descent2e.actions.attack.RangedAttack;
-import games.descent2e.actions.items.AddSurge;
-import games.descent2e.actions.items.ReplaceDefence;
-import games.descent2e.actions.items.RerollAttributeTest;
-import games.descent2e.actions.items.Shield;
+import games.descent2e.actions.items.*;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.searchcards.UseWardingTalisman;
 import games.descent2e.components.*;
@@ -1259,10 +1253,6 @@ public class DescentHelper {
                     }
                 }
 
-                case "Reroll" -> {
-
-                }
-
                 case "Surge" -> {
                     AddSurge addSurge = new AddSurge(f.getComponentID(), item.getComponentID());
                     if (equipping) {
@@ -1327,6 +1317,22 @@ public class DescentHelper {
                     } else {
                         if (f.hasBonus(DescentTypes.SkillBonus.ShieldMinimum)) {
                             f.removeBonus(DescentTypes.SkillBonus.ShieldMinimum);
+                        }
+                    }
+                }
+
+                case "RerollAttack" -> {
+                    if (!equipping) {
+                        int i = 0;
+                        List<DescentAction> interrupts = f.getAbilities();
+                        while (i < interrupts.size()) {
+                            if (interrupts.get(i) instanceof RerollAttackDice reroll) {
+                                if (reroll.getCardID() == item.getComponentID()) {
+                                    interrupts.remove(reroll);
+                                    continue;
+                                }
+                            }
+                            i++;
                         }
                     }
                 }

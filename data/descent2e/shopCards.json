@@ -48,7 +48,7 @@
     "weaponSurges": ["String[]", ["DAMAGE_PLUS_1"]],
     "equipSlots": ["String[]", ["hand", "hand"]],
     "cost": ["Integer", 100],
-    "action": ["String", "Attack. Once per attack roll, you may reroll 1 red power die.;Effect:Reroll:Red"],
+    "action": ["String", "Attack. Once per attack roll, you may reroll 1 red power die.;Effect:RerollAttack:Red"],
     "act": ["Integer", 1]
   },
   {
@@ -209,7 +209,7 @@
     "equipmentType": ["String[]", ["Trinket"]],
     "equipSlots": ["String[]", ["other"]],
     "cost": ["Integer", 25],
-    "passive": ["String", "Exhaust this card to reroll an attribute test. You must keep the new results.;Effect:Reroll:AttributeTest"],
+    "action": ["String", "Exhaust this card to reroll an attribute test. You must keep the new results.;Effect:Reroll:AttributeTest"],
     "act": ["Integer", 1]
   },
   {
@@ -281,7 +281,7 @@
     "weaponSurges": ["String[]", ["DAMAGE_PLUS_1", "PIERCE_2"]],
     "equipSlots": ["String[]", ["hand", "hand"]],
     "cost": ["Integer", 200],
-    "action": ["String", "Attack. Once per attack, you may reroll 1 power die.;Effect:Reroll:AnyPower"],
+    "action": ["String", "Attack. Once per attack, you may reroll 1 power die.;Effect:RerollAttack:Any"],
     "act": ["Integer", 2]
   },
   {

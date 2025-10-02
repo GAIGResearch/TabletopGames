@@ -65,7 +65,7 @@ public class UsePowerPotion extends DescentAction implements IExtendedSequence {
 
         for (List<Integer> combo : combinations)
         {
-            RerollAttackDice reroll = new RerollAttackDice(userID, combo);
+            RerollAttackDice reroll = new RerollAttackDice(userID, itemID, combo);
             if (reroll.canExecute(dgs))
                 retVal.add(reroll);
         }

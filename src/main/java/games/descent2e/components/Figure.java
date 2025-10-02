@@ -329,9 +329,14 @@ public class Figure extends Token {
     public void setCurrentAttack(MeleeAttack currentAttack) { this.currentAttack = currentAttack;}
     public void clearCurrentAttack() { currentAttack = null;}
 
-    public void exhaustCard (DescentCard card)
+    public void exhaustCard(DescentCard card)
     {
         exhausted.add(card);
+    }
+    public void refreshCard(DescentCard card)
+    {
+        if(exhausted.contains(card))
+            exhausted.remove(card);
     }
     public void refreshAllCards()
     {

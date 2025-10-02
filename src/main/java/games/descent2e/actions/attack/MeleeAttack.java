@@ -14,6 +14,8 @@ import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.archetypeskills.*;
+import games.descent2e.actions.items.RerollAttackDice;
+import games.descent2e.actions.items.RerollShield;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.*;
 import games.descent2e.components.*;
@@ -424,6 +426,22 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                                                 addDamage(Integer.parseInt(effect[2]));
                                     }
                                 }
+
+                                case "RerollAttack" -> {
+                                    if (isAttacker) {
+                                        f.refreshCard(equipment);
+                                        String colour = effect[2].toUpperCase();
+                                        boolean any = colour.contains("ANY");
+                                        for (int i = 0; i < state.getAttackDicePool().getSize(); i++) {
+                                            if (any || state.getAttackDicePool().getDice(i).getColour().toString().toUpperCase().equals(colour)) {
+                                                RerollAttackDice reroll = new RerollAttackDice(figure, equipment.getComponentID(), i);
+                                                if (!f.hasAbility(reroll))
+                                                    f.addAbility(reroll);
+                                            }
+                                        }
+                                    }
+                                }
+
                                 case "Shield" -> {
                                     if (!isAttacker) {
                                         Shield shield = new Shield(figure, equipment.getComponentID(), Integer.parseInt(effect[2]));
@@ -799,8 +817,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         if (phase.interrupt == null) {
             System.out.println(phase + "; " + phase.interrupt);
-            //return new ArrayList<>();
-            throw new AssertionError("Should not be reachable");
         }
         DescentGameState state = (DescentGameState) gs;
         List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
