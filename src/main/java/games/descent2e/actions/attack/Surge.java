@@ -50,8 +50,9 @@ public enum Surge {
         a.addInterruptAttack(s, Knockback.name+":1");
         a.addDamage(1);
     }),
-    DAMAGE_1_AWAY_3(1, (a, s) -> a.addInterruptAttack(s, "Distant Attack:3;1")),
-    DAMAGE_1_ADJACENT(1, (a, s) -> a.addInterruptAttack(s, "Adjacent:1")),
+    DAMAGE_1_AWAY_3(1, (a, s) -> a.addInterruptAttack(s, ExtraDamage.distant + ":3:1")),
+    DAMAGE_1_ALL_ADJACENT(1, (a, s) -> a.addInterruptAttack(s, ExtraDamage.adjacent + ":All:1")),
+    FULL_DAMAGE_ONE_ADJACENT(1, (a, s) -> a.addInterruptAttack(s, ExtraDamage.adjacent + ":1:Full")),
 
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         // Runic Knowledge can still be activated if we spent Fatigue to our maximum before we checked to remove it

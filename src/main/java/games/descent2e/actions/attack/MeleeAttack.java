@@ -915,6 +915,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     !target.getAttribute(Figure.Attribute.Health).isMinimum()) {
                 for (String attack : state.getInterruptAttacks()) {
 
+                    // Blast
                     if (attack.contains(BlastAttack.name)) {
                         Set<BlastAttack> blastAttacks = BlastAttack.constructBlasts(state, attackingFigure, defendingFigure);
                         if (!blastAttacks.isEmpty())
@@ -922,6 +923,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                         continue;
                     }
 
+                    // Fire Breath
                     if (attack.contains(FireBreath.name)) {
                         Set<FireBreath> fireBreath = FireBreath.constructFireBreath(state, attackingFigure, defendingFigure);
                         if (!fireBreath.isEmpty())
@@ -929,7 +931,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                         continue;
                     }
 
+                    // Knockback - both Splig and Crossbow
                     if (attack.contains(Knockback.name)) {
+                        List<Knockback> knockbacks = new ArrayList<>();
                         int distance = Integer.parseInt(attack.split(":")[1]);
                         target.setOffMap(true);
                         target.setAttribute(Figure.Attribute.MovePoints, distance);
@@ -949,7 +953,76 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                             for (Monster.Direction orientation : orientations) {
                                 Knockback knockback = new Knockback(defendingFigure, attackingFigure, startPos, pos, orientation, distance);
                                 if (knockback.canExecute(state))
-                                    interruptAttacks.add(knockback);
+                                    knockbacks.add(knockback);
+                            }
+                        }
+
+                        if (!knockbacks.isEmpty()) {
+                            knockbacks.sort(Comparator.comparing(ForcedMove::getOrientation));
+                            interruptAttacks.addAll(knockbacks);
+                        }
+
+                        continue;
+                    }
+
+                    // Distant Damage - Magic Staff
+                    if (attack.contains(ExtraDamage.distant)) {
+                        int range = Integer.parseInt(attack.split(":")[1]);
+                        int dmg = Integer.parseInt(attack.split(":")[2]);
+
+                        List<Integer> targets = new ArrayList<>();
+
+                        if (attacker instanceof Hero) {
+                            for (List<Monster> monsters : state.getMonsters()) {
+                                for (Monster m : monsters) {
+                                    if (m.getComponentID() == defendingFigure) continue;
+                                    if (getRangeAllSpaces(state, target, m) <= range)
+                                        targets.add(m.getComponentID());
+                                }
+                            }
+                        }
+                        if (attacker instanceof Monster) {
+                            for (Hero hero : state.getHeroes()) {
+                                if (hero.getComponentID() == defendingFigure) continue;
+                                if (getRangeAllSpaces(state, target, hero) <= range)
+                                    targets.add(hero.getComponentID());
+                            }
+                        }
+
+                        for (int t : targets) {
+                            ExtraDamage extraDamage = new ExtraDamage(attackingFigure, t, dmg, range);
+                            extraDamage.setName(attack);
+                            if (extraDamage.canExecute(state))
+                                interruptAttacks.add(extraDamage);
+                        }
+                        continue;
+                    }
+
+                    // Adjacent Damage - Mace of Kellos, Dawnblade
+                    if (attack.contains(ExtraDamage.adjacent)) {
+                        String[] split = attack.split(":");
+                        boolean targetAll = split[1].contains("All");
+                        boolean maxDamage = split[2].contains("Full");
+
+                        int dmg = maxDamage ? damage : Integer.parseInt(split[2]);
+
+                        List<Integer> targets = getMeleeTargets(state, attacker, false);
+
+                        if (targetAll) {
+                            ExtraDamage extraDamage = new ExtraDamage(attackingFigure, targets, dmg, 1);
+                            extraDamage.setName(attack);
+                            if (extraDamage.canExecute(state))
+                                interruptAttacks.add(extraDamage);
+                        }
+
+                        else {
+
+                            for (int t : targets) {
+                                if (t == defendingFigure) continue;
+                                ExtraDamage extraDamage = new ExtraDamage(attackingFigure, t, dmg);
+                                extraDamage.setName(attack);
+                                if (extraDamage.canExecute(state))
+                                    interruptAttacks.add(extraDamage);
                             }
                         }
                         continue;

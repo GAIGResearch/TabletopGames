@@ -37,8 +37,9 @@ public class SurgeAttackAction extends DescentAction {
             surgeName = surgeName.replace("COST", "(") + " SURGES)";
         surgeName = surgeName.replace(" TWICE", " (TWICE)");
         if(surgeName.contains((" AWAY")))
-            surgeName = surgeName.replace(" AWAY", " TO A MONSTER ") + " SPACES AWAY";
-        surgeName = surgeName.replace(" ADJACENT", " TO ADJACENT MONSTERS");
+            surgeName = surgeName.replace(" AWAY", " TO A MONSTER") + " SPACES AWAY";
+        surgeName = surgeName.replace(" ALL ADJACENT", " TO ALL ADJACENT MONSTERS");
+        surgeName = surgeName.replace(" ONE ADJACENT", " TO ONE ADJACENT MONSTER");
         return String.format("Surge: "+ surgeName + " by " + figureName);
     }
 

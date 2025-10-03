@@ -239,7 +239,7 @@
     "attackType": ["String", "melee"],
     "attackPower": ["String[]", ["blue", "red", "yellow"]],
     "equipmentType": ["String[]", ["Hammer"]],
-    "weaponSurges": ["String[]", ["DAMAGE_1_ADJACENT", "RECOVER_1_HEART"]],
+    "weaponSurges": ["String[]", ["DAMAGE_1_ALL_ADJACENT", "RECOVER_1_HEART"]],
     "equipSlots": ["String[]", ["hand"]],
     "cost": ["Integer", 175],
     "action": ["String", "Attack."],
