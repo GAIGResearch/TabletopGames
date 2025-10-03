@@ -2,6 +2,7 @@ package games.descent2e.actions.monsterfeats;
 
 import core.AbstractGameState;
 import core.components.BoardNode;
+import core.components.GridBoard;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
@@ -12,10 +13,13 @@ import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static core.CoreConstants.playersHash;
 import static games.descent2e.DescentHelper.figureDeath;
+import static games.descent2e.DescentHelper.getAttackingTiles;
 import static games.descent2e.actions.Move.*;
 
 public class ForcedMove extends DescentAction {
@@ -125,25 +129,53 @@ public class ForcedMove extends DescentAction {
 
     @Override
     public String toString() {
-        return "Forced Move by " + sourceID + " upon " + figureID + " from" + startPosition.toString() + " to " + whereTo.toString();
+        return "Forced Move by " + sourceID + " upon " + figureID + " from" + startPosition.toString() + " to " + whereTo.toString() + "; Orientation: " + orientation;
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        if (dgs.getComponentById(figureID) == null) return false;
-        if (dgs.getComponentById(sourceID) == null) return false;
-        BoardNode tile = dgs.getMasterBoard().getElement(whereTo);
-        if (tile == null) return false;
-        // Can only force move a figure onto an empty space
-        if (((PropertyInt) tile.getProperty(playersHash)).value != -1) return false;
 
         Figure f = (Figure) dgs.getComponentById(figureID);
+        if (f == null) return false;
+        if (dgs.getComponentById(sourceID) == null) return false;
 
-        // Monsters with the Unmovable passive (Sir Alric Farrow) cannot be forced to move
-        if (f instanceof Monster)
-            if (((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.UNMOVABLE)) return false;
+        if (f.getAttributeValue(Figure.Attribute.MovePoints) < maxDistance) return false;
 
-        return f.getAttributeValue(Figure.Attribute.MovePoints) >= maxDistance;
+        GridBoard board = dgs.getMasterBoard();
+
+        // Can only force move a figure onto an empty space
+        BoardNode tile = board.getElement(whereTo);
+        if (tile == null) return false;
+        int val = ((PropertyInt) tile.getProperty(playersHash)).value;
+        if (!(val == -1 || val == figureID)) return false;
+
+        if (f instanceof Hero)
+            if (startPosition.equals(whereTo)) return false;
+
+        if (f instanceof Monster m) {
+            if (startPosition.equals(whereTo))
+                if (orientation.equals(m.getOrientation())) return false;
+
+            // Monsters with the Unmovable passive (Sir Alric Farrow) cannot be forced to move
+            if (m.hasPassive(MonsterAbilities.MonsterPassive.UNMOVABLE)) return false;
+
+            Pair<Integer, Integer> size = m.getSize().copy();
+            if (size.a > 1 || size.b > 1) {
+                if (orientation.ordinal() % 2 == 0) size.swap();
+                Vector2D topLeftAnchor = m.applyAnchorModifier(whereTo.copy(), orientation);
+                for (int i = 0; i < size.b; i++) {
+                    for (int j = 0; j < size.a; j++) {
+                        tile = board.getElement(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
+                        if (tile == null) return false;
+                        val = ((PropertyInt) tile.getProperty(playersHash)).value;
+                        if (!(val == -1 || val == figureID))
+                            return false;
+                    }
+                }
+
+            }
+        }
+        return true;
     }
 
     @Override
@@ -166,5 +198,13 @@ public class ForcedMove extends DescentAction {
     public int hashCode()
     {
         return Objects.hash(figureID, sourceID, whereTo, maxDistance, orientation, startPosition, directionID);
+    }
+
+    public Vector2D getDestination() {
+        return whereTo;
+    }
+
+    public Monster.Direction getOrientation() {
+        return orientation;
     }
 }
