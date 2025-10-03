@@ -25,12 +25,14 @@ public class DramaMetrics implements IMetricsCollection {
         private final MCTSPlayer oracle;
         private final AbstractForwardModel fm;
         private double[] lastValues;
+        private final boolean onlyProcessGenuineChoices;
 
-        public StateEstimate(String gameType, MCTSParams oracleDetails) {
+        public StateEstimate(String gameType, boolean onlyProcessGenuineChoices, MCTSParams oracleDetails) {
             GameType game = GameType.valueOf(gameType);
             oracle = oracleDetails.instantiate();
             fm = game.createForwardModel(null, 0);
             oracle.setForwardModel(fm);
+            this.onlyProcessGenuineChoices = onlyProcessGenuineChoices;
             // params and nPlayers are only used for Pandemic and the AbstractRuleForwardModel
         }
 
@@ -45,7 +47,7 @@ public class DramaMetrics implements IMetricsCollection {
                 if (oracle != null) {
                     // use oracle to calculate state values
                     List<AbstractAction> actions = fm.computeAvailableActions(e.state);
-                    if (actions.size() > 1) {
+                    if (actions.size() > 1 || !onlyProcessGenuineChoices) {
                         AbstractAction oracleAction = oracle._getAction(e.state, actions);
                         records.put("OracleAction", oracleAction.toString());
                         records.put("OracleActionDescription", oracleAction.getString(e.state));
@@ -56,7 +58,7 @@ public class DramaMetrics implements IMetricsCollection {
                             oracleHeuristicValues = (double[]) actionStats.get("heuristicValue");
                         }
                     } else {
-                        return true; // no choice to be made
+                        return true; // no genuine choice to make, so skip recording
                     }
                 }
                 for (int i = 0; i < e.state.getNPlayers(); i++) {

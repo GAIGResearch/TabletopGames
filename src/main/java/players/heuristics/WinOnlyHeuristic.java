@@ -7,9 +7,12 @@ import core.interfaces.IStateHeuristic;
 public class WinOnlyHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        if (gs.getPlayerResults()[playerId] == CoreConstants.GameResult.DRAW_GAME)
-                return 0.5;
-        return  gs.getPlayerResults()[playerId].value;
+        // We do not use the RESULT.value because this varies from -1 to +1
+        return switch (gs.getPlayerResults()[playerId]) {
+            case DRAW_GAME, TIMEOUT, GAME_ONGOING -> 0.5;
+            case WIN_GAME -> 1.0;
+            case LOSE_GAME, GAME_END, DISQUALIFY -> 0.0;
+        };
     }
     @Override
     public double minValue() {
