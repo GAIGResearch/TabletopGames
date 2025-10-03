@@ -26,7 +26,8 @@ import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_DEFENCE
 
 public class BlastAttack extends MultiAttack {
 
-    public static boolean enabled = false;
+    public static String name = "Blast";
+
     public Vector2D position;               // The centre point of the Blast
     public BlastAttack(int attackingFigure, List<Integer> defendingFigures, Vector2D position) {
         super(attackingFigure, defendingFigures);
@@ -68,7 +69,7 @@ public class BlastAttack extends MultiAttack {
 
         // As this is an Interrupt Attack, we do not need to disable all Interrupt Attacks
         // Only decrement how many times we can use Fire Breath now that we have used it
-        disable();
+        state.removeInterruptAttack(name);
 
         movePhaseForward(state);
 
@@ -78,7 +79,7 @@ public class BlastAttack extends MultiAttack {
     }
 
     public boolean canExecute(DescentGameState dgs) {
-        if (!isEnabled()) return false;
+        if (dgs.hasInterruptAttack(name)) return false;
         Figure f = dgs.getActingFigure();
 
         if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;
@@ -135,7 +136,7 @@ public class BlastAttack extends MultiAttack {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), enabled, position);
+        return Objects.hash(super.hashCode(), name, position);
     }
 
     @Override
@@ -214,17 +215,5 @@ public class BlastAttack extends MultiAttack {
         }
 
         return blasts;
-    }
-
-    public static boolean isEnabled() {
-        return BlastAttack.enabled;
-    }
-
-    public static void enable() {
-        BlastAttack.enabled = true;
-    }
-
-    public static void disable() {
-        BlastAttack.enabled = false;
     }
 }

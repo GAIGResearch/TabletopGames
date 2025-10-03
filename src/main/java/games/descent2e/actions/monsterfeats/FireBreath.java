@@ -18,10 +18,8 @@ import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 public class FireBreath extends ChainAttack {
 
-    // A counter for how many times this has been enabled by external actions
-    // i.e. how many times a Shadow Dragon has spent the Fire Breath surge in a single attack
-    // So that we don't get stuck in a loop, we can only execute that many Fire Breaths
-    public static int enabled = 0;
+    public static String name = "Fire Breath";
+
     public FireBreath(int attackingFigure, List<Integer> defendingFigures, int distance, List<Vector2D> pathway) {
         super(attackingFigure, defendingFigures, distance, pathway, false);
         this.isFreeAttack = true;
@@ -64,7 +62,7 @@ public class FireBreath extends ChainAttack {
 
         // As this is an Interrupt Attack, we do not need to disable all Interrupt Attacks
         // Only decrement how many times we can use Fire Breath now that we have used it
-        decreaseEnabled();
+        state.removeInterruptAttack(name);
 
         movePhaseForward(state);
 
@@ -74,17 +72,18 @@ public class FireBreath extends ChainAttack {
     }
 
     public boolean canExecute(DescentGameState dgs) {
-        return isEnabled() && super.canExecute(dgs);
+        return dgs.hasInterruptAttack(name)
+                && super.canExecute(dgs);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return super.getString(gameState).replace("Chain Attack", "Fire Breath");
+        return super.getString(gameState).replace("Chain Attack", name);
     }
 
     @Override
     public String toString() {
-        return super.toString().replace("Chain Attack", "Fire Breath");
+        return super.toString().replace("Chain Attack", name);
     }
 
     @Override
@@ -98,7 +97,7 @@ public class FireBreath extends ChainAttack {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), enabled);
+        return Objects.hash(super.hashCode(), name);
     }
 
     @Override
@@ -225,21 +224,5 @@ public class FireBreath extends ChainAttack {
             }
         }
         return fireBreaths;
-    }
-
-    public static void decreaseEnabled() {
-        FireBreath.enabled = Math.min(FireBreath.enabled - 1, 0);
-    }
-
-    public static void increaseEnabled() {
-        FireBreath.enabled++;
-    }
-
-    public static boolean isEnabled() {
-        return FireBreath.enabled > 0;
-    }
-
-    public static void disable() {
-        FireBreath.enabled = 0;
     }
 }

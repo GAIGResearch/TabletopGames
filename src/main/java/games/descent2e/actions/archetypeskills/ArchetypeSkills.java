@@ -351,8 +351,6 @@ public class ArchetypeSkills {
                         f.addBonus(DescentTypes.SkillBonus.QuickCasting);
                         QuickCasting.setCardID(skill.getComponentID());
                     }
-                    if (!QuickCasting.isEnabled())
-                        QuickCasting.enable();
                 }
 
                 // - SCOUT SKILLS

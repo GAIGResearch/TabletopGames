@@ -11,16 +11,16 @@ import java.util.Objects;
 
 public class Knockback extends ForcedMove{
 
-    // A counter for how many times this has been enabled by external actions
-    // i.e. how many times Splig has spent the Knockback surge in a single attack
-    // So that we don't get stuck in a loop, we can only execute that many Knockbacks
-    public static int enabled = 0;
-    public static final int distance = 3;
+    public static String name = "Knockback";
     public Knockback(int target, int source, Vector2D startPosition, Vector2D whereTo) {
+        super(target, source, startPosition, whereTo, 3);
+    }
+
+    public Knockback(int target, int source, Vector2D startPosition, Vector2D whereTo, int distance) {
         super(target, source, startPosition, whereTo, distance);
     }
 
-    public Knockback(int target, int source, Vector2D startPosition, Vector2D whereTo, Monster.Direction orientation) {
+    public Knockback(int target, int source, Vector2D startPosition, Vector2D whereTo, Monster.Direction orientation, int distance) {
         super(target, source, startPosition, whereTo, orientation, distance);
     }
 
@@ -28,7 +28,7 @@ public class Knockback extends ForcedMove{
     public boolean execute(DescentGameState dgs) {
         // As this is an Interrupt Attack, we do not need to disable all Interrupt Attacks
         // Only decrement how many times we can use Knockback now that we have used it
-        decreaseEnabled();
+        dgs.removeInterruptAttack(name + ":" + maxDistance);
         super.execute(dgs);
         Figure f = (Figure) dgs.getComponentById(this.figureID);
         f.getAttribute(Figure.Attribute.MovePoints).setToMin();
@@ -39,7 +39,7 @@ public class Knockback extends ForcedMove{
     @Override
     public boolean canExecute(DescentGameState dgs)
     {
-        if (!isEnabled()) return false;
+        if (!dgs.hasInterruptAttack(name + ":" + maxDistance)) return false;
         if (!super.canExecute(dgs)) {
             return false;
         }
@@ -48,8 +48,7 @@ public class Knockback extends ForcedMove{
     }
 
     public Knockback copy() {
-        Knockback knockback = new Knockback(figureID, sourceID, startPosition, whereTo, orientation);
-        knockback.startPosition = startPosition.copy();
+        Knockback knockback = new Knockback(figureID, sourceID, startPosition, whereTo, orientation, maxDistance);
         knockback.directionID = directionID;
         return knockback;
     }
@@ -80,24 +79,8 @@ public class Knockback extends ForcedMove{
         return "Knockback by " + sourceID + " upon " + figureID + " from" + startPosition.toString() + " to " + whereTo.toString();
     }
 
-    public static void decreaseEnabled() {
-        Knockback.enabled = Math.min(FireBreath.enabled - 1, 0);
-    }
-
-    public static void increaseEnabled() {
-        Knockback.enabled++;
-    }
-
-    public static boolean isEnabled() {
-        return Knockback.enabled > 0;
-    }
-
-    public static void disable() {
-        Knockback.enabled = 0;
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), enabled, distance);
+        return Objects.hash(super.hashCode(), name);
     }
 }

@@ -84,7 +84,7 @@
     "attackType": ["String", "ranged"],
     "attackPower": ["String[]", ["blue", "yellow"]],
     "equipmentType": ["String[]", ["Bow", "Exotic"]],
-    "weaponSurges": ["String[]", ["DAMAGE_PLUS_2", "KNOCKBACK_DAMAGE_PLUS_1"]],
+    "weaponSurges": ["String[]", ["DAMAGE_PLUS_2", "KNOCKBACK_AND_DAMAGE_PLUS_1"]],
     "equipSlots": ["String[]", ["hand"]],
     "cost": ["Integer", 175],
     "action": ["String", "Attack. Pierce 1.;Effect:Pierce:1"],

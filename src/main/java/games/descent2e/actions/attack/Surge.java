@@ -2,7 +2,8 @@ package games.descent2e.actions.attack;
 
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
-import games.descent2e.DescentTypes;
+import games.descent2e.actions.monsterfeats.FireBreath;
+import games.descent2e.actions.monsterfeats.Knockback;
 import games.descent2e.components.Figure;
 
 import java.util.Objects;
@@ -43,14 +44,14 @@ public enum Surge {
     RECOVER_1_HEART(1, (a, s) -> a.addMending(1)),
     RECOVER_1_FATIGUE(1, (a, s) -> a.addFatigueHeal(1)),
     RECOVER_2_FATIGUE(1, (a, s) -> a.addFatigueHeal(2)),
-    BLAST(1, (a, s) -> a.addInterruptAttack("Blast")),
+    BLAST(1, (a, s) -> a.addInterruptAttack(s, BlastAttack.name)),
 
-    KNOCKBACK_DAMAGE_PLUS_1(1, (a, s) -> {
-        a.addInterruptAttack("Knockback");
+    KNOCKBACK_AND_DAMAGE_PLUS_1(1, (a, s) -> {
+        a.addInterruptAttack(s, Knockback.name+":1");
         a.addDamage(1);
     }),
-    DAMAGE_1_AWAY_3(1, (a, s) -> a.addInterruptAttack("Distant Attack:3;1")),
-    DAMAGE_1_ADJACENT(1, (a, s) -> a.addInterruptAttack("Adjacent:1")),
+    DAMAGE_1_AWAY_3(1, (a, s) -> a.addInterruptAttack(s, "Distant Attack:3;1")),
+    DAMAGE_1_ADJACENT(1, (a, s) -> a.addInterruptAttack(s, "Adjacent:1")),
 
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         // Runic Knowledge can still be activated if we spent Fatigue to our maximum before we checked to remove it
@@ -82,13 +83,13 @@ public enum Surge {
         a.addDamage(extraDamage);
     }),
 
-    FIRE_BREATH(1, (a, s) -> a.addInterruptAttack("Fire Breath")),
+    FIRE_BREATH(1, (a, s) -> a.addInterruptAttack(s, FireBreath.name)),
 
     // Lieutenants' Surges
     SUBDUE(1, (a, s) -> a.setSubdue(true)),
     BLOOD_CALL(1, (a, s) -> a.setLeeching(true)),
     WITHER(1, (a, s) -> a.addFatigueDamage(1)),
-    KNOCKBACK(1, (a, s) -> a.addInterruptAttack("Knockback"));
+    KNOCKBACK(1, (a, s) -> a.addInterruptAttack(s, Knockback.name + ":3"));
 
     private final BiConsumer<MeleeAttack, DescentGameState> lambda;
     private final int surgesUsed;

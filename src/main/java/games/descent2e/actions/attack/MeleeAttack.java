@@ -198,7 +198,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
         movePhaseForward(state);
 
-        removeInterruptAttacks();
+        removeInterruptAttacks(state);
 
         // When executing a melee attack we need to:
         // 1) roll the dice (with possible interrupt beforehand)
@@ -908,46 +908,67 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // We check for any interrupt attacks that can be used after this attack has concluded
         if (phase == INTERRUPT_ATTACK)
         {
+            Figure attacker = (Figure) state.getComponentById(attackingFigure);
             Figure target = (Figure) state.getComponentById(defendingFigure);
             List<AbstractAction> interruptAttacks = new ArrayList<>();
-            if (BlastAttack.isEnabled())
-            {
-                Set<BlastAttack> blastAttacks = BlastAttack.constructBlasts(state, attackingFigure, defendingFigure);
-                if (!blastAttacks.isEmpty())
-                    interruptAttacks.addAll(blastAttacks);
-            }
+            if (target != null &&
+                    !target.getAttribute(Figure.Attribute.Health).isMinimum()) {
+                for (String attack : state.getInterruptAttacks()) {
 
-            if (FireBreath.isEnabled())
-            {
-                Set<FireBreath> fireBreath = FireBreath.constructFireBreath(state, attackingFigure, defendingFigure);
-                if (!fireBreath.isEmpty())
-                    interruptAttacks.addAll(fireBreath);
-            }
+                    if (attack.contains(BlastAttack.name)) {
+                        Set<BlastAttack> blastAttacks = BlastAttack.constructBlasts(state, attackingFigure, defendingFigure);
+                        if (!blastAttacks.isEmpty())
+                            interruptAttacks.addAll(blastAttacks);
+                        continue;
+                    }
 
-            if (Knockback.isEnabled()) {
-                target.setOffMap(true);
-                target.setAttribute(Figure.Attribute.MovePoints, Knockback.distance);
+                    if (attack.contains(FireBreath.name)) {
+                        Set<FireBreath> fireBreath = FireBreath.constructFireBreath(state, attackingFigure, defendingFigure);
+                        if (!fireBreath.isEmpty())
+                            interruptAttacks.addAll(fireBreath);
+                        continue;
+                    }
 
-                Vector2D startPos = target.getPosition();
-                List<Vector2D> spaces = getForcedMovePositions(state, startPos, Knockback.distance);
-                for (Vector2D pos : spaces) {
-                    Knockback knockback = new Knockback(defendingFigure, attackingFigure, startPos, pos);
-                    if (knockback.canExecute(state))
-                        interruptAttacks.add(knockback);
+                    if (attack.contains(Knockback.name)) {
+                        int distance = Integer.parseInt(attack.split(":")[1]);
+                        target.setOffMap(true);
+                        target.setAttribute(Figure.Attribute.MovePoints, distance);
+
+                        Vector2D startPos = target.getPosition();
+                        List<Vector2D> spaces = getForcedMovePositions(state, startPos, distance);
+                        List<Monster.Direction> orientations = new ArrayList<>();
+                        orientations.add(Monster.Direction.DOWN);
+                        if (target instanceof Monster m) {
+                            if (m.getSize().a > 1 || m.getSize().b > 1) {
+                                orientations.add(Monster.Direction.LEFT);
+                                orientations.add(Monster.Direction.UP);
+                                orientations.add(Monster.Direction.RIGHT);
+                            }
+                        }
+                        for (Vector2D pos : spaces) {
+                            for (Monster.Direction orientation : orientations) {
+                                Knockback knockback = new Knockback(defendingFigure, attackingFigure, startPos, pos, orientation, distance);
+                                if (knockback.canExecute(state))
+                                    interruptAttacks.add(knockback);
+                            }
+                        }
+                        continue;
+                    }
                 }
-            }
 
-            if (QuickCasting.isEnabled()) {
-                Set<QuickCasting> quickCastings = QuickCasting.constructQuickCasting(state, attackingFigure);
-                if (!quickCastings.isEmpty())
-                    interruptAttacks.addAll(quickCastings);
-            }
+                // We apply these interruptions after the Attack has been fully completed
+                if (interruptAttacks.isEmpty()) {
+                    if (target.hasBonus(DescentTypes.SkillBonus.CounterAttack)) {
+                        CounterAttack counterAttack = new CounterAttack(defendingFigure, attackingFigure);
+                        if (counterAttack.canExecute(state))
+                            interruptAttacks.add(counterAttack);
+                    }
 
-            if (target != null) {
-                if (target.hasBonus(DescentTypes.SkillBonus.CounterAttack)) {
-                    CounterAttack counterAttack = new CounterAttack(defendingFigure, attackingFigure);
-                    if (counterAttack.canExecute(state))
-                        interruptAttacks.add(counterAttack);
+                    if (attacker.hasBonus(DescentTypes.SkillBonus.QuickCasting)) {
+                        Set<QuickCasting> quickCastings = QuickCasting.constructQuickCasting(state, attackingFigure);
+                        if (!quickCastings.isEmpty())
+                            interruptAttacks.addAll(quickCastings);
+                    }
                 }
             }
 
@@ -958,11 +979,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 // e.g. if the only legal target for Fire Breath to hit is the Dragon itself
                 retValue.add(new EndCurrentPhase());
             }
+
         }
 
         // We check for any attribute tests that must occur as consequence for this attack
         if (phase == ATTRIBUTE_TEST) {
-            Figure attacker = (Figure) state.getComponentById(attackingFigure);
+            //Figure attacker = (Figure) state.getComponentById(attackingFigure);
             Figure defender = (Figure) state.getComponentById(defendingFigure);
 
             if (defender instanceof Monster && ((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.AFTERSHOCK))
@@ -1143,24 +1165,26 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         return "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
     }
 
-    public void addInterruptAttack (String attack)
+    public void addInterruptAttack (DescentGameState dgs, String attack)
     {
         // Enables an Interrupt Attack based on the Surge spent
-        // In the base game, these are only the Shadow Dragon's Fire Breath, and Splig's Knockback
-
-        switch (attack) {
-            case "Blast" -> BlastAttack.enable();
-            case "Fire Breath" -> FireBreath.increaseEnabled();
-            case "Knockback" -> Knockback.increaseEnabled();
-        }
+        // Current Interrupt Attacks:
+        // Blast
+        // Fire Breath (Shadow Dragon)
+        // Knockback (Splig, Crossbow)
+        // Quickened Casting (Runemaster)
+        // TODO
+        // Damage 1 To All Adjacent (Mace of Kellos)
+        // Damage 1 To 3 Spaces Away (Magic Staff)
+        // Damage Equal To 1 Adjacent (Dawnblade)
+        // Zorek's Favor
+        dgs.addInterruptAttack(attack);
     }
 
-    public void removeInterruptAttacks()
+    public void removeInterruptAttacks(DescentGameState dgs)
     {
         // Switch off all interrupt attacks that have been enabled
         // So that we don't accidentally enable them again for different attacks
-        FireBreath.disable();
-        Knockback.disable();
-        BlastAttack.disable();
+        dgs.clearInterruptAttacks();
     }
 }
