@@ -47,4 +47,8 @@ public class PassBid extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         return String.format("Has elected to not bid");
     }
+
+    public int getPlayerId() {
+    	return this.playerId;
+    }
 }

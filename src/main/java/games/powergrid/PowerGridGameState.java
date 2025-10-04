@@ -83,7 +83,6 @@ public class PowerGridGameState extends AbstractGameState {
         this.poweredCities = new int[nPlayers];
     }
 
-    // ---------- Required TAG overrides ----------
 
     @Override
     protected GameType _getGameType() {
@@ -105,7 +104,6 @@ public class PowerGridGameState extends AbstractGameState {
     protected PowerGridGameState _copy(int playerId) {
         PowerGridGameState copy = new PowerGridGameState(gameParameters, getNPlayers());
 
-        // existing component copies...
         copy.gameMap        = (this.gameMap == null) ? null : this.gameMap.copy();
         copy.drawPile       = (this.drawPile == null) ? null : this.drawPile.copy();
         copy.currentMarket  = (this.currentMarket == null) ? null : this.currentMarket.copy();
@@ -384,38 +382,16 @@ public class PowerGridGameState extends AbstractGameState {
 	    return ownedPlantsByPlayer[playerId];
 	}
 
-	public PowerGridCard addPlantToPlayer(int playerId, PowerGridCard newCard) {
+	public void addPlantToPlayer(int playerId, PowerGridCard newCard) {
 	    if (newCard == null) throw new IllegalArgumentException("newCard is null");
 
 	    Deck<PowerGridCard> deck = ownedPlantsByPlayer[playerId];
-
-	    PowerGridCard removed = null;
-	    if (deck.getSize() >= 3) {
-	        // remove the lowest-numbered existing plant (keep the new one)
-	        java.util.List<PowerGridCard> comps = deck.getComponents();
-	        int idxLowest = 0;
-	        for (int i = 1; i < comps.size(); i++) {
-	            if (comps.get(i).getNumber() < comps.get(idxLowest).getNumber()) {
-	                idxLowest = i;
-	            }
-	        }
-	        removed = comps.remove(idxLowest);
-	    }
-
 	    deck.add(newCard);
 	    deck.getComponents().sort(java.util.Comparator.comparingInt(PowerGridCard::getNumber));
-	    return removed; // return what was replaced (or null if none)
 	}
 	
 	public Deck<PowerGridCard> getOwnedPlantsByPlayer(int playerId) {
 		return ownedPlantsByPlayer[playerId]; 
-	}
-
-	public void replacePlant(int playerId, int indexToSell, PowerGridCard newCard) {
-	    Deck<PowerGridCard> d = ownedPlantsByPlayer[playerId];
-	    if (d.getSize() != 3) throw new IllegalStateException("Replace only valid when at 3 plants.");
-	    d.getComponents().set(indexToSell, newCard);
-	    d.getComponents().sort(Comparator.comparingInt(PowerGridCard::getNumber));
 	}
 
 	public int getStep() {
@@ -644,10 +620,13 @@ public class PowerGridGameState extends AbstractGameState {
         for (int p = 0; p < n; p++) order.add(p);
 
         order.sort(
-            Comparator.<Integer>comparingInt(p -> cityCountByPlayer[p]).reversed()
-                .thenComparingInt(p -> highestPlantNumber(ownedPlantsByPlayer[p])).reversed()
-                .thenComparingInt(p -> p)
-        );
+        	    Comparator.<Integer>comparingInt(p -> cityCountByPlayer[p]).reversed()
+        	        .thenComparing(
+        	            Comparator.comparingInt((Integer p) -> highestPlantNumber(ownedPlantsByPlayer[p])).reversed()
+        	        )
+        	        .thenComparingInt(p -> p)
+        	);
+
         return java.util.Collections.unmodifiableList(order);
     }
 
@@ -660,7 +639,33 @@ public class PowerGridGameState extends AbstractGameState {
         }
         return max;  // -1 if no plants owned
     }
+
+	public int getCurrentBidder() {
+		return this.currentBidder;
+	}
     
+	public PowerGridCard removePlantFromMarkets(int plantNumber) {
+	    PowerGridCard c = removeFromDeck(getCurrentMarket(), plantNumber);
+	    if (c != null) return c;
+	    return removeFromDeck(getFutureMarket(), plantNumber);
+	}
+
+	private PowerGridCard removeFromDeck(Deck<PowerGridCard> deck, int number) {
+	    for (PowerGridCard c : deck.getComponents()) {
+	        if (c.getNumber() == number) {
+	            deck.remove(c);
+	            return c;
+	        }
+	    }
+	    return null;
+	}
+	public boolean removePlantFromPlayer(int playerId, int plantNumber) {
+	    var deck = getOwnedPlantsByPlayer(playerId);
+	    for (PowerGridCard c : deck.getComponents()) {
+	        if (c.getNumber() == plantNumber) { deck.remove(c); return true; }
+	    }
+	    return false;
+	}
 
     
 }

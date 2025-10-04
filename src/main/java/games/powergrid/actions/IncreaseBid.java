@@ -55,4 +55,10 @@ public class IncreaseBid extends AbstractAction {
         PowerGridGameState pggs = (PowerGridGameState) gameState;
         return String.format("Increases bid to " +  (pggs.getCurrentBid() + 1));
     }
+    
+    public int getPlayerId() {
+    	return this.playerId;
+    }
+
+
 }

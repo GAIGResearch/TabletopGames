@@ -858,7 +858,7 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
     //    players.add(new RandomPlayer());
     //    players.add(new BasicMCTSPlayer());
         //players.add(new OSLAPlayer());
@@ -874,8 +874,8 @@ public class Game {
 
 
          //players.add(new HumanGUIPlayer(ac));
-        // players.add(new HumanGUIPlayer(ac));
-        // players.add(new HumanGUIPlayer(ac));
+         //players.add(new HumanGUIPlayer(ac));
+         //players.add(new HumanGUIPlayer(ac));
     //    players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 

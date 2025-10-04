@@ -29,5 +29,8 @@ public class PassAction extends AbstractAction {
     public int hashCode() { return Objects.hash(playerId); }
     @Override
     public String getString(AbstractGameState gameState) { return "Has elected to pass this Round"; }
+    public int getPlayerId() {
+    	return this.playerId;
+    }
 }
 
