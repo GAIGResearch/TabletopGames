@@ -46,6 +46,7 @@ public class PowerGridGUI extends AbstractGUIManager {
 
     public PowerGridGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
+	    PowerGridParameters params = (PowerGridParameters) game.getGameState().getGameParameters();
         PowerGridGameState gs = (PowerGridGameState) game.getGameState();
         parent.setLayout(new BorderLayout(8, 8));
 
@@ -61,7 +62,7 @@ public class PowerGridGUI extends AbstractGUIManager {
         parent.add(layered, BorderLayout.CENTER);
 
         // Background map
-        mapPanel = new PowerGridMapPannel(gs.getNPlayers());
+        mapPanel = new PowerGridMapPannel(gs.getNPlayers(),params.step2Trigger[gs.getNPlayers() -1], params.citiesToTriggerEnd[gs.getNPlayers() -1]);
         mapPanel.setBounds(0, 0, 1100, 1120);
         layered.add(mapPanel, JLayeredPane.DEFAULT_LAYER);
         java.util.Map<Integer, Color> colorMap = new java.util.HashMap<>();
@@ -178,6 +179,7 @@ public class PowerGridGUI extends AbstractGUIManager {
 	@Override
 	protected void _update(AbstractPlayer player, AbstractGameState gameState) {
 	    PowerGridGameState gs = (PowerGridGameState) gameState;
+
 	    
 
 	    // refresh markets
@@ -185,7 +187,30 @@ public class PowerGridGUI extends AbstractGUIManager {
 	    futureMarketView.updateComponent(gs.getFutureMarket());
 	    marketOverlay.updateComponent(gs.getResourceMarket().snapshot());
 	    turnOverlay.setTurnOrder(buildTurnEntries(gs));
+	    currentMarketView.setAuctionPlantNumber(null);
+	    futureMarketView.setAuctionPlantNumber(null);
+	    if (gs.isAuctionLive()) {
+	        int auctionPlant = gs.getAuctionPlantNumber();
 
+	        if (gs.getStep() == 3) {
+	            // Step 3: hammer can be on either market
+	            if (gs.futureMarketContainsAuction(auctionPlant)) {
+	                futureMarketView.setAuctionPlantNumber(auctionPlant);
+	            } else {
+	                // either in current market or not found -> default to current
+	                currentMarketView.setAuctionPlantNumber(auctionPlant);
+	            }
+	        } else {
+	            // Steps 1–2: only current market can be auctioned
+	            currentMarketView.setAuctionPlantNumber(auctionPlant);
+	        }
+	    }
+	    Integer discountTarget = null;
+	    if (gs.getStep() == 2 && gs.getDiscountCard() != -1) {
+	        discountTarget = gs.getDiscountCard();
+	    }
+	    currentMarketView.setDiscountPlantNumber(discountTarget);
+	    futureMarketView.setDiscountPlantNumber(null);
 	    // update each player panel with its own data
 	    for (int i = 0; i < playerViews.length; i++) {
 	        playerViews[i].setMoney(gs.getPlayersMoney(i));

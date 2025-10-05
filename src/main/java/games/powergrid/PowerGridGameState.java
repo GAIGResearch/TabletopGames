@@ -37,7 +37,7 @@ public class PowerGridGameState extends AbstractGameState {
     
     private int turnOrderIndex = 0;
     private int[] playerMoney;
-    private int discoutCard; 
+    private int discountCard; 
     private int[] poweredCities; 
     private int step;
 
@@ -105,18 +105,22 @@ public class PowerGridGameState extends AbstractGameState {
     protected PowerGridGameState _copy(int playerId) {
         PowerGridGameState copy = new PowerGridGameState(gameParameters, getNPlayers());
 
+        // Components (ensure ResourceMarket.copy() copies BOTH avail and discard!)
         copy.gameMap        = (this.gameMap == null) ? null : this.gameMap.copy();
-        copy.drawPile       = (this.drawPile == null) ? null : this.drawPile.copy();
+        copy.drawPile       = (this.drawPile == null) ? null : this.drawPile.copy();        // consider player-aware copy if supported
         copy.currentMarket  = (this.currentMarket == null) ? null : this.currentMarket.copy();
         copy.futureMarket   = (this.futureMarket == null) ? null : this.futureMarket.copy();
         copy.resourceMarket = (this.resourceMarket == null) ? null : this.resourceMarket.copy();
 
-        copy.gamePhase = gamePhase; 
+        // Phase
+        copy.gamePhase = this.gamePhase;
 
+        // Primitive arrays
         copy.playerMoney       = (this.playerMoney == null) ? null : this.playerMoney.clone();
         copy.cityCountByPlayer = (this.cityCountByPlayer == null) ? null : this.cityCountByPlayer.clone();
-        copy.poweredCities       = (this.poweredCities  == null) ? null : this.poweredCities .clone();
+        copy.poweredCities     = (this.poweredCities == null) ? null : this.poweredCities.clone();
 
+        // 2D array
         if (this.citySlotsById != null) {
             copy.citySlotsById = new int[this.citySlotsById.length][];
             for (int i = 0; i < this.citySlotsById.length; i++) {
@@ -124,66 +128,56 @@ public class PowerGridGameState extends AbstractGameState {
             }
         }
 
-        copy.turnOrder = new ArrayList<>(this.turnOrder);
-        copy.turnOrderIndex = this.turnOrderIndex;
-        copy.roundOrder = new ArrayList<>(this.roundOrder);
-        copy.bidOrder = new ArrayList<>(this.bidOrder);
-        
+        // Lists/sets
+        copy.turnOrder       = new ArrayList<>(this.turnOrder);
+        copy.turnOrderIndex  = this.turnOrderIndex;
+        copy.roundOrder      = new ArrayList<>(this.roundOrder);
+        copy.bidOrder        = new ArrayList<>(this.bidOrder);
+        copy.plantsRan       = (this.plantsRan == null) ? null : new HashSet<>(this.plantsRan);
 
+        // Auction/bid state
         copy.auctionPlantNumber = this.auctionPlantNumber;
         copy.currentBid         = this.currentBid;
         copy.currentBidder      = this.currentBidder;
-        
-        copy.step = this.step;
 
-        if (this.activeRegions != null) {
-            copy.activeRegions = new HashSet<>(this.activeRegions);
-        } else {
-            copy.activeRegions = null;
-        }
-        
-        if (this.validCities != null) {
-            copy.validCities = new HashSet<>(this.validCities);
-        } else {
-            copy.validCities = null;
-        }
-        
-        if (this.invalidCities != null) {
-            copy.invalidCities = new HashSet<>(this.invalidCities);
-        } else {
-            copy.invalidCities = null;
-        }
-        
-        if (this.plantsRan != null) {
-            copy.plantsRan = new HashSet<>(this.plantsRan);
-        } else {
-            copy.plantsRan = null;
-        }
+        // Step / discounts
+        copy.step         = this.step;
+        copy.discountCard = this.discountCard; 
 
+        // Regions & city sets
+        copy.activeRegions = (this.activeRegions == null) ? null : new HashSet<>(this.activeRegions);
+        copy.validCities   = (this.validCities == null) ? null : new HashSet<>(this.validCities);
+        copy.invalidCities = (this.invalidCities == null) ? null : new HashSet<>(this.invalidCities);
 
-        if (fuelByPlayer != null) {
+        // Resource discard (state-level) 
+        copy.resourceDiscardPile = (this.resourceDiscardPile == null) ? null : new HashMap<>(this.resourceDiscardPile);
+
+        // Fuel by player
+        if (this.fuelByPlayer != null) {
             @SuppressWarnings("unchecked")
             EnumMap<PowerGridParameters.Resource, Integer>[] fbCopy =
-                    new EnumMap[fuelByPlayer.length];
-            for (int p = 0; p < fuelByPlayer.length; p++) {
+                    new EnumMap[this.fuelByPlayer.length];
+            for (int p = 0; p < this.fuelByPlayer.length; p++) {
                 fbCopy[p] = new EnumMap<>(PowerGridParameters.Resource.class);
-                fbCopy[p].putAll(fuelByPlayer[p]);
+                fbCopy[p].putAll(this.fuelByPlayer[p]);
             }
             copy.fuelByPlayer = fbCopy;
         }
-        
+
+        // Owned plants by player
         if (this.ownedPlantsByPlayer != null) {
             @SuppressWarnings("unchecked")
             Deck<PowerGridCard>[] opCopy = (Deck<PowerGridCard>[]) new Deck<?>[this.ownedPlantsByPlayer.length];
             for (int p = 0; p < this.ownedPlantsByPlayer.length; p++) {
                 Deck<PowerGridCard> src = this.ownedPlantsByPlayer[p];
-                opCopy[p] = (src == null) ? null : src.copy();  
+                opCopy[p] = (src == null) ? null : src.copy(); // consider player-aware copy if needed
             }
             copy.ownedPlantsByPlayer = opCopy;
         }
 
         return copy;
     }
+
 
 
 
@@ -303,8 +297,9 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 	
 	public boolean stepTwoTrigger() {
-		int trigger = (getNPlayers() > 5) ? 6 : 7; //TODO make this dynamic with the parameters 
-		return Arrays.stream(cityCountByPlayer).anyMatch(v -> v > trigger);		
+		PowerGridParameters params = (PowerGridParameters) this.getGameParameters();
+		int trigger = params.step2Trigger[this.getNPlayers()-1];
+		return Arrays.stream(cityCountByPlayer).anyMatch(v -> v >= trigger);		
 	}
 
 	
@@ -387,7 +382,6 @@ public class PowerGridGameState extends AbstractGameState {
 	    if (newCard == null) throw new IllegalArgumentException("newCard is null");
 	    Deck<PowerGridCard> deck = ownedPlantsByPlayer[playerId];
 	    deck.addToBottom(newCard);
-	    //deck.getComponents().sort(java.util.Comparator.comparingInt(PowerGridCard::getNumber));
 	}
 	
 	public Deck<PowerGridCard> getOwnedPlantsByPlayer(int playerId) {
@@ -443,7 +437,6 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 	
 
-	//TODO this might have to be moved 
 	public Integer checkNextBid(int playerID) {
 	    int startIndex = turnOrder.indexOf(playerID);
 	    if (startIndex == -1) {
@@ -466,7 +459,6 @@ public class PowerGridGameState extends AbstractGameState {
 	    System.out.println("Current player " +  playerID);
 	    
 
-	    // If no eligible players found
 	    return playerID;
 	}
 	
@@ -668,15 +660,37 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 
 
-	public int getDiscoutCard() {
-		return discoutCard;
+	public int getDiscountCard() {
+		return discountCard;
 	}
 
 
-	public void setDiscoutCard(int discoutCard) {
-		this.discoutCard = discoutCard;
+	public void setDiscountCard(int discoutCard) {
+		this.discountCard = discoutCard;
 	}
+	
+	public boolean futureMarketContainsAuction(int cardNumber) {
+	    // First, check current market
+	    if (currentMarket != null) {
+	        for (PowerGridCard card : currentMarket.getComponents()) {
+	            if (card.getNumber() == cardNumber) {
+	                return false;
+	            }
+	        }
+	    }
 
+	    // Then, check future market
+	    if (futureMarket != null) {
+	        for (PowerGridCard card : futureMarket.getComponents()) {
+	            if (card.getNumber() == cardNumber) {
+	                return true;
+	            }
+	        }
+	    }
+
+	    // If not found in either, return null
+	    return false;
+	}
     
 }
 

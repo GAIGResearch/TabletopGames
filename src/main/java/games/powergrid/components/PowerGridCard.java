@@ -12,10 +12,31 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * Power Plant card definition for Power Grid.
- * Includes the ResourceType enum and PlantInput helper class
- * so everything related to plants is in one file.
+ * Immutable model of a Power Grid card.
+ *
+ * <p>There are two kinds of cards:
+ * <ul>
+ *   <li>{@link Type#PLANT} – a power plant identified by a unique {@code number}, with a production
+ *       {@code capacity} (how many cities it can power) and an {@link PlantInput} specifying its fuel
+ *       requirement.</li>
+ *   <li>{@link Type#STEP3} – the unique step marker that, when revealed, advances the game to Step 3.
+ *       It has no capacity and no resource requirement.</li>
+ * </ul>
+ *
+ * <p><b>Immutability:</b> All fields are {@code final}. {@link PlantInput} defensively copies the
+ * provided requirement map, and exposes copies via {@link PlantInput#asMap()}. Because instances are
+ * immutable, {@link #copy()} safely returns {@code this}.
+ *
+ * <p><b>Equality & hashing:</b> Structural equality over {@code type}, {@code number}, {@code capacity},
+ * and a snapshot of the {@code input} requirement. See {@link #equals(Object)} and {@link #hashCode()}.
+ *
+ * <p>Use the factory methods {@link #plant(int, int, java.util.Map)} and {@link #step3()} to construct
+ * instances.
+ *
+ * @see PowerGridParameters.Resource
+ * @see PowerGridCard.PlantInput
  */
+
 public class PowerGridCard extends Card {
 
     public enum Type { PLANT, STEP3 }
@@ -26,9 +47,9 @@ public class PowerGridCard extends Card {
     public static final class PlantInput {
         private final EnumMap<Resource, Integer> req; //how many resources are required
 
-        public PlantInput(Map<Resource, Integer> req) { //constructor
+        public PlantInput(Map<Resource, Integer> req) { 
             this.req = new EnumMap<>(Resource.class); //instantiates the Enum map based on teResource Type class
-            this.req.putAll(req);//Copies all entries from the provided map into its own internal req
+            this.req.putAll(req);
         }
 
         public int totalUnits() { return req.values().stream().mapToInt(Integer::intValue).sum(); } //sets the number of units that can be on a card 
@@ -74,7 +95,7 @@ public class PowerGridCard extends Card {
     }
     
     @Override
-    public Card copy() { return this; } // immutable
+    public Card copy() { return this; } 
 
     @Override
     public boolean equals(Object o) {
@@ -97,25 +118,46 @@ public class PowerGridCard extends Card {
                 : "STEP3";
     }
     
+    /**
+     * Generates all valid fuel-spend combinations that satisfy this plant's input requirement.
+     * <p>
+     * Behavior:
+     * <ul>
+     *   <li>If the requirement involves a single resource type (e.g., {@code COAL=2}),
+     *       the only valid combination is that exact map.</li>
+     *   <li>If the requirement involves exactly two resource types (hybrid), and both
+     *       have the same required amount {@code k} (e.g., {@code GAS=3, OIL=3}),
+     *       this enumerates every split {@code (i, k - i)} for {@code i = 0..k}, where
+     *       the sum equals {@code k}. For example, {@code k=3} yields:
+     *       {@code (0,3), (1,2), (2,1), (3,0)}.</li>
+     *   <li>If more than two resource types are present, this method throws
+     *       {@link UnsupportedOperationException}.</li>
+     * </ul>
+     *
+     * <p><b>Returns:</b> A list of {@link EnumMap} entries where keys are
+     * {@code Resource} and values are units to spend for that resource. Each map
+     * represents one valid way to meet the plant's input requirement for a single run.
+     *
+     * @return all valid spend combinations matching the input requirement
+     * @throws UnsupportedOperationException if the requirement includes more than two resource types
+     */
     public List<EnumMap<Resource, Integer>> generatePossibleCombos() {
         List<EnumMap<Resource, Integer>> combos = new ArrayList<>();
         EnumMap<Resource, Integer> req = input.asMap();
 
         if (req.size() == 1) {
-            // Only one resource → just return the requirement
             combos.add(req);
             return combos;
         }
 
         if (req.size() == 2) {
-            // Hybrid: both values should be the same (e.g. GAS=2, OIL=2)
             Iterator<Map.Entry<Resource,Integer>> it = req.entrySet().iterator();
             Map.Entry<Resource,Integer> first = it.next();
             Map.Entry<Resource,Integer> second = it.next();
 
             Resource r1 = first.getKey();
             Resource r2 = second.getKey();
-            int k = first.getValue();  // assume both values equal
+            int k = first.getValue();  
 
             for (int i = 0; i <= k; i++) {
                 EnumMap<Resource,Integer> option = new EnumMap<>(Resource.class);

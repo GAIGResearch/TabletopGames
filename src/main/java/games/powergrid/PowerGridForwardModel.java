@@ -199,26 +199,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	
     return actions;
 }
-	public Map<Integer, Integer> citiesToBuildIn(Set<Integer> playerValidCities,Set<Integer> playerOwnedCities,PowerGridGameState s, int[] citySlotPrices) {
-				PowerGridGraphBoard gameMap = s.getGameMap();
-				int[][] citySlotsById = s.getCitySlotsById(); 
-				int step = s.getStep();		
-				Map<Integer,Integer> costMap = new HashMap<>(gameMap.shortestPathCosts(playerValidCities, playerOwnedCities));
-				for (Map.Entry<Integer, Integer> entry : costMap.entrySet()) {
-				    int cityId = entry.getKey();
-				    int[] citySlot = citySlotsById[cityId];
-				    for(int i = 0;i < step; i++){
-				    	if(citySlot[i] == -1){
-				    		int total = entry.getValue() + citySlotPrices[i];
-				            entry.setValue(total);			    		
-				    		break;
-				    	}
-				    }
-				}
-				return costMap;
-				
-			}
-
 	
 	
 	@Override
@@ -239,23 +219,23 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    }
 	}
 
+	
 
-
-
+	
 	private void onEnterPhase(PowerGridGameState state, PowerGridGamePhase phase) {
 	    switch (phase) {
 	        case PLAYER_ORDER -> {buildTurnOrder(state);
-	        						advancePhase(state);
-	        						endRound(state, state.getTurnOwner());
+	        					advancePhase(state);
+	        					endRound(state, state.getTurnOwner());
 	        						
 	        }
 	        case AUCTION -> {buildTurnOrder(state);
-	        //always sets the discount card to the first but the auction action checks if its phase 2
-			PowerGridCard firstCard = state.currentMarket.peek(0);
-			System.out.println("FIRST CARD: " + firstCard.getNumber());
-			state.setDiscoutCard(firstCard.getNumber());
+					        //always sets the discount card to the first but the auction action checks if its phase 2
+							PowerGridCard firstCard = state.currentMarket.peek(0);
+							if(firstCard != null) {
+								state.setDiscountCard(firstCard.getNumber());
+					        	}
 	        }
-	        //case AUCTION -> prepareAuction(state);
 	        case RESOURCE_BUY ->{List<Integer> order = state.getRoundOrder();
 					        	Collections.reverse(state.getRoundOrder());
 					        	state.setTurnOwner(order.get(0));
@@ -266,15 +246,13 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        case BUILD ->{List<Integer> order = state.getRoundOrder();
 			        	Collections.reverse(state.getRoundOrder());
 			        	state.setTurnOwner(order.get(0));
-	        	}
-	        case BUREAUCRACY ->{state.resetPlantsRan();;
+	        }
+	        case BUREAUCRACY ->{state.resetPlantsRan();
 	        					if(state.getStep() == 1 && state.stepTwoTrigger()){//no plants have been run yet 
 	        						state.setStep(2);
 	        						state.getCurrentMarket().draw(); //remove lowest card 
 	        						rebalanceMarkets(state);	        						
-	        					}
-	        	
-	        			
+	        					}	        	       			
 	        }
 	        default -> {}
 	    }
@@ -305,12 +283,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        					}else {
 	        						state.getCurrentMarket().pick(0);	        						
 	        					}
-	        					rebalanceMarkets(state);
-	        					
-	        					
-		
-	        
-	        	
+	        					rebalanceMarkets(state);       	
 	        }
 	        default -> {}
 	    }
@@ -333,6 +306,49 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    
 	   
 	}
+	
+	
+	/**
+	 * Determines and records the winner at game end using Power Grid’s standard scoring:
+	 * <ol>
+	 *   <li>Highest number of powered cities this round wins;</li>
+	 *   <li>Ties are broken by most money on hand.</li>
+	 * </ol>
+	 *
+	 * <p>Exactly one winner is selected. In the rare case of a perfect tie on both
+	 * powered cities and money, the implementation resolves the tie by iteration order
+	 * (i.e., the later player in the loop that matches the best metrics becomes winner).
+	 *
+	 * <p>All players are first marked {@code LOSE_GAME}; the chosen winner is then marked
+	 * {@code WIN_GAME}.
+	 *
+	 * @param gs the current {@link core.AbstractGameState}; must be a {@link games.powergrid.PowerGridGameState}
+	 */
+	
+    @Override
+	protected void endGame(AbstractGameState gs) {
+        PowerGridGameState state = (PowerGridGameState) gs;
+        int winner = 0;
+        int highestCities = -1;
+        int highestMoney = -1;
+
+        for (int i = 0; i < state.getNPlayers(); i++) {
+            int poweredCities = state.numberOfPoweredCities(i);
+            int money = state.getPlayersMoney(i);
+
+            if (poweredCities > highestCities ||
+                (poweredCities == highestCities && money > highestMoney)) {               
+                winner = i;
+                highestCities = poweredCities;
+                highestMoney = money;
+            }
+        }
+        for (int i = 0; i < state.getNPlayers(); i++) {
+            gs.setPlayerResult(LOSE_GAME, i);
+        }
+        gs.setPlayerResult(WIN_GAME, winner);
+    }
+
 	
 	private static void awardIncome(PowerGridGameState s) {
 	    for (int p = 0; p < s.getNPlayers(); p++) {    	
@@ -419,37 +435,49 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	}
 	
 	
+	/**
+	 * Computes the total cost to build in each candidate city for the current player,
+	 * combining the **network connection cost** from any already–owned city with the
+	 * **cheapest available house-slot price** permitted by the current game step.
+	 * <p>
+	 * For each {@code cityId} in {@code playerValidCities}, this method:
+	 * <ol>
+	 *   <li>Calls {@link PowerGridGraphBoard#shortestPathCosts(Set, Set)} to get the
+	 *       minimum connection cost from any {@code playerOwnedCities} source
+	 *       (or {@code 0} if the player owns no cities — the “first city is free” rule).</li>
+	 *   <li>Looks at {@code s.getCitySlotsById()[cityId]} and, scanning slots from index {@code 0}
+	 *       up to (but not including) {@code step = s.getStep()}, picks the first empty slot
+	 *       (value {@code -1}) and adds its price from {@code citySlotPrices[slotIndex]}.</li>
+	 * </ol>
+	 *
+	 *
+	 * @param playerValidCities cities the player is allowed to build in (e.g., inside active regions and not already built)
+	 * @param playerOwnedCities cities already owned by the player; used as sources for connection cost
+	 * @param s                 game state providing the map, slots, and current step
+	 * @param citySlotPrices    price by slot index (0-based); index 0 is Step 1 price, 1 is Step 2, 2 is Step 3
+	 * @return a map {@code cityId -> totalCost} (connection cost + slot price). The returned map is modifiable
+	 */
+	public Map<Integer, Integer> citiesToBuildIn(Set<Integer> playerValidCities,Set<Integer> playerOwnedCities,PowerGridGameState s, int[] citySlotPrices) {
+				PowerGridGraphBoard gameMap = s.getGameMap();
+				int[][] citySlotsById = s.getCitySlotsById(); 
+				int step = s.getStep();		
+				Map<Integer,Integer> costMap = new HashMap<>(gameMap.shortestPathCosts(playerValidCities, playerOwnedCities));
+				for (Map.Entry<Integer, Integer> entry : costMap.entrySet()) {
+				    int cityId = entry.getKey();
+				    int[] citySlot = citySlotsById[cityId];
+				    for(int i = 0;i < step; i++){
+				    	if(citySlot[i] == -1){
+				    		int total = entry.getValue() + citySlotPrices[i];
+				            entry.setValue(total);			    		
+				    		break;
+				    	}
+				    }
+				}
+				return costMap;
+				
+			}
+
 	
-	
-	
-    @Override
-    protected void endGame(AbstractGameState gs) {
-        PowerGridGameState state = (PowerGridGameState) gs;
-        int winner = 0;
-        int highestCities = -1;
-        int highestMoney = -1;
-
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            int poweredCities = state.numberOfPoweredCities(i);
-            int money = state.getPlayersMoney(i);  // Assuming you have this method
-
-            if (poweredCities > highestCities ||
-                (poweredCities == highestCities && money > highestMoney)) {
-                
-                winner = i;
-                highestCities = poweredCities;
-                highestMoney = money;
-            }
-        }
-
-        // Mark all players as lost first
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            gs.setPlayerResult(LOSE_GAME, i);
-        }
-
-        // Then mark the winner
-        gs.setPlayerResult(WIN_GAME, winner);
-    }
 
 
 	
@@ -510,7 +538,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             for (int k = 0; k < 3; k++) drawPile.draw();
         }
 
-        // Recombine: tempPile on top of drawPile
         List<PowerGridCard> buf = new ArrayList<>();
         while (tempPile.getSize() > 0) {
             buf.add(tempPile.draw());
@@ -594,8 +621,8 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         }
 
         PowerGridCard drawn = drawPile.draw();
-        if(drawn.getNumber() < s.getDiscoutCard()) {
-        	s.setDiscoutCard(-1);
+        if (drawn != null && s.getDiscountCard() != -1 && drawn.getNumber() < s.getDiscountCard()) {
+            s.setDiscountCard(-1);
         }
 
         if (drawn != null) {

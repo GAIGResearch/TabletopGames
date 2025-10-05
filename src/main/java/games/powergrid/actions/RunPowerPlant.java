@@ -12,6 +12,35 @@ import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridCard.PlantInput;
 import games.powergrid.components.PowerGridResourceMarket;
 
+/**
+ * Action that operates a specific power plant owned by the current player,
+ * consuming the specified fuel and producing electricity to power cities
+ * equal to the plant's capacity.
+ * <p>
+ * Execution rules:
+ * <ul>
+ *   <li>The current player must own {@code plantId}.</li>
+ *   <li>The plant must not have been run already this Bureaucracy phase.</li>
+ *   <li>The action spends the provided {@code spend} amounts from the player's fuel stores,
+ *       returning them to the market's discard pile.</li>
+ *   <li>On success, the plant is marked as run and the player's powered city count
+ *       increases by the plant's capacity (capped elsewhere by city ownership).</li>
+ * </ul>
+ *
+ * <p><b>Side effects:</b> Mutates {@link PowerGridGameState} by:
+ * <ul>
+ *   <li>Reducing the player's stored fuel,</li>
+ *   <li>Returning consumed fuel to discard pile kept in {@link PowerGridResourceMarket},</li>
+ *   <li>Marking the plant as run for this phase,</li>
+ *   <li>Increasing powered cities via {@link PowerGridGameState#addPoweredCities(int, int)}.</li>
+ * </ul>
+ *
+ * @see PowerGridGameState
+ * @see PowerGridCard
+ * @see PowerGridResourceMarket
+ * @see games.powergrid.PowerGridParameters.Resource
+ */
+
 public class RunPowerPlant extends AbstractAction {
 
 	    private final int plantId;  
@@ -19,7 +48,7 @@ public class RunPowerPlant extends AbstractAction {
 
 	    public RunPowerPlant(int plantId, Map<Resource, Integer> spend) {
 	        this.plantId = plantId;
-	        this.spend = new EnumMap<>(spend); // defensive copy
+	        this.spend = new EnumMap<>(spend); 
 	    }
 
 	    @Override
@@ -60,7 +89,6 @@ public class RunPowerPlant extends AbstractAction {
 
 	    @Override
 	    public AbstractAction copy() {
-	        // deep copy the EnumMap so the action is immutable
 	        return new RunPowerPlant(plantId, new EnumMap<>(spend));
 	    }
 
@@ -79,7 +107,6 @@ public class RunPowerPlant extends AbstractAction {
 
 	    @Override
 	    public String getString(AbstractGameState gameState) {
-	        // concise, UI-friendly label
 	        return "Run plant #" + plantId + " using " + spend;
 	    }
 

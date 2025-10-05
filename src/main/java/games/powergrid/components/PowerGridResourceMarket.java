@@ -1,20 +1,50 @@
 package games.powergrid.components;
 
 import core.CoreConstants;
-import core.CoreConstants.ComponentType;
 import core.components.Component;
 import games.powergrid.PowerGridParameters;
-import games.powergrid.PowerGridParameters.Step;
-
 import java.util.EnumMap;
 import java.util.Map;
 
+/**
+ * Mutable model of the Power Grid resource market.
+ *
+ * <p>The market tracks, for each {@link PowerGridParameters.Resource}:
+ * <ul>
+ *   <li><b>avail</b> – cubes currently for sale on the market board,</li>
+ *   <li><b>discard</b> – cubes off-board in the supply (spent fuel and setup stock).</li>
+ * </ul>
+ *
+ * <p><b>Core behaviors</b>
+ * <ul>
+ *   <li>{@link #setUpMarket(int[])} initializes the market (fills the supply and
+ *       moves the starting quantities onto the board).</li>
+ *   <li>{@link #buy(PowerGridParameters.Resource, int)} removes cubes from the board
+ *       after validating availability; {@link #costToBuy(PowerGridParameters.Resource, int)}
+ *       computes the marginal cost using the official price curves
+ *       (see {@code PowerGridParameters.*Price}).</li>
+ *   <li>{@link #returnToDiscardPile(PowerGridParameters.Resource, int)} returns spent fuel
+ *       to the off-board supply.</li>
+ *   <li>{@link #replenishMarket(int[])} and {@link #refill(PowerGridParameters, int, int, boolean)}
+ *       move cubes from the supply to the board based on step, player count, and map.</li>
+ *   <li>{@link #snapshot()} provides a defensive copy of on-board availability for UI or logging.</li>
+ * </ul>
+ *
+ * <p><b>Pricing model</b>: Prices increase as the market empties. The total cost for
+ * purchasing {@code amount} cubes is computed by summing the appropriate tail of the
+ * resource-specific price array (coal/gas/oil/uranium).
+ *
+ * @see PowerGridParameters.Resource
+ * @see PowerGridParameters#coalPrice
+ * @see PowerGridParameters#gasPrice
+ * @see PowerGridParameters#oilPrice
+ * @see PowerGridParameters#uraniumPrice
+ */
 
 public class PowerGridResourceMarket extends Component {
 	
 	private final EnumMap<PowerGridParameters.Resource, Integer> avail = new EnumMap<>(PowerGridParameters.Resource.class);
 	private final EnumMap<PowerGridParameters.Resource, Integer> discard = new EnumMap<>(PowerGridParameters.Resource.class);
-	public static final int[] discardStart = new int[]{27, 24, 20,12};
 	
 	public PowerGridResourceMarket() {
 		super(CoreConstants.ComponentType.BOARD, "ResourceMarket");
@@ -28,9 +58,7 @@ public class PowerGridResourceMarket extends Component {
 		discard.put(PowerGridParameters.Resource.COAL, 27);
 		discard.put(PowerGridParameters.Resource.GAS, 24);
 		discard.put(PowerGridParameters.Resource.OIL, 20);
-		discard.put(PowerGridParameters.Resource.URANIUM, 12);
-		
-		
+		discard.put(PowerGridParameters.Resource.URANIUM, 12);		
 		replenishMarket(startingResources);	
 	}
 	
@@ -57,12 +85,17 @@ public class PowerGridResourceMarket extends Component {
 	}
 	
 
-    @Override
-    public PowerGridResourceMarket copy() {
-        PowerGridResourceMarket c = new PowerGridResourceMarket();
-        for (var e : avail.entrySet()) c.avail.put(e.getKey(), e.getValue());
-        return c;
-    }
+	@Override
+	public PowerGridResourceMarket copy() {
+	    PowerGridResourceMarket c = new PowerGridResourceMarket();
+	    for (var e : avail.entrySet()) {
+	        c.avail.put(e.getKey(), e.getValue());
+	    }
+	    for (var e : discard.entrySet()) {
+	        c.discard.put(e.getKey(), e.getValue());
+	    }
+	    return c;
+	}
 	
     public void buy(PowerGridParameters.Resource r, int amount) {
         int have = avail.get(r);
@@ -86,6 +119,7 @@ public class PowerGridResourceMarket extends Component {
         return cost;
     }
 	
+    //maps the changing of prices with how many are available for purchase
 	private int[] priceCurveFor(PowerGridParameters.Resource r) {
 	    return switch (r) {
 	        case COAL    -> PowerGridParameters.coalPrice;
@@ -102,7 +136,6 @@ public class PowerGridResourceMarket extends Component {
 	    if (nPlayers == 3) return europeMap ? p.resourceRefreshEU_3P : p.resourceRefreshNA_3P;
 	    if (nPlayers == 4) return europeMap ? p.resourceRefreshEU_4P : p.resourceRefreshNA_4P;
 	    if (nPlayers == 5) return europeMap ? p.resourceRefreshEU_5P : p.resourceRefreshNA_5P;
-	    /* nPlayers >= 6 */
 	    return europeMap ? p.resourceRefreshEU_6P : p.resourceRefreshNA_6P;
 	}
 

@@ -102,7 +102,7 @@ public class PowerGridPlayerPanel extends JPanel {
     }
 
     public void setPlantDeck(Deck<PowerGridCard> plantDeck) {
-        Rectangle area = new Rectangle(0, 0, 3 * 100, 110); // ~3 cards visible
+        Rectangle area = new Rectangle(0, 0, 3 * 100, 110);
         rightCardHolder.removeAll();
         plantView = new PowerGridDeckView(
                 playerId, plantDeck, true, PowerGridParameters.CARD_ASSET_PATH, area
@@ -114,6 +114,6 @@ public class PowerGridPlayerPanel extends JPanel {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(1000, 200); // wider to give the cards space
+        return new Dimension(1000, 200); 
     }
 }

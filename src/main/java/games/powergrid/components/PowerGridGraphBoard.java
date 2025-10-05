@@ -13,6 +13,41 @@ import java.util.stream.Collectors;
 import core.CoreConstants;
 import core.components.Component;
 
+/**
+ * Immutable graph representation of a Power Grid map.
+ *
+ * <p>The board consists of:
+ * <ul>
+ *   <li>A mapping from integer <b>city IDs</b> to {@link PowerGridCity} nodes.</li>
+ *   <li>An adjacency list of undirected <b>edges</b> with integer costs ({@link Edge}).</li>
+ * </ul>
+ *
+ * <p><b>Immutability:</b> City and adjacency structures are defensively copied and
+ * exposed only via unmodifiable views; {@link #copy()} returns {@code this}.
+ * The public constructor accepts a (possibly directed) edge list and builds an
+ * undirected graph by inserting the reverse edge for each input edge.
+ *
+ * <p><b>Key operations:</b>
+ * <ul>
+ *   <li>{@link #cities()} / {@link #city(int)} – iterate or look up cities.</li>
+ *   <li>{@link #edgesFrom(int)} – read-only neighbors (costed connections).</li>
+ *   <li>{@link #shortestPathCosts(java.util.Set, java.util.Set)} – Dijkstra from sources to targets,
+ *       modeling the “first city is free” rule when sources are empty.</li>
+ *   <li>{@link #penalizeRegions(java.util.Set, int)} – keep cities but raise costs for edges that
+ *       are not fully within a set of active regions (useful for RL without changing input size).</li>
+ *   <li>{@link #validCities(java.util.Set)} / {@link #invalidCities(java.util.Set)} – filter city IDs
+ *       by region membership.</li>
+ *   <li>{@link #northAmerica()} / {@link #europe()} – convenience factories for sample maps.</li>
+ * </ul>
+ *
+ * <p><b>IDs and regions:</b> City IDs are stable integer keys. Regions are integers
+ * carried by {@link PowerGridCity}. {@link #REGION_ADJ_NA} provides coarse region adjacency
+ * for North America (useful for setup logic).
+ *
+ * @see PowerGridCity
+ * @see PowerGridGraphBoard.Edge
+ */
+
 public final class PowerGridGraphBoard extends Component {
 
     private final Map<Integer, PowerGridCity> citiesById;
@@ -27,7 +62,6 @@ public final class PowerGridGraphBoard extends Component {
     	    7, Set.of(3,4, 6)
     	);
 
-    // inner static class for clarity
     public static final class Edge {
         public final int from;
         public final int to;
@@ -65,11 +99,13 @@ public final class PowerGridGraphBoard extends Component {
      * TODO 
      * Incomplete Map of Europe
      */
+    
+  
     public static PowerGridGraphBoard europe() {
         Map<Integer, PowerGridCity> cities = new HashMap<>();
         cities.put(1, new PowerGridCity(1, "Aachen",   1,  false));
         cities.put(2, new PowerGridCity(2, "Bremen",   1,  false));
-        cities.put(3, new PowerGridCity(3, "Berlin",   2,  true));  // deluxe/double
+        cities.put(3, new PowerGridCity(3, "Berlin",   2,  true));  
         cities.put(4, new PowerGridCity(4, "Dresden",  2, false));
         cities.put(5, new PowerGridCity(5, "Essen",    1,  false));
         cities.put(6, new PowerGridCity(6, "Freiburg", 3,  false));
@@ -88,7 +124,6 @@ public final class PowerGridGraphBoard extends Component {
      * both directions. 
      */
     public static PowerGridGraphBoard northAmerica() {
-    	//going to need logic to build the board such that it follows the rules on which areas are allowed 
     	 Map<Integer, PowerGridCity> cities = new HashMap<>();
 
     	// Region 1: North East
@@ -259,34 +294,38 @@ public final class PowerGridGraphBoard extends Component {
         return new PowerGridGraphBoard("NorthAmerica", cities, edges);
     }
     public int maxCityId() {
-        // if the map is empty, return 0 (or throw an exception depending on your use case)
         return citiesById.keySet().stream()
                          .mapToInt(Integer::intValue)
                          .max()
                          .orElse(0);
     }
     
-    public PowerGridGraphBoard filterRegions(Set<Integer> keepRegions) {
-        Map<Integer, PowerGridCity> keptCities =
-            this.citiesById.values().stream()
-                .filter(c -> keepRegions.contains(c.getRegion()))
-                .collect(Collectors.toMap(
-                    c -> Integer.valueOf(c.getComponentID()),
-                    c -> c,
-                    (a, b) -> a,
-                    HashMap::new
-                ));
+    /**
+     * Produces a new graph with the same set of cities but with edge costs
+     * penalized unless both endpoints lie in {@code keepRegions}. This is used becuase for RL 
+     * we want the observation size to stay the same so we dont want to change the input size rather
+     * just penalize the edges.
+     * <p>
+     * Concretely:
+     * <ul>
+     *   <li>If both endpoints' {@code city.getRegion()} ∈ {@code keepRegions},
+     *       the original edge cost is preserved.</li>
+     *   <li>Otherwise (cross-region or entirely outside), the edge cost is set to
+     *       {@code penaltyCost}.</li>
+     *   <li>{@code e.from < e.to} is used to keep a single copy per undirected edge
+     *       when the adjacency stores both directions.</li>
+     * </ul>
+     *
+     * @param keepRegions regions that remain “active” (no penalty within them)
+     * @param penaltyCost the cost to apply to edges not fully inside {@code keepRegions}
+     * @return a new {@link PowerGridGraphBoard} with identical cities and penalized edge costs
+     *
+     * @throws NullPointerException if {@code keepRegions} is {@code null}
+     *
+     * @implNote Cities are shallow-copied; only edge costs are reconstructed. If your graph
+     *           is directed, remove the {@code e.from < e.to} filter.
+     */
 
-        List<Edge> keptEdges =
-            this.adj.entrySet().stream()
-                .flatMap(e -> e.getValue().stream())
-                .filter(e -> keptCities.containsKey(e.from) && keptCities.containsKey(e.to))
-                .filter(e -> e.from < e.to)
-                .collect(Collectors.toList());
-
-        return new PowerGridGraphBoard(this.getComponentName(), keptCities, keptEdges);
-    }
-    
     public PowerGridGraphBoard penalizeRegions(Set<Integer> keepRegions, int penaltyCost) {
         Map<Integer, PowerGridCity> sameCities = new HashMap<>(this.citiesById);
 
@@ -331,14 +370,11 @@ public final class PowerGridGraphBoard extends Component {
             .collect(Collectors.toSet());
     }
     
- // --- Add inside PowerGridGraphBoard ---
-
-    /** Number of cities on this board. */
     public int numCities() {
         return citiesById.size();
     }
 
-    /** True if this id exists on the map. */
+
     public boolean hasCity(int id) {
         return citiesById.containsKey(id);
     }
@@ -349,44 +385,32 @@ public final class PowerGridGraphBoard extends Component {
         return c.getComponentName(); // or c.getName() if your class has that
     }
 
-   
-    /** Cheapest cost from ANY source to target.
-     *  Empty sources ⇒ 0 (first city rule).
-     *  Throws if target is unreachable (which indicates a map/data bug). */
-    public int shortestPathCostOrThrow(Set<Integer> sources, int target) {
-        if (!hasCity(target)) throw new IllegalArgumentException("Unknown target city: " + target);
-        if (sources == null || sources.isEmpty()) return 0;
 
-        int maxId = maxCityId();
-        int[] dist = new int[maxId + 1];
-        java.util.Arrays.fill(dist, Integer.MAX_VALUE);
 
-        java.util.PriorityQueue<int[]> pq =
-            new java.util.PriorityQueue<>(java.util.Comparator.comparingInt(a -> a[1]));
-
-        for (int s : sources) {
-            if (!hasCity(s)) continue;       // ignore stale ids safely
-            dist[s] = 0;
-            pq.add(new int[]{s, 0});
-        }
-
-        while (!pq.isEmpty()) {
-            int[] cur = pq.poll();
-            int u = cur[0], d = cur[1];
-            if (d != dist[u]) continue;
-            if (u == target) return d;
-
-            for (Edge e : edgesFrom(u)) {
-                int v = e.to, nd = d + e.cost;
-                if (nd < dist[v]) { dist[v] = nd; pq.add(new int[]{v, nd}); }
-            }
-        }
-
-        throw new IllegalStateException("Unreachable target city " + target + " from sources " + sources);
-    }
-
-    /** Multi-target variant: returns cost per target; throws if ANY target is unreachable.
-     *  Empty sources ⇒ all targets cost 0 (first city rule). */
+    /**
+     * Computes the minimum connection cost (Dijkstra) from any of the given {@code sources}
+     * to each city in {@code targets}.
+     * <p>
+     * Special case: if {@code sources} is {@code null} or empty, this models the
+     * “first city is free” rule and returns cost {@code 0} for every target.
+     * Results are returned as an unmodifiable map from target city ID to its cost.
+     * The search stops early once all targets are settled.
+     *
+     * <p><b>Algorithm:</b> Dijkstra with a min-heap keyed by cumulative cost.
+     * Distances are initialized to {@link Integer#MAX_VALUE}, sources start at 0.
+     *
+     * @param targets set of destination city IDs to compute costs for (must not be null)
+     * @param sources set of starting city IDs (may be null/empty to apply the free-first-city rule)
+     * @return unmodifiable map of {@code targetId -> minCost}
+     *
+     * @throws NullPointerException if {@code targets} is null
+     * @throws IllegalArgumentException if any city ID in {@code targets} is unknown
+     * @throws IllegalStateException if any target is unreachable from the provided {@code sources}
+     *
+     * @implNote Uses {@code hasCity(int)} to validate city IDs, and {@code edgesFrom(int)}
+     *           to iterate outgoing edges. Runs in {@code O((V+E) log V)} time in the worst case.
+     */
+    
     public Map<Integer,Integer> shortestPathCosts(java.util.Set<Integer> targets,
                                                                    java.util.Set<Integer> sources) {
         java.util.Objects.requireNonNull(targets, "targets");

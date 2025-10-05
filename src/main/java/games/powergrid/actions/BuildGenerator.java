@@ -2,11 +2,30 @@ package games.powergrid.actions;
 
 import java.util.Objects;
 
+
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.powergrid.PowerGridGameState;
 import games.powergrid.components.PowerGridCity;
 import games.powergrid.components.PowerGridGraphBoard;
+
+/**
+ * Action that builds a generator (house) in a given city at a specified cost.
+ * <p>
+ * This action validates city bounds and slot availability for the current game step,
+ * checks that the acting player has sufficient funds, then:
+ * <ol>
+ *   <li>Claims the first open slot allowed by the current step,</li>
+ *   <li>Deducts the build cost from the player,</li>
+ *   <li>Increments the player's owned-city count.</li>
+ * </ol>
+ * <p>
+ * Slot availability follows Power Grid rules (e.g., only slot 0 in Step 1; slots 0–1 in Step 2; etc.).
+ * Exceptions are thrown if preconditions are violated (invalid city, no open slot, or insufficient funds).
+ *
+ * <p><b>Side effects:</b> Mutates {@link PowerGridGameState} by updating city slots, player money,
+ * and city counts.
+ */
 
 public class BuildGenerator extends AbstractAction {
     private final int cityId;
@@ -86,6 +105,17 @@ public class BuildGenerator extends AbstractAction {
     }
 
 
+    /**
+     * Returns the index of the first available (empty) city slot for building in the current step.
+     * <p>
+     * A slot is considered open if its value is {@code -1}. The search is limited by the
+     * current game step (e.g., in Step 1 only slot 0 can be used, in Step 2 up to slot 1, etc.).
+     *
+     * @param citySlot an array of player IDs occupying each slot in the city; {@code -1} indicates empty.
+     * @param step     the current game step, which determines how many slots are available for use.
+     * @return the index of the first open slot within the allowed range, or {@code -1} if none are available.
+     */
+    
     private int getFirstOpenSlot(int[] citySlot, int step) {
         int limit = Math.min(step, citySlot.length);
         for (int i = 0; i < limit; i++) {

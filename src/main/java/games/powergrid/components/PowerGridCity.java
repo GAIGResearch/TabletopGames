@@ -8,15 +8,21 @@ import core.CoreConstants;
 import core.components.Component;
 
 
-/*
- * Immuatable POwerGridCity class this is responsible for tracking the name, region, coordiantes for UI, and double city. In 
- * the version of powergrid this is based on powergrid delux several cities have double slots so 2 phase1, 2 phase2, and 2 phase 3. If 
- * the double_city value is true then it means this is a city that can hold two seperate players power plants at a given phase
+/**
+ * Immutable representation of a city on the Power Grid map.
+ * <p>
+ * Each city has a name, belongs to a numbered region, and may be a
+ * <em>double city</em> (a metropolis in the Deluxe rules). A double city
+ * provides two additional generator slots per step (i.e., two in Step 1, two in Step 2,
+ * and two in Step 3).
+ *
+ * <p><b>Immutability:</b> All fields are {@code final}; {@link #copy()} returns
+ * {@code this}.
  */
 public final class PowerGridCity extends Component {
     private final String name;
     private final int region;
-    private final boolean doubleCity; // true = 2 slots per step (Deluxe metropolises)
+    private final boolean doubleCity; // true = 2 slots per step this has not been implemented in the game logic
 
     public PowerGridCity(int id, String name, int region, boolean doubleCity) {
         super(CoreConstants.ComponentType.TOKEN, name, id);
@@ -31,7 +37,7 @@ public final class PowerGridCity extends Component {
 
     public boolean isDouble() { return doubleCity; }
 
-    @Override public PowerGridCity copy() { return this; } // immutable
+    @Override public PowerGridCity copy() { return this; }
     public int getRegion() {
     	return this.region();
     }

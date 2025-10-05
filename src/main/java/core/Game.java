@@ -855,9 +855,9 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
         //players.add(new RandomPlayer());
     //    players.add(new RandomPlayer());
     //    players.add(new BasicMCTSPlayer());
@@ -873,7 +873,7 @@ public class Game {
 
 
 
-         players.add(new HumanGUIPlayer(ac));
+         //players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
     //    players.add(new HumanConsolePlayer());
@@ -886,10 +886,23 @@ public class Game {
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
-//        ArrayList<GameType> games = new ArrayList<>();
-//        games.add(Connect4);
-//        runMany(games, players, 100L, 5, false, false, null, turnPause);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
+        List<GameType> games = java.util.Collections.singletonList(GameType.Root);
+       //games.add(Connect4);
+        long seedForBatch = 100L;
+        int gamesToRun    = 200;
+     // earlier in main:
+        //boolean useGUI = Utils.getArg(args, "gui", true);
+        //int turnPause  = Utils.getArg(args, "turnPause", 100);
+        //ActionController ac = new ActionController();
+
+
+        // If your Game.runMany has this signature:
+        //   runMany(List<GameType> games, List<AbstractPlayer> players, long seed, int nGames,
+//                   boolean verbose, boolean stopOnError, ActionController ac, int turnPause)
+
+        //Game.runMany(games, players, seedForBatch, gamesToRun, false, false, null, turnPause);
+
+
     }
 
 }

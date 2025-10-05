@@ -6,8 +6,22 @@ import games.powergrid.PowerGridGameState;
 
 import java.util.Objects;
 
-public class IncreaseBid extends AbstractAction {
+/**
+ * Action that raises the current auction bid by one unit for a specific player.
+ * <p>
+ * When executed during an active auction, this action computes {@code newBid = currentBid + 1}
+ * and, if the acting player can afford it, updates the game state's current bid and bidder.
+ * If the player cannot afford the increment, the bid is not changed and the action returns {@code false}.
+ *
+ * <p><b>Side effects:</b> Mutates {@link PowerGridGameState} by updating the highest bid and
+ * the current highest bidder.
+ *
+ * @see games.powergrid.actions.AuctionPowerPlant
+ * @see PowerGridGameState
+ */
 
+public class IncreaseBid extends AbstractAction {
+	
     private final int playerId;
 
     public IncreaseBid(int playerId) {
@@ -24,11 +38,8 @@ public class IncreaseBid extends AbstractAction {
         // Check if the player can afford the new bid
         if (pggs.getPlayersMoney(playerId) >= newBid) {
             pggs.setCurrentBid(newBid, playerId);  
-            System.out.printf("Player %d increases bid to %d%n", playerId, newBid);
             return true;
         }
-
-        System.out.printf("Player %d cannot afford to increase bid to %d%n", playerId, newBid);
         return false;
     }
 

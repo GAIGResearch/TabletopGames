@@ -16,6 +16,15 @@ public class PowerGridMapPannel extends JComponent {
 	private final Image resourceImage;
 	private final Image incomeImage;
 	private Image stepImage;
+	private final int endGameTrigger;
+	private final int stepTwoTrigger; 
+	private Point endBarCenter;
+	private Point stepTwoBarCenter;
+	private final int endBarWidth = 5, endBarHeight = 33;
+	private final int stepTwoBarWidth = 5, stepTwoBarHeight = 33;
+
+	   
+	   
 	private final Map<Integer, Image> regionMasks = Map.of(
 			1, ImageIO.GetInstance().getImage("data/powergrid/region_1.png"),
 			2, ImageIO.GetInstance().getImage("data/powergrid/region_2.png"),
@@ -131,10 +140,14 @@ public class PowerGridMapPannel extends JComponent {
 	}
 
 	
-	public PowerGridMapPannel(int numberPlayers) {
+	public PowerGridMapPannel(int numberPlayers, int stepTwoTrigger,  int endGameTrigger) {
+		this.endGameTrigger = endGameTrigger;
+		this.stepTwoTrigger = stepTwoTrigger; 
 		backgroundImage = ImageIO.GetInstance().getImage("data/powergrid/us_map.png");
 		resourceImage = ImageIO.GetInstance().getImage("data/powergrid/na_resource_card_" + numberPlayers + ".png");
 		incomeImage = ImageIO.GetInstance().getImage("data/powergrid/na_income_card.png");
+		endBarCenter     = computeBarCenter(this.endGameTrigger);
+	    stepTwoBarCenter = computeBarCenter(this.stepTwoTrigger);
 	}
 	
 
@@ -183,9 +196,10 @@ public class PowerGridMapPannel extends JComponent {
             if (mask != null) g.drawImage(mask, 0, 0, 1100, 1000, null);
         }
         drawincomeCard(g);
-        // Draw ownership markers (no scaling)
         drawOwnershipSquares((Graphics2D) g);
         drawGeneratorTrack((Graphics2D)g);
+        drawStepTwoBar((Graphics2D) g);
+        drawEndGameBar((Graphics2D) g);
     }
 
     
@@ -301,6 +315,41 @@ public class PowerGridMapPannel extends JComponent {
 	private int clamp(int v, int lo, int hi) {
 	    return (v < lo) ? lo : (v > hi) ? hi : v;
 	}
-  
+	private Point computeBarCenter(int trigger) {
+	    // Bar goes BETWEEN trigger-1 and trigger
+	    if (GENERATOR_TRACK == null || trigger < 1 || trigger >= GENERATOR_TRACK.length) return null;
+	    Point left  = GENERATOR_TRACK[trigger - 1];
+	    Point right = GENERATOR_TRACK[trigger];
+	    int cx = (left.x + right.x) / 2;
+	    int cy = (left.y + right.y) / 2;
+	    int liftY = -3; // align with your marker lift
+	    return new Point(cx, cy + liftY);
+	}
+    
+    private void drawEndGameBar(Graphics2D g2) {
+        if (endBarCenter == null) return;
+        Object oldAA = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        int x = (endBarCenter.x - endBarWidth / 2) -3;
+        int y = (endBarCenter.y - endBarHeight / 2) + 2;
+        g2.setColor(Color.BLACK);
+        g2.fillRect(x, y, endBarWidth, endBarHeight);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
+
+    private void drawStepTwoBar(Graphics2D g2) {
+        if (stepTwoBarCenter == null) return;
+        Object oldAA = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int x = (stepTwoBarCenter.x - stepTwoBarWidth / 2 )-3;;
+        int y = (stepTwoBarCenter.y - stepTwoBarHeight / 2) + 2;
+
+        g2.setColor(Color.LIGHT_GRAY);         // or choose a distinct color from end-game bar
+        g2.fillRect(x, y, stepTwoBarWidth, stepTwoBarHeight);
+
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
+
 
 }

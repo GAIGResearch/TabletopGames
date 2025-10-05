@@ -21,10 +21,9 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
     private boolean awaitingDiscard = false;
     private int winnerId = -1;
 
-    // Sequence-local state (prevents recursion & drives bidding)
     private boolean started = false;
     private boolean done     = false;
-    private int currentBidder;   // who should act NOW (managed by the sequence)
+    private int currentBidder;  
 
     public AuctionPowerPlant(int playerId, int plantNumber) {
         this.openerId = playerId;
@@ -33,32 +32,26 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        PowerGridGameState s = (PowerGridGameState) gs;
-        if (started) return true;                     // idempotent
-
+        PowerGridGameState s = (PowerGridGameState) gs;           
         if (plantNumber > s.getPlayersMoney(openerId)) return false;
         s.setAuctionPlantNumber(plantNumber);
         s.resetBidOrder();
-        if(s.getStep() == 2 && s.getDiscoutCard() == plantNumber) { //if step 2 and first card then it get the discount 
-        	System.out.println("RAN");
+        if(s.getStep() == 2 && s.getDiscountCard() == plantNumber) { //if step 2 and first card then it get the discount 
         	s.setCurrentBid(1, openerId);
+        	s.setDiscountCard(-1);
         }else {
         	s.setCurrentBid(plantNumber, openerId);
         }
 
-        // Choose the first bidder after the opener
-        currentBidder = s.checkNextBid(openerId);
-
-        // Optional: keep state.turnOwner in sync (nice for logs/UI)
+        currentBidder = s.checkNextBid(openerId); //first available bidder
+        
         s.setTurnOwner(currentBidder);
 
         gs.setActionInProgress(this);
         started = true;
-        System.out.printf("Player %d opens auction on plant %d%n", openerId, plantNumber);
         return true;
     }
 
-    // IMPORTANT: do NOT call state.getCurrentPlayer() here
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
         return currentBidder;
@@ -80,13 +73,11 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         List<AbstractAction> actions = new ArrayList<>();
         final int money = s.getPlayersMoney(currentBidder);
 
-        final int highestBidder = s.getCurrentBidder();         // highest bidder
+        final int highestBidder = s.getCurrentBidder();         
         final boolean isHighest = (currentBidder == highestBidder);
         
-        // there is nobody else to act.
-        final boolean onlyOneLeft =
-            s.isAuctionLive() && s.checkNextBid(highestBidder) == highestBidder;
-
+        final boolean onlyOneLeft = s.isAuctionLive() && s.checkNextBid(highestBidder) == highestBidder;
+        //edge case where the last person in round is the one auctioning
         if (onlyOneLeft) {
             actions.add(new PassBid(currentBidder));
             return actions;
@@ -113,6 +104,7 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         }
 
         int lastActor;
+        
         if (action instanceof IncreaseBid ib) {
             lastActor = ib.getPlayerId();
         } else if (action instanceof PassBid pb) {
@@ -135,18 +127,17 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         	PowerGridCard bought = s.removePlantFromMarkets(plant);
         	if (bought == null) throw new IllegalStateException("Plant not in markets");
         	s.addPlantToPlayer(winnerId, bought);
-        	System.out.println("Player: " + winnerId + " won plant: " + plant + " for $" + price );
 
-        	// auction is over now
+        	// auction is over now draw card and rebalance market
         	s.resetAuction();
         	PowerGridForwardModel.rebalanceMarkets(s);
 
-        	// need a discard?
+        	//handles discard if player has more than 3 careds 
         	if (s.getPlayerPlantDeck(winnerId).getSize() > 3) {
         	    awaitingDiscard = true;
-        	    currentBidder = winnerId;            // winner chooses
+        	    currentBidder = winnerId;            
         	    s.setTurnOwner(currentBidder);
-        	    return;                              // keep sequence alive
+        	    return;                              
         	}
 
         	// otherwise finish
@@ -169,11 +160,11 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
     @Override
     public AuctionPowerPlant copy() {
         AuctionPowerPlant cp = new AuctionPowerPlant(openerId, plantNumber);
-        cp.started = this.started;
-        cp.done = this.done;
-        cp.currentBidder = this.currentBidder;
-        cp.awaitingDiscard = this.awaitingDiscard;   
-        cp.winnerId = this.winnerId;                
+        cp.started         = this.started;
+        cp.done            = this.done;
+        cp.currentBidder   = this.currentBidder;
+        cp.awaitingDiscard = this.awaitingDiscard;
+        cp.winnerId        = this.winnerId;
         return cp;
     }
 

@@ -6,6 +6,20 @@ import games.powergrid.PowerGridGameState;
 
 import java.util.Objects;
 
+/**
+ * Action indicating that a player passes on making a higher bid in the current auction.
+ * <p>
+ * When executed, this marks the player as having passed for the ongoing auction round,
+ * so they will no longer be considered when selecting the next bidder unless the
+ * auction state resets.
+ *
+ * <p><b>Side effects:</b> Mutates {@link PowerGridGameState} by updating the auction's
+ * internal bid order (e.g., setting the player's entry to {@code -1}).
+ *
+ * @see PowerGridGameState#passBid(int)
+ * @see games.powergrid.actions.AuctionPowerPlant
+ */
+
 public class PassBid extends AbstractAction {
     private final int playerId;
 
@@ -16,13 +30,8 @@ public class PassBid extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         PowerGridGameState pggs = (PowerGridGameState) gs;
-
-        // Call the helper that marks the player as passed
-        pggs.passBid(playerId);
-
-        System.out.printf("Player %d passes the bid.%n", playerId);
-
-        return true;  // successful action
+        pggs.passBid(playerId); //marks player as passed 
+        return true;  
     }
 
     @Override

@@ -1,14 +1,15 @@
 package games.powergrid;
 
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import core.AbstractParameters;
-import evaluation.optimisation.TunableParameters;
 import games.powergrid.components.PowerGridCard;
 
-public class PowerGridParameters extends TunableParameters {
+public class PowerGridParameters extends AbstractParameters{
 	public static final String CARD_ASSET_PATH = "data/powergrid";
 	public enum Resource { COAL,  GAS, OIL, URANIUM} //TODO implement None Type resource
 	public enum PlantType { COAL, GAS, OIL, URANIUM, HYBRID, GREEN }
@@ -22,8 +23,8 @@ public class PowerGridParameters extends TunableParameters {
     public int[] startinResources = new int[]{23, 18, 14,2};
     
     // Step 2 Trigger
-    public int step2Trigger = 7;
-    public int step2Trigger_6P = 6;
+    public int [] step2Trigger = new int [] {0,0,7,7,7,6};
+    
     
     // end-game trigger 
     public  int [] citiesToTriggerEnd = new int [] {0,0,17,17,15,14};
@@ -101,29 +102,74 @@ public class PowerGridParameters extends TunableParameters {
     	    PowerGridCard.plant(50, 7, Map.of(Resource.URANIUM, 2))
     	);
 
-   
-    
-	@Override
-	protected boolean _equals(Object o) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Object instantiate() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void _reset() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	protected AbstractParameters _copy() {
-		return this; //The current version does not support changing any of the parameters
+	    PowerGridParameters p = new PowerGridParameters();
+
+	    p.maxRounds = this.maxRounds;
+	    p.startingMoney = this.startingMoney;
+
+	    p.citySlotPrices    = this.citySlotPrices == null ? null : this.citySlotPrices.clone();
+	    p.startinResources  = this.startinResources == null ? null : this.startinResources.clone();
+	    p.step2Trigger      = this.step2Trigger == null ? null : this.step2Trigger.clone();
+	    p.citiesToTriggerEnd= this.citiesToTriggerEnd == null ? null : this.citiesToTriggerEnd.clone();
+
+	    // Deep-copy the refresh tables
+	    p.resourceRefreshNA_2P = deepCopy(this.resourceRefreshNA_2P);
+	    p.resourceRefreshNA_3P = deepCopy(this.resourceRefreshNA_3P);
+	    p.resourceRefreshNA_4P = deepCopy(this.resourceRefreshNA_4P);
+	    p.resourceRefreshNA_5P = deepCopy(this.resourceRefreshNA_5P);
+	    p.resourceRefreshNA_6P = deepCopy(this.resourceRefreshNA_6P);
+
+	    p.resourceRefreshEU_2P = deepCopy(this.resourceRefreshEU_2P);
+	    p.resourceRefreshEU_3P = deepCopy(this.resourceRefreshEU_3P);
+	    p.resourceRefreshEU_4P = deepCopy(this.resourceRefreshEU_4P);
+	    p.resourceRefreshEU_5P = deepCopy(this.resourceRefreshEU_5P);
+	    p.resourceRefreshEU_6P = deepCopy(this.resourceRefreshEU_6P);
+
+	    // Cards are immutable
+	    p.plantsIncludedInGame = (this.plantsIncludedInGame == null)
+	            ? null
+	            : List.copyOf(this.plantsIncludedInGame);
+
+	    return p;
 	}
+
+	private static int[][] deepCopy(int[][] src) {
+	    if (src == null) return null;
+	    int[][] out = new int[src.length][];
+	    for (int i = 0; i < src.length; i++) {
+	        out[i] = (src[i] == null) ? null : src[i].clone();
+	    }
+	    return out;
+	}
+
+	@Override
+	protected boolean _equals(Object o) {
+	    if (this == o) return true;
+	    if (!(o instanceof PowerGridParameters that)) return false;
+	    if (!super.equals(o)) return false;
+
+	    return maxRounds == that.maxRounds
+	            && startingMoney == that.startingMoney
+	            && Arrays.equals(citySlotPrices, that.citySlotPrices)
+	            && Arrays.equals(startinResources, that.startinResources)
+	            && Arrays.equals(step2Trigger, that.step2Trigger)
+	            && Arrays.equals(citiesToTriggerEnd, that.citiesToTriggerEnd)
+	            && Arrays.deepEquals(resourceRefreshNA_2P, that.resourceRefreshNA_2P)
+	            && Arrays.deepEquals(resourceRefreshNA_3P, that.resourceRefreshNA_3P)
+	            && Arrays.deepEquals(resourceRefreshNA_4P, that.resourceRefreshNA_4P)
+	            && Arrays.deepEquals(resourceRefreshNA_5P, that.resourceRefreshNA_5P)
+	            && Arrays.deepEquals(resourceRefreshNA_6P, that.resourceRefreshNA_6P)
+	            && Arrays.deepEquals(resourceRefreshEU_2P, that.resourceRefreshEU_2P)
+	            && Arrays.deepEquals(resourceRefreshEU_3P, that.resourceRefreshEU_3P)
+	            && Arrays.deepEquals(resourceRefreshEU_4P, that.resourceRefreshEU_4P)
+	            && Arrays.deepEquals(resourceRefreshEU_5P, that.resourceRefreshEU_5P)
+	            && Arrays.deepEquals(resourceRefreshEU_6P, that.resourceRefreshEU_6P)
+	            && Objects.equals(plantsIncludedInGame, that.plantsIncludedInGame);
+	}
+
+
 
 }
