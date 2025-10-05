@@ -37,10 +37,14 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         if (started) return true;                     // idempotent
 
         if (plantNumber > s.getPlayersMoney(openerId)) return false;
-
         s.setAuctionPlantNumber(plantNumber);
         s.resetBidOrder();
-        s.setCurrentBid(plantNumber, openerId);
+        if(s.getStep() == 2 && s.getDiscoutCard() == plantNumber) { //if step 2 and first card then it get the discount 
+        	System.out.println("RAN");
+        	s.setCurrentBid(1, openerId);
+        }else {
+        	s.setCurrentBid(plantNumber, openerId);
+        }
 
         // Choose the first bidder after the opener
         currentBidder = s.checkNextBid(openerId);
@@ -63,22 +67,36 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         PowerGridGameState s = (PowerGridGameState) gs;
+
         if (awaitingDiscard) {
-        	Deck<PowerGridCard> deck = s.getPlayerPlantDeck(winnerId);
+            Deck<PowerGridCard> deck = s.getPlayerPlantDeck(winnerId);
             List<AbstractAction> actions = new ArrayList<>();
-            for (int i = 0; i < deck.getSize(); i++) {
-                actions.add(new Discard(i));   
+            for (int i = 0; i < deck.getSize() - 1; i++) {
+                actions.add(new Discard(i));
             }
             return actions;
         }
 
         List<AbstractAction> actions = new ArrayList<>();
-        int money = s.getPlayersMoney(currentBidder);
+        final int money = s.getPlayersMoney(currentBidder);
 
-        if (money > s.getCurrentBid()) {
+        final int highestBidder = s.getCurrentBidder();         // highest bidder
+        final boolean isHighest = (currentBidder == highestBidder);
+        
+        // there is nobody else to act.
+        final boolean onlyOneLeft =
+            s.isAuctionLive() && s.checkNextBid(highestBidder) == highestBidder;
+
+        if (onlyOneLeft) {
+            actions.add(new PassBid(currentBidder));
+            return actions;
+        }
+
+        if (!isHighest && money > s.getCurrentBid()) {
             actions.add(new IncreaseBid(currentBidder));
         }
-        actions.add(new PassBid(currentBidder));   // always allow pass
+
+        actions.add(new PassBid(currentBidder));
         return actions;
     }
 
@@ -117,6 +135,7 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         	PowerGridCard bought = s.removePlantFromMarkets(plant);
         	if (bought == null) throw new IllegalStateException("Plant not in markets");
         	s.addPlantToPlayer(winnerId, bought);
+        	System.out.println("Player: " + winnerId + " won plant: " + plant + " for $" + price );
 
         	// auction is over now
         	s.resetAuction();
@@ -139,7 +158,7 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
 
         // Otherwise continue the auction with the next bidder
         currentBidder = next;
-        s.setTurnOwner(currentBidder); // optional, but keeps UI/logs consistent
+        s.setTurnOwner(currentBidder); 
     }
 
     @Override
@@ -160,7 +179,7 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "OpenAuction(plant=" + plantNumber + ", opener=" + openerId + ")";
+        return "OpenAuction(plant=" + plantNumber + ", open bidder=" + openerId + ")";
     }
 
     @Override
@@ -175,29 +194,5 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
     public int hashCode() {
         return Objects.hash(openerId, plantNumber);
     }
-    
-	private void awardPlantToWinner(PowerGridGameState s, int winner, int plantNumber, int price) {
-	    // Preconditions protect you if callers ever change
-	    if (price < 0) throw new IllegalArgumentException("Negative price");
-	    if (s.getPlayersMoney(winner) < price)
-	        throw new IllegalStateException("Insufficient funds");
 
-	    s.decreasePlayerMoney(winner, price);
-
-	    PowerGridCard bought = s.removePlantFromMarkets(plantNumber);
-	    if (bought == null)
-	        throw new IllegalStateException("Plant " + plantNumber + " not in markets");
-	    if(s.getPlayerPlantDeck(winner).getSize() > 3) {
-	    	//add actions to remove cards 
-	    }
-	    s.addPlantToPlayer(winner, bought);
-	    
-	    // TODO: enforce 3-plant cap → trigger discard sub-sequence if >3
-	    // e.g., gs.setActionInProgress(new DiscardDownToThreePlants(winner));
-
-	    PowerGridForwardModel.rebalanceMarkets(s);
-
-	    // Optional: structured log
-	    // gs.logEvent(new LogEvent("AUCTION_WIN", winner, plantNumber, price));
-	}
 }

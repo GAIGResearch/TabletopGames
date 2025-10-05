@@ -37,6 +37,7 @@ public class PowerGridGameState extends AbstractGameState {
     
     private int turnOrderIndex = 0;
     private int[] playerMoney;
+    private int discoutCard; 
     private int[] poweredCities; 
     private int step;
 
@@ -384,10 +385,9 @@ public class PowerGridGameState extends AbstractGameState {
 
 	public void addPlantToPlayer(int playerId, PowerGridCard newCard) {
 	    if (newCard == null) throw new IllegalArgumentException("newCard is null");
-
 	    Deck<PowerGridCard> deck = ownedPlantsByPlayer[playerId];
-	    deck.add(newCard);
-	    deck.getComponents().sort(java.util.Comparator.comparingInt(PowerGridCard::getNumber));
+	    deck.addToBottom(newCard);
+	    //deck.getComponents().sort(java.util.Comparator.comparingInt(PowerGridCard::getNumber));
 	}
 	
 	public Deck<PowerGridCard> getOwnedPlantsByPlayer(int playerId) {
@@ -660,11 +660,21 @@ public class PowerGridGameState extends AbstractGameState {
 	    return null;
 	}
 	public boolean removePlantFromPlayer(int playerId, int plantNumber) {
-	    var deck = getOwnedPlantsByPlayer(playerId);
+	    Deck<PowerGridCard> deck = getOwnedPlantsByPlayer(playerId);
 	    for (PowerGridCard c : deck.getComponents()) {
 	        if (c.getNumber() == plantNumber) { deck.remove(c); return true; }
 	    }
 	    return false;
+	}
+
+
+	public int getDiscoutCard() {
+		return discoutCard;
+	}
+
+
+	public void setDiscoutCard(int discoutCard) {
+		this.discoutCard = discoutCard;
 	}
 
     

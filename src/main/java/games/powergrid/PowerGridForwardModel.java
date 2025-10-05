@@ -52,6 +52,8 @@ import static games.root.RootParameters.VictoryCondition.Score;
 
 
 public class PowerGridForwardModel extends StandardForwardModel implements ITreeActionSpace {
+	
+	boolean discountFirstCard = true; 
 	@Override
 	protected void _setup(AbstractGameState firstState) {
 		PowerGridGameState state = (PowerGridGameState)firstState;
@@ -245,11 +247,20 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        case PLAYER_ORDER -> {buildTurnOrder(state);
 	        						advancePhase(state);
 	        						endRound(state, state.getTurnOwner());
+	        						
+	        }
+	        case AUCTION -> {buildTurnOrder(state);
+	        //always sets the discount card to the first but the auction action checks if its phase 2
+			PowerGridCard firstCard = state.currentMarket.peek(0);
+			System.out.println("FIRST CARD: " + firstCard.getNumber());
+			state.setDiscoutCard(firstCard.getNumber());
 	        }
 	        //case AUCTION -> prepareAuction(state);
 	        case RESOURCE_BUY ->{List<Integer> order = state.getRoundOrder();
 					        	Collections.reverse(state.getRoundOrder());
 					        	state.setTurnOwner(order.get(0));
+					        	
+					        	
 
 	        }
 	        case BUILD ->{List<Integer> order = state.getRoundOrder();
@@ -525,35 +536,34 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         firstEight.sort(Comparator.comparingInt(PowerGridCard::getNumber));
 
         for (int i = 0; i < firstEight.size(); i++) {
-            if (i < 4) state.currentMarket.add(firstEight.get(i)); // cheapest 4
-            else       state.futureMarket.add(firstEight.get(i));  // next 4
+            if (i < 4) state.currentMarket.add(firstEight.get(i)); 
+            else       state.futureMarket.add(firstEight.get(i));  
         }
         sortMarket(state.currentMarket);
         sortMarket(state.futureMarket);
     }
+    
     
     private static void sortMarket(Deck<PowerGridCard> market) {
         market.getComponents().sort(Comparator.comparingInt(PowerGridCard::getNumber));
     }
     
 
-    //TODO this will be changed to both handle a randomize on the intial set up and handle in Phase1 basing it on #of generators if tied then highest plant number
     private void buildTurnOrder(PowerGridGameState state) {
         List<Integer> order = new ArrayList<>();
-        if(state.getTurnCounter() == 0) {
+      //first round of the game build the list of players and the turn order is random
+        if(state.getTurnCounter() == 0) { 
 	        for (int i = 0; i < state.getNPlayers(); i++) {
 	            order.add(i);
 	        }
 	        Collections.shuffle(order, state.getRnd());
         }else {
+        	//rest of the game order is calculated  based on #of plants -> highest Card -> player number
         	order = state.getComputedTurnOrder();
         }
-	        // reproducible shuffle
-        //turnOrder remains constant throughtout the round 
+
         state.setTurnOrder(order);
-        //will be modified during a specific phase 
         state.setRoundOrder(order);
-        //bidOrder matches RoundOrder
         state.resetBidOrder();
     }
     
@@ -584,6 +594,9 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         }
 
         PowerGridCard drawn = drawPile.draw();
+        if(drawn.getNumber() < s.getDiscoutCard()) {
+        	s.setDiscoutCard(-1);
+        }
 
         if (drawn != null) {
             if (drawn.type == Type.STEP3) {

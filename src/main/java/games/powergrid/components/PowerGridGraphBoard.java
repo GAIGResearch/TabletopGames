@@ -196,7 +196,7 @@ public final class PowerGridGraphBoard extends Component {
     	    	    new Edge(20, 26, 14),// Memphis - Kansas City
     	    	    new Edge(20, 21, 15),// Memphis - Oklahoma City
     	    	    new Edge(20, 18, 15),// Memphis - DallasFort_Worth
-    	    	    new Edge(22, 16, 9), // St Louis - Nashville
+    	    	    new Edge(22, 12, 9), // St Louis - Nashville
     	    	    new Edge(22, 23, 8), // St Louis - Indianapolis
     	    	    new Edge(22, 24, 9), // St Louis - Chicago
     	    	    new Edge(22, 26, 8), // St Louis - Kansas City

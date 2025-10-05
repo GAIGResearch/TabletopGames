@@ -855,9 +855,9 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
         //players.add(new RandomPlayer());
     //    players.add(new RandomPlayer());
     //    players.add(new BasicMCTSPlayer());
@@ -873,7 +873,7 @@ public class Game {
 
 
 
-         //players.add(new HumanGUIPlayer(ac));
+         players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
     //    players.add(new HumanConsolePlayer());
