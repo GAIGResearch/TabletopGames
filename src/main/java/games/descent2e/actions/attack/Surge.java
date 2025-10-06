@@ -90,7 +90,9 @@ public enum Surge {
     SUBDUE(1, (a, s) -> a.setSubdue(true)),
     BLOOD_CALL(1, (a, s) -> a.setLeeching(true)),
     WITHER(1, (a, s) -> a.addFatigueDamage(1)),
-    KNOCKBACK(1, (a, s) -> a.addInterruptAttack(s, Knockback.name + ":3"));
+    KNOCKBACK_1(1, (a, s) -> a.addInterruptAttack(s, Knockback.name + ":1")),
+    KNOCKBACK_2(1, (a, s) -> a.addInterruptAttack(s, Knockback.name + ":2")),
+    KNOCKBACK_3(1, (a, s) -> a.addInterruptAttack(s, Knockback.name + ":3"));
 
     private final BiConsumer<MeleeAttack, DescentGameState> lambda;
     private final int surgesUsed;
