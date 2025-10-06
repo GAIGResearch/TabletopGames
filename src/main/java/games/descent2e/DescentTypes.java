@@ -164,6 +164,7 @@ public class DescentTypes {
         Lurk,
         CounterAttack,
         Brute,
+        FatigueOnKill,
         AdjacentLineOfSight,
         Helmet,
         ShieldMinimum,

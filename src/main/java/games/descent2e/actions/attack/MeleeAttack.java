@@ -152,6 +152,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (defender.hasBonus(DescentTypes.SkillBonus.Lurk))
             addLurkDice(state);
 
+        // Remove the Shadow Rune bonus at the start of the attack - we'll reapply it later before rolling the attack
+        if (attacker.hasBonus(DescentTypes.SkillBonus.FatigueOnKill))
+            attacker.removeBonus(DescentTypes.SkillBonus.FatigueOnKill);
+
         // Check if the target has the Shadow passive and if we are adjacent to it
         // If we are, the Hero must spend a Surge on Shadow to hit it
         // Only need to check once for all Monsters
@@ -485,6 +489,25 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                                         }
                                     }
                                 }
+
+                                // Shield of the Dark God (Hero Relic)
+                                case "ShieldDarkGod" -> {
+
+                                }
+
+                                // Shield of Zorek's Favor (Overlord Relic)
+                                case "ShieldZoreksFavor" -> {
+                                    if(!isAttacker)
+                                        state.addInterruptAttack("Zorek's Favor");
+                                }
+
+                                // The Shadow Rune (Hero Relic)
+                                case "FatigueOnKill" -> {
+                                    if(isAttacker) {
+                                        if (!f.hasBonus(DescentTypes.SkillBonus.FatigueOnKill))
+                                            f.addBonus(DescentTypes.SkillBonus.FatigueOnKill);
+                                    }
+                                }
                             }
                         }
                     }
@@ -566,6 +589,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         if (startingHealth - damage <= 0) {
+
+            // The Shadow Rune (Hero Relic)
+            if (attacker.hasBonus(DescentTypes.SkillBonus.FatigueOnKill)) {
 
             result += "Kill; Damage: " + damage + "; Range: " + range;
 
