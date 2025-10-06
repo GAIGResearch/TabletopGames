@@ -298,12 +298,16 @@ public class DescentHeroView extends ComponentView {
 
                 Property action = rectToCardMap.get(r).getProperty("action");
                 if (action != null) {
-                    toolTip += "Action: " + action;
+                    toolTip += action;
                 }
                 Property passive = rectToCardMap.get(r).getProperty("passive");
                 if (passive != null) {
-                    toolTip += "Passive: " + passive;
+                    if (action != null) toolTip += " ";
+                    toolTip += passive;
                 }
+
+                if (toolTip.contains(";Effect:"))
+                    toolTip = toolTip.split(";Effect:")[0];
 
                 return toolTip;
             }

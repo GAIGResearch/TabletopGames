@@ -154,26 +154,25 @@ public class DescentForwardModel extends StandardForwardModel {
             figure.setProperty(new PropertyString("class", heroClass.name()));
 
             // Assign starting skills and equipment from chosen class
+            // Equipping them also sets up Surge abilities
             Deck<Card> classDeck = _data.findDeck(heroClass.name());
             for (Card c : classDeck.getComponents()) {
                 if (((PropertyInt) c.getProperty(xpHash)).value <= figure.getAttribute(Figure.Attribute.XP).getValue()) {
                     figure.equip(new DescentCard(c));
                 }
             }
-            // After equipping, set up abilities
-            figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
-                    .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
+
             // All Heroes have a Surge action of Recover 1 Fatigue
             figure.addAbility(new SurgeAttackAction(Surge.RECOVER_1_FATIGUE, figure.getComponentID()));
-            // figure.addAbility(new SurgeAttackAction(Surge.BLAST, figure.getComponentID()));
 
+            // This is now handled by equipping the items, no need for it to be here as well
             // Set up abilities from other equipment
-            List<DescentAction> passiveActions = getOtherEquipmentActions(figure);
+            /*List<DescentAction> passiveActions = getOtherEquipmentActions(figure);
             if (!passiveActions.isEmpty()) {
                 for (DescentAction act : passiveActions) {
                     figure.addAbility(act);
                 }
-            }
+            }*/
 
             // Enable the Heroic Feat
             figure.setFeatAvailable(true);

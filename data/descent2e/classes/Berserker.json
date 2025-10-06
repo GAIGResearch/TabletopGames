@@ -57,7 +57,7 @@
         "XP": ["Integer", 2],
         "fatigue": ["Integer", 0],
         "exhaust": ["Boolean", false],
-        "passive": ["String", "Each time you perform an attack with either 1 Melee weapon with 2 Hand icons or 2 Melee weapons with 1 hand icon each, you may exhaust this card to add 1 Surge to the results."]
+        "action": ["String", "Each time you perform an attack with either 1 Melee weapon with 2 Hand icons or 2 Melee weapons with 1 hand icon each, you may exhaust this card to add 1 Surge to the results."]
       },
       {
         "name": ["String","Whirlwind"],
