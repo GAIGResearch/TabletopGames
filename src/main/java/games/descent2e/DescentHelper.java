@@ -8,6 +8,8 @@ import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.archetypeskills.GhostArmor;
 import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.actions.attack.Surge;
+import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.items.*;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.searchcards.UseWardingTalisman;
@@ -1127,6 +1129,22 @@ public class DescentHelper {
         PropertyStringArray type = ((PropertyStringArray) item.getProperty("equipSlots"));
         if (type == null) return;
 
+        if (type.getValues()[0].contains("hand")) {
+            PropertyStringArray surges = ((PropertyStringArray) item.getProperty("weaponSurges"));
+            if (surges != null) {
+                for (Surge surge : item.getWeaponSurges()) {
+                    SurgeAttackAction s = new SurgeAttackAction(surge, f.getComponentID());
+                    if (equipping) {
+                        f.addAbility(s);
+                    }
+                    else {
+                        if (f.hasAbility(s))
+                            f.removeAbility(s);
+                    }
+                }
+            }
+        }
+
         // Obtain the action, or passive, property of the Item
         PropertyString action = (PropertyString) item.getProperty("action");
         if (action == null) {
@@ -1143,6 +1161,21 @@ public class DescentHelper {
             String[] split = effect.split(":");
 
             switch (split[1]) {
+
+                case "Reroll" -> {
+                    DescentAction reroll = null;
+                    if (split[2].contains("AttributeTest"))
+                        reroll = new RerollAttributeTest(f.getComponentID(), item.getComponentID());
+                    if (reroll != null) {
+                        if (equipping) {
+                            if (!f.hasAbility(reroll))
+                                f.addAbility(reroll);
+                        } else {
+                            if (f.hasAbility(reroll))
+                                f.removeAbility(reroll);
+                        }
+                    }
+                }
 
                 case "Surge" -> {
                     AddSurge addSurge = new AddSurge(f.getComponentID(), item.getComponentID());
