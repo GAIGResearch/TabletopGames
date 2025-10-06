@@ -196,22 +196,59 @@ public class PowerGridGameState extends AbstractGameState {
 
 	@Override
 	protected double _getHeuristicScore(int playerId) {
-		// TODO Auto-generated method stub
-		return 0;
+	    return new PowerGridHeuristic().evaluateState(this, playerId);
 	}
 
 	@Override
 	public double getGameScore(int playerId) {
-		// TODO Auto-generated method stub
-		return 0;
+		return cityCountByPlayer[playerId];
 	}
 
 	@Override
 	protected boolean _equals(Object o) {
-		// TODO Auto-generated method stub
-		return false;
-		
+	    if (this == o) return true;
+	    if (!(o instanceof PowerGridGameState other)) return false;
+
+	    // Components / markets
+	    if (!Objects.equals(gameMap, other.gameMap)) return false;
+	    if (!Objects.equals(resourceMarket, other.resourceMarket)) return false;
+	    if (!Objects.equals(resourceDiscardPile, other.resourceDiscardPile)) return false;
+	    if (!Objects.equals(drawPile, other.drawPile)) return false;
+	    if (!Objects.equals(currentMarket, other.currentMarket)) return false;
+	    if (!Objects.equals(futureMarket, other.futureMarket)) return false;
+
+	    // Orders & sets
+	    if (!Objects.equals(turnOrder, other.turnOrder)) return false;
+	    if (!Objects.equals(roundOrder, other.roundOrder)) return false;
+	    if (!Objects.equals(bidOrder, other.bidOrder)) return false;
+	    if (!Objects.equals(plantsRan, other.plantsRan)) return false;
+
+	    // Scalars
+	    if (turnOrderIndex != other.turnOrderIndex) return false;
+	    if (discountCard != other.discountCard) return false;
+	    if (step != other.step) return false;
+	    if (auctionPlantNumber != other.auctionPlantNumber) return false;
+	    if (currentBid != other.currentBid) return false;
+	    if (currentBidder != other.currentBidder) return false;
+
+	    // Arrays
+	    if (!Arrays.equals(playerMoney, other.playerMoney)) return false;
+	    if (!Arrays.equals(poweredCities, other.poweredCities)) return false;
+	    if (!Arrays.equals(cityCountByPlayer, other.cityCountByPlayer)) return false;
+	    if (!Arrays.deepEquals(citySlotsById, other.citySlotsById)) return false;
+
+	    // Arrays of maps / decks
+	    if (!Arrays.equals(fuelByPlayer, other.fuelByPlayer)) return false;
+	    if (!Arrays.equals(ownedPlantsByPlayer, other.ownedPlantsByPlayer)) return false;
+
+	    // Regions / city sets
+	    if (!Objects.equals(activeRegions, other.activeRegions)) return false;
+	    if (!Objects.equals(validCities, other.validCities)) return false;
+	    if (!Objects.equals(invalidCities, other.invalidCities)) return false;
+
+	    return true;
 	}
+
 	
 	@SuppressWarnings("unchecked")
 	public void initFuelStorage() {
@@ -421,8 +458,11 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 	
 	public int getCurrentBid() {
+		
 		return currentBid; 
 	}
+	
+
 	
 	public void setCurrentBid(int newBid, int playerId) {
 		this.currentBid = newBid;
@@ -440,9 +480,7 @@ public class PowerGridGameState extends AbstractGameState {
 	public Integer checkNextBid(int playerID) {
 	    int startIndex = turnOrder.indexOf(playerID);
 	    if (startIndex == -1) {
-	    	System.out.println(bidOrder);
-	    	System.out.println("Player" + playerID +  "Not in BidOrder");
-	        return null; // player not in bidOrder
+	        return null;
 	    }
 
 	    int size = bidOrder.size();
@@ -456,9 +494,6 @@ public class PowerGridGameState extends AbstractGameState {
 	            return candidate;  // first eligible player
 	        }
 	    }
-	    System.out.println("Current player " +  playerID);
-	    
-
 	    return playerID;
 	}
 	
@@ -592,7 +627,7 @@ public class PowerGridGameState extends AbstractGameState {
         plantsRan.clear();
     }
     
-    public int numberOfPoweredCities(int playerId) {
+    public int getPoweredCities(int playerId) {
         return this.poweredCities[playerId];
     }
 
@@ -691,7 +726,17 @@ public class PowerGridGameState extends AbstractGameState {
 	    // If not found in either, return null
 	    return false;
 	}
+    public int getPlayerCapacity(int playerId) {
+    	int capacity = 0; 
+    	for (PowerGridCard card : this.getPlayerPlantDeck(playerId)) {
+    		capacity += card.getCapacity(); 
+    	}
+    	return capacity; 
+    }
     
+    public int totalMoney() {
+    	return Arrays.stream(playerMoney).sum();  	
+    }
 }
 
 

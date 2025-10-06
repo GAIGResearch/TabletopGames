@@ -11,7 +11,7 @@ import games.powergrid.components.PowerGridCard;
 
 public class PowerGridParameters extends AbstractParameters{
 	public static final String CARD_ASSET_PATH = "data/powergrid";
-	public enum Resource { COAL,  GAS, OIL, URANIUM} //TODO implement None Type resource
+	public enum Resource { COAL,  GAS, OIL, URANIUM}
 	public enum PlantType { COAL, GAS, OIL, URANIUM, HYBRID, GREEN }
 
     public enum Step { STEP1, STEP2, STEP3 }

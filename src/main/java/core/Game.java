@@ -856,20 +856,20 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
         //players.add(new RandomPlayer());
-    //    players.add(new RandomPlayer());
-    //    players.add(new BasicMCTSPlayer());
+        //players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
+        //players.add(new BasicMCTSPlayer());
         //players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
+        //players.add(new RMHCPlayer());
 
-        // RMHCParams params = new RMHCParams();
-        // params.horizon = 15;
-        // params.discountFactor = 0.99;
-        // params.heuristic = AbstractGameState::getHeuristicScore;
-//        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
-//        players.add(rmhcPlayer);
+        //RMHCParams params = new RMHCParams();
+        //params.horizon = 15;
+        //params.discountFactor = 0.99;
+        //params.heuristic = AbstractGameState::getHeuristicScore;
+        //AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
+        //players.add(rmhcPlayer);
 
 
 
@@ -886,10 +886,10 @@ public class Game {
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
-        List<GameType> games = java.util.Collections.singletonList(GameType.Root);
+        List<GameType> games = java.util.Collections.singletonList(GameType.PowerGrid);
        //games.add(Connect4);
         long seedForBatch = 100L;
-        int gamesToRun    = 200;
+        int gamesToRun    = 100;
      // earlier in main:
         //boolean useGUI = Utils.getArg(args, "gui", true);
         //int turnPause  = Utils.getArg(args, "turnPause", 100);
@@ -897,7 +897,7 @@ public class Game {
 
 
         // If your Game.runMany has this signature:
-        //   runMany(List<GameType> games, List<AbstractPlayer> players, long seed, int nGames,
+          //runMany(List<GameType> games, List<AbstractPlayer> players, long seed, int nGames,
 //                   boolean verbose, boolean stopOnError, ActionController ac, int turnPause)
 
         //Game.runMany(games, players, seedForBatch, gamesToRun, false, false, null, turnPause);

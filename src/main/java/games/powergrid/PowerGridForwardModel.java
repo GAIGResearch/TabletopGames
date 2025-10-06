@@ -224,8 +224,9 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	
 	private void onEnterPhase(PowerGridGameState state, PowerGridGamePhase phase) {
 	    switch (phase) {
-	        case PLAYER_ORDER -> {buildTurnOrder(state);
+	        case PLAYER_ORDER -> {buildTurnOrder(state);        			  
 	        					advancePhase(state);
+	        					state.clearPoweredCities();
 	        					endRound(state, state.getTurnOwner());
 	        						
 	        }
@@ -247,7 +248,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 			        	Collections.reverse(state.getRoundOrder());
 			        	state.setTurnOwner(order.get(0));
 	        }
-	        case BUREAUCRACY ->{state.resetPlantsRan();
+	        case BUREAUCRACY ->{state.resetPlantsRan();        					
 	        					if(state.getStep() == 1 && state.stepTwoTrigger()){//no plants have been run yet 
 	        						state.setStep(2);
 	        						state.getCurrentMarket().draw(); //remove lowest card 
@@ -264,16 +265,15 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    switch (phase) {
 	    	case AUCTION ->{}
 	    	case RESOURCE_BUY->{}
-	        case BUILD -> { PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
-	        				if(state.getMaxCitiesOwned() >= params.citiesToTriggerEnd[state.getNPlayers()-1]) {
-	        					state.setGameStatus(CoreConstants.GameResult.GAME_END); }
-	        }
+	        case BUILD -> {}
+	        
 	        case BUREAUCRACY -> { 
-	        					if(state.getGameStatus() == CoreConstants.GameResult.GAME_END) {
-	        						endGame(state);
+	        					PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
+	        					if(state.getMaxCitiesOwned() >= params.citiesToTriggerEnd[state.getNPlayers()-1]) {
+	        						state.setGameStatus(CoreConstants.GameResult.GAME_END);
+	        					    return; 
 	        					}
 	        					awardIncome(state);
-	        					PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 	        					state.getResourceMarket().refill(params, state.getStep(), state.getNPlayers(), false);
 	        					if(state.getStep()!=3) {
 	        						PowerGridCard largestCard = state.getFutureMarket().pickLast();
@@ -295,14 +295,17 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 
 	public void advancePhase(AbstractGameState gameState) {
+
 		PowerGridGameState s = (PowerGridGameState) gameState;
 	    s.resetRoundOrderNextPhase(); //rest the round turn order based on the global turn order
 	    endPlayerTurn(s, s.getCurrentPlayer()); //
 	    PowerGridGameState.PowerGridGamePhase current = (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase(); //get the current phase from the state 
 	    onExitPhase(s, current); //clean up actions for leaving a phase 
+	    if (s.getGameStatus() == CoreConstants.GameResult.GAME_END) return;
 	    PowerGridGameState.PowerGridGamePhase next = current.next(); // get the next phase by calling next on the phase class in parameters 
 	    gameState.setGamePhase(next); //set the phase in state to next 
 	    onEnterPhase(s, next); //perfroms ations that need to be taken prior to the next phase 
+	   
 	    
 	   
 	}
@@ -328,16 +331,16 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     @Override
 	protected void endGame(AbstractGameState gs) {
         PowerGridGameState state = (PowerGridGameState) gs;
+		state.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winner = 0;
         int highestCities = -1;
         int highestMoney = -1;
 
         for (int i = 0; i < state.getNPlayers(); i++) {
-            int poweredCities = state.numberOfPoweredCities(i);
+            int poweredCities = state.getPoweredCities(i);
             int money = state.getPlayersMoney(i);
 
-            if (poweredCities > highestCities ||
-                (poweredCities == highestCities && money > highestMoney)) {               
+            if (poweredCities > highestCities ||(poweredCities == highestCities && money > highestMoney)) {               
                 winner = i;
                 highestCities = poweredCities;
                 highestMoney = money;
@@ -347,12 +350,13 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             gs.setPlayerResult(LOSE_GAME, i);
         }
         gs.setPlayerResult(WIN_GAME, winner);
+        System.out.println("The winner is " + winner + " with " + highestCities + " cities and $" + highestMoney);
     }
 
 	
 	private static void awardIncome(PowerGridGameState s) {
 	    for (int p = 0; p < s.getNPlayers(); p++) {    	
-	        int powered = Math.min(s.numberOfPoweredCities(p), PowerGridParameters.INCOME_TRACK.length - 1);
+	        int powered = Math.min(s.getPoweredCities(p), PowerGridParameters.INCOME_TRACK.length - 1);
 	        s.increasePlayerMoney(p, PowerGridParameters.INCOME_TRACK[powered]);
 	    }
 	}
@@ -659,7 +663,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             sortMarket(future);
         }
 
-        s.printMarkets();
+        //s.printMarkets();
     }
 
 
