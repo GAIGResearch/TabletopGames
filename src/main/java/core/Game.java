@@ -856,11 +856,11 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
         //players.add(new RandomPlayer());
         //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        //players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
         //players.add(new OSLAPlayer());
         //players.add(new RMHCPlayer());
 

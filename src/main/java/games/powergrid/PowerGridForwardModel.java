@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.IntStream;
-
-import com.google.iam.v1.AuditConfigDelta.Action;
 
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -23,13 +20,10 @@ import core.components.Deck;
 import games.powergrid.PowerGridGameState.PowerGridGamePhase;
 import core.interfaces.ITreeActionSpace;
 import games.powergrid.PowerGridParameters.Resource;
-import games.powergrid.PowerGridParameters.Step;
 import games.powergrid.actions.AuctionPowerPlant;
 import games.powergrid.actions.BuildGenerator;
 import games.powergrid.actions.BuyResource;
-import games.powergrid.actions.IncreaseBid;
 import games.powergrid.actions.PassAction;
-import games.powergrid.actions.PassBid;
 import games.powergrid.actions.RunPowerPlant;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridCard.Type;
@@ -43,12 +37,9 @@ import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.LinkedHashSet;
 
-import static core.CoreConstants.GameResult.DRAW_GAME;
-import static core.CoreConstants.GameResult.GAME_END;
 import static core.CoreConstants.GameResult.LOSE_GAME;
 import static core.CoreConstants.GameResult.WIN_GAME;
 import static core.CoreConstants.VisibilityMode.*;
-import static games.root.RootParameters.VictoryCondition.Score;
 
 
 public class PowerGridForwardModel extends StandardForwardModel implements ITreeActionSpace {
@@ -65,6 +56,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.setResourceMarket(new PowerGridResourceMarket());
 		state.resourceMarket.setUpMarket(params.startinResources);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
 		state.initFuelStorage(); 
+		state.setIncome(new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0)));
 		state.setStep(1);
 		state.setDrawPile(setupDecks(params,state.getNPlayers(), state.getRnd()));
 		state.setCurrentMarket(new Deck<>("currentMarket", VISIBLE_TO_ALL));
@@ -358,6 +350,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    for (int p = 0; p < s.getNPlayers(); p++) {    	
 	        int powered = Math.min(s.getPoweredCities(p), PowerGridParameters.INCOME_TRACK.length - 1);
 	        s.increasePlayerMoney(p, PowerGridParameters.INCOME_TRACK[powered]);
+	        s.setPlayerIncome(p,PowerGridParameters.INCOME_TRACK[powered]);
 	    }
 	}
 

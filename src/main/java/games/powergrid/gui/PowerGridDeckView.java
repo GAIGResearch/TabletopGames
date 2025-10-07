@@ -73,6 +73,4 @@ public class PowerGridDeckView extends DeckView<PowerGridCard> {
         return card != null && auctionPlantNumber != null && card.number == auctionPlantNumber.intValue();
     }
     
-
-    
 }

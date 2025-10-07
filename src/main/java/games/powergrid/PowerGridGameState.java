@@ -33,9 +33,11 @@ public class PowerGridGameState extends AbstractGameState {
     private List<Integer> roundOrder = new ArrayList<>();
     private List<Integer> bidOrder = new ArrayList<>();
     private Set<Integer> plantsRan = new HashSet<>();
+    private List<Integer> income = new ArrayList<>();
     
-    
-    private int turnOrderIndex = 0;
+  
+
+	private int turnOrderIndex = 0;
     private int[] playerMoney;
     private int discountCard; 
     private int[] poweredCities; 
@@ -134,6 +136,7 @@ public class PowerGridGameState extends AbstractGameState {
         copy.roundOrder      = new ArrayList<>(this.roundOrder);
         copy.bidOrder        = new ArrayList<>(this.bidOrder);
         copy.plantsRan       = (this.plantsRan == null) ? null : new HashSet<>(this.plantsRan);
+        copy.income			 = 	new ArrayList<>(this.income);
 
         // Auction/bid state
         copy.auctionPlantNumber = this.auctionPlantNumber;
@@ -291,6 +294,19 @@ public class PowerGridGameState extends AbstractGameState {
 	void setTurnOrder(List<Integer> newOrder) {
 		turnOrder = new ArrayList<>(newOrder);
 		turnOrderIndex = 0; 
+		}
+	
+	  public Integer getIncome(int playerId) {
+			return income.get(playerId);
+		}
+
+
+		public void setIncome(List<Integer> income) {
+			this.income = income;
+		}
+		
+		public void setPlayerIncome(int playerId, int money) {
+		    income.set(playerId, money);  
 		}
 	
 	public List<Integer> getRoundOrder() {

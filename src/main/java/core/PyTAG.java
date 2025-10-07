@@ -9,6 +9,7 @@ import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.diamant.DiamantFeatures;
 import games.loveletter.features.LLStateFeaturesReduced;
+import games.powergrid.PowerGridFeatures;
 import games.stratego.StrategoFeatures;
 import games.sushigo.SGFeatures;
 import games.tictactoe.TTTFeatures;
@@ -31,7 +32,8 @@ enum FeatureExtractors {
     Stratego(StrategoFeatures.class, null),
     SushiGo(null, SGFeatures.class),
     TicTacToe(TTTFeatures.class, TTTFeatures.class),
-    Diamant(DiamantFeatures.class, DiamantFeatures.class);
+    Diamant(DiamantFeatures.class, DiamantFeatures.class),
+	PowerGrid(PowerGridFeatures.class, PowerGridFeatures.class); //gets both the JSON and Vector observation 
     Class<? extends IStateFeatureVector> stateFeatureVector;
     Class<? extends IStateFeatureJSON> stateFeatureJSON;
     FeatureExtractors(Class<? extends IStateFeatureVector> stateFeatureVector, Class<? extends IStateFeatureJSON> stateFeatureJSON) {

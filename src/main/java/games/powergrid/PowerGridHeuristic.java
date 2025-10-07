@@ -62,7 +62,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 
 public static double capacityCityMatchScore(int capacity, int cities) {
 	    // If no cities, don't penalize (nothing to power).
-	    if (cities <= 0) return 1.0;
+	    if (cities <= 0) return 0.0;
 	
 	    // Ratio centered at 1.0
 	    double ratio = capacity / (double) cities;
@@ -71,7 +71,7 @@ public static double capacityCityMatchScore(int capacity, int cities) {
 	    // Width of the bell curve (standard deviation in ratio-space).
 	    // Larger tauOver => gentler penalty for surplus.
 	    // Smaller tauUnder => stronger penalty for shortage.
-	    double tauOver  = 0.60; // surplus capacity -> slight penalty
+	    double tauOver  = 0.90; // surplus capacity -> slight penalty
 	    double tauUnder = 0.30; // shortage       -> stronger penalty
 	
 	    double tau = dx >= 0 ? tauOver : tauUnder;
