@@ -164,7 +164,6 @@ public class DescentTypes {
         Lurk,
         CounterAttack,
         Brute,
-        FatigueOnKill,
         AdjacentLineOfSight,
         Helmet,
         ShieldMinimum,
@@ -172,7 +171,9 @@ public class DescentTypes {
         SpeedLimit_3,
         SpeedLimit_4,
         DoubleMovePenalty,
-        FatiguePenalty;
+        FatiguePenalty,
+        FatigueOnKill,
+        ZoreksFavor;
     }
 
     public enum DescentToken {

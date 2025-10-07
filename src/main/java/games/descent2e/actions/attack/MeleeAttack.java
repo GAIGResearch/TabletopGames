@@ -15,10 +15,7 @@ import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.archetypeskills.*;
-import games.descent2e.actions.items.RerollAttackDice;
-import games.descent2e.actions.items.RerollDarkGodShield;
-import games.descent2e.actions.items.RerollShield;
-import games.descent2e.actions.items.Shield;
+import games.descent2e.actions.items.*;
 import games.descent2e.actions.monsterfeats.*;
 import games.descent2e.components.*;
 import utilities.Vector2D;
@@ -155,9 +152,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (defender.hasBonus(DescentTypes.SkillBonus.Lurk))
             addLurkDice(state);
 
-        // Remove the Shadow Rune bonus at the start of the attack - we'll reapply it later before rolling the attack
+        // Remove the Shadow Rune and Zorek's Favor bonuses at the start of the attack
+        // We'll reapply them later before rolling the attack
         if (attacker.hasBonus(DescentTypes.SkillBonus.FatigueOnKill))
             attacker.removeBonus(DescentTypes.SkillBonus.FatigueOnKill);
+        if (defender.hasBonus(DescentTypes.SkillBonus.ZoreksFavor))
+            defender.removeBonus(DescentTypes.SkillBonus.ZoreksFavor);
 
         // Check if the target has the Shadow passive and if we are adjacent to it
         // If we are, the Hero must spend a Surge on Shadow to hit it
@@ -507,8 +507,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
                                 // Shield of Zorek's Favor (Overlord Relic)
                                 case "ShieldZoreksFavor" -> {
-                                    if(!isAttacker)
-                                        state.addInterruptAttack("Zorek's Favor");
+                                    if (!isAttacker) {
+                                        if (!f.hasBonus(DescentTypes.SkillBonus.ZoreksFavor))
+                                            f.addBonus(DescentTypes.SkillBonus.ZoreksFavor);
+                                    }
                                 }
 
                                 // The Shadow Rune (Hero Relic)
@@ -1063,11 +1065,20 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                                     interruptAttacks.add(extraDamage);
                             }
                         }
-                        continue;
                     }
                 }
 
                 // We apply these interruptions after the Attack has been fully completed
+                if (interruptAttacks.isEmpty()) {
+                    if (target.hasBonus(DescentTypes.SkillBonus.ZoreksFavor)) {
+                        ZoreksFavor favor = new ZoreksFavor(defendingFigure, attackingFigure);
+                        if (favor.canExecute(state)) {
+                            interruptAttacks.add(favor);
+                            return interruptAttacks;
+                        }
+                    }
+                }
+
                 if (interruptAttacks.isEmpty()) {
                     if (target.hasBonus(DescentTypes.SkillBonus.CounterAttack)) {
                         CounterAttack counterAttack = new CounterAttack(defendingFigure, attackingFigure);
