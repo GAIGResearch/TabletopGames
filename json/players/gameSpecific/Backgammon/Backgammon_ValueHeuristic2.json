@@ -1,0 +1,34 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "rolloutTermination" : "END_TURN",
+  "rolloutLength" : 0,
+  "MAST" : "Both",
+  "rolloutType" : "MAST",
+  "heuristic" : {
+    "features" : {
+      "features" : [
+      ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.backgammon.BGStateFeatures"
+      },
+      "class" : "evaluation.features.AutomatedFeatures"
+    },
+    "coefficients" : {
+      "BorneOff" : 2.55,
+      "BIAS" : -1.30e-13,
+      "PiecesOnBoard_Opp" : -0.0804,
+      "PiecesOnBoard" : 0.0804,
+      "BorneOff_Opp" : -2.55
+    },
+    "class" : "players.heuristics.LinearStateHeuristic",
+    "defaultHeuristic" : {
+      "class" : "players.heuristics.LeaderHeuristic"
+    }
+  },
+  "class" : "players.mcts.MCTSParams",
+  "maxTreeDepth" : 3,
+  "budget" : -999,
+  "reuseTree" : true
+}
