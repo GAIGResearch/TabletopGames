@@ -173,7 +173,8 @@ public class DescentTypes {
         DoubleMovePenalty,
         FatiguePenalty,
         FatigueOnKill,
-        ZoreksFavor;
+        ZoreksFavor,
+        ScorpionsKiss;
     }
 
     public enum DescentToken {

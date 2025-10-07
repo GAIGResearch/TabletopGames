@@ -20,6 +20,7 @@ import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
 import games.descent2e.actions.items.EquipItem;
+import games.descent2e.actions.items.ScorpionsKiss;
 import games.descent2e.actions.items.TradeItem;
 import games.descent2e.actions.monsterfeats.Land;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
@@ -1083,6 +1084,16 @@ public class DescentForwardModel extends StandardForwardModel {
                     actions.addAll(monsterActions);
                     attacks.addAll(monsterActions);
                 }
+
+                // Scorpion's Kiss (Overlord Relic)
+                if (actingFigure.hasBonus(SkillBonus.ScorpionsKiss)) {
+                    for (Hero hero : dgs.getHeroes()) {
+                        ScorpionsKiss scorpionsKiss = new ScorpionsKiss(actingFigure.getComponentID(), hero.getComponentID());
+                        if (scorpionsKiss.canExecute(dgs))
+                            actions.add(scorpionsKiss);
+                    }
+                }
+
             }
 
             // - Special (specified by quest)
