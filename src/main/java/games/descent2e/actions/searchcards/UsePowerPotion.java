@@ -16,8 +16,11 @@ import games.descent2e.components.DescentCard;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
+import org.apache.spark.sql.sources.In;
 
 import java.util.*;
+
+import static games.descent2e.DescentHelper.getDiceCombinations;
 
 public class UsePowerPotion extends DescentAction implements IExtendedSequence {
     int userID;
@@ -61,7 +64,7 @@ public class UsePowerPotion extends DescentAction implements IExtendedSequence {
         DescentGameState dgs = (DescentGameState) state;
         List<DescentDice> dice = dgs.getAttackDicePool().getComponents();
 
-        List<List<Integer>> combinations = getDiceCombinations(dgs, dice);
+        List<List<Integer>> combinations = getDiceCombinations(dice);
 
         for (List<Integer> combo : combinations)
         {
@@ -76,35 +79,6 @@ public class UsePowerPotion extends DescentAction implements IExtendedSequence {
         finish.addAll(retVal);
 
         return finish;
-    }
-
-    public List<List<Integer>> getDiceCombinations(DescentGameState dgs, List<DescentDice> dice) {
-        List<Integer> diceIndex = new ArrayList<>();
-        for (DescentDice die : dice) {
-            diceIndex.add(dice.indexOf(die));
-        }
-        List<List<Integer>> retVal = new ArrayList<>();
-
-        for (int i = 0; i < diceIndex.size(); i++)
-        {
-            List<Integer> combos = new ArrayList<>();
-            getCombinations(0, i+1, combos, retVal, diceIndex);
-        }
-        return retVal;
-    }
-
-    public void getCombinations(int index, int max, List<Integer> combos, List<List<Integer>> retVal, List<Integer> indexToTrack) {
-        if (combos.size() == max) {
-            retVal.add(new ArrayList<>(combos));
-            return;
-        }
-
-        for (int i = index; i < indexToTrack.size(); i++)
-        {
-            combos.add(indexToTrack.get(i));
-            getCombinations(i+1, max, combos, retVal, indexToTrack);
-            combos.remove(combos.size() - 1);
-        }
     }
 
     @Override

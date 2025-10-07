@@ -1385,7 +1385,37 @@ public class DescentHelper {
             else
                 f.removeBonus(DescentTypes.SkillBonus.Helmet);
         }
+    }
 
+    // Used for getting combinations of Dice (for rerolling some or all of Defence Dice for shields, etc.)
+    public static List<List<Integer>> getDiceCombinations(List<DescentDice> dice) {
+        List<Integer> diceIndex = new ArrayList<>();
 
+        for (DescentDice die : dice) {
+            diceIndex.add(dice.indexOf(die));
+        }
+
+        List<List<Integer>> retVal = new ArrayList<>();
+
+        for (int i = 0; i < diceIndex.size(); i++) {
+            List<Integer> combos = new ArrayList<>();
+            getCombinations(0, i+1, combos, retVal, diceIndex);
+        }
+
+        return retVal;
+    }
+
+    private static void getCombinations(int index, int max, List<Integer> combos, List<List<Integer>> retVal, List<Integer> indexToTrack) {
+        if (combos.size() == max) {
+            retVal.add(new ArrayList<>(combos));
+            return;
+        }
+
+        for (int i = index; i < indexToTrack.size(); i++)
+        {
+            combos.add(indexToTrack.get(i));
+            getCombinations(i+1, max, combos, retVal, indexToTrack);
+            combos.remove(combos.size() - 1);
+        }
     }
 }

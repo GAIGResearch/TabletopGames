@@ -16,6 +16,7 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.archetypeskills.*;
 import games.descent2e.actions.items.RerollAttackDice;
+import games.descent2e.actions.items.RerollDarkGodShield;
 import games.descent2e.actions.items.RerollShield;
 import games.descent2e.actions.items.Shield;
 import games.descent2e.actions.monsterfeats.*;
@@ -23,6 +24,8 @@ import games.descent2e.components.*;
 import utilities.Vector2D;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.Triggers.*;
@@ -492,7 +495,14 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
                                 // Shield of the Dark God (Hero Relic)
                                 case "ShieldDarkGod" -> {
-
+                                    if (!isAttacker) {
+                                        List<List<Integer>> diceCombos = getDiceCombinations(state.getDefenceDicePool().getComponents());
+                                        for (List<Integer> combo : diceCombos) {
+                                            RerollDarkGodShield shield = new RerollDarkGodShield(figure, equipment.getComponentID(), combo);
+                                            if (!f.hasAbility(shield))
+                                                f.addAbility(shield);
+                                        }
+                                    }
                                 }
 
                                 // Shield of Zorek's Favor (Overlord Relic)
@@ -592,6 +602,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
             // The Shadow Rune (Hero Relic)
             if (attacker.hasBonus(DescentTypes.SkillBonus.FatigueOnKill)) {
+                addFatigueHeal(1);
+            }
 
             result += "Kill; Damage: " + damage + "; Range: " + range;
 
