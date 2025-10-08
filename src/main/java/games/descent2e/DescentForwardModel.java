@@ -51,6 +51,7 @@ import static games.descent2e.actions.monsterfeats.Air.removeAirImmunity;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
 import static games.descent2e.components.Figure.Attribute.Health;
+import static games.descent2e.components.Figure.Attribute.MovePoints;
 import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends StandardForwardModel {
@@ -395,6 +396,24 @@ public class DescentForwardModel extends StandardForwardModel {
                     PrayerOfPeace.removePrayerBonus(hero);
                 }
             }
+
+            // Check skills of neighbouring Figures
+            // e.g. Duskblade's -1 Speed penalty on initiation
+            for (BoardNode neighbour : dgs.getMasterBoard().getElement(h.getPosition()).getNeighbours().keySet()) {
+                int figID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
+                if (figID == -1) continue;
+                Figure f = (Figure) dgs.getComponentById(figID);
+
+                // Duskblade (Overlord Relic)
+                if (f.hasBonus(SkillBonus.Duskblade)) {
+                    if (!h.hasBonus(SkillBonus.SpeedPenalty)) {
+                        h.addBonus(SkillBonus.SpeedPenalty);
+                        if (h.getAttributeMax(MovePoints) > 1)
+                            h.getAttribute(MovePoints).setMaximum(h.getAttributeMax(MovePoints) - 1);
+                    }
+                }
+            }
+
         }
 
         /*

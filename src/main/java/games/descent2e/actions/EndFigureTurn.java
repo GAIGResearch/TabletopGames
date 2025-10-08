@@ -50,6 +50,12 @@ public class EndFigureTurn extends DescentAction{
         // If we are Immobilized, remove that condition now
         if(f.hasCondition(DescentTypes.DescentCondition.Immobilize)) { f.removeCondition(DescentTypes.DescentCondition.Immobilize); }
 
+        // Remove Start Of Turn Movement Penalties, e.g. Duskblade (Overlord Relic)
+        if(f.hasBonus(SpeedPenalty)) {
+            f.removeBonus(SpeedPenalty);
+            f.getAttribute(Figure.Attribute.MovePoints).setMaximum(f.getAttributeMax(Figure.Attribute.MovePoints) + 1);
+        }
+
         if (f instanceof Hero hero)
         {
             // If the Hero has rested, restore their Fatigue

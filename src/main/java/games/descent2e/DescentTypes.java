@@ -174,7 +174,9 @@ public class DescentTypes {
         FatiguePenalty,
         FatigueOnKill,
         ZoreksFavor,
-        ScorpionsKiss;
+        ScorpionsKiss,
+        Duskblade,
+        SpeedPenalty;
     }
 
     public enum DescentToken {

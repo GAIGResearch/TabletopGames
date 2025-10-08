@@ -1377,6 +1377,18 @@ public class DescentHelper {
                 }
             }
 
+                }
+
+                case "Duskblade" -> {
+                    if (equipping) {
+                        if (!f.hasBonus(DescentTypes.SkillBonus.Duskblade))
+                            f.addBonus(DescentTypes.SkillBonus.Duskblade);
+                    } else {
+                        if (f.hasBonus(DescentTypes.SkillBonus.Duskblade))
+                            f.removeBonus(DescentTypes.SkillBonus.Duskblade);
+                    }
+                }
+            }
         }
 
         if (List.of(((PropertyStringArray) item.getProperty("equipmentType")).getValues()).contains("Helmet")) {
