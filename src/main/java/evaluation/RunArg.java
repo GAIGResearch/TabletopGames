@@ -45,8 +45,8 @@ public enum RunArg {
             "metrics" + File.separator + "out",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
-            "\t For tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
-            "\t If a seedFile is specified, then this is ignored.",
+            "\t A tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
+            "\t If a seedFile is specified, then this argument is ignored.",
             0,
             new Usage[]{Usage.RunGames}),
     evalGames("The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)",
