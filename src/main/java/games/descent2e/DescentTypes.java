@@ -176,6 +176,7 @@ public class DescentTypes {
         ZoreksFavor,
         ScorpionsKiss,
         Duskblade,
+        BonesOfWoe,
         SpeedPenalty;
     }
 

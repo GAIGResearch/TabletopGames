@@ -480,6 +480,23 @@ public class DescentForwardModel extends StandardForwardModel {
             // Call for Regeneration for all monsters with that passive (realistically, only Sir Alric Farrow)
             regeneration(dgs.getMonsters());
 
+            // And this is where the Bones of Woe (Overlord Relic) would go
+            // If I actually implemented Overlord Cards into the game
+            // As it stands, it is completely useless as a Relic, because Cards are too disruptive
+            // I did have another branch where they are available, but I'd need to call that back in for this
+            for (List<Monster> monsters : dgs.getMonsters()) {
+                for (Monster monster : monsters) {
+                    if (monster.hasBonus(SkillBonus.BonesOfWoe)) {
+                        DicePool bonesOfWoe = DicePool.constructDicePool("BLUE");
+                        bonesOfWoe.roll(dgs.getRnd());
+                        if (bonesOfWoe.getSurge() >= 1) {
+                            System.out.println("Bones of Woe! Draw 1 Overlord Card!");
+                        }
+                    }
+                }
+            }
+
+
         } else {
             // Next Hero
             Figure nextActingFigure = dgs.heroes.get(dgs.heroActingNext);
