@@ -1375,8 +1375,13 @@ public class DescentHelper {
                         }
                     }
                 }
-            }
 
+                case "StaffOfLight" -> {
+                    StaffOfLight staff = new StaffOfLight();
+                    if (equipping)
+                        f.addAbility(staff);
+                    else
+                        f.removeAbility(staff);
                 }
 
                 case "Duskblade" -> {
