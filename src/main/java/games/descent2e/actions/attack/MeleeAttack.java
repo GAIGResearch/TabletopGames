@@ -1249,6 +1249,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         return pierce;
     }
 
+    public int getAttackingFigure()
+    {
+        return attackingFigure;
+    }
+
     public int getDefendingFigure()
     {
         return defendingFigure;

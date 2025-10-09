@@ -1166,6 +1166,8 @@ public class DescentHelper {
                     DescentAction reroll = null;
                     if (split[2].contains("AttributeTest"))
                         reroll = new RerollAttributeTest(f.getComponentID(), item.getComponentID());
+                    if (split[2].contains("Relic"))
+                        reroll = new FortunasDice(f.getComponentID(), item.getComponentID());
                     if (reroll != null) {
                         if (equipping) {
                             if (!f.hasAbility(reroll))
