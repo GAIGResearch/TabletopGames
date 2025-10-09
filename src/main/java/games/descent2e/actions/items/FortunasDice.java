@@ -46,12 +46,15 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
 
     @Override
     public boolean execute(DescentGameState dgs) {
+
+        Figure f = (Figure) dgs.getComponentById(userID);
+        f.addActionTaken(toString());
+
         if (diceID == -1) {
             dgs.setActionInProgress(this);
             return true;
         }
 
-        Figure f = (Figure) dgs.getComponentById(userID);
         DescentCard item = (DescentCard) dgs.getComponentById(itemID);
         f.exhaustCard(item);
         f.getAttribute(Figure.Attribute.Fatigue).increment();
@@ -59,8 +62,6 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
         DescentDice dice = getDice(dgs, diceID, diceType);
 
         dice.setFace(DescentHelper.reroll(dgs, dice));
-
-        f.addActionTaken(toString());
 
         return true;
     }
@@ -183,6 +184,14 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
         if (diceID == -1) {
             if (dgs.getActionsInProgress().isEmpty()) return false;
             if (f.isExhausted(item)) return false;
+
+            // Check that we aren't just going in a loop of wanting to use it, then declining using it
+            List<String> actions = f.getActionsTaken();
+            if (actions.size() > 1) {
+                if (actions.get(actions.size() - 2).contains("Fortuna's Dice"))
+                    if (actions.get(actions.size() - 1).contains("End "))
+                        return false;
+            }
             return (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum());
         }
 
@@ -203,7 +212,7 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
             case "DEFENCE" -> {
                 if (current instanceof MeleeAttack melee) {
                     if (melee.getDefendingFigure() == userID)
-                        return (melee.getPhase() == MeleeAttack.AttackPhase.POST_ATTACK_ROLL);
+                        return (melee.getPhase() == MeleeAttack.AttackPhase.POST_DEFENCE_ROLL);
                 }
             }
             case "ATTRIBUTE" -> {
