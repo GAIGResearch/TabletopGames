@@ -16,6 +16,7 @@ import games.descent2e.components.DescentCard;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
+import utilities.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,8 +115,7 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
         }
 
         // Just in case we decide against using Fortuna's Dice after all
-        if (!retVal.isEmpty())
-            retVal.add(new EndCurrentPhase());
+        retVal.add(new EndCurrentPhase());
 
         return retVal;
     }
@@ -184,15 +184,15 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
         if (diceID == -1) {
             if (dgs.getActionsInProgress().isEmpty()) return false;
             if (f.isExhausted(item)) return false;
+            if (f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) return false;
 
             // Check that we aren't just going in a loop of wanting to use it, then declining using it
-            List<String> actions = f.getActionsTaken();
-            if (actions.size() > 1) {
-                if (actions.get(actions.size() - 2).contains("Fortuna's Dice"))
-                    if (actions.get(actions.size() - 1).contains("End "))
-                        return false;
+            List<Pair<Integer, AbstractAction>> history = dgs.getHistory();
+            if (history.size() > 1) {
+                Pair<Integer, AbstractAction> previous = history.get(history.size() - 2);
+                return previous.a != f.getOwnerId() || !(previous.b instanceof FortunasDice);
             }
-            return (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum());
+            return true;
         }
 
         Stack<IExtendedSequence> actions = dgs.getActionsInProgress();
@@ -201,34 +201,10 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
         // As the general Fortuna's Dice request is already in progress, we need to check what the action it interrupted is
         IExtendedSequence current = actions.get(actions.size() - 2);
 
-        if ((getDice(dgs, diceID, diceType)) == null) return false;
-        switch(diceType) {
-            case "ATTACK" -> {
-                if (current instanceof MeleeAttack melee) {
-                    if (melee.getAttackingFigure() == userID)
-                        return (melee.getPhase() == MeleeAttack.AttackPhase.POST_ATTACK_ROLL);
-                }
-            }
-            case "DEFENCE" -> {
-                if (current instanceof MeleeAttack melee) {
-                    if (melee.getDefendingFigure() == userID)
-                        return (melee.getPhase() == MeleeAttack.AttackPhase.POST_DEFENCE_ROLL);
-                }
-            }
-            case "ATTRIBUTE" -> {
-                if (current instanceof AttributeTest test) {
-                    if (test.getTestingFigure() == userID)
-                        return (test.getPhase() == AttributeTest.TestPhase.POST_TEST_ROLL);
-                }
-            }
-            case "HEAL" -> {
-                return dgs.getActingFigure().getComponentID() == userID;
-            }
-            case "REVIVE" -> {
-                return dgs.getActingFigure().getComponentID() == userID;
-            }
-        }
-        return false;
+        DescentDice dice = (getDice(dgs, diceID, diceType));
+
+        if (dice == null) return false;
+        return canUse(dgs, current, dice);
     }
 
     public DescentDice getDice(DescentGameState dgs, int diceID, String diceType) {
@@ -255,5 +231,43 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
             }
         }
         return null;
+    }
+
+    protected boolean canUse(DescentGameState dgs, IExtendedSequence currentAction, DescentDice dice)
+    {
+        // For Defence and Test dice, we prevent rerolling if we got the best result they could get
+        // We don't do this for Attack dice or Healing dice as there are too many factors to consider why we reroll
+
+        if (currentAction instanceof MeleeAttack melee) {
+            // Always allow rerolling for valid attacks
+            if (melee.getAttackingFigure() == userID)
+                return melee.getPhase() == MeleeAttack.AttackPhase.POST_ATTACK_ROLL;
+
+            // Only allow rerolling for defending if we'd take damage
+            if (melee.getDefendingFigure() == userID) {
+                if (melee.getPhase() != MeleeAttack.AttackPhase.POST_DEFENCE_ROLL) return false;
+
+                // No point in rerolling if we got the best result possible
+                if (dice.isMaxShield()) return false;
+
+                // If the defender already has enough defence to block the attack, there's no point in exhausting the shield
+                int damage = dgs.getAttackDicePool().getDamage() + melee.getExtraDamage();
+                int defence = dgs.getDefenceDicePool().getShields() + melee.getExtraDefence() - melee.getPierce();
+                return damage > defence;
+            }
+        }
+
+        // For Attribute Tests, only allow if we failed the test
+        if (currentAction instanceof AttributeTest test) {
+            // There is no point in rerolling a die that already has the lowest result possible
+            if (dice.getShielding() == 0) return false;
+
+            if (test.getTestingFigure() != userID) return false;
+            Figure f = (Figure) dgs.getComponentById(userID);
+            int result = dgs.getAttributeDicePool().getShields();
+            return (result > f.getAttributeValue(test.getAttribute()));
+        }
+
+        return dgs.getActingFigure().getComponentID() == userID;
     }
 }

@@ -19,6 +19,7 @@ public class DescentDice extends Component {
     private int surge;
     private int range;
     private int shielding;
+    private int maxShield;
     private int nSides;
 
     private Map<Integer, Map<String, Integer>> sides;
@@ -85,6 +86,9 @@ public class DescentDice extends Component {
             sideMap.put("surge", tempSurge.intValue());
             sideMap.put("shielding", tempShield.intValue());
             this.sides.put(i, sideMap);
+
+            if (tempShield.intValue() > this.maxShield)
+                this.maxShield = tempShield.intValue();
         }
         parseComponent(this, dice);
     }
@@ -105,6 +109,10 @@ public class DescentDice extends Component {
         return shielding;
     }
 
+    public boolean isMaxShield() {
+        return shielding == maxShield;
+    }
+
     public DiceType getColour() {
         return colour;
     }
@@ -114,6 +122,7 @@ public class DescentDice extends Component {
         DescentDice  copy = new DescentDice(this.componentID);
         copy.colour = this.colour;
         copy.shielding = this.shielding;
+        copy.maxShield = this.maxShield;
         copy.nSides = this.nSides;
         copy.result = this.result;
         copy.damage = this.damage;
@@ -134,13 +143,13 @@ public class DescentDice extends Component {
             DescentDice dice = (DescentDice) obj;
             return dice.colour == this.colour && dice.result == this.result && dice.damage == this.damage &&
                     dice.surge == this.surge && dice.range == this.range && dice.shielding == this.shielding &&
-                    dice.nSides == this.nSides && dice.sides.equals(this.sides);
+                    dice.maxShield == this.maxShield && dice.nSides == this.nSides && dice.sides.equals(this.sides);
         }
         return false;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(colour, result, damage, surge, range, shielding, nSides, sides);
+        return Objects.hash(colour, result, damage, surge, range, shielding, maxShield, nSides, sides);
     }
 
 }
