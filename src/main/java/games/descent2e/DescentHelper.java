@@ -1117,7 +1117,10 @@ public class DescentHelper {
 
             // Remove from state lists
             for (List<Monster> monsterGroup: dgs.getMonsters()) {
-                monsterGroup.remove(m);
+                if (monsterGroup.contains(m)) {
+                    monsterGroup.remove(m);
+                    dgs.addDefeated(m);
+                }
             }
         }
     }

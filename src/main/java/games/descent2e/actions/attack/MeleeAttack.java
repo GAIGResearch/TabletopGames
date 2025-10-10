@@ -950,126 +950,125 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         {
             Figure attacker = (Figure) state.getComponentById(attackingFigure);
             Figure target = (Figure) state.getComponentById(defendingFigure);
+
+            // Certain Interruptions only trigger if the target is alive (e.g. Shield of Zorek's Favor Overlord Relic)
+            boolean targetDefeated = target.getAttribute(Figure.Attribute.Health).isMinimum();
+
             List<AbstractAction> interruptAttacks = new ArrayList<>();
-            if (target != null &&
-                    !target.getAttribute(Figure.Attribute.Health).isMinimum()) {
-                for (String attack : state.getInterruptAttacks()) {
+            for (String attack : state.getInterruptAttacks()) {
 
-                    // Blast
-                    if (attack.contains(BlastAttack.name)) {
-                        Set<BlastAttack> blastAttacks = BlastAttack.constructBlasts(state, attackingFigure, defendingFigure);
-                        if (!blastAttacks.isEmpty())
-                            interruptAttacks.addAll(blastAttacks);
-                        continue;
+                // Blast
+                if (attack.contains(BlastAttack.name)) {
+                    Set<BlastAttack> blastAttacks = BlastAttack.constructBlasts(state, attacker, target);
+                    if (!blastAttacks.isEmpty())
+                        interruptAttacks.addAll(blastAttacks);
+                    continue;
+                }
+
+                // Fire Breath
+                if (attack.contains(FireBreath.name)) {
+                    Set<FireBreath> fireBreath = FireBreath.constructFireBreath(state, attacker, target);
+                    if (!fireBreath.isEmpty())
+                        interruptAttacks.addAll(fireBreath);
+                    continue;
+                }
+
+                // Knockback - both Splig and Crossbow
+                if (attack.contains(Knockback.name)) {
+                    // There's no point throwing a defeated Monster like a ragdoll, it's already removed from the map
+                    // Defeated Heroes are fair game though
+                    if (targetDefeated && target instanceof Monster) continue;
+                    List<Knockback> knockbacks = new ArrayList<>();
+                    int distance = Integer.parseInt(attack.split(":")[1]);
+                    target.setOffMap(true);
+                    target.setAttribute(Figure.Attribute.MovePoints, distance);
+
+                    Vector2D startPos = target.getPosition();
+                    List<Vector2D> spaces = getForcedMovePositions(state, startPos, distance);
+                    List<Monster.Direction> orientations = new ArrayList<>();
+                    orientations.add(Monster.Direction.DOWN);
+                    if (target instanceof Monster m) {
+                        if (m.getSize().a > 1 || m.getSize().b > 1) {
+                            orientations.add(Monster.Direction.LEFT);
+                            orientations.add(Monster.Direction.UP);
+                            orientations.add(Monster.Direction.RIGHT);
+                        }
+                    }
+                    for (Vector2D pos : spaces) {
+                        for (Monster.Direction orientation : orientations) {
+                            Knockback knockback = new Knockback(defendingFigure, attackingFigure, startPos, pos, orientation, distance);
+                            if (knockback.canExecute(state))
+                                knockbacks.add(knockback);
+                        }
+                    }
+                    if (!knockbacks.isEmpty()) {
+                        knockbacks.sort(Comparator.comparing(ForcedMove::getOrientation));
+                        interruptAttacks.addAll(knockbacks);
+                    }
+                    continue;
+                }
+
+                // Distant Damage - Magic Staff
+                if (attack.contains(ExtraDamage.distant)) {
+                    int range = Integer.parseInt(attack.split(":")[1]);
+                    int dmg = Integer.parseInt(attack.split(":")[2]);
+
+                    List<Integer> targets = new ArrayList<>();
+                    if (attacker instanceof Hero) {
+                        for (List<Monster> monsters : state.getMonsters()) {
+                            for (Monster m : monsters) {
+                                if (m.getComponentID() == defendingFigure) continue;
+                                if (getRangeAllSpaces(state, target, m) <= range)
+                                    targets.add(m.getComponentID());
+                            }
+                        }
+                    }
+                    if (attacker instanceof Monster) {
+                        for (Hero hero : state.getHeroes()) {
+                            if (hero.getComponentID() == defendingFigure) continue;
+                            if (getRangeAllSpaces(state, target, hero) <= range)
+                                targets.add(hero.getComponentID());
+                        }
                     }
 
-                    // Fire Breath
-                    if (attack.contains(FireBreath.name)) {
-                        Set<FireBreath> fireBreath = FireBreath.constructFireBreath(state, attackingFigure, defendingFigure);
-                        if (!fireBreath.isEmpty())
-                            interruptAttacks.addAll(fireBreath);
-                        continue;
+                    for (int t : targets) {
+                        ExtraDamage extraDamage = new ExtraDamage(attackingFigure, t, dmg, range);
+                        extraDamage.setName(attack);
+                        if (extraDamage.canExecute(state))
+                            interruptAttacks.add(extraDamage);
                     }
+                    continue;
+                }
 
-                    // Knockback - both Splig and Crossbow
-                    if (attack.contains(Knockback.name)) {
-                        List<Knockback> knockbacks = new ArrayList<>();
-                        int distance = Integer.parseInt(attack.split(":")[1]);
-                        target.setOffMap(true);
-                        target.setAttribute(Figure.Attribute.MovePoints, distance);
+                // Adjacent Damage - Mace of Kellos, Dawnblade
+                if (attack.contains(ExtraDamage.adjacent)) {
+                    String[] split = attack.split(":");
+                    boolean targetAll = split[1].contains("All");
+                    boolean maxDamage = split[2].contains("Full");
 
-                        Vector2D startPos = target.getPosition();
-                        List<Vector2D> spaces = getForcedMovePositions(state, startPos, distance);
-                        List<Monster.Direction> orientations = new ArrayList<>();
-                        orientations.add(Monster.Direction.DOWN);
-                        if (target instanceof Monster m) {
-                            if (m.getSize().a > 1 || m.getSize().b > 1) {
-                                orientations.add(Monster.Direction.LEFT);
-                                orientations.add(Monster.Direction.UP);
-                                orientations.add(Monster.Direction.RIGHT);
-                            }
-                        }
-                        for (Vector2D pos : spaces) {
-                            for (Monster.Direction orientation : orientations) {
-                                Knockback knockback = new Knockback(defendingFigure, attackingFigure, startPos, pos, orientation, distance);
-                                if (knockback.canExecute(state))
-                                    knockbacks.add(knockback);
-                            }
-                        }
+                    int dmg = maxDamage ? damage : Integer.parseInt(split[2]);
 
-                        if (!knockbacks.isEmpty()) {
-                            knockbacks.sort(Comparator.comparing(ForcedMove::getOrientation));
-                            interruptAttacks.addAll(knockbacks);
-                        }
-
-                        continue;
-                    }
-
-                    // Distant Damage - Magic Staff
-                    if (attack.contains(ExtraDamage.distant)) {
-                        int range = Integer.parseInt(attack.split(":")[1]);
-                        int dmg = Integer.parseInt(attack.split(":")[2]);
-
-                        List<Integer> targets = new ArrayList<>();
-
-                        if (attacker instanceof Hero) {
-                            for (List<Monster> monsters : state.getMonsters()) {
-                                for (Monster m : monsters) {
-                                    if (m.getComponentID() == defendingFigure) continue;
-                                    if (getRangeAllSpaces(state, target, m) <= range)
-                                        targets.add(m.getComponentID());
-                                }
-                            }
-                        }
-                        if (attacker instanceof Monster) {
-                            for (Hero hero : state.getHeroes()) {
-                                if (hero.getComponentID() == defendingFigure) continue;
-                                if (getRangeAllSpaces(state, target, hero) <= range)
-                                    targets.add(hero.getComponentID());
-                            }
-                        }
-
+                    List<Integer> targets = getMeleeTargets(state, attacker, false);
+                    if (targetAll) {
+                        ExtraDamage extraDamage = new ExtraDamage(attackingFigure, targets, dmg, 1);
+                        extraDamage.setName(attack);
+                        if (extraDamage.canExecute(state))
+                            interruptAttacks.add(extraDamage);
+                    } else {
                         for (int t : targets) {
-                            ExtraDamage extraDamage = new ExtraDamage(attackingFigure, t, dmg, range);
+                            if (t == defendingFigure) continue;
+                            ExtraDamage extraDamage = new ExtraDamage(attackingFigure, t, dmg);
                             extraDamage.setName(attack);
                             if (extraDamage.canExecute(state))
                                 interruptAttacks.add(extraDamage);
-                        }
-                        continue;
-                    }
-
-                    // Adjacent Damage - Mace of Kellos, Dawnblade
-                    if (attack.contains(ExtraDamage.adjacent)) {
-                        String[] split = attack.split(":");
-                        boolean targetAll = split[1].contains("All");
-                        boolean maxDamage = split[2].contains("Full");
-
-                        int dmg = maxDamage ? damage : Integer.parseInt(split[2]);
-
-                        List<Integer> targets = getMeleeTargets(state, attacker, false);
-
-                        if (targetAll) {
-                            ExtraDamage extraDamage = new ExtraDamage(attackingFigure, targets, dmg, 1);
-                            extraDamage.setName(attack);
-                            if (extraDamage.canExecute(state))
-                                interruptAttacks.add(extraDamage);
-                        }
-
-                        else {
-
-                            for (int t : targets) {
-                                if (t == defendingFigure) continue;
-                                ExtraDamage extraDamage = new ExtraDamage(attackingFigure, t, dmg);
-                                extraDamage.setName(attack);
-                                if (extraDamage.canExecute(state))
-                                    interruptAttacks.add(extraDamage);
-                            }
                         }
                     }
                 }
+            }
 
-                // We apply these interruptions after the Attack has been fully completed
-                if (interruptAttacks.isEmpty()) {
+            // We apply these interruptions after the Attack has been fully completed
+            if (interruptAttacks.isEmpty()) {
+                if (!targetDefeated) {
                     if (target.hasBonus(DescentTypes.SkillBonus.ZoreksFavor)) {
                         ZoreksFavor favor = new ZoreksFavor(defendingFigure, attackingFigure);
                         if (favor.canExecute(state)) {
@@ -1078,19 +1077,20 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                         }
                     }
                 }
+            }
 
-                if (interruptAttacks.isEmpty()) {
+            if (interruptAttacks.isEmpty()) {
+                if (!targetDefeated) {
                     if (target.hasBonus(DescentTypes.SkillBonus.CounterAttack)) {
                         CounterAttack counterAttack = new CounterAttack(defendingFigure, attackingFigure);
                         if (counterAttack.canExecute(state))
                             interruptAttacks.add(counterAttack);
                     }
-
-                    if (attacker.hasBonus(DescentTypes.SkillBonus.QuickCasting)) {
-                        Set<QuickCasting> quickCastings = QuickCasting.constructQuickCasting(state, attackingFigure);
-                        if (!quickCastings.isEmpty())
-                            interruptAttacks.addAll(quickCastings);
-                    }
+                }
+                if (attacker.hasBonus(DescentTypes.SkillBonus.QuickCasting)) {
+                    Set<QuickCasting> quickCastings = QuickCasting.constructQuickCasting(state, attackingFigure);
+                    if (!quickCastings.isEmpty())
+                        interruptAttacks.addAll(quickCastings);
                 }
             }
 

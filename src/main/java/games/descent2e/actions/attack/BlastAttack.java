@@ -146,13 +146,12 @@ public class BlastAttack extends MultiAttack {
         return retValue;
     }
 
-    public static Set<BlastAttack> constructBlasts(DescentGameState dgs, int attackingFigure, int defendingFigure)
+    public static Set<BlastAttack> constructBlasts(DescentGameState dgs, Figure attacker, Figure initialTarget)
     {
         Set<BlastAttack> blasts = new HashSet<>();
 
-        // TODO What to do if we killed the Initial Target earlier?
-        Figure attacker = (Figure) dgs.getComponentById(attackingFigure);
-        Figure initialTarget = (Figure) dgs.getComponentById(defendingFigure);
+        int attackingFigure = attacker.getComponentID();
+        int defendingFigure = initialTarget.getComponentID();
 
         Pair<Integer, Integer> size = initialTarget.getSize();
         List<BoardNode> attackingTiles = new ArrayList<>();

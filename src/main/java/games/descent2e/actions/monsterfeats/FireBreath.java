@@ -107,8 +107,11 @@ public class FireBreath extends ChainAttack {
         return retValue;
     }
 
-    public static Set<FireBreath> constructFireBreath(DescentGameState dgs, int attackingFigure, int defendingFigure)
+    public static Set<FireBreath> constructFireBreath(DescentGameState dgs, Figure attacker, Figure target)
     {
+        int attackingFigure = attacker.getComponentID();
+        int defendingFigure = target.getComponentID();
+
         Set<FireBreath> fireBreaths = new HashSet<>();
 
         Set<FireBreath> allBreaths = new HashSet<>();
@@ -116,8 +119,6 @@ public class FireBreath extends ChainAttack {
         List<List<Integer>> targets = new ArrayList<>();
         List<List<Vector2D>> paths = new ArrayList<>();
         FireBreath fireBreath;
-
-        Figure target = (Figure) dgs.getComponentById(defendingFigure);
         Vector2D step0 = target.getPosition();
         BoardNode startPosition = dgs.getMasterBoard().getElement(step0);
 
