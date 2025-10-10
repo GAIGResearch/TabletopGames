@@ -179,6 +179,7 @@ public class FortunasDice extends DescentAction implements IExtendedSequence {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(userID);
         if (f == null) return false;
+        if (dgs.getActingFigure().getComponentID() != userID) return false;
         DescentCard item = (DescentCard) dgs.getComponentById(itemID);
         if (item == null) return false;
         if (diceID == -1) {
