@@ -10,7 +10,7 @@ import games.powergrid.components.PowerGridCity;
 import games.powergrid.components.PowerGridGraphBoard;
 
 /**
- * Action that builds a generator (house) in a given city at a specified cost.
+ * Action that builds a generator in a given city at a specified cost.
  * <p>
  * This action validates city bounds and slot availability for the current game step,
  * checks that the acting player has sufficient funds, then:
@@ -84,7 +84,7 @@ public class BuildGenerator extends AbstractAction {
     public int hashCode() {
         return Objects.hash(cityId, cost);
     }
-
+/*
     @Override
     public String getString(AbstractGameState gameState) {
         PowerGridGameState s = (PowerGridGameState) gameState;
@@ -103,7 +103,11 @@ public class BuildGenerator extends AbstractAction {
 
         return String.format("BuildGenerator(city=%s, slot=%s, cost=%d)", cityName, slotStr, cost);
     }
-
+*/
+    @Override
+    public String getString(AbstractGameState gameState) {
+    	return "Build " + cityId; 
+    }
 
     /**
      * Returns the index of the first available (empty) city slot for building in the current step.

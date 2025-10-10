@@ -164,5 +164,21 @@ public class PowerGridResourceMarket extends Component {
                ", ur=" + avail.get(PowerGridParameters.Resource.URANIUM) + "}";
     }
     
+    public double[] flattenAvailableNormalized() {
+        double[] out = new double[4];
+
+        double maxCoal     = 24d;
+        double maxGas      = 24d;
+        double maxOil      = 24d;
+        double maxUranium  = 12d;
+
+        out[0] = avail.get(PowerGridParameters.Resource.COAL)    / maxCoal;
+        out[1] = avail.get(PowerGridParameters.Resource.GAS)     / maxGas;
+        out[2] = avail.get(PowerGridParameters.Resource.OIL)     / maxOil;
+        out[3] = avail.get(PowerGridParameters.Resource.URANIUM) / maxUranium;
+
+        return out;
+    }
+    
 
 }

@@ -19,33 +19,33 @@ import games.powergrid.PowerGridGameState;
  */
 
 public class PassAction extends AbstractAction {
-    private final int playerId;
-
-    public PassAction(int playerId) {
-        this.playerId = playerId;
-    }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        PowerGridGameState pggs = (PowerGridGameState) gs;
-        pggs.removeFromRound(playerId);
+        PowerGridGameState s = (PowerGridGameState) gs;
+        int me = s.getCurrentPlayer();
+        s.removeFromRound(me);
         return true;
     }
 
     @Override
-    public AbstractAction copy() { return new PassAction(playerId); }
-    
+    public AbstractAction copy() { 
+        return new PassAction(); 
+    }
+
     @Override
-    public boolean equals(Object obj) { return obj instanceof PassAction && ((PassAction) obj).playerId == playerId; }
-    
+    public boolean equals(Object obj) { 
+        return obj instanceof PassAction; 
+    }
+
     @Override
-    public int hashCode() { return Objects.hash(playerId); }
-    
+    public int hashCode() { 
+        return 0xA55A1;  // any small constant; valid hex
+    }
+
     @Override
-    public String getString(AbstractGameState gameState) { return "Has elected to pass this Round"; }
-    
-    public int getPlayerId() {
-    	return this.playerId;
+    public String getString(AbstractGameState gameState) { 
+        return "Pass Round"; 
     }
 }
 

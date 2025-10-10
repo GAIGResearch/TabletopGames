@@ -10,6 +10,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
+import utilities.ActionTreeNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,59 +27,73 @@ import java.util.*;
 public class TestFeatures {
 	
 
-	    private static void printPretty(String[] names, double[] vec) {
-	        int width = Arrays.stream(names).mapToInt(String::length).max().orElse(8) + 2;
-	        for (int i = 0; i < names.length; i++) {
-	            String n = (i < names.length) ? names[i] : "f" + i;
-	            String v = (i < vec.length) ? String.valueOf(vec[i]) : "NA";
-	            System.out.printf("%-" + width + "s : %s%n", n, v);
-	        }
-	    }
+    private static void printPretty(String[] names, double[] vec) {
+        int width = Arrays.stream(names).mapToInt(String::length).max().orElse(8) + 2;
+        for (int i = 0; i < names.length; i++) {
+            String n = (i < names.length) ? names[i] : "f" + i;
+            String v = (i < vec.length) ? String.valueOf(vec[i]) : "NA";
+            System.out.printf("%-" + width + "s : %s%n", n, v);
+        }
+    }
 
-	    public static void main(String[] args) throws Exception {
-	        long seed = 1234;
-	        Random rnd = new Random(seed);
+    private static void printMask(String title, int[] mask) {
+        int legal = 0;
+        for (int v : mask) if (v != 0) legal++;
+        System.out.println(title + " legal actions: " + legal);
+        System.out.println(title + " mask: " + java.util.Arrays.toString(mask));
+    }
 
-	        ArrayList<AbstractPlayer> players = new ArrayList<>();
-	        players.add(new PythonAgent()); // learning slot
-	        players.add(new RandomPlayer(rnd));
-	        players.add(new RandomPlayer(rnd));
-	        players.add(new RandomPlayer(rnd));
+    public static void main(String[] args) throws Exception {
+        long seed = 1234;
+        Random rnd = new Random(seed);
+        int numberOfSteps = 20;
 
-	        PyTAG env = new PyTAG(GameType.PowerGrid, null, players, seed, false);
-	        env.reset();  // runs until PythonAgent must act
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
+        players.add(new PythonAgent()); // learning slot
+        players.add(new RandomPlayer(rnd));
+        players.add(new RandomPlayer(rnd));
+        players.add(new RandomPlayer(rnd));
+        players.add(new RandomPlayer(rnd));
+        players.add(new RandomPlayer(rnd));
 
-	        // Observation that Python will receive
-	        double[] obs = env.getObservationVector();
+        PyTAG env = new PyTAG(GameType.PowerGrid, null, players, seed, false);
+        env.reset();  // runs until PythonAgent must act
 
-	        // Get names without touching FeatureExtractors
-	        String[] names = new PowerGridFeatures().names();
+        // Feature names (avoid FeatureExtractors visibility)
+        String[] names = new PowerGridFeatures().names();
 
-	        System.out.println("=== PyTAG observation ===");
-	        printPretty(names, obs);
+        System.out.println("=== Initial PyTAG observation ===");
+        printPretty(names, env.getObservationVector());
+        System.out.println("Shape: " + env.getTreeShape());
+        //System.out.println("Tree mask: " + java.util.Arrays.toString(env.getActionTree()));
+        printMask("INITIAL", env.getActionMask());   // <-- show initial action mask
 
-	        // Step once using a random legal action (masked)
-	        int[] mask = env.getActionMask();
-	        int randomAction = env.sampleRNDAction(mask, rnd);
-	        env.step(randomAction);
+        for (int step = 1; step <= numberOfSteps; step++) {
+            if (env.isDone()) {
+                System.out.println("\nEpisode finished before step " + step);
+                break;
+            }
 
-	        double[] obs2 = env.getObservationVector();
-	        System.out.println("\n=== After one env.step(...) ===");
-	        printPretty(names, obs2);
-	        
-	        
-	        env.step(randomAction);
+            // BEFORE step: show current mask
+            System.out.println("\n=== BEFORE step " + step + " ===");
+            printMask("BEFORE", env.getActionMask());
 
-	        double[] obs3 = env.getObservationVector();
-	        System.out.println("\n=== After two env.step(...) ===");
-	        printPretty(names, obs3);
-	        
+            // Sample a valid action from the current mask
+            int[] mask = env.getActionMask();
+            int actionId = env.sampleRNDAction(mask, rnd);
 
-		     // Observation that Python will receive (JSON)
-		     String json = env.getObservationJson();
-		     System.out.println("\n=== PyTAG JSON observation ===");
-		     System.out.println(json);
-	    }
+            // Take the step
+            env.step(actionId);
+
+            // AFTER step: observation + tree + action mask
+            System.out.println("\n=== AFTER step " + step + " ===");
+            printPretty(names, env.getObservationVector());
+            System.out.println("Shape: " + env.getTreeShape());
+            System.out.println("Tree mask: " + java.util.Arrays.toString(env.getActionTree()));
+            System.out.println("Tree mask Size: " + (env.getActionTree().length));
+            printMask("AFTER", env.getActionMask());  // <-- show mask after state update
+        }
+    }
 	}
 
 

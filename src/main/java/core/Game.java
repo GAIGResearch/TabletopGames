@@ -856,7 +856,7 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         //players.add(new RandomPlayer());
         //players.add(new RandomPlayer());
@@ -873,7 +873,7 @@ public class Game {
 
 
 
-         //players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
     //    players.add(new HumanConsolePlayer());

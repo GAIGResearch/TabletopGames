@@ -21,23 +21,17 @@ import java.util.Objects;
  */
 
 public class IncreaseBid extends AbstractAction {
-	
-    private final int playerId;
-
-    public IncreaseBid(int playerId) {
-        this.playerId = playerId;
-    }
+    private int playerId = -1; //TODO get rid of this if able
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        PowerGridGameState pggs = (PowerGridGameState) gs;
+        PowerGridGameState s = (PowerGridGameState) gs;
+        if (!s.isAuctionLive()) return false;
+        if (playerId < 0) playerId = s.getCurrentPlayer();
 
-        int currentBid = pggs.getCurrentBid();
-        int newBid = currentBid + 1;
-
-        // Check if the player can afford the new bid
-        if (pggs.getPlayersMoney(playerId) >= newBid) {
-            pggs.setCurrentBid(newBid, playerId);  
+        int newBid = s.getCurrentBid() + 1;
+        if (s.getPlayersMoney(playerId) >= newBid) {
+            s.setCurrentBid(newBid, playerId);
             return true;
         }
         return false;
@@ -45,31 +39,26 @@ public class IncreaseBid extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new IncreaseBid(playerId);
+        IncreaseBid c = new IncreaseBid();
+        c.playerId = this.playerId;
+        return c;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof IncreaseBid)) return false;
-        IncreaseBid other = (IncreaseBid) obj;
-        return this.playerId == other.playerId;
-    }
+    // Option A: treat all IncreaseBid as equal
+    @Override public boolean equals(Object o) { return o instanceof IncreaseBid; }
+    @Override public int hashCode() { return 0x1A2B3C; }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(playerId);
-    }
-
+    // Null-safe label
     @Override
     public String getString(AbstractGameState gameState) {
-        PowerGridGameState pggs = (PowerGridGameState) gameState;
-        return String.format("Increases bid to " +  (pggs.getCurrentBid() + 1));
-    }
-    
-    public int getPlayerId() {
-    	return this.playerId;
+        if (gameState instanceof PowerGridGameState s) {
+            return "Increase bid to " + (s.getCurrentBid() + 1);
+        }
+        return "Increase bid by 1";
     }
 
+    public String getName(AbstractGameState gameState) { return "Increase Bid"; }
 
+    public int getPlayerId() { return playerId; }
 }
+

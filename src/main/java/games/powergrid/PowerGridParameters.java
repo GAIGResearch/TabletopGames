@@ -44,6 +44,8 @@ public class PowerGridParameters extends AbstractParameters{
     public int[][] resourceRefreshEU_5P = new int[][] {{3,3,4,2},{8,5,3,3},{4,7,5,3}};
     public int[][] resourceRefreshEU_6P = new int[][] {{5,4,4,2},{10,6,5,3},{5,8,6,4}};
     
+    public static final int MAXPLAYERS = 6; 
+    
     public static final int[] coalPrice = new int[] {1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,5,6,6,6,7,7,8,8,9,9};
 
     public static final int[] gasPrice = new int[] {1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8};

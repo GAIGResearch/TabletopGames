@@ -33,7 +33,7 @@ import games.powergrid.components.PowerGridCard.PlantInput;
 public class Discard extends AbstractAction {
 
 	 final int index;  
-	    Discard(int index) { this.index = index; }
+	    public Discard(int index) { this.index = index; }
 
 	    @Override
 	    public boolean execute(AbstractGameState gs) {
@@ -52,7 +52,7 @@ public class Discard extends AbstractAction {
 	        return true;
 	    }
 
-	    @Override public Discard copy() { return this; }
+	    @Override public Discard copy() { return new Discard(index); }
 	    
 	    @Override
 	    public boolean equals(Object o) {
@@ -61,7 +61,7 @@ public class Discard extends AbstractAction {
 
 	    @Override public int hashCode(){ return 0xD15C4 << 3 ^ index; }
 	    
-	    @Override public String getString(AbstractGameState gs){ return "DiscardSlot(" + index + ")"; }
+	    @Override public String getString(AbstractGameState gs){ return "Discard " + index ; }
 	    
 	    /**
 	     * Ensures that a player's stored fuel does not exceed the total storage capacity

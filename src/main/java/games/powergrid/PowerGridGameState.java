@@ -45,7 +45,8 @@ public class PowerGridGameState extends AbstractGameState {
 
 	
     private int[] cityCountByPlayer;
-    private int[][] citySlotsById;          // [cityId][slot] -> playerId or -1 if empty
+    private double[] oneHotRegion; 
+    private int[][] citySlotsById;          
     private Deck<PowerGridCard>[] ownedPlantsByPlayer;
     
     public enum PowerGridGamePhase implements IGamePhase{
@@ -120,6 +121,7 @@ public class PowerGridGameState extends AbstractGameState {
         // Primitive arrays
         copy.playerMoney       = (this.playerMoney == null) ? null : this.playerMoney.clone();
         copy.cityCountByPlayer = (this.cityCountByPlayer == null) ? null : this.cityCountByPlayer.clone();
+        copy.oneHotRegion = (this.oneHotRegion  == null) ? null : this.oneHotRegion.clone();
         copy.poweredCities     = (this.poweredCities == null) ? null : this.poweredCities.clone();
 
         // 2D array
@@ -646,6 +648,10 @@ public class PowerGridGameState extends AbstractGameState {
     public int getPoweredCities(int playerId) {
         return this.poweredCities[playerId];
     }
+    
+    public int [] getPoweredCities() {
+    	return this.poweredCities; 
+    }
 
     public void clearPoweredCities() {
         Arrays.fill(this.poweredCities, 0);
@@ -753,6 +759,21 @@ public class PowerGridGameState extends AbstractGameState {
     public int totalMoney() {
     	return Arrays.stream(playerMoney).sum();  	
     }
+    
+    public void setOneHotRegions(Set<Integer> activeRegions, int numRegions) {
+        double[] out = new double[numRegions];
+        for (int i = 1; i <= numRegions; i++) {
+            out[i - 1] = activeRegions.contains(i) ? 1 : 0;
+        }
+        this.oneHotRegion = out;
+    }
+    
+    public double[] getOneHotRegions() {
+    	return this.oneHotRegion;
+    }
+    
+   
+    
 }
 
 

@@ -16,35 +16,36 @@ import games.powergrid.components.PowerGridCard;
 
 public class AuctionPowerPlant extends AbstractAction implements IExtendedSequence {
 
-    private final int openerId;
     private final int plantNumber;
+
+    // runtime
+    private boolean started = false, done = false;
     private boolean awaitingDiscard = false;
+    private int currentBidder = -1;
     private int winnerId = -1;
 
-    private boolean started = false;
-    private boolean done     = false;
-    private int currentBidder;  
-
-    public AuctionPowerPlant(int playerId, int plantNumber) {
-        this.openerId = playerId;
+    public AuctionPowerPlant(int plantNumber) {
         this.plantNumber = plantNumber;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        PowerGridGameState s = (PowerGridGameState) gs;           
+        PowerGridGameState s = (PowerGridGameState) gs;
+        int openerId = s.getCurrentPlayer();   // <— opener determined at runtime
+
         if (plantNumber > s.getPlayersMoney(openerId)) return false;
+
         s.setAuctionPlantNumber(plantNumber);
         s.resetBidOrder();
-        if(s.getStep() == 2 && s.getDiscountCard() == plantNumber) { //if step 2 and first card then it get the discount 
-        	s.setCurrentBid(1, openerId);
-        	s.setDiscountCard(-1);
-        }else {
-        	s.setCurrentBid(plantNumber, openerId);
+
+        if (s.getStep() == 2 && s.getDiscountCard() == plantNumber) {
+            s.setCurrentBid(1, openerId);
+            s.setDiscountCard(-1);
+        } else {
+            s.setCurrentBid(plantNumber, openerId);
         }
 
-        currentBidder = s.checkNextBid(openerId); //first available bidder
-        
+        currentBidder = s.checkNextBid(openerId);
         s.setTurnOwner(currentBidder);
 
         gs.setActionInProgress(this);
@@ -52,10 +53,6 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         return true;
     }
 
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        return currentBidder;
-    }
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
@@ -79,15 +76,15 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         final boolean onlyOneLeft = s.isAuctionLive() && s.checkNextBid(highestBidder) == highestBidder;
         //edge case where the last person in round is the one auctioning
         if (onlyOneLeft) {
-            actions.add(new PassBid(currentBidder));
+            actions.add(new PassBid());
             return actions;
         }
 
         if (!isHighest && money > s.getCurrentBid()) {
-            actions.add(new IncreaseBid(currentBidder));
+            actions.add(new IncreaseBid());
         }
 
-        actions.add(new PassBid(currentBidder));
+        actions.add(new PassBid());
         return actions;
     }
 
@@ -103,15 +100,8 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
             return;
         }
 
-        int lastActor;
-        
-        if (action instanceof IncreaseBid ib) {
-            lastActor = ib.getPlayerId();
-        } else if (action instanceof PassBid pb) {
-            lastActor = pb.getPlayerId();
-        } else {
-            lastActor = currentBidder; // fallback
-        }
+        int lastActor = currentBidder;
+
 
         // Find the next eligible bidder
         int next = s.checkNextBid(lastActor);
@@ -157,33 +147,46 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         return done;
     }
 
-    @Override
-    public AuctionPowerPlant copy() {
-        AuctionPowerPlant cp = new AuctionPowerPlant(openerId, plantNumber);
-        cp.started         = this.started;
-        cp.done            = this.done;
-        cp.currentBidder   = this.currentBidder;
-        cp.awaitingDiscard = this.awaitingDiscard;
-        cp.winnerId        = this.winnerId;
-        return cp;
-    }
 
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return "OpenAuction(plant=" + plantNumber + ", open bidder=" + openerId + ")";
-    }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof AuctionPowerPlant)) return false;
-        AuctionPowerPlant other = (AuctionPowerPlant) obj;
-        return openerId == other.openerId && plantNumber == other.plantNumber;
-    }
+	 @Override
+	    public int getCurrentPlayer(AbstractGameState state) {
+	        return currentBidder;
+	    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(openerId, plantNumber);
-    }
+	    // ... keep your _computeAvailableActions, _afterAction, executionComplete unchanged ...
 
-}
+	    @Override
+	    public AuctionPowerPlant copy() {
+	        AuctionPowerPlant cp = new AuctionPowerPlant(plantNumber);
+	        cp.started = this.started;
+	        cp.done = this.done;
+	        cp.currentBidder = this.currentBidder;
+	        cp.awaitingDiscard = this.awaitingDiscard;
+	        cp.winnerId = this.winnerId;
+	        return cp;
+	    }
+
+	    @Override
+	    public String getString(AbstractGameState gameState) {
+	        return "OpenAuction(plant=" + plantNumber + ")";
+	    }
+
+	    @Override
+	    public boolean equals(Object obj) {
+	        if (this == obj) return true;
+	        if (!(obj instanceof AuctionPowerPlant)) return false;
+	        AuctionPowerPlant other = (AuctionPowerPlant) obj;
+	        return this.plantNumber == other.plantNumber; // <— ignore opener
+	    }
+
+	    @Override
+	    public int hashCode() {
+	        return Objects.hash(plantNumber); // <— ignore opener
+	    }
+
+	    public int getPlantNumber() { return plantNumber; }
+	}
+    
+
+

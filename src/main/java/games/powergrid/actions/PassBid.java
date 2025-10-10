@@ -21,43 +21,23 @@ import java.util.Objects;
  */
 
 public class PassBid extends AbstractAction {
-    private final int playerId;
-
-    public PassBid(int playerId) {
-        this.playerId = playerId;
-    }
-
     @Override
     public boolean execute(AbstractGameState gs) {
-        PowerGridGameState pggs = (PowerGridGameState) gs;
-        pggs.passBid(playerId); //marks player as passed 
-        return true;  
+        PowerGridGameState s = (PowerGridGameState) gs;
+        if (!s.isAuctionLive()) return false;   // optional guard
+        int me = s.getCurrentPlayer();
+        s.passBid(me);
+        return true;
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PassBid(playerId);
-    }
+    public AbstractAction copy() { return new PassBid(); }
+
+    @Override public boolean equals(Object o) { return o instanceof PassBid; }
+    @Override public int hashCode() { return  0xA55B1D; }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof PassBid)) return false;
-        PassBid other = (PassBid) obj;
-        return this.playerId == other.playerId;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(playerId);
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return String.format("Has elected to not bid");
-    }
-
-    public int getPlayerId() {
-    	return this.playerId;
-    }
+    public String getString(AbstractGameState gameState) { return "Pass Bid"; }
 }
+
+
