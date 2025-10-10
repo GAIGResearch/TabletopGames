@@ -2,10 +2,7 @@ package games.descent2e.gui;
 
 import core.components.Card;
 import core.components.Deck;
-import core.properties.Property;
-import core.properties.PropertyBoolean;
-import core.properties.PropertyString;
-import core.properties.PropertyStringArray;
+import core.properties.*;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
@@ -236,8 +233,11 @@ public class DescentHeroView extends ComponentView {
         Property cost = card.getProperty("cost");
         if (equipmentType != null) {
             int w = fm.stringWidth(text);
-            text = " " + cost + "G";
-            g.drawString(text, x + w/2 + width / 2, y);
+            if (((PropertyInt) cost).value > 0)
+                text = " " + cost + "G";
+            else
+                text = " [RELIC]";
+            g.drawString(text, x + w / 2 + width / 2, y);
         }
 
         Property exhaust = card.getProperty("exhaust");

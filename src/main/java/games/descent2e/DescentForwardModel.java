@@ -313,6 +313,8 @@ public class DescentForwardModel extends StandardForwardModel {
         dgs.act2ShopCards = _data.act2ShopCards;
         dgs.act2ShopCards.shuffle(rnd);
 
+        dgs.relicCards = _data.relicCards;
+
         // Announce all figures in play, including their stats and starting positions
         // Primarily for debug purposes
         boolean announce = false;

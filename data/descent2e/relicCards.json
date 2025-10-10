@@ -1,0 +1,137 @@
+[
+  {
+    "name": ["String","Dawnblade"],
+    "heroRelic": ["Boolean", true],
+    "counterpart": ["String", "Duskblade"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", false],
+    "attackType": ["String", "melee"],
+    "attackPower": ["String[]", ["blue", "red","yellow"]],
+    "equipmentType": ["String[]", ["Blade"]],
+    "weaponSurges": ["String[]", ["DAMAGE_PLUS_3", "FULL_DAMAGE_ONE_ADJACENT"]],
+    "equipSlots": ["String[]", ["hand"]],
+    "cost": ["Integer", -1],
+    "action": ["String", "Attack."]
+  },
+  {
+    "name": ["String","Duskblade"],
+    "heroRelic": ["Boolean", false],
+    "counterpart": ["String", "Dawnblade"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", false],
+    "weaponSurges": ["String[]", ["PIERCE_5"]],
+    "cost": ["Integer", -1],
+    "passive": ["String", "A hero that starts his turn adjacent to this lieutenant receives -1 Speed for that turn. Each of this lieutenant's attacks gains: Surge: Pierce 5.;Effect:Duskblade"]
+  },
+  {
+    "name": ["String","Staff of Light"],
+    "heroRelic": ["Boolean", true],
+    "counterpart": ["String", "Staff of Shadows"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", false],
+    "attackType": ["String", "ranged"],
+    "attackPower": ["String[]", ["blue", "yellow"]],
+    "equipmentType": ["String[]", ["Magic, Staff"]],
+    "weaponSurges": ["String[]", ["DAMAGE_PLUS_2", "RECOVER_1_HEART"]],
+    "equipSlots": ["String[]", ["hand", "hand"]],
+    "cost": ["Integer", -1],
+    "action": ["String", "Attack. Action: Each hero within 3 spaces of you recovers 1 Heart and 1 Fatigue.;Effect:StaffOfLight"]
+  },
+  {
+    "name": ["String","Staff of Shadows"],
+    "heroRelic": ["Boolean", false],
+    "counterpart": ["String", "Staff of Light"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", true],
+    "cost": ["Integer", -1],
+    "action": ["String", "Exhaust this card and discard 1 Overlord card from your hand to either draw 1 Overlord card or force a reroll of any 1 die. You may do this at any time, even if it's not your turn.;Effect:StaffOfShadows"]
+  },
+  {
+    "name": ["String","Fortuna's Dice"],
+    "heroRelic": ["Boolean", true],
+    "counterpart": ["String", "Bones of Woe"],
+    "fatigue": ["Integer", 1],
+    "exhaust": ["Boolean", true],
+    "equipmentType": ["String[]", ["Trinket"]],
+    "equipSlots": ["String[]", ["other"]],
+    "cost": ["Integer", -1],
+    "action": ["String", "Exhaust this card and suffer 1 Fatigue to reroll any 1 die you have just rolled.;Effect:Reroll:Relic"]
+  },
+  {
+    "name": ["String","Bones of Woe"],
+    "heroRelic": ["Boolean", false],
+    "counterpart": ["String", "Fortuna's Dice"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", true],
+    "cost": ["Integer", -1],
+    "passive": ["String", "At the start of each of your turns, roll the blue attack die. On a Surge, draw 1 Overlord card.;Effect:BonesOfWoe"]
+  },
+  {
+    "name": ["String","Shield of the Dark God"],
+    "heroRelic": ["Boolean", true],
+    "counterpart": ["String", "Shield of Zorek's Favor"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", true],
+    "equipmentType": ["String[]", ["Shield"]],
+    "equipSlots": ["String[]", ["hand"]],
+    "cost": ["Integer", -1],
+    "action": ["String", "Exhaust this card after rolling defense dice to reroll some or all of the defense dice. Keep the new result only if it is better.;Effect:ShieldDarkGod"]
+  },
+  {
+    "name": ["String","Shield of Zorek's Favor"],
+    "heroRelic": ["Boolean", false],
+    "counterpart": ["String", "Shield of the Dark God"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", false],
+    "cost": ["Integer", -1],
+    "passive": ["String", "Each time an attack targeting this lieutenant is resolved and they are not defeated, this lieutenant tests Might. If they pass, the attacker suffers 1 Heart for each Shield rolled on this test.;Effect:ShieldZoreksFavor"]
+  },
+  {
+    "name": ["String","Trueshot"],
+    "heroRelic": ["Boolean", true],
+    "counterpart": ["String", "Scorpion's Kiss"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", false],
+    "attackType": ["String", "ranged"],
+    "attackPower": ["String[]", ["blue", "red", "yellow"]],
+    "equipmentType": ["String[]", ["Bow"]],
+    "weaponSurges": ["String[]", ["KNOCKBACK_1","DAMAGE_PLUS_2"]],
+    "equipSlots": ["String[]", ["hand", "hand"]],
+    "cost": ["Integer", -1],
+    "action": ["String", "Attack. +3 Range;Effect:Range:3"]
+  },
+  {
+    "name": ["String","Scorpion's Kiss"],
+    "heroRelic": ["Boolean", false],
+    "counterpart": ["String", "Trueshot"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", false],
+    "cost": ["Integer", -1],
+    "action": ["String", "This lieutenant gains:\nAction: Exhaust this card and choose a hero in your line of sight. That hero tests Awareness. If they fail, they are Immobilized and Poisoned. If they pass, they only suffer 1 of those conditions of your choice.;Effect:ScorpionsKiss"]
+  },
+  {
+    "name": ["String","The Shadow Rune"],
+    "heroRelic": ["Boolean", true],
+    "counterpart": ["String", "The Shadow Rune (Overlord)"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", false],
+    "attackType": ["String", "ranged"],
+    "attackPower": ["String[]", ["blue", "yellow", "yellow"]],
+    "equipmentType": ["String[]", ["Magic", "Rune"]],
+    "weaponSurges": ["String[]", ["DAMAGE_AND_RANGE_PLUS_1","DAMAGE_PLUS_2"]],
+    "equipSlots": ["String[]", ["hand", "hand"]],
+    "cost": ["Integer", -1],
+    "action": ["String", "Attack. Each time you defeat a monster with this weapon, recover 1 Fatigue.;Effect:FatigueOnKill"]
+  },
+  {
+    "name": ["String","The Shadow Rune (Overlord)"],
+    "heroRelic": ["Boolean", false],
+    "counterpart": ["String", "The Shadow Rune"],
+    "fatigue": ["Integer", 0],
+    "exhaust": ["Boolean", false],
+    "attackType": ["String", "ranged"],
+    "weaponSurges": ["String[]", ["DAMAGE_AND_RANGE_PLUS_1","DAMAGE_PLUS_2"]],
+    "cost": ["Integer", -1],
+    "passive": ["String", "Baron Zachareth only. Each of your attacks gain: Surge: +2 Heart, Surge: +1 Range, +1 Heart, Surge: Draw 1 Overlord Card;Effect:BecomeRanged;Effect:EquipLimit:Zachareth"]
+  }
+]

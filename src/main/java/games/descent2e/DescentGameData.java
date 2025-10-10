@@ -5,6 +5,7 @@ import core.components.*;
 import core.properties.PropertyString;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
+import games.descent2e.components.cards.RelicCard;
 import games.descent2e.components.cards.SearchCard;
 import games.descent2e.components.cards.ShopCard;
 import games.descent2e.components.tokens.DToken;
@@ -34,6 +35,7 @@ public class DescentGameData extends AbstractGameData {
     Deck<Card> searchCards;
     Deck<Card> act1ShopCards;
     Deck<Card> act2ShopCards;
+    Deck<Card> relicCards;
     List<Quest> quests;
     List<Quest> sideQuests;
     HashMap<String, HashMap<String, Monster>> monsters;
@@ -54,7 +56,7 @@ public class DescentGameData extends AbstractGameData {
         Pair<Deck<Card>, Deck<Card>> shopCards = ShopCard.loadCards(dataPath + "shopCards.json");
         act1ShopCards = shopCards.a;
         act2ShopCards = shopCards.b;
-
+        relicCards = RelicCard.loadCards(dataPath + "relicCards.json");
 
         decks = new ArrayList<>();
         // Read all class decks
@@ -387,12 +389,13 @@ public class DescentGameData extends AbstractGameData {
                 Objects.equals(heroes, that.heroes) && Objects.equals(decks, that.decks) &&
                 Objects.equals(searchCards, that.searchCards) && Objects.equals(quests, that.quests) &&
                 Objects.equals(act1ShopCards, that.act1ShopCards) && Objects.equals(act2ShopCards, that.act2ShopCards) &&
-                Objects.equals(sideQuests, that.sideQuests) && Objects.equals(monsters, that.monsters);
+                Objects.equals(relicCards, that.relicCards) && Objects.equals(sideQuests, that.sideQuests) &&
+                Objects.equals(monsters, that.monsters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tiles, boardConfigurations, heroes, decks, searchCards, act1ShopCards, act2ShopCards, quests, sideQuests, monsters);
+        return Objects.hash(tiles, boardConfigurations, heroes, decks, searchCards, act1ShopCards, act2ShopCards, relicCards, quests, sideQuests, monsters);
     }
 
     public DescentGameData copy() {
@@ -416,6 +419,7 @@ public class DescentGameData extends AbstractGameData {
         copy.searchCards = searchCards.copy();
         copy.act1ShopCards = act1ShopCards.copy();
         copy.act2ShopCards = act2ShopCards.copy();
+        copy.relicCards = relicCards.copy();
         copy.quests = new ArrayList<>();
         for (Quest q: quests) {
             copy.quests.add(q.copy());
