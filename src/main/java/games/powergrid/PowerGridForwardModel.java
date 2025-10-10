@@ -56,7 +56,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		PowerGridGameState state = (PowerGridGameState)firstState;
 		PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 		state.setActiveRegions(RegionPicker.randomContiguousSetDFS(state));		
-		state.setGameMap( PowerGridGraphBoard.northAmerica().penalizeRegions(state.getActiveRegions(),10000));//creates a board where the cost to go to invalid region is 100000
+		state.setGameMap( PowerGridGraphBoard.northAmerica().penalizeRegions(state.getActiveRegions()));//creates a board where the cost to go to invalid region is 100000
 		state.setInvalidCities(state.gameMap.invalidCities(state.getActiveRegions()));//creates a set of invalid cities based on the current legal board 
 		state.setValidCities(state.gameMap.validCities(state.getActiveRegions()));//creates a set of valid cities based on the current legal board 
 		state.setOneHotRegions(state.getActiveRegions(), 7);

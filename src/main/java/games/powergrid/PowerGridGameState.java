@@ -10,7 +10,6 @@ import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridGraphBoard;
 import games.powergrid.components.PowerGridResourceMarket;
-import games.powergrid.components.PowerGridCard.PlantInput;
 
 import java.util.*;
 

@@ -1,26 +1,17 @@
 package games.powergrid;
 
 import games.GameType;
-import games.powergrid.PowerGridFeatures;
-import games.diamant.*;
 
-import core.Game;
+
 import core.PyTAG;
-import core.AbstractGameState;
 import core.AbstractPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
-import utilities.ActionTreeNode;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-import core.*;
-import games.GameType;
-import players.python.PythonAgent;   // ensure this exists in your classpath
-import players.simple.RandomPlayer;
-
-import java.util.*;
 
 
 
@@ -46,7 +37,7 @@ public class TestFeatures {
     public static void main(String[] args) throws Exception {
         long seed = 1234;
         Random rnd = new Random(seed);
-        int numberOfSteps = 20;
+        int numberOfSteps = 100;
 
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new PythonAgent()); // learning slot

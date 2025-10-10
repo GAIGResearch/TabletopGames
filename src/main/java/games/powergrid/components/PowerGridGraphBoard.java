@@ -52,6 +52,9 @@ public final class PowerGridGraphBoard extends Component {
 
     private final Map<Integer, PowerGridCity> citiesById;
     private final Map<Integer, List<Edge>> adj;
+    private final int maxCost;
+    private final List<double[]>  AdjacencyVector; 
+    private static final int INVALID_EDGE_COST = 1000;
     public static final Map<Integer, Set<Integer>> REGION_ADJ_NA = Map.of(
     	    1, Set.of(2),      
     	    2, Set.of(1,3, 4),
@@ -86,6 +89,10 @@ public final class PowerGridGraphBoard extends Component {
         this.adj = tmp.entrySet().stream()
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
                                                       e -> List.copyOf(e.getValue())));
+        this.maxCost =  maxValidShortestPathCost();
+        this.AdjacencyVector = normalizedAdjacency2D();
+        
+       
     }
 
     public PowerGridCity city(int id) { return citiesById.get(id); }
@@ -290,7 +297,7 @@ public final class PowerGridGraphBoard extends Component {
     	    	    new Edge(45, 46, 10) // Guadalajara - Mexico City
     	    	);
 
-
+    	    
         return new PowerGridGraphBoard("NorthAmerica", cities, edges);
     }
     public int maxCityId() {
@@ -326,7 +333,7 @@ public final class PowerGridGraphBoard extends Component {
      *           is directed, remove the {@code e.from < e.to} filter.
      */
 
-    public PowerGridGraphBoard penalizeRegions(Set<Integer> keepRegions, int penaltyCost) {
+    public PowerGridGraphBoard penalizeRegions(Set<Integer> keepRegions) {
         Map<Integer, PowerGridCity> sameCities = new HashMap<>(this.citiesById);
 
         List<Edge> penalizedEdges = this.adj.entrySet().stream()
@@ -336,7 +343,7 @@ public final class PowerGridGraphBoard extends Component {
                 boolean bothActive =
                     keepRegions.contains(citiesById.get(e.from).getRegion()) &&
                     keepRegions.contains(citiesById.get(e.to).getRegion());
-                int newCost = bothActive ? e.cost : penaltyCost;
+                int newCost = bothActive ? e.cost : INVALID_EDGE_COST;
                 return new Edge(e.from, e.to, newCost);
             })
             .collect(Collectors.toList());
@@ -465,6 +472,107 @@ public final class PowerGridGraphBoard extends Component {
         return java.util.Collections.unmodifiableMap(result);
     }
 
+    
+    //Helper method used to determine the max possible cost between two cities this is used to normalize the adjacency matrix for RL 
+    public int maxValidShortestPathCost() {
+        int maxId = maxCityId();
+        java.util.List<Integer> cityIds = new java.util.ArrayList<>(citiesById.keySet());
+        cityIds.sort(Integer::compare);
 
+        int globalMax = 0;
+
+        for (int src : cityIds) {
+            int[] dist = new int[maxId + 1];
+            java.util.Arrays.fill(dist, Integer.MAX_VALUE);
+
+            java.util.PriorityQueue<int[]> pq =
+                new java.util.PriorityQueue<>(java.util.Comparator.comparingInt(a -> a[1]));
+            dist[src] = 0;
+            pq.add(new int[]{src, 0});
+
+            while (!pq.isEmpty()) {
+                int[] cur = pq.poll();
+                int u = cur[0], d = cur[1];
+                if (d != dist[u]) continue;
+
+                // Explore only valid edges (skip invalid edges with cost == 1000)
+                for (Edge e : edgesFrom(u)) {
+                    if (e.cost >= 1000) continue;
+                    int v = e.to;
+                    int nd = d + e.cost;
+                    if (nd < dist[v]) {
+                        dist[v] = nd;
+                        pq.add(new int[]{v, nd});
+                    }
+                }
+            }
+
+            for (int tgt : cityIds) {
+                int d = dist[tgt];
+                if (d != Integer.MAX_VALUE && d > globalMax)
+                    globalMax = d;
+            }
+        }
+        return globalMax;
+    }
+    
+    public int maxValidEdgeCost() {
+        int max = Integer.MIN_VALUE;
+        for (var list : adj.values()) {
+            for (Edge e : list) {
+                if (e.from < e.to && e.cost < INVALID_EDGE_COST) {
+                    if (e.cost > max) max = e.cost;
+                }
+            }
+        }
+        return (max == Integer.MIN_VALUE) ? 0 : max; // or throw if you prefer
+    }
+    
+    public List<double[]> normalizedAdjacency2D() {
+        final int maxId = Math.max(1, maxCityId()); 
+        final double idDenom = maxId;               
+        final int maxValidEdge = Math.max(1, maxCost);
+        final double costDenom = maxValidEdge;
+
+        List<double[]> out = new ArrayList<>();
+
+        // deterministic city order
+        var entries = new ArrayList<>(adj.entrySet());
+        entries.sort(Map.Entry.comparingByKey());
+
+        for (var ent : entries) {
+            int city = ent.getKey();
+            List<Edge> edges = ent.getValue();
+
+            // each city has 1 (city id) + 2 * numEdges elements
+            int len = 1 + (edges == null ? 0 : edges.size() * 2);
+            double[] vec = new double[len];
+            int pos = 0;
+
+            vec[pos++] = city / idDenom; // normalized city id
+
+            if (edges != null) {
+                for (Edge e : edges) {
+                    vec[pos++] = e.to / idDenom; // normalized neighbor id
+                    double costNorm = (e.cost >= INVALID_EDGE_COST)
+                            ? 1.0
+                            : 0.8 * (e.cost / costDenom);
+                    vec[pos++] = costNorm;
+                }
+            }
+
+            out.add(vec);
+        }
+
+        return out;
+    }
+
+
+    // If you prefer using the cached field:
+    public int getMaxValidShortestPathCost() { return maxCost; }
+
+    public List<double[]> getAdjacencyVector() {
+    	return this.AdjacencyVector;
+    }
 
 }

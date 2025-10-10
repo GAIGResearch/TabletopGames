@@ -56,6 +56,11 @@ public class PowerGridParameters extends AbstractParameters{
 
     public static final int[] INCOME_TRACK = {10,22,33,44,54,64,73,82,90,98,105,112,118,124,129,134,138,42,145,148,150};
     
+    public static final int MAX_INCOME = 150;
+    public static final int MAX_CARD= 50;
+    
+    public static final int MAX_CAPACITY= 20;
+    
     public List<PowerGridCard> plantsIncludedInGame = List.of(
     		//NOTE RENEWABLES RESOURCE COAL BUT COST NONE
     		//initial cards

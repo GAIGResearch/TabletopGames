@@ -1,12 +1,13 @@
 package games.powergrid;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import core.AbstractGameState;
 import core.components.Deck;
 import core.interfaces.IStateFeatureJSON;
 import core.interfaces.IStateFeatureVector;
-import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridResourceMarket;
 
@@ -24,70 +25,104 @@ public class PowerGridFeatures implements IStateFeatureVector, IStateFeatureJSON
 	@Override
 	public double[] doubleVector(AbstractGameState state, int playerId) {
 	    // return the actual numbers without calling featureVector()
+		double [] array = concatDoubleArrays(buildPlayersObservation(state, playerId), buildGlobalObservation(state,playerId));
 		System.out.println("GLOBAL VECTOR LENGTH"  + buildGlobalObservation(state,playerId).length);
+		if (hasValueGreaterThanOne(array)) {
+		    System.out.println("Found a value > 1!");
+		}
 	    return concatDoubleArrays(buildPlayersObservation(state, playerId), buildGlobalObservation(state,playerId)); // or your 11-feature self-only vector
 	}
+	
+	
+	public static boolean hasValueGreaterThanOne(double[] arr) {
+	    for (int i = 0; i < arr.length; i++) {
+	        double v = arr[i];
+	        if (v > 1.0) {
+	            System.out.println("Value " + v + " at index " + i + " is greater than 1.0");
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+
+
+
+
 	public double[] buildPlayersObservation(AbstractGameState state, int agentPlayerID) {
 	    PowerGridGameState pggs = (PowerGridGameState) state;
-	    final int MAX_PLAYERS = 6, F = 11; // 8 stats + 3 plant numbers
+	    PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 
-	    double[] out = new double[F * MAX_PLAYERS]; // 66
+	    final int MAX_PLAYERS = 6, F = 11;
+	    final double MONEY_MAX = 500.0;                 
+	    final double COAL_MAX = 9.0, GAS_MAX = 9.0, OIL_MAX = 9.0, UR_MAX = 6.0; //would be better if these corresponded to players actual capacity will experiment 
+	    final double CAP_MAX  = PowerGridParameters.MAX_CAPACITY;
+	    final double INC_MAX  = PowerGridParameters.MAX_INCOME;
+	    final double CARD_MAX = PowerGridParameters.MAX_CARD;
+	    final int nPlayers    = pggs.getNPlayers();
+	    final double cityMax  = (params.citiesToTriggerEnd[nPlayers - 1]) + 2.0; // your prior logic
 
-	    int w = 0; // write pointer
+	    double[] out = new double[F * MAX_PLAYERS];
+	    int w = 0;
 
-	    // self
-	    out[w+0] = pggs.getPlayersMoney(agentPlayerID);
-	    out[w+1] = pggs.getFuel(agentPlayerID, Resource.COAL);
-	    out[w+2] = pggs.getFuel(agentPlayerID, Resource.GAS);
-	    out[w+3] = pggs.getFuel(agentPlayerID, Resource.OIL);
-	    out[w+4] = pggs.getFuel(agentPlayerID, Resource.URANIUM);
-	    out[w+5] = pggs.getCityCountByPlayer(agentPlayerID);
-	    out[w+6] = pggs.getPlayerCapacity(agentPlayerID);
-	    out[w+7] = pggs.getIncome(agentPlayerID);
+	    // RL agent
+	    out[w+0] = n(pggs.getPlayersMoney(agentPlayerID), MONEY_MAX);
+	    out[w+1] = n(pggs.getFuel(agentPlayerID, PowerGridParameters.Resource.COAL), COAL_MAX);
+	    out[w+2] = n(pggs.getFuel(agentPlayerID, PowerGridParameters.Resource.GAS),  GAS_MAX);
+	    out[w+3] = n(pggs.getFuel(agentPlayerID, PowerGridParameters.Resource.OIL),  OIL_MAX);
+	    out[w+4] = n(pggs.getFuel(agentPlayerID, PowerGridParameters.Resource.URANIUM), UR_MAX);
+	    out[w+5] = n(pggs.getCityCountByPlayer(agentPlayerID), cityMax);
+	    out[w+6] = n(pggs.getPlayerCapacity(agentPlayerID), CAP_MAX);
+	    out[w+7] = n(pggs.getIncome(agentPlayerID),          INC_MAX);
 
 	    Deck<PowerGridCard> hand = pggs.getOwnedPlantsByPlayer(agentPlayerID);
-	    out[w+8]  = plantNo(hand, 0);
-	    out[w+9]  = plantNo(hand, 1);
-	    out[w+10] = plantNo(hand, 2);
+	    out[w+8]  = n(plantNo(hand, 0), CARD_MAX);
+	    out[w+9]  = n(plantNo(hand, 1), CARD_MAX);
+	    out[w+10] = n(plantNo(hand, 2), CARD_MAX);
 	    w += F;
 
-	    // the 5 others in seat order after the agent; zeros remain for empty seats
+	    // Other Players normalized 
 	    for (int offset = 1; offset < MAX_PLAYERS; offset++) {
 	        int pid = (agentPlayerID + offset) % MAX_PLAYERS;
-	        if (pid < pggs.getNPlayers()) {
-	            out[w+0] = pggs.getPlayersMoney(pid);
-	            out[w+1] = pggs.getFuel(pid, Resource.COAL);
-	            out[w+2] = pggs.getFuel(pid, Resource.GAS);
-	            out[w+3] = pggs.getFuel(pid, Resource.OIL);
-	            out[w+4] = pggs.getFuel(pid, Resource.URANIUM);
-	            out[w+5] = pggs.getCityCountByPlayer(pid);
-	            out[w+6] = pggs.getPlayerCapacity(pid);
-	            out[w+7] = pggs.getIncome(pid);
+	        if (pid < nPlayers) {
+	            out[w+0] = n(pggs.getPlayersMoney(pid), MONEY_MAX);
+	            out[w+1] = n(pggs.getFuel(pid, PowerGridParameters.Resource.COAL), COAL_MAX);
+	            out[w+2] = n(pggs.getFuel(pid, PowerGridParameters.Resource.GAS),  GAS_MAX);
+	            out[w+3] = n(pggs.getFuel(pid, PowerGridParameters.Resource.OIL),  OIL_MAX);
+	            out[w+4] = n(pggs.getFuel(pid, PowerGridParameters.Resource.URANIUM), UR_MAX);
+	            out[w+5] = n(pggs.getCityCountByPlayer(pid), cityMax);
+	            out[w+6] = n(pggs.getPlayerCapacity(pid), CAP_MAX);
+	            out[w+7] = n(pggs.getIncome(pid),          INC_MAX);
 
 	            Deck<PowerGridCard> opp = pggs.getOwnedPlantsByPlayer(pid);
-	            out[w+8]  = plantNo(opp, 0);
-	            out[w+9]  = plantNo(opp, 1);
-	            out[w+10] = plantNo(opp, 2);
+	            out[w+8]  = n(plantNo(opp, 0), CARD_MAX);
+	            out[w+9]  = n(plantNo(opp, 1), CARD_MAX);
+	            out[w+10] = n(plantNo(opp, 2), CARD_MAX);
+	        } else {
+	            // leave zeros for empty seats
 	        }
 	        w += F;
 	    }
 
 	    return out;
 	}
+
 	
 	public double[] buildGlobalObservation(AbstractGameState state, int agentPlayerID) {
 	    PowerGridGameState pggs = (PowerGridGameState) state;
 	    PowerGridResourceMarket market = pggs.getResourceMarket();
 
-	    double[] validRegions  = pggs.getOneHotRegions();                        
-	    double[] cityslotid    = encodeSlotsMineOppEmpty(pggs.getCitySlotsById(), agentPlayerID); 
+	    double[] validRegions  = pggs.getOneHotRegions();         
+	    
+	    List<double[]>  cityslotid    = encodeSlotsMineOppEmpty(pggs.getCitySlotsById(), agentPlayerID); 
+	    List<double[]> graphAdjacency = pggs.getGameMap().getAdjacencyVector();
+	    double[] mapVector = interleaveCitySlotsAndAdjacency(cityslotid,graphAdjacency);
 	    double[] resourceMarket= (market != null) ? market.flattenAvailableNormalized() : new double[4];
 	    double[] turnOrder     = encodeOrderNormalized(pggs.getTurnOrder(),      PowerGridParameters.MAXPLAYERS);
 	    double [] roundOrder    = encodeOrderNormalized(pggs.getRoundOrder(),     PowerGridParameters.MAXPLAYERS);
 	    double [] citiesOwned   = normalizePoweredCities(pggs.getPoweredCities(),
 	                                                   pggs.getMaxCitiesOwned(),
 	                                                   PowerGridParameters.MAXPLAYERS);
-
+	   
 	    // Current + Future markets (corrected: cm=four, fm=four; fixed indices)
 	    double[] currentFutureVector = new double[8];
 	    Deck<PowerGridCard> cm = pggs.getCurrentMarket();
@@ -96,17 +131,27 @@ public class PowerGridFeatures implements IStateFeatureVector, IStateFeatureJSON
 	        currentFutureVector[i]     = plantNo(cm, i); 
 	        currentFutureVector[i + 4] = plantNo(fm, i); 
 	    }
-
+	    if (hasValueGreaterThanOne(turnOrder)) {
+		    System.out.println("Found VR value > 1!");
+		}
 
 	    return concatDoubleArrays(
 	        validRegions,
-	        resourceMarket,       // safe even if market was null (we made [0,0,0,0])
+	        resourceMarket,       
 	        turnOrder,
 	        roundOrder,
 	        citiesOwned,
 	        currentFutureVector,
-	        cityslotid
+	        mapVector 
 	    );
+	}
+
+	private static double clamp01(double x) {
+	    return x < 0 ? 0 : (x > 1 ? 1 : x);
+	}
+
+	private static double n(double v, double denom) {
+	    return denom <= 0 ? 0 : clamp01(v / denom);
 	}
 
 	
@@ -125,26 +170,67 @@ public class PowerGridFeatures implements IStateFeatureVector, IStateFeatureJSON
 	    }
 	    return out;
 	}
-
-
 	
+	public static double[] interleaveCitySlotsAndAdjacency(
+	        List<double[]> cityslotidByCity,
+	        List<double[]> adjacencyByCity) {
+
+	    int n = Math.min(cityslotidByCity.size(), adjacencyByCity.size());
+
+	    // compute total length first
+	    int totalLen = 0;
+	    for (int i = 0; i < n; i++) {
+	        totalLen += cityslotidByCity.get(i).length + adjacencyByCity.get(i).length;
+	    }
+
+	    // build the output array
+	    double[] out = new double[totalLen];
+	    int pos = 0;
+
+	    for (int i = 0; i < n; i++) {
+	        double[] a = cityslotidByCity.get(i);
+	        double[] b = adjacencyByCity.get(i);
+
+	        System.arraycopy(a, 0, out, pos, a.length);
+	        pos += a.length;
+
+	        System.arraycopy(b, 0, out, pos, b.length);
+	        pos += b.length;
+	    }
+
+	    return out;
+	}
+
+
+
 	public static double[] encodeOrderNormalized(List<Integer> order, int maxPlayers) {
 	    double[] out = new double[maxPlayers];
+
+	    // Count only valid player IDs
 	    int activeCount = 0;
-
 	    for (int pid : order)
-	        if (pid >= 0 && pid < maxPlayers)
-	            activeCount++;
+	        if (pid >= 0 && pid < maxPlayers) activeCount++;
 
-	    for (int i = 0; i < order.size(); i++) {
-	        int pid = order.get(i);
+	    if (activeCount == 0) return out;           // all zeros
+	    if (activeCount == 1) {                      // single active gets 1.0
+	        for (int pid : order)
+	            if (pid >= 0 && pid < maxPlayers) { out[pid] = 1.0; break; }
+	        return out;
+	    }
+
+	    // rank players among valid entries only
+	    int rank = 0; // 0 for first, activeCount-1 for last
+	    for (int pid : order) {
 	        if (pid >= 0 && pid < maxPlayers) {
-	            // 1.0 = first, 0 = last among active players
-	            out[pid] = activeCount <= 1 ? 1f : (float) (activeCount - i) / (activeCount - 1);
+	            double v = 1.0 - ((double) rank / (activeCount - 1)); // 1.0 .. 0.0
+	            // optional clamp to be extra safe
+	            out[pid] = (v < 0 ? 0 : (v > 1 ? 1 : v));
+	            rank++;
 	        }
 	    }
 	    return out;
 	}
+
 	
 	
 	public static double[] normalizePoweredCities(int[] poweredCities, int maxCities, int maxPlayers) {
@@ -167,29 +253,27 @@ public class PowerGridFeatures implements IStateFeatureVector, IStateFeatureJSON
 	}
 	
 	
-	//helper method that encodes the game map 
-	public static double[] encodeSlotsMineOppEmpty(int[][] slots, int meId) {
-	    int total = 0;
-	    for (int[] row : slots) total += row.length;
-	    int width = 3; // mine, opponent, empty
-	    double[] out = new double[total * width];
+	// Helper method that encodes the city slots as a list of vectors [mine, opponent, empty]
+	public static List<double[]> encodeSlotsMineOppEmpty(int[][] slots, int meId) {
+	    List<double[]> encoded = new ArrayList<>();
 
-	    int k = 0;
 	    for (int[] row : slots) {
 	        for (int owner : row) {
-	            int base = k * width;
+	            double[] vec = new double[3]; // [mine, opponent, empty]
 	            if (owner < 0) {
-	                out[base + 2] = 0f;              // empty
+	                vec[2] = 1.0;  // empty
 	            } else if (owner == meId) {
-	                out[base + 0] = 1f;              // mine
+	                vec[0] = 1.0;  // mine
 	            } else {
-	                out[base + 1] = 1f;              // opponent
+	                vec[1] = 1.0;  // opponent
 	            }
-	            k++;
+	            encoded.add(vec);
 	        }
 	    }
-	    return out;
+
+	    return encoded;
 	}
+
 
 	@Override
 	public String[] names() {
