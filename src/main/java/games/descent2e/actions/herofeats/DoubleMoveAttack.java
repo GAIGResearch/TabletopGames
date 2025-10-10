@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static games.descent2e.DescentHelper.getAttackType;
 import static games.descent2e.DescentHelper.moveActions;
 
 public class DoubleMoveAttack extends DescentAction implements IExtendedSequence {
@@ -51,12 +52,24 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         List<RangedAttack> attacks = new ArrayList<>();
 
         Figure hero = dgs.getActingFigure();
+        DescentTypes.AttackType type = getAttackType(hero);
+        boolean reach = DescentHelper.checkReach(dgs, hero);
 
         if (!hero.hasUsedExtraAction()) {
-            List<Integer> targets = DescentHelper.getRangedTargets(dgs, hero);
-            if (!targets.isEmpty())
-                for (Integer target : targets)
-                    attacks.add(new FreeAttack(hero.getComponentID(), target, false, false));
+            if (type == DescentTypes.AttackType.MELEE || type == DescentTypes.AttackType.BOTH) {
+                List<Integer> targets = DescentHelper.getMeleeTargets(dgs, hero, reach);
+                if (!targets.isEmpty())
+                    for (Integer target : targets) {
+                        attacks.add(new FreeAttack(hero.getComponentID(), target, true, reach));
+                    }
+            }
+            if (type == DescentTypes.AttackType.RANGED || type == DescentTypes.AttackType.BOTH) {
+                List<Integer> targets = DescentHelper.getRangedTargets(dgs, hero);
+                if (!targets.isEmpty())
+                    for (Integer target : targets) {
+                        attacks.add(new FreeAttack(hero.getComponentID(), target, false, reach));
+                    }
+            }
         }
 
         moveActions = moveActions(dgs, hero);
