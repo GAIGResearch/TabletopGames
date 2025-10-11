@@ -213,7 +213,32 @@ public class ArchetypeSkills {
                 }
 
                 case "Exploding Rune" -> {
-                    // TODO: Fix Blast
+                    Deck<DescentCard> hand = f.getHandEquipment();
+                    if (hand == null) break;
+                    if (!hasRuneItem(f, hand)) break;
+
+                    DescentTypes.AttackType attackType = getAttackType(f);
+                    boolean reach = checkReach(dgs, f);
+                    List<Integer> targets;
+
+                    if (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH)
+                    {
+                        targets = getMeleeTargets(dgs, f, reach);
+                        for (Integer target : targets) {
+                            ExplodingRune explode = new ExplodingRune(f.getComponentID(), target, true, reach);
+                            if (explode.canExecute(dgs))
+                                actions.add(explode);
+                        }
+                    }
+                    if (attackType == DescentTypes.AttackType.RANGED || attackType == DescentTypes.AttackType.BOTH)
+                    {
+                        targets = getRangedTargets(dgs, f);
+                        for (Integer target : targets) {
+                            ExplodingRune explode = new ExplodingRune(f.getComponentID(), target);
+                            if (explode.canExecute(dgs))
+                                actions.add(explode);
+                        }
+                    }
                 }
 
                 case "Inscribe Rune" -> {
@@ -226,19 +251,7 @@ public class ArchetypeSkills {
                 case "Runic Sorcery" -> {
                     Deck<DescentCard> hand = f.getHandEquipment();
                     if (hand == null) break;
-                    boolean hasRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
-                    if (!hasRuneItem) {
-                        for (DescentCard item : hand.getComponents()) {
-                            String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
-                            if (equipmentType == null) continue;
-                            if (Arrays.asList(equipmentType).contains("Rune")) {
-                                hasRuneItem = true;
-                                break;
-                            }
-                        }
-                    }
-                    // If we still don't have a legal Rune weapon, don't bother
-                    if (!hasRuneItem) break;
+                    if (!hasRuneItem(f, hand)) break;
 
                     DescentTypes.AttackType attackType = getAttackType(f);
                     boolean reach = checkReach(dgs, f);
@@ -281,17 +294,7 @@ public class ArchetypeSkills {
                 case "Rune Mastery" -> {
                     Deck<DescentCard> hand = f.getHandEquipment();
                     if (hand == null) break;
-                    boolean hasRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
-                    if (!hasRuneItem) {
-                        for (DescentCard item : hand.getComponents()) {
-                            String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
-                            if (equipmentType == null) continue;
-                            if (Arrays.asList(equipmentType).contains("Rune")) {
-                                hasRuneItem = true;
-                                break;
-                            }
-                        }
-                    }
+                    boolean hasRuneItem = hasRuneItem(f, hand);
                     RuneMastery runeMastery = new RuneMastery(skill.getComponentID());
 
                     // Enable the ability only if we have a suitable weapon
@@ -306,19 +309,7 @@ public class ArchetypeSkills {
                 case "Break the Rune" -> {
                     Deck<DescentCard> hand = f.getHandEquipment();
                     if (hand == null) break;
-                    boolean hasRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
-                    if (!hasRuneItem) {
-                        for (DescentCard item : hand.getComponents()) {
-                            String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
-                            if (equipmentType == null) continue;
-                            if (Arrays.asList(equipmentType).contains("Rune")) {
-                                hasRuneItem = true;
-                                break;
-                            }
-                        }
-                    }
-                    // If we still don't have a legal Rune weapon, don't bother
-                    if (!hasRuneItem) break;
+                    if (!hasRuneItem(f, hand)) break;
 
                     List<Integer> targets = new ArrayList<>();
                     Set<BoardNode> tiles = getNeighboursInRange(dgs, f.getPosition(), 3);
@@ -602,5 +593,20 @@ public class ArchetypeSkills {
         }
 
         return actions;
+    }
+
+    public static boolean hasRuneItem(Figure f, Deck<DescentCard> hand) {
+        boolean hasRuneItem = f.hasBonus(DescentTypes.SkillBonus.InscribeRune);
+        if (!hasRuneItem) {
+            for (DescentCard item : hand.getComponents()) {
+                String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                if (equipmentType == null) continue;
+                if (Arrays.asList(equipmentType).contains("Rune")) {
+                    hasRuneItem = true;
+                    break;
+                }
+            }
+        }
+        return hasRuneItem;
     }
 }

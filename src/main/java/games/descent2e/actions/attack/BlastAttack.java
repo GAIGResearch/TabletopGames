@@ -33,6 +33,7 @@ public class BlastAttack extends MultiAttack {
         super(attackingFigure, defendingFigures);
         this.position = position;
         this.isFreeAttack = true;
+        this.isMelee = true;
     }
 
     @Override
@@ -79,7 +80,7 @@ public class BlastAttack extends MultiAttack {
     }
 
     public boolean canExecute(DescentGameState dgs) {
-        if (dgs.hasInterruptAttack(name)) return false;
+        if (!dgs.hasInterruptAttack(name)) return false;
         Figure f = dgs.getActingFigure();
 
         if (!PrayerOfPeace.canAttackPrayer(dgs, f)) return false;

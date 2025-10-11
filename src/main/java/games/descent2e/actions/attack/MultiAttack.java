@@ -9,7 +9,6 @@ import games.descent2e.actions.archetypeskills.PrayerOfPeace;
 import games.descent2e.actions.monsterfeats.Air;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.monsterfeats.NotMe;
-import games.descent2e.actions.monsterfeats.NotMeSwap;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
