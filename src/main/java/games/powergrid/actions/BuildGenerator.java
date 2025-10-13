@@ -60,6 +60,7 @@ public class BuildGenerator extends AbstractAction {
 
         citySlots[slotIndex] = playerId;
         pggs.decreasePlayerMoney(playerId, cost);
+        
 
         pggs.incrementCityCount(playerId); 
 
@@ -84,7 +85,7 @@ public class BuildGenerator extends AbstractAction {
     public int hashCode() {
         return Objects.hash(cityId, cost);
     }
-/*
+
     @Override
     public String getString(AbstractGameState gameState) {
         PowerGridGameState s = (PowerGridGameState) gameState;
@@ -103,10 +104,10 @@ public class BuildGenerator extends AbstractAction {
 
         return String.format("BuildGenerator(city=%s, slot=%s, cost=%d)", cityName, slotStr, cost);
     }
-*/
-    @Override
-    public String getString(AbstractGameState gameState) {
-    	return "Build " + cityId; 
+
+    
+    public String getSimpleString() {
+    	return "Build " + this.cityId; 
     }
 
     /**

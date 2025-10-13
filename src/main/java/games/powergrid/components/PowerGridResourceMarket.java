@@ -167,9 +167,9 @@ public class PowerGridResourceMarket extends Component {
     public double[] flattenAvailableNormalized() {
         double[] out = new double[4];
 
-        double maxCoal     = 24d;
+        double maxCoal     = 27d;
         double maxGas      = 24d;
-        double maxOil      = 24d;
+        double maxOil      = 20d;
         double maxUranium  = 12d;
 
         out[0] = avail.get(PowerGridParameters.Resource.COAL)    / maxCoal;

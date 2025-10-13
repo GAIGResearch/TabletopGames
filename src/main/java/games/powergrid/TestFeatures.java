@@ -35,9 +35,9 @@ public class TestFeatures {
     }
 
     public static void main(String[] args) throws Exception {
-        long seed = 1234;
+        long seed = 1;
         Random rnd = new Random(seed);
-        int numberOfSteps = 100;
+        int numberOfSteps = 20;
 
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new PythonAgent()); // learning slot
@@ -79,6 +79,7 @@ public class TestFeatures {
             // AFTER step: observation + tree + action mask
             System.out.println("\n=== AFTER step " + step + " ===");
             printPretty(names, env.getObservationVector());
+            System.out.println("Observation Size: " + env.getObservationVector().length);
             System.out.println("Shape: " + env.getTreeShape());
             System.out.println("Tree mask: " + java.util.Arrays.toString(env.getActionTree()));
             System.out.println("Tree mask Size: " + (env.getActionTree().length));

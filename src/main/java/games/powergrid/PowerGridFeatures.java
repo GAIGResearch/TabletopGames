@@ -3,6 +3,7 @@ package games.powergrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import core.AbstractGameState;
 import core.components.Deck;
@@ -26,7 +27,6 @@ public class PowerGridFeatures implements IStateFeatureVector, IStateFeatureJSON
 	public double[] doubleVector(AbstractGameState state, int playerId) {
 	    // return the actual numbers without calling featureVector()
 		double [] array = concatDoubleArrays(buildPlayersObservation(state, playerId), buildGlobalObservation(state,playerId));
-		System.out.println("GLOBAL VECTOR LENGTH"  + buildGlobalObservation(state,playerId).length);
 		if (hasValueGreaterThanOne(array)) {
 		    System.out.println("Found a value > 1!");
 		}
@@ -277,7 +277,148 @@ public class PowerGridFeatures implements IStateFeatureVector, IStateFeatureJSON
 
 	@Override
 	public String[] names() {
-		return new String[]{ "Player Money", "Resource:Coal","Resource:Gas","Resource:Oil","Resource:Uranium", "Generator", "Capacity", "Income","Plant1","Plant2","Plant3"};
+		String[] playerBlockNames = {
+			    // --- Agent (Player 0) ---
+			    "Agent Money", 
+			    "Resource:Coal", 
+			    "Resource:Gas", 
+			    "Resource:Oil", 
+			    "Resource:Uranium", 
+			    "Generator", 
+			    "Capacity", 
+			    "Income", 
+			    "Plant1", 
+			    "Plant2", 
+			    "Plant3",
+
+			    // --- Player 1 ---
+			    "Player1 Money", 
+			    "Resource:Coal", 
+			    "Resource:Gas", 
+			    "Resource:Oil", 
+			    "Resource:Uranium", 
+			    "Generator", 
+			    "Capacity", 
+			    "Income", 
+			    "Plant1", 
+			    "Plant2", 
+			    "Plant3",
+
+			    // --- Player 2 ---
+			    "Player2 Money", 
+			    "Resource:Coal", 
+			    "Resource:Gas", 
+			    "Resource:Oil", 
+			    "Resource:Uranium", 
+			    "Generator", 
+			    "Capacity", 
+			    "Income", 
+			    "Plant1", 
+			    "Plant2", 
+			    "Plant3",
+
+			    // --- Player 3 ---
+			    "Player3 Money", 
+			    "Resource:Coal", 
+			    "Resource:Gas", 
+			    "Resource:Oil", 
+			    "Resource:Uranium", 
+			    "Generator", 
+			    "Capacity", 
+			    "Income", 
+			    "Plant1", 
+			    "Plant2", 
+			    "Plant3",
+
+			    // --- Player 4 ---
+			    "Player4 Money", 
+			    "Resource:Coal", 
+			    "Resource:Gas", 
+			    "Resource:Oil", 
+			    "Resource:Uranium", 
+			    "Generator", 
+			    "Capacity", 
+			    "Income", 
+			    "Plant1", 
+			    "Plant2", 
+			    "Plant3",
+
+			    // --- Player 5 ---
+			    "Player5 Money", 
+			    "Resource:Coal", 
+			    "Resource:Gas", 
+			    "Resource:Oil", 
+			    "Resource:Uranium", 
+			    "Generator", 
+			    "Capacity", 
+			    "Income", 
+			    "Plant1", 
+			    "Plant2", 
+			    "Plant3"
+			};
+		String[] powerGridStateVariables = { 
+			    // --- Regions ---
+			    "Region1", 
+			    "Region2", 
+			    "Region3", 
+			    "Region4", 
+			    "Region5", 
+			    "Region6", 
+			    "Region7",
+
+			    // --- Resource Market ---
+			    "Coal_Amount", 
+			    "Gas_Amount", 
+			    "Oil_Amount", 
+			    "Uranium_Amount",
+
+			    // --- Turn Order (TO) ---
+			    "TO_First", 
+			    "TO_Second", 
+			    "TO_Third", 
+			    "TO_Fourth", 
+			    "TO_Fifth", 
+			    "TO_Sixth", 
+
+			    // --- Round Order (RO) ---
+			    "RO_First", 
+			    "RO_Second", 
+			    "RO_Third", 
+			    "RO_Fourth", 
+			    "RO_Fifth", 
+			    "RO_Sixth", 
+
+			    // --- Player City Counts ---
+			    "Player0_Cities_Owned", 
+			    "Player1_Cities_Owned", 
+			    "Player2_Cities_Owned", 
+			    "Player3_Cities_Owned", 
+			    "Player4_Cities_Owned", 
+			    "Player5_Cities_Owned",
+			    
+			    //Current Market 			    
+			    "Current_Market1",
+			    "Current_Market2",
+			    "Current_Market3",
+			    "Current_Market4",
+			    
+			    //Future Market
+			    "Future_Market1",
+			    "Future_Market2",
+			    "Future_Market3",
+			    "Future_Market4"
+			    
+			};
+		
+
+
+		String[] combined = Stream.concat(
+			    Arrays.stream(playerBlockNames),
+			    Arrays.stream(powerGridStateVariables)
+			).toArray(String[]::new);
+
+			return combined; 
+		
 	}  
     public int getObservationSpace() {
         return names().length;

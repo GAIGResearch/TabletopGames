@@ -719,92 +719,92 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     
     
     
-    //PYTAG ACTION TREES 
-    @Override 
+ // PYTAG ACTION TREES
+    @Override
     public ActionTreeNode initActionTree(AbstractGameState gs) {
         PowerGridGameState s = (PowerGridGameState) gs;
-        ActionTreeNode root = new ActionTreeNode(0, "root");
         PowerGridGraphBoard map = s.getGameMap();
+        PowerGridParameters params = (PowerGridParameters) s.getGameParameters();
+
+        ActionTreeNode root = new ActionTreeNode(0, "root");
+
+        // --- AUCTION & sub-tree roots
         ActionTreeNode auction = root.addChild(0, "AUCTION");
         ActionTreeNode startAuction = auction.addChild(0, "start_auction");
-        
-        //Pass Round action is attached to the root
-        ActionTreeNode passRound = root.addChild(0,"Pass Round");
+
+        // Pass Round is a fixed literal in updateActionTree → keep the same here
+        ActionTreeNode passRound = root.addChild(0, "Pass Round");
         passRound.setAction(new PassAction());
-     
-     
-        //Increase Bid action 
-        ActionTreeNode leafbid = auction.addChild(0, "Increase Bid");
-        leafbid.setAction(new IncreaseBid());
-        
-        //Pass Bid Action 
-        ActionTreeNode leafPassBid = auction.addChild(0, "Pass Bid");
-        leafPassBid.setAction(new PassBid());
-        
-        //return "Discard: " + index ;
-        ActionTreeNode leafdis0 =  auction.addChild(0, "Discard 0");
-        leafdis0.setAction(new Discard(0));
-        ActionTreeNode leafdis1 =auction.addChild(0, "Discard 1");
-        leafdis1.setAction(new Discard(1));
-        ActionTreeNode leafdis2 =  auction.addChild(0, "Discard 2");
-        leafdis2.setAction(new Discard(2));
+
+        {
+            IncreaseBid ib = new IncreaseBid();
+            ActionTreeNode n = auction.addChild(0, ib.getString(null));
+            n.setAction(ib);
+        }
+
+        {
+            PassBid pb = new PassBid();
+            ActionTreeNode n = auction.addChild(0, pb.getString(null));
+            n.setAction(pb);
+        }
+
+        for (int i = 0; i < 3; i++) {
+            Discard d = new Discard(i);
+            ActionTreeNode n = auction.addChild(0, d.getString(null));
+            n.setAction(d);
+        }
+
+        // Open auction leaves under start_auction 
+        for (PowerGridCard card : params.plantsIncludedInGame) {
+            int plantNumber = card.getNumber();
+            AuctionPowerPlant app = new AuctionPowerPlant(plantNumber);
+            ActionTreeNode n = startAuction.addChild(0, app.getString(null));
+            n.setAction(app);
+        }
 
        
-		PowerGridParameters params = (PowerGridParameters) s.getGameParameters();
-		
-		
-		ActionTreeNode runPowerPlant = root.addChild(0,"BUREAUCRACY");
-		for (PowerGridCard card : params.plantsIncludedInGame) {
-		    int plantNumber = card.getNumber();
-		    ActionTreeNode auctionLeaf = startAuction.addChild(0, "OpenAuction(plant=" + plantNumber +")");
-		    auctionLeaf.setAction(new AuctionPowerPlant(plantNumber));
+        ActionTreeNode runPowerPlant = root.addChild(0, "BUREAUCRACY");
+        for (PowerGridCard card : params.plantsIncludedInGame) {
+            int plantNumber = card.getNumber();
+            if (card.getInput().hasMultipleTypes()) {
+                for (EnumMap<Resource, Integer> mix : card.generatePossibleCombos()) {
+                    RunPowerPlant act = new RunPowerPlant(plantNumber, mix);
+                    ActionTreeNode leaf = runPowerPlant.addChild(0, act.getString(null));
+                    leaf.setAction(act);
+                }
+            } else {
+                RunPowerPlant act = new RunPowerPlant(plantNumber, card.getInput().asMap());
+                ActionTreeNode leaf = runPowerPlant.addChild(0, act.getString(null));
+                leaf.setAction(act);
+            }
+        }
 
-		    if (card.getInput().hasMultipleTypes()) {
-		        for (EnumMap<Resource,Integer> mix : card.generatePossibleCombos()) {
-		            RunPowerPlant act = new RunPowerPlant(plantNumber, mix);
-		            String label = act.getString(null);           // <<< unify labels
-		            ActionTreeNode leaf = runPowerPlant.addChild(0, label);
-		            leaf.setAction(act);
-		        }
-		    } else {
-		        RunPowerPlant act = new RunPowerPlant(plantNumber, card.getInput().asMap());
-		        String label = act.getString(null);               // <<< unify labels
-		        ActionTreeNode leaf = runPowerPlant.addChild(0, label);
-		        leaf.setAction(act);
-		    }
-		}
-        
         ActionTreeNode buyResource = root.addChild(0, "RESOURCE_BUY");
+        java.util.function.BiConsumer<Resource, Integer> addBuy = (res, amt) -> {
+            BuyResource act = new BuyResource(res, amt);
+            ActionTreeNode leaf = buyResource.addChild(0, act.getString(null));
+            leaf.setAction(act);
+        };
+        for (int i = 1; i <= 9; i++) {
+            addBuy.accept(Resource.COAL, i);
+            addBuy.accept(Resource.GAS,  i);
+            addBuy.accept(Resource.OIL,  i);
+            if (i <= 6) addBuy.accept(Resource.URANIUM, i);
+        }
 
-	     java.util.function.BiConsumer<Resource, Integer> addBuy = (res, amt) -> {
-	         BuyResource act = new BuyResource(res, amt);
-	         String label = act.getString(null);   // safe: your getString ignores the state
-	         ActionTreeNode leaf = buyResource.addChild(0, label);
-	         leaf.setAction(act);
-	     };
+        // --- BUILD – labels must match bg.getSimpleString() (used in updateActionTree)
+        ActionTreeNode buildCity = root.addChild(0, "BUILD");
+        for (PowerGridCity city : map.cities()) {
+            int cityId = city.getComponentID();
+            int baseCost = 10; // placeholder if your action computes internally
+            BuildGenerator action = new BuildGenerator(cityId, baseCost);
+            ActionTreeNode leaf = buildCity.addChild(0, action.getSimpleString());
+            leaf.setAction(action);
+        }
 
-	     for (int i = 1; i <= 9; i++) {
-	         addBuy.accept(Resource.COAL, i);
-	         addBuy.accept(Resource.GAS,  i);
-	         addBuy.accept(Resource.OIL,  i);
-	         if (i <= 6) addBuy.accept(Resource.URANIUM, i); 
-	     }
-	     ActionTreeNode buildCity = root.addChild(0, "BUILD");
-
-	     for (PowerGridCity city : map.cities()) {
-	         int cityId = city.getComponentID();
-	         // For simplicity, the base build cost (without network distance) can come from your parameters.
-	         // The forward model or execute() method will recalc the final price correctly when executed.
-	         int baseCost = 10; // placeholder; you can pass 0 or city.getCost() if you store it per city.
-
-	         BuildGenerator action = new BuildGenerator(cityId, baseCost);
-	         String label = action.getString(null);   // e.g. "BuildGenerator(city=Boston, slot=none, cost=10)"
-	         
-	         ActionTreeNode leaf = buildCity.addChild(0, label);
-	         leaf.setAction(action);
-	     }
         return root;
     }
+
 
     
 
@@ -819,17 +819,14 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             case AUCTION -> {
                 ActionTreeNode auction  = ensure(root,  "AUCTION");
                 ActionTreeNode start    = ensure(auction, "start_auction");
-                ActionTreeNode incBid   = ensure(auction, "Increase Bid");
-                ActionTreeNode passBidN = ensure(auction, "Pass Bid");
 
                 for (var a : actions) {
                     if (a instanceof AuctionPowerPlant app) {
-                        String key = app.getString(null);
-                        ensure(start, key).setAction(a);
-                    } else if (a instanceof IncreaseBid) {
-                        incBid.setAction(a);
-                    } else if (a instanceof PassBid) {
-                        passBidN.setAction(a);
+                        ensure(start, app.getString(null)).setAction(a);
+                    } else if (a instanceof IncreaseBid ib) {
+                        ensure(auction, ib.getString(null)).setAction(a);
+                    } else if (a instanceof PassBid pb) {
+                        ensure(auction,pb.getString(null)).setAction(a);
                     } else if (a instanceof Discard d) {
                         ensure(auction, d.getString(null)).setAction(a);
                     } else if (a instanceof PassAction) {
@@ -853,7 +850,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
                 ActionTreeNode build = ensure(root, "BUILD");
                 for (var a : actions) {
                     if (a instanceof BuildGenerator bg) {
-                        ensure(build, bg.getString(null)).setAction(a);      
+                        ensure(build, bg.getSimpleString()).setAction(a);      
                     } else if (a instanceof PassAction) {
                         ensure(root, "Pass Round").setAction(a);
                     }
