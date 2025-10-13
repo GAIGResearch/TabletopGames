@@ -33,7 +33,7 @@ enum FeatureExtractors {
     SushiGo(null, SGFeatures.class),
     TicTacToe(TTTFeatures.class, TTTFeatures.class),
     Diamant(DiamantFeatures.class, DiamantFeatures.class),
-	PowerGrid(PowerGridFeatures.class, PowerGridFeatures.class); //gets both the JSON and Vector observation 
+	PowerGrid(PowerGridFeatures.class, null); //gets both the JSON and Vector observation 
     Class<? extends IStateFeatureVector> stateFeatureVector;
     Class<? extends IStateFeatureJSON> stateFeatureJSON;
     FeatureExtractors(Class<? extends IStateFeatureVector> stateFeatureVector, Class<? extends IStateFeatureJSON> stateFeatureJSON) {

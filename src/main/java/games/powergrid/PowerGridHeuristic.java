@@ -2,6 +2,7 @@ package games.powergrid;
 
 
 import core.AbstractGameState;
+import core.CoreConstants.GameResult;
 import core.interfaces.IStateHeuristic;
 
 public class PowerGridHeuristic implements IStateHeuristic {
@@ -12,6 +13,14 @@ public class PowerGridHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState gs, int playerId) {
         PowerGridGameState s = (PowerGridGameState) gs;
         PowerGridParameters p = (PowerGridParameters) s.getGameParameters();
+        if (s.isGameOver()) {
+            if (gs.getWinner() == playerId)
+                return 10;
+            else {
+            	return 0;
+            }
+            
+        }
 
         int endTrigger = p.citiesToTriggerEnd[s.getNPlayers() - 1];
         int cities     = s.getCityCountByPlayer(playerId);

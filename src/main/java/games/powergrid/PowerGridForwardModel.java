@@ -112,14 +112,13 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	                    
 	                }
 	            }
-	            // Player may also pass (done for the round)
-	            actions.add(new PassAction());
-	        } else {
-	            return null;
+	        } 
+
+	        	actions.add(new PassAction());
 	        }
 
 	        break;
-	    }
+	    
 
         case RESOURCE_BUY:
         	EnumMap<PowerGridParameters.Resource, Integer> buyCapacity = playerBuyCapacity(s, me);
@@ -732,21 +731,20 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         ActionTreeNode auction = root.addChild(0, "AUCTION");
         ActionTreeNode startAuction = auction.addChild(0, "start_auction");
 
-        // Pass Round is a fixed literal in updateActionTree → keep the same here
+        // Pass Round is 
         ActionTreeNode passRound = root.addChild(0, "Pass Round");
         passRound.setAction(new PassAction());
 
-        {
-            IncreaseBid ib = new IncreaseBid();
-            ActionTreeNode n = auction.addChild(0, ib.getString(null));
-            n.setAction(ib);
-        }
+        // Increase Bid
+        IncreaseBid ib = new IncreaseBid();
+        ActionTreeNode n1 = auction.addChild(0, ib.getString(null));
+        n1.setAction(ib);
 
-        {
-            PassBid pb = new PassBid();
-            ActionTreeNode n = auction.addChild(0, pb.getString(null));
-            n.setAction(pb);
-        }
+        // Pass Bid
+        PassBid pb = new PassBid();
+        ActionTreeNode n2 = auction.addChild(0, pb.getString(null));
+        n2.setAction(pb);
+
 
         for (int i = 0; i < 3; i++) {
             Discard d = new Discard(i);
