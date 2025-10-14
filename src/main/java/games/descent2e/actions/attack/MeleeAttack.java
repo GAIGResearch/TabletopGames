@@ -1,6 +1,5 @@
 package games.descent2e.actions.attack;
 
-import com.sun.xml.bind.v2.model.annotation.Quick;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -21,8 +20,6 @@ import games.descent2e.components.*;
 import utilities.Vector2D;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.Triggers.*;
@@ -399,6 +396,14 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             Deck<DescentCard> myEquipment = f.getAllEquipment();
             for (DescentCard equipment : myEquipment.getComponents())
             {
+                // Ignore skills of our non-primary weapon
+                if (isAttacker)
+                    if (f.getHandEquipment().contains(equipment))
+                        if (f.getWeapons().size() > 1)
+                            if (!f.getPrimaryWeapon().equals(equipment))
+                                continue;
+
+
                 // Apply Armour dice
                 if (!isAttacker) {
                     if (equipment.equals(f.getArmor())) {
@@ -872,6 +877,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         if (phase.interrupt == null) {
             System.out.println(phase + "; " + phase.interrupt);
+            throw new AssertionError("Should not be reachable");
         }
         DescentGameState state = (DescentGameState) gs;
         List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
@@ -1289,7 +1295,15 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public String getInitialResult(DescentGameState dgs)
     {
         Figure defender = (Figure) dgs.getComponentById(defendingFigure);
-        return "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
+        String result = "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
+
+        Figure attacker = (Figure) dgs.getComponentById(attackingFigure);
+        if (attacker instanceof Hero hero) {
+            if (hero.getPrimaryWeapon() != null)
+                return "Weapon: " + hero.getPrimaryWeapon().toString() + "; " + result;
+        }
+
+        return result;
     }
 
     public void addInterruptAttack (DescentGameState dgs, String attack)

@@ -32,6 +32,7 @@ public class Hero extends Figure {
     Deck<DescentCard> skills;
     Deck<DescentCard> handEquipment;
     DescentCard armor;
+    DescentCard primaryWeapon;
     Deck<DescentCard> otherEquipment;
     Deck<DescentCard> inventory;
     Map<String, Integer> equipSlotsAvailable;
@@ -94,6 +95,18 @@ public class Hero extends Figure {
         this.handEquipment = handEquipment;
     }
 
+    public DescentCard getPrimaryWeapon() {
+        return primaryWeapon;
+    }
+
+    public void setPrimaryWeapon(DescentCard weapon) {
+        primaryWeapon = weapon;
+    }
+
+    public void resetPrimaryWeapon() {
+        primaryWeapon = null;
+    }
+
     public DescentCard getArmor() {
         return armor;
     }
@@ -121,8 +134,10 @@ public class Hero extends Figure {
     public boolean hasEquipment() {
         // First, check that we actually have any items in our inventory that can be equipped
         if (!inventory.getComponents().isEmpty())
-            for (DescentCard item : inventory.getComponents())
+            for (DescentCard item : inventory.getComponents()) {
+                if (item.isAttack()) return true;
                 if (canEquip(item)) return true;
+            }
 
         // Next, check that we have any armour, weapons, or other items already equipped
         // Only allow if we have at least one weapon equipped (and thus have more than the basic Blue attack die)
@@ -403,6 +418,9 @@ public class Hero extends Figure {
 
     @Override
     public DicePool getAttackDice() {
+        // If we have multiple weapons equipped, we need to pick the primary weapon
+        if (getWeapons().contains(primaryWeapon))
+            return primaryWeapon.getDicePool();
         Optional<DescentCard> wpn = getWeapons().stream().findFirst();
         if (wpn.isPresent())
             return wpn.get().getDicePool();
@@ -420,7 +438,8 @@ public class Hero extends Figure {
                 rested == hero.rested && defeated == hero.defeated &&
                 canTrade == hero.canTrade && equipped == hero.equipped &&
                 Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) &&
-                Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(inventory, hero.inventory) &&
+                Objects.equals(primaryWeapon, hero.primaryWeapon) && Objects.equals(armor, hero.armor) &&
+                Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(inventory, hero.inventory) &&
                 Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Objects.equals(heroicFeatStr, hero.heroicFeatStr) &&
                 heroicFeat == hero.heroicFeat && heroAbility == hero.heroAbility &&
                 Objects.equals(abilityStr, hero.abilityStr) && maxMovement == hero.maxMovement;
@@ -428,7 +447,7 @@ public class Hero extends Figure {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, inventory,
+        return Objects.hash(super.hashCode(), skills, handEquipment, primaryWeapon, armor, otherEquipment, inventory,
                 equipSlotsAvailable, heroicFeatStr, heroicFeat.ordinal(), usedHeroAbility, featAvailable,
                 canTrade, equipped, rested, defeated, heroAbility.ordinal(), abilityStr, maxMovement);
     }
@@ -452,6 +471,7 @@ public class Hero extends Figure {
         if (skills != null) copy.skills = skills.copy();
         if (handEquipment != null) copy.handEquipment = handEquipment.copy();
         if (otherEquipment != null) copy.otherEquipment = otherEquipment.copy();
+        if (primaryWeapon != null) copy.primaryWeapon = primaryWeapon.copy();
         if (armor != null) copy.armor = armor.copy();
         if (inventory != null) copy.inventory = inventory.copy();
         copy.heroicFeatStr = this.heroicFeatStr;

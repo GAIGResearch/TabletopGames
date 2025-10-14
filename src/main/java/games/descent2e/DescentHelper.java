@@ -42,16 +42,10 @@ public class DescentHelper {
 
         if (f instanceof Hero)
         {
-            Deck<DescentCard> hand = ((Hero) f).getHandEquipment();
-            if (hand != null) {
-                for (DescentCard item : hand.getComponents()) {
-                    String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
-                    if (equipmentType == null) continue;
-                    if (Arrays.asList(equipmentType).contains("Reach")) {
-                        return true;
-                    }
-                }
-            }
+            DescentCard item = ((Hero) f).getPrimaryWeapon();
+            String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+            if (equipmentType == null) return false;
+            return Arrays.asList(equipmentType).contains("Reach");
 
         }
         return false;
@@ -713,6 +707,7 @@ public class DescentHelper {
                     }
                 }
             }
+            attackType = ((Hero) f).getPrimaryWeapon().getAttackType();
         }
         if (f instanceof Monster) {
             attackType = ((Monster) f).getAttackType();
@@ -1133,18 +1128,22 @@ public class DescentHelper {
         if (type == null) return;
 
         if (type.getValues()[0].contains("hand")) {
+            // Set Primary Weapon
+            if (item.isAttack()) {
+                if (equipping) {
+                    if (f.getPrimaryWeapon() == null)
+                        f.setPrimaryWeapon(item);
+                } else {
+                    Deck<DescentCard> hands = f.getHandEquipment();
+                    if (hands.getComponents().isEmpty() || !hands.get(0).isAttack())
+                        f.resetPrimaryWeapon();
+                }
+            }
+
+            // Apply Surges
             PropertyStringArray surges = ((PropertyStringArray) item.getProperty("weaponSurges"));
             if (surges != null) {
-                for (Surge surge : item.getWeaponSurges()) {
-                    SurgeAttackAction s = new SurgeAttackAction(surge, f.getComponentID());
-                    if (equipping) {
-                        f.addAbility(s);
-                    }
-                    else {
-                        if (f.hasAbility(s))
-                            f.removeAbility(s);
-                    }
-                }
+                enableSurges(f, item, equipping);
             }
         }
 
@@ -1438,6 +1437,21 @@ public class DescentHelper {
             combos.add(indexToTrack.get(i));
             getCombinations(i+1, max, combos, retVal, indexToTrack);
             combos.remove(combos.size() - 1);
+        }
+    }
+
+    public static void enableSurges(Hero f, DescentCard item, boolean enable) {
+        for (Surge surge : item.getWeaponSurges()) {
+            SurgeAttackAction s = new SurgeAttackAction(surge, f.getComponentID());
+            if (enable) {
+                // Only enable Surges if they are the primary weapon
+                if (f.getPrimaryWeapon().equals(item))
+                    f.addAbility(s);
+            }
+            else {
+                if (f.hasAbility(s))
+                    f.removeAbility(s);
+            }
         }
     }
 }

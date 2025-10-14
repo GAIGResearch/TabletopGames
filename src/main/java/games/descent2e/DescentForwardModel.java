@@ -19,6 +19,7 @@ import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
+import games.descent2e.actions.items.ChangeWeapon;
 import games.descent2e.actions.items.EquipItem;
 import games.descent2e.actions.items.ScorpionsKiss;
 import games.descent2e.actions.items.TradeItem;
@@ -343,7 +344,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
         // There is a slim but non-zero chance that, somehow, the last acting Monster the Overlord had just killed itself with a Friendly Fire incident
         // We need to account for that here
-        boolean lastMonsterTeamKilled = (dgs.getCurrentPlayer() == dgs.overlordPlayer && dgs.getCurrentMonsterGroup().isEmpty());
+        boolean lastMonsterTeamKilled = (dgs.getTurnOwner() == dgs.overlordPlayer && dgs.getCurrentMonsterGroup().isEmpty());
 
         if (action instanceof EndFigureTurn || lastMonsterTeamKilled) {
 
@@ -1007,7 +1008,6 @@ public class DescentForwardModel extends StandardForwardModel {
                     }
                 }
             }
-
         }
 
         // Flying Monsters must declare they've landed before performing any other actions other than moving
@@ -1147,13 +1147,21 @@ public class DescentForwardModel extends StandardForwardModel {
             // TODO: exhaust a card for an action/modifier/effect "free" action
         }
 
-        if (actingFigure instanceof Hero) {
+        if (actingFigure instanceof Hero hero) {
+            if (hero.getWeapons().size() > 1) {
+                for (DescentCard weapon : hero.getWeapons()) {
+                    ChangeWeapon changeWeapon = new ChangeWeapon(hero.getComponentID(), weapon.getComponentID());
+                    if (changeWeapon.canExecute(dgs))
+                        actions.add(changeWeapon);
+                }
+            }
+
             // Archetype Skills
             List<AbstractAction> archetypeSkills = getArchetypeSkillActions(dgs, actingFigure.getComponentID());
             if (!archetypeSkills.isEmpty()) actions.addAll(archetypeSkills);
 
             // Heroic Feat
-            if (((Hero) actingFigure).isFeatAvailable()) {
+            if (hero.isFeatAvailable()) {
                 List<DescentAction> heroicFeats = heroicFeatAction(dgs);
                 if (!heroicFeats.isEmpty())
                     actions.addAll(heroicFeats);

@@ -13,6 +13,8 @@ import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.EndCurrentPhase;
 import games.descent2e.actions.attack.FreeAttack;
 import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.actions.items.ChangeWeapon;
+import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 
@@ -51,9 +53,18 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         List<AbstractAction> moveActions;
         List<RangedAttack> attacks = new ArrayList<>();
 
-        Figure hero = dgs.getActingFigure();
+        Hero hero = (Hero) dgs.getActingFigure();
         DescentTypes.AttackType type = getAttackType(hero);
         boolean reach = DescentHelper.checkReach(dgs, hero);
+
+        moveActions = moveActions(dgs, hero);
+        if (!moveActions.isEmpty()) {
+            StopMove stopMove = new StopMove(hero.getComponentID());
+            // Jain should only stop if she has not made her free attack yet
+            if (stopMove.canExecute(dgs) && hero.hasUsedExtraAction())
+                retVal.add(stopMove);
+            retVal.addAll(moveActions);
+        }
 
         if (!hero.hasUsedExtraAction()) {
             if (type == DescentTypes.AttackType.MELEE || type == DescentTypes.AttackType.BOTH) {
@@ -70,22 +81,19 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
                         attacks.add(new FreeAttack(hero.getComponentID(), target, false, reach));
                     }
             }
-        }
-
-        moveActions = moveActions(dgs, hero);
-        if (!moveActions.isEmpty()) {
-            StopMove stopMove = new StopMove(hero.getComponentID());
-            // Jain should only stop if she has not made her free attack yet
-            if (stopMove.canExecute(dgs) && hero.hasUsedExtraAction())
-                retVal.add(stopMove);
-            retVal.addAll(moveActions);
+            // Allow for swapping weapons
+            if (hero.getWeapons().size() > 1) {
+                for (DescentCard weapon : hero.getWeapons()) {
+                    ChangeWeapon change = new ChangeWeapon(hero.getComponentID(), weapon.getComponentID());
+                    if (change.canExecute(dgs))
+                        retVal.add(change);
+                }
+            }
         }
         if (!attacks.isEmpty())
             retVal.addAll(attacks);
-
         if (retVal.isEmpty())
             retVal.add(new EndCurrentPhase());
-
         return retVal;
     }
 
@@ -100,7 +108,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
             completed = true;
         }
 
-        if (executionComplete(state)) {
+        if (completed) {
             DescentGameState dgs = (DescentGameState) state;
             Hero hero = (Hero) dgs.getActingFigure();
 
