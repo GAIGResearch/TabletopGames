@@ -39,6 +39,7 @@ public class DescentGameData extends AbstractGameData {
     List<Quest> quests;
     List<Quest> sideQuests;
     HashMap<String, HashMap<String, Monster>> monsters;
+    HashMap<String, HashMap<String, Monster>> lieutenants;
 
     @Override
     public void load(String dataPath) {
@@ -48,6 +49,7 @@ public class DescentGameData extends AbstractGameData {
         DescentDice.loadDice(dataPath + "/components/dice.json");
         heroes = Hero.loadHeroes(dataPath + "heroes.json");
         monsters = loadMonsters(dataPath + "monsters.json");
+        lieutenants = loadLieutenants(dataPath + "lieutenants.json");
 
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
@@ -380,6 +382,79 @@ public class DescentGameData extends AbstractGameData {
         return monsters;
     }
 
+    private static HashMap<String, HashMap<String, Monster>> loadLieutenants(String dataPath) {
+        HashMap<String, HashMap<String, Monster>> monsters = new HashMap<>();
+
+        JSONParser jsonParser = new JSONParser();
+        try (FileReader reader = new FileReader(dataPath)) {
+            JSONArray data = (JSONArray) jsonParser.parse(reader);
+
+            for (Object o : data) {
+                JSONObject obj = (JSONObject) o;
+
+                String key = (String) obj.get("id");
+                Monster superT = new Monster();
+                superT.setLieutenant(true);
+                HashSet<String> ignoreKeys = new HashSet<String>(){{
+                    add("act1");
+                    add("act2");
+                    add("id");
+                }};
+
+                superT.loadFigure(obj, ignoreKeys);
+
+                ignoreKeys.clear();
+                ignoreKeys.add("type");
+                ignoreKeys.add("id");
+
+                HashMap<String, Monster> monsterDef = new HashMap<>();
+                Monster act1two = new Monster();
+                act1two.setLieutenant(true);
+                act1two.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(0), ignoreKeys);
+                Monster act1three = new Monster();
+                act1three.setLieutenant(true);
+                act1three.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(1), ignoreKeys);
+                Monster act1four = new Monster();
+                act1four.setLieutenant(true);
+                act1four.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(2), ignoreKeys);
+
+                Monster act2two = new Monster();
+                act2two.setLieutenant(true);
+                act2two.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(0), ignoreKeys);
+                Monster act2three = new Monster();
+                act2three.setLieutenant(true);
+                act2three.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(1), ignoreKeys);
+                Monster act2four = new Monster();
+                act2four.setLieutenant(true);
+                act2four.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(2), ignoreKeys);
+
+                String attackType = ((JSONArray)obj.get("attackType")).get(1).toString();
+                //System.out.println(attackType);
+                act1two.setAttackType(attackType);
+                act1three.setAttackType(attackType);
+                act1four.setAttackType(attackType);
+                act2two.setAttackType(attackType);
+                act2three.setAttackType(attackType);
+                act2four.setAttackType(attackType);
+                superT.setAttackType(attackType);
+
+                monsterDef.put("1-two", act1two);
+                monsterDef.put("1-three", act1three);
+                monsterDef.put("1-four", act1four);
+                monsterDef.put("2-two", act2two);
+                monsterDef.put("2-three", act2three);
+                monsterDef.put("2-four", act2four);
+                monsterDef.put("super", superT);
+
+                monsters.put(key, monsterDef);
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        return monsters;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -390,12 +465,12 @@ public class DescentGameData extends AbstractGameData {
                 Objects.equals(searchCards, that.searchCards) && Objects.equals(quests, that.quests) &&
                 Objects.equals(act1ShopCards, that.act1ShopCards) && Objects.equals(act2ShopCards, that.act2ShopCards) &&
                 Objects.equals(relicCards, that.relicCards) && Objects.equals(sideQuests, that.sideQuests) &&
-                Objects.equals(monsters, that.monsters);
+                Objects.equals(monsters, that.monsters) && Objects.equals(lieutenants, that.lieutenants);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tiles, boardConfigurations, heroes, decks, searchCards, act1ShopCards, act2ShopCards, relicCards, quests, sideQuests, monsters);
+        return Objects.hash(tiles, boardConfigurations, heroes, decks, searchCards, act1ShopCards, act2ShopCards, relicCards, quests, sideQuests, monsters, lieutenants);
     }
 
     public DescentGameData copy() {
@@ -437,6 +512,14 @@ public class DescentGameData extends AbstractGameData {
                 monsterDef.put(k2, monsters.get(k).get(k2).copy());
             }
             copy.monsters.put(k, monsterDef);
+        }
+        copy.lieutenants = new HashMap<>();
+        for (String k: lieutenants.keySet()) {
+            HashMap<String, Monster> monsterDef = new HashMap<>();
+            for (String k2: lieutenants.get(k).keySet()) {
+                monsterDef.put(k2, lieutenants.get(k).get(k2).copy());
+            }
+            copy.lieutenants.put(k, monsterDef);
         }
         return copy;
     }
