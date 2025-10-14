@@ -44,7 +44,6 @@ public class PowerGridHeuristic implements IStateHeuristic {
 
         double score = wPowered * poweredTerm + wMatch * matchTerm + wCity * cityTerm;
         double clampedScore = clamp01(score);
-        System.out.println("Player: " + playerId + " Score: " +  clampedScore);
         return clampedScore;
     }
 

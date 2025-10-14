@@ -51,6 +51,10 @@ public class Discard extends AbstractAction {
 	        enforceStorageCaps(s, me);
 	        return true;
 	    }
+	    
+	    public int getIndex() {
+	    	return this.index; 
+	    }
 
 	    @Override public Discard copy() { return new Discard(index); }
 	    

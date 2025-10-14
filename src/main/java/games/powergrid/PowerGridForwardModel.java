@@ -15,6 +15,7 @@ import com.google.apps.card.v1.Card;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.CoreConstants.GameResult;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 
@@ -130,7 +131,9 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     		    	if(s.getResourceMarket().costToBuy(r, i) > s.getPlayersMoney(me)) {
     		    		continue;
     		    	}
+    		    	BuyResource br = new BuyResource(r,i);
     		    	actions.add(new BuyResource(r,i));
+    		    	String key = "buy_" + br.getResource().name() + "_" + br.getAmount();
     		    }
     		    
     		}
@@ -268,7 +271,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        case BUREAUCRACY -> { 
 	        					PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 	        					if(state.getMaxCitiesOwned() >= params.citiesToTriggerEnd[state.getNPlayers()-1]) {
-	        						state.setGameStatus(CoreConstants.GameResult.GAME_END);
+	        						state.setGameStatus(GameResult.GAME_END);
 	        					    return; 
 	        					}
 	        					awardIncome(state);
@@ -299,13 +302,10 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    endPlayerTurn(s, s.getCurrentPlayer()); //
 	    PowerGridGameState.PowerGridGamePhase current = (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase(); //get the current phase from the state 
 	    onExitPhase(s, current); //clean up actions for leaving a phase 
-	    if (s.getGameStatus() == CoreConstants.GameResult.GAME_END) return;
+	    if (s.getGameStatus() == GameResult.GAME_END) return;
 	    PowerGridGameState.PowerGridGamePhase next = current.next(); // get the next phase by calling next on the phase class in parameters 
 	    gameState.setGamePhase(next); //set the phase in state to next 
-	    onEnterPhase(s, next); //perfroms ations that need to be taken prior to the next phase 
-	   
-	    
-	   
+	    onEnterPhase(s, next); //perfroms ations that need to be taken prior to the next phase  
 	}
 	
 	
@@ -718,7 +718,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     
     
     
- // PYTAG ACTION TREES
     @Override
     public ActionTreeNode initActionTree(AbstractGameState gs) {
         PowerGridGameState s = (PowerGridGameState) gs;
@@ -727,168 +726,167 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
         ActionTreeNode root = new ActionTreeNode(0, "root");
 
-        // --- AUCTION & sub-tree roots
         ActionTreeNode auction = root.addChild(0, "AUCTION");
         ActionTreeNode startAuction = auction.addChild(0, "start_auction");
 
-        // Pass Round is 
-        ActionTreeNode passRound = root.addChild(0, "Pass Round");
-        passRound.setAction(new PassAction());
+        // Add fixed auction controls so the head is stable
+        auction.addChild(0, "increase_bid");
+        auction.addChild(0, "pass_bid");
+        auction.addChild(0, "discard_0");
+        auction.addChild(0, "discard_1");
+        auction.addChild(0, "discard_2");
 
-        // Increase Bid
-        IncreaseBid ib = new IncreaseBid();
-        ActionTreeNode n1 = auction.addChild(0, ib.getString(null));
-        n1.setAction(ib);
+        
 
-        // Pass Bid
-        PassBid pb = new PassBid();
-        ActionTreeNode n2 = auction.addChild(0, pb.getString(null));
-        n2.setAction(pb);
-
-
-        for (int i = 0; i < 3; i++) {
-            Discard d = new Discard(i);
-            ActionTreeNode n = auction.addChild(0, d.getString(null));
-            n.setAction(d);
-        }
-
-        // Open auction leaves under start_auction 
-        for (PowerGridCard card : params.plantsIncludedInGame) {
-            int plantNumber = card.getNumber();
-            AuctionPowerPlant app = new AuctionPowerPlant(plantNumber);
-            ActionTreeNode n = startAuction.addChild(0, app.getString(null));
-            n.setAction(app);
-        }
-
-       
         ActionTreeNode runPowerPlant = root.addChild(0, "BUREAUCRACY");
+        ActionTreeNode buyResource   = root.addChild(0, "RESOURCE_BUY");
+        ActionTreeNode buildCity     = root.addChild(0, "BUILD");
+
+        // Open-auction options: one leaf per plant
+        for (PowerGridCard card : params.plantsIncludedInGame) {
+            startAuction.addChild(0, "plant_" + card.getNumber());
+        }
+
+        // Bureaucracy: one leaf per run mix
         for (PowerGridCard card : params.plantsIncludedInGame) {
             int plantNumber = card.getNumber();
             if (card.getInput().hasMultipleTypes()) {
-                for (EnumMap<Resource, Integer> mix : card.generatePossibleCombos()) {
-                    RunPowerPlant act = new RunPowerPlant(plantNumber, mix);
-                    ActionTreeNode leaf = runPowerPlant.addChild(0, act.getString(null));
-                    leaf.setAction(act);
+                for (EnumMap<PowerGridParameters.Resource, Integer> mix : card.generatePossibleCombos()) {
+                    runPowerPlant.addChild(0, "run_" + plantNumber + "_" + mixKey(mix));
                 }
             } else {
-                RunPowerPlant act = new RunPowerPlant(plantNumber, card.getInput().asMap());
-                ActionTreeNode leaf = runPowerPlant.addChild(0, act.getString(null));
-                leaf.setAction(act);
+                runPowerPlant.addChild(0, "run_" + plantNumber + "_" + mixKey(card.getInput().asMap()));
             }
         }
 
-        ActionTreeNode buyResource = root.addChild(0, "RESOURCE_BUY");
-        java.util.function.BiConsumer<Resource, Integer> addBuy = (res, amt) -> {
-            BuyResource act = new BuyResource(res, amt);
-            ActionTreeNode leaf = buyResource.addChild(0, act.getString(null));
-            leaf.setAction(act);
-        };
+        // Resource buy options (fixed menu)
         for (int i = 1; i <= 9; i++) {
-            addBuy.accept(Resource.COAL, i);
-            addBuy.accept(Resource.GAS,  i);
-            addBuy.accept(Resource.OIL,  i);
-            if (i <= 6) addBuy.accept(Resource.URANIUM, i);
+            buyResource.addChild(0, "buy_COAL_" + i);
+            buyResource.addChild(0, "buy_GAS_"  + i);
+            buyResource.addChild(0, "buy_OIL_"  + i);
+            if (i <= 6) buyResource.addChild(0, "buy_URANIUM_" + i);
         }
 
-        // --- BUILD – labels must match bg.getSimpleString() (used in updateActionTree)
-        ActionTreeNode buildCity = root.addChild(0, "BUILD");
+        // Build options: one per city
         for (PowerGridCity city : map.cities()) {
-            int cityId = city.getComponentID();
-            int baseCost = 10; // placeholder if your action computes internally
-            BuildGenerator action = new BuildGenerator(cityId, baseCost);
-            ActionTreeNode leaf = buildCity.addChild(0, action.getSimpleString());
-            leaf.setAction(action);
+            buildCity.addChild(0, "build_city_" + city.getComponentID());
         }
+        root.addChild(0, "Pass Round");
 
         return root;
     }
 
+    // deterministically encode a mix like {COAL=2, OIL=1} -> "COAL2OIL1"
+    private static String mixKey(EnumMap<PowerGridParameters.Resource, Integer> mix) {
+        StringBuilder sb = new StringBuilder();
+        for (var e : mix.entrySet()) {
+            int v = (e.getValue() == null) ? 0 : e.getValue();
+            if (v > 0) sb.append(e.getKey().name()).append(v);
+        }
+        return sb.toString();
+    }
+
+
 
     
-
     @Override
     public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
         root.resetTree();
 
-        var actions = computeAvailableActions(gameState);
-        var phase = (PowerGridGameState.PowerGridGamePhase) gameState.getGamePhase();
+        PowerGridGameState s = (PowerGridGameState) gameState;
+        var phase = (PowerGridGameState.PowerGridGamePhase) s.getGamePhase();
+        var acts  = computeAvailableActions(gameState);
 
+        // Pre-existing nodes from initActionTree:
+       
+        ActionTreeNode auction = root.findChildrenByName("AUCTION");
+        ActionTreeNode start   = (auction != null) ? auction.findChildrenByName("start_auction") : null;
+        ActionTreeNode buy     = root.findChildrenByName("RESOURCE_BUY");
+        ActionTreeNode build   = root.findChildrenByName("BUILD");
+        ActionTreeNode run     = root.findChildrenByName("BUREAUCRACY");
+        ActionTreeNode pass    = root.findChildrenByName("Pass Round");
+        
         switch (phase) {
-            case AUCTION -> {
-                ActionTreeNode auction  = ensure(root,  "AUCTION");
-                ActionTreeNode start    = ensure(auction, "start_auction");
 
-                for (var a : actions) {
+            case PLAYER_ORDER -> {
+                for (var a : acts) {
+                    if (a instanceof PassAction && pass != null) pass.setAction(a);
+                }
+            }
+
+            case AUCTION -> {
+                for (var a : acts) {
                     if (a instanceof AuctionPowerPlant app) {
-                        ensure(start, app.getString(null)).setAction(a);
-                    } else if (a instanceof IncreaseBid ib) {
-                        ensure(auction, ib.getString(null)).setAction(a);
-                    } else if (a instanceof PassBid pb) {
-                        ensure(auction,pb.getString(null)).setAction(a);
+                        var leaf = (start != null) ? start.findChildrenByName("plant_" + app.getPlantNumber()) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof IncreaseBid) {
+                        var leaf = (auction != null) ? auction.findChildrenByName("increase_bid") : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassBid) {
+                        var leaf = (auction != null) ? auction.findChildrenByName("pass_bid") : null;
+                        if (leaf != null) leaf.setAction(a);
                     } else if (a instanceof Discard d) {
-                        ensure(auction, d.getString(null)).setAction(a);
-                    } else if (a instanceof PassAction) {
-                        ensure(root, "Pass Round").setAction(a);
+                        var leaf = (auction != null) ? auction.findChildrenByName("discard_" + d.getIndex()) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassAction && pass != null) {
+                        pass.setAction(a);
                     }
                 }
             }
 
             case RESOURCE_BUY -> {
-                ActionTreeNode resource = ensure(root, "RESOURCE_BUY");
-                for (var a : actions) {
+                for (var a : acts) {
                     if (a instanceof BuyResource br) {
-                        ensure(resource, br.getString(null)).setAction(a);  
-                    } else if (a instanceof PassAction) {
-                        ensure(root, "Pass Round").setAction(a);
+                        String key = "buy_" + br.getResource().name() + "_" + br.getAmount();
+                        var leaf = (buy != null) ? buy.findChildrenByName(key) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassAction && pass != null) {
+                        pass.setAction(a);
                     }
                 }
             }
 
             case BUILD -> {
-                ActionTreeNode build = ensure(root, "BUILD");
-                for (var a : actions) {
+                for (var a : acts) {
                     if (a instanceof BuildGenerator bg) {
-                        ensure(build, bg.getSimpleString()).setAction(a);      
-                    } else if (a instanceof PassAction) {
-                        ensure(root, "Pass Round").setAction(a);
+                        String key = "build_city_" + bg.getCityId();
+                        var leaf = (build != null) ? build.findChildrenByName(key) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassAction && pass != null) {
+                        pass.setAction(a);
                     }
                 }
             }
 
             case BUREAUCRACY -> {
-                ActionTreeNode run = ensure(root, "BUREAUCRACY");
-                for (var a : actions) {
+                for (var a : acts) {
                     if (a instanceof RunPowerPlant rp) {
-                        ensure(run, rp.getString(null)).setAction(a);        
-                    } else if (a instanceof PassAction) {
-                        ensure(root, "Pass Round").setAction(a);
+                        String key = "run_" + rp.getPlantId() + "_" + mixKey(rp.getSpend());
+                        var leaf = (run != null) ? run.findChildrenByName(key) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassAction && pass != null) {
+                        pass.setAction(a);
                     }
                 }
-            }
-
-            default -> {
-                for (var a : actions) ensure(root, "Pass Round").setAction(a);
             }
         }
         return root;
     }
-
-
-    private static ActionTreeNode ensure(ActionTreeNode parent, String name) {
-        if (parent == null) {
-            throw new IllegalArgumentException("Parent node is null for child: " + name);
-        }
-
-        ActionTreeNode child = parent.findChildrenByName(name);
-        if (child != null) {
-        	System.out.println("Action: " + name);
-            return child;  // already exists
-        } else {
-            System.out.println("NEW CHILD CREATED: " + name);
-            return parent.addChild(0, name);
-        }
+    private static void dbgAuction(PowerGridGameState s) {
+        int pid = s.getCurrentPlayer();
+        System.out.println(" -- AUCTION DEBUG --");
+        System.out.println(" pid=" + pid +
+                " money=" + s.getPlayersMoney(pid) +
+                " step=" + s.getStep() +
+                " auctionLive=" + s.isAuctionLive() +
+                " auctionPlant=" + s.getAuctionPlantNumber() +
+                " currentBid=" + s.getCurrentBid() +
+                " currentBidder=" + s.getCurrentBidder() +
+                " roundPassed(pid)=" + s.getRoundOrder());  // or your equivalent
+        System.out.print(" market:");
+        for (var c : s.getCurrentMarket()) System.out.print(" " + c.getNumber());
+        System.out.println();
     }
-
 }
 
 

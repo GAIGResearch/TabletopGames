@@ -11,6 +11,7 @@ import players.simple.RandomPlayer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 
@@ -35,57 +36,84 @@ public class TestFeatures {
     }
 
     public static void main(String[] args) throws Exception {
-        long seed = 1;
+    	
+        long seed = 3;
         Random rnd = new Random(seed);
-        int numberOfSteps = 20;
+        int numberOfSteps = 10;
 
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new PythonAgent()); // learning slot
         players.add(new RandomPlayer(rnd));
         players.add(new RandomPlayer(rnd));
-        players.add(new RandomPlayer(rnd));
-        players.add(new RandomPlayer(rnd));
-        players.add(new RandomPlayer(rnd));
+
 
         PyTAG env = new PyTAG(GameType.PowerGrid, null, players, seed, false);
         env.reset();  // runs until PythonAgent must act
 
-        // Feature names (avoid FeatureExtractors visibility)
+        // 🟢 Define feature names for printPretty
         String[] names = new PowerGridFeatures().names();
 
-        System.out.println("=== Initial PyTAG observation ===");
-        printPretty(names, env.getObservationVector());
-        System.out.println("Shape: " + env.getTreeShape());
-        //System.out.println("Tree mask: " + java.util.Arrays.toString(env.getActionTree()));
-        printMask("INITIAL", env.getActionMask());   // <-- show initial action mask
+        // After env.reset()
+        List<String> headNames = env.getLeafNames();           // fixed order of leaves
+        System.out.println("Head size: " + headNames.size());
+        printMask("INITIAL", env.getActionMask());
+        printOnes("INITIAL", env.getActionMask(), headNames);
 
+        // Step loop
         for (int step = 1; step <= numberOfSteps; step++) {
             if (env.isDone()) {
                 System.out.println("\nEpisode finished before step " + step);
                 break;
             }
 
-            // BEFORE step: show current mask
             System.out.println("\n=== BEFORE step " + step + " ===");
-            printMask("BEFORE", env.getActionMask());
+            int[] maskBefore = env.getActionMask();
+            // sanity: head stability
+            assertStableHead(headNames, env.getLeafNames());
+            printMask("BEFORE", maskBefore);
+            printOnes("BEFORE", maskBefore, headNames);
 
-            // Sample a valid action from the current mask
-            int[] mask = env.getActionMask();
-            int actionId = env.sampleRNDAction(mask, rnd);
+            // Choose a valid action and show what it is
+            int actionId = env.sampleRNDAction(maskBefore, rnd);
+            String chosenName = env.getActionNameById(actionId);
+            System.out.println("Chosen actionId: " + actionId + " -> " + chosenName);
 
-            // Take the step
+            // Execute
             env.step(actionId);
 
-            // AFTER step: observation + tree + action mask
             System.out.println("\n=== AFTER step " + step + " ===");
-            printPretty(names, env.getObservationVector());
-            System.out.println("Observation Size: " + env.getObservationVector().length);
+            //printPretty(names, env.getObservationVector());
             System.out.println("Shape: " + env.getTreeShape());
-            System.out.println("Tree mask: " + java.util.Arrays.toString(env.getActionTree()));
-            System.out.println("Tree mask Size: " + (env.getActionTree().length));
-            printMask("AFTER", env.getActionMask());  // <-- show mask after state update
+
+            int[] maskAfter = env.getActionMask();
+            assertStableHead(headNames, env.getLeafNames());   // still stable
+            printMask("AFTER", maskAfter);
+            printOnes("AFTER", maskAfter, headNames);
         }
     }
+
+    
+    private static void printOnes(String title, int[] mask, List<String> names) {
+        System.out.println(title + " on (index -> name):");
+        for (int i = 0; i < mask.length; i++) {
+            if (mask[i] == 1) {
+                System.out.printf("  [%d] %s%n", i, names.get(i));
+            }
+        }
+    }
+
+    private static void assertStableHead(List<String> baseline, List<String> current) {
+        if (baseline.size() != current.size()) {
+            throw new AssertionError("Leaf count changed! " + baseline.size() + " -> " + current.size());
+        }
+        for (int i = 0; i < baseline.size(); i++) {
+            if (!baseline.get(i).equals(current.get(i))) {
+                throw new AssertionError("Leaf order/name changed at " + i + ": '"
+                        + baseline.get(i) + "' -> '" + current.get(i) + "'");
+            }
+        }
+    }
+
 	}
 
 

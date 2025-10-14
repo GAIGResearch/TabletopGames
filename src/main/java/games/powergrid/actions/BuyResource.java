@@ -53,6 +53,14 @@ public class BuyResource extends AbstractAction {
         return true;
 
     }
+    
+    public Resource getResource() {
+    	return this.resource; 
+    }
+    
+    public int getAmount() {
+    	return this.amount; 
+    }
 
     @Override
     public AbstractAction copy() {

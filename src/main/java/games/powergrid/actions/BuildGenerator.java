@@ -109,7 +109,10 @@ public class BuildGenerator extends AbstractAction {
     public String getSimpleString() {
     	return "Build " + this.cityId; 
     }
-
+    
+    public int getCityId() {
+    	return this.cityId; 
+    }
     /**
      * Returns the index of the first available (empty) city slot for building in the current step.
      * <p>

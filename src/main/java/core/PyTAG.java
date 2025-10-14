@@ -450,5 +450,52 @@ public class PyTAG {
 
 
     }
+    
+    
+ // --- ADDED FOR DEBUG DELETE LATER ---
+    
+    public List<String> getLeafNames() {
+        // same order as leaves/mask
+        List<String> names = new ArrayList<>();
+        for (ActionTreeNode leaf : this.leaves) names.add(leaf.getName());
+        return names;
+    }
+
+    public AbstractAction getActionById(int id) {
+        return this.leaves.get(id).getAction(); // may be null if masked off
+    }
+
+    public String getActionNameById(int id) {
+        ActionTreeNode leaf = this.leaves.get(id);
+        // Prefer a readable action string if bound, else the leaf name
+        AbstractAction a = leaf.getAction();
+        return (a != null) ? a.getString(gameState) : leaf.getName();
+    }
+    
+    public String getGamePhase() {
+        if (gameState instanceof games.powergrid.PowerGridGameState) {
+            games.powergrid.PowerGridGameState s = (games.powergrid.PowerGridGameState) gameState;
+            return s.getGamePhase().toString();
+        }
+        return "UNKNOWN";
+    }
+    
+ // In your PyTAG helper/bridge class (not AbstractGameState)
+    public int getCurrentActor() {
+        return gameState.getCurrentPlayer();   // actor 'now', respects extended sequences
+    }
+
+    public int getTurnOwner() {
+        return gameState.getTurnOwner();       // underlying turn owner
+    }
+
+    public String getActionInProgressName() {
+        var aip = gameState.currentActionInProgress();
+        return (aip == null) ? "NONE" : aip.toString();
+    }
+
+// --- ADDED FOR DEBUG DELETE LATER ---
+
+
 
 }

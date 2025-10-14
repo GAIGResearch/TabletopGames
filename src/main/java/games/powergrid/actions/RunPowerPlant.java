@@ -81,6 +81,14 @@ public class RunPowerPlant extends AbstractAction {
 
 	        return true;
 	    }
+	    
+	    public int getPlantId() {
+	    	return this.plantId; 
+	    }
+	    
+	    public EnumMap<Resource, Integer> getSpend(){
+	    	return this.spend; 
+	    }
 
 	    @Override
 	    public String toString() {

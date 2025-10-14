@@ -2,6 +2,7 @@ package games.powergrid;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants.GameResult;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
@@ -203,10 +204,6 @@ public class PowerGridGameState extends AbstractGameState {
 	    return new PowerGridHeuristic().evaluateState(this, playerId);
 	}
 
-	@Override
-	public double getGameScore(int playerId) {
-		return cityCountByPlayer[playerId];
-	}
 
 	@Override
 	protected boolean _equals(Object o) {
@@ -771,8 +768,59 @@ public class PowerGridGameState extends AbstractGameState {
     	return this.oneHotRegion;
     }
     
-   
+
     
+    @Override
+    public double getGameScore(int playerId) {
+        // ---- Weights for shaping (tune to taste) ----
+        final double wCities   = 1.00;  // progress toward win condition
+        final double wPowered  = 0.60;  // efficiency (how many of your cities are powered)
+        final double wMoney    = 0.20;  // liquidity
+        final double wCapacity = 0.20;  // infrastructure health
+
+        // ---- Normalization constants ----
+        int cityTarget = 0;
+        try {
+            PowerGridParameters params = (PowerGridParameters) getGameParameters();
+            if (params != null && params.citiesToTriggerEnd!= null && params.citiesToTriggerEnd.length >= getNPlayers()) {
+                cityTarget = params.citiesToTriggerEnd[getNPlayers() - 1];
+            }
+        } catch (Exception ignored) {}
+        if (cityTarget <= 0) cityTarget = Math.max(1, getMaxCitiesOwned());
+
+        int citiesMine   = getCityCountByPlayer(playerId);
+        int poweredMine  = getPoweredCities(playerId);
+        int capacityMine = getPlayerCapacity(playerId);
+        int moneyMine    = getPlayersMoney(playerId);
+
+        // ---- Shaped components ----
+        double termCities   = clamp01(citiesMine / (double) cityTarget);
+        double termPowered  = (citiesMine == 0) ? 0.0 : clamp01(poweredMine / (double) citiesMine);
+        double termMoney    = clamp01(Math.tanh(moneyMine / 100.0));
+        int desired         = Math.max(citiesMine, poweredMine);
+        double termCapacity = (desired == 0) ? 0.0 : clamp01(capacityMine / (double) desired);
+
+        double raw = wCities * termCities + wPowered * termPowered + wMoney * termMoney + wCapacity * termCapacity;
+        double denom = wCities + wPowered + wMoney + wCapacity;
+        double shaped = raw / denom;  // normalized to [0,1]
+
+        // ---- Terminal bonus ----
+        if (getPlayerResults()[playerId] == GameResult.WIN_GAME) {
+            shaped += 10.0;  // large terminal win reward
+        } else if (getPlayerResults()[playerId] == GameResult.LOSE_GAME) {
+            shaped -= 5.0;   // optional: penalize losing heavily
+        }
+
+        return shaped;
+    }
+
+    // helper
+    private static double clamp01(double x) {
+        return x < 0 ? 0 : (x > 1 ? 1 : x);
+    }
+
+
+
 }
 
 
