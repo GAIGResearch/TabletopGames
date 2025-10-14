@@ -12,21 +12,14 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.attack.MeleeAttack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import utilities.Pair;
 import utilities.Vector2D;
-
-import javax.management.ObjectName;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 import static games.descent2e.DescentConstants.attackHash;
 import static games.descent2e.DescentConstants.defenceHash;
 import static games.descent2e.components.Figure.Attribute.*;
 
-// TODO: figure out how to do ability/heroic-feat
 public class Figure extends Token {
 
     DicePool attackDice = DicePool.empty;
@@ -43,19 +36,11 @@ public class Figure extends Token {
         Knowledge,
         Awareness;
         public boolean isSecondary() {
-            switch (this) {
-                case MovePoints:
-                case Health:
-                case XP:
-                case Fatigue:
-                    return false;
-                case Might:
-                case Willpower:
-                case Knowledge:
-                case Awareness:
-                    return true;
-            }
-            return false;
+            return switch (this) {
+                // case MovePoints, Health, XP, Fatigue -> false;
+                case Might, Willpower, Knowledge, Awareness -> true;
+                default -> false;
+            };
         }
     }
 

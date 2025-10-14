@@ -1,6 +1,8 @@
 package games.descent2e.components;
 
+import core.CoreConstants;
 import core.components.Counter;
+import core.components.Deck;
 import games.descent2e.DescentTypes.AttackType;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
@@ -16,6 +18,7 @@ import java.util.Objects;
 public class Monster extends Figure {
 
     boolean lieutenant = false;
+    Deck<DescentCard> lieutenantInventory = new Deck<>("Overlord Relics", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
     boolean flying = false;
     AttackType attackType = AttackType.NONE;
     public enum Direction {
@@ -95,6 +98,7 @@ public class Monster extends Figure {
         copy.surges = new ArrayList<>(surges);
         copy.passives = new ArrayList<>(passives);
         copy.actions = new ArrayList<>(actions);
+        if (lieutenantInventory != null) copy.lieutenantInventory = lieutenantInventory.copy();
         super.copyComponentTo(copy);
         return copy;
     }
@@ -126,6 +130,24 @@ public class Monster extends Figure {
 
     public boolean isLieutenant() {
         return lieutenant;
+    }
+
+    public void addInventory(DescentCard card) {
+        if (lieutenant)
+            lieutenantInventory.add(card);
+    }
+
+    public void removeInventory(DescentCard card) {
+        if (lieutenantInventory.contains(card))
+            lieutenantInventory.remove(card);
+    }
+
+    public void resetInventory() {
+        lieutenantInventory.clear();
+    }
+
+    public Deck<DescentCard> getInventory() {
+        return lieutenantInventory;
     }
 
     public void setFlying(boolean flying) {
@@ -218,10 +240,7 @@ public class Monster extends Figure {
     }
     public void removeSurge (Surge surge)
     {
-        if (surges.contains(surge))
-        {
-            surges.remove(surge);
-        }
+        surges.remove(surge);
     }
     public void addPassive(MonsterAbilities.MonsterPassive ability)
     {
@@ -232,9 +251,7 @@ public class Monster extends Figure {
     }
     public void removePassive(MonsterAbilities.MonsterPassive ability)
     {
-        if (passives.contains(ability)) {
-            passives.remove(ability);
-        }
+        passives.remove(ability);
     }
     public void addAction(MonsterAbilities.MonsterAbility action)
     {
@@ -245,9 +262,7 @@ public class Monster extends Figure {
     }
     public void removeAction(MonsterAbilities.MonsterAbility action)
     {
-        if (actions.contains(action)) {
-            actions.remove(action);
-        }
+        actions.remove(action);
     }
 
     public void removeAll()
@@ -306,6 +321,7 @@ public class Monster extends Figure {
         if (!(o instanceof Monster monster)) return false;
         if (!super.equals(o)) return false;
         return lieutenant == monster.lieutenant &&
+                lieutenantInventory.equals(monster.lieutenantInventory) &&
                 flying == monster.flying &&
                 orientation == monster.orientation &&
                 attackType == monster.attackType &&
@@ -316,6 +332,6 @@ public class Monster extends Figure {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), lieutenant, flying, orientation.ordinal(), attackType, surges, passives, actions);
+        return Objects.hash(super.hashCode(), lieutenant, lieutenantInventory, flying, orientation.ordinal(), attackType, surges, passives, actions);
     }
 }

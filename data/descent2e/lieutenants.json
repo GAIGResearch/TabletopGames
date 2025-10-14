@@ -1,0 +1,406 @@
+[
+  {
+    "monster-sources": "https://descent2e.fandom.com/wiki/Lieutenant",
+
+    "id": "Sir Alric Farrow",
+    "type": ["String", "Monster"],
+    "lieutenant": ["Boolean", true],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/sir-alric-farrow.png"],
+    "attackType": ["String", "melee"],
+    "MovePoints": ["Integer", 3],
+    "Might": ["Integer", 5],
+    "Knowledge": ["Integer", 1],
+    "Willpower": ["Integer", 2],
+    "Awareness": ["Integer", 4],
+    "color": ["Color", "purple"],
+    "description": ["String", "The Black Knight returns! A silent specter of death, Sir Alric fears nothing."],
+    "biography": ["String", "He has already died once fighting for what he believes in. Now, he is a simple puppet of the Overlord, and the prospect of dying again does not frighten him... not half as much as he frightens those who cross his path."],
+    "act1": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 10],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Unmoveable", "Surge: +1 Heart"]],
+        "action": ["String[]", ["Overpower"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 14],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Unmoveable", "Surge: +1 Heart"]],
+        "action": ["String[]", ["Overpower"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 16],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Unmoveable", "Surge: +1 Heart"]],
+        "action": ["String[]", ["Overpower"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 12],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Regeneration", "Unmoveable", "Surge: +2 Heart"]],
+        "action": ["String[]", ["Overpower"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 15],
+        "defence": ["String[]", ["black", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Regeneration", "Unmoveable", "Surge: +2 Heart"]],
+        "action": ["String[]", ["Overpower"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 18],
+        "defence": ["String[]", ["black","grey", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Regeneration", "Unmoveable", "Surge: +2 Heart"]],
+        "action": ["String[]", ["Overpower"]]
+      }
+    ]
+  },
+  {
+    "id": "Belthir",
+    "type": ["String", "Monster"],
+    "lieutenant": ["Boolean", true],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/belthir.png"],
+    "attackType": ["String", "melee"],
+    "MovePoints": ["Integer", 4],
+    "Might": ["Integer", 4],
+    "Knowledge": ["Integer", 3],
+    "Willpower": ["Integer", 4],
+    "Awareness": ["Integer", 1],
+    "color": ["Color", "purple"],
+    "description": ["String", "A Dragon Hybrid for Hire! A relic of the Dragon Wars, Belthir has lost none of his fire."],
+    "biography": ["String", "Dragon hybrids like Belthir are rare, particularly as the Dragon Wars fade from history into myth. Belthir has made a name for himself as a mercenary and rather ruthless adventurer over the past several decades. If he is now in service of the Overlord, that bodes ill for Terrinoth."],
+    "act1": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 9],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Fly", "Reach", "Surge: Poison"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 11],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Fly", "Reach", "Surge: Poison"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 15],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Fly", "Reach", "Surge: Poison"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 13],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Fly", "Reach", "Surge: Poison"]],
+        "action": ["String[]", ["CryHavoc"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 15],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Fly", "Reach", "Surge: Poison"]],
+        "action": ["String[]", ["CryHavoc"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 18],
+        "defence": ["String[]", ["grey", "grey", "brown"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Fly", "Reach", "Surge: Poison"]],
+        "action": ["String[]", ["CryHavoc"]]
+      }
+    ]
+  },
+  {
+    "id": "Lady Eliza Farrow",
+    "type": ["String", "Monster"],
+    "lieutenant": ["Boolean", true],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/lady-eliza-farrow.png"],
+    "attackType": ["String", "ranged"],
+    "MovePoints": ["Integer", 5],
+    "Might": ["Integer", 1],
+    "Knowledge": ["Integer", 3],
+    "Willpower": ["Integer", 3],
+    "Awareness": ["Integer", 5],
+    "color": ["Color", "purple"],
+    "description": ["String", "A Comely and Well-spoken Vampire! Lady Eliza offers salvation with one hand, and doom with the other."],
+    "biography": ["String", "Lord Merick married abruptly after his brother Sir Alric died, and his new bride Eliza was, all agreed, comely and well-spoken. But many also now feel that the marriage marked the beginning of his slide to evil... Whereas her husband found a way to cheat death through the use of his necromantic magic, Lady Eliza Farrow has found immortality as a vampire. By feeding off the blood of others, Eliza can exist forever in a state between life and death, possessed of undiminished intellect and beauty, but perpetually driven by her boundless hunger."],
+    "act1": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 7],
+        "defence": ["String[]", ["brown"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Surge: Blood Call"]],
+        "actions": ["String[]", ["Sacrifice", "Seduce"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 9],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Surge: Blood Call"]],
+        "actions": ["String[]", ["Sacrifice", "Seduce"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 12],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Surge: Blood Call"]],
+        "actions": ["String[]", ["Sacrifice", "Seduce"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 9],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow", "red"]],
+        "passive": ["String[]", ["Surge: Blood Call"]],
+        "actions": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 11],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "yellow", "red"]],
+        "passive": ["String[]", ["Surge: Blood Call"]],
+        "actions": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 15],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "yellow", "red"]],
+        "passive": ["String[]", ["Surge: Blood Call"]],
+        "actions": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
+      }
+    ]
+  },
+  {
+    "id": "Lord Merick Farrow",
+    "type": ["String", "Monster"],
+    "lieutenant": ["Boolean", true],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/lord-merick-farrow.png"],
+    "attackType": ["String", "ranged"],
+    "MovePoints": ["Integer", 4],
+    "Might": ["Integer", 2],
+    "Knowledge": ["Integer", 4],
+    "Willpower": ["Integer", 2],
+    "Awareness": ["Integer", 3],
+    "color": ["Color", "purple"],
+    "description": ["String", "The Ill-Fated Lord! Lord Merick will stop at nothing to return his brother from the dead."],
+    "biography": ["String", "When Lord Merick Farrow's brother Sir Alric died in battle, it was a tragedy for all the Free Cities. However, when Lord Merick struck a deal with the dark powers to get his brother back, it foretold their doom. Merick Farrow’s desire to raise his brother from the dead led to his exploration of magic, and his necromantic experiments eventually led to his downfall. Corrupted by the power he was able to harness, Merick Farrow now serves as one of the Overlord’s most sinister agents."],
+    "act1": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 8],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Aftershock", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Ignite"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 11],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Aftershock", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Ignite"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 13],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Aftershock", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Ignite"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 10],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "passive": ["String[]", ["Aftershock", "Surge: Wither", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Ignite"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 12],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "passive": ["String[]", ["Aftershock", "Surge: Wither", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Ignite"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 15],
+        "defence": ["String[]", ["black", "grey"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "passive": ["String[]", ["Aftershock", "Surge: Wither", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Ignite"]]
+      }
+    ]
+  },
+  {
+    "id": "Splig",
+    "type": ["String", "Monster"],
+    "lieutenant": ["Boolean", true],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/splig.png"],
+    "attackType": ["String", "melee"],
+    "MovePoints": ["Integer", 3],
+    "Might": ["Integer", 4],
+    "Knowledge": ["Integer", 3],
+    "Willpower": ["Integer", 3],
+    "Awareness": ["Integer", 2],
+    "color": ["Color", "purple"],
+    "description": ["String", "The King of All Goblins! Splig is a cowardly fellow, but do not underestimate his strength."],
+    "biography": ["String", "Goblins rule through simple tyranny and by bullying smaller goblins. Splig, by virtue of being the biggest goblin, is always the leader. And because he is the leader, he gets all the food. And because he gets all the food, he's the biggest goblin. Splig likes the way this works!"],
+    "act1": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 7],
+        "defence": ["String[]", ["brown"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 9],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 13],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 10],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Promotion"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 12],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Promotion"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 16],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]],
+        "actions": ["String[]", ["Promotion"]]
+      }
+    ]
+  },
+  {
+    "id": "Baron Zachareth",
+    "type": ["String", "Monster"],
+    "lieutenant": ["Boolean", true],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/baron-zachareth.png"],
+    "attackType": ["String", "melee"],
+    "MovePoints": ["Integer", 4],
+    "Might": ["Integer", 3],
+    "Knowledge": ["Integer", 3],
+    "Willpower": ["Integer", 3],
+    "Awareness": ["Integer", 4],
+    "color": ["Color", "purple"],
+    "description": ["String", "The Traitorous Baron Lives! The Baron is a man filled with pride and deceit, and little else."],
+    "biography": ["String", "The charming Baron of Carthridge is a good leader and a staunch ally to the people of Rhynn. But even a generous heart can be corrupted by evil, and few know what dark ambitions are hidden in Baron Zachareth’s soul.\n\nFew agree on whether Baron Zachareth of Carthridge is a hero or a villain, but those under his rule laud his strong leadership, particularly in battle against the enemies of the Daqan, whose numbers seem to increase each day."],
+    "act1": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 10],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
+        "actions": ["String[]", ["Dominion"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 13],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
+        "actions": ["String[]", ["Dominion"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 16],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
+        "actions": ["String[]", ["Dominion"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["Integer", 2],
+        "Health": ["Integer", 10],
+        "defence": ["String[]", ["black", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
+        "actions": ["String[]", ["Dominion", "Shadow Bolt"]]
+      },
+      {
+        "instance": ["Integer", 3],
+        "Health": ["Integer", 13],
+        "defence": ["String[]", ["black", "grey", "brown"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
+        "actions": ["String[]", ["Dominion", "Shadow Bolt"]]
+      },
+      {
+        "instance": ["Integer", 4],
+        "Health": ["Integer", 16],
+        "defence": ["String[]", ["black", "grey", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
+        "actions": ["String[]", ["Dominion", "Shadow Bolt"]]
+      }
+    ]
+  }
+]
