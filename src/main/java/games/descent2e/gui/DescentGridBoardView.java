@@ -252,12 +252,14 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
 
                     // TODO ugly version
 
+                    String mPath = path;
+
                     String imagePath = dataPath;
-                    if (((PropertyColor) m.getProperty(colorHash)).valueStr.equals("red")) {
-                        imagePath += path.replace(".png", "-master.png");
-                    } else {
-                        imagePath += path;
+                    if (!m.isLieutenant()) {
+                        if (((PropertyString) m.getProperty("instance")).value.equals("Master"))
+                            mPath = mPath.replace(".png", "-master.png");
                     }
+                    imagePath += mPath;
                     Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
                     BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
                     g.drawImage(imgToDraw, offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, null);

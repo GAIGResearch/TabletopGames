@@ -2009,6 +2009,9 @@ public class DescentForwardModel extends StandardForwardModel {
         dgs.monstersPerGroup = new ArrayList<>();
         dgs.monsterGroups = new ArrayList<>();
         List<String[]> monsters = quest.getMonsters();
+
+        int players = dgs.getNPlayers();
+
         for (String[] mDef : monsters) {
             List<Monster> monsterGroup = new ArrayList<>();
             List<Monster> monsterOriginalGroup = new ArrayList<>();
@@ -2016,11 +2019,14 @@ public class DescentForwardModel extends StandardForwardModel {
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
             String tile = mDef[1];
+            boolean isLieutenant = nameDef.contains("lieutenant");
             Set<Vector2D> tileCoords = dgs.gridReferences.get(tile).keySet();
             int act = quest.getAct();
-            Map<String, Monster> monsterDef = _data.findMonster(name);
+            Map<String, Monster> monsterDef;
+            if (isLieutenant)
+                monsterDef = _data.findLieutenant(name);
+            else monsterDef = _data.findMonster(name);
             Monster superDef = monsterDef.get("super");
-            int[] monsterSetup = ((PropertyIntArray) superDef.getProperty(setupHash)).getValues();
 
             // TODO: this could be adding/removing abilities too
             // Check attribute modifiers
@@ -2048,107 +2054,142 @@ public class DescentForwardModel extends StandardForwardModel {
             // If that is the case, we do not spawn a Master
             // Otherwise, there is always 1 Master
 
-            boolean spawnMaster = true;
-
-            if ((dgs.getNPlayers() <= 3 && monsterSetup[1] == 0)) {
-                spawnMaster = false;
-            }
-            Monster master = monsterDef.get(act + "-master").copyNewID();
-            master.getNActionsExecuted().setMaximum(nActionsPerFigure);
-            master.setProperties(monsterDef.get(act + "-master").getProperties());
-            master.setComponentName(name + " master");
-
-            PropertyStringArray passives = (PropertyStringArray) master.getProperty("passive");
-            if (passives != null)
-                master.setPassivesAndSurges(passives.getValues());
-
-            PropertyStringArray actions = ((PropertyStringArray) master.getProperty("action"));
-            if (actions != null) {
-                master.setActions(actions.getValues());
-            }
-
-            if (attributeModifiers.containsKey("master")) {
-                for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("master")) {
-                    master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
-                }
-            }
-            if (attributeModifiers.containsKey("all")) {
-                for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("all")) {
-                    master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
-                }
-            }
-
-            for (Surge surge : master.getSurges()) {
-                master.addAbility(new SurgeAttackAction(surge, master.getComponentID()));
-            }
-
-            // If our Health was just modified, set it to the new maximum
-            if (!master.getAttribute(Figure.Attribute.Health).isMaximum()) {
-                master.setAttributeToMax(Figure.Attribute.Health);
-            }
-
-            // Don't spawn the Master monster if we're only supposed to spawn 1 Minion only
-            if (spawnMaster) {
-                placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
-                master.setOwnerId(dgs.overlordPlayer);
-                monsterGroup.add(master);
-                monsterOriginalGroup.add(master.copyNewID());
-            }
-
-            // How many minions?
-            int nMinions;
-            if (nameDef.contains("group")) {
-                if (nameDef.contains("ignore")) {
-                    // Ignore group limits, max number
-                    nMinions = monsterSetup[monsterSetup.length - 1];
-                } else {
-                    // Respect group limits
-                    nMinions = monsterSetup[Math.max(0, dgs.getNPlayers() - 3)];
-                }
-            } else {
-                // Format name:#minions
-                nMinions = Integer.parseInt(nameDef.split(":")[1]);
-            }
-
-            // Place minions
-            for (int i = 0; i < nMinions; i++) {
-                Monster minion = monsterDef.get(act + "-minion").copyNewID();
-                minion.setProperties(monsterDef.get(act + "-minion").getProperties());
-                minion.setComponentName(name + " minion " + (i + 1));
-
-                passives = (PropertyStringArray) minion.getProperty("passive");
+            if (isLieutenant) {
+                Monster lieutenant = monsterDef.get(act + "-" + players).copyNewID();
+                lieutenant.getNActionsExecuted().setMaximum(nActionsPerFigure);
+                lieutenant.setProperties(monsterDef.get(act + "-" + players).getProperties());
+                lieutenant.setComponentName(name);
+                PropertyStringArray passives = (PropertyStringArray) lieutenant.getProperty("passive");
                 if (passives != null)
-                    minion.setPassivesAndSurges(passives.getValues());
+                    lieutenant.setPassivesAndSurges(passives.getValues());
 
-                actions = ((PropertyStringArray) minion.getProperty("action"));
-                if (actions != null)
-                    minion.setActions(actions.getValues());
-
-                for (Surge surge : minion.getSurges()) {
-                    minion.addAbility(new SurgeAttackAction(surge, minion.getComponentID()));
+                PropertyStringArray actions = ((PropertyStringArray) lieutenant.getProperty("action"));
+                if (actions != null) {
+                    lieutenant.setActions(actions.getValues());
                 }
 
-                placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, superDef);
-                minion.setOwnerId(dgs.overlordPlayer);
-                minion.getNActionsExecuted().setMaximum(nActionsPerFigure);
-                if (attributeModifiers.containsKey("minion")) {
-                    for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("minion")) {
-                        minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
+                if (!attributeModifiers.isEmpty()) {
+                    for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("all")) {
+                        lieutenant.getAttribute(modifier.a).setMaximum(lieutenant.getAttribute(modifier.a).getMaximum() + modifier.b);
+                    }
+                }
+
+                for (Surge surge : lieutenant.getSurges()) {
+                    lieutenant.addAbility(new SurgeAttackAction(surge, lieutenant.getComponentID()));
+                }
+
+                // If our Health was just modified, set it to the new maximum
+                if (!lieutenant.getAttribute(Figure.Attribute.Health).isMaximum()) {
+                    lieutenant.setAttributeToMax(Figure.Attribute.Health);
+                }
+
+                placeMonster(dgs, lieutenant, new ArrayList<>(tileCoords), rnd, superDef);
+                lieutenant.setOwnerId(dgs.overlordPlayer);
+                monsterGroup.add(lieutenant);
+                monsterOriginalGroup.add(lieutenant.copyNewID());
+            }
+
+            else {
+                int[] monsterSetup = ((PropertyIntArray) superDef.getProperty(setupHash)).getValues();
+                boolean spawnMaster = players > 3 || monsterSetup[1] != 0;
+
+                Monster master = monsterDef.get(act + "-master").copyNewID();
+                master.getNActionsExecuted().setMaximum(nActionsPerFigure);
+                master.setProperties(monsterDef.get(act + "-master").getProperties());
+                master.setComponentName(name + " master");
+
+                PropertyStringArray passives = (PropertyStringArray) master.getProperty("passive");
+                if (passives != null)
+                    master.setPassivesAndSurges(passives.getValues());
+
+                PropertyStringArray actions = ((PropertyStringArray) master.getProperty("action"));
+                if (actions != null) {
+                    master.setActions(actions.getValues());
+                }
+
+                if (attributeModifiers.containsKey("master")) {
+                    for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("master")) {
+                        master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
                     }
                 }
                 if (attributeModifiers.containsKey("all")) {
                     for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("all")) {
-                        minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
+                        master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
                     }
                 }
 
-                // If our Health was just modified, set it to the new maximum
-                if (!minion.getAttribute(Figure.Attribute.Health).isMaximum()) {
-                    minion.setAttributeToMax(Figure.Attribute.Health);
+                for (Surge surge : master.getSurges()) {
+                    master.addAbility(new SurgeAttackAction(surge, master.getComponentID()));
                 }
 
-                monsterGroup.add(minion);
-                monsterOriginalGroup.add(minion.copyNewID());
+                // If our Health was just modified, set it to the new maximum
+                if (!master.getAttribute(Figure.Attribute.Health).isMaximum()) {
+                    master.setAttributeToMax(Figure.Attribute.Health);
+                }
+
+                // Don't spawn the Master monster if we're only supposed to spawn 1 Minion only
+                if (spawnMaster) {
+                    placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
+                    master.setOwnerId(dgs.overlordPlayer);
+                    monsterGroup.add(master);
+                    monsterOriginalGroup.add(master.copyNewID());
+                }
+
+                // How many minions?
+                int nMinions;
+                if (nameDef.contains("group")) {
+                    if (nameDef.contains("ignore")) {
+                        // Ignore group limits, max number
+                        nMinions = monsterSetup[monsterSetup.length - 1];
+                    } else {
+                        // Respect group limits
+                        nMinions = monsterSetup[Math.max(0, dgs.getNPlayers() - 3)];
+                    }
+                } else {
+                    // Format name:#minions
+                    nMinions = Integer.parseInt(nameDef.split(":")[1]);
+                }
+
+                // Place minions
+                for (int i = 0; i < nMinions; i++) {
+                    Monster minion = monsterDef.get(act + "-minion").copyNewID();
+                    minion.setProperties(monsterDef.get(act + "-minion").getProperties());
+                    minion.setComponentName(name + " minion " + (i + 1));
+
+                    passives = (PropertyStringArray) minion.getProperty("passive");
+                    if (passives != null)
+                        minion.setPassivesAndSurges(passives.getValues());
+
+                    actions = ((PropertyStringArray) minion.getProperty("action"));
+                    if (actions != null)
+                        minion.setActions(actions.getValues());
+
+                    for (Surge surge : minion.getSurges()) {
+                        minion.addAbility(new SurgeAttackAction(surge, minion.getComponentID()));
+                    }
+
+                    placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, superDef);
+                    minion.setOwnerId(dgs.overlordPlayer);
+                    minion.getNActionsExecuted().setMaximum(nActionsPerFigure);
+                    if (attributeModifiers.containsKey("minion")) {
+                        for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("minion")) {
+                            minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
+                        }
+                    }
+                    if (attributeModifiers.containsKey("all")) {
+                        for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("all")) {
+                            minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
+                        }
+                    }
+
+                    // If our Health was just modified, set it to the new maximum
+                    if (!minion.getAttribute(Figure.Attribute.Health).isMaximum()) {
+                        minion.setAttributeToMax(Figure.Attribute.Health);
+                    }
+
+                    monsterGroup.add(minion);
+                    monsterOriginalGroup.add(minion.copyNewID());
+                }
             }
             dgs.monsters.add(monsterGroup);
             dgs.monstersOriginal.add(monsterOriginalGroup);

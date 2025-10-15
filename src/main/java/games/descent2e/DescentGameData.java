@@ -145,6 +145,9 @@ public class DescentGameData extends AbstractGameData {
     public HashMap<String, Monster> findMonster(String name) {
         return monsters.get(name);
     }
+    public HashMap<String, Monster> findLieutenant(String name) {
+        return lieutenants.get(name);
+    }
 
     private static ArrayList<Quest> loadQuests(String dataPath) {
 
@@ -405,47 +408,34 @@ public class DescentGameData extends AbstractGameData {
 
                 superT.loadFigure(obj, ignoreKeys);
 
+                String attackType = ((JSONArray)obj.get("attackType")).get(1).toString();
+                superT.setAttackType(attackType);
+
                 ignoreKeys.clear();
                 ignoreKeys.add("type");
                 ignoreKeys.add("id");
 
                 HashMap<String, Monster> monsterDef = new HashMap<>();
-                Monster act1two = new Monster();
-                act1two.setLieutenant(true);
+                Monster act1two = superT.copy();
                 act1two.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(0), ignoreKeys);
-                Monster act1three = new Monster();
-                act1three.setLieutenant(true);
+                Monster act1three = superT.copy();
                 act1three.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(1), ignoreKeys);
-                Monster act1four = new Monster();
-                act1four.setLieutenant(true);
+                Monster act1four = superT.copy();
                 act1four.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(2), ignoreKeys);
 
-                Monster act2two = new Monster();
-                act2two.setLieutenant(true);
+                Monster act2two = superT.copy();
                 act2two.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(0), ignoreKeys);
-                Monster act2three = new Monster();
-                act2three.setLieutenant(true);
+                Monster act2three = superT.copy();
                 act2three.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(1), ignoreKeys);
-                Monster act2four = new Monster();
-                act2four.setLieutenant(true);
+                Monster act2four = superT.copy();
                 act2four.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(2), ignoreKeys);
 
-                String attackType = ((JSONArray)obj.get("attackType")).get(1).toString();
-                //System.out.println(attackType);
-                act1two.setAttackType(attackType);
-                act1three.setAttackType(attackType);
-                act1four.setAttackType(attackType);
-                act2two.setAttackType(attackType);
-                act2three.setAttackType(attackType);
-                act2four.setAttackType(attackType);
-                superT.setAttackType(attackType);
-
-                monsterDef.put("1-two", act1two);
-                monsterDef.put("1-three", act1three);
-                monsterDef.put("1-four", act1four);
-                monsterDef.put("2-two", act2two);
-                monsterDef.put("2-three", act2three);
-                monsterDef.put("2-four", act2four);
+                monsterDef.put("1-2", act1two);
+                monsterDef.put("1-3", act1three);
+                monsterDef.put("1-4", act1four);
+                monsterDef.put("2-2", act2two);
+                monsterDef.put("2-3", act2three);
+                monsterDef.put("2-4", act2four);
                 monsterDef.put("super", superT);
 
                 monsters.put(key, monsterDef);
