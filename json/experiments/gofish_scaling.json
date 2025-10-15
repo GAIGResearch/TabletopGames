@@ -1,0 +1,14 @@
+{
+  "game": "GoFish",
+  "nPlayers": 2,
+  "mode": "exhaustive",
+
+  "matchups": 600,
+  "verbose": true,
+
+  "listener": "json/listeners/basiclistener.json",
+  "destDir": "target/gofish_scaling",
+  "output": "target/gofish_scaling/Tournament.log",
+
+  "playerDirectory": "json/players/gameSpecific/gofish"
+}

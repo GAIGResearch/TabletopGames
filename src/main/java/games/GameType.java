@@ -5,7 +5,6 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
 import core.rules.AbstractRuleBasedForwardModel;
-import dev.langchain4j.agent.tool.P;
 import games.backgammon.*;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameParameters;
@@ -43,7 +42,6 @@ import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.gui.DescentGUI;
-import games.diamant.*;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
@@ -58,14 +56,14 @@ import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.gofish.GoFishForwardModel;
+import games.gofish.GoFishGameState;
+import games.gofish.GoFishParameters;
+import games.gofish.gui.GoFishGUIManager;
 import games.hanabi.HanabiForwardModel;
 import games.hanabi.HanabiGameState;
 import games.hanabi.HanabiParameters;
 import games.hanabi.gui.HanabiGUIManager;
-import games.hearts.HeartsForwardModel;
-import games.hearts.HeartsGameState;
-import games.hearts.HeartsParameters;
-import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
@@ -74,7 +72,6 @@ import games.mastermind.MMForwardModel;
 import games.mastermind.MMGameState;
 import games.mastermind.MMParameters;
 import games.monopolydeal.gui.MonopolyDealGUIManager;
-import games.mastermind.*;
 import games.mastermind.gui.MMGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
@@ -137,7 +134,6 @@ import gametemplate.GTGameState;
 import gametemplate.GTParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.*;
 import llm.DocumentSummariser;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import players.human.ActionController;
@@ -187,6 +183,13 @@ public enum GameType {
             Arrays.asList(Strategy, Animals, Cards, ComicBook, Humour),
             Arrays.asList(HandManagement, HotPotato, PlayerElimination, PushYourLuck, SetCollection, TakeThat),
             ExplodingKittensGameState.class, ExplodingKittensForwardModel.class, ExplodingKittensParameters.class, ExplodingKittensGUIManager.class),
+    GoFish(2, 6,
+            Arrays.asList(Cards, Simple),
+            Arrays.asList(HandManagement, SetCollection, TakeThat),
+            GoFishGameState.class,
+            GoFishForwardModel.class,
+            GoFishParameters.class,
+            GoFishGUIManager.class),
     LoveLetter(2, 4,
             Arrays.asList(Cards, Deduction, Renaissance),
             Arrays.asList(HandManagement, PlayerElimination),
@@ -283,9 +286,6 @@ public enum GameType {
             Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
             Arrays.asList(Memory, GridMovement),
             ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
-    Hearts(3,7,Arrays.asList(Cards, Number),
-            Arrays.asList(HandManagement, LoseATurn, TakeThat),
-            HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             List.of(GridMovement),

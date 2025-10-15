@@ -1,0 +1,12 @@
+{
+  "game": "GoFish",
+  "nPlayers":2,
+  "mode": "exhaustive",
+  "matchups": 50,
+  "verbose": true,
+  "listener": "json/listeners/basiclistener.json",
+  "destDir": "target/gofish",
+  "output": "target/gofish/Tournament.log",
+  "playerDirectory": "json/players/gameSpecific/gofish",
+  "seed": 12345
+}
