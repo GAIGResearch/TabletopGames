@@ -156,7 +156,7 @@
         "defence": ["String[]", ["brown"]],
         "attack": ["String[]", ["blue", "yellow"]],
         "passive": ["String[]", ["Surge: Blood Call"]],
-        "actions": ["String[]", ["Sacrifice", "Seduce"]]
+        "action": ["String[]", ["Sacrifice", "Seduce"]]
       },
       {
         "instance": ["Integer", 3],
@@ -164,7 +164,7 @@
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow"]],
         "passive": ["String[]", ["Surge: Blood Call"]],
-        "actions": ["String[]", ["Sacrifice", "Seduce"]]
+        "action": ["String[]", ["Sacrifice", "Seduce"]]
       },
       {
         "instance": ["Integer", 4],
@@ -172,7 +172,7 @@
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow"]],
         "passive": ["String[]", ["Surge: Blood Call"]],
-        "actions": ["String[]", ["Sacrifice", "Seduce"]]
+        "action": ["String[]", ["Sacrifice", "Seduce"]]
       }
     ],
     "act2": [
@@ -182,7 +182,7 @@
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "yellow", "red"]],
         "passive": ["String[]", ["Surge: Blood Call"]],
-        "actions": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
+        "action": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
       },
       {
         "instance": ["Integer", 3],
@@ -190,7 +190,7 @@
         "defence": ["String[]", ["grey", "brown"]],
         "attack": ["String[]", ["blue", "yellow", "red"]],
         "passive": ["String[]", ["Surge: Blood Call"]],
-        "actions": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
+        "action": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
       },
       {
         "instance": ["Integer", 4],
@@ -198,7 +198,7 @@
         "defence": ["String[]", ["grey", "brown"]],
         "attack": ["String[]", ["blue", "yellow", "red"]],
         "passive": ["String[]", ["Surge: Blood Call"]],
-        "actions": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
+        "action": ["String[]", ["Sacrifice", "Seduce", "Wail"]]
       }
     ]
   },
@@ -224,7 +224,7 @@
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["Aftershock", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Ignite"]]
+        "action": ["String[]", ["Ignite"]]
       },
       {
         "instance": ["Integer", 3],
@@ -232,7 +232,7 @@
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["Aftershock", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Ignite"]]
+        "action": ["String[]", ["Ignite"]]
       },
       {
         "instance": ["Integer", 4],
@@ -240,7 +240,7 @@
         "defence": ["String[]", ["grey", "brown"]],
         "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["Aftershock", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Ignite"]]
+        "action": ["String[]", ["Ignite"]]
       }
     ],
     "act2": [
@@ -250,7 +250,7 @@
         "defence": ["String[]", ["grey", "brown"]],
         "attack": ["String[]", ["blue", "red", "yellow"]],
         "passive": ["String[]", ["Aftershock", "Surge: Wither", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Ignite"]]
+        "action": ["String[]", ["Ignite"]]
       },
       {
         "instance": ["Integer", 3],
@@ -258,7 +258,7 @@
         "defence": ["String[]", ["grey", "grey"]],
         "attack": ["String[]", ["blue", "red", "yellow"]],
         "passive": ["String[]", ["Aftershock", "Surge: Wither", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Ignite"]]
+        "action": ["String[]", ["Ignite"]]
       },
       {
         "instance": ["Integer", 4],
@@ -266,7 +266,7 @@
         "defence": ["String[]", ["black", "grey"]],
         "attack": ["String[]", ["blue", "red", "yellow"]],
         "passive": ["String[]", ["Aftershock", "Surge: Wither", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Ignite"]]
+        "action": ["String[]", ["Ignite"]]
       }
     ]
   },
@@ -315,7 +315,7 @@
         "defence": ["String[]", ["grey"]],
         "attack": ["String[]", ["blue", "red", "yellow"]],
         "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Promotion"]]
+        "action": ["String[]", ["Promotion"]]
       },
       {
         "instance": ["Integer", 3],
@@ -323,7 +323,7 @@
         "defence": ["String[]", ["grey", "brown"]],
         "attack": ["String[]", ["blue", "red", "yellow"]],
         "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Promotion"]]
+        "action": ["String[]", ["Promotion"]]
       },
       {
         "instance": ["Integer", 4],
@@ -331,7 +331,7 @@
         "defence": ["String[]", ["grey", "brown"]],
         "attack": ["String[]", ["blue", "red", "yellow"]],
         "passive": ["String[]", ["NotMe", "Surge: Knockback", "Surge: +1 Heart"]],
-        "actions": ["String[]", ["Promotion"]]
+        "action": ["String[]", ["Promotion"]]
       }
     ]
   },
@@ -357,7 +357,7 @@
         "defence": ["String[]", ["black"]],
         "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
-        "actions": ["String[]", ["Dominion"]]
+        "action": ["String[]", ["Dominion"]]
       },
       {
         "instance": ["Integer", 3],
@@ -365,7 +365,7 @@
         "defence": ["String[]", ["black"]],
         "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
-        "actions": ["String[]", ["Dominion"]]
+        "action": ["String[]", ["Dominion"]]
       },
       {
         "instance": ["Integer", 4],
@@ -373,7 +373,7 @@
         "defence": ["String[]", ["black"]],
         "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
-        "actions": ["String[]", ["Dominion"]]
+        "action": ["String[]", ["Dominion"]]
       }
     ],
     "act2": [
@@ -383,7 +383,7 @@
         "defence": ["String[]", ["black", "grey"]],
         "attack": ["String[]", ["blue", "red", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
-        "actions": ["String[]", ["Dominion", "Shadow Bolt"]]
+        "action": ["String[]", ["Dominion", "Shadow Bolt"]]
       },
       {
         "instance": ["Integer", 3],
@@ -391,7 +391,7 @@
         "defence": ["String[]", ["black", "grey", "brown"]],
         "attack": ["String[]", ["blue", "red", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
-        "actions": ["String[]", ["Dominion", "Shadow Bolt"]]
+        "action": ["String[]", ["Dominion", "Shadow Bolt"]]
       },
       {
         "instance": ["Integer", 4],
@@ -399,7 +399,7 @@
         "defence": ["String[]", ["black", "grey", "grey"]],
         "attack": ["String[]", ["blue", "red", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
-        "actions": ["String[]", ["Dominion", "Shadow Bolt"]]
+        "action": ["String[]", ["Dominion", "Shadow Bolt"]]
       }
     ]
   }
