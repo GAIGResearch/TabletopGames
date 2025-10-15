@@ -64,6 +64,8 @@ import games.hanabi.HanabiForwardModel;
 import games.hanabi.HanabiGameState;
 import games.hanabi.HanabiParameters;
 import games.hanabi.gui.HanabiGUIManager;
+import games.hearts.*;
+import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
@@ -147,6 +149,7 @@ import java.util.*;
 import static core.CoreConstants.*;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
+
 import games.monopolydeal.*;
 
 /**
@@ -265,7 +268,7 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
-    Descent2e(2,5,
+    Descent2e(2, 5,
             new ArrayList<>(),
             new ArrayList<>(),
             DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class),
@@ -286,6 +289,9 @@ public enum GameType {
             Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
             Arrays.asList(Memory, GridMovement),
             ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
+    Hearts(3, 7, Arrays.asList(Cards, Number),
+            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+            HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             List.of(GridMovement),
@@ -294,7 +300,7 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement, DiceRolling),
             BGGameState.class, BGForwardModel.class, BGParameters.class, BGGUIManager.class),
-    Mastermind(1,1,
+    Mastermind(1, 1,
             Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
             List.of(PatternBuilding),
             MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
@@ -302,7 +308,7 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
             ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class),
-    Root(2, 4, Arrays.asList(Strategy,Wargame), Arrays.asList(ActionPoints, ActionQueue,
+    Root(2, 4, Arrays.asList(Strategy, Wargame), Arrays.asList(ActionPoints, ActionQueue,
             ActionRetrieval, AreaMajority, AreaMovement, DiceRolling, HandManagement, MultiUseCards, Negotiation,
             PointToPointMovement, Race, SuddenDeathEnding, TakeThat, VariablePlayerPowers, VariableSetup), RootGameState.class, RootForwardModel.class, RootParameters.class, RootGUIManager.class),
     Saboteur(3, 10,
@@ -312,7 +318,8 @@ public enum GameType {
     Chess(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),;
+            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),
+    ;
 
 
     // Core classes where the game is defined
