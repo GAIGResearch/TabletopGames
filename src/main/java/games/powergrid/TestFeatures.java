@@ -37,7 +37,7 @@ public class TestFeatures {
 
     public static void main(String[] args) throws Exception {
     	
-        long seed = 3;
+        long seed = 5;
         Random rnd = new Random(seed);
         int numberOfSteps = 10;
 
@@ -52,7 +52,8 @@ public class TestFeatures {
 
         // 🟢 Define feature names for printPretty
         String[] names = new PowerGridFeatures().names();
-
+        System.out.println("Obs (feature) size = " + names.length);
+        
         // After env.reset()
         List<String> headNames = env.getLeafNames();           // fixed order of leaves
         System.out.println("Head size: " + headNames.size());
@@ -64,6 +65,12 @@ public class TestFeatures {
             if (env.isDone()) {
                 System.out.println("\nEpisode finished before step " + step);
                 break;
+            }
+            try {
+            	double[] obs = env.getObservationVector();
+            	checkObsInUnitInterval("after reset", obs);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             System.out.println("\n=== BEFORE step " + step + " ===");
@@ -80,11 +87,11 @@ public class TestFeatures {
 
             // Execute
             env.step(actionId);
-
+            
             System.out.println("\n=== AFTER step " + step + " ===");
             //printPretty(names, env.getObservationVector());
             System.out.println("Shape: " + env.getTreeShape());
-
+            System.out.println("Reward:" + env.getReward());
             int[] maskAfter = env.getActionMask();
             assertStableHead(headNames, env.getLeafNames());   // still stable
             printMask("AFTER", maskAfter);
@@ -113,6 +120,28 @@ public class TestFeatures {
             }
         }
     }
+    
+    public static boolean checkObsInUnitInterval(String label, double[] obs) {
+        boolean ok = true;
+        for (int i = 0; i < obs.length; i++) {
+            double v = obs[i];
+            if (Double.isNaN(v) || Double.isInfinite(v)) {
+                System.err.printf("OBS NUMERIC ERROR (%s): idx=%d value=%s%n", label, i, String.valueOf(v));
+                ok = false;
+                continue;
+            }
+            if (v < 0.0 || v > 1.0) {
+                System.err.printf("OBS RANGE ERROR   (%s): idx=%d value=%.6f (expected in [0,1])%n", label, i, v);
+                ok = false;
+            }
+        }
+        if (!ok) {
+            System.err.printf("Observation check FAILED (%s): %d features checked%n", label, obs.length);
+        }
+        if(!ok)System.exit(0);
+        return ok;
+    }
+
 
 	}
 

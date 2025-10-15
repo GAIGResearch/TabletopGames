@@ -12,16 +12,10 @@ import core.interfaces.IStateFeatureVector;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridResourceMarket;
 
-public class PowerGridFeatures implements IStateFeatureVector, IStateFeatureJSON {
+public class PowerGridFeatures implements IStateFeatureVector {
 	
 	
 
-	@Override
-	public String getObservationJson(AbstractGameState gameState, int playerId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 
 	@Override
 	public double[] doubleVector(AbstractGameState state, int playerId) {
@@ -277,150 +271,42 @@ public class PowerGridFeatures implements IStateFeatureVector, IStateFeatureJSON
 
 	@Override
 	public String[] names() {
-		String[] playerBlockNames = {
-			    // --- Agent (Player 0) ---
-			    "Agent Money", 
-			    "Resource:Coal", 
-			    "Resource:Gas", 
-			    "Resource:Oil", 
-			    "Resource:Uranium", 
-			    "Generator", 
-			    "Capacity", 
-			    "Income", 
-			    "Plant1", 
-			    "Plant2", 
-			    "Plant3",
+	    List<String> names = new ArrayList<>();
 
-			    // --- Player 1 ---
-			    "Player1 Money", 
-			    "Resource:Coal", 
-			    "Resource:Gas", 
-			    "Resource:Oil", 
-			    "Resource:Uranium", 
-			    "Generator", 
-			    "Capacity", 
-			    "Income", 
-			    "Plant1", 
-			    "Plant2", 
-			    "Plant3",
+	    // --- Player blocks ---
+	    String[] playerTemplate = {
+	        "Money", "Resource:Coal", "Resource:Gas", "Resource:Oil", "Resource:Uranium",
+	        "Generator", "Capacity", "Income", "Plant1", "Plant2", "Plant3"
+	    };
+	    for (int p = 0; p < 6; p++) {
+	        String prefix = (p == 0) ? "Agent " : "Player" + p + " ";
+	        for (String var : playerTemplate) names.add(prefix + var);
+	    }
 
-			    // --- Player 2 ---
-			    "Player2 Money", 
-			    "Resource:Coal", 
-			    "Resource:Gas", 
-			    "Resource:Oil", 
-			    "Resource:Uranium", 
-			    "Generator", 
-			    "Capacity", 
-			    "Income", 
-			    "Plant1", 
-			    "Plant2", 
-			    "Plant3",
+	    // --- Power Grid state variables ---
+	    names.addAll(Arrays.asList(
+	        // Regions
+	        "Region1", "Region2", "Region3", "Region4", "Region5", "Region6", "Region7",
+	        // Resource Market
+	        "Coal_Amount", "Gas_Amount", "Oil_Amount", "Uranium_Amount",
+	        // Turn Order
+	        "TO_First", "TO_Second", "TO_Third", "TO_Fourth", "TO_Fifth", "TO_Sixth",
+	        // Round Order
+	        "RO_First", "RO_Second", "RO_Third", "RO_Fourth", "RO_Fifth", "RO_Sixth",
+	        // Player city counts
+	        "Player0_Cities_Owned", "Player1_Cities_Owned", "Player2_Cities_Owned",
+	        "Player3_Cities_Owned", "Player4_Cities_Owned", "Player5_Cities_Owned",
+	        // Current Market
+	        "Current_Market1", "Current_Market2", "Current_Market3", "Current_Market4",
+	        // Future Market
+	        "Future_Market1", "Future_Market2", "Future_Market3", "Future_Market4"
+	    ));
 
-			    // --- Player 3 ---
-			    "Player3 Money", 
-			    "Resource:Coal", 
-			    "Resource:Gas", 
-			    "Resource:Oil", 
-			    "Resource:Uranium", 
-			    "Generator", 
-			    "Capacity", 
-			    "Income", 
-			    "Plant1", 
-			    "Plant2", 
-			    "Plant3",
+	    // --- Fill remaining to reach total length 671 ---
+	    while (names.size() < 671) {
+	        names.add("F" + names.size());
+	    }
 
-			    // --- Player 4 ---
-			    "Player4 Money", 
-			    "Resource:Coal", 
-			    "Resource:Gas", 
-			    "Resource:Oil", 
-			    "Resource:Uranium", 
-			    "Generator", 
-			    "Capacity", 
-			    "Income", 
-			    "Plant1", 
-			    "Plant2", 
-			    "Plant3",
-
-			    // --- Player 5 ---
-			    "Player5 Money", 
-			    "Resource:Coal", 
-			    "Resource:Gas", 
-			    "Resource:Oil", 
-			    "Resource:Uranium", 
-			    "Generator", 
-			    "Capacity", 
-			    "Income", 
-			    "Plant1", 
-			    "Plant2", 
-			    "Plant3"
-			};
-		String[] powerGridStateVariables = { 
-			    // --- Regions ---
-			    "Region1", 
-			    "Region2", 
-			    "Region3", 
-			    "Region4", 
-			    "Region5", 
-			    "Region6", 
-			    "Region7",
-
-			    // --- Resource Market ---
-			    "Coal_Amount", 
-			    "Gas_Amount", 
-			    "Oil_Amount", 
-			    "Uranium_Amount",
-
-			    // --- Turn Order (TO) ---
-			    "TO_First", 
-			    "TO_Second", 
-			    "TO_Third", 
-			    "TO_Fourth", 
-			    "TO_Fifth", 
-			    "TO_Sixth", 
-
-			    // --- Round Order (RO) ---
-			    "RO_First", 
-			    "RO_Second", 
-			    "RO_Third", 
-			    "RO_Fourth", 
-			    "RO_Fifth", 
-			    "RO_Sixth", 
-
-			    // --- Player City Counts ---
-			    "Player0_Cities_Owned", 
-			    "Player1_Cities_Owned", 
-			    "Player2_Cities_Owned", 
-			    "Player3_Cities_Owned", 
-			    "Player4_Cities_Owned", 
-			    "Player5_Cities_Owned",
-			    
-			    //Current Market 			    
-			    "Current_Market1",
-			    "Current_Market2",
-			    "Current_Market3",
-			    "Current_Market4",
-			    
-			    //Future Market
-			    "Future_Market1",
-			    "Future_Market2",
-			    "Future_Market3",
-			    "Future_Market4"
-			    
-			};
-		
-
-
-		String[] combined = Stream.concat(
-			    Arrays.stream(playerBlockNames),
-			    Arrays.stream(powerGridStateVariables)
-			).toArray(String[]::new);
-
-			return combined; 
-		
-	}  
-    public int getObservationSpace() {
-        return names().length;
-    }
+	    return names.toArray(new String[0]);
+	}
 }

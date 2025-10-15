@@ -33,7 +33,7 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         PowerGridGameState s = (PowerGridGameState) gs;
         int openerId = s.getCurrentPlayer();   // <— opener determined at runtime
 
-        if (plantNumber > s.getPlayersMoney(openerId)) return false;
+        if (plantNumber > s.getPlayersMoney(openerId)) return false; //Small bug here you need the plant number worth of money  ot bid which on discount card in step 2
 
         s.setAuctionPlantNumber(plantNumber);
         s.resetBidOrder();
@@ -44,7 +44,7 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
         } else {
             s.setCurrentBid(plantNumber, openerId);
         }
-
+        gs.setActionInProgress(this);
         currentBidder = s.checkNextBid(openerId);
         s.setTurnOwner(currentBidder);
 
