@@ -81,6 +81,7 @@
     "boards": [
       "acolyte-of-saradyn"
     ],
+    "starting-tile" : "entrance1A",
     "starting-locations": [
       [[1, 15],
       [1, 16],
@@ -144,6 +145,7 @@
     "boards": [
       "rellegars-rest-1"
     ],
+    "starting-tile" : "entrance1A",
     "starting-locations": [
       [[3, 5],
         [3, 6],

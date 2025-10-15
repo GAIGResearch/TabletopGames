@@ -194,6 +194,8 @@ public class DescentGameData extends AbstractGameData {
                     }
                     q.setStartingLocations(startingLocations);
                 }
+                String lt = (String) obj.get("starting-tile");
+                q.setStartingTile(lt);
 
                 // Find monsters traits for open groups
                 ArrayList<String> qTraits = new ArrayList<>();

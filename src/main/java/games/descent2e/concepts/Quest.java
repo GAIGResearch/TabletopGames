@@ -21,6 +21,7 @@ public class Quest {
     private List<DescentReward> commonRewards;
     private List<String> boards;
     private Map<String, List<Vector2D>> startingLocations;
+    private String startingTile;
     private List<Quest> nextMainQuests;
     private List<Quest> nextSideQuests;
     private int act;
@@ -54,6 +55,12 @@ public class Quest {
     }
     public Map<String, List<Vector2D>> getStartingLocations() {
         return startingLocations;
+    }
+    public void setStartingTile(String startingTile) {
+        this.startingTile = startingTile;
+    }
+    public String getStartingTile() {
+        return startingTile;
     }
     public void setMonsters(List<String[]> monsters) {
         this.monsters = monsters;
@@ -119,6 +126,7 @@ public class Quest {
                 q.startingLocations.put(e.getKey(), new ArrayList<>(e.getValue()));
             }
         }
+        q.startingTile = startingTile;
         q.name = name;
         if (monsters != null) {
             q.monsters = new ArrayList<>(Collections.nCopies(monsters.size(), null));
@@ -194,13 +202,13 @@ public class Quest {
                 Objects.equals(tokens, quest.tokens) && Objects.equals(gameOverConditions, quest.gameOverConditions) &&
                 Objects.equals(overlordRewards, quest.overlordRewards) && Objects.equals(heroRewards, quest.heroRewards) &&
                 Objects.equals(commonRewards, quest.commonRewards) && Objects.equals(boards, quest.boards) &&
-                Objects.equals(startingLocations, quest.startingLocations) && Objects.equals(nextMainQuests, quest.nextMainQuests) &&
-                Objects.equals(nextSideQuests, quest.nextSideQuests);
+                Objects.equals(startingLocations, quest.startingLocations) && Objects.equals(startingTile, quest.startingTile) &&
+                Objects.equals(nextMainQuests, quest.nextMainQuests) && Objects.equals(nextSideQuests, quest.nextSideQuests);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(name, monsters, monsterTraits, tokens, gameOverConditions, overlordRewards, heroRewards,
-                commonRewards, boards, startingLocations, nextMainQuests, nextSideQuests, act);
+                commonRewards, boards, startingLocations, startingTile, nextMainQuests, nextSideQuests, act);
     }
 }

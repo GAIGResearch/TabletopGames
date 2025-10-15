@@ -116,7 +116,8 @@ public class DescentForwardModel extends StandardForwardModel {
         // 5. Player setup phase interrupts, after which setup continues:
         // Players choose heroes & class
 
-        List<Vector2D> heroStartingPositions = firstQuest.getStartingLocations().get(firstBoard);
+        // List<Vector2D> heroStartingPositions = firstQuest.getStartingLocations().get(firstBoard);
+        List<Vector2D> heroStartingPositions = new ArrayList<>(dgs.gridReferences.get(firstQuest.getStartingTile()).keySet());
         List<Archetype> archetypes = new ArrayList<>(List.of(Archetype.values()));
         Random rnd = dgs.getRnd();
         dgs.heroes = new ArrayList<>();
