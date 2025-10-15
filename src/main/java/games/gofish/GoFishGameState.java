@@ -27,7 +27,9 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected GameType _getGameType() { return GameType.GoFish; }
+    protected GameType _getGameType() {
+        return GameType.GoFish;
+    }
 
     @Override
     protected List<Component> _getAllComponents() {
@@ -45,23 +47,18 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
         // Core status
         copy.gameStatus = this.gameStatus;
         if (this.playerResults != null) copy.playerResults = this.playerResults.clone();
-        // Note: not copying turn order/current player here (your TAG build doesn’t expose those hooks).
 
         // Components
         copy.drawDeck = (this.drawDeck == null) ? null : this.drawDeck.copy();
 
         copy.playerHands = new ArrayList<>();
-        if (this.playerHands != null) {
-            for (Deck<FrenchCard> hand : this.playerHands) {
-                copy.playerHands.add(hand == null ? null : hand.copy());
-            }
+        for (Deck<FrenchCard> hand : this.playerHands) {
+            copy.playerHands.add(hand == null ? null : hand.copy());
         }
 
         copy.playerBooks = new ArrayList<>();
-        if (this.playerBooks != null) {
-            for (Deck<FrenchCard> books : this.playerBooks) {
-                copy.playerBooks.add(books == null ? null : books.copy());
-            }
+        for (Deck<FrenchCard> books : this.playerBooks) {
+            copy.playerBooks.add(books == null ? null : books.copy());
         }
 
         // Flags
@@ -70,9 +67,9 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
         copy.lastRequestedRank = this.lastRequestedRank;
 
         // Redeterminisation (hide others’ hands if partial observable)
-        if (getCoreGameParameters().partialObservable && playerId != -1 && copy.drawDeck != null) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId && copy.playerHands.get(i) != null) {
+                if (i != playerId) {
                     copy.drawDeck.add(copy.playerHands.get(i));
                     copy.playerHands.get(i).clear();
                 }
@@ -81,7 +78,7 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     int handSize = this.playerHands.get(i).getSize();
-                    for (int j = 0; j < handSize && copy.drawDeck.getSize() > 0; j++) {
+                    for (int j = 0; j < handSize; j++) {
                         copy.playerHands.get(i).add(copy.drawDeck.draw());
                     }
                 }
@@ -91,13 +88,12 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     }
 
 
-
     @Override
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal()) {
             int books = getPlayerBooks().get(playerId).getSize() / 4;
             int cardsInHand = getPlayerHands().get(playerId).getSize();
-            return books - 0.1 * cardsInHand;
+            return (books - 0.1 * cardsInHand) / 13.0; // 13 books possible
         }
         return getPlayerResults()[playerId].value;
     }
@@ -110,9 +106,8 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GoFishGameState)) return false;
+        if (!(o instanceof GoFishGameState that)) return false;
         if (!super.equals(o)) return false;
-        GoFishGameState that = (GoFishGameState) o;
         return continuePlayerTurn == that.continuePlayerTurn
                 && mustDraw == that.mustDraw
                 && lastRequestedRank == that.lastRequestedRank
@@ -144,9 +139,17 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     }
 
     // Getters
-    public List<Deck<FrenchCard>> getPlayerHands() { return playerHands; }
-    public Deck<FrenchCard> getDrawDeck() { return drawDeck; }
-    public List<Deck<FrenchCard>> getPlayerBooks() { return playerBooks; }
+    public List<Deck<FrenchCard>> getPlayerHands() {
+        return playerHands;
+    }
+
+    public Deck<FrenchCard> getDrawDeck() {
+        return drawDeck;
+    }
+
+    public List<Deck<FrenchCard>> getPlayerBooks() {
+        return playerBooks;
+    }
 
     // Helpers
     public boolean playerHasRank(int playerId, int rank) {
@@ -162,16 +165,6 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
             if (hand.get(i).number == rank) removed.add(hand.pick(i));
         }
         return removed;
-    }
-
-    public List<FrenchCard> takeAllRankFromPlayer(int playerId, int rank) {
-        return removeCardsOfRank(playerId, rank);
-    }
-
-    public Set<Integer> ranksInHand(int playerId) {
-        Set<Integer> ranks = new HashSet<>();
-        for (FrenchCard c : playerHands.get(playerId).getComponents()) ranks.add(c.number);
-        return ranks;
     }
 
     public void checkAndCollectBooks(int playerId) {

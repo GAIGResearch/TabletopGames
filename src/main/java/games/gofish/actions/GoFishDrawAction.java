@@ -14,12 +14,10 @@ import java.util.Objects;
 public class GoFishDrawAction extends AbstractAction {
 
     public final int playerID;
+    private final int requestedRank;
 
     // Outcome flag: set during execute(), read by ForwardModel._afterAction
     public boolean drewRequestedRank = false;
-
-    // Rank that was asked for (if any), to check the 'lucky draw' rule
-    private final int requestedRank;
 
     public GoFishDrawAction(int playerID) {
         this(playerID, -1);
@@ -46,23 +44,22 @@ public class GoFishDrawAction extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        // Important: do NOT carry over runtime outcome flags into the copy.
-        return new GoFishDrawAction(playerID, requestedRank);
+    public GoFishDrawAction copy() {
+        GoFishDrawAction retValue = new GoFishDrawAction(playerID, requestedRank);
+        retValue.drewRequestedRank = this.drewRequestedRank;
+        return retValue;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof GoFishDrawAction)) return false;
-        GoFishDrawAction other = (GoFishDrawAction) obj;
-        // Equality based on intent only
-        return playerID == other.playerID && requestedRank == other.requestedRank;
+        if (!(obj instanceof GoFishDrawAction other)) return false;
+        return playerID == other.playerID && requestedRank == other.requestedRank && drewRequestedRank == other.drewRequestedRank;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, requestedRank);
+        return Objects.hash(playerID, requestedRank, drewRequestedRank);
     }
 
     @Override

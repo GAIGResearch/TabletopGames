@@ -19,12 +19,12 @@ public class GoFishEndTurnAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new GoFishEndTurnAction(playerId);
+        return this; // immutable
     }
 
     @Override
     public int hashCode() {
-        return 31 * playerId;
+        return 31 * playerId + 321984;
     }
 
     @Override

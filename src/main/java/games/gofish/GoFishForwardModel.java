@@ -52,17 +52,6 @@ public class GoFishForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         GoFishGameState state = (GoFishGameState) gameState;
 
-        // If already terminal, no actions
-        if (state.getGameStatus() != CoreConstants.GameResult.GAME_ONGOING) {
-            return new ArrayList<>();
-        }
-
-        // If effectively terminal, mark and exit
-        if (isGameEnd(state)) {
-            endGame(state);
-            return new ArrayList<>();
-        }
-
         int currentPlayer = state.getCurrentPlayer();
         List<AbstractAction> actions = new ArrayList<>();
 
@@ -73,7 +62,7 @@ public class GoFishForwardModel extends StandardForwardModel {
         // Empty hand: draw if possible, else pass
         if (handEmpty) {
             if (!deckEmpty) actions.add(new GoFishDrawAction(currentPlayer));
-            else            actions.add(new GoFishEndTurnAction(currentPlayer));
+            else actions.add(new GoFishEndTurnAction(currentPlayer));
             return actions;
         }
 
@@ -106,13 +95,13 @@ public class GoFishForwardModel extends StandardForwardModel {
         // If no asks possible: draw if can, else pass
         if (!hasValidTargets || ranks.isEmpty()) {
             if (!deckEmpty) actions.add(new GoFishDrawAction(currentPlayer));
-            else            actions.add(new GoFishEndTurnAction(currentPlayer));
+            else actions.add(new GoFishEndTurnAction(currentPlayer));
         }
 
         // Guard: never return empty in a non-terminal state
-        if (actions.isEmpty() && state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            System.err.println("GoFish WARNING: empty actions; injecting EndTurn.");
-            actions.add(new GoFishEndTurnAction(currentPlayer));
+        if (actions.isEmpty()) {
+            throw new IllegalStateException("No actions available to player " + currentPlayer +
+                    " in Go Fish, but game is not over!");
         }
 
         return actions;
@@ -149,13 +138,15 @@ public class GoFishForwardModel extends StandardForwardModel {
         // End if terminal
         if (isGameEnd(state)) {
             endGame(state);
-            return;
-        }
-
-        // Advance turn if not continuing
-        if (state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            if (!state.continuePlayerTurn) endPlayerTurn(state);
-            else state.continuePlayerTurn = false; // consume the repeat
+        } else {
+            if (!state.continuePlayerTurn) {
+                endPlayerTurn(state);
+                // then end round if we are back to the first player
+                if (state.getCurrentPlayer() == state.getFirstPlayer()) {
+                    endRound(state);
+                }
+            }
+            state.continuePlayerTurn = false; // consume the repeat
         }
     }
 
@@ -171,38 +162,6 @@ public class GoFishForwardModel extends StandardForwardModel {
         for (int i = 0; i < state.getNPlayers(); i++)
             if (state.getPlayerHands().get(i).getSize() > 0) return false;
         return true;
-        // (If you prefer: deck empty + everyone stuck is also handled
-        // by EndTurnAction until hands empty; both are fine.)
     }
 
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        GoFishGameState state = (GoFishGameState) gameState;
-
-        state.setGameStatus(CoreConstants.GameResult.GAME_END);
-
-        // Winner(s): most books
-        int maxBooks = -1;
-        List<Integer> winners = new ArrayList<>();
-        for (int p = 0; p < state.getNPlayers(); p++) {
-            int books = state.getPlayerBooks().get(p).getSize() / 4;
-            if (books > maxBooks) {
-                maxBooks = books;
-                winners.clear();
-                winners.add(p);
-            } else if (books == maxBooks) {
-                winners.add(p);
-            }
-        }
-
-        for (int p = 0; p < state.getNPlayers(); p++) {
-            if (winners.contains(p)) {
-                state.setPlayerResult(
-                        winners.size() == 1 ? CoreConstants.GameResult.WIN_GAME
-                                : CoreConstants.GameResult.DRAW_GAME, p);
-            } else {
-                state.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, p);
-            }
-        }
-    }
 }

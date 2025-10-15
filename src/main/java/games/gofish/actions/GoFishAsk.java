@@ -49,26 +49,27 @@ public class GoFishAsk extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        // Important: do NOT carry over rollout outcome flags into the copy.
-        return new GoFishAsk(askingPlayer, targetPlayer, rankAsked);
+    public GoFishAsk copy() {
+        GoFishAsk retValue =  new GoFishAsk(askingPlayer, targetPlayer, rankAsked);
+        retValue.receivedCards = this.receivedCards;
+        return retValue;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof GoFishAsk)) return false;
-        GoFishAsk other = (GoFishAsk) obj;
+        if (!(obj instanceof GoFishAsk other)) return false;
         // Equality is based on intent (who asks whom for what), not the outcome.
         return askingPlayer == other.askingPlayer
                 && targetPlayer == other.targetPlayer
+                && receivedCards == other.receivedCards
                 && rankAsked == other.rankAsked;
     }
 
     @Override
     public int hashCode() {
         // Do NOT include receivedCards in hash (it changes after execute()).
-        return Objects.hash(askingPlayer, targetPlayer, rankAsked);
+        return Objects.hash(askingPlayer, targetPlayer, rankAsked, receivedCards);
     }
 
     @Override

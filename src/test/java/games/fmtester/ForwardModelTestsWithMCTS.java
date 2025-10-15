@@ -167,4 +167,9 @@ public class ForwardModelTestsWithMCTS {
         fmt = new ForwardModelTester("game=ChineseCheckers", "nGames=1", "nPlayers=6", "agent=json\\players\\gameSpecific\\ChineseCheckers.json");
     }
 
+    @Test
+    public void testGoFish() {
+        new ForwardModelTester("game=GoFish", "nGames=10", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
+
 }
