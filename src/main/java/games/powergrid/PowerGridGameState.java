@@ -45,7 +45,26 @@ public class PowerGridGameState extends AbstractGameState {
 
 	
     private int[] cityCountByPlayer;
-    private double[] oneHotRegion; 
+    public int[] getPlayerMoney() {
+		return playerMoney;
+	}
+
+
+	public void setPlayerMoney(int[] playerMoney) {
+		this.playerMoney = playerMoney;
+	}
+
+
+	public void setPoweredCities(int[] poweredCities) {
+		this.poweredCities = poweredCities;
+	}
+
+
+	public void setCityCountByPlayer(int[] cityCountByPlayer) {
+		this.cityCountByPlayer = cityCountByPlayer;
+	}
+
+	private double[] oneHotRegion; 
     private int[][] citySlotsById;          
     private Deck<PowerGridCard>[] ownedPlantsByPlayer;
     
@@ -82,9 +101,6 @@ public class PowerGridGameState extends AbstractGameState {
 
     public PowerGridGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        this.cityCountByPlayer = new int[nPlayers];
-        this.playerMoney = new int[nPlayers];
-        this.poweredCities = new int[nPlayers];
     }
 
 
@@ -806,8 +822,10 @@ public class PowerGridGameState extends AbstractGameState {
 
         // ---- Terminal bonus ----
         if (getPlayerResults()[playerId] == GameResult.WIN_GAME) {
+        	System.out.println("Player_Won");
             shaped += 10.0;  // large terminal win reward
         } else if (getPlayerResults()[playerId] == GameResult.LOSE_GAME) {
+        	System.out.println("Player_Lost");
             shaped -= 5.0;   // optional: penalize losing heavily
         }
 

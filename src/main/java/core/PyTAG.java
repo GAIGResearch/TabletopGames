@@ -250,7 +250,8 @@ public class PyTAG {
         this.leaves = root.getLeafNodes();
     }
 */
-    public void reset() {
+    public void reset(){
+        // Reset game instance, run built-in agents until a python agent is required to make a decision
         this.game.reset(players);
         this.turnPause = 0;
         this.tick = 0;
@@ -259,43 +260,26 @@ public class PyTAG {
         this.lastSeed = seedRandom.nextLong();
         gameState.gameParameters.setRandomSeed(this.lastSeed);
         this.forwardModel = game.getForwardModel();
-
-        // probe the very first state we see
-        PGProbe.Snap s0 = PGProbe.snap((PowerGridGameState) gameState);
-
-        // ⚠️ computeAvailableActions SHOULD be pure. Verify it:
-        PGProbe.Snap s1a = PGProbe.snap((PowerGridGameState) gameState);
+        
+        
+        System.out.println("PLAYER BEFORE isTErminal ran : " + gameState.getCurrentPlayer());
+        // execute the game if needed until Python agent is required to make a decision
+        boolean isTerminal = nextDecision();//seems to work deleting this but it shouldnt 
+        
         this.availableActions = forwardModel.computeAvailableActions(gameState);
-        PGProbe.Snap s1b = PGProbe.snap((PowerGridGameState) gameState);
-        PGProbe.diff("after computeAvailableActions(gameState)", s1a, s1b);
 
-        // This typically runs until the Python player must act (and CAN mutate a lot)
-        PGProbe.Snap s2a = PGProbe.snap((PowerGridGameState) gameState);
-        PGProbe.Snap s2b = PGProbe.snap((PowerGridGameState) gameState);
-        PGProbe.diff("after nextDecision()", s2a, s2b);
-
+        // get action tree for current player
         if (this.root == null){
             this.root = ((ITreeActionSpace)this.forwardModel).initActionTree(this.gameState);
         }
-
-        // Use an observation copy for available actions (should be pure)
+        // update with initial actions
+        // Compute the updated available actions and the action tree
         AbstractGameState observation = gameState.copy(gameState.getCurrentPlayer());
-        PGProbe.Snap s3a = PGProbe.snap((PowerGridGameState) gameState);
         this.availableActions = forwardModel.computeAvailableActions(observation);
-        PGProbe.Snap s3b = PGProbe.snap((PowerGridGameState) gameState);
-        PGProbe.diff("after computeAvailableActions(observation)", s3a, s3b);
-
-        // Keep the same state you used for actions when updating tree to avoid mismatches
-        PGProbe.Snap s4a = PGProbe.snap((PowerGridGameState) gameState);
-        this.root = ((ITreeActionSpace)this.forwardModel).updateActionTree(this.root, observation);
-        PGProbe.Snap s4b = PGProbe.snap((PowerGridGameState) gameState);
-        PGProbe.diff("after updateActionTree(root, observation)", s4a, s4b);
-
+        this.root = ((ITreeActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
         this.leaves = root.getLeafNodes();
-
-        // Final summary vs very first
-        PGProbe.diff("SUMMARY reset(): start→end", s0, PGProbe.snap((PowerGridGameState) gameState));
     }
+
 
    
 
@@ -323,6 +307,14 @@ public class PyTAG {
         while ( !(currentPlayer instanceof PythonAgent)){
             AbstractGameState observation = gameState.copy(activePlayer);
             List<core.actions.AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+            System.out.println("\n=== " + currentPlayer.getClass().getSimpleName()
+                    + " (P" + activePlayer + ") ===");
+                System.out.println("Phase: " + gameState.getGamePhase());
+                System.out.println("Available actions: " + observedActions.size());
+
+                for (int i = 0; i < observedActions.size(); i++) {
+                    System.out.println("  [" + i + "] " + observedActions.get(i));
+                }
 
             if (isDone()){
                 // game is over

@@ -47,58 +47,48 @@ public class PowerGridFeatures implements IStateFeatureVector {
 	    PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 
 	    final int MAX_PLAYERS = 6, F = 11;
-	    final double MONEY_MAX = 500.0;                 
-	    final double COAL_MAX = 9.0, GAS_MAX = 9.0, OIL_MAX = 9.0, UR_MAX = 6.0; //would be better if these corresponded to players actual capacity will experiment 
-	    final double CAP_MAX  = PowerGridParameters.MAX_CAPACITY;
-	    final double INC_MAX  = PowerGridParameters.MAX_INCOME;
-	    final double CARD_MAX = PowerGridParameters.MAX_CARD;
-	    final int nPlayers    = pggs.getNPlayers();
-	    final double cityMax  = (params.citiesToTriggerEnd[nPlayers - 1]) + 2.0; // your prior logic
+	    final int PLAYERS     = pggs.getNPlayers();  // only rotate over active seats
+
+	    final double MONEY_MAX = 500.0;
+	    final double COAL_MAX  = 9.0, GAS_MAX = 9.0, OIL_MAX = 9.0, UR_MAX = 6.0;
+	    final double CAP_MAX   = PowerGridParameters.MAX_CAPACITY;
+	    final double INC_MAX   = PowerGridParameters.MAX_INCOME;
+	    final double CARD_MAX  = PowerGridParameters.MAX_CARD;
+	    final double cityMax   = params.citiesToTriggerEnd[PLAYERS - 1] + 2.0;
 
 	    double[] out = new double[F * MAX_PLAYERS];
 	    int w = 0;
 
-	    // RL agent
-	    out[w+0] = n(pggs.getPlayersMoney(agentPlayerID), MONEY_MAX);
-	    out[w+1] = n(pggs.getFuel(agentPlayerID, PowerGridParameters.Resource.COAL), COAL_MAX);
-	    out[w+2] = n(pggs.getFuel(agentPlayerID, PowerGridParameters.Resource.GAS),  GAS_MAX);
-	    out[w+3] = n(pggs.getFuel(agentPlayerID, PowerGridParameters.Resource.OIL),  OIL_MAX);
-	    out[w+4] = n(pggs.getFuel(agentPlayerID, PowerGridParameters.Resource.URANIUM), UR_MAX);
-	    out[w+5] = n(pggs.getCityCountByPlayer(agentPlayerID), cityMax);
-	    out[w+6] = n(pggs.getPlayerCapacity(agentPlayerID), CAP_MAX);
-	    out[w+7] = n(pggs.getIncome(agentPlayerID),          INC_MAX);
+	    // --- Agent-first rotation over *active* players only ---
+	    for (int b = 0; b < PLAYERS; b++) {
+	        int pid = (agentPlayerID + b) % PLAYERS;
 
-	    Deck<PowerGridCard> hand = pggs.getOwnedPlantsByPlayer(agentPlayerID);
-	    out[w+8]  = n(plantNo(hand, 0), CARD_MAX);
-	    out[w+9]  = n(plantNo(hand, 1), CARD_MAX);
-	    out[w+10] = n(plantNo(hand, 2), CARD_MAX);
-	    w += F;
+	        out[w + 0] = n(pggs.getPlayersMoney(pid), MONEY_MAX);
+	        out[w + 1] = n(pggs.getFuel(pid, PowerGridParameters.Resource.COAL),     COAL_MAX);
+	        out[w + 2] = n(pggs.getFuel(pid, PowerGridParameters.Resource.GAS),      GAS_MAX);
+	        out[w + 3] = n(pggs.getFuel(pid, PowerGridParameters.Resource.OIL),      OIL_MAX);
+	        out[w + 4] = n(pggs.getFuel(pid, PowerGridParameters.Resource.URANIUM),  UR_MAX);
+	        out[w + 5] = n(pggs.getCityCountByPlayer(pid), cityMax);
+	        out[w + 6] = n(pggs.getPlayerCapacity(pid),   CAP_MAX);
+	        out[w + 7] = n(pggs.getIncome(pid),           INC_MAX);
 
-	    // Other Players normalized 
-	    for (int offset = 1; offset < MAX_PLAYERS; offset++) {
-	        int pid = (agentPlayerID + offset) % MAX_PLAYERS;
-	        if (pid < nPlayers) {
-	            out[w+0] = n(pggs.getPlayersMoney(pid), MONEY_MAX);
-	            out[w+1] = n(pggs.getFuel(pid, PowerGridParameters.Resource.COAL), COAL_MAX);
-	            out[w+2] = n(pggs.getFuel(pid, PowerGridParameters.Resource.GAS),  GAS_MAX);
-	            out[w+3] = n(pggs.getFuel(pid, PowerGridParameters.Resource.OIL),  OIL_MAX);
-	            out[w+4] = n(pggs.getFuel(pid, PowerGridParameters.Resource.URANIUM), UR_MAX);
-	            out[w+5] = n(pggs.getCityCountByPlayer(pid), cityMax);
-	            out[w+6] = n(pggs.getPlayerCapacity(pid), CAP_MAX);
-	            out[w+7] = n(pggs.getIncome(pid),          INC_MAX);
+	        Deck<PowerGridCard> deck = pggs.getOwnedPlantsByPlayer(pid);
+	        out[w + 8]  = n(plantNo(deck, 0), CARD_MAX);
+	        out[w + 9]  = n(plantNo(deck, 1), CARD_MAX);
+	        out[w +10]  = n(plantNo(deck, 2), CARD_MAX);
 
-	            Deck<PowerGridCard> opp = pggs.getOwnedPlantsByPlayer(pid);
-	            out[w+8]  = n(plantNo(opp, 0), CARD_MAX);
-	            out[w+9]  = n(plantNo(opp, 1), CARD_MAX);
-	            out[w+10] = n(plantNo(opp, 2), CARD_MAX);
-	        } else {
-	            // leave zeros for empty seats
-	        }
 	        w += F;
+	    }
+
+	    // --- Pad remaining blocks with zeros ---
+	    if (w < F * MAX_PLAYERS) {
+	        Arrays.fill(out, w, F * MAX_PLAYERS, 0.0);
 	    }
 
 	    return out;
 	}
+
+
 
 	
 	public double[] buildGlobalObservation(AbstractGameState state, int agentPlayerID) {

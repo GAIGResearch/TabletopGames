@@ -900,9 +900,10 @@ public class Game {
           //runMany(List<GameType> games, List<AbstractPlayer> players, long seed, int nGames,
 //                   boolean verbose, boolean stopOnError, ActionController ac, int turnPause)
 
-        //Game.runMany(games, players, seedForBatch, gamesToRun, false, false, null, turnPause);
+        //Game.runMany(games, players, seedForBatch, gamesToRun, false, false, useGUI ? ac : null, turnPause);
 
 
     }
+
 
 }

@@ -65,19 +65,22 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.resourceMarket.setUpMarket(params.startinResources);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
 		state.initFuelStorage(); 
 		state.setIncome(new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0)));
+		state.setPlayerMoney(new int [] {0,0,0,0,0,0} );
+		state.setCityCountByPlayer(new int [] {0,0,0,0,0,0} );
+		state.setPoweredCities(new int [] {0,0,0,0,0,0} );
 		state.setStep(1);
 		state.setDrawPile(setupDecks(params,state.getNPlayers(), state.getRnd()));
 		state.setCurrentMarket(new Deck<>("currentMarket", VISIBLE_TO_ALL));
 		state.setFutureMarket(new Deck<>("futureMarket",  VISIBLE_TO_ALL));
 		initMarkets(state);
 		state.initCityStorageForBoard();//creates a 2d array which keeps track of which cities are bought 
-		buildTurnOrder(state);
 		state.setStartingMoney(params.startingMoney);
+		buildTurnOrder(state);
 		state.setGamePhase(PowerGridGameState.PowerGridGamePhase.AUCTION); 
 		int first_player = state.getTurnOrder().get(0);
 		state.setTurnOwner(first_player);
-		state.initOwnedPlants();
-						
+		state.initOwnedPlants();			
+		
 	}
 	
 
@@ -94,6 +97,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 	    case AUCTION: {
 	        // Player can start an auction only if they're still in the round and no auction is live
+	    	//Somthing is wrong with round order 
 	        final boolean canStartAuction = s.getRoundOrder().contains(me) && !s.isAuctionLive();
 	        final int money = s.getPlayersMoney(me);
 
@@ -114,7 +118,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	                }
 	            }
 	        } 
-
+	        	System.out.println("THE PLAYER COULD NOT START AN AUCTION");
 	        	actions.add(new PassAction());
 	        }
 
@@ -243,7 +247,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 	        case AUCTION -> {
 	            // Auction uses normal (turn) order
-	            buildTurnOrder(state);
 	            List<Integer> ord = new ArrayList<>(state.getTurnOrder());
 	            state.setRoundOrder(ord);
 	            state.setTurnOwner(ord.get(0));
@@ -814,11 +817,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         root.resetTree();
 
         List<AbstractAction> acts = computeAvailableActions(gameState);
-        System.out.println(
-                "ACTION SIZE " + computeAvailableActions(gameState).size() +
-                " | where=" + new Exception().getStackTrace()[1]
-            );
-        System.out.println("ACTION SIZE: " + acts.size() + " Current Player: " + gameState.getCurrentPlayer());
         for (var a : acts) {
             ActionTreeNode leaf = null;
 
@@ -853,7 +851,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
             if (leaf != null) {
                 leaf.setAction(a);
-            } // else: action exists but we didn’t pre-build a leaf (shouldn’t happen if covered above)
+            } 
         }
 
         return root;
