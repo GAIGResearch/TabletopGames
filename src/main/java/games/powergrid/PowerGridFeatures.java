@@ -276,19 +276,19 @@ public class PowerGridFeatures implements IStateFeatureVector {
 	    // --- Power Grid state variables ---
 	    names.addAll(Arrays.asList(
 	        // Regions
-	        "Region1", "Region2", "Region3", "Region4", "Region5", "Region6", "Region7",
+	        "Region1", "Region2", "Region3", "Region4", "Region5", "Region6", "Region7", //66-72
 	        // Resource Market
-	        "Coal_Amount", "Gas_Amount", "Oil_Amount", "Uranium_Amount",
+	        "Coal_Amount", "Gas_Amount", "Oil_Amount", "Uranium_Amount", //73-76
 	        // Turn Order
-	        "TO_First", "TO_Second", "TO_Third", "TO_Fourth", "TO_Fifth", "TO_Sixth",
+	        "TO_First", "TO_Second", "TO_Third", "TO_Fourth", "TO_Fifth", "TO_Sixth",//77-82
 	        // Round Order
-	        "RO_First", "RO_Second", "RO_Third", "RO_Fourth", "RO_Fifth", "RO_Sixth",
+	        "RO_First", "RO_Second", "RO_Third", "RO_Fourth", "RO_Fifth", "RO_Sixth",//83-88
 	        // Player city counts
-	        "Player0_Cities_Owned", "Player1_Cities_Owned", "Player2_Cities_Owned",
-	        "Player3_Cities_Owned", "Player4_Cities_Owned", "Player5_Cities_Owned",
+	        "Player0_Cities_Owned", "Player1_Cities_Owned", "Player2_Cities_Owned",//89-91
+	        "Player3_Cities_Owned", "Player4_Cities_Owned", "Player5_Cities_Owned",//92-94
 	        // Current Market
-	        "Current_Market1", "Current_Market2", "Current_Market3", "Current_Market4",
-	        // Future Market
+	        "Current_Market1", "Current_Market2", "Current_Market3", "Current_Market4",//95-98
+	        // Future Market//99-102
 	        "Future_Market1", "Future_Market2", "Future_Market3", "Future_Market4"
 	    ));
 

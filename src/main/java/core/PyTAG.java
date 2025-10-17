@@ -261,8 +261,8 @@ public class PyTAG {
         gameState.gameParameters.setRandomSeed(this.lastSeed);
         this.forwardModel = game.getForwardModel();
         
+        PowerGridGameState gs = (PowerGridGameState) gameState; 
         
-        System.out.println("PLAYER BEFORE isTErminal ran : " + gameState.getCurrentPlayer());
         // execute the game if needed until Python agent is required to make a decision
         boolean isTerminal = nextDecision();//seems to work deleting this but it shouldnt 
         
@@ -307,14 +307,6 @@ public class PyTAG {
         while ( !(currentPlayer instanceof PythonAgent)){
             AbstractGameState observation = gameState.copy(activePlayer);
             List<core.actions.AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
-            System.out.println("\n=== " + currentPlayer.getClass().getSimpleName()
-                    + " (P" + activePlayer + ") ===");
-                System.out.println("Phase: " + gameState.getGamePhase());
-                System.out.println("Available actions: " + observedActions.size());
-
-                for (int i = 0; i < observedActions.size(); i++) {
-                    System.out.println("  [" + i + "] " + observedActions.get(i));
-                }
 
             if (isDone()){
                 // game is over

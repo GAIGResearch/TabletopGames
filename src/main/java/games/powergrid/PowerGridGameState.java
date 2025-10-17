@@ -785,54 +785,40 @@ public class PowerGridGameState extends AbstractGameState {
     }
     
 
-    
     @Override
     public double getGameScore(int playerId) {
-        // ---- Weights for shaping (tune to taste) ----
-        final double wCities   = 1.00;  // progress toward win condition
-        final double wPowered  = 0.60;  // efficiency (how many of your cities are powered)
-        final double wMoney    = 0.20;  // liquidity
-        final double wCapacity = 0.20;  // infrastructure health
+        // Only score in BUREAUCRACY
+        if ((PowerGridGamePhase) getGamePhase() != PowerGridGamePhase.BUREAUCRACY) {
+            return 0.0;
+        }
+
+        // ---- Weights ----
+        final double wCities = 0.8;   // importance of cities
+        final double wIncome = 0.5;   // importance of income
 
         // ---- Normalization constants ----
         int cityTarget = 0;
         try {
             PowerGridParameters params = (PowerGridParameters) getGameParameters();
-            if (params != null && params.citiesToTriggerEnd!= null && params.citiesToTriggerEnd.length >= getNPlayers()) {
+            if (params != null && params.citiesToTriggerEnd != null &&
+                params.citiesToTriggerEnd.length >= getNPlayers()) {
                 cityTarget = params.citiesToTriggerEnd[getNPlayers() - 1];
             }
         } catch (Exception ignored) {}
         if (cityTarget <= 0) cityTarget = Math.max(1, getMaxCitiesOwned());
 
-        int citiesMine   = getCityCountByPlayer(playerId);
-        int poweredMine  = getPoweredCities(playerId);
-        int capacityMine = getPlayerCapacity(playerId);
-        int moneyMine    = getPlayersMoney(playerId);
+        // ---- Raw features ----
+        int cities = getCityCountByPlayer(playerId);
+        int income = getIncome(playerId);
 
-        // ---- Shaped components ----
-        double termCities   = clamp01(citiesMine / (double) cityTarget);
-        double termPowered  = (citiesMine == 0) ? 0.0 : clamp01(poweredMine / (double) citiesMine);
-        double termMoney    = clamp01(Math.tanh(moneyMine / 100.0));
-        int desired         = Math.max(citiesMine, poweredMine);
-        double termCapacity = (desired == 0) ? 0.0 : clamp01(capacityMine / (double) desired);
+        // ---- Normalize to [0,1] ----
+        double normCities = clamp01((double) cities / cityTarget);
+        double normIncome = clamp01((double) income / PowerGridParameters.MAX_INCOME);
 
-        double raw = wCities * termCities + wPowered * termPowered + wMoney * termMoney + wCapacity * termCapacity;
-        double denom = wCities + wPowered + wMoney + wCapacity;
-        double shaped = raw / denom;  // normalized to [0,1]
-
-        // ---- Terminal bonus ----
-        if (getPlayerResults()[playerId] == GameResult.WIN_GAME) {
-        	System.out.println("Player_Won");
-            shaped += 10.0;  // large terminal win reward
-        } else if (getPlayerResults()[playerId] == GameResult.LOSE_GAME) {
-        	System.out.println("Player_Lost");
-            shaped -= 5.0;   // optional: penalize losing heavily
-        }
-
-        return shaped;
+        // ---- Weighted combination ----
+        return wCities * normCities + wIncome * normIncome;
     }
 
-    // helper
     private static double clamp01(double x) {
         return x < 0 ? 0 : (x > 1 ? 1 : x);
     }

@@ -1,5 +1,6 @@
 package games.powergrid;
 
+import java.awt.Taskbar.State;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,11 +77,14 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.initCityStorageForBoard();//creates a 2d array which keeps track of which cities are bought 
 		state.setStartingMoney(params.startingMoney);
 		buildTurnOrder(state);
-		state.setGamePhase(PowerGridGameState.PowerGridGamePhase.AUCTION); 
+		state.setGamePhase(PowerGridGamePhase.AUCTION); 
 		int first_player = state.getTurnOrder().get(0);
 		state.setTurnOwner(first_player);
-		state.initOwnedPlants();			
-		
+		state.initOwnedPlants();	
+		List<Integer> ord = new ArrayList<>(state.getTurnOrder());
+        state.setRoundOrder(ord);
+        state.resetAuction();
+        
 	}
 	
 
@@ -97,7 +101,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 	    case AUCTION: {
 	        // Player can start an auction only if they're still in the round and no auction is live
-	    	//Somthing is wrong with round order 
 	        final boolean canStartAuction = s.getRoundOrder().contains(me) && !s.isAuctionLive();
 	        final int money = s.getPlayersMoney(me);
 
@@ -118,7 +121,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	                }
 	            }
 	        } 
-	        	System.out.println("THE PLAYER COULD NOT START AN AUCTION");
 	        	actions.add(new PassAction());
 	        }
 
@@ -135,9 +137,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     		    	if(s.getResourceMarket().costToBuy(r, i) > s.getPlayersMoney(me)) {
     		    		continue;
     		    	}
-    		    	BuyResource br = new BuyResource(r,i);
     		    	actions.add(new BuyResource(r,i));
-    		    	String key = "buy_" + br.getResource().name() + "_" + br.getAmount();
     		    }
     		    
     		}
@@ -228,66 +228,48 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 	
 	private void onEnterPhase(PowerGridGameState state, PowerGridGamePhase phase) {
-		  if (state.isActionInProgress()) {
-		        System.out.println("WARNING: Action still in progress entering phase " 
-		            + phase + " — current sequence: " + state.currentActionInProgress());
-		    }
 	    switch (phase) {
-
 	        case PLAYER_ORDER -> {
-	            // Recompute full turn order for the round.
 	            buildTurnOrder(state);
-	            // Start of a round: round order = turn order (highest to lowest).
-	            List<Integer> ord = new ArrayList<>(state.getTurnOrder());
-	            state.setRoundOrder(ord);
-	            state.setTurnOwner(ord.get(0));
-	            state.clearPoweredCities();
 	            advancePhase(state);
+	            state.clearPoweredCities();
+	            endRound(state, state.getTurnOwner());
 	        }
 
 	        case AUCTION -> {
-	            // Auction uses normal (turn) order
-	            List<Integer> ord = new ArrayList<>(state.getTurnOrder());
-	            state.setRoundOrder(ord);
-	            state.setTurnOwner(ord.get(0));
-	            // Pre-set discount marker (the action will check legality by step)
-	            PowerGridCard firstCard = state.getCurrentMarket().peek(0);
-	            if (firstCard != null) state.setDiscountCard(firstCard.getNumber());
+	            buildTurnOrder(state);
+	            // always sets the discount card to the first but the auction action checks if it's phase 2
+	            PowerGridCard firstCard = state.currentMarket.peek(0);
+	            if (firstCard != null) {
+	                state.setDiscountCard(firstCard.getNumber());
+	            }
 	        }
 
 	        case RESOURCE_BUY -> {
-	            // Reverse order (last becomes first)
-	            List<Integer> rev = new ArrayList<>(state.getRoundOrder());
-	            Collections.reverse(rev);
-	            state.setRoundOrder(rev);
-	            state.setTurnOwner(rev.get(0));
+	            List<Integer> order = state.getRoundOrder();
+	            Collections.reverse(state.getRoundOrder());
+	            state.setTurnOwner(order.get(0));
 	        }
 
 	        case BUILD -> {
-	            // Reverse order again (Power Grid builds in reverse player order too)
-	            List<Integer> rev = new ArrayList<>(state.getRoundOrder());
-	            Collections.reverse(rev);
-	            state.setRoundOrder(rev);
-	            state.setTurnOwner(rev.get(0));
+	            List<Integer> order = state.getRoundOrder();
+	            Collections.reverse(state.getRoundOrder());
+	            state.setTurnOwner(order.get(0));
 	        }
 
 	        case BUREAUCRACY -> {
 	            state.resetPlantsRan();
-
-	            // Step 2 trigger: only after cities hit the threshold and *before* running plants payout adjustments.
-	            if (state.getStep() == 1 && state.stepTwoTrigger()) {
+	            if (state.getStep() == 1 && state.stepTwoTrigger()) { // no plants have been run yet 
 	                state.setStep(2);
-	                // Remove lowest card from current market and then rebalance.
-	                state.getCurrentMarket().draw();
+	                state.getCurrentMarket().draw(); // remove lowest card 
 	                rebalanceMarkets(state);
 	            }
-
-	            // No need to touch roundOrder here; payout and refills happen on exit.
 	        }
 
-	        default -> { /* no-op */ }
+	        default -> {}
 	    }
 	}
+
 
 
 
@@ -301,7 +283,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        case BUREAUCRACY -> { 
 	        					PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 	        					if(state.getMaxCitiesOwned() >= params.citiesToTriggerEnd[state.getNPlayers()-1]) {
-	        						state.setGameStatus(GameResult.GAME_END);
+	        						endGame(state);
 	        					    return; 
 	        					}
 	        					awardIncome(state);
@@ -359,7 +341,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     @Override
 	protected void endGame(AbstractGameState gs) {
         PowerGridGameState state = (PowerGridGameState) gs;
-		state.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winner = 0;
         int highestCities = -1;
         int highestMoney = -1;
@@ -378,7 +359,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             gs.setPlayerResult(LOSE_GAME, i);
         }
         gs.setPlayerResult(WIN_GAME, winner);
-        System.out.println("The winner is " + winner + " with " + highestCities + " cities and $" + highestMoney);
+		state.setGameStatus(CoreConstants.GameResult.GAME_END);
     }
 
 	
@@ -389,7 +370,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        s.setPlayerIncome(p,PowerGridParameters.INCOME_TRACK[powered]);
 	    }
 	}
-
+	//TODO STILL BUG HERE SOMETIMES DOESNT move cards to top row still works logic wise tho 
 	/**
 	 * Computes how much of each resource type a player can legally purchase
 	 * based on the storage capacity of their owned power plants, ignoring
@@ -416,7 +397,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    Deck<PowerGridCard> hand = s.getOwnedPlantsByPlayer(playerId);
 	    if (hand == null) return canBuy;
 
-	    // 1) Sum capacities: dedicated + hybrid pool
+	    // Sum capacities: dedicated + hybrid pool
 	    int coalCap = 0, gasCap = 0, oilCap = 0, urCap = 0, hybridCap = 0;
 
 	    // use getComponents() unless your Deck implements Iterable<PowerGridCard>
@@ -440,7 +421,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	        }
 	    }
 
-	    // 2) Subtract what the player already stores
+	    //  Subtract what the player already stores
 	    int cHave = s.getFuel(playerId, PowerGridParameters.Resource.COAL);
 	    int gHave = s.getFuel(playerId, PowerGridParameters.Resource.GAS);
 	    int oHave = s.getFuel(playerId, PowerGridParameters.Resource.OIL);
@@ -449,7 +430,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    int coalFree = Math.max(0, coalCap - cHave);
 	    int urFree   = Math.max(0, urCap   - uHave);
 
-	    // 3) Dedicated first, overflow into hybrid pool (shared for GAS/OIL)
+	    //  Dedicated first, overflow into hybrid pool (shared for GAS/OIL)
 	    int gasDedicatedUsed = Math.min(gHave, gasCap);
 	    int oilDedicatedUsed = Math.min(oHave, oilCap);
 	    int gasOverflow = Math.max(0, gHave - gasCap);
@@ -746,7 +727,33 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     }
     
     
-    
+    /**
+     * Initializes the full hierarchical {@link ActionTreeNode} structure for the Power Grid game.
+     * <p>
+     * This method defines the static action-space layout used by both Java and Python agents 
+     * in PyTAG integration. Each major game phase (e.g., AUCTION, RESOURCE_BUY, BUILD, BUREAUCRACY)
+     * is represented as a child branch under the root node. Individual legal actions (such as
+     * "increase_bid", "build_city_5", or "run_13_COAL2OIL1") are added as named leaves to ensure
+     * the action mask remains consistent across all game states.
+     * </p>
+     *
+     * <p>
+     * The resulting tree provides a deterministic, phase-based structure that mirrors the 
+     * game's possible action types:
+     * <ul>
+     *   <li><b>AUCTION</b> – Includes sub-actions for bidding, passing, discarding, and 
+     *       opening new auctions (one per available power plant).</li>
+     *   <li><b>RESOURCE_BUY</b> – Contains fixed "buy_RESOURCE_AMOUNT" options for each fuel type.</li>
+     *   <li><b>BUILD</b> – Includes one leaf per city ("build_city_ID") for expansion actions.</li>
+     *   <li><b>BUREAUCRACY</b> – Includes all valid combinations of plant operation mixes
+     *       ("run_PLANT_MIXKEY") for the production phase.</li>
+     *   <li><b>Pass Round</b> – Always available at the root level as a fallback/pass action.</li>
+     * </ul>
+     * </p>
+     *
+     * @param gs the current {@link AbstractGameState}, expected to be an instance of {@link PowerGridGameState}
+     * @return the fully constructed root {@link ActionTreeNode} containing all static phase and action leaves
+     */
     
     @Override
     public ActionTreeNode initActionTree(AbstractGameState gs) {
@@ -756,52 +763,59 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
         ActionTreeNode root = new ActionTreeNode(0, "root");
 
-        root.addChild(0, "increase_bid");
-        root.addChild(0, "pass_bid");
-        root.addChild(0, "discard_0");
-        root.addChild(0, "discard_1");
-        root.addChild(0, "discard_2");
+        // --- Phase roots---
+        ActionTreeNode auction       = root.addChild(0, "AUCTION");
+        ActionTreeNode startAuction  = auction.addChild(0, "start_auction");
+        ActionTreeNode buyResource   = root.addChild(0, "RESOURCE_BUY");
+        ActionTreeNode build         = root.addChild(0, "BUILD");
+        ActionTreeNode runPhase      = root.addChild(0, "BUREAUCRACY");
 
-        // Open auction leaves: one per plant
+        // --- AUCTION placeholders---
+        auction.addChild(0, "increase_bid");
+        auction.addChild(0, "pass_bid");
+        auction.addChild(0, "discard_0");
+        auction.addChild(0, "discard_1");
+        auction.addChild(0, "discard_2");
+
+        // Open auction leaves: one per plant under start_auction
         for (PowerGridCard card : params.plantsIncludedInGame) {
-            root.addChild(0, "plant_" + card.getNumber());
+            startAuction.addChild(0, "auction_plant_" + card.getNumber());
         }
 
-        // Bureaucracy: one leaf per plant/mix
+        // --- BUREAUCRACY ---
         for (PowerGridCard card : params.plantsIncludedInGame) {
             int plantNumber = card.getNumber();
             if (card.getInput().hasMultipleTypes()) {
                 for (EnumMap<PowerGridParameters.Resource, Integer> mix : card.generatePossibleCombos()) {
-                    root.addChild(0, "run_" + plantNumber + "_" + mixKey(mix));
+                    runPhase.addChild(0, "run_" + plantNumber + "_" + mixKey(mix));
                 }
             } else {
-                root.addChild(0, "run_" + plantNumber + "_" + mixKey(card.getInput().asMap()));
+                runPhase.addChild(0, "run_" + plantNumber + "_" + mixKey(card.getInput().asMap()));
             }
         }
 
-        // Resource buy options (fixed menu)
+        // --- RESOURCE_BUY ---
         for (int i = 1; i <= 9; i++) {
-            root.addChild(0, "buy_COAL_" + i);
-            root.addChild(0, "buy_GAS_"  + i);
-            root.addChild(0, "buy_OIL_"  + i);
-            if (i <= 6) root.addChild(0, "buy_URANIUM_" + i);
+            buyResource.addChild(0, "buy_COAL_" + i);
+            buyResource.addChild(0, "buy_GAS_"  + i);
+            buyResource.addChild(0, "buy_OIL_"  + i);
+            if (i <= 6) buyResource.addChild(0, "buy_URANIUM_" + i);
         }
 
-        // Build options: one per city
+        // --- BUILD ---
         for (PowerGridCity city : map.cities()) {
-            root.addChild(0, "build_city_" + city.getComponentID());
+            build.addChild(0, "build_city_" + city.getComponentID());
         }
 
-        // Always include pass to keep a stable slot
+        // Always include pass to keep a stable slot (at root)
         root.addChild(0, "Pass Round");
 
         return root;
     }
 
-    // deterministically encode a mix like {COAL=2, OIL=1} -> "COAL2OIL1"
-    private static String mixKey(EnumMap<PowerGridParameters.Resource, Integer> mix) {
+    // helper method to deterministically encode a mix of rosource -> amount in the Enum Map  like {COAL=2, OIL=1} -> "COAL2OIL1"
+    private String mixKey(EnumMap<PowerGridParameters.Resource, Integer> mix) {
         StringBuilder sb = new StringBuilder();
-        // Ensure deterministic ordering by resource name
         var keys = new java.util.ArrayList<>(mix.keySet());
         keys.sort(java.util.Comparator.comparing(Enum::name));
         for (var k : keys) {
@@ -811,52 +825,114 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         }
         return sb.toString();
     }
+    
+    /**
+     * Updates the {@link ActionTreeNode} structure with the currently available actions for the active phase.
+     * <p>
+     * This method resets the existing tree and rebinds valid {@link AbstractAction} instances to their 
+     * corresponding named leaves (e.g., "increase_bid", "buy_COAL_3", "build_city_12") based on the 
+     * current {@link PowerGridGamePhase}. Each phase (AUCTION, RESOURCE_BUY, BUILD, BUREAUCRACY) 
+     * activates only the relevant action nodes, while the "Pass Round" node is always maintained.
+     * </p>
+     *
+     * @param root       the root {@link ActionTreeNode} previously initialized by {@code initActionTree}
+     * @param gameState  the current {@link AbstractGameState}, expected to be a {@link PowerGridGameState}
+     * @return the updated {@link ActionTreeNode} with phase-appropriate actions bound to their nodes
+     */
 
     @Override
     public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
         root.resetTree();
 
-        List<AbstractAction> acts = computeAvailableActions(gameState);
-        for (var a : acts) {
-            ActionTreeNode leaf = null;
+        PowerGridGameState s = (PowerGridGameState) gameState;
+        var phase = (PowerGridGameState.PowerGridGamePhase) s.getGamePhase();
+        java.util.List<AbstractAction> acts = computeAvailableActions(gameState);
 
-            // Map each action instance to its flat-name key
-            if (a instanceof games.powergrid.actions.AuctionPowerPlant app) {
-                leaf = root.findChildrenByName("plant_" + app.getPlantNumber());
+        // Phase nodes
+        ActionTreeNode auction     = root.findChildrenByName("AUCTION");
+        ActionTreeNode start       = (auction != null) ? auction.findChildrenByName("start_auction") : null;
+        ActionTreeNode buy         = root.findChildrenByName("RESOURCE_BUY");
+        ActionTreeNode build       = root.findChildrenByName("BUILD");
+        ActionTreeNode run         = root.findChildrenByName("BUREAUCRACY");
+        ActionTreeNode passLeaf    = root.findChildrenByName("Pass Round");
 
-            } else if (a instanceof games.powergrid.actions.IncreaseBid) {
-                leaf = root.findChildrenByName("increase_bid");
-
-            } else if (a instanceof games.powergrid.actions.PassBid) {
-                leaf = root.findChildrenByName("pass_bid");
-
-            } else if (a instanceof games.powergrid.actions.Discard d) {
-                leaf = root.findChildrenByName("discard_" + d.getIndex());
-
-            } else if (a instanceof games.powergrid.actions.BuyResource br) {
-                String key = "buy_" + br.getResource().name() + "_" + br.getAmount();
-                leaf = root.findChildrenByName(key);
-
-            } else if (a instanceof games.powergrid.actions.BuildGenerator bg) {
-                String key = "build_city_" + bg.getCityId();
-                leaf = root.findChildrenByName(key);
-
-            } else if (a instanceof games.powergrid.actions.RunPowerPlant rp) {
-                String key = "run_" + rp.getPlantId() + "_" + mixKey(rp.getSpend());
-                leaf = root.findChildrenByName(key);
-
-            } else if (a instanceof PassAction) {
-                leaf = root.findChildrenByName("Pass Round");
+        switch (phase) {
+            case PLAYER_ORDER -> {
+                for (var a : acts) {
+                    if (a instanceof PassAction && passLeaf != null) passLeaf.setAction(a);
+                }
             }
 
-            if (leaf != null) {
-                leaf.setAction(a);
-            } 
+            case AUCTION -> {
+                for (var a : acts) {
+                    if (a instanceof games.powergrid.actions.AuctionPowerPlant app) {
+                        var leaf = (start != null) ? start.findChildrenByName("auction_plant_" + app.getPlantNumber()) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof games.powergrid.actions.IncreaseBid) {
+                        var leaf = (auction != null) ? auction.findChildrenByName("increase_bid") : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof games.powergrid.actions.PassBid) {
+                        var leaf = (auction != null) ? auction.findChildrenByName("pass_bid") : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof games.powergrid.actions.Discard d) {
+                        var leaf = (auction != null) ? auction.findChildrenByName("discard_" + d.getIndex()) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassAction) {
+                        if (passLeaf != null) passLeaf.setAction(a);
+                    }
+                }
+            }
+
+            case RESOURCE_BUY -> {
+                for (var a : acts) {
+                    if (a instanceof games.powergrid.actions.BuyResource br) {
+                        String key = "buy_" + br.getResource().name() + "_" + br.getAmount();
+                        var leaf = (buy != null) ? buy.findChildrenByName(key) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassAction) {
+                        if (passLeaf != null) passLeaf.setAction(a);
+                    }
+                }
+            }
+
+            case BUILD -> {
+                for (var a : acts) {
+                    if (a instanceof games.powergrid.actions.BuildGenerator bg) {
+                        String key = "build_city_" + bg.getCityId();
+                        var leaf = (build != null) ? build.findChildrenByName(key) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassAction) {
+                        if (passLeaf != null) passLeaf.setAction(a);
+                    }
+                }
+            }
+
+            case BUREAUCRACY -> {
+                for (var a : acts) {
+                    if (a instanceof games.powergrid.actions.RunPowerPlant rp) {
+                        String key = "run_" + rp.getPlantId() + "_" + mixKey(rp.getSpend());
+                        var leaf = (run != null) ? run.findChildrenByName(key) : null;
+                        if (leaf != null) leaf.setAction(a);
+                    } else if (a instanceof PassAction) {
+                        if (passLeaf != null) passLeaf.setAction(a);
+                    }
+                }
+            }
+
+            default -> {
+                for (var a : acts) {
+                    if (a instanceof PassAction && passLeaf != null) passLeaf.setAction(a);
+                }
+            }
         }
 
         return root;
     }
 
+
+        
+        
+        
     private static void dbgAuction(PowerGridGameState s) {
         int pid = s.getCurrentPlayer();
         System.out.println(" -- AUCTION DEBUG --");
