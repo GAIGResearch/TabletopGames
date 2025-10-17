@@ -173,10 +173,11 @@ public class DescentTypes {
         DoubleMovePenalty,
         FatiguePenalty,
         FatigueOnKill,
+        Duskblade,
+        StaffOfShadows,
+        BonesOfWoe,
         ZoreksFavor,
         ScorpionsKiss,
-        Duskblade,
-        BonesOfWoe,
         SpeedPenalty;
     }
 

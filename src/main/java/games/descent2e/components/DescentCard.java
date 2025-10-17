@@ -26,7 +26,8 @@ public class DescentCard extends Card {
         if (at != null) {
             attackType = AttackType.valueOf(at.toString().toUpperCase(Locale.ROOT));
             PropertyStringArray attPower = (PropertyStringArray) data.getProperty("attackPower");
-            dicePool = DicePool.constructDicePool(attPower.getValues());
+            if (attPower != null)
+                dicePool = DicePool.constructDicePool(attPower.getValues());
         }
         Property ws = data.getProperty("weaponSurges");
         if (ws != null) {

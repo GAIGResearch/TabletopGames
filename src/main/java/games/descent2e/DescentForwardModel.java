@@ -490,6 +490,7 @@ public class DescentForwardModel extends StandardForwardModel {
             // I did have another branch where they are available, but I'd need to call that back in for this
             for (List<Monster> monsters : dgs.getMonsters()) {
                 for (Monster monster : monsters) {
+                    if (!monster.isLieutenant()) continue;
                     if (monster.hasBonus(SkillBonus.BonesOfWoe)) {
                         DicePool bonesOfWoe = DicePool.constructDicePool("BLUE");
                         bonesOfWoe.roll(dgs.getRnd());

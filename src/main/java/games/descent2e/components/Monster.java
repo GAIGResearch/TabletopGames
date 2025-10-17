@@ -3,8 +3,14 @@ package games.descent2e.components;
 import core.CoreConstants;
 import core.components.Counter;
 import core.components.Deck;
+import core.properties.PropertyBoolean;
+import core.properties.PropertyString;
+import core.properties.PropertyStringArray;
+import games.descent2e.DescentHelper;
+import games.descent2e.DescentTypes;
 import games.descent2e.DescentTypes.AttackType;
 import games.descent2e.actions.attack.Surge;
+import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.monsterfeats.NotMe;
 import utilities.Pair;
@@ -107,6 +113,119 @@ public class Monster extends Figure {
         Monster copy = new Monster(componentName, nActionsExecuted.getMaximum());
         copyComponentTo(copy);
         return copy;
+    }
+
+    public boolean canEquip(DescentCard c) {
+        if (!lieutenant) return false;
+        PropertyBoolean heroRelic = (PropertyBoolean) c.getProperty("heroRelic");
+        if (heroRelic == null) return false;
+        if (heroRelic.value) return false;
+        PropertyString passive = (PropertyString) c.getProperty("passive");
+        if (passive != null) {
+            if (passive.value.contains("Effect:EquipLimit:")) {
+                String limit = passive.value.split("Effect:EquipLimit:")[1];
+                return componentName.contains(limit.split(";")[0]);
+            }
+        }
+        return true;
+    }
+
+    public void equip(DescentCard c) {
+        if (canEquip(c)) {
+            lieutenantInventory.add(c);
+
+            // Apply any surges, if possible
+            for (Surge surge : c.getWeaponSurges()) {
+                SurgeAttackAction s = new SurgeAttackAction(surge, componentID);
+                addAbility(s);
+            }
+
+            // Obtain the action, or passive, property of the Item
+            PropertyString action = (PropertyString) c.getProperty("action");
+            if (action == null) {
+                action = (PropertyString) c.getProperty("passive");
+                if (action == null) return;
+            }
+
+            if (!action.value.contains(";Effect")) return;
+
+            String[] effects = action.value.split(";");
+
+            for (String effect : effects) {
+                if (Objects.equals(effect, effects[0])) continue;
+                String[] split = effect.split(":");
+
+                switch (split[1]) {
+                    case "Duskblade" -> {
+                        addBonus(DescentTypes.SkillBonus.Duskblade);
+                    }
+                    case "StaffOfShadows" -> {
+                        addBonus(DescentTypes.SkillBonus.StaffOfShadows);
+                    }
+                    case "BonesOfWoe" -> {
+                        addBonus(DescentTypes.SkillBonus.BonesOfWoe);
+                    }
+                    case "ShieldZoreksFavor" -> {
+                        addBonus(DescentTypes.SkillBonus.ZoreksFavor);
+                    }
+                    case "ScorpionsKiss" -> {
+                        addBonus(DescentTypes.SkillBonus.ScorpionsKiss);
+                    }
+                    case "BecomeRanged" -> {
+                        setAttackType("ranged");
+                    }
+                }
+            }
+        }
+    }
+
+    public void unequip(DescentCard c) {
+        lieutenantInventory.remove(c);
+
+        // Remove Surges
+        for (Surge surge : c.getWeaponSurges()) {
+            SurgeAttackAction s = new SurgeAttackAction(surge, componentID);
+            removeAbility(s);
+        }
+
+        // Obtain the action, or passive, property of the Item
+        PropertyString action = (PropertyString) c.getProperty("action");
+        if (action == null) {
+            action = (PropertyString) c.getProperty("passive");
+            if (action == null) return;
+        }
+
+        if (!action.value.contains(";Effect")) return;
+
+        String[] effects = action.value.split(";");
+
+        for (String effect : effects) {
+            if (Objects.equals(effect, effects[0])) continue;
+            String[] split = effect.split(":");
+
+            switch (split[1]) {
+                case "Duskblade" -> {
+                    removeBonus(DescentTypes.SkillBonus.Duskblade);
+                }
+                case "StaffOfShadows" -> {
+                    removeBonus(DescentTypes.SkillBonus.StaffOfShadows);
+                }
+                case "BonesOfWoe" -> {
+                    removeBonus(DescentTypes.SkillBonus.BonesOfWoe);
+                }
+                case "ShieldZoreksFavor" -> {
+                    removeBonus(DescentTypes.SkillBonus.ZoreksFavor);
+                }
+                case "ScorpionsKiss" -> {
+                    removeBonus(DescentTypes.SkillBonus.ScorpionsKiss);
+                }
+                case "BecomeRanged" -> {
+                    // This only affects Baron Zachareth, who by default is melee
+                    // We're assuming that the only Lieutenants who get impacted by this are melee originally
+                    setAttackType("melee");
+                }
+            }
+        }
     }
 
     public void setAttackType(String attack)
