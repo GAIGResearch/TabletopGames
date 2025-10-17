@@ -138,6 +138,15 @@ public class NTBEA {
         throw new IllegalArgumentException("Cannot add to search space - not an ITPSearchSpace");
     }
 
+    public boolean hasParameter(String key) {
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+            if (itp.itp instanceof TunableParameters<?> tp) {
+                return tp.getParameterValue(key) != null;
+            }
+        }
+        throw new IllegalArgumentException("Cannot check for parameter unless params.searchSpace is Tunable");
+    }
+
     /**
      * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
      *
