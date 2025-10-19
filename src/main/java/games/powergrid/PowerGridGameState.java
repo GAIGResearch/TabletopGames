@@ -197,6 +197,7 @@ public class PowerGridGameState extends AbstractGameState {
         }
 
         return copy;
+ 
     }
 
 
@@ -824,7 +825,7 @@ public class PowerGridGameState extends AbstractGameState {
     }
 
 
-
+    @Override public int hashCode() { return 0; }
 
 }
 

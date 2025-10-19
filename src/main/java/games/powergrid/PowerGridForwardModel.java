@@ -948,6 +948,8 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         for (var c : s.getCurrentMarket()) System.out.print(" " + c.getNumber());
         System.out.println();
     }
+    
+    @Override public int hashCode() { return 0; }
 }
 
 

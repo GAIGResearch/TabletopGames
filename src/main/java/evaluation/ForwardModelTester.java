@@ -43,6 +43,7 @@ public class ForwardModelTester {
 
     public ForwardModelTester(AbstractParameters params, String... args) {
         String agentToPlay = Utils.getArg(args, "agent", "random");
+        System.out.println(agentToPlay);
         int numberOfGames = Utils.getArg(args, "nGames", 1);
         String gameToRun = Utils.getArg(args, "game", "MonopolyDeal");
         int nPlayers = Utils.getArg(args, "nPlayers", 2);
