@@ -124,6 +124,10 @@ public class NTBEA {
     // This sets a tunable parameter that is *NOT* in the search space itself to the specified value
     // This will ensure that all agents in the run use this parameter
     public void fixTunableParameter(String key, Object value) {
+        if (!hasParameter(key)) {
+            System.out.println("Not parameter: " + key + " to fix");
+            return;
+        }
         for (int i = 0; i < params.searchSpace.nDims(); i++) {
             if (params.searchSpace.name(i).equals(key)) {
                 throw new IllegalArgumentException("Cannot set a tunable parameter that is in the search space. Use fixSearchDimension instead.");

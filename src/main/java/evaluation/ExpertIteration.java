@@ -413,20 +413,15 @@ public class ExpertIteration {
 
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
             ntbea.setOpponents(Collections.singletonList(bestAgent));
-            if (ntbea.hasParameter("actionHeuristic"))
-                ntbea.fixTunableParameter("actionHeuristic", actionHeuristic);  // so this is used when tuning
-            if (ntbea.hasParameter("rolloutPolicyParams.actionHeuristic"))
-                ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);
+            ntbea.fixTunableParameter("actionHeuristic", actionHeuristic);  // so this is used when tuning
+            ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);
 
             if (valueSearchSettings != null && valueSearchSpace != null) {
                 // we can use the value search settings to initialise the action search settings
                 fixSSDimensions(ntbea, actionSearchSpace, valueSearchSettings, valueSearchSpace);
 
                 // and also make sure we include the state heuristic in the action search
-                if (ntbea.hasParameter("heuristic"))
-                    ntbea.fixTunableParameter("heuristic", stateHeuristic);
-                else
-                    throw new AssertionError("We really rather need a heuristic");
+                ntbea.fixTunableParameter("heuristic", stateHeuristic);
             }
 
             ntbeaParams.printSearchSpaceDetails();
