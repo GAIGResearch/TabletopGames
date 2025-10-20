@@ -1380,6 +1380,7 @@ public class DescentForwardModel extends StandardForwardModel {
             if (f instanceof Hero) {
                 String tile = quest.getStartingTile();
                 List<Vector2D> heroStartingPositions = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
+                heroStartingPositions.sort(Comparator.comparingInt(Vector2D::getX).thenComparingInt(Vector2D::getY));
                 for (Vector2D pos : heroStartingPositions) {
                     Place place = new Place(f.getComponentID(), pos, tile);
                     if (place.canExecute(dgs))
@@ -1392,6 +1393,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     if (!m.getName().contains(monsters[0].split(":")[0])) continue;
                     String tile = monsters[1];
                     List<Vector2D> monsterStartingPositions = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
+                    monsterStartingPositions.sort(Comparator.comparingInt(Vector2D::getX).thenComparingInt(Vector2D::getY));
 
                     if (m.getSize().a.equals(m.getSize().b)) {
                         for (Vector2D pos : monsterStartingPositions) {
@@ -1413,7 +1415,7 @@ public class DescentForwardModel extends StandardForwardModel {
         }
 
         if (!placement.isEmpty()) {
-            placement.sort(Comparator.comparingInt(Place::getX).thenComparingInt(Place::getY));
+            //placement.sort(Comparator.comparingInt(Place::getX).thenComparingInt(Place::getY));
             actions.addAll(placement);
         }
         else actions.add(new EndFigureTurn());
