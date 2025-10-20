@@ -108,6 +108,10 @@ public class DescentForwardModel extends StandardForwardModel {
         dgs.monsterActingNext = 0;
         dgs.heroActingNext = 0;
 
+        // Only disable if we want random figure placements
+        // i.e. we want to disable players choosing starting locations
+        // dgs.endSetup();
+
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
 
         // TODO: is this quest phase or campaign phase?
@@ -182,17 +186,21 @@ public class DescentForwardModel extends StandardForwardModel {
             figure.setFeatAvailable(true);
 
             // Place hero on the board in random starting position out of those available
-            Vector2D position = heroStartingPositions.get(rnd.nextInt(heroStartingPositions.size()));
-            figure.setPosition(position);
+            if (!dgs.inSetup()) {
+                Vector2D position = heroStartingPositions.get(rnd.nextInt(heroStartingPositions.size()));
+                figure.setPosition(position);
 
-            // System.out.println(position);
+                // System.out.println(position);
 
-            // Tell the board there's a hero there
-            PropertyInt prop = new PropertyInt("players", figure.getComponentID());
-            dgs.masterBoard.getElement(position.getX(), position.getY()).setProperty(prop);
+                // Tell the board there's a hero there
+                PropertyInt prop = new PropertyInt("players", figure.getComponentID());
+                dgs.masterBoard.getElement(position).setProperty(prop);
 
-            // This starting position no longer an option (one hero per space)
-            heroStartingPositions.remove(position);
+                // This starting position no longer an option (one hero per space)
+                heroStartingPositions.remove(position);
+            }
+
+            figure.setOffMap(true);
 
             // Inform game of this hero figure
             dgs.heroes.add(figure);
@@ -361,6 +369,8 @@ public class DescentForwardModel extends StandardForwardModel {
                 if (actingFigure instanceof Hero) endHeroPlayerTurn(dgs);
                 else endOverlordPlayerTurn(dgs);
             }
+
+            if (dgs.inSetup()) return;
 
             startOfNewTurn(dgs);
         }
@@ -538,6 +548,10 @@ public class DescentForwardModel extends StandardForwardModel {
                 dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
             }
             endRound(dgs, 1);
+            if (dgs.inSetup()) {
+                dgs.endSetup();
+                dgs.setRoundCounter(0);
+            }
         } else {
             dgs.monsterActingNext = nextMonster;  // continue turn with the next monster
         }
@@ -806,6 +820,10 @@ public class DescentForwardModel extends StandardForwardModel {
         // Init action list
         List<AbstractAction> actions = new ArrayList<>();
         Figure actingFigure = dgs.getActingFigure();
+
+        // Setup Only
+        if (dgs.inSetup())
+            return setupActions(dgs, actingFigure);
 
         // Equipment Initialisation
         // This is only for Heroes who have items available in their inventories
@@ -1351,6 +1369,56 @@ public class DescentForwardModel extends StandardForwardModel {
 //                break;
 //        }
 //        return heroicFeats;
+    }
+
+    private List<AbstractAction> setupActions(DescentGameState dgs, Figure f) {
+        List<AbstractAction> actions = new ArrayList<>();
+        List<Place> placement = new ArrayList<>();
+        Quest quest = dgs.getCurrentQuest();
+
+        if (f.isOffMap()) {
+            if (f instanceof Hero) {
+                String tile = quest.getStartingTile();
+                List<Vector2D> heroStartingPositions = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
+                for (Vector2D pos : heroStartingPositions) {
+                    Place place = new Place(f.getComponentID(), pos, tile);
+                    if (place.canExecute(dgs))
+                        placement.add(place);
+                }
+            }
+
+            if (f instanceof Monster m) {
+                for (String[] monsters : quest.getMonsters()) {
+                    if (!m.getName().contains(monsters[0].split(":")[0])) continue;
+                    String tile = monsters[1];
+                    List<Vector2D> monsterStartingPositions = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
+
+                    if (m.getSize().a.equals(m.getSize().b)) {
+                        for (Vector2D pos : monsterStartingPositions) {
+                            Place place = new Place(m.getComponentID(), pos, tile);
+                            if (place.canExecute(dgs))
+                                placement.add(place);
+                        }
+                    } else {
+                        for (Monster.Direction d : Monster.Direction.values()) {
+                            for (Vector2D pos : monsterStartingPositions) {
+                                Place place = new Place(m.getComponentID(), pos, tile, d);
+                                if (place.canExecute(dgs))
+                                    placement.add(place);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!placement.isEmpty()) {
+            placement.sort(Comparator.comparingInt(Place::getX).thenComparingInt(Place::getY));
+            actions.addAll(placement);
+        }
+        else actions.add(new EndFigureTurn());
+
+        return actions;
     }
 
     private List<AbstractAction> meleeAttackActions(DescentGameState dgs, Figure f) {
@@ -2243,18 +2311,21 @@ public class DescentForwardModel extends StandardForwardModel {
                     }
                 }
                 if (canPlace) {
+                    // If the Monster has the Web passive, add it to our GameState list
+                    if (monster.hasPassive(MonsterAbilities.MonsterPassive.WEB))
+                    {
+                        dgs.webMonstersIDs.add(monster.getComponentID());
+                    }
+
+                    monster.setOffMap(true);
+
+                    if (dgs.inSetup()) break;
                     monster.setPosition(option.copy());
                     PropertyInt prop = new PropertyInt("players", monster.getComponentID());
                     for (int i = 0; i < h; i++) {
                         for (int j = 0; j < w; j++) {
                             dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
                         }
-                    }
-
-                    // If the Monster has the Web passive, add it to our GameState list
-                    if (monster.hasPassive(MonsterAbilities.MonsterPassive.WEB))
-                    {
-                        dgs.webMonstersIDs.add(monster.getComponentID());
                     }
 
                     break;

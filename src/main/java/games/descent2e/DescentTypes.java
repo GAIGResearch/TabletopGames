@@ -69,6 +69,10 @@ public class DescentTypes {
         Block(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}});
 
         HashMap<Figure.Attribute, Integer> moveCosts;
+        static HashSet<TerrainType> startingTerrains = new HashSet<TerrainType>() {{
+            add(Plain);
+            add(Water);
+        }};
         static HashSet<TerrainType> walkableTerrains = new HashSet<TerrainType>() {{
             add(Plain);
             add(Water);
@@ -123,6 +127,10 @@ public class DescentTypes {
                 margins.add(t.name().toLowerCase());
             }
             return margins;
+        }
+
+        public static boolean isStartingTerrain(String terrain) {
+            return terrain != null && startingTerrains.contains(Utils.searchEnum(TerrainType.class, terrain));
         }
 
         public static boolean isWalkableTerrain(String terrain) {

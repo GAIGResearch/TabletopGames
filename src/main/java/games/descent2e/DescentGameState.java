@@ -32,6 +32,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
     Map<String, Map<Vector2D, Vector2D>> gridReferences;
     boolean initData;
+    boolean setup = true;
 
     Deck<Card> searchCards;
     Deck<Card> act1ShopCards;
@@ -175,6 +176,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             copy.gridReferences.put(e.getKey(), map);
         }
         copy.initData = initData;
+        copy.setup = setup;
         copy.tokens = new ArrayList<>();
         for (DToken t : tokens) {
             copy.tokens.add(t.copy());
@@ -257,7 +259,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         if (this == o) return true;
         if (!(o instanceof DescentGameState that)) return false;
         if (!super.equals(o)) return false;
-        return initData == that.initData && overlordPlayer == that.overlordPlayer &&
+        return initData == that.initData && setup == that.setup && overlordPlayer == that.overlordPlayer &&
                 Objects.equals(data, that.data) && Objects.equals(tiles, that.tiles) &&
                 Arrays.deepEquals(tileReferences, that.tileReferences) &&
                 Objects.equals(gridReferences, that.gridReferences) &&
@@ -286,7 +288,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards, act1ShopCards, act2ShopCards, relicCards,
+        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, setup, searchCards, act1ShopCards, act2ShopCards, relicCards,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
                 monsters, monstersOriginal, monstersPerGroup, monsterGroups, webMonstersIDs, overlordPlayer, tokens, currentQuest,
                 defeatedFigures, defeated, interruptAttacks, monsterActingNext, heroActingNext, monsterGroupActingNext);
@@ -417,6 +419,18 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public Deck<Card> getRelicCards() {
         return relicCards;
+    }
+
+    public boolean inSetup() {
+        return setup;
+    }
+
+    public void endSetup() {
+        setup = false;
+    }
+
+    public void setRoundCounter(int roundCounter) {
+        this.roundCounter = roundCounter;
     }
 
     /*

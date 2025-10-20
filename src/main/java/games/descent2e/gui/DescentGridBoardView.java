@@ -207,6 +207,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         // Draw heroes
         for (Hero f : gameState.getHeroes()) {
             Vector2D loc = f.getPosition();
+            if (loc == null) continue;
             DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString) f.getProperty("archetype")).value);
 
             // Color
@@ -240,9 +241,9 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                 String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
                 for (Monster m : monsterGroup) {
-//                Vector2D loc = m.getPosition();
-                    Vector2D loc = m.applyAnchorModifier();
+                    Vector2D loc = m.getPosition();
                     if (loc == null) continue;
+                    loc = m.applyAnchorModifier();
                     int orientation = m.getOrientation().ordinal();
 
                     // Get the size of the monster, and scale according to item size
