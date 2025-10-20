@@ -815,9 +815,17 @@ public class PowerGridGameState extends AbstractGameState {
         // ---- Normalize to [0,1] ----
         double normCities = clamp01((double) cities / cityTarget);
         double normIncome = clamp01((double) income / PowerGridParameters.MAX_INCOME);
+        
+        
+        // ---- Exponential Penalty as game gets longer ----
+        int round = Math.max(0, getRoundCounter());
+        final double maxPenalty = 0.5;     
+        final int    halfLife  = 25;      
+        double timePenalty = -maxPenalty * (1.0 - Math.exp(-(double)round / halfLife));
+
 
         // ---- Weighted combination ----
-        return wCities * normCities + wIncome * normIncome;
+        return (wCities * normCities + wIncome * normIncome) + timePenalty;
     }
 
     private static double clamp01(double x) {
