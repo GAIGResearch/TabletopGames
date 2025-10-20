@@ -295,11 +295,6 @@ public class Game {
 
                 AbstractPlayer currentPlayer = players.get(activePlayer);
 
-                // we check via a volatile boolean, otherwise GUI button presses do not trigger this
-                // as the JVM hoists pause and isHumanToMove() ouside the while loop on the basis that
-                // they cannot be changed in this thread....
-
-
                 /*
                  * The Game is responsible for tracking the players and the current game state
                  * It is important that the Game never passes the main AbstractGameState to the individual players,

@@ -75,7 +75,7 @@ public class GoFishAsk extends AbstractAction {
     @Override
     public String toString() {
         String rankName = switch (rankAsked) {
-            case 1 -> "Aces";
+            case 14 -> "Aces";
             case 11 -> "Jacks";
             case 12 -> "Queens";
             case 13 -> "Kings";

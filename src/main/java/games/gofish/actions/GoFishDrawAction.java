@@ -66,7 +66,7 @@ public class GoFishDrawAction extends AbstractAction {
     public String toString() {
         if (requestedRank != -1) {
             String rankName = switch (requestedRank) {
-                case 1 -> "Aces";
+                case 14 -> "Aces";
                 case 11 -> "Jacks";
                 case 12 -> "Queens";
                 case 13 -> "Kings";
