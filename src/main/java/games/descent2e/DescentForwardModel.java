@@ -2080,6 +2080,7 @@ public class DescentForwardModel extends StandardForwardModel {
         List<String[]> monsters = quest.getMonsters();
 
         int players = dgs.getNPlayers();
+        players = Math.max(players - 1, 2); // Exclude Overlord from count, minimum 2 Heroes
 
         for (String[] mDef : monsters) {
             List<Monster> monsterGroup = new ArrayList<>();
