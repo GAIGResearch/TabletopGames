@@ -1395,15 +1395,30 @@ public class DescentForwardModel extends StandardForwardModel {
                     List<Vector2D> monsterStartingPositions = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
                     monsterStartingPositions.sort(Comparator.comparingInt(Vector2D::getX).thenComparingInt(Vector2D::getY));
 
-                    if (m.getSize().a.equals(m.getSize().b)) {
-                        for (Vector2D pos : monsterStartingPositions) {
+                    Pair<Integer, Integer> size = m.getSize();
+                    if (size.a > 1 || size.b > 1) {
+                        int totalSize = getMonsterGroupTileSize(dgs, m);
+                        if (monsterStartingPositions.size() < totalSize)
+                            throw new AssertionError("Not enough starting positions to spawn all " + m.getName().split(" minion")[0].split(" master")[0] +"s!");
+                    }
+
+                    List<Vector2D> toCheck = new ArrayList<>();
+                    GridBoard board = dgs.getMasterBoard();
+                    for (Vector2D pos : monsterStartingPositions) {
+                        if (((PropertyInt) board.getElement(pos).getProperty(playersHash)).value == -1) {
+                            toCheck.add(pos);
+                        }
+                    }
+
+                    if (size.a.equals(size.b)) {
+                        for (Vector2D pos : toCheck) {
                             Place place = new Place(m.getComponentID(), pos, tile);
                             if (place.canExecute(dgs))
                                 placement.add(place);
                         }
                     } else {
-                        for (Monster.Direction d : Monster.Direction.values()) {
-                            for (Vector2D pos : monsterStartingPositions) {
+                        for (Vector2D pos : toCheck) {
+                            for (Monster.Direction d : Monster.Direction.values()) {
                                 Place place = new Place(m.getComponentID(), pos, tile, d);
                                 if (place.canExecute(dgs))
                                     placement.add(place);
@@ -1411,6 +1426,9 @@ public class DescentForwardModel extends StandardForwardModel {
                         }
                     }
                 }
+            }
+            if (placement.isEmpty()) {
+                throw new AssertionError("No valid placement actions found for " + f.getName());
             }
         }
 

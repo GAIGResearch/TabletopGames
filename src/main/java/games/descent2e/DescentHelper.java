@@ -1454,4 +1454,15 @@ public class DescentHelper {
             }
         }
     }
+
+    public static int getMonsterGroupTileSize(DescentGameState dgs, Monster f) {
+        int count = 1;
+        for (List<Monster> monsterGroup : dgs.getMonsters()) {
+            if (monsterGroup.contains(f)) {
+                count = monsterGroup.size();
+                break;
+            }
+        }
+        return f.getSize().a * f.getSize().b * count;
+    }
 }
