@@ -170,7 +170,7 @@ public class LearnFromData {
             }
             if (!excludedFeatures.isEmpty()) {
                 System.out.println("Excluding features with zero coefficients: " + excludedFeatures);
-                asf = removeExcludedFeatures(excludedFeatures, asf);
+                removeExcludedFeatures(excludedFeatures, asf);
             }
 
             do {
@@ -298,7 +298,7 @@ public class LearnFromData {
                     String newFileName = dataDirectory + File.separator + "ImproveModel_Iter_" + iteration + ".txt";
                     bestFeatures.processData(false, newFileName, maxRecords, rawData);
                     // then remove excluded features from the bestFeatures (these are always in the file so it always contains the original raw data)
-                    bestFeatures = removeExcludedFeatures(excludedFeatures, bestFeatures);
+                    removeExcludedFeatures(excludedFeatures, bestFeatures);
                     iteration++;
                     rawData = new String[]{newFileName};
                 }
@@ -334,8 +334,7 @@ public class LearnFromData {
         return startingHeuristic;
     }
 
-    private AutomatedFeatures removeExcludedFeatures(List<String> excludedFeatures, AutomatedFeatures asf) {
-        AutomatedFeatures retValue = asf.copy();
+    private void removeExcludedFeatures(List<String> excludedFeatures, AutomatedFeatures asf) {
         List<Integer> indicesToRemove = IntStream.range(0, asf.names().length)
                 .filter(i -> excludedFeatures.contains(asf.names()[i]))
                 .boxed().sorted().toList();
@@ -343,9 +342,8 @@ public class LearnFromData {
         for (int i = indicesToRemove.size() - 1; i >= 0; i--) {
             int indexToRemove = indicesToRemove.get(i);
             //         System.out.println("Removing feature: " + finalAsf.names()[indexToRemove]);
-            retValue.removeFeature(indexToRemove);
+            asf.removeFeature(indexToRemove);
         }
-        return retValue;
     }
 
     private boolean usedInInteraction(AutomatedFeatures asf, String feature) {

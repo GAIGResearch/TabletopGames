@@ -7,6 +7,5 @@
   "verbose" : false,
   "listener" : "GameResultsListener.json",
   "destDir" : "SkillGrid_CantStop_3P",
-  "output" : "SkillGrid_CantStop_3P/Tournament.log",
   "seed" : 740234
 }
