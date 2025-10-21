@@ -6,6 +6,8 @@ public class GoFishParameters extends AbstractParameters {
 
     // Game-specific parameters
     public int startingHandSize = 5;
+    public boolean continueFishingOnSuccess = false;
+    public boolean continueOnDrawingSameRank = true;
 
     public GoFishParameters() {
         setMaxRounds(500);

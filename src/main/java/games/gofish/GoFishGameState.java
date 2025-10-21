@@ -17,11 +17,6 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     Deck<FrenchCard> drawDeck;            // central draw pile
     List<Deck<FrenchCard>> playerBooks;   // completed books per player (public)
 
-    // --- Flow flags read by ForwardModel ---
-    public boolean continuePlayerTurn = false;
-    public boolean mustDraw = false;
-    public int lastRequestedRank = -1;
-
     public GoFishGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
@@ -60,11 +55,6 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
         for (Deck<FrenchCard> books : this.playerBooks) {
             copy.playerBooks.add(books == null ? null : books.copy());
         }
-
-        // Flags
-        copy.continuePlayerTurn = this.continuePlayerTurn;
-        copy.mustDraw = this.mustDraw;
-        copy.lastRequestedRank = this.lastRequestedRank;
 
         // Redeterminisation (hide others’ hands if partial observable)
         if (getCoreGameParameters().partialObservable && playerId != -1) {
@@ -108,18 +98,14 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
         if (this == o) return true;
         if (!(o instanceof GoFishGameState that)) return false;
         if (!super.equals(o)) return false;
-        return continuePlayerTurn == that.continuePlayerTurn
-                && mustDraw == that.mustDraw
-                && lastRequestedRank == that.lastRequestedRank
-                && Objects.equals(playerHands, that.playerHands)
+        return Objects.equals(playerHands, that.playerHands)
                 && Objects.equals(drawDeck, that.drawDeck)
                 && Objects.equals(playerBooks, that.playerBooks);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerHands, drawDeck, playerBooks,
-                continuePlayerTurn, mustDraw, lastRequestedRank);
+        return Objects.hash(super.hashCode(), playerHands, drawDeck, playerBooks);
     }
 
     @Override
@@ -133,9 +119,6 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
             int books = playerBooks == null ? 0 : playerBooks.get(i).getSize() / 4;
             System.out.println("P" + i + " Hand=" + handSz + " Books=" + books);
         }
-        if (continuePlayerTurn) System.out.println("Flag: continuePlayerTurn");
-        if (mustDraw) System.out.println("Flag: mustDraw");
-        if (lastRequestedRank != -1) System.out.println("Last rank asked: " + lastRequestedRank);
     }
 
     // Getters

@@ -15,15 +15,13 @@ import java.util.Objects;
  */
 public class GoFishAsk extends AbstractAction {
 
-    public final int askingPlayer;
     public final int targetPlayer;
     public final int rankAsked;
 
     // Outcome flag set during execute(), read by ForwardModel._afterAction
     public boolean receivedCards = false;
 
-    public GoFishAsk(int askingPlayer, int targetPlayer, int rankAsked) {
-        this.askingPlayer = askingPlayer;
+    public GoFishAsk(int targetPlayer, int rankAsked) {
         this.targetPlayer = targetPlayer;
         this.rankAsked = rankAsked;
     }
@@ -31,15 +29,11 @@ public class GoFishAsk extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gameState) {
         GoFishGameState state = (GoFishGameState) gameState;
-
-        // Store requested rank to support "draw the same rank" rule in FM
-        state.lastRequestedRank = this.rankAsked;
-
         // Transfer all cards of that rank if target has them
         if (state.playerHasRank(targetPlayer, rankAsked)) {
             List<FrenchCard> cards = state.removeCardsOfRank(targetPlayer, rankAsked);
             for (FrenchCard c : cards) {
-                state.getPlayerHands().get(askingPlayer).add(c);
+                state.getPlayerHands().get(state.getCurrentPlayer()).add(c);
             }
             receivedCards = true; // same player continues (FM decides)
         } else {
@@ -50,7 +44,7 @@ public class GoFishAsk extends AbstractAction {
 
     @Override
     public GoFishAsk copy() {
-        GoFishAsk retValue =  new GoFishAsk(askingPlayer, targetPlayer, rankAsked);
+        GoFishAsk retValue =  new GoFishAsk(targetPlayer, rankAsked);
         retValue.receivedCards = this.receivedCards;
         return retValue;
     }
@@ -60,8 +54,7 @@ public class GoFishAsk extends AbstractAction {
         if (this == obj) return true;
         if (!(obj instanceof GoFishAsk other)) return false;
         // Equality is based on intent (who asks whom for what), not the outcome.
-        return askingPlayer == other.askingPlayer
-                && targetPlayer == other.targetPlayer
+        return targetPlayer == other.targetPlayer
                 && receivedCards == other.receivedCards
                 && rankAsked == other.rankAsked;
     }
@@ -69,7 +62,7 @@ public class GoFishAsk extends AbstractAction {
     @Override
     public int hashCode() {
         // Do NOT include receivedCards in hash (it changes after execute()).
-        return Objects.hash(askingPlayer, targetPlayer, rankAsked, receivedCards);
+        return Objects.hash(targetPlayer, rankAsked, receivedCards);
     }
 
     @Override

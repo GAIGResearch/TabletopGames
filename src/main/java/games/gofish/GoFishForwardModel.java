@@ -7,8 +7,6 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.CoreConstants;
 import games.gofish.actions.GoFishAsk;
-import games.gofish.actions.GoFishDrawAction;
-import games.gofish.actions.GoFishEndTurnAction;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,10 +39,6 @@ public class GoFishForwardModel extends StandardForwardModel {
             }
             state.checkAndCollectBooks(i);
         }
-
-        state.continuePlayerTurn = false;
-        state.mustDraw = false;
-        state.lastRequestedRank = -1;
         state.setFirstPlayer(0);
     }
 
@@ -56,46 +50,16 @@ public class GoFishForwardModel extends StandardForwardModel {
         List<AbstractAction> actions = new ArrayList<>();
 
         Deck<FrenchCard> hand = state.getPlayerHands().get(currentPlayer);
-        boolean deckEmpty = state.getDrawDeck().getSize() == 0;
-        boolean handEmpty = hand.getSize() == 0;
-
-        // Empty hand: draw if possible, else pass
-        if (handEmpty) {
-            if (!deckEmpty) actions.add(new GoFishDrawAction(currentPlayer));
-            else actions.add(new GoFishEndTurnAction(currentPlayer));
-            return actions;
-        }
-
-        // Must draw due to failed ask
-        if (state.mustDraw) {
-            if (!deckEmpty) {
-                if (state.lastRequestedRank != -1)
-                    actions.add(new GoFishDrawAction(currentPlayer, state.lastRequestedRank));
-                else
-                    actions.add(new GoFishDrawAction(currentPlayer));
-            } else {
-                actions.add(new GoFishEndTurnAction(currentPlayer));
-            }
-            return actions;
-        }
 
         // Ask actions: each unique rank in hand × each opponent with at least 1 card
         Set<Integer> ranks = new HashSet<>();
         for (FrenchCard c : hand.getComponents()) ranks.add(c.number);
 
-        boolean hasValidTargets = false;
         for (int target = 0; target < state.getNPlayers(); target++) {
             if (target == currentPlayer) continue;
             if (state.getPlayerHands().get(target).getSize() > 0) {
-                hasValidTargets = true;
-                for (int r : ranks) actions.add(new GoFishAsk(currentPlayer, target, r));
+                for (int r : ranks) actions.add(new GoFishAsk(target, r));
             }
-        }
-
-        // If no asks possible: draw if can, else pass
-        if (!hasValidTargets || ranks.isEmpty()) {
-            if (!deckEmpty) actions.add(new GoFishDrawAction(currentPlayer));
-            else actions.add(new GoFishEndTurnAction(currentPlayer));
         }
 
         // Guard: never return empty in a non-terminal state
@@ -110,43 +74,58 @@ public class GoFishForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         GoFishGameState state = (GoFishGameState) gameState;
+        GoFishParameters  params = (GoFishParameters) state.getGameParameters();
         int current = state.getCurrentPlayer();
 
         // Interpret action outcome
+        boolean continuePlayerTurn = false;
         if (action instanceof GoFishAsk ask) {
-            state.lastRequestedRank = ask.rankAsked;
-
             if (!ask.receivedCards) {
-                // Failed ask -> must draw (or pass if deck empty, handled in _computeAvailableActions)
-                state.mustDraw = true;
-                return; // stay on same player to draw/pass next
+                // Failed ask -> must draw if deck not empty
+                if (state.drawDeck.getSize() > 0) {
+                    FrenchCard card = state.drawDeck.draw();
+                    state.getPlayerHands().get(current).add(card);
+                    if (params.continueOnDrawingSameRank && card.number == ask.rankAsked) {
+                        continuePlayerTurn = true;
+                    }
+                }
             } else {
-                // Successful ask -> same player continues
-                state.continuePlayerTurn = true;
-                state.lastRequestedRank = -1;
+                if (params.continueFishingOnSuccess) {
+                    continuePlayerTurn = true;
+                }
             }
-        } else if (action instanceof GoFishDrawAction draw) {
-            state.mustDraw = false;
-            // Continue if we drew the requested rank (optional rule enabled here)
-            state.continuePlayerTurn = draw.drewRequestedRank;
-            state.lastRequestedRank = -1;
         }
 
         // Books after any action
         state.checkAndCollectBooks(current);
 
+        if (state.playerHands.get(current).getSize() == 0 && state.drawDeck.getSize() == 0) {
+            continuePlayerTurn = false;  // special case
+        }
+
         // End if terminal
         if (isGameEnd(state)) {
             endGame(state);
         } else {
-            if (!state.continuePlayerTurn) {
-                endPlayerTurn(state);
-                // then end round if we are back to the first player
-                if (state.getCurrentPlayer() == state.getFirstPlayer()) {
-                    endRound(state);
-                }
+            if (!continuePlayerTurn) {
+                boolean nextPlayerFound = false;
+                do {
+                    endPlayerTurn(state);
+                    // then end round if we are back to the first player
+                    if (state.getCurrentPlayer() == state.getFirstPlayer()) {
+                        endRound(state);
+                    }
+                    current =  state.getCurrentPlayer();
+                    if (state.playerHands.get(current).getSize() == 0) {
+                        // draw card
+                        if (state.drawDeck.getSize() > 0) {
+                            state.playerHands.get(current).add(state.drawDeck.draw());
+                        }
+                    } else {
+                        nextPlayerFound = true;
+                    }
+                } while (!nextPlayerFound);
             }
-            state.continuePlayerTurn = false; // consume the repeat
         }
     }
 
