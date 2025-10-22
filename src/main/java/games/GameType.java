@@ -5,7 +5,8 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
 import core.rules.AbstractRuleBasedForwardModel;
-import dev.langchain4j.agent.tool.P;
+import games.XIIScripta.XIIGUIManager;
+import games.XIIScripta.XIIParameters;
 import games.backgammon.*;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameParameters;
@@ -80,6 +81,10 @@ import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUIManager;
+import games.pentegrammai.PenteForwardModel;
+import games.pentegrammai.PenteGUIManager;
+import games.pentegrammai.PenteGameState;
+import games.pentegrammai.PenteParameters;
 import games.poker.PokerForwardModel;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
@@ -294,6 +299,14 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement, DiceRolling),
             BGGameState.class, BGForwardModel.class, BGParameters.class, BGGUIManager.class),
+    XIIScripta(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement, DiceRolling),
+            BGGameState.class, BGForwardModel.class, XIIParameters.class, XIIGUIManager.class),
+    PenteGrammai(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement, DiceRolling),
+            PenteGameState .class, PenteForwardModel.class, PenteParameters.class, PenteGUIManager.class),
     Mastermind(1,1,
             Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
             List.of(PatternBuilding),
