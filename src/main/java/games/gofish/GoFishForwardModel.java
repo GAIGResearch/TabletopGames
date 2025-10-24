@@ -94,7 +94,7 @@ public class GoFishForwardModel extends StandardForwardModel {
         // Books after any action
         state.checkAndCollectBooks(current);
 
-        if (state.playerHands.get(current).getSize() == 0 && state.drawDeck.getSize() == 0) {
+        if (state.playerHands.get(current).getSize() == 0) {
             continuePlayerTurn = false;  // special case
         }
 
@@ -115,6 +115,8 @@ public class GoFishForwardModel extends StandardForwardModel {
                         // draw card
                         if (state.drawDeck.getSize() > 0) {
                             state.playerHands.get(current).add(state.drawDeck.draw());
+                        } else {
+                            // we skip this player, they are now out of the game
                         }
                     } else {
                         nextPlayerFound = true;
@@ -131,11 +133,11 @@ public class GoFishForwardModel extends StandardForwardModel {
             totalBooks += b.getSize() / 4;
         if (totalBooks >= 13) return true;
 
-        // Deck empty AND all hands empty?
-        if (state.getDrawDeck().getSize() > 0) return false;
+        // Only one player left with cards?
+        int count = 0;
         for (int i = 0; i < state.getNPlayers(); i++)
-            if (state.getPlayerHands().get(i).getSize() > 0) return false;
-        return true;
+            if (state.getPlayerHands().get(i).getSize() > 0) count++;
+        return count <= 1;
     }
 
 }
