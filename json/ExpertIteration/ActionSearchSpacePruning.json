@@ -1,0 +1,12 @@
+{
+        "class":"players.mcts.MCTSParams",
+        "budgetType" : "BUDGET_TIME",
+        "progressiveWideningExponent" : [0.0, 2.0],
+        "progressiveWideningConstant" : [0.0, 0.1, 0.3, 0.5],
+        "initialiseVisits" : [0, 3, 10, 30],
+        "pUCT" : [false, true],
+        "pUCTTemperature" : 5.0,
+        "budget" : -999,
+        "epsilon" : 1e-6,
+        "breakMS" : 0
+}

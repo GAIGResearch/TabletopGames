@@ -1,0 +1,10 @@
+{
+  "class":"players.mcts.MCTSParams",
+  "budgetType" : "BUDGET_TIME",
+  "FPU" : [0.5, 1.0, 10.0, 100.0, 1000000.0],
+  "pUCT" : [false, true],
+  "pUCTTemperature" : [0.0, 0.01, 0.1, 1.0, 10.0],
+  "budget" : -999,
+  "epsilon" : 1e-6,
+  "breakMS" : 0
+}
