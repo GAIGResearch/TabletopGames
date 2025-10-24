@@ -47,7 +47,7 @@ public class PowerGridFeatures implements IStateFeatureVector {
 	    PowerGridParameters params = (PowerGridParameters) state.getGameParameters();
 
 	    final int MAX_PLAYERS = 6, F = 11;
-	    final int PLAYERS     = pggs.getNPlayers();  // only rotate over active seats
+	    final int PLAYERS     = pggs.getNPlayers();  
 
 	    final double MONEY_MAX = 500.0;
 	    final double COAL_MAX  = 9.0, GAS_MAX = 9.0, OIL_MAX = 9.0, UR_MAX = 6.0;
@@ -59,7 +59,6 @@ public class PowerGridFeatures implements IStateFeatureVector {
 	    double[] out = new double[F * MAX_PLAYERS];
 	    int w = 0;
 
-	    // --- Agent-first rotation over *active* players only ---
 	    for (int b = 0; b < PLAYERS; b++) {
 	        int pid = (agentPlayerID + b) % PLAYERS;
 

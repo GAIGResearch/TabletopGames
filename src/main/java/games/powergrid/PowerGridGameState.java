@@ -2,7 +2,8 @@ package games.powergrid;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.CoreConstants.GameResult;
+import core.AbstractPlayer;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
@@ -28,8 +29,22 @@ public class PowerGridGameState extends AbstractGameState {
     protected Deck<PowerGridCard> currentMarket;
     protected Deck<PowerGridCard> futureMarket;
     
+    private List<Boolean> RewardGiven = new ArrayList<>();
     
-    private List<Integer> turnOrder = new ArrayList<>();
+    public List<Boolean> getRewardGiven() {
+		return RewardGiven;
+	}
+
+    public void setRewardGiven(int playerId) {
+        RewardGiven.set(playerId, true);
+    }
+
+    
+	public void setRewardGiven(List<Boolean> rewardGiven) {
+		RewardGiven = rewardGiven;
+	}
+
+	private List<Integer> turnOrder = new ArrayList<>();
     private List<Integer> roundOrder = new ArrayList<>();
     private List<Integer> bidOrder = new ArrayList<>();
     private Set<Integer> plantsRan = new HashSet<>();
@@ -149,6 +164,7 @@ public class PowerGridGameState extends AbstractGameState {
         }
 
         // Lists/sets
+        copy.RewardGiven = new ArrayList<>(this.RewardGiven);
         copy.turnOrder       = new ArrayList<>(this.turnOrder);
         copy.turnOrderIndex  = this.turnOrderIndex;
         copy.roundOrder      = new ArrayList<>(this.roundOrder);
@@ -788,45 +804,50 @@ public class PowerGridGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        // Only score in BUREAUCRACY
-        if ((PowerGridGamePhase) getGamePhase() != PowerGridGamePhase.BUREAUCRACY) {
-            return 0.0;
+        final PowerGridGamePhase phase = (PowerGridGamePhase) getGamePhase();
+
+        final double wCities = 0.8;
+        final double wIncome = 1.2;
+        System.out.println("Current playerId: " + playerId);
+ 
+        
+
+
+        if(this.getGameStatus() == CoreConstants.GameResult.GAME_END) {
+        	
+        	//TODO bug where the last player to go triggers the win so have to hardcode that we are only checking player 0 which has to be the python agent as the winer 
+        	if (this.getWinners().contains(0)) {
+        	    return 4;
+        	} else {
+        	    return -2;
+        	}
         }
 
-        // ---- Weights ----
-        final double wCities = 0.8;   // importance of cities
-        final double wIncome = 0.5;   // importance of income
+        double base = 0.0;
+        if (phase == PowerGridGamePhase.BUREAUCRACY) {      
+            int cityTarget = 0;
+            try {
+                PowerGridParameters params = (PowerGridParameters) getGameParameters();
+                if (params != null && params.citiesToTriggerEnd != null &&
+                    params.citiesToTriggerEnd.length >= getNPlayers()) {
+                    cityTarget = params.citiesToTriggerEnd[getNPlayers() - 1];
+                }
+            } catch (Exception ignored) {}
+            if (cityTarget <= 0) cityTarget = Math.max(1, getMaxCitiesOwned());
 
-        // ---- Normalization constants ----
-        int cityTarget = 0;
-        try {
-            PowerGridParameters params = (PowerGridParameters) getGameParameters();
-            if (params != null && params.citiesToTriggerEnd != null &&
-                params.citiesToTriggerEnd.length >= getNPlayers()) {
-                cityTarget = params.citiesToTriggerEnd[getNPlayers() - 1];
-            }
-        } catch (Exception ignored) {}
-        if (cityTarget <= 0) cityTarget = Math.max(1, getMaxCitiesOwned());
+            int cities = getCityCountByPlayer(playerId);
 
-        // ---- Raw features ----
-        int cities = getCityCountByPlayer(playerId);
-        int income = getIncome(playerId);
-
-        // ---- Normalize to [0,1] ----
-        double normCities = clamp01((double) cities / cityTarget);
-        double normIncome = clamp01((double) income / PowerGridParameters.MAX_INCOME);
+            double normCities = clamp01((double) cities / cityTarget);
+            double normIncome = clamp01((double) poweredCities[playerId]/20);
+        
+            base = (wCities * normCities + wIncome * normIncome); //+ timePenalty;
+            //this.RewardGiven.set(playerId, true);
+        }
         
         
-        // ---- Exponential Penalty as game gets longer ----
-        int round = Math.max(0, getRoundCounter());
-        final double maxPenalty = 0.5;     
-        final int    halfLife  = 25;      
-        double timePenalty = -maxPenalty * (1.0 - Math.exp(-(double)round / halfLife));
-
-
-        // ---- Weighted combination ----
-        return (wCities * normCities + wIncome * normIncome) + timePenalty;
+        return base;
     }
+
 
     private static double clamp01(double x) {
         return x < 0 ? 0 : (x > 1 ? 1 : x);

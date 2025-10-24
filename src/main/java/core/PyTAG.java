@@ -221,35 +221,7 @@ public class PyTAG {
         else throw new Exception("Function is not implemented");
     }
 
-    // --End of Wrapper Functions--
-    /*
-    public void reset(){
-        // Reset game instance, run built-in agents until a python agent is required to make a decision
-        this.game.reset(players);
-        this.turnPause = 0;
-        this.tick = 0;
-        this.game.setTurnPause(turnPause);
-        this.gameState = game.getGameState();
-        this.lastSeed = seedRandom.nextLong();
-        gameState.gameParameters.setRandomSeed(this.lastSeed);
-        this.forwardModel = game.getForwardModel();
-        this.availableActions = forwardModel.computeAvailableActions(gameState);
-
-        // execute the game if needed until Python agent is required to make a decision
-        boolean isTerminal = nextDecision();
-
-        // get action tree for current player
-        if (this.root == null){
-            this.root = ((ITreeActionSpace)this.forwardModel).initActionTree(this.gameState);
-        }
-        // update with initial actions
-        // Compute the updated available actions and the action tree
-        AbstractGameState observation = gameState.copy(gameState.getCurrentPlayer());
-        this.availableActions = forwardModel.computeAvailableActions(observation);
-        this.root = ((ITreeActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
-        this.leaves = root.getLeafNodes();
-    }
-*/
+ 
     public void reset(){
         // Reset game instance, run built-in agents until a python agent is required to make a decision
         this.game.reset(players);
@@ -264,7 +236,7 @@ public class PyTAG {
         PowerGridGameState gs = (PowerGridGameState) gameState; 
         
         // execute the game if needed until Python agent is required to make a decision
-        boolean isTerminal = nextDecision();//seems to work deleting this but it shouldnt 
+        boolean isTerminal = nextDecision();
         
         this.availableActions = forwardModel.computeAvailableActions(gameState);
 

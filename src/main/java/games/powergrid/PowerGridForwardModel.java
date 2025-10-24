@@ -69,6 +69,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.setPlayerMoney(new int [] {0,0,0,0,0,0} );
 		state.setCityCountByPlayer(new int [] {0,0,0,0,0,0} );
 		state.setPoweredCities(new int [] {0,0,0,0,0,0} );
+		state.setRewardGiven(new ArrayList<>(Arrays.asList(false,false,false,false,false,false)));
 		state.setStep(1);
 		state.setDrawPile(setupDecks(params,state.getNPlayers(), state.getRnd()));
 		state.setCurrentMarket(new Deck<>("currentMarket", VISIBLE_TO_ALL));
@@ -233,6 +234,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	            buildTurnOrder(state);
 	            advancePhase(state);
 	            state.clearPoweredCities();
+	    		state.setRewardGiven(new ArrayList<>(Arrays.asList(false,false,false,false,false,false)));
 	            endRound(state, state.getTurnOwner());
 	        }
 

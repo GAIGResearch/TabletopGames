@@ -78,7 +78,6 @@ public class RunPowerPlant extends AbstractAction {
 	            
 	        }
 	        s.addPoweredCities(player, capacity);
-
 	        return true;
 	    }
 	    
