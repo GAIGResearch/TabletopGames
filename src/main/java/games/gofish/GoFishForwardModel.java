@@ -5,13 +5,15 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
-import core.CoreConstants;
+import core.components.PartialObservableDeck;
 import games.gofish.actions.GoFishAsk;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static core.CoreConstants.VisibilityMode.*;
 
 public class GoFishForwardModel extends StandardForwardModel {
 
@@ -21,15 +23,15 @@ public class GoFishForwardModel extends StandardForwardModel {
         GoFishParameters params = (GoFishParameters) state.getGameParameters();
 
         // Create and shuffle deck
-        state.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        state.drawDeck = FrenchCard.generateDeck("DrawDeck", HIDDEN_TO_ALL);
         state.drawDeck.shuffle(state.getRnd());
 
         // Init hands and books
         state.playerHands = new ArrayList<>();
         state.playerBooks = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++) {
-            state.playerHands.add(new Deck<>("hand_" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
-            state.playerBooks.add(new Deck<>("books_" + i, i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
+            state.playerHands.add(new PartialObservableDeck<>("hand_" + i, i, state.getNPlayers(), VISIBLE_TO_OWNER));
+            state.playerBooks.add(new Deck<>("books_" + i, i, VISIBLE_TO_ALL));
         }
 
         // Deal
@@ -61,13 +63,6 @@ public class GoFishForwardModel extends StandardForwardModel {
                 for (int r : ranks) actions.add(new GoFishAsk(target, r));
             }
         }
-
-        // Guard: never return empty in a non-terminal state
-        if (actions.isEmpty()) {
-            throw new IllegalStateException("No actions available to player " + currentPlayer +
-                    " in Go Fish, but game is not over!");
-        }
-
         return actions;
     }
 

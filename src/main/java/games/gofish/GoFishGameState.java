@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
+import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.GameType;
 
@@ -13,7 +14,7 @@ import java.util.*;
 public class GoFishGameState extends AbstractGameState implements IPrintable {
 
     // --- Components ---
-    List<Deck<FrenchCard>> playerHands;   // each player's hand (owner-visible)
+    List<PartialObservableDeck<FrenchCard>> playerHands;   // each player's hand
     Deck<FrenchCard> drawDeck;            // central draw pile
     List<Deck<FrenchCard>> playerBooks;   // completed books per player (public)
 
@@ -41,19 +42,19 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
 
         // Core status
         copy.gameStatus = this.gameStatus;
-        if (this.playerResults != null) copy.playerResults = this.playerResults.clone();
+        copy.playerResults = this.playerResults.clone();
 
         // Components
-        copy.drawDeck = (this.drawDeck == null) ? null : this.drawDeck.copy();
+        copy.drawDeck =  this.drawDeck.copy();
 
         copy.playerHands = new ArrayList<>();
-        for (Deck<FrenchCard> hand : this.playerHands) {
-            copy.playerHands.add(hand == null ? null : hand.copy());
+        for (PartialObservableDeck<FrenchCard> hand : this.playerHands) {
+            copy.playerHands.add(hand.copy());
         }
 
         copy.playerBooks = new ArrayList<>();
         for (Deck<FrenchCard> books : this.playerBooks) {
-            copy.playerBooks.add(books == null ? null : books.copy());
+            copy.playerBooks.add(books.copy());
         }
 
         // Redeterminisation (hide others’ hands if partial observable)
@@ -122,7 +123,7 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     }
 
     // Getters
-    public List<Deck<FrenchCard>> getPlayerHands() {
+    public List<PartialObservableDeck<FrenchCard>> getPlayerHands() {
         return playerHands;
     }
 
