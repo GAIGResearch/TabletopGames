@@ -27,7 +27,6 @@ public class BasicTurns {
         fm.setup(state);
     }
 
-
     @Test
     public void testSequenceOfAskAndThenDraw() {
         GoFishAsk askAction = getNextAction(true);
@@ -69,7 +68,6 @@ public class BasicTurns {
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(currentCards, state.playerHands.get(0).getSize());
         assertEquals(otherCards, state.playerHands.get(askAction.targetPlayer).getSize());
-
     }
 
     @Test
@@ -143,6 +141,43 @@ public class BasicTurns {
 
         assertEquals(takenCount + 1, totalOfRankInHand(asker, rank));
         assertEquals(takenCount + 1, visibleToAllOfRankInHand(asker, rank));
+    }
+
+    @Test
+    public void testRedeterminisationAfterFishI() {
+        PartialObservableDeck<FrenchCard> origP0Hand = state.playerHands.get(0);
+        testSuccessfulAskMakesTakenCardsVisibleToAll_whenAskerHadOne();
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            GoFishGameState copyState = (GoFishGameState) state.copy(p);
+            // we now check that the players hand (p) is unchanged (each card should be identical)
+            List<FrenchCard> origHand = state.playerHands.get(p).getComponents();
+            List<FrenchCard> copyHand = copyState.playerHands.get(p).getComponents();
+            assertEquals("Hand size should be the same for player " + p, origHand.size(), copyHand.size());
+            for (int i = 0; i < origHand.size(); i++) {
+                assertEquals("Player " + p + " should see the same card at position " + i,
+                        origHand.get(i), copyHand.get(i));
+            }
+
+            if (p == 0) continue;
+
+            // Merge visible and hidden card checks into a single loop
+
+            PartialObservableDeck<FrenchCard> copyP0Hand = copyState.playerHands.get(0);
+            for (int i = 0; i < origP0Hand.getSize(); i++) {
+                assertEquals(origP0Hand.isComponentVisible(i, p), copyP0Hand.isComponentVisible(i, p));
+                boolean visible = origP0Hand.isComponentVisible(i, p);
+                FrenchCard origCard = origP0Hand.get(i);
+                FrenchCard copyCard = copyP0Hand.get(i);
+                if (visible) {
+                    assertEquals("Player " + p + " should see the same visible card at position " + i,
+                            origCard, copyCard);
+                } else {
+                    boolean same = origCard.equals(copyCard);
+                    assertFalse("Player " + p + " should see a different card for hidden position " + i, same);
+                }
+            }
+        }
+
     }
 
     @Test

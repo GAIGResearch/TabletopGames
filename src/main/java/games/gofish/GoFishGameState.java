@@ -8,6 +8,7 @@ import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.GameType;
+import utilities.DeterminisationUtilities;
 
 import java.util.*;
 
@@ -59,21 +60,10 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
 
         // Redeterminisation (hide others’ hands if partial observable)
         if (getCoreGameParameters().partialObservable && playerId != -1) {
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    copy.drawDeck.add(copy.playerHands.get(i));
-                    copy.playerHands.get(i).clear();
-                }
-            }
-            copy.drawDeck.shuffle(redeterminisationRnd);
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    int handSize = this.playerHands.get(i).getSize();
-                    for (int j = 0; j < handSize; j++) {
-                        copy.playerHands.get(i).add(copy.drawDeck.draw());
-                    }
-                }
-            }
+            List<Deck<FrenchCard>> copyDecks = new ArrayList<>();
+            copyDecks.add(copy.drawDeck);
+            copyDecks.addAll(copy.playerHands);
+            DeterminisationUtilities.reshuffle(playerId, copyDecks, c -> true, redeterminisationRnd);
         }
         return copy;
     }
