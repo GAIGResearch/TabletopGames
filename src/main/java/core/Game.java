@@ -716,60 +716,20 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new HumanGUIPlayer(ac));
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
 //        players.add(new BasicMCTSPlayer());
 //        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-
-        MCTSParams params = new MCTSParams();
-//        params.rolloutTermination = MCTSEnums.RolloutTermination.END_ROUND;
-//        params.rolloutTermination = MCTSEnums.RolloutTermination.END_TURN;
-//        params.rolloutLength = 1;
-//        params.heuristic = new LeadHeuristic();
-//        params.reuseTree = true;
-//        params.normaliseRewards = false;
-        params.heuristic = AbstractGameState::getHeuristicScore;
-        params.maxTreeDepth = 10;
-        MCTSParams params2 = new MCTSParams();
-        params2.maxTreeDepth = 10;
-        params2.heuristic = new ScoreAndHandHeuristic();
-        players.add(new MCTSPlayer(params2));
-        players.add(new MCTSPlayer(params));
-        players.add(new MCTSPlayer(params));
-        players.add(new MCTSPlayer(params));
-//        MCTSParams mcts_params = new MCTSParams();
-//        players.add(new MCTSPlayer(mcts_params));
-//        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-//        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
 
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;
 
         /* Run! */
-//        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
-        /* Run multiple games */
-        long t = System.currentTimeMillis();
-        int n = 100;
-        ArrayList<GameType> games = new ArrayList<>();
-        games.add(GameType.SeaSaltPaper);
-//        runMany(games, players, 100L, n, false, true, null, turnPause);
-        long[] seeds = new long[n];
-        Random rnd = new Random();
-        for (int i = 0; i < n; i++) {
-            seeds[i] = rnd.nextInt();
-        }
-        runMany(games, players, n, seeds, null, false, null, 0);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
-        System.out.println("FISNIHED RUNNING IN " + (System.currentTimeMillis() - t)/1000 + " SECONDS");
     }
 }
