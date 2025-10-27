@@ -8,17 +8,36 @@ import java.util.*;
 
 import static players.PlayerConstants.*;
 
+/**
+ * PI-MCTS (Perfect-Information Monte Carlo Tree Search) wrapper for MCTS
+ * Uses multiple determinised SingleTreeNode roots to create several
+ * determinisations, running MCTS on each determinised state, and then aggregating the suggested
+ * root actions across trees using a chosen aggregation policy.
+ *
+ * This class does the following:
+ *  - Build N determinized trees from the decision point.
+ *  - Runs MCTS on each determinized root.
+ *  - Aggregates action statistics to inform the final choice.
+ */
 public class PISingleTreeNode extends SingleTreeNode {
+    //One root MCTS tree per determinisation
     SingleTreeNode[] roots;
     AbstractGameState state;
+    //Number of determinisations(roots) to create;
     int numDeterminizations = 1;
     MCTSPlayer mctsPlayer;
     double epsilon = 1e-6;
-    //Action Stats variable to hold aggregated values
+
+    /**
+     * Aggregated action statistics across determinisations.
+     * Key:   action
+     * Value: accumulated stats
+     */
     Map<AbstractAction, ActionStats> accumulatedActionStats;
 
     //Instantiate A new Tree Node for PI-MCTS
     public PISingleTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
+
         this.decisionPlayer = state.getCurrentPlayer();
         this.params = player.getParameters();
         this.forwardModel = player.getForwardModel();
@@ -33,24 +52,31 @@ public class PISingleTreeNode extends SingleTreeNode {
         }
         numDeterminizations = params.numDeterminizations;
         roots = new SingleTreeNode[params.numDeterminizations];
-
     }
+
+
+     //Run PI-MCTS search where for each determinisation, state is copied, a SingleTreeNode root is created, and MCTS search is performed.
 
     @Override
     public void mctsSearch(long initialisationTime) {
         initialiseRootMetrics();
         initialisationTimeTaken = initialisationTime;
-        //Create Determinized Trees and Run MCTS on the Determinized Trees
+
+        // Create determinised trees and run MCTS on each one independently.
         for (int i = 0; i < params.numDeterminizations; i++) {
             roots[i] = SingleTreeNode.createRootNode(mctsPlayer, state.copy(state.getCurrentPlayer()), rnd, mctsPlayer.getFactory());
+            // MCTS on the determinised root.
             roots[i].mctsSearch(initialisationTime);
         }
     }
-    //Returns the best action after search based on the chosen AggrergationPolicy
+
+
+     //The choice is made by aggregating recommendations across determinisations using the chosen PerfectInformationPolicy.
+
     @Override
     public AbstractAction bestAction()
     {
-        AbstractAction calulatedAction = null;
+        AbstractAction calculatedAction = null;
 
         switch (params.perfectInformationPolicy)
         {
@@ -71,12 +97,16 @@ public class PISingleTreeNode extends SingleTreeNode {
                 return  bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy.TotalVisits);
             }
         }
-        return calulatedAction;
+        return calculatedAction;
     }
 
-    //Returns the best action based on the SingleVote Aggregation Policy
-    AbstractAction bestAction_SingleVote()
-    {
+    /**
+     * Single-vote aggregation:
+     *  - Let each determinised root pick its own best action.
+     *  - Aggregate votes for actions across all determinisations.
+     *  - Pick the action with the highest count with tiny noise to break ties.
+     */
+    AbstractAction bestAction_SingleVote() {
         //Voting
         Map<AbstractAction, Integer> actionCounts = new HashMap<>();
         for (int i = 0; i < params.numDeterminizations; i++) {
@@ -96,9 +126,13 @@ public class PISingleTreeNode extends SingleTreeNode {
         return bestAction_vote;
     }
 
-    AbstractAction bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy policy)
-    {
-        //Aggregating Statistics
+    /**
+     * Aggregation by accumulated statistics from all determinised roots based on selected aggregation policy
+     *  TotalValue:   Total Value for decisionPlayer per action node
+     *  TotalVisits:  total visits to the action node
+     *  AverageValue: TotalValue / TotalVisits
+     */
+    AbstractAction bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy policy) {
         accumulatedActionStats = new HashMap<>();
         for (int i = 0; i < params.numDeterminizations; i++) {
             Map<AbstractAction, ActionStats> currentActionStats = roots[i].actionValues;
