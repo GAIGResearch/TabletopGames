@@ -45,8 +45,8 @@ public enum RunArg {
             "metrics" + File.separator + "out",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.ExpertIteration}),
     distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
-            "\t For tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
-            "\t If a seedFile is specified, then this is ignored.",
+            "\t A tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
+            "\t If a seedFile is specified, then this argument is ignored.",
             0,
             new Usage[]{Usage.RunGames}),
     evalGames("The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)",
@@ -211,7 +211,8 @@ public enum RunArg {
     expertTime("The multiplier to use for the expert's budget (if MCTS). Default is 10.",
             10,
             new Usage[]{Usage.ExpertIteration}),
-    maxRecords("The maximum number of records to use for learning. Default is 10000.",
+    maxRecords("The maximum number of records to use for learning. Default is 10000.\n" +
+            "Algorithms such as least squares can O(n^3), in which case we need to limit this (and you may have memory limits).\n",
             10000,
             new Usage[]{Usage.ExpertIteration}),
     seed("(Optional) Random seed to use for process. This is not the seed used for games, but the seed of \n" +
@@ -252,6 +253,10 @@ public enum RunArg {
             "a value approaching infinity is equivalent to a Max function.",
             1.0,
             new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
+    maxData("The maxim,um number of data items to use when learning a heuristic\n" +
+            "Algorithms such as least squares can O(n^3), in which case we need to limit this (and you may have memory limits)\n",
+            10000,
+            new Usage[]{Usage.ExpertIteration}),
     OSDBudget("Budget of games to be used for a one step deviation analysis of the final recommended agent",
             0,
             new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),

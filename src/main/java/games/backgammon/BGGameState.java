@@ -11,14 +11,13 @@ public class BGGameState extends AbstractGameState {
 
 //    Backgammon involves moving 15 checkers around a board, aiming to be the first to "bear off" (remove) all your pieces before your opponent. Players move their pieces based on dice rolls, and a key strategy involves hitting opponent's pieces (blots) to send them to the bar, forcing them to re-enter the game.
 //    Here's a more detailed breakdown of the rules:
-//            1. Setup:
+//
+//    1. Setup:
 //    Board: The board has 24 triangular points, divided into four quadrants, with the "home" areas for each player on opposite sides.
 //            Checkers: Each player starts with 15 checkers, initially placed in a specific configuration on the board.
-//            Dice: Two dice are used, and each player has a cup to shake them.
-//    Doubling Cube: A doubling cube is used to increase the stakes during the game.
-//            2. Game Play:
-//    Starting the Game:
-//    Players roll one die each to determine who goes first, and the player with the higher roll starts.
+//            Dice: Two dice are used
+//
+//    2. Game Play:
 //    Moving Checkers:
 //    Players move their checkers around the board, in opposite directions, based on the numbers rolled on the two dice.
 //    Hitting Checkers:
@@ -29,27 +28,25 @@ public class BGGameState extends AbstractGameState {
 //    Once all checkers are in the home board, players can start "bearing off" (removing) checkers from the board.
 //    Winning the Game:
 //    The first player to bear off all their checkers wins the game.
-//            3. Key Rules:
+//
+//    3. Key Rules:
 //    Open Points: A point that is not occupied by two or more of the opponent's checkers.
 //    Closed Points: A point occupied by two or more of the opponent's checkers.
-//    Doubling: Players can double the stakes at any time before rolling the dice, and the other player must either accept the double or forfeit the game.
-//            Redoubles: After a double, the player who accepted the double can offer to redouble the stakes.
 //    Moving Checkers: Players must move both numbers rolled, if possible.
 //    Cannot Move: If a player cannot play all the numbers rolled, they must play as many as possible, starting with the larger number.
-//            Bouncing: If a player cannot move a checker because of the opponent's closed points, they cannot move any other checkers until the opponent's points become open.
+//    Bouncing: If a player cannot move a checker because of the opponent's closed points, they cannot move any other checkers until the opponent's points become open.
 
-    // the first index is the player, the second index is the point on the board
-    // the arrays for each player are in reverse order..i.e each is from the perspective of the player
-    // with [0] being the first point (on the player's home board) and [23] being the last (24th) point (on the opponent's home board)
-    // so a player's home board is [0] through [5]
-    protected int[][] piecesPerPoint;
-    protected int[] piecesOnBar;  // currently out the game and need to be put into play as first moves
+    protected List<List<Token>> counters; // the master list of counters, used to track the pieces on the board
+    protected int[][] playerTrackMapping; // maps player-specific track positions to counters indices
     protected int[] piecesBorneOff;
 
     protected Dice[] dice;
+    protected int[] availableDiceValues; // the values of the dice rolled, used for actions
     protected boolean[] diceUsed;
 
     protected int[] blots;
+
+    protected List<Token> movedThisTurn;
 
     public BGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -71,61 +68,96 @@ public class BGGameState extends AbstractGameState {
      */
     @Override
     protected List<Component> _getAllComponents() {
-        // Let's create one Token per piece (while we're not using Tokens to record the pieces in game state, this may be helpful to something tracking the number of pieces)
-        List<Component> tokens = new ArrayList<>();
-        for (int player = 0; player < 2; player++) {
-            for (int i = 0; i < piecesPerPoint[player].length; i++) {
-                tokens.add(new Token("Piece for "  + player + " on point " + i));
-            }
+        List<Component> components = new ArrayList<>();
+        for (int playerId = 0; playerId < getNPlayers(); playerId++) {
+            components.addAll(counters.get(playerId));
         }
-        tokens.addAll(Arrays.stream(dice).toList());
-
-        return tokens;
+        return components;
     }
 
     public int getPiecesOnPoint(int playerId, int point) {
-        return piecesPerPoint[playerId][point];
+        return (int) counters.get(point).stream().filter(token -> token.getOwnerId() == playerId).count();
     }
+
     public int getPiecesOnBar(int playerId) {
-        return piecesOnBar[playerId];
-    }
-    public int[] getPlayerPieces(int playerId) {
-        return piecesPerPoint[playerId].clone();
+        return getPiecesOnPoint(playerId, 0);
     }
 
     public int getPiecesBorneOff(int playerId) {
         return piecesBorneOff[playerId];
     }
-    /**
-     * -1 indicates the bar (from), or borne off (to)
+
+    /*
+    Returns the index of the space on the physical board corresponding to the nth point on the 'race track' for the player
      */
+    public int getPhysicalSpace(int playerId, int nthPoint) {
+        return playerTrackMapping[playerId][nthPoint];
+    }
+
+    /*
+    The reverse mapping from the physical space on the board to the logical position on the player's track.
+     */
+    public int getLogicalPosition(int playerId, int physicalPoint) {
+        if (physicalPoint == 0) return 0; // the bar is always just off the track point
+        for (int i = 0; i < playerTrackMapping[playerId].length; i++) {
+            if (playerTrackMapping[playerId][i] == physicalPoint) {
+                return i + 1;
+            }
+        }
+        throw new IllegalArgumentException("Physical point not found in player's track: " + physicalPoint);
+    }
+
     public void movePiece(int playerId, int from, int to) {
-        int boardLength = piecesPerPoint[0].length;
-        int ownPiecesOnStartSpace = from < 0 ? piecesOnBar[playerId] : piecesPerPoint[playerId][from];
-        int opponentPiecesOnEndSpace = to < 0 ? 0 : piecesPerPoint[1 - playerId][boardLength - to - 1];
-        if (ownPiecesOnStartSpace <= 0)
-            throw new IllegalArgumentException("No pieces on the from point");
-        if (opponentPiecesOnEndSpace > 1)
-            throw new IllegalArgumentException("Cannot move to a point occupied by two or more opponent pieces");
-
-
-        // actual hit of opponent pieces is done in MovePiece class
-        if (from < 0)
-            piecesOnBar[playerId]--;
-        else
-            piecesPerPoint[playerId][from]--;
-
-        if (to < 0)
+        // Moving on the board
+        List<Token> fromList = counters.get(from);
+        Optional<Token> tokenOpt = fromList.stream()
+                .filter(t -> t.getOwnerId() == playerId)
+                .findFirst();
+        if (tokenOpt.isEmpty()) {
+            throw new IllegalArgumentException("No pieces on the from point for player " + playerId);
+        }
+        Token token = tokenOpt.get();
+        if (!movedThisTurn.contains(token)) {
+            movedThisTurn.add(token);
+        }
+        fromList.remove(token);
+        if (to == -1) {
             piecesBorneOff[playerId]++;
-        else
-            piecesPerPoint[playerId][to]++;
+        } else {
+            counters.get(to).add(token);
+        }
+    }
+
+    public void movePieceToBar(int playerId, int point) {
+        movePiece(playerId, point, 0);
+        blots[playerId]++;
     }
 
     public void rollDice() {
         for (Dice die : dice) {
             die.roll(rnd);
         }
-        Arrays.fill(diceUsed, false);
+        updateAvailableDiceValues();
+    }
+
+    protected void updateAvailableDiceValues() {
+        BGParameters params = (BGParameters) getGameParameters();
+        if (params.doubleActions && Arrays.stream(dice).allMatch(d -> d.getValue() == dice[0].getValue())) {
+            // if doubles, we get double the actions (doubles in this sense means, "all" dice have the same value)
+            diceUsed = new boolean[dice.length * 2];
+            availableDiceValues = new int[dice.length * 2];
+            for (int i = 0; i < dice.length; i++) {
+                availableDiceValues[i] = dice[i].getValue();
+                availableDiceValues[i + dice.length] = dice[i].getValue();
+            }
+        } else {
+            // otherwise, we just use the number of dice rolled
+            diceUsed = new boolean[dice.length];
+            availableDiceValues = new int[dice.length];
+            for (int i = 0; i < dice.length; i++) {
+                availableDiceValues[i] = dice[i].getValue();
+            }
+        }
     }
 
     // for testing only
@@ -133,17 +165,17 @@ public class BGGameState extends AbstractGameState {
         for (int i = 0; i < dice.length; i++) {
             dice[i].setValue(values[i]);
         }
-        Arrays.fill(diceUsed, false);
+        updateAvailableDiceValues();
     }
 
     public void useDiceValue(int dieValue) {
-        for (int i = 0; i < dice.length; i++) {
-            if (!diceUsed[i] && dice[i].getValue() == dieValue) {
+        for (int i = 0; i < availableDiceValues.length; i++) {
+            if (!diceUsed[i] && availableDiceValues[i] == dieValue) {
                 diceUsed[i] = true;
                 return;
             }
         }
-        throw new IllegalArgumentException("Die value not found");
+        throw new IllegalArgumentException("Die value not found: " + dieValue);
     }
 
     public int[] getDiceValues() {
@@ -156,11 +188,11 @@ public class BGGameState extends AbstractGameState {
 
     public int[] getAvailableDiceValues() {
         // only return values for dice not yet used
-        int[] values = new int[dice.length];
+        int[] values = new int[availableDiceValues.length];
         int count = 0;
-        for (int i = 0; i < dice.length; i++) {
+        for (int i = 0; i < diceUsed.length; i++) {
             if (!diceUsed[i]) {
-                values[count++] = dice[i].getValue();
+                values[count++] = availableDiceValues[i];
             }
         }
         return Arrays.copyOf(values, count);
@@ -170,40 +202,33 @@ public class BGGameState extends AbstractGameState {
         BGParameters params = (BGParameters) getGameParameters();
         int count = 0;
         for (int i = 0; i < params.homeBoardSize; i++) {
-            count += piecesPerPoint[playerId][i];
+            if (params.route == BGParameters.Route.CommonHalfA)
+                count += getPiecesOnPoint(playerId, playerTrackMapping[playerId][params.boardSize - params.entryBoardSize - i - 1]);
+            else
+                count += getPiecesOnPoint(playerId, playerTrackMapping[playerId][params.boardSize - i - 1]);
         }
         return count;
     }
 
     public boolean allPiecesOnHomeBoard(int playerId) {
         BGParameters params = (BGParameters) getGameParameters();
-        if (piecesOnBar[playerId] > 0)
-            return false;
-        for (int i = params.homeBoardSize; i < params.boardSize; i++) {
-            if (piecesPerPoint[playerId][i] > 0) {
-                return false;
-            }
-        }
-        return true;
+        return piecesOnHomeBoard(playerId) == params.piecesPerPlayer - piecesBorneOff[playerId];
     }
 
-    public void movePieceToBar(int playerId, int point) {
-        if (piecesPerPoint[playerId][point] <= 0) {
-            throw new IllegalArgumentException("No pieces on the point");
+    // returns the physical space on the board where the token is located
+    public int locationOfToken(Token t) {
+        for (int i = 0; i < counters.size(); i++) {
+            if (counters.get(i).contains(t)) {
+                // found the token, return the point
+                return i;
+            }
         }
-        piecesPerPoint[playerId][point]--;
-        piecesOnBar[playerId]++;
-        blots[playerId]++;
+        throw new IllegalArgumentException("Token not found in game state: " + t);
     }
 
     @Override
     protected BGGameState _copy(int playerId) {
         BGGameState copy = new BGGameState(gameParameters, getNPlayers());
-        copy.piecesPerPoint = new int[piecesPerPoint.length][];
-        for (int i = 0; i < piecesPerPoint.length; i++) {
-            copy.piecesPerPoint[i] = Arrays.copyOf(piecesPerPoint[i], piecesPerPoint[i].length);
-        }
-        copy.piecesOnBar = Arrays.copyOf(piecesOnBar, piecesOnBar.length);
         copy.piecesBorneOff = Arrays.copyOf(piecesBorneOff, piecesBorneOff.length);
         copy.blots = Arrays.copyOf(blots, blots.length);
         copy.dice = new Dice[dice.length];
@@ -211,6 +236,16 @@ public class BGGameState extends AbstractGameState {
             copy.dice[i] = dice[i].copy();
         }
         copy.diceUsed = Arrays.copyOf(diceUsed, diceUsed.length);
+        copy.availableDiceValues = Arrays.copyOf(availableDiceValues, availableDiceValues.length);
+
+        copy.counters = new ArrayList<>();
+        for (int i = 0; i < counters.size(); i++) {
+            // individual counters are immutable, so we can avoid the overhead of copying them
+            List<Token> playerCounters = new ArrayList<>(counters.get(i));
+            copy.counters.add(playerCounters);
+        }
+        copy.playerTrackMapping = playerTrackMapping; // this is immutable, so we can just copy the reference
+        copy.movedThisTurn = new ArrayList<>(movedThisTurn);
         return copy;
     }
 
@@ -226,17 +261,20 @@ public class BGGameState extends AbstractGameState {
             // for a default heuristic, we count a piece borne off as worth 1.0
             // and otherwise we divide its current position by 24, so a point on the bar is worth zero
             double score = 0;
-            int boardLength = piecesPerPoint[0].length;
-            for (int i = 0; i < piecesPerPoint[playerId].length; i++) {
-                // pieces are worth more the closer they are to the home board (i.e. the lower the index)
-                score += piecesPerPoint[playerId][boardLength - i - 1] * i / 24.0;
-                // opponent pieces are worth less the closer they are to their home board (i.e. the lower the index)
-                score -= piecesPerPoint[1 - playerId][i] * i / 24.0;
+            BGParameters params = (BGParameters) getGameParameters();
+            double length = params.boardSize;
+            double maxPoints = params.piecesPerPlayer;
+            int boardLength = playerTrackMapping[playerId].length;
+            for (int i = 0; i < boardLength; i++) {
+                // pieces are worth more the further they have moved
+                score += getPiecesOnPoint(playerId, getPhysicalSpace(playerId, i)) * i / length;
+                // opponent pieces are worth less the further they have moved
+                score -= getPiecesOnPoint(1 - playerId, getPhysicalSpace(1 - playerId, i)) * (length - i) / length;
             }
             // borne off
             score += piecesBorneOff[playerId];
             score -= piecesBorneOff[1 - playerId];
-            return score / 15.0;  // to scale to 1.0 when all our pieces are borne off and none of the opponent
+            return score / maxPoints;  // to scale to 1.0 when all our pieces are borne off and none of the opponent
         }
         // if the game is over, return 1.0 for a win and 0.0 for a loss
         return playerResults[playerId].value;
@@ -252,15 +290,18 @@ public class BGGameState extends AbstractGameState {
         return piecesBorneOff[playerId];
     }
 
+
     @Override
     protected boolean _equals(Object o) {
         if (o instanceof BGGameState bgs) {
             return Arrays.equals(piecesBorneOff, bgs.piecesBorneOff) &&
-                    Arrays.equals(piecesOnBar, bgs.piecesOnBar) &&
                     Arrays.equals(blots, bgs.blots) &&
                     Arrays.equals(diceUsed, bgs.diceUsed) &&
+                    Arrays.equals(availableDiceValues, bgs.availableDiceValues) &&
                     Arrays.equals(dice, bgs.dice) &&
-                    Arrays.deepEquals(piecesPerPoint, bgs.piecesPerPoint);
+                    counters.equals(bgs.counters) &&
+                    movedThisTurn.equals(bgs.movedThisTurn) &&
+                    Arrays.deepEquals(playerTrackMapping, bgs.playerTrackMapping);
         }
         return false;
     }
@@ -268,11 +309,12 @@ public class BGGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return Arrays.hashCode(piecesBorneOff) + 31 *
-                Arrays.hashCode(piecesOnBar) + 31 * 31 *
-                Arrays.hashCode(blots) + 31 * 31 * 31 *
-                Arrays.hashCode(diceUsed) + 31 * 31 * 31 * 31 *
-                Arrays.hashCode(dice) + 31 * 31 * 31 * 31 * 31 *
-                Arrays.deepHashCode(piecesPerPoint) +
+                Arrays.hashCode(blots) + 31 * 31 *
+                Arrays.hashCode(diceUsed) + 31 * 31 * 31 *
+                Arrays.hashCode(dice) + 31 * 31 * 31 * 31 *
+                Arrays.hashCode(availableDiceValues) - 31 * 255 *
+                Objects.hash(counters, movedThisTurn) + 31 * 31 * 31 * 31 * 31 *
+                Arrays.deepHashCode(playerTrackMapping) +
                 super.hashCode();
     }
 

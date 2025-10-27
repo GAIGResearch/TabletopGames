@@ -24,7 +24,6 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static evaluation.RunArg.bicTimer;
 import static evaluation.RunArg.parseConfig;
 import static utilities.JSONUtils.loadClass;
 
@@ -390,15 +389,7 @@ public class ExpertIteration {
             if (actionSearchSettings != null) {
                 if (actionSearchSpace != null) {   // on first iteration we have results of action search
                     // we can use the action search settings to initialise the value search settings
-                    List<String> valueNames = valueSearchSpace.getDimensions();
-                    for (int i = 0; i < actionSearchSettings.length; i++) {
-                        if (!valueNames.contains(actionSearchSpace.name(i))) {
-                            // usually we will have different parameters in the two searches, but if there is overlap we
-                            // 'forget' the previous value
-                            // otherwise we fix the non-optimised settings to the action search settings
-                            ntbea.fixTunableParameter(actionSearchSpace.name(i), actionSearchSpace.value(i, actionSearchSettings[i]));
-                        }
-                    }
+                    fixSSDimensions(ntbea, valueSearchSpace, actionSearchSettings, actionSearchSpace);
                 }
                 // as well as the old action-tuned settings, we also use the old action heuristic for which they were tuned
                 if (oldActionHeuristic != null) {
@@ -423,19 +414,11 @@ public class ExpertIteration {
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
             ntbea.setOpponents(Collections.singletonList(bestAgent));
             ntbea.fixTunableParameter("actionHeuristic", actionHeuristic);  // so this is used when tuning
-            ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);  // TODO: check if this is a parameter
+            ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);
 
             if (valueSearchSettings != null && valueSearchSpace != null) {
                 // we can use the value search settings to initialise the action search settings
-                List<String> actionNames = actionSearchSpace.getDimensions();
-                for (int i = 0; i < valueSearchSettings.length; i++) {
-                    if (!actionNames.contains(valueSearchSpace.name(i))) {
-                        // usually we will have different parameters in the two searches, but if there is overlap we
-                        // 'forget' the previous value
-                        // otherwise we fix the non-optimised settings to the value search settings
-                        ntbea.fixTunableParameter(valueSearchSpace.name(i), valueSearchSpace.value(i, valueSearchSettings[i]));
-                    }
-                }
+                fixSSDimensions(ntbea, actionSearchSpace, valueSearchSettings, valueSearchSpace);
 
                 // and also make sure we include the state heuristic in the action search
                 ntbea.fixTunableParameter("heuristic", stateHeuristic);
@@ -450,5 +433,17 @@ public class ExpertIteration {
         String agentName = String.format("NTBEA_%02d.json", iter);
         newTunedPlayer.setName(agentName);
         agents.add(newTunedPlayer);
+    }
+
+    private void fixSSDimensions(NTBEA ntbea, ITPSearchSpace<?> actionSearchSpace, int[] valueSearchSettings, ITPSearchSpace<?> valueSearchSpace) {
+        List<String> actionNames = actionSearchSpace.getDimensions();
+        for (int i = 0; i < valueSearchSettings.length; i++) {
+            if (!actionNames.contains(valueSearchSpace.name(i))) {
+                // usually we will have different parameters in the two searches, but if there is overlap we
+                // 'forget' the previous value
+                // otherwise we fix the non-optimised settings to the value search settings
+                ntbea.fixTunableParameter(valueSearchSpace.name(i), valueSearchSpace.value(i, valueSearchSettings[i]));
+            }
+        }
     }
 }

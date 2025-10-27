@@ -7,6 +7,5 @@
   "seed" : 740234,
   "listener" : "json/listeners/basiclistener.json",
   "destDir" : "outputdir",
-  "output" : "outputdir/Tournament.log",
   "playerDirectory" : "tournamentPlayers"
 }

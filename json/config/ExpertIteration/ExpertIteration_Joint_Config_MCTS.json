@@ -9,7 +9,7 @@
 	"stateForAction" : true,
 	"destDir" : "ExpertIteration/Backgammon",
 	"matchups" : 50,
-	"everyN" : 29,
+	"sampleRate" : 0.03,
 	"expert" : "MCTS",
 	"valueSS" : "ValueSearchSpace.json",
 	"actionSS" : "ActionSearchSpace.json",

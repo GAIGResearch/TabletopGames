@@ -5,60 +5,72 @@ import core.interfaces.IStateFeatureVector;
 
 public class BGStateFeatures implements IStateFeatureVector {
 
-
     String[] names = new String[]{
             "BorneOff", "BorneOff_Opp",
             "Bar", "Bar_Opp",
             "HomeBoard", "HomeBoard_Opp",
             "Singletons", "Singletons_Opp",
             "MeanToHome", "MeanToHome_Opp",
-            "PiecesOnBoard", "PiecesOnBoard_Opp"
+            "PiecesOnBoard", "PiecesOnBoard_Opp",
+            "Stacks", "Stacks_Opp"
     };
 
     @Override
     public double[] doubleVector(AbstractGameState state, int playerID) {
         BGGameState bgState = (BGGameState) state;
+        BGParameters params = (BGParameters) state.getGameParameters();
         double[] features = new double[names.length];
         // BorneOff
         features[0] = bgState.getGameScore(playerID);
         features[1] = bgState.getGameScore(1 - playerID);
 
         // Bar
-        features[2] = bgState.piecesOnBar[playerID];
-        features[3] = bgState.piecesOnBar[1 - playerID];
+        features[2] = bgState.getPiecesOnBar(playerID);
+        features[3] = bgState.getPiecesOnBar(1 - playerID);
 
         // HomeBoard
         features[4] = bgState.piecesOnHomeBoard(playerID);
         features[5] = bgState.piecesOnHomeBoard(1 - playerID);
 
         // MeanToHome and PiecesOnBoard
-        int sum = 0, count = 0, boardLen = bgState.piecesPerPoint[playerID].length;
+        int sum = 0, count = 0, boardLen = params.boardSize;
         int singletons = 0;
+        int stacks = 0;
         for (int i = 0; i < boardLen; i++) {
-            sum += bgState.piecesPerPoint[playerID][i] * i;
-            count += bgState.piecesPerPoint[playerID][i];
-            if (bgState.piecesPerPoint[playerID][i] == 1) {
+            int physicalIndex = bgState.getPhysicalSpace(playerID, i);
+            int piecesOnPoint = bgState.getPiecesOnPoint(playerID, physicalIndex);
+            sum += piecesOnPoint * i;
+            count += piecesOnPoint;
+            if (piecesOnPoint == 1) {
                 singletons++;
+            } else {
+                stacks++;
             }
         }
         features[6] = singletons;
         features[8] = count > 0 ? (double) sum / count : 0.0;
         features[10] = sum;
+        features[12] = stacks;
 
         count = 0;
         sum = 0;
         singletons = 0;
-        boardLen = bgState.piecesPerPoint[1 - playerID].length;
+        stacks = 0;
         for (int i = 0; i < boardLen; i++) {
-            sum += bgState.piecesPerPoint[1 - playerID][i] * i;
-            count += bgState.piecesPerPoint[1 - playerID][i];
-            if (bgState.piecesPerPoint[1 - playerID][i] == 1) {
+            int physicalIndex = bgState.getPhysicalSpace(1 - playerID, i);
+            int piecesOnPoint = bgState.getPiecesOnPoint(1 - playerID, physicalIndex);
+            sum += piecesOnPoint * i;
+            count += piecesOnPoint;
+            if (piecesOnPoint == 1) {
                 singletons++;
+            } else {
+                stacks++;
             }
         }
         features[7] = singletons;
         features[9] = count > 0 ? (double) sum / count : 0.0;
         features[11] = sum;
+        features[13] = stacks;
 
         return features;
 

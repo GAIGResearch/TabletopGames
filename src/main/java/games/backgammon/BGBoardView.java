@@ -1,46 +1,36 @@
 package games.backgammon;
 
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.CoreConstants;
-import core.actions.AbstractAction;
-import games.descent2e.actions.Move;
-import games.dotsboxes.AddGridCellEdge;
-import games.dotsboxes.DBEdge;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
-public class BackgammonBoardView extends JComponent {
+public class BGBoardView extends JComponent {
 
-    private final int boardWidth = 800;
-    private final int boardHeight = 400;
-    private final int triangleBase = 60;
-    private final int triangleHeight = 150;
-    private final int margin = 20;
-    int discRadius = 20;
-    int discMargin = 5;
+    protected int boardWidth = 800;
+    protected int boardHeight = 400;
+    protected final int triangleBase = 60;
+    protected final int triangleHeight = 150;
+    protected int margin = 20;
+    protected int discRadius = 20;
+    protected int discMargin = 5;
 
-    private int[][] piecesPerPoint = new int[2][24]; // [player][point]
-    private int[] piecesOnBar = new int[2];      // [player]
-    private int[] piecesBorneOff = new int[2];   // [player]
-    private int[] diceValues = new int[2];
-    private boolean[] diceUsed = new boolean[2];
-    private BGForwardModel forwardModel;
-    private List<MovePiece> validActions = new ArrayList<>();
-    private int currentPlayer = 0;
+    protected int[][] piecesPerPoint = new int[2][25]; // [player][point]
+    protected int[] piecesOnBar = new int[2];      // [player]
+    protected int[] piecesBorneOff = new int[2];   // [player]
+    protected int[] diceValues = new int[2];
+    protected BGForwardModel forwardModel;
+    protected List<MovePiece> validActions = new ArrayList<>();
+    protected int currentPlayer = 0;
 
-    int firstClick = -1;
-    int secondClick = -1;
+    protected int firstClick = -1;
+    protected int secondClick = -1;
 
-    public BackgammonBoardView(BGForwardModel model) {
+    public BGBoardView(BGForwardModel model) {
         this.setPreferredSize(new Dimension(boardWidth, boardHeight));
         forwardModel = model;
 
@@ -53,7 +43,7 @@ public class BackgammonBoardView extends JComponent {
                     int y = evt.getY();
                     boolean topHalf = (y < boardHeight / 2);
                     // we now convert this x, y position to one of the 'points' on the board
-                    // between 1 and 24, or 0 to bear-off and 25 for the bar
+                    // between 1 and 24, or 0 to bear-off and 25 for the bar (from perspective of player 0; these are reversed for player 1)
 
                     int point = (x - margin) / triangleBase;
                     if (topHalf) {
@@ -65,11 +55,11 @@ public class BackgammonBoardView extends JComponent {
                     } else {
                         // bottom half
                         point = switch (point) {
-                            case -1 -> -1;
                             case 12 -> 25;
                             default -> point + 13;
                         };
                     }
+           //        System.out.printf("Clicked at (%d, %d), mapped to point %d%n", x, y, point);
                     // this is from the perspective of player 0
                     if (firstClick == -1)
                         firstClick = point;
@@ -84,8 +74,24 @@ public class BackgammonBoardView extends JComponent {
         });
     }
 
+    public int getFirstClick() {
+        return firstClick;
+    }
+    public int getSecondClick() {
+        return secondClick;
+    }
+
+    public void setFirstClick(int firstClick) {
+        this.firstClick = firstClick;
+    }
+    public void setSecondClick(int secondClick) {
+        this.secondClick = secondClick;
+    }
+
     public synchronized void update(BGGameState state) {
         int nPlayers = state.getNPlayers();
+        BGParameters params = (BGParameters) state.getGameParameters();
+        int boardLength = params.boardSize;
 
         validActions = forwardModel.computeAvailableActions(state).stream()
                 .filter(a -> a instanceof MovePiece)
@@ -95,12 +101,13 @@ public class BackgammonBoardView extends JComponent {
 
         // Update pieces on points
         for (int player = 0; player < nPlayers; player++) {
-            piecesPerPoint[player] = state.getPlayerPieces(player);
-            piecesOnBar[player] = state.getPiecesOnBar(player);
-            piecesBorneOff[player] = state.getPiecesBorneOff(player);
+            for (int i = 1; i <= boardLength; i++) {
+                piecesPerPoint[player][i] = state.getPiecesOnPoint(player, i);
+                piecesOnBar[player] = state.getPiecesOnBar(player);
+                piecesBorneOff[player] = state.getPiecesBorneOff(player);
+            }
         }
-        diceValues = state.getDiceValues();
-        diceUsed = state.diceUsed.clone();
+        diceValues = state.getAvailableDiceValues();
 
         // Repaint the board to reflect the updated state
         repaint();
@@ -122,14 +129,14 @@ public class BackgammonBoardView extends JComponent {
 
         // Draw the discs on the triangles
         // point is measured from the perspective of player 0
-        for (int point = 0; point < piecesPerPoint[0].length; point++) {
+        for (int point = 1; point < piecesPerPoint[0].length; point++) {
             // which player (if any) has discs on this point
-            int player = piecesPerPoint[0][point] > 0 ? 0 : (piecesPerPoint[1][23 - point] > 0 ? 1 : -1);
+            int player = piecesPerPoint[0][point] > 0 ? 0 : (piecesPerPoint[1][point] > 0 ? 1 : -1);
             if (player == -1) continue; // No discs on this point
 
-            int numDiscs = piecesPerPoint[player][player == 0 ? point : (23 - point)];
-            boolean topRowOfTriangles = point < 12;
-            int position = topRowOfTriangles ? (11 - point) : (point - 12);
+            int numDiscs = piecesPerPoint[player][point];
+            boolean topRowOfTriangles = point < 13;
+            int position = topRowOfTriangles ? (12 - point) : (point - 13);
             // Calculate the x position based on the triangle base and margin
             int x = margin + position * triangleBase + triangleBase / 2 - discRadius / 2;
             // Calculate the y position based on the triangle height and margin
@@ -182,10 +189,9 @@ public class BackgammonBoardView extends JComponent {
             y = margin - g.getFontMetrics().getHeight() / 2;
             g2d.drawString(text, x, y);
         }
-
     }
 
-    private void drawDiscs(Graphics2D g2d, int x, int yStart, int numDiscs, int player, boolean fromTop) {
+    protected void drawDiscs(Graphics2D g2d, int x, int yStart, int numDiscs, int player, boolean fromTop) {
         for (int i = 0; i < numDiscs; i++) {
             int y = fromTop ? yStart + i * (discRadius + discMargin) : yStart - i * (discRadius + discMargin);
             g2d.setColor(player == 0 ? Color.WHITE : Color.BLACK);
@@ -195,7 +201,7 @@ public class BackgammonBoardView extends JComponent {
         }
     }
 
-    private void drawTriangle(Graphics2D g2d, int i) {
+    protected void drawTriangle(Graphics2D g2d, int i) {
         // we start with i = 0 on the top row on the far right
         // and i = 23 on the bottom row on the far right
         // with the triangles proceeding in a horseshoe shape around the board
@@ -215,12 +221,9 @@ public class BackgammonBoardView extends JComponent {
 
         // Then, if firstClick is -1, we look through validActions to find the from position of all valid moves
         // and highlight the triangles that are valid moves
-        // i and from/to in MovePiece use 0..23 for the points
-        // firstClick and secondClick use 1..24 for the points
-        int clickPlayerPerspective = currentPlayer == 0 ? i : (23 - i);
         if (firstClick == -1) {
             for (MovePiece action : validActions) {
-                if (action.from == clickPlayerPerspective) {
+                if (action.from == i + 1) {
                     g2d.setColor(Color.YELLOW);
                     g2d.setStroke(new BasicStroke(2));
                     g2d.drawPolygon(xPoints, yPoints, 3);
@@ -231,18 +234,21 @@ public class BackgammonBoardView extends JComponent {
             // Highlight the second click position
             // but only considering validActions for which from = firstClick
             for (MovePiece action : validActions) {
-                int fromPoint = currentPlayer == 0 ? firstClick - 1 : 24 - firstClick;
+                int fromPoint =  firstClick;
                 if (firstClick == 25 && currentPlayer == 0 || firstClick == 0 && currentPlayer == 1) {
-                    fromPoint = -1; // Bar
+                    fromPoint = 0; // Bar
                 }
-                if (action.from == fromPoint && action.to == clickPlayerPerspective) {
+                if (firstClick == 0 && currentPlayer == 0 || firstClick == 25 && currentPlayer == 1) {
+                    fromPoint = -1; // Bearing off
+                }
+                if (action.from == fromPoint && action.to == i + 1) {
                     g2d.setColor(Color.RED);
                     g2d.setStroke(new BasicStroke(2));
                     g2d.drawPolygon(xPoints, yPoints, 3);
                     break;
                 }
             }
-            if (i == firstClick - 1) {
+            if (i + 1 == firstClick) {
                 // also keep yellow if we have clicked on a triangle
                 g2d.setColor(Color.YELLOW);
                 g2d.setStroke(new BasicStroke(2));
@@ -252,7 +258,7 @@ public class BackgammonBoardView extends JComponent {
     }
 
 
-    private void drawDice(Graphics2D g2d, int centerX, int centerY) {
+    protected void drawDice(Graphics2D g2d, int centerX, int centerY) {
         int dieSize = 40; // Size of each die
         int dieMargin = 10; // Margin between dice
 
@@ -261,7 +267,7 @@ public class BackgammonBoardView extends JComponent {
             int y = centerY - dieSize / 2;
 
             // Set color based on whether the die has been used
-            g2d.setColor(diceUsed[i] ? Color.LIGHT_GRAY : Color.WHITE);
+            g2d.setColor(Color.WHITE);
             g2d.fillRoundRect(x, y, dieSize, dieSize, 10, 10);
 
             g2d.setColor(Color.BLACK);
@@ -272,7 +278,7 @@ public class BackgammonBoardView extends JComponent {
         }
     }
 
-    private void drawDieFace(Graphics2D g2d, int x, int y, int size, int value) {
+    protected void drawDieFace(Graphics2D g2d, int x, int y, int size, int value) {
         int dotSize = size / 6; // Size of the dots
         int offset = size / 4; // Offset for the dots from the center
 

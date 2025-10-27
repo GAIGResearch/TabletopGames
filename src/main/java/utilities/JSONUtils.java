@@ -175,6 +175,9 @@ public class JSONUtils {
                 throw new AssertionError("Error constructing " + outputClass.getName() + " using JSON constructor.\n" +
                         "JSON: " + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getTargetException().getMessage());
             } catch (Exception e) {
+                if (e instanceof InvocationTargetException ite) {
+                    System.out.println(ite.getTargetException().getMessage());
+                }
                 throw new AssertionError(e.getClass().getSimpleName() + " Error constructing " + outputClass.getName() + " using JSON constructor.\n" +
                         "JSON: " + JSONUtils.prettyPrint(json, 1) + " \n: " + e.getMessage());
             }
