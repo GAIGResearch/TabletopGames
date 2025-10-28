@@ -11,6 +11,7 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.actions.Triggers;
+import games.descent2e.components.tokens.Door;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -43,6 +44,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     DicePool defenceDicePool;
     DicePool attributeDicePool;
     List<Hero> heroes;
+    List<Door> doors;
     Figure overlord;
     Figure heroesSide;
     List<List<Monster>> monsters;
@@ -77,6 +79,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         defenceDicePool = new DicePool(Collections.emptyList());
         attributeDicePool = new DicePool(Collections.emptyList());
 
+        doors = new ArrayList<>();
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
         monstersOriginal = new ArrayList<>();
@@ -125,6 +128,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         monstersOriginal.forEach(components::addAll);
         components.addAll(defeated);
         components.add(overlord);
+        components.addAll(doors);
         //components.add(heroesSide);   // TODO This breaks it for some reason
         // TODO
         return components;
@@ -147,6 +151,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.heroes = new ArrayList<>();
         for (Hero f : heroes) {
             copy.heroes.add(f.copy());
+        }
+        copy.doors = new ArrayList<>();
+        for (Door d : doors) {
+            copy.doors.add(d.copy());
         }
         copy.monsters = new ArrayList<>();
         for (List<Monster> ma : monsters) {
@@ -273,7 +281,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 Objects.equals(attributeDicePool, that.attributeDicePool) &&
                 Objects.equals(heroes, that.heroes) && Objects.equals(overlord, that.overlord) &&
                 Objects.equals(monsters, that.monsters) && Objects.equals(tokens, that.tokens) &&
-                Objects.equals(monstersOriginal, that.monstersOriginal) &&
+                Objects.equals(doors, that.doors) && Objects.equals(monstersOriginal, that.monstersOriginal) &&
                 Objects.equals(monstersPerGroup, that.monstersPerGroup) &&
                 Objects.equals(monsterGroups, that.monsterGroups) &&
                 Objects.equals(webMonstersIDs, that.webMonstersIDs) &&
@@ -289,7 +297,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, setup, searchCards, act1ShopCards, act2ShopCards, relicCards,
-                masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
+                masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, doors, heroesSide,
                 monsters, monstersOriginal, monstersPerGroup, monsterGroups, webMonstersIDs, overlordPlayer, tokens, currentQuest,
                 defeatedFigures, defeated, interruptAttacks, monsterActingNext, heroActingNext, monsterGroupActingNext);
         result = 31 * result + Arrays.deepHashCode(tileReferences);
@@ -312,6 +320,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 defenceDicePool.hashCode(),
                 attributeDicePool.hashCode(),
                 heroes.hashCode(),
+                doors.hashCode(),
                 overlord.hashCode(),
                 heroesSide.hashCode(),
                 monsters.hashCode(),
@@ -554,6 +563,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public List<DToken> getTokens() {
         return tokens;
+    }
+
+    public List<Door> getDoors() {
+        return doors;
     }
 
     public Quest getCurrentQuest() {

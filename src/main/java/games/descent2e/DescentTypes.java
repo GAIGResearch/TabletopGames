@@ -192,7 +192,8 @@ public class DescentTypes {
     public enum DescentToken {
         Search ("search.png", 1),
         Villager ("villager.png", 2),
-        WhiteObjective("whiteobjective.png", 1);
+        WhiteObjective("whiteobjective.png", 1),
+        Door("door.png", 1);
         String imgPath; int nImgOptions;
         DescentToken(String imgPath, int nImgOptions) {
             this.imgPath = imgPath;
