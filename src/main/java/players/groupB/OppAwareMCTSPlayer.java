@@ -1,31 +1,19 @@
 package players.groupB;
 
 import core.AbstractGameState;
-import players.basicMCTS.BasicMCTSPlayer;
+import core.actions.AbstractAction;
 import players.basicMCTS.BasicMCTSParams;
+import players.basicMCTS.BasicMCTSPlayer;
 
 /**
  * OppAwareMCTSPlayer
- * Author: Ali Askari
- * MSc AI Coursework – ECS7032P
- *
- * Blueprint version:
- * - Extends BasicMCTSPlayer
- * - Integrates OpponentAwareHeuristic and FrequencyOpponentModel (to be expanded later)
+ * Extends BasicMCTSPlayer with opponent modelling and adaptive heuristic.
  */
 public class OppAwareMCTSPlayer extends BasicMCTSPlayer {
 
-    private FrequencyOpponentModel opponentModel;
-    private OpponentAwareHeuristic heuristic;
+    private final FrequencyOpponentModel opponentModel;
+    private final OpponentAwareHeuristic heuristic;
 
-    // Default constructor
-    public OppAwareMCTSPlayer() {
-        super();
-        this.opponentModel = new FrequencyOpponentModel();
-        this.heuristic = new OpponentAwareHeuristic(opponentModel);
-    }
-
-    // Copy constructor using parameters
     public OppAwareMCTSPlayer(BasicMCTSParams params) {
         super(params);
         this.opponentModel = new FrequencyOpponentModel();
@@ -39,7 +27,13 @@ public class OppAwareMCTSPlayer extends BasicMCTSPlayer {
 
 
     public double getHeuristicValue(AbstractGameState gameState, int playerID) {
-        // Placeholder – later will integrate real opponent-aware logic
         return heuristic.evaluate(gameState, playerID);
+    }
+
+    /**
+     * Example hook — if available, track opponent actions after rollouts.
+     */
+    public void onOpponentAction(int opponentId, AbstractAction action) {
+        opponentModel.updateModel(opponentId, action.toString());
     }
 }
