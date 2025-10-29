@@ -137,12 +137,99 @@ public class Place extends DescentAction{
                         if (!DescentTypes.TerrainType.isStartingTerrain(node.getComponentName())) return false;
                     }
                 }
-                return true;
+
+                // Arbitrarily big numbers for initialisation, need to be positive so no -1 or null
+                int remaining = 1000;
+                int totalSize = 1000;
+                for (List<Monster> monsters : dgs.getMonsters()) {
+                    if (monsters.contains(m)) {
+                        remaining = monsters.size() - monsters.indexOf(m) - 1;
+                        totalSize = monsters.size() * w * h;
+                        break;
+                    }
+                }
+                // If this is the last monster in a group to be placed, we have no further need to check any deeper
+                // Else, have to make sure that we're not denying any future monster placements by plodding ourselves here
+                if (remaining < 1) return true;
+                else {
+                    // Technically speaking, there is no guarantee that this will protect us;
+                    // there may be some ridiculously shaped tile that prevents us from placing anything
+                    // but this stops even further ridiculous computation,
+                    // e.g. Barghests checking every single rotation only to be told "True" for everything
+                    // This is just a sensible-looking limit here, might change later
+                    // Barghests and other 2x2 have total size of 8 (21), and Dragons have 12 (31)
+                    // All the awkward-shaped tiles are either large enough to allow anyway, or have < 20 positions
+                    if (possible.size() > (totalSize * 2.5) + 1) return true;
+
+                    List<Vector2D> futurePossible = new ArrayList<>(List.copyOf(possible));
+                    for (int i = 0; i < h; i++) {
+                        for (int j = 0; j < w; j++) {
+                            futurePossible.remove(new Vector2D(anchor.getX() + i, anchor.getY() + j));
+                        }
+                    }
+
+                    return checkFuture(board, m, futurePossible, remaining);
+                }
             }
         }
 
         if (((PropertyInt) node.getProperty(playersHash)).value != -1) return false;
         return DescentTypes.TerrainType.isStartingTerrain(node.getComponentName());
+    }
+
+    boolean checkFuture(GridBoard board, Monster m, List<Vector2D> possible, int remaining) {
+        int canPlace = 0;
+        Pair<Integer, Integer> size = m.getSize();
+        int w = size.a;
+        int h = size.b;
+        boolean checkRotation = w != h;
+
+        for (Vector2D anchor : possible) {
+            // Immediately return true at the earliest legal convenience
+            if (canPlace >= remaining) return true;
+
+            List<Vector2D> available = new ArrayList<>();
+            for (int i = 0; i < h; i++) {
+                for (int j = 0; j < w; j++) {
+                    Vector2D pos = new Vector2D(anchor.getX() + j, anchor.getY() + i);
+                    if (!possible.contains(pos)) break;
+                    BoardNode node = board.getElement(pos);
+                    if (node == null) break;
+                    if (((PropertyInt) node.getProperty(playersHash)).value != -1) break;
+                    if (!DescentTypes.TerrainType.isStartingTerrain(node.getComponentName())) break;
+                    available.add(pos);
+                }
+            }
+            if (available.size() == w * h) {
+                List<Vector2D> futurePossible = new ArrayList<>(List.copyOf(possible));
+                futurePossible.removeAll(available);
+                if (checkFuture(board, m, futurePossible, remaining - 1))
+                    canPlace++;
+            }
+            // Do it again but vertically, if we must
+            if (checkRotation) {
+                if (canPlace >= remaining) return true;
+                available.clear();
+                for (int i = 0; i < h; i++) {
+                    for (int j = 0; j < w; j++) {
+                        Vector2D pos = new Vector2D(anchor.getX() + j, anchor.getY() + i);
+                        if (!possible.contains(pos)) break;
+                        BoardNode node = board.getElement(pos);
+                        if (node == null) break;
+                        if (((PropertyInt) node.getProperty(playersHash)).value != -1) break;
+                        if (!DescentTypes.TerrainType.isStartingTerrain(node.getComponentName())) break;
+                        available.add(pos);
+                    }
+                }
+                if (available.size() == w * h) {
+                    List<Vector2D> futurePossible = new ArrayList<>(List.copyOf(possible));
+                    futurePossible.removeAll(available);
+                    if (checkFuture(board, m, futurePossible, remaining - 1))
+                        canPlace++;
+                }
+            }
+        }
+        return canPlace >= remaining;
     }
 
     @Override
