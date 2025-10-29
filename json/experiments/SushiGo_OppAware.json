@@ -1,0 +1,15 @@
+{
+  "game": "SushiGo",
+  "nPlayers": 3,
+  "mode": "exhaustive",
+  "matchups": 200,
+  "seed": 42,
+  "verbose": true,
+  "destDir": "outputdir_oppaware",
+  "addTimeStamp": true,
+  "players": [
+    "players.groupB.OppAwareMCTSPlayer",
+    "players.basicMCTS.BasicMCTSPlayer",
+    "players.simple.RandomPlayer"
+  ]
+}

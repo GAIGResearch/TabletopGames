@@ -152,6 +152,11 @@ public enum RunArg {
             "\t If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.",
             "",
             new Usage[]{Usage.RunGames, Usage.ExpertIteration}),
+    players("A list of player class names provided in the JSON configuration. " +
+            "For example: ['players.groupB.OppAwareMCTSPlayer', 'players.basicMCTS.BasicMCTSPlayer', 'players.simple.RandomPlayer']." ,
+            new ArrayList<>(),
+            new Usage[]{Usage.RunGames}),
+
     playerRange("The total number of players in each game (the default is 'all') \n " +
             "\t A range can also be specified, for example 3-5. \n " +
             "\t Different player counts can be specified for each game in pipe-delimited format.\n" +

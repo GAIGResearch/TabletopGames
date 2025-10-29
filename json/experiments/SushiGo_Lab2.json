@@ -1,0 +1,16 @@
+{
+  "game": "SushiGo",
+  "nPlayers": 3,
+  "mode": "random",
+  "matchups": 100,
+  "nGames": 10,
+  "seed": 12345,
+  "verbose": true,
+  "destDir": "outputdir",
+  "addTimeStamp": true,
+  "players": [
+    "players.simple.RandomPlayer",
+    "players.simple.OSLAPlayer",
+    "players.basicMCTS.BasicMCTSPlayer"
+  ]
+}
