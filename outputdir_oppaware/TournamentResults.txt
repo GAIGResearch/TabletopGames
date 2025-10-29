@@ -1,0 +1,498 @@
+Game: SushiGo, Players: 3, Mode: EXHAUSTIVE, TotalGames: 96, GamesPerMatchup: 4
+Alpha calculations using Delta Ordinal
+Alpha: 10.0
+	1.000	Basic MCTS
+	0.000	RandomPlayer
+	0.000	RMHC
+	0.000	SuperOSLA
+
+Transition matrix for alpha = 10.0
+1.000	0.000	0.000	0.000	
+1.000	0.000	0.000	0.000	
+1.000	0.000	0.000	0.000	
+1.000	0.000	0.000	0.000	
+B matrix for alpha = 10.0
+5.000	1.000	1.000	1.000	
+1.000	1.000	1.000	1.000	
+1.000	1.000	1.000	1.000	
+1.000	1.000	1.000	1.000	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for RandomPlayer
+		RandomPlayer
+		RMHC
+		SuperOSLA
+
+Alpha calculations using Win Rate
+Alpha: 10.0
+	1.000	Basic MCTS
+	0.000	RandomPlayer
+	0.000	RMHC
+	0.000	SuperOSLA
+
+Transition matrix for alpha = 10.0
+1.000	0.000	0.000	0.000	
+1.000	0.000	0.000	0.000	
+1.000	0.000	0.000	0.000	
+1.000	0.000	0.000	0.000	
+B matrix for alpha = 10.0
+4.997	1.000	1.000	1.000	
+1.000	1.000	0.999	0.999	
+1.000	0.999	0.999	0.999	
+1.000	0.999	0.999	0.999	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for RandomPlayer
+		RandomPlayer
+		RMHC
+		SuperOSLA
+
+Basic MCTS got 69.00 points. Basic MCTS won 71.9% of the 96 games of the tournament. Basic MCTS won 95.8% of the 72 games it played during the tournament.
+Basic MCTS got a mean score of 57.86.
+Basic MCTS won 95.8% of the 48 games against RandomPlayer.
+Basic MCTS won 95.8% of the 48 games against RMHC.
+Basic MCTS won 95.8% of the 48 games against SuperOSLA.
+
+RandomPlayer got 11.00 points. RandomPlayer won 11.5% of the 96 games of the tournament. RandomPlayer won 15.3% of the 72 games it played during the tournament.
+RandomPlayer got a mean score of 34.19.
+RandomPlayer won 0.0% of the 48 games against Basic MCTS.
+RandomPlayer won 22.9% of the 48 games against RMHC.
+RandomPlayer won 22.9% of the 48 games against SuperOSLA.
+
+RMHC got 7.00 points. RMHC won 7.3% of the 96 games of the tournament. RMHC won 9.7% of the 72 games it played during the tournament.
+RMHC got a mean score of 35.46.
+RMHC won 2.1% of the 48 games against Basic MCTS.
+RMHC won 14.6% of the 48 games against RandomPlayer.
+RMHC won 12.5% of the 48 games against SuperOSLA.
+
+SuperOSLA got 9.00 points. SuperOSLA won 9.4% of the 96 games of the tournament. SuperOSLA won 12.5% of the 72 games it played during the tournament.
+SuperOSLA got a mean score of 34.68.
+SuperOSLA won 4.2% of the 48 games against Basic MCTS.
+SuperOSLA won 16.7% of the 48 games against RandomPlayer.
+SuperOSLA won 16.7% of the 48 games against RMHC.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+Basic MCTS: Win rate 0.96 +/- 0.024	Mean Ordinal 1.04 +/- 0.02
+RandomPlayer: Win rate 0.15 +/- 0.042	Mean Ordinal 2.29 +/- 0.08
+SuperOSLA: Win rate 0.13 +/- 0.039	Mean Ordinal 2.39 +/- 0.08
+RMHC: Win rate 0.10 +/- 0.035	Mean Ordinal 2.28 +/- 0.07
+
+Alpha-rank by Win Rate
+	Basic MCTS                    	1.00
+	SuperOSLA                     	0.00
+	RMHC                          	0.00
+	RandomPlayer                  	0.00
+
+Alpha-rank by Ordinal Position
+	Basic MCTS                    	1.00
+	RMHC                          	0.00
+	SuperOSLA                     	0.00
+	RandomPlayer                  	0.00
+
+Game: SushiGo, Players: 3, Mode: EXHAUSTIVE, TotalGames: 120, GamesPerMatchup: 1
+Alpha calculations using Delta Ordinal
+Alpha: 10.0
+	0.007	Basic MCTS
+	0.165	Basic MCTS
+	0.602	Basic MCTS
+	0.226	Basic MCTS
+	0.000	RandomPlayer
+	0.000	RandomPlayer
+
+Transition matrix for alpha = 10.0
+0.004	0.166	0.252	0.579	0.000	0.000	
+0.003	0.143	0.759	0.094	0.000	0.000	
+0.009	0.115	0.610	0.265	0.000	0.000	
+0.001	0.314	0.477	0.207	0.000	0.000	
+0.030	0.563	0.245	0.161	0.000	0.000	
+0.089	0.059	0.135	0.717	0.000	0.000	
+B matrix for alpha = 10.0
+0.435	0.294	0.356	0.366	0.249	0.459	
+0.294	1.086	1.021	0.765	0.282	0.179	
+0.356	1.021	1.773	0.997	0.257	0.280	
+0.366	0.765	0.997	1.366	0.327	0.232	
+0.249	0.282	0.257	0.327	0.404	0.185	
+0.459	0.179	0.280	0.232	0.185	0.543	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for Basic MCTS
+		Basic MCTS
+		RandomPlayer
+	Cluster for Basic MCTS
+		Basic MCTS
+		RandomPlayer
+	Cluster for Basic MCTS
+		Basic MCTS
+		RandomPlayer
+	Cluster for Basic MCTS
+		Basic MCTS
+		RandomPlayer
+
+Alpha calculations using Win Rate
+Alpha: 10.0
+	0.040	Basic MCTS
+	0.292	Basic MCTS
+	0.307	Basic MCTS
+	0.360	Basic MCTS
+	0.001	RandomPlayer
+	0.001	RandomPlayer
+
+Transition matrix for alpha = 10.0
+0.045	0.237	0.359	0.359	0.000	0.000	
+0.045	0.241	0.554	0.159	0.000	0.000	
+0.032	0.112	0.259	0.595	0.001	0.000	
+0.040	0.492	0.141	0.325	0.001	0.001	
+0.198	0.301	0.198	0.301	0.001	0.001	
+0.067	0.541	0.235	0.155	0.000	0.000	
+B matrix for alpha = 10.0
+0.367	0.456	0.445	0.411	0.260	0.272	
+0.456	1.145	0.771	0.775	0.240	0.290	
+0.445	0.771	1.053	0.799	0.271	0.217	
+0.411	0.775	0.799	1.098	0.283	0.354	
+0.260	0.240	0.271	0.283	0.260	0.270	
+0.272	0.290	0.217	0.354	0.270	0.377	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for Basic MCTS
+		Basic MCTS
+		RandomPlayer
+		RandomPlayer
+	Cluster for Basic MCTS
+		Basic MCTS
+		RandomPlayer
+		RandomPlayer
+	Cluster for Basic MCTS
+		Basic MCTS
+		RandomPlayer
+		RandomPlayer
+	Cluster for Basic MCTS
+		Basic MCTS
+		RandomPlayer
+		RandomPlayer
+
+Basic MCTS got 24.00 points. Basic MCTS won 20.0% of the 120 games of the tournament. Basic MCTS won 40.0% of the 60 games it played during the tournament.
+Basic MCTS got a mean score of 50.42.
+Basic MCTS won 29.2% of the 24 games against Basic MCTS.
+Basic MCTS won 33.3% of the 24 games against Basic MCTS.
+Basic MCTS won 29.2% of the 24 games against Basic MCTS.
+Basic MCTS won 58.3% of the 24 games against RandomPlayer.
+Basic MCTS won 50.0% of the 24 games against RandomPlayer.
+
+Basic MCTS got 32.00 points. Basic MCTS won 25.8% of the 120 games of the tournament. Basic MCTS won 51.7% of the 60 games it played during the tournament.
+Basic MCTS got a mean score of 54.33.
+Basic MCTS won 45.8% of the 24 games against Basic MCTS.
+Basic MCTS won 37.5% of the 24 games against Basic MCTS.
+Basic MCTS won 41.7% of the 24 games against Basic MCTS.
+Basic MCTS won 62.5% of the 24 games against RandomPlayer.
+Basic MCTS won 70.8% of the 24 games against RandomPlayer.
+
+Basic MCTS got 31.50 points. Basic MCTS won 25.8% of the 120 games of the tournament. Basic MCTS won 51.7% of the 60 games it played during the tournament.
+Basic MCTS got a mean score of 53.93.
+Basic MCTS won 54.2% of the 24 games against Basic MCTS.
+Basic MCTS won 45.8% of the 24 games against Basic MCTS.
+Basic MCTS won 37.5% of the 24 games against Basic MCTS.
+Basic MCTS won 58.3% of the 24 games against RandomPlayer.
+Basic MCTS won 62.5% of the 24 games against RandomPlayer.
+
+Basic MCTS got 31.50 points. Basic MCTS won 25.8% of the 120 games of the tournament. Basic MCTS won 51.7% of the 60 games it played during the tournament.
+Basic MCTS got a mean score of 51.98.
+Basic MCTS won 50.0% of the 24 games against Basic MCTS.
+Basic MCTS won 37.5% of the 24 games against Basic MCTS.
+Basic MCTS won 45.8% of the 24 games against Basic MCTS.
+Basic MCTS won 62.5% of the 24 games against RandomPlayer.
+Basic MCTS won 62.5% of the 24 games against RandomPlayer.
+
+RandomPlayer got 0.00 points. RandomPlayer won 0.0% of the 120 games of the tournament. RandomPlayer won 0.0% of the 60 games it played during the tournament.
+RandomPlayer got a mean score of 34.50.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against RandomPlayer.
+
+RandomPlayer got 1.00 points. RandomPlayer won 0.8% of the 120 games of the tournament. RandomPlayer won 1.7% of the 60 games it played during the tournament.
+RandomPlayer got a mean score of 35.12.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 4.2% of the 24 games against Basic MCTS.
+RandomPlayer won 4.2% of the 24 games against RandomPlayer.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+Basic MCTS: Win rate 0.53 +/- 0.063	Mean Ordinal 1.58 +/- 0.09
+Basic MCTS: Win rate 0.53 +/- 0.064	Mean Ordinal 1.53 +/- 0.08
+Basic MCTS: Win rate 0.53 +/- 0.064	Mean Ordinal 1.55 +/- 0.08
+Basic MCTS: Win rate 0.40 +/- 0.063	Mean Ordinal 1.83 +/- 0.10
+RandomPlayer: Win rate 0.02 +/- 0.017	Mean Ordinal 2.73 +/- 0.06
+RandomPlayer: Win rate 0.00 +/- 0.000	Mean Ordinal 2.73 +/- 0.06
+
+Alpha-rank by Win Rate
+	Basic MCTS                    	0.36
+	Basic MCTS                    	0.31
+	Basic MCTS                    	0.29
+	Basic MCTS                    	0.04
+	RandomPlayer                  	0.00
+	RandomPlayer                  	0.00
+
+Alpha-rank by Ordinal Position
+	Basic MCTS                    	0.60
+	Basic MCTS                    	0.23
+	Basic MCTS                    	0.17
+	Basic MCTS                    	0.01
+	RandomPlayer                  	0.00
+	RandomPlayer                  	0.00
+
+Game: SushiGo, Players: 3, Mode: EXHAUSTIVE, TotalGames: 120, GamesPerMatchup: 1
+Alpha calculations using Delta Ordinal
+Alpha: 10.0
+	0.351	OppAwareMCTS
+	0.243	OppAwareMCTS
+	0.135	Basic MCTS
+	0.271	Basic MCTS
+	0.000	RandomPlayer
+	0.000	RandomPlayer
+
+Transition matrix for alpha = 10.0
+0.204	0.025	0.058	0.712	0.000	0.000	
+0.822	0.102	0.067	0.008	0.000	0.000	
+0.563	0.245	0.161	0.030	0.000	0.000	
+0.015	0.649	0.282	0.053	0.000	0.000	
+0.638	0.121	0.121	0.121	0.000	0.000	
+0.051	0.270	0.409	0.270	0.000	0.000	
+B matrix for alpha = 10.0
+1.997	0.508	0.413	0.335	0.226	0.233	
+0.508	1.270	0.855	0.247	0.546	0.099	
+0.413	0.855	0.700	0.402	0.412	0.169	
+0.335	0.247	0.402	1.103	0.128	0.306	
+0.226	0.546	0.412	0.128	0.451	0.147	
+0.233	0.099	0.169	0.306	0.147	0.316	
+Alpha calculations using Win Rate
+Alpha: 10.0
+	0.210	OppAwareMCTS
+	0.238	OppAwareMCTS
+	0.369	Basic MCTS
+	0.181	Basic MCTS
+	0.000	RandomPlayer
+	0.000	RandomPlayer
+
+Transition matrix for alpha = 10.0
+0.138	0.060	0.318	0.482	0.000	0.001	
+0.450	0.196	0.297	0.056	0.001	0.000	
+0.182	0.277	0.420	0.120	0.000	0.001	
+0.035	0.422	0.422	0.121	0.000	0.000	
+0.211	0.092	0.485	0.211	0.000	0.000	
+0.056	0.450	0.297	0.196	0.000	0.000	
+B matrix for alpha = 10.0
+0.661	0.402	0.621	0.396	0.291	0.224	
+0.402	0.840	0.817	0.462	0.270	0.213	
+0.621	0.817	1.168	0.747	0.294	0.284	
+0.396	0.462	0.747	0.720	0.277	0.342	
+0.291	0.270	0.294	0.277	0.333	0.239	
+0.224	0.213	0.284	0.342	0.239	0.333	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for RandomPlayer
+		RandomPlayer
+		RandomPlayer
+	Cluster for RandomPlayer
+		RandomPlayer
+		RandomPlayer
+
+OppAwareMCTS got 28.00 points. OppAwareMCTS won 23.3% of the 120 games of the tournament. OppAwareMCTS won 46.7% of the 60 games it played during the tournament.
+OppAwareMCTS got a mean score of 50.70.
+OppAwareMCTS won 45.8% of the 24 games against OppAwareMCTS.
+OppAwareMCTS won 41.7% of the 24 games against Basic MCTS.
+OppAwareMCTS won 33.3% of the 24 games against Basic MCTS.
+OppAwareMCTS won 62.5% of the 24 games against RandomPlayer.
+OppAwareMCTS won 50.0% of the 24 games against RandomPlayer.
+
+OppAwareMCTS got 30.00 points. OppAwareMCTS won 25.0% of the 120 games of the tournament. OppAwareMCTS won 50.0% of the 60 games it played during the tournament.
+OppAwareMCTS got a mean score of 51.17.
+OppAwareMCTS won 37.5% of the 24 games against OppAwareMCTS.
+OppAwareMCTS won 37.5% of the 24 games against Basic MCTS.
+OppAwareMCTS won 50.0% of the 24 games against Basic MCTS.
+OppAwareMCTS won 54.2% of the 24 games against RandomPlayer.
+OppAwareMCTS won 70.8% of the 24 games against RandomPlayer.
+
+Basic MCTS got 33.00 points. Basic MCTS won 27.5% of the 120 games of the tournament. Basic MCTS won 55.0% of the 60 games it played during the tournament.
+Basic MCTS got a mean score of 51.57.
+Basic MCTS won 50.0% of the 24 games against OppAwareMCTS.
+Basic MCTS won 41.7% of the 24 games against OppAwareMCTS.
+Basic MCTS won 45.8% of the 24 games against Basic MCTS.
+Basic MCTS won 70.8% of the 24 games against RandomPlayer.
+Basic MCTS won 66.7% of the 24 games against RandomPlayer.
+
+Basic MCTS got 29.00 points. Basic MCTS won 24.2% of the 120 games of the tournament. Basic MCTS won 48.3% of the 60 games it played during the tournament.
+Basic MCTS got a mean score of 50.58.
+Basic MCTS won 45.8% of the 24 games against OppAwareMCTS.
+Basic MCTS won 37.5% of the 24 games against OppAwareMCTS.
+Basic MCTS won 33.3% of the 24 games against Basic MCTS.
+Basic MCTS won 62.5% of the 24 games against RandomPlayer.
+Basic MCTS won 62.5% of the 24 games against RandomPlayer.
+
+RandomPlayer got 0.00 points. RandomPlayer won 0.0% of the 120 games of the tournament. RandomPlayer won 0.0% of the 60 games it played during the tournament.
+RandomPlayer got a mean score of 34.67.
+RandomPlayer won 0.0% of the 24 games against OppAwareMCTS.
+RandomPlayer won 0.0% of the 24 games against OppAwareMCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against RandomPlayer.
+
+RandomPlayer got 0.00 points. RandomPlayer won 0.0% of the 120 games of the tournament. RandomPlayer won 0.0% of the 60 games it played during the tournament.
+RandomPlayer got a mean score of 34.07.
+RandomPlayer won 0.0% of the 24 games against OppAwareMCTS.
+RandomPlayer won 0.0% of the 24 games against OppAwareMCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against RandomPlayer.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+Basic MCTS: Win rate 0.55 +/- 0.064	Mean Ordinal 1.63 +/- 0.10
+OppAwareMCTS: Win rate 0.50 +/- 0.065	Mean Ordinal 1.63 +/- 0.09
+Basic MCTS: Win rate 0.48 +/- 0.065	Mean Ordinal 1.68 +/- 0.10
+OppAwareMCTS: Win rate 0.47 +/- 0.064	Mean Ordinal 1.62 +/- 0.08
+RandomPlayer: Win rate 0.00 +/- 0.000	Mean Ordinal 2.60 +/- 0.06
+RandomPlayer: Win rate 0.00 +/- 0.000	Mean Ordinal 2.82 +/- 0.05
+
+Alpha-rank by Win Rate
+	Basic MCTS                    	0.37
+	OppAwareMCTS                  	0.24
+	OppAwareMCTS                  	0.21
+	Basic MCTS                    	0.18
+	RandomPlayer                  	0.00
+	RandomPlayer                  	0.00
+
+Alpha-rank by Ordinal Position
+	OppAwareMCTS                  	0.35
+	Basic MCTS                    	0.27
+	OppAwareMCTS                  	0.24
+	Basic MCTS                    	0.14
+	RandomPlayer                  	0.00
+	RandomPlayer                  	0.00
+
+Game: SushiGo, Players: 3, Mode: EXHAUSTIVE, TotalGames: 120, GamesPerMatchup: 1
+Alpha calculations using Delta Ordinal
+Alpha: 10.0
+	0.294	OppAwareMCTS
+	0.151	OppAwareMCTS
+	0.305	Basic MCTS
+	0.250	Basic MCTS
+	0.000	RandomPlayer
+	0.000	RandomPlayer
+
+Transition matrix for alpha = 10.0
+0.325	0.040	0.493	0.141	0.000	0.000	
+0.463	0.058	0.463	0.017	0.000	0.000	
+0.161	0.030	0.245	0.563	0.000	0.000	
+0.318	0.483	0.060	0.138	0.000	0.000	
+0.014	0.004	0.874	0.109	0.000	0.000	
+0.445	0.055	0.445	0.055	0.000	0.000	
+B matrix for alpha = 10.0
+1.016	0.607	0.897	0.387	0.451	0.374	
+0.607	0.674	0.310	0.300	0.413	0.416	
+0.897	0.310	1.886	0.502	0.278	0.213	
+0.387	0.300	0.502	0.729	0.074	0.203	
+0.451	0.413	0.278	0.074	0.776	0.401	
+0.374	0.416	0.213	0.203	0.401	0.402	
+Alpha calculations using Win Rate
+Alpha: 10.0
+	0.219	OppAwareMCTS
+	0.073	OppAwareMCTS
+	0.504	Basic MCTS
+	0.203	Basic MCTS
+	0.000	RandomPlayer
+	0.001	RandomPlayer
+
+Transition matrix for alpha = 10.0
+0.222	0.042	0.512	0.222	0.001	0.000	
+0.272	0.051	0.625	0.051	0.001	0.000	
+0.223	0.042	0.512	0.223	0.000	0.001	
+0.188	0.188	0.434	0.188	0.000	0.001	
+0.063	0.027	0.765	0.144	0.000	0.000	
+0.260	0.172	0.395	0.172	0.001	0.001	
+B matrix for alpha = 10.0
+0.643	0.508	0.993	0.516	0.439	0.306	
+0.508	0.542	0.640	0.432	0.504	0.336	
+0.993	0.640	2.207	0.834	0.441	0.307	
+0.516	0.432	0.834	0.482	0.376	0.286	
+0.439	0.504	0.441	0.376	0.611	0.348	
+0.306	0.336	0.307	0.286	0.348	0.283	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for OppAwareMCTS
+		OppAwareMCTS
+		OppAwareMCTS
+		Basic MCTS
+		RandomPlayer
+	Cluster for OppAwareMCTS
+		OppAwareMCTS
+		OppAwareMCTS
+		Basic MCTS
+		RandomPlayer
+
+OppAwareMCTS got 30.00 points. OppAwareMCTS won 25.0% of the 120 games of the tournament. OppAwareMCTS won 50.0% of the 60 games it played during the tournament.
+OppAwareMCTS got a mean score of 52.00.
+OppAwareMCTS won 50.0% of the 24 games against OppAwareMCTS.
+OppAwareMCTS won 37.5% of the 24 games against Basic MCTS.
+OppAwareMCTS won 41.7% of the 24 games against Basic MCTS.
+OppAwareMCTS won 58.3% of the 24 games against RandomPlayer.
+OppAwareMCTS won 62.5% of the 24 games against RandomPlayer.
+
+OppAwareMCTS got 25.00 points. OppAwareMCTS won 20.8% of the 120 games of the tournament. OppAwareMCTS won 41.7% of the 60 games it played during the tournament.
+OppAwareMCTS got a mean score of 49.45.
+OppAwareMCTS won 33.3% of the 24 games against OppAwareMCTS.
+OppAwareMCTS won 29.2% of the 24 games against Basic MCTS.
+OppAwareMCTS won 41.7% of the 24 games against Basic MCTS.
+OppAwareMCTS won 45.8% of the 24 games against RandomPlayer.
+OppAwareMCTS won 58.3% of the 24 games against RandomPlayer.
+
+Basic MCTS got 35.00 points. Basic MCTS won 29.2% of the 120 games of the tournament. Basic MCTS won 58.3% of the 60 games it played during the tournament.
+Basic MCTS got a mean score of 51.62.
+Basic MCTS won 45.8% of the 24 games against OppAwareMCTS.
+Basic MCTS won 54.2% of the 24 games against OppAwareMCTS.
+Basic MCTS won 45.8% of the 24 games against Basic MCTS.
+Basic MCTS won 79.2% of the 24 games against RandomPlayer.
+Basic MCTS won 66.7% of the 24 games against RandomPlayer.
+
+Basic MCTS got 29.00 points. Basic MCTS won 24.2% of the 120 games of the tournament. Basic MCTS won 48.3% of the 60 games it played during the tournament.
+Basic MCTS got a mean score of 51.90.
+Basic MCTS won 41.7% of the 24 games against OppAwareMCTS.
+Basic MCTS won 41.7% of the 24 games against OppAwareMCTS.
+Basic MCTS won 37.5% of the 24 games against Basic MCTS.
+Basic MCTS won 62.5% of the 24 games against RandomPlayer.
+Basic MCTS won 58.3% of the 24 games against RandomPlayer.
+
+RandomPlayer got 1.00 points. RandomPlayer won 0.8% of the 120 games of the tournament. RandomPlayer won 1.7% of the 60 games it played during the tournament.
+RandomPlayer got a mean score of 33.82.
+RandomPlayer won 4.2% of the 24 games against OppAwareMCTS.
+RandomPlayer won 0.0% of the 24 games against OppAwareMCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 4.2% of the 24 games against RandomPlayer.
+
+RandomPlayer got 0.00 points. RandomPlayer won 0.0% of the 120 games of the tournament. RandomPlayer won 0.0% of the 60 games it played during the tournament.
+RandomPlayer got a mean score of 34.83.
+RandomPlayer won 0.0% of the 24 games against OppAwareMCTS.
+RandomPlayer won 0.0% of the 24 games against OppAwareMCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against Basic MCTS.
+RandomPlayer won 0.0% of the 24 games against RandomPlayer.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+Basic MCTS: Win rate 0.58 +/- 0.064	Mean Ordinal 1.57 +/- 0.10
+OppAwareMCTS: Win rate 0.50 +/- 0.065	Mean Ordinal 1.62 +/- 0.09
+Basic MCTS: Win rate 0.48 +/- 0.065	Mean Ordinal 1.67 +/- 0.09
+OppAwareMCTS: Win rate 0.42 +/- 0.064	Mean Ordinal 1.73 +/- 0.09
+RandomPlayer: Win rate 0.02 +/- 0.017	Mean Ordinal 2.72 +/- 0.06
+RandomPlayer: Win rate 0.00 +/- 0.000	Mean Ordinal 2.68 +/- 0.06
+
+Alpha-rank by Win Rate
+	Basic MCTS                    	0.50
+	OppAwareMCTS                  	0.22
+	Basic MCTS                    	0.20
+	OppAwareMCTS                  	0.07
+	RandomPlayer                  	0.00
+	RandomPlayer                  	0.00
+
+Alpha-rank by Ordinal Position
+	Basic MCTS                    	0.30
+	OppAwareMCTS                  	0.29
+	Basic MCTS                    	0.25
+	OppAwareMCTS                  	0.15
+	RandomPlayer                  	0.00
+	RandomPlayer                  	0.00
+

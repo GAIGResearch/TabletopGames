@@ -1,13 +1,17 @@
 package players.groupB;
 
 import core.AbstractGameState;
-import games.sushigo.SGGameState;
-import games.sushigo.cards.SGCard;
-import java.util.List;
 
 /**
  * OpponentAwareHeuristic
- * Evaluates SushiGo! states using self-value + predicted opponent threats.
+ * ----------------------
+ * Evaluates the quality of a game state for the active player.
+ * Combines:
+ *   (1) Self utility (e.g., your Sushi Go! score)
+ *   (2) A penalty for strong / aggressive opponents.
+ *
+ * This allows the agent to avoid greedy drafting when it predicts
+ * that other players will heavily compete for the same cards.
  */
 public class OpponentAwareHeuristic {
 
@@ -18,25 +22,37 @@ public class OpponentAwareHeuristic {
     }
 
     /**
-     * Evaluates how good the state is for a given player.
-     * Combines self score + opponent threat estimation.
+     * Evaluate a given AbstractGameState from the perspective of playerId.
+     * @param gameState The current state of the game
+     * @param playerId  The ID of the evaluating player
+     * @return A numeric score: higher = better for playerId
      */
     public double evaluate(AbstractGameState gameState, int playerId) {
-        if (!(gameState instanceof SGGameState)) return 0.0;
-        SGGameState sgs = (SGGameState) gameState;
-
-        // Self value (simplified): current score
-        double selfScore = sgs.getGameScore(playerId);
-
-        // Opponent threat: sum of their strongest move probabilities
-        double threatScore = 0.0;
-        for (int opp = 0; opp < sgs.getNPlayers(); opp++) {
-            if (opp == playerId) continue;
-            // Example: estimate if opponent tends to grab high-value cards (e.g., Sashimi)
-            threatScore += opponentModel.getAggressivenessScore(opp) * 0.1;
+        // Step 1: Estimate player's own score (self utility)
+        double selfUtility;
+        try {
+            selfUtility = gameState.getGameScore(playerId);
+        } catch (Exception e) {
+            // Some games may not expose getGameScore early; fail-safe to 0
+            selfUtility = 0.0;
         }
 
-        // Combine both
-        return selfScore - threatScore; // lower if opponents are “dangerous”
+        // Step 2: Estimate how aggressive opponents appear overall
+        double totalAggressiveness = 0.0;
+        int opponentCount = Math.max(1, gameState.getNPlayers() - 1);
+
+        for (int opp = 0; opp < gameState.getNPlayers(); opp++) {
+            if (opp == playerId) continue;
+            totalAggressiveness += opponentModel.getAggressivenessScore(opp);
+        }
+
+        double avgAggressiveness = totalAggressiveness / opponentCount;
+
+        // Step 3: Combine both components
+        // The lambda weight (0.1) controls how much the penalty matters
+        double lambda = 0.1;
+        double heuristicValue = selfUtility - lambda * avgAggressiveness;
+
+        return heuristicValue;
     }
 }
