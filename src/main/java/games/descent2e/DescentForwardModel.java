@@ -110,7 +110,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
         // Only disable if we want random figure placements
         // i.e. we want to disable players choosing starting locations
-        // dgs.endSetup();
+        dgs.endSetup();
 
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
 
@@ -199,8 +199,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 // This starting position no longer an option (one hero per space)
                 heroStartingPositions.remove(position);
             }
-
-            figure.setOffMap(true);
+            else figure.setOffMap(true);
 
             // Inform game of this hero figure
             dgs.heroes.add(figure);
@@ -2388,9 +2387,10 @@ public class DescentForwardModel extends StandardForwardModel {
                         dgs.webMonstersIDs.add(monster.getComponentID());
                     }
 
-                    monster.setOffMap(true);
-
-                    if (dgs.inSetup()) break;
+                    if (dgs.inSetup()) {
+                        monster.setOffMap(true);
+                        break;
+                    }
                     monster.setPosition(option.copy());
                     PropertyInt prop = new PropertyInt("players", monster.getComponentID());
                     for (int i = 0; i < h; i++) {
