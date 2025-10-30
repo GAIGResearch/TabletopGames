@@ -263,6 +263,16 @@ public class DescentGameData extends AbstractGameData {
                 }
 
                 // Find special rules
+                ArrayList<String[]> qRules = new ArrayList<>();
+
+                JSONArray rules = (JSONArray) obj.get("rules");
+                if (rules != null) {
+                    for (Object o1 : rules) {
+                        JSONArray rDef = (JSONArray) o1;
+                        qRules.add((String[]) rDef.toArray(new String[0]));
+                    }
+                    q.setRules(qRules);
+                }
 
                 // Find game over conditions
                 JSONArray gos = (JSONArray) obj.get("game-over");

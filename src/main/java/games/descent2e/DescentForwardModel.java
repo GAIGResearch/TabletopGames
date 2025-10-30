@@ -721,42 +721,92 @@ public class DescentForwardModel extends StandardForwardModel {
     }
 
     private void overlordCheckFatigue(DescentGameState dgs, boolean startOfTurn) {
+        // Don't apply during Setup Mode
+        if (dgs.inSetup()) return;
+
         int changeFatigueBy = 0;
 
-        String questName = dgs.getCurrentQuest().getName();
+        List<String[]> rules = dgs.getCurrentQuest().getRules();
+        for (String[] rule : rules) {
+            // Ignore any rule that doesn't refer to Fatigue
+            if (!rule[2].contains("Fatigue")) continue;
 
-        switch (questName) {
-            case "Acolyte of Saradyn":
-                changeFatigueBy = fatigueCheckForAcolyteOfSaradyn(dgs);
-                break;
+            // Only make sure we're properly looking at Start/End Turns when appropriate
+            if (startOfTurn) {
+                if (rule[1].toUpperCase().contains("END")) continue;
+            } else {
+                if (rule[1].toUpperCase().contains("START")) continue;
+            }
 
-            case "Rellegar's Rest":
-                // Encounter 1
-                // We only check at the start of the Overlord's turns here
-                if (startOfTurn)
-                    changeFatigueBy = 1;
-                break;
+            // Check for any if clauses for changing Fatigue
+            if (rule[2].contains(";")) {
+                if (rule[2].contains("if(")) {
+                    String[] conditions = rule[2].split("\\(");
+                    switch (conditions[1]) {
 
-            case "Rellegar's Rest E2":
-                // Encounter 2
-                break;
+                        // Will insert more as they come about
+                        case "count" -> {
+                            int change = Integer.parseInt(rule[2].split(":")[2]);
+                            String figure = conditions[2].split(",")[0];
+                            String tile = conditions[2].split(",")[1].split("\\)")[0];
+                            String count = conditions[2].split(",")[1].split("\\)")[1];
 
-            case "Siege of Skytower":
-                // We decrease the Heroes' Side Fatigue at the end of the Overlord's turn
-                // But the Overlord's Fatigue increases for every monster that makes it to the Exit
-                if (!startOfTurn)
-                    heroesSideDecreaseFatigue(dgs, 1);
-                break;
+                            int amount = 0;
+                            List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
+                            List<List<Monster>> monsters = dgs.getMonsters();
+                            for (List<Monster> mList : monsters) {
+                                for (Monster m : mList) {
+                                    if (!m.getName().contains(figure)) break;
+                                    Vector2D position = m.getPosition();
+                                    if (tileCoords.contains(position)) {
+                                        amount++;
+                                    }
+                                }
+                            }
 
-            default:
-                break;
-        }
+                            switch (count.charAt(0)) {
+                                case '>' -> {
+                                    if (count.charAt(1) == '=') {
+                                        if (amount >= Integer.parseInt(count.substring(2)))
+                                            changeFatigueBy = change;
+                                    }
+                                    else if (amount > Integer.parseInt(count.substring(1)))
+                                        changeFatigueBy = change;
+                                }
+                                case '<' -> {
+                                    if (count.charAt(1) == '=') {
+                                        if (amount <= Integer.parseInt(count.substring(2)))
+                                            changeFatigueBy = change;
+                                    }
+                                    else if (amount < Integer.parseInt(count.substring(1)))
+                                        changeFatigueBy = change;
+                                }
+                                case '=' -> {
+                                    if (amount == Integer.parseInt(count.substring(1)))
+                                        changeFatigueBy = change;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+                changeFatigueBy = Integer.parseInt(rule[2].split(":")[2]);
 
-        // We only need to change the Overlord's Fatigue if we have met the conditions to increase or decrease
-        if (changeFatigueBy > 0) {
-            overlordIncreaseFatigue(dgs, changeFatigueBy);
-        } else if (changeFatigueBy < 0) {
-            overlordDecreaseFatigue(dgs, Math.abs(changeFatigueBy));
+            // We only need to change the Overlord's Fatigue if we have met the conditions to increase or decrease
+            if (rule[0].contains("overlord")) {
+                if (changeFatigueBy > 0) {
+                    overlordIncreaseFatigue(dgs, changeFatigueBy);
+                } else if (changeFatigueBy < 0) {
+                    overlordDecreaseFatigue(dgs, Math.abs(changeFatigueBy));
+                }
+            } else if (rule[0].contains("hero")) {
+                if (changeFatigueBy > 0) {
+                    heroesSideIncreaseFatigue(dgs, changeFatigueBy);
+                } else {
+                    heroesSideDecreaseFatigue(dgs, changeFatigueBy);
+                }
+            }
         }
     }
 
