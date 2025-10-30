@@ -732,9 +732,9 @@ public class DescentForwardModel extends StandardForwardModel {
 
             // Only make sure we're properly looking at Start/End Turns when appropriate
             if (startOfTurn) {
-                if (rule[1].toUpperCase().contains("END")) continue;
+                if (!rule[1].toUpperCase().contains("START")) continue;
             } else {
-                if (rule[1].toUpperCase().contains("START")) continue;
+                if (!rule[1].toUpperCase().contains("END")) continue;
             }
 
             // Check for any if clauses for changing Fatigue
@@ -793,13 +793,13 @@ public class DescentForwardModel extends StandardForwardModel {
                 changeFatigueBy = Integer.parseInt(rule[2].split(":")[2]);
 
             // We only need to change the Overlord's Fatigue if we have met the conditions to increase or decrease
-            if (rule[0].contains("overlord")) {
+            if (rule[0].toLowerCase().contains("overlord")) {
                 if (changeFatigueBy > 0) {
                     overlordIncreaseFatigue(dgs, changeFatigueBy);
                 } else if (changeFatigueBy < 0) {
                     overlordDecreaseFatigue(dgs, Math.abs(changeFatigueBy));
                 }
-            } else if (rule[0].contains("hero")) {
+            } else if (rule[0].toLowerCase().contains("hero")) {
                 if (changeFatigueBy > 0) {
                     heroesSideIncreaseFatigue(dgs, changeFatigueBy);
                 } else {
@@ -827,39 +827,6 @@ public class DescentForwardModel extends StandardForwardModel {
     private void heroesSideDecreaseFatigue(DescentGameState dgs, int decreaseFatigueBy) {
         dgs.heroesSide.decrementAttribute(Figure.Attribute.Fatigue, decreaseFatigueBy);
 //        System.out.println("Heroes' Side Fatigue decreased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
-    }
-
-    // TODO This is just the check for the first quest
-    // I'm putting it here for now, but once more quests are implemented we should put it into its own contained class
-    // To avoid cluttering this class
-    private int fatigueCheckForAcolyteOfSaradyn(DescentGameState dgs) {
-        boolean changeFatigue = false;
-        int changeFatigueBy = 0;
-
-        // Check for within board piece 9A's range
-        String tile = "9A";
-        List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
-
-        List<List<Monster>> monsters = dgs.getMonsters();
-        for (List<Monster> mList : monsters) {
-
-            if (changeFatigue) {
-                break;
-            }
-
-            for (Monster m : mList) {
-                if (m.getName().contains("Goblin Archer")) {
-                    Vector2D position = m.getPosition();
-                    if (tileCoords.contains(position)) {
-                        changeFatigue = true;
-                        changeFatigueBy = 1;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return changeFatigueBy;
     }
 
     @Override
