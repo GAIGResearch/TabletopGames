@@ -482,6 +482,7 @@ public class DescentForwardModel extends StandardForwardModel {
             // we have reached the overlord player
             endPlayerTurn(dgs, 0);  // we just move on to the next player
             overlordCheckFatigue(dgs, true);
+            checkReinforcements(dgs, true);
             // reset all monsters for acting
             dgs.monsterActingNext = -1;
             dgs.monsterGroupActingNext = 0;
@@ -528,7 +529,7 @@ public class DescentForwardModel extends StandardForwardModel {
             // Overlord has no more monsters to activate
             endPlayerTurn(dgs);
             overlordCheckFatigue(dgs, false);
-            checkReinforcements(dgs);
+            checkReinforcements(dgs, false);
 
             // Reset figures for the next round
             for (Figure f : dgs.getHeroes()) {
@@ -557,42 +558,38 @@ public class DescentForwardModel extends StandardForwardModel {
     }
 
 
-    private void checkReinforcements(DescentGameState dgs) {
-        // TODO
+    private void checkReinforcements(DescentGameState dgs, boolean startOfTurn) {
 
-        String questName = dgs.getCurrentQuest().getName();
-        String monsterName = "";
-        List<String> monsters = dgs.getMonsterGroups();
-        List<Integer> maxMonsters = dgs.getMonstersPerGroup();
-        int i = 0;
+        for (String[] rule : dgs.getCurrentQuest().getRules()) {
+            if (!rule[0].toLowerCase().contains("reinforcements")) continue;
+            if (startOfTurn) {
+                if (!rule[1].toUpperCase().contains("START")) continue;
+            } else {
+                if (!rule[1].toUpperCase().contains("END")) continue;
+            }
 
-        boolean canSpawn = false;
-        int noToSpawn = 0;
+            String[] split = rule[2].split(":");
+            String monsterName = split[1];
+            String tile = split[3];
 
-        // Check for within board piece 9A's range
-        String tile = "";
-
-        switch (questName) {
-            case "Acolyte of Saradyn":
-                monsterName = "Goblin Archer";
-                i = getMonsterGroupIndex(monsters, monsterName);
-                if (i >= 0) {
-                    if (dgs.getMonsters().get(i).size() < maxMonsters.get(i)) {
-                        canSpawn = true;
-                        tile = "4A";
-                        noToSpawn = Math.min(maxMonsters.get(i) - dgs.getMonsters().get(i).size(), 2);
-                    }
+            List<String> monsters = dgs.getMonsterGroups();
+            List<Integer> maxMonsters = dgs.getMonstersPerGroup();
+            int i = getMonsterGroupIndex(monsters, monsterName);
+            boolean canSpawn = false;
+            int noToSpawn = 0;
+            if (i >= 0) {
+                List<Monster> mon = dgs.getMonsters().get(i);
+                if (mon.size() < maxMonsters.get(i)) {
+                    canSpawn = true;
+                    noToSpawn = Math.min(maxMonsters.get(i) - mon.size(), Integer.parseInt(split[2]));
                 }
-                break;
+            }
 
-            default:
-                break;
-        }
-
-        if (canSpawn) {
-            //System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
-            List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
-            spawnReinforcements(dgs, i, noToSpawn, tileCoords);
+            if (canSpawn) {
+                //System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
+                List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
+                spawnReinforcements(dgs, i, noToSpawn, tileCoords);
+            }
         }
     }
 
