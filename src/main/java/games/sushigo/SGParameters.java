@@ -32,7 +32,8 @@ public class SGParameters extends AbstractParameters {
     public int valueMakiSecond = 3;
     public int valueTempuraPair = 5;
     public int valueSashimiTriple = 10;
-    public int[] valueDumpling = new int[] {1, 3, 6, 10, 15};
+    // dumpling values are incremental, e.g. 1 dumpling = 1 point, 2 = 3 points, 3 = 6 points, etc.
+    public int[] valueDumpling = new int[] {1, 2, 3, 4, 5};
     public int valueSquidNigiri = 3;
     public int valueSalmonNigiri = 2;
     public int valueEggNigiri = 1;
