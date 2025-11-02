@@ -14,8 +14,8 @@ public class SGParameters extends AbstractParameters {
     public int nRounds = 3;
 
     public HashMap<Pair<SGCard.SGCardType, Integer>, Integer> nCardsPerType = new HashMap<Pair<SGCard.SGCardType, Integer>, Integer>() {{
-        put(new Pair<>(SGCard.SGCardType.Maki, 3), 12);
-        put(new Pair<>(SGCard.SGCardType.Maki, 2), 8);
+        put(new Pair<>(SGCard.SGCardType.Maki, 3), 8);
+        put(new Pair<>(SGCard.SGCardType.Maki, 2), 12);
         put(new Pair<>(SGCard.SGCardType.Maki, 1), 6);
         put(new Pair<>(SGCard.SGCardType.Chopsticks, 1), 4);
         put(new Pair<>(SGCard.SGCardType.Tempura, 1), 14);
