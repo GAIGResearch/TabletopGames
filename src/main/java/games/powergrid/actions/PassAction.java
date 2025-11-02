@@ -40,7 +40,7 @@ public class PassAction extends AbstractAction {
 
     @Override
     public int hashCode() { 
-        return 0xA55A1;  // any small constant; valid hex
+        return 0xA55A1; 
     }
 
     @Override

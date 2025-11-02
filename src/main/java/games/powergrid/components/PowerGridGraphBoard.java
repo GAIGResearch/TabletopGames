@@ -574,5 +574,35 @@ public final class PowerGridGraphBoard extends Component {
     public List<double[]> getAdjacencyVector() {
     	return this.AdjacencyVector;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PowerGridGraphBoard g)) return false;
+
+        // Quick check: same number of cities
+        if (citiesById.size() != g.citiesById.size()) return false;
+
+        // Compare regions per city ID
+        for (var entry : citiesById.entrySet()) {
+            PowerGridCity c1 = entry.getValue();
+            PowerGridCity c2 = g.citiesById.get(entry.getKey());
+            if (c2 == null || c1.getRegion() != c2.getRegion()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        for (var e : citiesById.entrySet()) {
+            h = 31 * h + Integer.hashCode(e.getKey());
+            h = 31 * h + Integer.hashCode(e.getValue().getRegion());
+        }
+        return h;
+    }
+
 
 }

@@ -854,14 +854,12 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
         //players.add(new RandomPlayer());
-        //players.add(new BasicMCTSPlayer());
-        //players.add(new OSLAPlayer());
+        //players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
+        //players.add(new RandomPlayer());
+        players.add(new BasicMCTSPlayer());
+        players.add(new OSLAPlayer());
         //players.add(new RMHCPlayer());
 
         //RMHCParams params = new RMHCParams();
@@ -883,13 +881,13 @@ public class Game {
         String gameParams = null;
 
         /* Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+        //runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
         List<GameType> games = java.util.Collections.singletonList(GameType.PowerGrid);
        //games.add(Connect4);
         long seedForBatch = 100L;
-        int gamesToRun    = 100;
+        int gamesToRun    = 1000;
      // earlier in main:
         //boolean useGUI = Utils.getArg(args, "gui", true);
         //int turnPause  = Utils.getArg(args, "turnPause", 100);
@@ -900,7 +898,7 @@ public class Game {
           //runMany(List<GameType> games, List<AbstractPlayer> players, long seed, int nGames,
 //                   boolean verbose, boolean stopOnError, ActionController ac, int turnPause)
 
-        //Game.runMany(games, players, seedForBatch, gamesToRun, false, false, useGUI ? ac : null, turnPause);
+        Game.runMany(games, players, seedForBatch, gamesToRun, false, true, null, 0);
 
 
     }

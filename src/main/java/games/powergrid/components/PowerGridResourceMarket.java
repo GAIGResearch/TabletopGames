@@ -180,5 +180,23 @@ public class PowerGridResourceMarket extends Component {
         return out;
     }
     
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PowerGridResourceMarket m)) return false;
+        return this.avail.equals(m.avail) && this.discard.equals(m.discard);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = 1;
+        for (PowerGridParameters.Resource r : PowerGridParameters.Resource.values()) {
+            h = 31 * h + Integer.hashCode(avail.getOrDefault(r, 0));
+            h = 31 * h + Integer.hashCode(discard.getOrDefault(r, 0));
+        }
+        return h;
+    }
+
+    
 
 }

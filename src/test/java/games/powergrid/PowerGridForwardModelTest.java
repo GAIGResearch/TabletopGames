@@ -24,7 +24,7 @@ public class PowerGridForwardModelTest {
         @Test
         public void testForwardModelConsistency() {
             // Adjust game name, players, seed, etc. to your setup
-        	ForwardModelTester fmt = new ForwardModelTester("game=PowerGrid","nGames=1", "nPlayers=2");
+        	ForwardModelTester fmt = new ForwardModelTester("game=PowerGrid","nGames=1", "nPlayers=3");
         }
             // If the tester throws no AssertionError, the test passes.
         

@@ -45,22 +45,42 @@ public class PowerGridCard extends Card {
      * it is immutable 
      */
     public static final class PlantInput {
-        private final EnumMap<Resource, Integer> req; //how many resources are required
+        private final EnumMap<Resource, Integer> req;
 
-        public PlantInput(Map<Resource, Integer> req) { 
-            this.req = new EnumMap<>(Resource.class); //instantiates the Enum map based on teResource Type class
+        public PlantInput(Map<Resource, Integer> req) {
+            this.req = new EnumMap<>(Resource.class);
             this.req.putAll(req);
         }
 
-        public int totalUnits() { return req.values().stream().mapToInt(Integer::intValue).sum(); } //sets the number of units that can be on a card 
+        public int totalUnits() { return req.values().stream().mapToInt(Integer::intValue).sum(); }
         public int get(Resource t) { return req.getOrDefault(t, 0); }
         public EnumMap<Resource,Integer> asMap() { return new EnumMap<>(req); }
         public boolean hasMultipleTypes() { return req.size() > 1; }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof PlantInput)) return false;
+            PlantInput that = (PlantInput) o;
+            // EnumMap equality is content-based and order-insensitive for keys
+            return Objects.equals(this.req, that.req);
+        }
+
+        @Override
+        public int hashCode() {
+            // Fold in a stable order (EnumMap already iterates by enum order)
+            int h = 1;
+            for (Resource r : Resource.values()) {
+                Integer v = req.get(r);
+                h = 31 * h + (v == null ? 0 : v.hashCode());
+            }
+            return h;
+        }
 
         @Override
         public String toString() { return req.toString(); }
     }
+
 
     public final Type type;
     public final int number;
@@ -102,14 +122,21 @@ public class PowerGridCard extends Card {
         if (this == o) return true;
         if (!(o instanceof PowerGridCard)) return false;
         PowerGridCard that = (PowerGridCard) o;
-        return number == that.number && capacity == that.capacity
-                && type == that.type && input.asMap().equals(that.input.asMap());
+        return number == that.number
+            && capacity == that.capacity
+            && type == that.type
+            && Objects.equals(input, that.input);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, number, capacity, input.asMap());
+        int r = type.hashCode();
+        r = 31 * r + Integer.hashCode(number);
+        r = 31 * r + Integer.hashCode(capacity);
+        r = 31 * r + (input == null ? 0 : input.hashCode());
+        return r;
     }
+
 
     @Override
     public String toString() {

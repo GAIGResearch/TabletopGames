@@ -177,12 +177,12 @@ public class AuctionPowerPlant extends AbstractAction implements IExtendedSequen
 	        if (this == obj) return true;
 	        if (!(obj instanceof AuctionPowerPlant)) return false;
 	        AuctionPowerPlant other = (AuctionPowerPlant) obj;
-	        return this.plantNumber == other.plantNumber; // <— ignore opener
+	        return this.plantNumber == other.plantNumber; 
 	    }
 
 	    @Override
 	    public int hashCode() {
-	        return Objects.hash(plantNumber); // <— ignore opener
+	        return Objects.hash(plantNumber);
 	    }
 
 	    public int getPlantNumber() { return plantNumber; }

@@ -361,7 +361,9 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             gs.setPlayerResult(LOSE_GAME, i);
         }
         gs.setPlayerResult(WIN_GAME, winner);
+        //System.out.println("WINNER: Player " + winner);
 		state.setGameStatus(CoreConstants.GameResult.GAME_END);
+		
     }
 
 	

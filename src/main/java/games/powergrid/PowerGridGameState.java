@@ -243,6 +243,9 @@ public class PowerGridGameState extends AbstractGameState {
 	    if (this == o) return true;
 	    if (!(o instanceof PowerGridGameState other)) return false;
 
+	    // Phase (enum compare is fine)
+	    if (this.gamePhase != other.gamePhase) return false;
+
 	    // Components / markets
 	    if (!Objects.equals(gameMap, other.gameMap)) return false;
 	    if (!Objects.equals(resourceMarket, other.resourceMarket)) return false;
@@ -251,11 +254,13 @@ public class PowerGridGameState extends AbstractGameState {
 	    if (!Objects.equals(currentMarket, other.currentMarket)) return false;
 	    if (!Objects.equals(futureMarket, other.futureMarket)) return false;
 
-	    // Orders & sets
+	    // Orders, sets, and lists
 	    if (!Objects.equals(turnOrder, other.turnOrder)) return false;
 	    if (!Objects.equals(roundOrder, other.roundOrder)) return false;
 	    if (!Objects.equals(bidOrder, other.bidOrder)) return false;
 	    if (!Objects.equals(plantsRan, other.plantsRan)) return false;
+	    if (!Objects.equals(RewardGiven, other.RewardGiven)) return false;
+	    if (!Objects.equals(income, other.income)) return false;
 
 	    // Scalars
 	    if (turnOrderIndex != other.turnOrderIndex) return false;
@@ -269,9 +274,10 @@ public class PowerGridGameState extends AbstractGameState {
 	    if (!Arrays.equals(playerMoney, other.playerMoney)) return false;
 	    if (!Arrays.equals(poweredCities, other.poweredCities)) return false;
 	    if (!Arrays.equals(cityCountByPlayer, other.cityCountByPlayer)) return false;
+	    if (!Arrays.equals(oneHotRegion, other.oneHotRegion)) return false;
 	    if (!Arrays.deepEquals(citySlotsById, other.citySlotsById)) return false;
 
-	    // Arrays of maps / decks
+	    // Arrays of maps / decks (1-D; Arrays.equals calls element .equals)
 	    if (!Arrays.equals(fuelByPlayer, other.fuelByPlayer)) return false;
 	    if (!Arrays.equals(ownedPlantsByPlayer, other.ownedPlantsByPlayer)) return false;
 
@@ -282,6 +288,7 @@ public class PowerGridGameState extends AbstractGameState {
 
 	    return true;
 	}
+
 
 	
 	@SuppressWarnings("unchecked")
@@ -330,6 +337,10 @@ public class PowerGridGameState extends AbstractGameState {
 	  public Integer getIncome(int playerId) {
 			return income.get(playerId);
 		}
+	  
+	  public List<Integer> getIncome(){
+		  return income; 
+	  }
 
 
 		public void setIncome(List<Integer> income) {
@@ -785,6 +796,14 @@ public class PowerGridGameState extends AbstractGameState {
     	return capacity; 
     }
     
+    public int [] getPlayerCapacity() {
+    	int[] playersCapacity = new int[this.getNPlayers()];
+    	for(int i = 0; i < this.getNPlayers(); i++) {
+    		playersCapacity[i] = getPlayerCapacity(i);
+    	}
+    	return playersCapacity;
+    }
+    
     public int totalMoney() {
     	return Arrays.stream(playerMoney).sum();  	
     }
@@ -808,15 +827,12 @@ public class PowerGridGameState extends AbstractGameState {
 
         final double wCities = 0.8;
         final double wIncome = 1.2;
-        System.out.println("Current playerId: " + playerId);
  
-        
-
-
+       
         if(this.getGameStatus() == CoreConstants.GameResult.GAME_END) {
         	
         	//TODO bug where the last player to go triggers the win so have to hardcode that we are only checking player 0 which has to be the python agent as the winer 
-        	if (this.getWinners().contains(0)) {
+        	if (this.getWinners().contains(playerId)) {
         	    return 4;
         	} else {
         	    return -2;
@@ -854,11 +870,52 @@ public class PowerGridGameState extends AbstractGameState {
     }
 
 
-    @Override public int hashCode() { return 0; }
+    @Override
+    public int hashCode() {
+        int result = 1;
+
+        // Components / markets
+        result = 31 * result + Objects.hashCode(gameMap);
+        result = 31 * result + Objects.hashCode(resourceMarket);
+        result = 31 * result + Objects.hashCode(resourceDiscardPile);
+        result = 31 * result + Objects.hashCode(drawPile);
+        result = 31 * result + Objects.hashCode(currentMarket);
+        result = 31 * result + Objects.hashCode(futureMarket);
+
+        // Orders & sets
+        result = 31 * result + Objects.hashCode(turnOrder);
+        result = 31 * result + Objects.hashCode(roundOrder);
+        result = 31 * result + Objects.hashCode(bidOrder);
+        result = 31 * result + Objects.hashCode(plantsRan);
+
+        // Scalars
+        result = 31 * result + Integer.hashCode(turnOrderIndex);
+        result = 31 * result + Integer.hashCode(discountCard);
+        result = 31 * result + Integer.hashCode(step);
+        result = 31 * result + Integer.hashCode(auctionPlantNumber);
+        result = 31 * result + Integer.hashCode(currentBid);
+        result = 31 * result + Integer.hashCode(currentBidder);
+
+        // Arrays
+        result = 31 * result + Arrays.hashCode(playerMoney);
+        result = 31 * result + Arrays.hashCode(poweredCities);
+        result = 31 * result + Arrays.hashCode(cityCountByPlayer);
+        result = 31 * result + Arrays.deepHashCode(citySlotsById);
+
+        // Arrays of maps / decks
+        result = 31 * result + Arrays.hashCode(fuelByPlayer);
+        result = 31 * result + Arrays.hashCode(ownedPlantsByPlayer);
+
+        // Regions / city sets
+        result = 31 * result + Objects.hashCode(activeRegions);
+        result = 31 * result + Objects.hashCode(validCities);
+        result = 31 * result + Objects.hashCode(invalidCities);
+
+        return result;
+    }
+
 
 }
-
-
 
 
 
