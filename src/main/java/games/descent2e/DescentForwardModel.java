@@ -370,7 +370,6 @@ public class DescentForwardModel extends StandardForwardModel {
             }
 
             if (dgs.inSetup()) return;
-
             startOfNewTurn(dgs);
         }
     }
@@ -526,10 +525,24 @@ public class DescentForwardModel extends StandardForwardModel {
         // We check to see if we need to end the overlord turn (and hence also the round)
         int nextMonster = dgs.nextMonster();
         if (nextMonster == -1) {
+            // Check if we need to respawn any reinforcements
+            checkReinforcements(dgs, false);
+            if (!dgs.getReinforcements().isEmpty()) {
+                dgs.startReinforcements();
+                Monster next = dgs.getReinforcements().get(0);
+                List<List<Monster>> mons = dgs.getMonsters();
+                for (List<Monster> monsters : mons) {
+                    if (monsters.contains(next)) {
+                        dgs.monsterGroupActingNext = mons.indexOf(monsters);
+                        dgs.monsterActingNext = monsters.indexOf(next);
+                        return;
+                    }
+                }
+            }
+
             // Overlord has no more monsters to activate
             endPlayerTurn(dgs);
             overlordCheckFatigue(dgs, false);
-            checkReinforcements(dgs, false);
 
             // Reset figures for the next round
             for (Figure f : dgs.getHeroes()) {
@@ -540,6 +553,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     m.resetRound();
                 }
             }
+            dgs.endReinforcing();
             dgs.overlord.resetRound();
             dgs.monsterGroupActingNext = 0;
             dgs.monsterActingNext = 0;
@@ -559,6 +573,9 @@ public class DescentForwardModel extends StandardForwardModel {
 
 
     private void checkReinforcements(DescentGameState dgs, boolean startOfTurn) {
+
+        // Don't apply additional reinforcements if we've already done it this turn
+        if (dgs.canReinforce()) return;
 
         for (String[] rule : dgs.getCurrentQuest().getRules()) {
             if (!rule[0].toLowerCase().contains("reinforcements")) continue;
@@ -587,8 +604,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
             if (canSpawn) {
                 //System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
-                List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
-                spawnReinforcements(dgs, i, noToSpawn, tileCoords);
+                spawnReinforcements(dgs, i, noToSpawn, tile);
             }
         }
     }
@@ -604,7 +620,7 @@ public class DescentForwardModel extends StandardForwardModel {
         return -1;
     }
 
-    private void spawnReinforcements(DescentGameState dgs, int index, int noToSpawn, List<Vector2D> tileCoords) {
+    private void spawnReinforcements(DescentGameState dgs, int index, int noToSpawn, String tile) {
         boolean masterExists = false;     // Checks if a Master monster originally spawned
         boolean canSpawnMaster = true;    // Checks if the Master monster is dead
         boolean minionExists = false;     // Checks if a Minion monster originally spawned
@@ -612,8 +628,6 @@ public class DescentForwardModel extends StandardForwardModel {
         // Assuming spawning a Master takes priority over spawning a Minion
         // We assume that we can always spawn a Minion
         // As we will just return if we do not have enough monsters to spawn otherwise
-
-        Random rnd = dgs.getRnd();
         List<Monster> monstersOriginal = dgs.getOriginalMonsters().get(index);
         List<Monster> monsters = dgs.getMonsters().get(index);
         for (Monster monster : monstersOriginal) {
@@ -658,61 +672,22 @@ public class DescentForwardModel extends StandardForwardModel {
 
             Monster monster = originalMonster.copyNewID();
 
-
-            // TODO: copied straight from DescentForwardModel's spawning
             String size = ((PropertyString) monster.getProperty(sizeHash)).value;
             int w = Integer.parseInt(size.split("x")[0]);
             int h = Integer.parseInt(size.split("x")[1]);
             monster.setSize(w, h);
+            monster.setPosition(null);
 
-            while (!tileCoords.isEmpty()) {
-                Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
-                tileCoords.remove(option);
-                BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
-                if (position.getComponentName().equals("plain") &&
-                        ((PropertyInt) position.getProperty(playersHash)).value == -1) {
-                    //if (position.getComponentName().equals("plain")) {
-                    // TODO: some monsters want to spawn in lava/water.
-                    // This can be top-left corner, check if the other tiles are valid too
-                    boolean canPlace = true;
-                    for (int i = 0; i < h; i++) {
-                        for (int j = 0; j < w; j++) {
-                            if (i == 0 && j == 0) continue;
-                            Vector2D thisTile = new Vector2D(option.getX() + j, option.getY() + i);
-                            BoardNode tile = dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY());
-                            if (tile == null || !tile.getComponentName().equals("plain") ||
-                                    !tileCoords.contains(thisTile) ||
-                                    ((PropertyInt) tile.getProperty(playersHash)).value != -1) {
-                                canPlace = false;
-                            }
-                        }
-                    }
-                    if (canPlace) {
-                        monster.setPosition(option.copy());
-                        PropertyInt prop = new PropertyInt("players", monster.getComponentID());
-                        for (int i = 0; i < h; i++) {
-                            for (int j = 0; j < w; j++) {
-                                dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
-                            }
-                        }
-                        if (canSpawnMaster) {
-                            dgs.monsters.get(index).add(indexToSpawn, monster);
-                            canSpawnMaster = false;
-                        } else {
-                            dgs.monsters.get(index).add(indexToSpawn, monster);
-                        }
+            monster.setOffMap(true);
 
-                        // If the Monster has the Web passive, add it to our GameState list
-                        if (monster.hasPassive(MonsterAbilities.MonsterPassive.WEB))
-                        {
-                            dgs.webMonstersIDs.add(monster.getComponentID());
-                        }
-                        //System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
-                        break;
-                    }
-                }
+            dgs.monsters.get(index).add(indexToSpawn, monster);
+            // If the Monster has the Web passive, add it to our GameState list
+            if (monster.hasPassive(MonsterAbilities.MonsterPassive.WEB)) {
+                dgs.webMonstersIDs.add(monster.getComponentID());
             }
-
+            dgs.addReinforcement(monster, tile);
+            if (canSpawnMaster)
+                canSpawnMaster = false;
         }
     }
 
@@ -833,6 +808,13 @@ public class DescentForwardModel extends StandardForwardModel {
         // Init action list
         List<AbstractAction> actions = new ArrayList<>();
         Figure actingFigure = dgs.getActingFigure();
+
+        if (actingFigure instanceof Monster monster && dgs.getReinforcements().contains(monster)) {
+            actions.addAll(reinforcementActions(dgs, monster));
+            if (actions.isEmpty())
+                actions.add(new EndFigureTurn());
+            return actions;
+        }
 
         // Setup Only
         if (dgs.inSetup())
@@ -1450,6 +1432,54 @@ public class DescentForwardModel extends StandardForwardModel {
             actions.addAll(placement);
         }
         else actions.add(new EndFigureTurn());
+
+        return actions;
+    }
+
+    private List<AbstractAction> reinforcementActions(DescentGameState dgs, Monster m) {
+        List<AbstractAction> actions = new ArrayList<>();
+        List<Place> placement = new ArrayList<>();
+
+        String tile = dgs.getReinforcementPositions().get(dgs.getReinforcements().indexOf(m));
+        List<Vector2D> monsterStartingPositions = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
+        monsterStartingPositions.sort(Comparator.comparingInt(Vector2D::getX).thenComparingInt(Vector2D::getY));
+
+        Pair<Integer, Integer> size = m.getSize();
+        if (size.a > 1 || size.b > 1) {
+            int totalSize = getMonsterGroupTileSize(dgs, m);
+            if (monsterStartingPositions.size() < totalSize)
+                throw new AssertionError("Not enough starting positions to spawn all " + m.getName().split(" minion")[0].split(" master")[0] +"s!");
+        }
+
+        List<Vector2D> toCheck = new ArrayList<>();
+        GridBoard board = dgs.getMasterBoard();
+        for (Vector2D pos : monsterStartingPositions) {
+            if (((PropertyInt) board.getElement(pos).getProperty(playersHash)).value == -1) {
+                toCheck.add(pos);
+            }
+        }
+
+        if (size.a.equals(size.b)) {
+            for (Vector2D pos : toCheck) {
+                Place place = new Place(m.getComponentID(), pos, tile);
+                if (place.canExecute(dgs))
+                    placement.add(place);
+            }
+        } else {
+            for (Vector2D pos : toCheck) {
+                for (Monster.Direction d : Monster.Direction.values()) {
+                    Place place = new Place(m.getComponentID(), pos, tile, d);
+                    if (place.canExecute(dgs))
+                        placement.add(place);
+                }
+            }
+        }
+
+
+        if (!placement.isEmpty()) {
+            //placement.sort(Comparator.comparingInt(Place::getX).thenComparingInt(Place::getY));
+            actions.addAll(placement);
+        }
 
         return actions;
     }

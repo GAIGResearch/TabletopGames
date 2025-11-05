@@ -103,7 +103,7 @@ public class Place extends DescentAction{
     public boolean canExecute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(figureId);
         if (f == null) return false;
-        if (!f.equals(dgs.getActingFigure())) return false;
+        if (f.getOwnerId() != dgs.getCurrentPlayer()) return false;
         if (!f.isOffMap()) return false;
         if (f.getPosition() != null) return false;
 

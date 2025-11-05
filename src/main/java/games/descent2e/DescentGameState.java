@@ -34,6 +34,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     Map<String, Map<Vector2D, Vector2D>> gridReferences;
     boolean initData;
     boolean setup = true;
+    boolean reinforcing = false;
 
     Deck<Card> searchCards;
     Deck<Card> act1ShopCards;
@@ -56,6 +57,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     ArrayList<DToken> tokens;
     Quest currentQuest;
     List<Figure> defeated;
+    List<Monster> reinforcements;
+    List<String> reinforcementPositions;
     List<Pair<String, String>> defeatedFigures;
     List<String> interruptAttacks;
 
@@ -88,6 +91,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         webMonstersIDs = new ArrayList<>();
         defeatedFigures = new ArrayList<>();
         defeated = new ArrayList<>();
+        reinforcements = new ArrayList<>();
+        reinforcementPositions = new ArrayList<>();
         interruptAttacks = new ArrayList<>();
     }
 
@@ -185,6 +190,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         }
         copy.initData = initData;
         copy.setup = setup;
+        copy.reinforcing = reinforcing;
         copy.tokens = new ArrayList<>();
         for (DToken t : tokens) {
             copy.tokens.add(t.copy());
@@ -200,6 +206,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         }
         copy.defeated = new ArrayList<>();
         copy.defeated.addAll(defeated);
+        copy.reinforcements = new ArrayList<>();
+        copy.reinforcements.addAll(reinforcements);
+        copy.reinforcementPositions = new ArrayList<>();
+        copy.reinforcementPositions.addAll(reinforcementPositions);
         copy.interruptAttacks.addAll(interruptAttacks);
         copy.monsterActingNext = monsterActingNext;
         copy.monsterGroupActingNext = monsterGroupActingNext;
@@ -267,7 +277,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         if (this == o) return true;
         if (!(o instanceof DescentGameState that)) return false;
         if (!super.equals(o)) return false;
-        return initData == that.initData && setup == that.setup && overlordPlayer == that.overlordPlayer &&
+        return initData == that.initData &&
+                setup == that.setup &&
+                reinforcing == that.reinforcing &&
+                overlordPlayer == that.overlordPlayer &&
                 Objects.equals(data, that.data) && Objects.equals(tiles, that.tiles) &&
                 Arrays.deepEquals(tileReferences, that.tileReferences) &&
                 Objects.equals(gridReferences, that.gridReferences) &&
@@ -288,6 +301,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 Objects.equals(currentQuest, that.currentQuest) &&
                 Objects.equals(defeatedFigures, that.defeatedFigures) &&
                 Objects.equals(defeated, that.defeated) &&
+                Objects.equals(reinforcements, that.reinforcements) &&
+                Objects.equals(reinforcementPositions, that.reinforcementPositions) &&
                 Objects.equals(interruptAttacks, that.interruptAttacks) &&
                 monsterActingNext == that.monsterActingNext &&
                 heroActingNext == that.heroActingNext &&
@@ -296,10 +311,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, setup, searchCards, act1ShopCards, act2ShopCards, relicCards,
+        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, setup, reinforcing, searchCards, act1ShopCards, act2ShopCards, relicCards,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, doors, heroesSide,
                 monsters, monstersOriginal, monstersPerGroup, monsterGroups, webMonstersIDs, overlordPlayer, tokens, currentQuest,
-                defeatedFigures, defeated, interruptAttacks, monsterActingNext, heroActingNext, monsterGroupActingNext);
+                defeatedFigures, defeated, reinforcements, reinforcementPositions, interruptAttacks, monsterActingNext, heroActingNext, monsterGroupActingNext);
         result = 31 * result + Arrays.deepHashCode(tileReferences);
         return result;
     }
@@ -333,6 +348,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 currentQuest.hashCode(),
                 defeatedFigures.hashCode(),
                 defeated.hashCode(),
+                reinforcements.hashCode(),
+                reinforcementPositions.hashCode(),
                 interruptAttacks.hashCode(),
                 Arrays.deepHashCode(tileReferences)
         };
@@ -390,6 +407,29 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         defeated.remove(f);
     }
 
+    public List<String> getReinforcementPositions() {
+        return reinforcementPositions;
+    }
+
+    public List<Monster> getReinforcements() {
+        return reinforcements;
+    }
+
+    public void addReinforcement(Monster f, String position) {
+        reinforcements.add(f);
+        reinforcementPositions.add(position);
+    }
+
+    public void removeReinforcement(Monster f) {
+        reinforcementPositions.remove(reinforcementPositions.get(reinforcements.indexOf(f)));
+        reinforcements.remove(f);
+    }
+
+    public void clearReinforcements() {
+        reinforcements.clear();
+        reinforcementPositions.clear();
+    }
+
     public List<List<Monster>> getMonsters() {
         return monsters;
     }
@@ -436,6 +476,18 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public void endSetup() {
         setup = false;
+    }
+
+    public boolean canReinforce() {
+        return reinforcing;
+    }
+
+    public void startReinforcements() {
+        reinforcing = true;
+    }
+
+    public void endReinforcing() {
+        reinforcing = false;
     }
 
     public void setRoundCounter(int roundCounter) {
@@ -489,6 +541,25 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
 
     public int nextMonster() {
+
+        if (!reinforcements.isEmpty()) {
+            Monster monster = getMonsters().get(monsterGroupActingNext).get(monsterActingNext);
+            if (reinforcements.contains(monster)) {
+                int index = reinforcements.indexOf(monster);
+                if (index + 1 >= reinforcements.size()) {
+                    clearReinforcements();
+                    return -1;
+                }
+                Monster next = reinforcements.get(index + 1);
+                for (List<Monster> mon: monsters) {
+                    if (mon.contains(next))
+                        return mon.indexOf(next);
+                }
+            }
+        }
+
+
+        // Otherwise, proceed as normal
         do {
             int groupSize = getCurrentMonsterGroup().size();
             // Only looks for the next monster in the group as long as the group is not empty
