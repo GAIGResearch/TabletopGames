@@ -218,6 +218,10 @@ public class EquipItem extends DescentAction implements IExtendedSequence {
             return user.getInventory().contains(item) &&
                     user.canEquip(item);
         }
-        return user.hasEquipment();
+        // This is for initiating the Change Equipment menu
+        // We must have an item that we can equip/unequip for it to be allowed
+        // As we can always end the equipment change, we therefore must have at least two actions available
+        if (!user.hasEquipment()) return false;
+        return _computeAvailableActions(dgs).size() > 1;
     }
 }
