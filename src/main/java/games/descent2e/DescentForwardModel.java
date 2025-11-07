@@ -824,12 +824,14 @@ public class DescentForwardModel extends StandardForwardModel {
         // This is only for Heroes who have items available in their inventories
         if (actingFigure instanceof Hero hero) {
             if (!hero.isEquipped()) {
-                EquipItem startEquip = new EquipItem(actingFigure.getComponentID());
-                EquipItem stopEquip = new EquipItem();
-                if (startEquip.canExecute(dgs) && stopEquip.canExecute(dgs)) {
-                    actions.add(startEquip);
-                    actions.add(stopEquip);
-                    return actions;
+                if (hero.getNActionsExecuted().isMinimum()) {
+                    EquipItem startEquip = new EquipItem(actingFigure.getComponentID());
+                    EquipItem stopEquip = new EquipItem();
+                    if (startEquip.canExecute(dgs) && stopEquip.canExecute(dgs)) {
+                        actions.add(startEquip);
+                        actions.add(stopEquip);
+                        return actions;
+                    }
                 }
             }
         }
