@@ -365,7 +365,8 @@ public class Hero extends Figure {
                         for (DescentCard item : inventory)
                         {
                             if (item.getProperty("attackPower") != null)
-                                return true;
+                                if (item.getProperty("cost") != null)
+                                    return true;
                         }
                         return false;
                     }
