@@ -372,6 +372,11 @@ public class DescentForwardModel extends StandardForwardModel {
             if (dgs.inSetup()) return;
             startOfNewTurn(dgs);
         }
+        if (!(action instanceof EquipItem)) {
+            if (dgs.getActingFigure() instanceof Hero hero)
+                if (!hero.isEquipped())
+                    hero.setEquipped(true);
+        }
     }
 
     private void startOfNewTurn(DescentGameState dgs) {
@@ -824,14 +829,12 @@ public class DescentForwardModel extends StandardForwardModel {
         // This is only for Heroes who have items available in their inventories
         if (actingFigure instanceof Hero hero) {
             if (!hero.isEquipped()) {
-                if (hero.getNActionsExecuted().isMinimum()) {
-                    EquipItem startEquip = new EquipItem(actingFigure.getComponentID());
-                    EquipItem stopEquip = new EquipItem();
-                    if (startEquip.canExecute(dgs) && stopEquip.canExecute(dgs)) {
-                        actions.add(startEquip);
-                        actions.add(stopEquip);
-                        return actions;
-                    }
+                EquipItem startEquip = new EquipItem(actingFigure.getComponentID());
+                EquipItem stopEquip = new EquipItem();
+                if (startEquip.canExecute(dgs) && stopEquip.canExecute(dgs)) {
+                    actions.add(startEquip);
+                    actions.add(stopEquip);
+                    return actions;
                 }
             }
         }
