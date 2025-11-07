@@ -9,10 +9,7 @@ import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.searchcards.UsePowerPotion;
 import games.descent2e.components.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class RerollAttackDice extends DescentAction {
     
@@ -131,6 +128,12 @@ public class RerollAttackDice extends DescentAction {
 
         IExtendedSequence action = dgs.currentActionInProgress();
         if (action == null) return false;
+        if (action instanceof UsePowerPotion powerPotion) {
+            // If we're using a Power Potion to reroll, make sure that we check the actual attack action.
+            Stack<IExtendedSequence> actions = dgs.getActionsInProgress();
+            if (actions.size() < 2) return false;
+            action = actions.get(actions.size() - 2);
+        }
         if (!(action instanceof MeleeAttack melee)) return false;
         if (melee.getCurrentPlayer(dgs) != f.getOwnerId()) return false;
         return !melee.getSkip() && melee.getPhase() == MeleeAttack.AttackPhase.POST_ATTACK_ROLL;
