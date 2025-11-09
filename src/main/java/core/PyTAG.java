@@ -8,6 +8,7 @@ import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.ITreeActionSpace;
 import core.interfaces.IStateFeatureJSON;
+import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.catan.CatanFeatures;
 import games.diamant.DiamantFeatures;
@@ -41,6 +42,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static core.Game.runMany;
+import static core.Game.runOne;
 
 enum RewardType {
     // Enum for choosing different types of rewards for the agent
@@ -215,6 +219,31 @@ public class PyTAG {
 //
 //        }
 
+    }
+
+    public void evaluate(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
+                         boolean isNormalized, RewardType rewardType, boolean useGUI, int repetitions,
+                         boolean randomizeParameters, boolean detailedStatistics){
+        /* evaluates specific agents */
+        this.seedRandom = new Random(seed);
+        this.isNormalized = isNormalized;
+        this.players = players;
+        this.stateVectoriser = FeatureExtractors.valueOf(gameToPlay.name()).getStateFeatureVector();
+        this.stateJSONiser = FeatureExtractors.valueOf(gameToPlay.name()).getStateFeatureJSON();
+
+//        ActionController ac = (useGUI) ? null : new ActionController();
+
+        /* Game parameter configuration. Set to null to ignore and use default parameters */
+        String gameParams = null;
+
+        if (useGUI){
+            runOne(gameToPlay, gameParams, players, seed, false, null,
+                    useGUI ? new ActionController() : null, turnPause);
+        } else{
+            List<GameType> games = Collections.singletonList(gameToPlay);
+            runMany(games, players, seed, repetitions, randomizeParameters, detailedStatistics,
+                    null, turnPause); // false, null, useGUI ? new ActionController() : null, turnPause);
+        }
     }
 
     // --Wrappers for interface functions--
@@ -482,6 +511,7 @@ public class PyTAG {
 //        players.add(new PythonAgent());
 
         boolean usePyTAG = true;
+        GameType gameType =  GameType.valueOf("SushiGo");
 
         int wins = 0;
         int episodes = 0;
@@ -495,7 +525,7 @@ public class PyTAG {
 
         try {
             // Initialise the game
-            PyTAG env = new PyTAG(GameType.valueOf("SushiGo"), null, players, 343,
+            PyTAG env = new PyTAG(gameType, null, players, 343,
                     true, RewardType.SCORE);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
@@ -556,6 +586,10 @@ public class PyTAG {
                     stopwatch.start();
                 }
             }
+            // evaluate
+            // for evaluation we need to pass an agent with an overwritten configuration
+//            env.evaluate(gameType, null, players, seed, env.isNormalized, env.rewardType, true, 1, false, false);
+
         } catch (Exception e){
             System.out.println("Exception during game initialisation" + e);
         }
