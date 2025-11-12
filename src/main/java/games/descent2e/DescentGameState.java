@@ -219,6 +219,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
+        if (inSetup()) return 0.0;          // Everyone gets a blanket score of 0.0 during Setup
         return new DescentHeuristic().evaluateState(this, playerId);
         //return 0.0;
     }
