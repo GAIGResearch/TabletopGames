@@ -368,7 +368,9 @@ public class DescentHelper {
         BoardNode targetTile = dgs.masterBoard.getElement(endPoint.getX(), endPoint.getY());
         int target = ((PropertyInt) targetTile.getProperty(playersHash)).value;
 
-        boolean ignoreAdjacent = ((Figure) dgs.getComponentById(start)).hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+        boolean ignoreAdjacent = false;
+        if (start != -1)    // Make sure that we actually have a Figure to start with
+            ignoreAdjacent = ((Figure) dgs.getComponentById(start)).hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
 
         // For each coordinate in the line, check:
         // 1) Does the coordinate have its board node
