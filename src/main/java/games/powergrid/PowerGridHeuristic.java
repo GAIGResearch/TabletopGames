@@ -49,7 +49,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 	    PowerGridGameState s = (PowerGridGameState) gs;
 	    if (s.isGameOver()) {
 	        return (gs.getWinner() == playerId) ? 10.0 : 0.0;
-	    }
+	    }  
 	    //calculates the total resources the player has regardless of type required by the player
     	Deck<PowerGridCard> hand = s.getPlayerPlantDeck(playerId);
     	int totalPlayerFuel = 0;
@@ -75,7 +75,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 
 	    int[] cityCountArray = s.getCityCountByPlayer();
 	    int[] moneyArray     = s.getPlayerMoney();
-	    int[] incomeArray    = s.getIncome().stream().mapToInt(Integer::intValue).toArray();
+	    int[] incomeArray    = s.getIncome();
 	    int[] capacityArray  = s.getPlayerCapacity();
 
 	    int mostCities   = getMaxExcluding(cityCountArray, playerId);
@@ -83,7 +83,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 	    int mostIncome   = getMaxExcluding(incomeArray, playerId);
 	    int mostCapacity = getMaxExcluding(capacityArray, playerId);
 
-
+	    //more penalty to being behind rather than being ahead
 	    double posCap = 1.2, negCap = 2.0;
 
 	    // Scale factors 
@@ -139,7 +139,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 	
 	
 	/**
-	 * Returns the largest value in the given array, excluding the element at the specified index.
+	 * Returns the largest value in the given array, excluding the element at the specified index( the player using the heuristic).
 	 * <p>
 	 * This method is useful for comparing a specific player's value to the leader's value
 	 * in a particular category, without considering the player's own score.

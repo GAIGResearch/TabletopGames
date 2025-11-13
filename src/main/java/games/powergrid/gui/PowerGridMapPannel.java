@@ -261,27 +261,32 @@ public class PowerGridMapPannel extends JComponent {
 	    Object oldAA = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
 	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-	    // Build: count -> list of players at that count
+	    // Build: count -> list of *active* players at that count
 	    Map<Integer, java.util.List<Integer>> byCount = new java.util.HashMap<>();
 	    for (int pid = 0; pid < cityCountByPlayer.length; pid++) {
+
+	        if (!playerColors.containsKey(pid)) {
+	            continue;
+	        }
+
 	        int raw = cityCountByPlayer[pid];
 	        int count = clamp(raw, 0, GENERATOR_TRACK.length - 1);
 	        byCount.computeIfAbsent(count, k -> new java.util.ArrayList<>()).add(pid);
 	    }
 
-	    final int radius = 12;               // circle radius in px
+	    final int radius = 12;   // circle radius in px
 	    final int diam   = radius * 2;
-	    final int pad    = -12;               // spacing between markers negative so they overlap
-	    final int liftY  = -3;              
+	    final int pad    = -12;  // spacing between markers (negative so they overlap)
+	    final int liftY  = -3;
 
 	    for (Map.Entry<Integer, java.util.List<Integer>> e : byCount.entrySet()) {
 	        int count = e.getKey();
 	        java.awt.Point base = GENERATOR_TRACK[count];
 	        java.util.List<Integer> players = e.getValue();
-	        java.util.Collections.sort(players); 
+	        java.util.Collections.sort(players);
 
 	        int m = players.size();
-	        int step = diam + pad; 
+	        int step = diam + pad;
 	        double startOffset = -((m - 1) * step) / 2.0;
 
 	        for (int j = 0; j < m; j++) {
@@ -290,6 +295,11 @@ public class PowerGridMapPannel extends JComponent {
 	            int cy = base.y + liftY;
 
 	            Color fill = playerColors.get(pid);
+	            if (fill == null) {
+	                // Extra safety: don't draw if somehow missing a color
+	                continue;
+	            }
+
 	            g2.setColor(fill);
 	            g2.fillOval(cx - radius, cy - radius, diam, diam);
 
@@ -298,7 +308,6 @@ public class PowerGridMapPannel extends JComponent {
 	            g2.drawOval(cx - radius, cy - radius, diam, diam);
 
 	            String label = "P" + pid;
-
 	            g2.setFont(new Font("SansSerif", Font.BOLD, 12));
 	            FontMetrics fm = g2.getFontMetrics();
 
@@ -309,8 +318,10 @@ public class PowerGridMapPannel extends JComponent {
 	            g2.drawString(label, tx, ty);
 	        }
 	    }
+
 	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
 	}
+
 
 	private int clamp(int v, int lo, int hi) {
 	    return (v < lo) ? lo : (v > hi) ? hi : v;

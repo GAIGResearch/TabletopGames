@@ -65,7 +65,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.setResourceMarket(new PowerGridResourceMarket());
 		state.resourceMarket.setUpMarket(params.startinResources);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
 		state.initFuelStorage(); 
-		state.setIncome(new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0, 0)));
+		state.setIncome(new int [] {0, 0, 0, 0, 0, 0});
 		state.setPlayerMoney(new int [] {0,0,0,0,0,0} );
 		state.setCityCountByPlayer(new int [] {0,0,0,0,0,0} );
 		state.setPoweredCities(new int [] {0,0,0,0,0,0} );

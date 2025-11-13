@@ -48,11 +48,11 @@ public class PowerGridGameState extends AbstractGameState {
     private List<Integer> roundOrder = new ArrayList<>();
     private List<Integer> bidOrder = new ArrayList<>();
     private Set<Integer> plantsRan = new HashSet<>();
-    private List<Integer> income = new ArrayList<>();
     
   
 
 	private int turnOrderIndex = 0;
+	private int[] income; 
     private int[] playerMoney;
     private int discountCard; 
     private int[] poweredCities; 
@@ -151,6 +151,7 @@ public class PowerGridGameState extends AbstractGameState {
 
         // Primitive arrays
         copy.playerMoney       = (this.playerMoney == null) ? null : this.playerMoney.clone();
+        copy.income = (this.income == null) ? null: this.income.clone(); 
         copy.cityCountByPlayer = (this.cityCountByPlayer == null) ? null : this.cityCountByPlayer.clone();
         copy.oneHotRegion = (this.oneHotRegion  == null) ? null : this.oneHotRegion.clone();
         copy.poweredCities     = (this.poweredCities == null) ? null : this.poweredCities.clone();
@@ -170,7 +171,6 @@ public class PowerGridGameState extends AbstractGameState {
         copy.roundOrder      = new ArrayList<>(this.roundOrder);
         copy.bidOrder        = new ArrayList<>(this.bidOrder);
         copy.plantsRan       = (this.plantsRan == null) ? null : new HashSet<>(this.plantsRan);
-        copy.income			 = 	new ArrayList<>(this.income);
 
         // Auction/bid state
         copy.auctionPlantNumber = this.auctionPlantNumber;
@@ -334,21 +334,21 @@ public class PowerGridGameState extends AbstractGameState {
 		turnOrderIndex = 0; 
 		}
 	
-	  public Integer getIncome(int playerId) {
-			return income.get(playerId);
+	  public int getIncome(int playerId) {
+			return income[playerId];
 		}
 	  
-	  public List<Integer> getIncome(){
+	  public int [] getIncome(){
 		  return income; 
 	  }
 
 
-		public void setIncome(List<Integer> income) {
+		public void setIncome(int [] income) {
 			this.income = income;
 		}
 		
 		public void setPlayerIncome(int playerId, int money) {
-		    income.set(playerId, money);  
+		    income[playerId] = money;  
 		}
 	
 	public List<Integer> getRoundOrder() {
@@ -824,19 +824,20 @@ public class PowerGridGameState extends AbstractGameState {
     @Override
     public double getGameScore(int playerId) {
         final PowerGridGamePhase phase = (PowerGridGamePhase) getGamePhase();
-
+        
         final double wCities = 0.8;
         final double wIncome = 1.2;
+        
  
-       
-        if(this.getGameStatus() == CoreConstants.GameResult.GAME_END) {
-        	
-        	//TODO bug where the last player to go triggers the win so have to hardcode that we are only checking player 0 which has to be the python agent as the winer 
-        	if (this.getWinners().contains(playerId)) {
-        	    return 4;
-        	} else {
-        	    return -2;
-        	}
+       //if the player wins at the end they get a reward else they get penalized 
+        if (this.getGameStatus() == CoreConstants.GameResult.GAME_END) {
+            CoreConstants.GameResult[] res = getPlayerResults();
+            CoreConstants.GameResult r = (res != null && playerId < res.length) ? res[playerId] : null;
+            if (r == CoreConstants.GameResult.WIN_GAME) {
+                return 4.0;
+            } else {
+                return -2.0;  
+            }
         }
 
         double base = 0.0;
@@ -856,8 +857,7 @@ public class PowerGridGameState extends AbstractGameState {
             double normCities = clamp01((double) cities / cityTarget);
             double normIncome = clamp01((double) poweredCities[playerId]/20);
         
-            base = (wCities * normCities + wIncome * normIncome); //+ timePenalty;
-            //this.RewardGiven.set(playerId, true);
+            base = (wCities * normCities + wIncome * normIncome); 
         }
         
         

@@ -43,6 +43,7 @@ public class PowerGridGUI extends AbstractGUIManager {
         }
         return m;
     }
+    
 
     public PowerGridGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
@@ -129,8 +130,9 @@ public class PowerGridGUI extends AbstractGUIManager {
                 "Power Grid",
                 (PowerGridGameState) game.getGameState(),
                 topWidth,
-                defaultInfoPanelHeight  // provided by AbstractGUIManager
+                defaultInfoPanelHeight
         );
+
         parent.add(infoPanel, BorderLayout.NORTH);
 
 	     // (Optional) If you also want the default action buttons bar at the bottom:
@@ -168,6 +170,36 @@ public class PowerGridGUI extends AbstractGUIManager {
         parent.repaint();
     }
 
+    @Override
+    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
+        JPanel gameInfo = new JPanel();
+        gameInfo.setOpaque(false);
+        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
+        gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
+
+        // use the base class logic to fill labels
+        updateGameStateInfo(gameState);
+
+        gameInfo.add(gameStatus);
+        gameInfo.add(playerStatus);
+        gameInfo.add(playerScores);
+        gameInfo.add(gamePhase);
+        gameInfo.add(turn);
+        gameInfo.add(currentPlayer);
+
+        gameInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
+
+        JPanel wrapper = new JPanel();
+        wrapper.setOpaque(false);
+        wrapper.setLayout(new FlowLayout());
+        wrapper.add(gameInfo);
+
+        // *** key change: pass EMPTY SET so no listener is registered ***
+        createActionHistoryPanel(width / 2 - 10, height, java.util.Collections.emptySet());
+        wrapper.add(historyContainer);
+
+        return wrapper;
+    }
 
 	@Override
 	public int getMaxActionSpace() {
