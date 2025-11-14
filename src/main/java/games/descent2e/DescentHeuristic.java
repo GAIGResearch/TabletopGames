@@ -182,6 +182,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
     }
     private double getOverlordThreat(DescentGameState dgs, String questName) {
         double retVal = 0.0;
+        if (dgs.inSetup()) return retVal;
         switch (questName)
         {
             case "Acolyte of Saradyn":
@@ -202,6 +203,8 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     if (tileCoords.contains(position)) distance = 0.0;
                     for (int i = 0; i < tileCoords.size(); i++) {
                         if (distance <= 1.0) break;
+                        if (position == null)
+                            System.out.println("lol");
                         double dist = getDistance(position, tileCoords.get(i));
                         if (dist < distance) {
                             distance = dist;
@@ -234,6 +237,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
 
     private double getHeroesThreat(DescentGameState dgs, String questName) {
         double retVal = 0.0;
+        if (dgs.inSetup()) return retVal;
         switch (questName)
         {
             case "Acolyte of Saradyn":

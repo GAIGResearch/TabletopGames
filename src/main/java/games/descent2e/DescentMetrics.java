@@ -474,7 +474,10 @@ public class DescentMetrics implements IMetricsCollection {
             DescentGameState dgs = (DescentGameState) e.state;
             for (int i = 0; i < dgs.getHeroes().size(); i++) {
                 Vector2D pos = dgs.getHeroes().get(i).getPosition();
-                records.put("Hero " + (i + 1), pos.toString());
+                if (pos == null)
+                    records.put("Hero " + (i + 1), "Spawning");
+                else
+                    records.put("Hero " + (i + 1), pos.toString());
             }
 
             List<Monster> goblins = dgs.getMonsters().get(0);
@@ -492,12 +495,18 @@ public class DescentMetrics implements IMetricsCollection {
                 Vector2D pos = goblin.getPosition();
                 if (goblin.getName().contains("master"))
                 {
-                    records.put("Goblin Master", pos.toString());
+                    if (pos == null)
+                        records.put("Goblin Master", "Spawning");
+                    else
+                        records.put("Goblin Master", pos.toString());
                 }
                 else
                 {
                     index = Integer.parseInt(goblin.getName().replace("Goblin Archer minion ", ""));
-                    records.put("Goblin Minion " + index, pos.toString());
+                    if (pos == null)
+                        records.put("Goblin Minion " + index, "Spawning");
+                    else
+                        records.put("Goblin Minion " + index, pos.toString());
                 }
             }
 
@@ -511,12 +520,18 @@ public class DescentMetrics implements IMetricsCollection {
                 Vector2D pos = barghest.getPosition();
                 if (barghest.getName().contains("master"))
                 {
-                    records.put("Barghest Master", pos.toString());
+                    if (pos == null)
+                        records.put("Barghest Master", "Spawning");
+                    else
+                        records.put("Barghest Master", pos.toString());
                 }
                 else
                 {
                     index = Integer.parseInt(barghest.getName().replace("Barghest minion ", ""));
-                    records.put("Barghest Minion " + index, pos.toString());
+                    if (pos == null)
+                        records.put("Barghest Minion " + index, "Spawning");
+                    else
+                        records.put("Barghest Minion " + index, pos.toString());
                 }
             }
 
@@ -770,14 +785,18 @@ public class DescentMetrics implements IMetricsCollection {
             for (Hero hero : dgs.getHeroes())
             {
                 String h = hero.getComponentName().replace("Hero: ", "") + " - " + hero.getProperty("archetype") + " (" + hero.getProperty("class") + ") - " +
-                        hero.getAttributeValue(Health) + " HP - " + hero.getHandEquipment().toString() + " - " + hero.getPosition().toString();
+                        hero.getAttributeValue(Health) + " HP - " + hero.getHandEquipment().toString();
+                if (hero.getPosition() != null)
+                    h += " - " + hero.getPosition().toString();
                 setup.add(h);
             }
             for (int i = 0; i < dgs.getMonsters().size(); i++)
             {
                 for (Monster monster : dgs.getMonsters().get(i))
                 {
-                    String m = monster.getComponentName() + " - " + monster.getAttributeValue(Health) + " HP - " + monster.getPosition().toString();
+                    String m = monster.getComponentName() + " - " + monster.getAttributeValue(Health) + " HP";
+                    if (monster.getPosition() != null)
+                        m += " - " + monster.getPosition().toString();
                     setup.add(m);
                 }
             }
