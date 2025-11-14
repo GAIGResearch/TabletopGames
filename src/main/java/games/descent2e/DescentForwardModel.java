@@ -362,6 +362,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 endOverlordPlayerTurn(dgs);
             } else {
                 Figure actingFigure = dgs.getActingFigure();
+                dgs.activated.add(actingFigure);
                 dgs.logEvent(Event.GameEvent.GAME_EVENT, "End Turn: " + actingFigure.getName().replace("Hero: ", "") + "; " + actingFigure.getComponentID() + ";" + actingFigure.getPosition());
 
                 // Now check to see if we need to end the player turn
@@ -559,6 +560,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 }
             }
             dgs.endReinforcing();
+            dgs.activated.clear();
             dgs.overlord.resetRound();
             dgs.monsterGroupActingNext = 0;
             dgs.monsterActingNext = 0;
