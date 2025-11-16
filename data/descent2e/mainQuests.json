@@ -160,7 +160,7 @@
     "act": 1,
     "traits": ["Building", "Water", "Wilderness"],
     "monsters": [
-      ["Barghest:group", "4A-1"],
+      ["Elemental:group", "4A-1"],
       ["Goblin Archer:group", "4A-2"]
     ],
     "tokens" : [],
@@ -181,7 +181,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Barghest"
+          "figureNameContains": "Elemental"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -192,11 +192,50 @@
     "boards": [
       "test"
     ],
+    "starting-tile" : "4A-3",
     "starting-locations": [
       [[3, 4],
         [3, 5],
         [3, 6],
         [3, 7]]
     ]
+  },
+  {
+    "id": "TestBuild",
+    "act": 1,
+    "traits": ["Building", "Water", "Wilderness"],
+    "monsters": [
+      ["Goblin Archer:group", "6A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Goblin Archer"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "testbuild"
+    ],
+    "starting-tile" : "entrance1A"
   }
 ]

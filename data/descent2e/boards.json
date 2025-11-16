@@ -204,5 +204,39 @@
         "connections": ["String[]", ["W-0"]]
       }
     ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "testbuild",
+    "nodes" :
+    [
+      {
+        "name": ["String", "entrance1A"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["12A"]],
+        "connections": ["String[]", ["E-0"]]
+      },
+      {
+        "name": ["String", "12A"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["6A", "entrance1A"]],
+        "connections": ["String[]", ["N-0", "W-0"]]
+      },
+      {
+        "name": ["String", "6A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["endcap1A", "12A"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "endcap1A"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["6A"]],
+        "connections": ["String[]", ["S-0"]]
+      }
+    ]
   }
 ]
