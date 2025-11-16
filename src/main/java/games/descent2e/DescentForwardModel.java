@@ -1774,9 +1774,10 @@ public class DescentForwardModel extends StandardForwardModel {
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
                     // Avoid removing already set tiles
-                    if (tileGrid[i - y][j - x] == null || tileGrid[i - y][j - x].getComponentName().equalsIgnoreCase("null")
-                            || board[i][j] != null && !board[i][j].getComponentName().equalsIgnoreCase("null")
-                            || !TerrainType.isInsideTerrain(tileGrid[i - y][j - x].getComponentName())) continue;
+                    if (tileGrid[i - y][j - x] == null) continue;
+                    if (tileGrid[i - y][j - x].getComponentName().equalsIgnoreCase("null")) continue;
+                    if (board[i][j] != null && !board[i][j].getComponentName().equalsIgnoreCase("null")) continue;
+                    if (!TerrainType.isInsideTerrain(tileGrid[i - y][j - x].getComponentName())) continue;
 
                     // Set
                     board[i][j] = tileGrid[i - y][j - x].copy();
@@ -1792,6 +1793,7 @@ public class DescentForwardModel extends StandardForwardModel {
                         gridReferences.get(s).remove(new Vector2D(j, i));
                     }
                     gridReferences.get(tile.getComponentName()).put(new Vector2D(j, i), new Vector2D(j - x, i - y));
+                    // System.out.println(tile.getComponentName() + "; (x,y): (" + x + "," + y + "); (j,i): (" + j + "," + i + "); (j-x, i-y): (" + (j - x) + "," + (i - y) + ")");
                 }
             }
 
@@ -1872,16 +1874,31 @@ public class DescentForwardModel extends StandardForwardModel {
                                 }
                                 tileGridN = tileGridNTrim;
                             }
-                            Vector2D topLeftCorner = new Vector2D(connectionToNeighbour.b.getX() - connectionFromNeighbour.getX(),
-                                    connectionToNeighbour.b.getY() - connectionFromNeighbour.getY());
 
                             // Update area bounds
-                            if (topLeftCorner.getX() < bounds.x) bounds.x = topLeftCorner.getX();
-                            if (topLeftCorner.getY() < bounds.y) bounds.y = topLeftCorner.getY();
-                            int deltaMaxX = (int) (topLeftCorner.getX() + tileGridN[0].length - bounds.getMaxX());
-                            if (deltaMaxX > 0) bounds.width += deltaMaxX;
-                            int deltaMaxY = (int) (topLeftCorner.getY() + tileGridN.length - bounds.getMaxY());
-                            if (deltaMaxY > 0) bounds.height += deltaMaxY;
+                            Vector2D topLeftCorner = new Vector2D(connectionToNeighbour.b.getX() - connectionFromNeighbour.getX(),
+                                    connectionToNeighbour.b.getY() - connectionFromNeighbour.getY());
+                            Vector2D bottomRightCorner = new Vector2D(topLeftCorner.getX() + tileGridN[0].length,
+                                    topLeftCorner.getY() + tileGridN.length);
+                            Vector2D oldTopLeft = new Vector2D(bounds.x, bounds.y);
+                            Vector2D oldBottomRight = new Vector2D((int) bounds.getMaxX(), (int) bounds.getMaxY());
+
+                            int deltaMinX = oldTopLeft.getX() - topLeftCorner.getX();
+                            if (deltaMinX > 0) {
+                                bounds.x = topLeftCorner.getX();
+                                bounds.width += deltaMinX;
+                            }
+                            int deltaMinY = oldTopLeft.getY() - topLeftCorner.getY();
+                            if (deltaMinY > 0) {
+                                bounds.y = topLeftCorner.getY();
+                                bounds.height += deltaMinY;
+                            }
+                            int deltaMaxX = bottomRightCorner.getX() - oldBottomRight.getX();
+                            if (deltaMaxX > 0)
+                                bounds.width += deltaMaxX;
+                            int deltaMaxY = bottomRightCorner.getY() - oldBottomRight.getY();
+                            if (deltaMaxY > 0)
+                                bounds.height += deltaMaxY;
 
                             // Draw neighbour recursively
                             addTilesToBoard(tileToAdd, neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
