@@ -100,7 +100,7 @@
       ["Goblin Archer:group", "6A"]
     ],
     "tokens": [
-      ["Search", "Search action", "nHeroes", ["6A-1;2", "3A-5;4", "21A-1;4", "12A-5;1"], ""]
+      ["Search", "Search action", "nHeroes", ["6A-1;2", "3A-4;4", "21A-1;3", "12A-4;1"], ""]
     ],
     "rules": [
       ["overlord fatigue", "START_TURN", "AttributeModifier:Fatigue:+1"],
@@ -153,6 +153,64 @@
         [4, 3]]
     ],
     "next-quest": ["Rellegar's Rest 2"],
+    "next-side-quests": [0, 1]
+  },
+  {
+    "id": "Rellegar's Rest 2",
+    "act": 1,
+    "traits": ["Building", "Water", "Wilderness"],
+    "monsters": [
+      ["Lord Merick Farrow:lieutenant", "13B"],
+      ["Goblin Archer:group", "19B"],
+      ["Elemental:group", "3B"]
+    ],
+    "tokens": [
+      ["Search", "Search action", "nHeroes", [null, null, "13B-4;4", null], ""]
+    ],
+    "rules": [
+      ["overlord reinforcements", "END_TURN", "SpawnMonster:Goblin Archer:1:entrance1B"]
+    ],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Goblin Archer"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "Attribute",
+          "attribute": "Fatigue",
+          "figureNameContains": "Overlord"
+        },
+        "target": 6,
+        "comparison-type": "More",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      }
+    ],
+    "boards": [
+      "rellegars-rest-2"
+    ],
+    "starting-tile" : "entrance1B",
+    "next-quest": ["Blood Will Tell", "The Baron Returns"],
     "next-side-quests": [0, 1]
   },
   {

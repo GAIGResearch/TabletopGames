@@ -98,8 +98,90 @@
       {
         "name": ["String", "3A"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["18A"]],
-        "connections": ["String[]", ["W-0"]]
+        "neighbours": ["String[]", ["18A", "12A", "21A"]],
+        "connections": ["String[]", ["W-0", "E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "12A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["3A", "endcap1A"]],
+        "connections": ["String[]", ["W-0", "S-0"]]
+      },
+      {
+        "name": ["String", "endcap1A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["12A"]],
+        "connections": ["String[]", ["N-0"]]
+      },
+      {
+        "name": ["String", "21A"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["3A", "exit1A"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "exit1A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["21A"]],
+        "connections": ["String[]", ["N-0"]]
+      }
+    ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "rellegars-rest-2",
+    "nodes" :
+    [
+      {
+        "name": ["String", "entrance1B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["19B"]],
+        "connections": ["String[]", ["N-0"]]
+      },
+      {
+        "name": ["String", "19B"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["3B", "entrance1B"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "3B"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["13B", "24B", "19B"]],
+        "connections": ["String[]", ["N-0", "W-0", "S-0"]]
+      },
+      {
+        "name": ["String", "13B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["3B", "endcap1B-1"]],
+        "connections": ["String[]", ["S-0", "N-0"]]
+      },
+      {
+        "name": ["String", "endcap1B-1"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["13B"]],
+        "connections": ["String[]", ["S-0"]]
+      },
+      {
+        "name": ["String", "24B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["3B", "21B"]],
+        "connections": ["String[]", ["E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "21B"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["24B", "endcap1B-2"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "endcap1B-2"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["21B"]],
+        "connections": ["String[]", ["N-0"]]
       }
     ]
   },

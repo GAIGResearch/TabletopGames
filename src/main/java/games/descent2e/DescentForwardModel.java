@@ -263,6 +263,8 @@ public class DescentForwardModel extends StandardForwardModel {
                 Vector2D location = null;
                 if (tileName == null) {
                     // Find fixed location
+                    String loc = def.getLocations()[i];
+                    if (loc == null) continue;
                     String[] split = def.getLocations()[i].split("-");
                     tileName = split[0];
                     String[] splitPos = split[1].split(";");
