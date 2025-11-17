@@ -292,6 +292,84 @@
     "starting-tile" : "entrance1B"
   },
   {
+    "id": "The Baron Returns 1",
+    "act": 1,
+    "traits": ["Building", "Cursed", "Wilderness"],
+    "monsters": [
+      ["Elemental:group", "19B"],
+      ["Goblin Archer:group", "5B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Elemental"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "the-baron-returns-1"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "The Baron Returns 2",
+    "act": 1,
+    "traits": ["Building", "Cave", "Civilized"],
+    "monsters": [
+      ["Elemental:group", "1B"],
+      ["Goblin Archer:group", "3B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Elemental"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "the-baron-returns-2"
+    ],
+    "starting-tile" : "entrance1B"
+  },
+  {
     "id": "Test",
     "act": 1,
     "traits": ["Building", "Water", "Wilderness"],

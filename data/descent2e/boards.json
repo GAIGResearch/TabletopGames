@@ -420,6 +420,206 @@
     "verticesKey": "name",
     "neighboursKey": "neighbours",
     "maxNeighbours": -1,
+    "id": "the-baron-returns-1",
+    "nodes" :
+    [
+      {
+        "name": ["String", "entrance1A"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["8A"]],
+        "connections": ["String[]", ["W-0"]]
+      },
+      {
+        "name": ["String", "8A"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["entrance1A", "transition"]],
+        "connections": ["String[]", ["E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "transition"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["8A", "3B"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "3B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["transition", "26B", "5B"]],
+        "connections": ["String[]", ["N-0", "S-0", "E-0"]]
+      },
+      {
+        "name": ["String", "26B"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["3B", "endcap1B-1"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "endcap1B-1"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["26B"]],
+        "connections": ["String[]", ["N-0"]]
+      },
+      {
+        "name": ["String", "5B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["3B", "27B", "9B"]],
+        "connections": ["String[]", ["W-0", "S-0", "E-0"]]
+      },
+      {
+        "name": ["String", "27B"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["5B", "14B"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "14B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["27B", "endcap1B-2"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "endcap1B-2"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["14B"]],
+        "connections": ["String[]", ["N-0"]]
+      },
+      {
+        "name": ["String", "9B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["5B", "11B", "19B"]],
+        "connections": ["String[]", ["W-0", "N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "11B"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["9B", "endcap1B-3"]],
+        "connections": ["String[]", ["S-0", "N-0"]]
+      },
+      {
+        "name": ["String", "endcap1B-3"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["11B"]],
+        "connections": ["String[]", ["S-0"]]
+      },
+      {
+        "name": ["String", "19B"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["9B", "exit1B"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "exit1B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["19B"]],
+        "connections": ["String[]", ["N-0"]]
+      }
+    ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "the-baron-returns-2",
+    "nodes" :
+    [
+      {
+        "name": ["String", "entrance1B"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["23B"]],
+        "connections": ["String[]", ["S-0"]]
+      },
+      {
+        "name": ["String", "23B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["entrance1B", "5B","26B"]],
+        "connections": ["String[]", ["N-0", "S-0", "E-0"]]
+      },
+      {
+        "name": ["String", "5B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["23B", "extender1B-1", "18B"]],
+        "connections": ["String[]", ["N-0", "E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "extender1B-1"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["5B", "1B"]],
+        "connections": ["String[]", ["W-0", "E-0"]]
+      },
+      {
+        "name": ["String", "1B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["extender1B-1", "extender1B-2","3B"]],
+        "connections": ["String[]", ["W-0", "E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "extender1B-2"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["1B", "9B"]],
+        "connections": ["String[]", ["W-0", "E-0"]]
+      },
+      {
+        "name": ["String", "18B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["5B", "3B"]],
+        "connections": ["String[]", ["N-0", "E-0"]]
+      },
+      {
+        "name": ["String", "3B"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["18B", "1B", "17B"]],
+        "connections": ["String[]", ["W-0", "N-0", "E-0"]]
+      },
+      {
+        "name": ["String", "17B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["3B", "extender1B-3"]],
+        "connections": ["String[]", ["W-0", "N-0"]]
+      },
+      {
+        "name": ["String", "extender1B-3"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["17B", "9B"]],
+        "connections": ["String[]", ["S-0", "N-0"]]
+      },
+      {
+        "name": ["String", "9B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["extender1B-2", "extender1B-3", "extender1B-4"]],
+        "connections": ["String[]", ["W-0", "S-0", "N-0"]]
+      },
+      {
+        "name": ["String", "extender1B-4"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["9B", "8B"]],
+        "connections": ["String[]", ["S-0", "N-0"]]
+      },
+      {
+        "name": ["String", "8B"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["extender1B-4", "21B"]],
+        "connections": ["String[]", ["S-0", "W-0"]]
+      },
+      {
+        "name": ["String", "21B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["8B", "26B"]],
+        "connections": ["String[]", ["E-0", "W-0"]]
+      },
+      {
+        "name": ["String", "26B"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["23B", "21B"]],
+        "connections": ["String[]", ["W-0", "E-0"]]
+      }
+    ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
     "id": "board2",
     "nodes" :
     [
