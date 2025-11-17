@@ -108,8 +108,8 @@
       ["null", "null", "null", "open", "open", "null", "null", "null"],
       ["null", "pit", "pit", "pit", "pit", "plain", "pit", "null"],
       ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
-      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
-      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
       ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
       ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
       ["null", "null", "null", "null", "null", "null", "null", "null"]

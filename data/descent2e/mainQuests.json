@@ -370,6 +370,84 @@
     "starting-tile" : "entrance1B"
   },
   {
+    "id": "Archive of Arrizon 1",
+    "act": 1,
+    "traits": ["Building", "Hot", "Mountain", "Wilderness"],
+    "monsters": [
+      ["Elemental:group", "5B"],
+      ["Goblin Archer:group", "9B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Elemental"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "archive-of-arrizon-1"
+    ],
+    "starting-tile" : "exit1B"
+  },
+  {
+    "id": "Archive of Arrizon 2",
+    "act": 1,
+    "traits": ["Building", "Cave", "Dark", "Hot", "Mountain"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "4B"],
+      ["Ettin:group", "4B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "archive-of-arrizon-2"
+    ],
+    "starting-tile" : "entrance1B"
+  },
+  {
     "id": "Test",
     "act": 1,
     "traits": ["Building", "Water", "Wilderness"],
