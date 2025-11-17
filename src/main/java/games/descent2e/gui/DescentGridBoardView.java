@@ -107,6 +107,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                 if (space.getY() > maxY) maxY = space.getY();
                 compID = gameState.getTileReferences()[space.getY()][space.getX()];
             }
+            //System.out.println(tile + ", " + compID);
             int orientation = ((PropertyInt)gameState.getTiles().get(compID).getProperty(orientationHash)).value;
             Image img = ImageIO.GetInstance().getImage(dataPath + "tiles/" + tile.split("-")[0] + ".png");
             Image img2 = rotateImage((BufferedImage) img, new Pair<>(img.getWidth(null), img.getHeight(null)), orientation);

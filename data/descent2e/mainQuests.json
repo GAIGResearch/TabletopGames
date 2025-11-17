@@ -158,7 +158,7 @@
   {
     "id": "Rellegar's Rest 2",
     "act": 1,
-    "traits": ["Building", "Water", "Wilderness"],
+    "traits": ["Building", "Dark"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "13B"],
       ["Goblin Archer:group", "19B"],
@@ -216,7 +216,7 @@
   {
     "id": "Siege of Skytower",
     "act": 1,
-    "traits": ["Building", "Water", "Wilderness"],
+    "traits": ["Building", "Civilized", "Mountain"],
     "monsters": [
       ["Elemental:group", "8B"],
       ["Goblin Archer:group", "1A"]
@@ -251,6 +251,45 @@
       "siege-of-skytower"
     ],
     "starting-tile" : "3B"
+  },
+  {
+    "id": "Blood Will Tell",
+    "act": 1,
+    "traits": ["Cave", "Cursed", "Dark"],
+    "monsters": [
+      ["Elemental:group", "6B"],
+      ["Goblin Archer:group", "5B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Elemental"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "blood-will-tell"
+    ],
+    "starting-tile" : "entrance1B"
   },
   {
     "id": "Test",
