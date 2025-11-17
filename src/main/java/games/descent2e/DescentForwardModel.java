@@ -1826,6 +1826,8 @@ public class DescentForwardModel extends StandardForwardModel {
             // Draw neighbours
             for (BoardNode neighbour : tileToAdd.getNeighbours().keySet()) {
 
+                if (drawn.containsKey(neighbour)) continue;
+
                 // Find location to start drawing neighbour
                 Pair<String, Vector2D> connectionToNeighbour = findConnection(tileToAdd, neighbour, findOpenings(tileGrid));
 
