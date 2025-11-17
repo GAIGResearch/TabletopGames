@@ -190,6 +190,130 @@
     "verticesKey": "name",
     "neighboursKey": "neighbours",
     "maxNeighbours": -1,
+    "id": "siege-of-skytower",
+    "nodes" :
+    [
+      {
+        "name": ["String", "entrance1A"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["1A"]],
+        "connections": ["String[]", ["S-0"]]
+      },
+      {
+        "name": ["String", "1A"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["entrance1A", "11A", "12A"]],
+        "connections": ["String[]", ["N-0", "W-0", "E-0"]]
+      },
+      {
+        "name": ["String", "12A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["1A", "20A"]],
+        "connections": ["String[]", ["W-0", "S-0"]]
+      },
+      {
+        "name": ["String", "20A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["12A", "transition-1"]],
+        "connections": ["String[]", ["N-0", "W-0"]]
+      },
+      {
+        "name": ["String", "transition-1"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["20A", "3B"]],
+        "connections": ["String[]", ["E-0", "W-0"]]
+      },
+      {
+        "name": ["String", "11A"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["1A", "extender1A-1"]],
+        "connections": ["String[]", ["E-0", "W-0"]]
+      },
+      {
+        "name": ["String", "extender1A-1"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["11A", "extender1A-2"]],
+        "connections": ["String[]", ["E-0", "W-0"]]
+      },
+      {
+        "name": ["String", "extender1A-2"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["extender1A-1", "25A"]],
+        "connections": ["String[]", ["E-0", "W-0"]]
+      },
+      {
+        "name": ["String", "25A"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["extender1A-2", "24A"]],
+        "connections": ["String[]", ["E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "24A"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["25A", "transition-2"]],
+        "connections": ["String[]", ["N-0", "E-0"]]
+      },
+      {
+        "name": ["String", "transition-2"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["24A", "16B"]],
+        "connections": ["String[]", ["W-0", "E-0"]]
+      },
+      {
+        "name": ["String", "16B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["transition-2", "8B", "3B", "endcap1B-1"]],
+        "connections": ["String[]", ["W-0", "N-0", "E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "endcap1B-1"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["16B"]],
+        "connections": ["String[]", ["N-0"]]
+      },
+      {
+        "name": ["String", "8B"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["16B", "6B"]],
+        "connections": ["String[]", ["S-0", "E-0"]]
+      },
+      {
+        "name": ["String", "6B"],
+        "orientation": ["Integer", 1],
+        "neighbours": ["String[]", ["8B", "endcap1B-2"]],
+        "connections": ["String[]", ["W-0", "E-0"]]
+      },
+      {
+        "name": ["String", "endcap1B-2"],
+        "orientation": ["Integer", 3],
+        "neighbours": ["String[]", ["6B"]],
+        "connections": ["String[]", ["W-0"]]
+      },
+      {
+        "name": ["String", "3B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["16B", "transition-1", "15B"]],
+        "connections": ["String[]", ["W-0", "E-0", "S-0"]]
+      },
+      {
+        "name": ["String", "15B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["3B", "exit1B"]],
+        "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "exit1B"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["15B"]],
+        "connections": ["String[]", ["N-0"]]
+      }
+    ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
     "id": "board2",
     "nodes" :
     [

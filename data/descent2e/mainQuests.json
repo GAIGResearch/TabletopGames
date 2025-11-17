@@ -214,6 +214,45 @@
     "next-side-quests": [0, 1]
   },
   {
+    "id": "Siege of Skytower",
+    "act": 1,
+    "traits": ["Building", "Water", "Wilderness"],
+    "monsters": [
+      ["Elemental:group", "8B"],
+      ["Goblin Archer:group", "1A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Elemental"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "siege-of-skytower"
+    ],
+    "starting-tile" : "3B"
+  },
+  {
     "id": "Test",
     "act": 1,
     "traits": ["Building", "Water", "Wilderness"],
