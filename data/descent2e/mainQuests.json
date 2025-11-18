@@ -1,6 +1,6 @@
 [
   {
-    "id": "Acolyte of Saradyn",
+    "id": "Acolyte Of Saradyn",
     "act": 1,
     "monsters": [
       ["Goblin Archer:group", "5A"],
@@ -446,6 +446,900 @@
       "archive-of-arrizon-2"
     ],
     "starting-tile" : "entrance1B"
+  },
+  {
+    "id": "Rise of Urthko 1",
+    "act": 1,
+    "traits": ["Cave", "Cursed", "Hot"],
+    "monsters": [
+      ["Lord Merick Farrow:lieutenant", "entrance1B"],
+      ["Ettin:group", "4B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "rise-of-urthko-1"
+    ],
+    "starting-tile" : "exit1B"
+  },
+  {
+    "id": "Rise of Urthko 2",
+    "act": 1,
+    "traits": ["Cave", "Cursed", "Dark"],
+    "monsters": [
+      ["Sir Alric Farrow:lieutenant", "2B"],
+      ["Ettin:group", "2B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "rise-of-urthko-2"
+    ],
+    "starting-tile" : "entrance1B"
+  },
+  {
+    "id": "Caladen's Crossing 1",
+    "act": 1,
+    "traits": ["Civilized", "Cursed", "Wilderness"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "3A"],
+      ["Ettin:group", "3A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "caladens-crossing-1"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Caladen's Crossing 2",
+    "act": 1,
+    "traits": ["Building", "Cursed", "Mountain", "Wilderness"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "2A"],
+      ["Ettin:group", "2A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "caladens-crossing-2"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "From The Wreckage",
+    "act": 1,
+    "traits": ["Cursed", "Mountain", "Wilderness"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "11A"],
+      ["Ettin:group", "1B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "from-the-wreckage"
+    ],
+    "starting-tile" : "11A"
+  },
+  {
+    "id": "Saradyn In Flames",
+    "act": 1,
+    "traits": ["Building", "Cursed", "Hot"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "5B"],
+      ["Ettin:group", "5B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "saradyn-in-flames"
+    ],
+    "starting-tile" : "entrance1B"
+  },
+  {
+    "id": "Army Of Dal'Zunm",
+    "act": 2,
+    "traits": ["Cursed", "Dark", "Water", "Wilderness"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "2A"],
+      ["Ettin:group", "2A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "army-of-dalzunm"
+    ],
+    "starting-tile" : "5A"
+  },
+  {
+    "id": "Prison Of Khinn 1",
+    "act": 2,
+    "traits": ["Building", "Cursed", "Wilderness"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "3B"],
+      ["Ettin:group", "3B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "prison-of-khinn-1"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Prison of Khinn 2",
+    "act": 2,
+    "traits": ["Building", "Cave", "Cursed", "Dark"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "5B"],
+      ["Ettin:group", "5B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "prison-of-khinn-2"
+    ],
+    "starting-tile" : "entrance1B"
+  },
+  {
+    "id": "Lord Of Flame 1",
+    "act": 2,
+    "traits": ["Building", "Cold", "Hot", "Mountain"],
+    "monsters": [
+      ["Lord Merick Farrow:lieutenant", "10"],
+      ["Ettin:group", "11A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "lord-of-flame-1"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Lord Of Flame 2",
+    "act": 2,
+    "traits": ["Cave", "Cold", "Hot", "Water"],
+    "monsters": [
+      ["Lord Merick Farrow:lieutenant", "24B"],
+      ["Ettin:group", "7B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "lord-of-flame-2"
+    ],
+    "starting-tile" : "entrance1B"
+  },
+  {
+    "id": "Dead Or Drowning",
+    "act": 2,
+    "traits": ["Building", "Mountain", "Water", "Wilderness"],
+    "monsters": [
+      ["Zombie:group", "5A"],
+      ["Ettin:group", "3A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "dead-or-drowning"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Rite Of The Red Dawn",
+    "act": 2,
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "16A"],
+      ["Ettin:group", "4A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "rite-of-the-red-dawn"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Shadowfall Mountain 1",
+    "act": 2,
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "6A"],
+      ["Ettin:group", "6A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "shadowfall-mountain-1"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Shadowfall Mountain 2",
+    "act": 2,
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "2A"],
+      ["Ettin:group", "1A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "shadowfall-mountain-2"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Edge Of Dawn 1",
+    "act": 2,
+    "traits": ["Building", "Dark", "Wilderness"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "4B"],
+      ["Ettin:group", "4B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "edge-of-dawn-1"
+    ],
+    "starting-tile" : "entrance1B"
+  },
+  {
+    "id": "Edge Of Dawn 2",
+    "act": 2,
+    "traits": ["Building", "Cave", "Civilized", "Cursed"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "1B"],
+      ["Ettin:group", "1B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "edge-of-dawn-2"
+    ],
+    "starting-tile" : "exit1B"
+  },
+  {
+    "id": "Piercing Darkness 1",
+    "act": 2,
+    "traits": ["Building", "Dark", "Wilderness"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "2B"],
+      ["Ettin:group", "2B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "piercing-darkness-1"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Piercing Darkness 2",
+    "act": 2,
+    "traits": ["Building", "Civilized", "Cursed"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "1B"],
+      ["Ettin:group", "1B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "piercing-darkness-2"
+    ],
+    "starting-tile" : "entrance1B"
+  },
+  {
+    "id": "Blood And Betrayal 1",
+    "act": 2,
+    "traits": ["Building", "Cursed", "Wilderness"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "2A"],
+      ["Ettin:group", "2A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "blood-and-betrayal-1"
+    ],
+    "starting-tile" : "entrance1A"
+  },
+  {
+    "id": "Blood And Betrayal 2A",
+    "act": 2,
+    "traits": ["Building", "Cave", "Cursed", "Dark"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "6B"],
+      ["Ettin:group", "6B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "blood-and-betrayal-2A"
+    ],
+    "starting-tile" : "23B"
+  },
+  {
+    "id": "Blood And Betrayal 2B",
+    "act": 2,
+    "traits": ["Cave", "Cursed", "Dark", "Hot"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "13B"],
+      ["Ettin:group", "13B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "blood-and-betrayal-2b"
+    ],
+    "starting-tile" : "6B"
+  },
+  {
+    "id": "Blood And Betrayal 3",
+    "act": 2,
+    "traits": ["Building", "Cave", "Cursed", "Dark"],
+    "monsters": [
+      ["Lady Eliza Farrow:lieutenant", "1B"],
+      ["Ettin:group", "1B"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Ettin"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "blood-and-betrayal-3"
+    ],
+    "starting-tile" : "exit1B"
   },
   {
     "id": "Test",
