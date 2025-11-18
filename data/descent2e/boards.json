@@ -2017,9 +2017,9 @@
       },
       {
         "name": ["String", "12A"],
-        "orientation": ["Integer", 2],
+        "orientation": ["Integer", 1],
         "neighbours": ["String[]", ["7A", "6A"]],
-        "connections": ["String[]", ["E-0", "N-0"]]
+        "connections": ["String[]", ["W-0", "N-0"]]
       },
       {
         "name": ["String", "6A"],
