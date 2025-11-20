@@ -22,7 +22,7 @@
       {
         "name": ["String", "9A"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["21A", "entrance1A", "8A"]],
+        "neighbours": ["String[]", ["21A", "exit1A", "8A"]],
         "connections": ["String[]", ["N-0", "W-0", "E-0"]]
       },
       {
@@ -62,7 +62,7 @@
         "connections": ["String[]", ["S-0", "N-0"]]
       },
       {
-        "name": ["String", "entrance1A"],
+        "name": ["String", "exit1A"],
         "orientation": ["Integer", 1],
         "neighbours": ["String[]", ["9A"]],
         "connections": ["String[]", ["E-0"]]
@@ -78,7 +78,7 @@
     "nodes" :
     [
       {
-        "name": ["String", "entrance1A"],
+        "name": ["String", "exit1A"],
         "orientation": ["Integer", 0],
         "neighbours": ["String[]", ["6A"]],
         "connections": ["String[]", ["N-0"]]
@@ -86,7 +86,7 @@
       {
         "name": ["String", "6A"],
         "orientation": ["Integer", 2],
-        "neighbours": ["String[]", ["18A", "entrance1A"]],
+        "neighbours": ["String[]", ["18A", "exit1A"]],
         "connections": ["String[]", ["N-0", "S-0"]]
       },
       {
@@ -116,11 +116,11 @@
       {
         "name": ["String", "21A"],
         "orientation": ["Integer", 3],
-        "neighbours": ["String[]", ["3A", "exit1A"]],
+        "neighbours": ["String[]", ["3A", "entrance1A"]],
         "connections": ["String[]", ["N-0", "S-0"]]
       },
       {
-        "name": ["String", "exit1A"],
+        "name": ["String", "entrance1A"],
         "orientation": ["Integer", 0],
         "neighbours": ["String[]", ["21A"]],
         "connections": ["String[]", ["N-0"]]

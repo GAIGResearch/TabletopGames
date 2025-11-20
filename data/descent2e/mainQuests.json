@@ -9,7 +9,7 @@
     "tokens": [
       ["Villager", "Wounded Clergy", "nHeroes", ["8A"], ""],
       ["Search", "Search action", "nHeroes", ["21A-3;1", "9A-3;3", "11A-1;3", "4A-3;1"], "Effect:SearchAction; Effect:Greedy:Skill; Effect:Lurk:Skill"],
-      ["WhiteObjective", "Acolyte", "1", ["player"], ""]
+      ["WhiteObjective", "Acolyte", "1", ["player"], "Effect:AcolyteAction;Effect:TradeAcolyteAction"]
     ],
     "rules": [
       ["overlord fatigue", "START_TURN", "if(count(Goblin Archer,9A)>0);AttributeModifier:Fatigue:+1"],
@@ -81,7 +81,7 @@
     "boards": [
       "acolyte-of-saradyn"
     ],
-    "starting-tile" : "entrance1A",
+    "starting-tile" : "exit1A",
     "starting-locations": [
       [[1, 15],
       [1, 16],
@@ -137,7 +137,7 @@
           "attribute": "Fatigue",
           "figureNameContains": "Overlord"
         },
-        "target": 6,
+        "target": 5,
         "comparison-type": "More",
         "result-heroes": "LOSE_GAME",
         "result-overlord": "WIN_GAME"
@@ -146,7 +146,7 @@
     "boards": [
       "rellegars-rest-1"
     ],
-    "starting-tile" : "entrance1A",
+    "starting-tile" : "exit1A",
     "starting-locations": [
       [[3, 5],
         [3, 6],
