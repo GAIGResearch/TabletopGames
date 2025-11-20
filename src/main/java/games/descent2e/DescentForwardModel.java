@@ -1393,40 +1393,37 @@ public class DescentForwardModel extends StandardForwardModel {
             }
 
             if (f instanceof Monster m) {
-                for (String[] monsters : quest.getMonsters()) {
-                    if (!m.getName().contains(monsters[0].split(":")[0])) continue;
-                    String tile = monsters[1];
-                    List<Vector2D> monsterStartingPositions = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
-                    monsterStartingPositions.sort(Comparator.comparingInt(Vector2D::getX).thenComparingInt(Vector2D::getY));
+                String tile = ((PropertyString) m.getProperty("spawn")).value;
+                List<Vector2D> monsterStartingPositions = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
+                monsterStartingPositions.sort(Comparator.comparingInt(Vector2D::getX).thenComparingInt(Vector2D::getY));
 
-                    Pair<Integer, Integer> size = m.getSize();
-                    if (size.a > 1 || size.b > 1) {
-                        int totalSize = getMonsterGroupTileSize(dgs, m);
-                        if (monsterStartingPositions.size() < totalSize)
-                            throw new AssertionError("Not enough starting positions to spawn all " + m.getName().split(" minion")[0].split(" master")[0] +"s!");
+                Pair<Integer, Integer> size = m.getSize();
+                if (size.a > 1 || size.b > 1) {
+                    int totalSize = getMonsterGroupTileSize(dgs, m);
+                    if (monsterStartingPositions.size() < totalSize)
+                        throw new AssertionError("Not enough starting positions to spawn all " + m.getName().split(" minion")[0].split(" master")[0] +"s!");
+                }
+
+                List<Vector2D> toCheck = new ArrayList<>();
+                GridBoard board = dgs.getMasterBoard();
+                for (Vector2D pos : monsterStartingPositions) {
+                    if (((PropertyInt) board.getElement(pos).getProperty(playersHash)).value == -1) {
+                        toCheck.add(pos);
                     }
+                }
 
-                    List<Vector2D> toCheck = new ArrayList<>();
-                    GridBoard board = dgs.getMasterBoard();
-                    for (Vector2D pos : monsterStartingPositions) {
-                        if (((PropertyInt) board.getElement(pos).getProperty(playersHash)).value == -1) {
-                            toCheck.add(pos);
-                        }
+                if (size.a.equals(size.b)) {
+                    for (Vector2D pos : toCheck) {
+                        Place place = new Place(m.getComponentID(), pos, tile);
+                        if (place.canExecute(dgs))
+                            placement.add(place);
                     }
-
-                    if (size.a.equals(size.b)) {
-                        for (Vector2D pos : toCheck) {
-                            Place place = new Place(m.getComponentID(), pos, tile);
+                } else {
+                    for (Vector2D pos : toCheck) {
+                        for (Monster.Direction d : Monster.Direction.values()) {
+                            Place place = new Place(m.getComponentID(), pos, tile, d);
                             if (place.canExecute(dgs))
                                 placement.add(place);
-                        }
-                    } else {
-                        for (Vector2D pos : toCheck) {
-                            for (Monster.Direction d : Monster.Direction.values()) {
-                                Place place = new Place(m.getComponentID(), pos, tile, d);
-                                if (place.canExecute(dgs))
-                                    placement.add(place);
-                            }
                         }
                     }
                 }
@@ -2180,14 +2177,42 @@ public class DescentForwardModel extends StandardForwardModel {
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
             String tile = mDef[1];
+            boolean isOpen = name.contains("open");
             boolean isLieutenant = nameDef.contains("lieutenant");
             Set<Vector2D> tileCoords = dgs.gridReferences.get(tile).keySet();
             int act = quest.getAct();
             Map<String, Monster> monsterDef;
-            if (isLieutenant)
-                monsterDef = _data.findLieutenant(name);
-            else monsterDef = _data.findMonster(name);
+            if (isOpen) {
+                List<Pair<String, HashMap<String, Monster>>> possible = new ArrayList<>();
+                // Go through all the traits
+                for (String trait : quest.getMonsterTraits()) {
+                    // Get all the Monsters with those traits
+                    for (Pair<String, HashMap<String, Monster>> monster : _data.findMonstersWithTrait(trait)) {
+                        // Eliminate the ones that we already have, either from previous traits or from other groups
+                        if (possible.contains(monster)) continue;
+                        String monName = monster.a;
+                        boolean skip = false;
+                        for (String[] m : monsters)
+                            if (m[0].contains(monName)) {
+                                skip = true;
+                                break;
+                            }
+                        if (skip) continue;
+                        possible.add(monster);
+                    }
+                }
+                Pair <String, HashMap<String, Monster>> choice = possible.get(rnd.nextInt(possible.size()));
+                name = choice.a;
+                monsterDef = choice.b;
+            }
+            else {
+                if (isLieutenant)
+                    monsterDef = _data.findLieutenant(name);
+                else monsterDef = _data.findMonster(name);
+            }
             Monster superDef = monsterDef.get("super");
+            PropertyString spawnpoint = new PropertyString("spawn", tile);
+            superDef.setProperty(spawnpoint);
 
             // TODO: this could be adding/removing abilities too
             // Check attribute modifiers
@@ -2219,6 +2244,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 Monster lieutenant = monsterDef.get(act + "-" + players).copyNewID();
                 lieutenant.getNActionsExecuted().setMaximum(nActionsPerFigure);
                 lieutenant.setProperties(monsterDef.get(act + "-" + players).getProperties());
+                lieutenant.setProperty(spawnpoint);
                 lieutenant.setComponentName(name);
                 PropertyStringArray passives = (PropertyStringArray) lieutenant.getProperty("passive");
                 if (passives != null)
@@ -2257,6 +2283,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 Monster master = monsterDef.get(act + "-master").copyNewID();
                 master.getNActionsExecuted().setMaximum(nActionsPerFigure);
                 master.setProperties(monsterDef.get(act + "-master").getProperties());
+                master.setProperty(spawnpoint);
                 master.setComponentName(name + " master");
 
                 PropertyStringArray passives = (PropertyStringArray) master.getProperty("passive");
@@ -2315,6 +2342,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 for (int i = 0; i < nMinions; i++) {
                     Monster minion = monsterDef.get(act + "-minion").copyNewID();
                     minion.setProperties(monsterDef.get(act + "-minion").getProperties());
+                    minion.setProperty(spawnpoint);
                     minion.setComponentName(name + " minion " + (i + 1));
 
                     passives = (PropertyStringArray) minion.getProperty("passive");
@@ -2385,7 +2413,7 @@ public class DescentForwardModel extends StandardForwardModel {
             Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
             tileCoords.remove(option);
             BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
-            if (position != null && position.getComponentName().equals("plain") &&
+            if (position != null && DescentTypes.TerrainType.isStartingTerrain(position.getComponentName()) &&
                     ((PropertyInt) position.getProperty(playersHash)).value == -1) {
                 // TODO: some monsters want to spawn in lava/water.
                 // This can be top-left corner, check if the other tiles are valid too
@@ -2395,7 +2423,7 @@ public class DescentForwardModel extends StandardForwardModel {
                         if (i == 0 && j == 0) continue;
                         Vector2D thisTile = new Vector2D(option.getX() + j, option.getY() + i);
                         BoardNode tile = dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY());
-                        if (tile == null || !tile.getComponentName().equals("plain") ||
+                        if (tile == null || !DescentTypes.TerrainType.isStartingTerrain(tile.getComponentName()) ||
                                 !tileCoords.contains(thisTile) ||
                                 ((PropertyInt) tile.getProperty(playersHash)).value != -1) {
                             canPlace = false;
@@ -2420,7 +2448,6 @@ public class DescentForwardModel extends StandardForwardModel {
                             dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
                         }
                     }
-
                     break;
                 }
             }

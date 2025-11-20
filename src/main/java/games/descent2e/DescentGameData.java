@@ -3,6 +3,7 @@ package games.descent2e;
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
+import core.properties.PropertyStringArray;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.cards.RelicCard;
@@ -147,6 +148,18 @@ public class DescentGameData extends AbstractGameData {
     }
     public HashMap<String, Monster> findLieutenant(String name) {
         return lieutenants.get(name);
+    }
+
+    public List<Pair<String, HashMap<String, Monster>>> findMonstersWithTrait(String trait) {
+        List<Pair<String, HashMap<String, Monster>>> possible = new ArrayList<>();
+        for (int i = 0; i < monsters.values().size(); i++) {
+            String name = monsters.keySet().toArray()[i].toString();
+            Monster monster = ((Monster) ((HashMap) monsters.values().toArray()[i]).values().toArray()[0]);
+            String[] traits = ((PropertyStringArray) monster.getProperty("traits")).getValues();
+            if (Arrays.asList(traits).contains(trait))
+                possible.add(new Pair<>(name, monsters.get(name)));
+        }
+        return possible;
     }
 
     private static ArrayList<Quest> loadQuests(String dataPath) {
