@@ -215,7 +215,7 @@
     "id": "Flesh Moulder",
     "type": ["String", "Monster"],
     "setup": ["Integer[]", [1, 2, 3]],
-    "traits": ["String[]", ["Cursed", "Civilised"]],
+    "traits": ["String[]", ["Cursed", "Civilized"]],
     "size": ["String", "1x1"],
     "img": ["String", "monsters/flesh-moulder.png"],
     "attackType": ["String", "ranged"],
