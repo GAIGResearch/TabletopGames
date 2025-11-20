@@ -278,17 +278,34 @@ public class DescentForwardModel extends StandardForwardModel {
                     }
                     tileName = null;
                 } else if (!tileName.equalsIgnoreCase("player")) {
-                    // Find random location on tile
-                    int idx = rnd.nextInt(dgs.gridReferences.get(tileName).size());
-                    while (previousKeys.contains(idx)) idx = rnd.nextInt(dgs.gridReferences.get(tileName).size());
-                    int k = 0;
-                    for (Vector2D key : dgs.gridReferences.get(tileName).keySet()) {
-                        if (k == idx) {
-                            location = key;
-                            previousKeys.add(idx);
-                            break;
+
+                    // Get a specific tile
+                    if (tileName.contains("-")) {
+                        Map tile = dgs.gridReferences.get(tileName.split("-")[0]);
+                        String coords = tileName.split("-")[1];
+                        Vector2D pos = new Vector2D(Integer.parseInt(coords.split(";")[0]), Integer.parseInt(coords.split(";")[1]));
+                        for (int j = 0; j < tile.size(); j++) {
+                            if (tile.values().toArray()[j].equals(pos)) {
+                                location = (Vector2D) tile.keySet().toArray()[j];
+                                break;
+                            }
                         }
-                        k++;
+                    }
+
+                    // Find random location on tile
+                    else {
+                        System.out.println(tileName);
+                        int idx = rnd.nextInt(dgs.gridReferences.get(tileName).size());
+                        while (previousKeys.contains(idx)) idx = rnd.nextInt(dgs.gridReferences.get(tileName).size());
+                        int k = 0;
+                        for (Vector2D key : dgs.gridReferences.get(tileName).keySet()) {
+                            if (k == idx) {
+                                location = key;
+                                previousKeys.add(idx);
+                                break;
+                            }
+                            k++;
+                        }
                     }
                 } else {
                     // A player should hold these tokens, not on the board, location is left null
