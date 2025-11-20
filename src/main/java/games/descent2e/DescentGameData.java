@@ -213,6 +213,16 @@ public class DescentGameData extends AbstractGameData {
                 String lt = (String) obj.get("starting-tile");
                 q.setStartingTile(lt);
 
+                // Find random starting locations for Tokens, if defined
+                JSONArray rts = (JSONArray) obj.get("random-tokens");
+                ArrayList<String> rtPos = new ArrayList<>();
+                if (rts != null) {
+                    for (Object b : rts) {
+                        rtPos.add((String) b);
+                    }
+                    q.setRandomLocations(rtPos);
+                }
+
                 // Find monsters traits for open groups
                 ArrayList<String> qTraits = new ArrayList<>();
 

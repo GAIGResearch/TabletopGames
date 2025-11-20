@@ -258,6 +258,7 @@ public class DescentForwardModel extends StandardForwardModel {
             // TODO let overlord pick locations if not fixed
             String tileName = null;
             List<Integer> previousKeys = new ArrayList<>();
+            List<Integer> previousRandom = new ArrayList<>();
             if (def.getLocations().length == 1) tileName = def.getLocations()[0];
             for (int i = 0; i < n; i++) {
                 Vector2D location = null;
@@ -277,8 +278,37 @@ public class DescentForwardModel extends StandardForwardModel {
                         }
                     }
                     tileName = null;
-                } else if (!tileName.equalsIgnoreCase("player")) {
-
+                } else if (tileName.equals("random")) {
+                    List<String> randomLoc = firstQuest.getRandomLocations();
+                    int idx = rnd.nextInt(randomLoc.size());
+                    while (previousRandom.contains(idx)) idx = rnd.nextInt(randomLoc.size());
+                    String loc = randomLoc.get(idx);
+                    if (loc.contains("-")) {
+                        Map tile = dgs.gridReferences.get(loc.split("-")[0]);
+                        String coords = loc.split("-")[1];
+                        Vector2D pos = new Vector2D(Integer.parseInt(coords.split(";")[0]), Integer.parseInt(coords.split(";")[1]));
+                        for (int j = 0; j < tile.size(); j++) {
+                            if (tile.values().toArray()[j].equals(pos)) {
+                                location = (Vector2D) tile.keySet().toArray()[j];
+                                break;
+                            }
+                        }
+                    } else {
+                        do idx = rnd.nextInt(dgs.gridReferences.get(loc).size());
+                        while (previousKeys.contains(idx));
+                        int k = 0;
+                        for (Vector2D key : dgs.gridReferences.get(loc).keySet()) {
+                            if (k == idx) {
+                                location = key;
+                                previousKeys.add(idx);
+                                break;
+                            }
+                            k++;
+                        }
+                    }
+                    previousRandom.add(idx);
+                }
+                else if (!tileName.equalsIgnoreCase("player")) {
                     // Get a specific tile
                     if (tileName.contains("-")) {
                         Map tile = dgs.gridReferences.get(tileName.split("-")[0]);

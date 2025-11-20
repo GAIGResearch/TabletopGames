@@ -23,6 +23,7 @@ public class Quest {
     private List<String> boards;
     private Map<String, List<Vector2D>> startingLocations;
     private String startingTile;
+    private List<String> randomLocations;
     private List<Quest> nextMainQuests;
     private List<Quest> nextSideQuests;
     private int act;
@@ -56,6 +57,12 @@ public class Quest {
     }
     public Map<String, List<Vector2D>> getStartingLocations() {
         return startingLocations;
+    }
+    public void setRandomLocations(List<String> randomLocations) {
+        this.randomLocations = randomLocations;
+    }
+    public List<String> getRandomLocations() {
+        return randomLocations;
     }
     public void setStartingTile(String startingTile) {
         this.startingTile = startingTile;
@@ -151,6 +158,10 @@ public class Quest {
                 q.tokens.add(d.copy());
             }
         }
+        if (randomLocations != null)
+        {
+            q.randomLocations = new ArrayList<>(List.copyOf(randomLocations));
+        }
         if (rules != null)
         {
             q.rules = new ArrayList<>(List.copyOf(rules));
@@ -214,12 +225,13 @@ public class Quest {
                 Objects.equals(overlordRewards, quest.overlordRewards) && Objects.equals(heroRewards, quest.heroRewards) &&
                 Objects.equals(commonRewards, quest.commonRewards) && Objects.equals(boards, quest.boards) &&
                 Objects.equals(startingLocations, quest.startingLocations) && Objects.equals(startingTile, quest.startingTile) &&
-                Objects.equals(nextMainQuests, quest.nextMainQuests) && Objects.equals(nextSideQuests, quest.nextSideQuests);
+                Objects.equals(nextMainQuests, quest.nextMainQuests) && Objects.equals(nextSideQuests, quest.nextSideQuests) &&
+                Objects.equals(randomLocations, quest.randomLocations);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(name, monsters, monsterTraits, tokens, rules, gameOverConditions, overlordRewards, heroRewards,
-                commonRewards, boards, startingLocations, startingTile, nextMainQuests, nextSideQuests, act);
+                commonRewards, boards, startingLocations, startingTile, randomLocations, nextMainQuests, nextSideQuests, act);
     }
 }
