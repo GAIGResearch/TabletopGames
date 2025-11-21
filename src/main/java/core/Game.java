@@ -862,16 +862,16 @@ public class Game {
         //players.add(new OSLAPlayer());
         //players.add(new RMHCPlayer());
 
-        //RMHCParams params = new RMHCParams();
-        //params.horizon = 15;
-        //params.discountFactor = 0.99;
-        //params.heuristic = AbstractGameState::getHeuristicScore;
-        //AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
-        //players.add(rmhcPlayer);
+        RMHCParams params = new RMHCParams();
+        params.horizon = 8;
+        params.discountFactor = 0.99;
+        params.heuristic = AbstractGameState::getHeuristicScore;
+        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
+        players.add(rmhcPlayer);
 
 
 
-        players.add(new HumanGUIPlayer(ac));
+        //players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
     //    players.add(new HumanConsolePlayer());
@@ -884,11 +884,11 @@ public class Game {
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
-        //List<GameType> games = java.util.Collections.singletonList(GameType.PowerGrid);
+       List<GameType> games = java.util.Collections.singletonList(GameType.PowerGrid);
        //games.add(Connect4);
-        //long seedForBatch = 100L;
-        //int gamesToRun    = 1000;
-     // earlier in main:
+       long seedForBatch = 100L;
+        int gamesToRun    = 1000;
+
         //boolean useGUI = Utils.getArg(args, "gui", true);
         //int turnPause  = Utils.getArg(args, "turnPause", 100);
         //ActionController ac = new ActionController();
@@ -896,7 +896,7 @@ public class Game {
 
         // If your Game.runMany has this signature:
           //runMany(List<GameType> games, List<AbstractPlayer> players, long seed, int nGames,
-//                   boolean verbose, boolean stopOnError, ActionController ac, int turnPause)
+                  // boolean verbose, boolean stopOnError, ActionController ac, int turnPause)
 
         //Game.runMany(games, players, seedForBatch, gamesToRun, false, true, null, 0);
 

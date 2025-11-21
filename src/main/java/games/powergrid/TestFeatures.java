@@ -19,7 +19,7 @@ import java.util.Random;
  * TestFeatures is a standalone diagnostic and validation utility for the Power Grid environment 
  * within the TAG/PyTAG framework. 
  * <p>
- * It provides an executable test harness that interacts with the {@link PyTAG} wrapper to:
+ * It provides an executable test that interacts with the {@link PyTAG} wrapper to:
  * <ul>
  *   <li>Initialize and reset a Power Grid game environment with a configurable set of players.</li>
  *   <li>Iteratively step through a fixed number of game turns, sampling random legal actions 
@@ -123,7 +123,6 @@ public class TestFeatures {
             printOnes("AFTER", maskAfter, headNames);
         }
 
-        // After the loop, print winners
         System.out.println("\n=== FINAL RESULTS ===");
         printWinners(env, N_PLAYERS);
     }

@@ -118,7 +118,6 @@ public class PowerGridMapPannel extends JComponent {
 	// Player colors (playerId -> Color)
 	private Map<Integer, Color> playerColors = Map.of();
 
-	// Call these from your GUI manager when state changes:
 	public void setCitySlotsById(int[][] slots) {
 	    this.citySlotsById = slots;
 	    repaint();
@@ -126,7 +125,7 @@ public class PowerGridMapPannel extends JComponent {
 	
 	public void setCityCountByPlayer(int[] counts) {
 	    this.cityCountByPlayer = counts;
-	    repaint();   // force a redraw so drawGeneratorTrack() sees the new data
+	    repaint();   
 	}
 	public void setPlayerColors(Map<Integer, Color> colors) {
 	    this.playerColors = (colors == null) ? Map.of() : colors;
@@ -174,7 +173,7 @@ public class PowerGridMapPannel extends JComponent {
     
     
     private void drawStepCard(Graphics g) {
-        if (stepImage != null) { // check the actual image, not backgroundImage
+        if (stepImage != null) { 
             drawImage(g, stepImage, 338, 8, 110, 110);
         }
     }
@@ -276,7 +275,7 @@ public class PowerGridMapPannel extends JComponent {
 
 	    final int radius = 12;   // circle radius in px
 	    final int diam   = radius * 2;
-	    final int pad    = -12;  // spacing between markers (negative so they overlap)
+	    final int pad    = -12;  // spacing between markers 
 	    final int liftY  = -3;
 
 	    for (Map.Entry<Integer, java.util.List<Integer>> e : byCount.entrySet()) {
@@ -295,8 +294,7 @@ public class PowerGridMapPannel extends JComponent {
 	            int cy = base.y + liftY;
 
 	            Color fill = playerColors.get(pid);
-	            if (fill == null) {
-	                // Extra safety: don't draw if somehow missing a color
+	            if (fill == null) {          
 	                continue;
 	            }
 
@@ -333,7 +331,7 @@ public class PowerGridMapPannel extends JComponent {
 	    Point right = GENERATOR_TRACK[trigger];
 	    int cx = (left.x + right.x) / 2;
 	    int cy = (left.y + right.y) / 2;
-	    int liftY = -3; // align with your marker lift
+	    int liftY = -3; 
 	    return new Point(cx, cy + liftY);
 	}
     
@@ -356,7 +354,7 @@ public class PowerGridMapPannel extends JComponent {
         int x = (stepTwoBarCenter.x - stepTwoBarWidth / 2 )-3;;
         int y = (stepTwoBarCenter.y - stepTwoBarHeight / 2) + 2;
 
-        g2.setColor(Color.LIGHT_GRAY);         // or choose a distinct color from end-game bar
+        g2.setColor(Color.LIGHT_GRAY);         
         g2.fillRect(x, y, stepTwoBarWidth, stepTwoBarHeight);
 
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);

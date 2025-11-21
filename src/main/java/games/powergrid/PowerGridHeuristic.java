@@ -130,7 +130,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 	        double g = 1.0 - Math.exp(-(diff) / Math.max(1e-9, posScale));
 	        return posCap * g;
 	    } else {
-	        // penalty that saturates toward -negCap (usually larger magnitude)
+	        // penalty that saturates toward -negCap 
 	        double gap = -diff;
 	        double g = 1.0 - Math.exp(-(gap) / Math.max(1e-9, negScale));
 	        return -negCap * g;

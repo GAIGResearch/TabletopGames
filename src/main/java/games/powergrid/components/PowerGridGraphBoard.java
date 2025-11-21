@@ -83,16 +83,13 @@ public final class PowerGridGraphBoard extends Component {
         Map<Integer, List<Edge>> tmp = new HashMap<>();
         for (Edge e : edges) {
             tmp.computeIfAbsent(e.from, k -> new ArrayList<>()).add(e);
-            // add reverse edge since Power Grid is undirected
+            // add reverse edge since Power Grid is an undirected graph
             tmp.computeIfAbsent(e.to, k -> new ArrayList<>()).add(new Edge(e.to, e.from, e.cost));
         }
-        this.adj = tmp.entrySet().stream()
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
-                                                      e -> List.copyOf(e.getValue())));
+        this.adj = tmp.entrySet().stream().collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, e -> List.copyOf(e.getValue())));
         this.maxCost =  maxValidShortestPathCost();
         this.AdjacencyVector = normalizedAdjacency2D();
-        
-       
+              
     }
 
     public PowerGridCity city(int id) { return citiesById.get(id); }
@@ -300,6 +297,10 @@ public final class PowerGridGraphBoard extends Component {
     	    
         return new PowerGridGraphBoard("NorthAmerica", cities, edges);
     }
+    
+    /**
+     * @return the highest city ID in the map, or 0 if none exist
+     */
     public int maxCityId() {
         return citiesById.keySet().stream()
                          .mapToInt(Integer::intValue)
@@ -389,7 +390,7 @@ public final class PowerGridGraphBoard extends Component {
     public String cityName(int id) {
         PowerGridCity c = citiesById.get(id);
         if (c == null) throw new IllegalArgumentException("Unknown city id: " + id);
-        return c.getComponentName(); // or c.getName() if your class has that
+        return c.getComponentName(); 
     }
 
 
@@ -515,7 +516,12 @@ public final class PowerGridGraphBoard extends Component {
         }
         return globalMax;
     }
-    
+    /**
+     * Finds the highest valid edge cost in the adjacency map.
+     * Ignores invalid edges and reversed duplicates.
+     *
+     * @return the maximum valid edge cost, or 0 if none exist
+     */
     public int maxValidEdgeCost() {
         int max = Integer.MIN_VALUE;
         for (var list : adj.values()) {
@@ -525,9 +531,18 @@ public final class PowerGridGraphBoard extends Component {
                 }
             }
         }
-        return (max == Integer.MIN_VALUE) ? 0 : max; // or throw if you prefer
+        return (max == Integer.MIN_VALUE) ? 0 : max; 
     }
     
+    /**
+     * Builds a normalized 2D feature representation of the city adjacency graph.
+     * Each row encodes the normalized city ID followed by (neighbor ID, edge cost) pairs.
+     * <p>
+     * Used by {@code PowerGridFeatures.buildGlobalObservation} when constructing
+     * the global state feature vector.
+     *
+     * @return a list of double arrays, one per city, with normalized adjacency data
+     */
     public List<double[]> normalizedAdjacency2D() {
         final int maxId = Math.max(1, maxCityId()); 
         final double idDenom = maxId;               
@@ -536,7 +551,6 @@ public final class PowerGridGraphBoard extends Component {
 
         List<double[]> out = new ArrayList<>();
 
-        // deterministic city order
         var entries = new ArrayList<>(adj.entrySet());
         entries.sort(Map.Entry.comparingByKey());
 
@@ -577,10 +591,8 @@ public final class PowerGridGraphBoard extends Component {
     
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o) return true;        
         if (!(o instanceof PowerGridGraphBoard g)) return false;
-
-        // Quick check: same number of cities
         if (citiesById.size() != g.citiesById.size()) return false;
 
         // Compare regions per city ID

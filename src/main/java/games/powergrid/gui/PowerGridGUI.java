@@ -39,7 +39,7 @@ public class PowerGridGUI extends AbstractGUIManager {
     buildAvail(PowerGridGameState gs) {
         var m = new java.util.EnumMap<PowerGridParameters.Resource, Integer>(PowerGridParameters.Resource.class);
         for (PowerGridParameters.Resource r : PowerGridParameters.Resource.values()) {
-            m.put(r, gs.getResourceMarket().getAvailable(r)); // or your accessor
+            m.put(r, gs.getResourceMarket().getAvailable(r)); 
         }
         return m;
     }
@@ -115,8 +115,8 @@ public class PowerGridGUI extends AbstractGUIManager {
             futureMarketView  = new PowerGridDeckView(-1, gs.getFutureMarket(),  true, PowerGridParameters.CARD_ASSET_PATH, viewArea);
 
 
-            // Place them directly on the layered pane (no wrapper, no border)
-            currentMarketView.setBounds(555,  15, 450, 110);  // x,y,w,h — wide enough for 4 cards
+            // Placed market view directly on the map pane
+            currentMarketView.setBounds(555,  15, 450, 110); 
             futureMarketView.setBounds (555, 135, 450, 110);
 
             layered.add(currentMarketView, JLayeredPane.PALETTE_LAYER);
@@ -135,20 +135,20 @@ public class PowerGridGUI extends AbstractGUIManager {
 
         parent.add(infoPanel, BorderLayout.NORTH);
 
-	     // (Optional) If you also want the default action buttons bar at the bottom:
+	    
 	     JComponent actionPanel = createActionPanel(new IScreenHighlight[0], topWidth, defaultActionPanelHeight,false,true,null,null,null);
 	     parent.add(actionPanel, BorderLayout.SOUTH);
 	
 	     // Make sure the overall preferred size accounts for the new bars
 	     parent.setPreferredSize(new Dimension(
 	             topWidth,
-	             layered.getPreferredSize().height + defaultInfoPanelHeight + /* + defaultActionPanelHeight if added */ 0 + 10
+	             layered.getPreferredSize().height + defaultInfoPanelHeight + 10
 	     ));
 	     parent.revalidate();
 	     parent.repaint();
        
 
-     // Players column population
+     // Players column populated by player count
         if (game != null) {
             AbstractGameState s = game.getGameState();
             int n = s.getNPlayers();
@@ -161,7 +161,7 @@ public class PowerGridGUI extends AbstractGUIManager {
                 playerViews[p].setAlignmentX(Component.LEFT_ALIGNMENT);
 
                 JPanel wrapper = wrapTitled("Player " + p, playerViews[p]);
-                playerWrappers[p] = wrapper;              // <-- keep the wrapper so we can highlight later
+                playerWrappers[p] = wrapper;              
                 playersColumn.add(wrapper);
             }
         }
@@ -177,7 +177,6 @@ public class PowerGridGUI extends AbstractGUIManager {
         gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
         gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
 
-        // use the base class logic to fill labels
         updateGameStateInfo(gameState);
 
         gameInfo.add(gameStatus);
@@ -194,7 +193,6 @@ public class PowerGridGUI extends AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        // *** key change: pass EMPTY SET so no listener is registered ***
         createActionHistoryPanel(width / 2 - 10, height, java.util.Collections.emptySet());
         wrapper.add(historyContainer);
 
@@ -203,8 +201,7 @@ public class PowerGridGUI extends AbstractGUIManager {
 
 	@Override
 	public int getMaxActionSpace() {
-		// TODO Auto-generated method stub
-		return 200;
+		return 80;
 	}
 
 	//called whenever the state changes
@@ -264,7 +261,6 @@ public class PowerGridGUI extends AbstractGUIManager {
 	    wrapper.setOpaque(false);
 	    wrapper.setBorder(BorderFactory.createTitledBorder(title));
 	    wrapper.add(inner, BorderLayout.CENTER);
-	    // ensure the wrapper itself has a size when used with absolute positioning
 	    wrapper.setPreferredSize(new Dimension(180, 180));
 	    return wrapper;
 	}

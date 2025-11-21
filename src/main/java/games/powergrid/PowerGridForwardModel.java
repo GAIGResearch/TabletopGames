@@ -1,6 +1,5 @@
 package games.powergrid;
 
-import java.awt.Taskbar.State;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.google.apps.card.v1.Card;
 
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -27,10 +25,7 @@ import games.powergrid.PowerGridParameters.Resource;
 import games.powergrid.actions.AuctionPowerPlant;
 import games.powergrid.actions.BuildGenerator;
 import games.powergrid.actions.BuyResource;
-import games.powergrid.actions.Discard;
-import games.powergrid.actions.IncreaseBid;
 import games.powergrid.actions.PassAction;
-import games.powergrid.actions.PassBid;
 import games.powergrid.actions.RunPowerPlant;
 import games.powergrid.components.PowerGridCard;
 import games.powergrid.components.PowerGridCard.Type;
@@ -63,7 +58,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.setValidCities(state.gameMap.validCities(state.getActiveRegions()));//creates a set of valid cities based on the current legal board 
 		state.setOneHotRegions(state.getActiveRegions(), 7);
 		state.setResourceMarket(new PowerGridResourceMarket());
-		state.resourceMarket.setUpMarket(params.startinResources);//TODO Eventually change this when EU implemeted and put in parameters the amount of intial setup
+		state.resourceMarket.setUpMarket(params.startinResources);//TODO Eventually change this when EU implemented and put in parameters the amount of initial setup
 		state.initFuelStorage(); 
 		state.setIncome(new int [] {0, 0, 0, 0, 0, 0});
 		state.setPlayerMoney(new int [] {0,0,0,0,0,0} );
@@ -227,7 +222,16 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 	
 
-	
+	/**
+	 * Handles all preprocessing logic when the game enters a new phase.
+	 * This includes updating turn order, setting discount cards,
+	 * reversing player order for certain phases, and applying step-change rules.
+	 * <p>
+	 * Called by advancePhase whenever the GamePhase changes.
+	 *
+	 * @param state the current game state
+	 * @param phase the newly entered phase
+	 */
 	private void onEnterPhase(PowerGridGameState state, PowerGridGamePhase phase) {
 	    switch (phase) {
 	        case PLAYER_ORDER -> {
@@ -276,6 +280,15 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 
 
+	/**
+	 * Handles all post processing logic when the game exits a phase.
+	 * This includes awarding income, handling the post turn market, and checking the end game condition.
+	 * <p>
+	 * Called by advancePhase whenever the GamePhase changes.
+	 *
+	 * @param state the current game state
+	 * @param phase the newly entered phase
+	 */
 	private void onExitPhase(PowerGridGameState state, PowerGridGamePhase phase) {
 	    switch (phase) {
 	    	case AUCTION ->{}
@@ -308,7 +321,20 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	
 	
 
-
+	/**
+	 * Advances the game to the next phase, performing all required transition logic.
+	 * <p>
+	 * This includes:
+	 * <ul>
+	 *   <li>Resetting round turn order</li>
+	 *   <li>Ending the current player's turn</li>
+	 *   <li>Running phase-exit cleanup</li>
+	 *   <li>Updating the state to the next phase</li>
+	 *   <li>Running phase-entry initialization</li>
+	 * </ul>
+	 *
+	 * @param gameState the current game state
+	 */
 	public void advancePhase(AbstractGameState gameState) {
 
 		PowerGridGameState s = (PowerGridGameState) gameState;
@@ -361,12 +387,16 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             gs.setPlayerResult(LOSE_GAME, i);
         }
         gs.setPlayerResult(WIN_GAME, winner);
-        //System.out.println("WINNER: Player " + winner);
 		state.setGameStatus(CoreConstants.GameResult.GAME_END);
 		
     }
 
-	
+    /**
+     * Awards money to each player based on how many cities they powered this round.
+     * Uses the INCOME_TRACK table to determine payout and records the income.
+     *
+     * @param s the current game state
+     */
 	private static void awardIncome(PowerGridGameState s) {
 	    for (int p = 0; p < s.getNPlayers(); p++) {    	
 	        int powered = Math.min(s.getPoweredCities(p), PowerGridParameters.INCOME_TRACK.length - 1);
@@ -404,7 +434,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	    // Sum capacities: dedicated + hybrid pool
 	    int coalCap = 0, gasCap = 0, oilCap = 0, urCap = 0, hybridCap = 0;
 
-	    // use getComponents() unless your Deck implements Iterable<PowerGridCard>
 	    for (PowerGridCard card : hand.getComponents()) {
 	        PowerGridCard.PlantInput in = card.getInput();
 	        int g = in.get(PowerGridParameters.Resource.GAS);
@@ -572,38 +601,50 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
         return drawPile;
     }
     
+    
+    /**
+     * Initializes the power plant markets at game start by drawing the first 8 cards,
+     * sorting them, and placing the lowest 4 into the current market and the next 4 into the future market.
+     *
+     * @param state the current game state
+     */
     private void initMarkets(PowerGridGameState state) {
-        // Draw 8, sort ascending by plant number, split 4/4 into current/future
+        // Draw 8
         List<PowerGridCard> firstEight = new ArrayList<>(8);
         for (int i = 0; i < 8 && state.drawPile.getSize() > 0; i++) {
             firstEight.add(state.drawPile.draw());
         }
+        //sort ascending by plant number
         firstEight.sort(Comparator.comparingInt(PowerGridCard::getNumber));
 
         for (int i = 0; i < firstEight.size(); i++) {
             if (i < 4) state.currentMarket.add(firstEight.get(i)); 
             else       state.futureMarket.add(firstEight.get(i));  
         }
+        // split 4/4 into current/future
         sortMarket(state.currentMarket);
         sortMarket(state.futureMarket);
     }
     
-    
+    //helper to sort the cards in the market 
     private static void sortMarket(Deck<PowerGridCard> market) {
         market.getComponents().sort(Comparator.comparingInt(PowerGridCard::getNumber));
     }
     
-
+    /**
+     * Builds and assigns the player turn order.
+     * Random on the first round, otherwise based on computed order (plants owned → highest plant → player ID).
+     *
+     * @param state the current game state
+     */
     private void buildTurnOrder(PowerGridGameState state) {
         List<Integer> order = new ArrayList<>();
-      //first round of the game build the list of players and the turn order is random
         if(state.getTurnCounter() == 0) { 
 	        for (int i = 0; i < state.getNPlayers(); i++) {
 	            order.add(i);
 	        }
 	        Collections.shuffle(order, state.getRnd());
         }else {
-        	//rest of the game order is calculated  based on #of plants -> highest Card -> player number
         	order = state.getComputedTurnOrder();
         }
 
@@ -685,7 +726,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
     
 
     /**
-     * Utility for selecting a random contiguous set of map regions.
+     * Utility for selecting a random contiguous set of map regions used to build the map.
      * <p>
      * Uses a single depth-first search (DFS) over
      * {@link PowerGridGraphBoard#REGION_ADJ_NA} to collect {@code k} regions,
@@ -726,7 +767,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
                     if (!chosen.contains(v)) stack.push(v);
                 }
             }
-            return chosen; // guaranteed to have size k by your assumption
+            return chosen; 
         }
     }
     
@@ -767,26 +808,26 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
         ActionTreeNode root = new ActionTreeNode(0, "root");
 
-        // --- Phase roots---
+        //Phase NODES
         ActionTreeNode auction       = root.addChild(0, "AUCTION");
         ActionTreeNode startAuction  = auction.addChild(0, "start_auction");
         ActionTreeNode buyResource   = root.addChild(0, "RESOURCE_BUY");
         ActionTreeNode build         = root.addChild(0, "BUILD");
         ActionTreeNode runPhase      = root.addChild(0, "BUREAUCRACY");
 
-        // --- AUCTION placeholders---
+        //AUCTION 
         auction.addChild(0, "increase_bid");
         auction.addChild(0, "pass_bid");
         auction.addChild(0, "discard_0");
         auction.addChild(0, "discard_1");
         auction.addChild(0, "discard_2");
 
-        // Open auction leaves: one per plant under start_auction
+        // Open auction leaves one per plant under start_auction
         for (PowerGridCard card : params.plantsIncludedInGame) {
             startAuction.addChild(0, "auction_plant_" + card.getNumber());
         }
 
-        // --- BUREAUCRACY ---
+        //BUREAUCRACY 
         for (PowerGridCard card : params.plantsIncludedInGame) {
             int plantNumber = card.getNumber();
             if (card.getInput().hasMultipleTypes()) {
@@ -798,7 +839,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             }
         }
 
-        // --- RESOURCE_BUY ---
+        //RESOURCE_BUY
         for (int i = 1; i <= 9; i++) {
             buyResource.addChild(0, "buy_COAL_" + i);
             buyResource.addChild(0, "buy_GAS_"  + i);
@@ -806,7 +847,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
             if (i <= 6) buyResource.addChild(0, "buy_URANIUM_" + i);
         }
 
-        // --- BUILD ---
+        //BUILD 
         for (PowerGridCity city : map.cities()) {
             build.addChild(0, "build_city_" + city.getComponentID());
         }

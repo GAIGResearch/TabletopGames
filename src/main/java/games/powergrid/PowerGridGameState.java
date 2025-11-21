@@ -139,9 +139,9 @@ public class PowerGridGameState extends AbstractGameState {
     protected PowerGridGameState _copy(int playerId) {
         PowerGridGameState copy = new PowerGridGameState(gameParameters, getNPlayers());
 
-        // Components (ensure ResourceMarket.copy() copies BOTH avail and discard!)
+        // Components 
         copy.gameMap        = (this.gameMap == null) ? null : this.gameMap.copy();
-        copy.drawPile       = (this.drawPile == null) ? null : this.drawPile.copy();        // consider player-aware copy if supported
+        copy.drawPile       = (this.drawPile == null) ? null : this.drawPile.copy();        
         copy.currentMarket  = (this.currentMarket == null) ? null : this.currentMarket.copy();
         copy.futureMarket   = (this.futureMarket == null) ? null : this.futureMarket.copy();
         copy.resourceMarket = (this.resourceMarket == null) ? null : this.resourceMarket.copy();
@@ -276,8 +276,6 @@ public class PowerGridGameState extends AbstractGameState {
 	    if (!Arrays.equals(cityCountByPlayer, other.cityCountByPlayer)) return false;
 	    if (!Arrays.equals(oneHotRegion, other.oneHotRegion)) return false;
 	    if (!Arrays.deepEquals(citySlotsById, other.citySlotsById)) return false;
-
-	    // Arrays of maps / decks (1-D; Arrays.equals calls element .equals)
 	    if (!Arrays.equals(fuelByPlayer, other.fuelByPlayer)) return false;
 	    if (!Arrays.equals(ownedPlantsByPlayer, other.ownedPlantsByPlayer)) return false;
 
@@ -408,7 +406,6 @@ public class PowerGridGameState extends AbstractGameState {
 	    if (citySlotsById[cityId][slotIndex] != -1)
 	        throw new IllegalStateException("Slot already occupied");
 	    citySlotsById[cityId][slotIndex] = playerId;
-	    // Count *cities*, not houses: increment only on first presence in that city
 	    cityCountByPlayer[playerId]++;
 	}
 	
@@ -443,7 +440,6 @@ public class PowerGridGameState extends AbstractGameState {
 	    return sb.toString();
 	}
 	
-	/*Money Helper Methods*/
 	public void setStartingMoney(int starting_money) {
 		for (int i = 0; i < nPlayers; i++) {
 	        playerMoney[i] = starting_money;
@@ -567,7 +563,7 @@ public class PowerGridGameState extends AbstractGameState {
 	            return player;  // first valid player found
 	        }
 	    }
-	    // If all are -1, return -1 (or throw, depending on your game logic)
+	    // If all are -1, return -1 
 	    return -1;
 	}
 
@@ -726,7 +722,7 @@ public class PowerGridGameState extends AbstractGameState {
                 if (c != null) max = Math.max(max, c.getNumber());
             }
         }
-        return max;  // -1 if no plants owned
+        return max;  
     }
 
 	public int getCurrentBidder() {
@@ -820,6 +816,27 @@ public class PowerGridGameState extends AbstractGameState {
     	return this.oneHotRegion;
     }
     
+    /**
+     * Computes the game score for the given player, used for intermediate
+     * reward shaping and final outcome scoring. This is what PyTAG uses so this does not 
+     * necessarily reflect the "Score" of a game. 
+     *
+     * <p>After the Bureaucracy phase, the score is calculated based on a 
+     * a weighted combination of:
+     * <ul>
+     *   <li>Normalized city count (progress toward game-end city target)</li>
+     *   <li>Normalized income (based on powered cities)</li>
+     * </ul>
+     *
+     * <p>At game end:
+     * <ul>
+     *   <li>Winners receive +4.0</li>
+     *   <li>All non-winners receive −2.0</li>
+     * </ul>
+     *
+     * @param playerId the player whose score is being calculated
+     * @return a reward value reflecting current progress or final result
+     */
 
     @Override
     public double getGameScore(int playerId) {
