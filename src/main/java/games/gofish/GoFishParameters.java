@@ -1,8 +1,8 @@
 package games.gofish;
 
-import core.AbstractParameters;
+import evaluation.optimisation.TunableParameters;
 
-public class GoFishParameters extends AbstractParameters {
+public class GoFishParameters extends TunableParameters {
 
     // Game-specific parameters
     public int startingHandSize = 5;
@@ -11,6 +11,15 @@ public class GoFishParameters extends AbstractParameters {
 
     public GoFishParameters() {
         setMaxRounds(500);
+        addTunableParameter("startingHandSize", 5);
+        addTunableParameter("continueFishingOnSuccess", false);
+        addTunableParameter("continueOnDrawingSameRank", true);
+    }
+    @Override
+    public void _reset() {
+        startingHandSize = (int) getParameterValue("startingHandSize");
+        continueFishingOnSuccess = (boolean) getParameterValue("continueFishingOnSuccess");
+        continueOnDrawingSameRank = (boolean) getParameterValue("continueOnDrawingSameRank");
     }
 
     @Override
@@ -26,4 +35,11 @@ public class GoFishParameters extends AbstractParameters {
         if (!(o instanceof GoFishParameters that)) return false;
         return this.startingHandSize == that.startingHandSize;
     }
+
+    @Override
+    public GoFishParameters instantiate() {
+        return this;
+    }
+
+
 }
