@@ -43,6 +43,7 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
@@ -308,7 +309,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     }
                     previousRandom.add(idx);
                 }
-                else if (!tileName.equalsIgnoreCase("player")) {
+                else if (!tileName.equalsIgnoreCase("player") && !tileName.equalsIgnoreCase("")) {
                     // Get a specific tile
                     if (tileName.contains("-")) {
                         Map tile = dgs.gridReferences.get(tileName.split("-")[0]);
@@ -372,6 +373,29 @@ public class DescentForwardModel extends StandardForwardModel {
         dgs.act2ShopCards.shuffle(rnd);
 
         dgs.relicCards = _data.relicCards;
+
+        // Any rules that apply at the start of the game
+        for (String[] rule : firstQuest.getRules()) {
+            if (rule[1].toUpperCase().contains("START_GAME")) {
+                if (rule[0].contains("Token")) {
+                    String tokenType = rule[0].split(":")[1];
+                    List<DToken> tokens = dgs.getTokens().stream().filter(t -> t.getTokenType().equals(tokenType)).toList();
+                    int index = 0;
+                    if (rule[2].split(":")[2].contains("Random"))
+                        index = rnd.nextInt(tokens.size());
+                    else if (rule[2].split(":")[2].contains("All"))
+                        index = -1;
+                    else index = Integer.parseInt(rule[2].split(":")[2]);
+                    if (rule[2].split(":")[0].contains("ComponentName")) {
+                        if (index == -1) {
+                            for (DToken t : tokens)
+                                t.setComponentName(rule[2].split(":")[1]);
+                        } else
+                            tokens.get(index).setComponentName(rule[2].split(":")[1]);
+                    }
+                }
+            }
+        }
 
         // Announce all figures in play, including their stats and starting positions
         // Primarily for debug purposes
