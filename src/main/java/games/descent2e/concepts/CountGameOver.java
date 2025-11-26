@@ -83,28 +83,20 @@ public class CountGameOver extends GameOverCondition {
         Less,
         Equal;
         public boolean compare(int a, int b) {
-            switch (this) {
-                case More:
-                    return a > b;
-                case Less:
-                    return a < b;
-                case Equal:
-                    return a == b;
-            }
-            return false;
+            return switch (this) {
+                case More -> a > b;
+                case Less -> a < b;
+                case Equal -> a == b;
+            };
         }
 
         @Override
         public String toString() {
-            switch(this) {
-                case More:
-                    return ">";
-                case Less:
-                    return "<";
-                case Equal:
-                    return "=";
-            }
-            return null;
+            return switch (this) {
+                case More -> ">";
+                case Less -> "<";
+                case Equal -> "=";
+            };
         }
     }
 }
