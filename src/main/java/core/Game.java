@@ -9,6 +9,9 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
+import games.seasaltpaper.heuristics.LeadHeuristic;
+import games.seasaltpaper.heuristics.ScoreAndHandHeuristic;
+import games.seasaltpaper.heuristics.ScoreHeuristic;
 import games.pandemic.PandemicForwardModel;
 import gui.AbstractGUIManager;
 import gui.GUI;
@@ -17,10 +20,13 @@ import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.rhea.RHEAPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
+import players.simple.FirstActionPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
@@ -696,7 +702,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Chess");
+        String gameType = Utils.getArg(args, "game", "SeaSaltPaper");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -704,12 +710,19 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+
+//        players.add(new MCTSPlayer());
+//        players.add(new HumanConsolePlayer());
+//        players.add(new HumanConsolePlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-    //    players.add(new BasicMCTSPlayer());
-//        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-        // players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
 
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */
@@ -717,6 +730,6 @@ public class Game {
 
         /* Run! */
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
-    }
 
+    }
 }

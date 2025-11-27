@@ -97,6 +97,10 @@ import games.resistance.ResForwardModel;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.gui.ResGUIManager;
+import games.seasaltpaper.SeaSaltPaperForwardModel;
+import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.SeaSaltPaperParameters;
+import games.seasaltpaper.gui.SSPGUIManager;
 import games.root.RootForwardModel;
 import games.root.RootGameState;
 import games.root.RootParameters;
@@ -196,6 +200,10 @@ public enum GameType {
             Arrays.asList(Cards, Deduction, Renaissance),
             Arrays.asList(HandManagement, PlayerElimination),
             LoveLetterGameState.class, LoveLetterForwardModel.class, LoveLetterParameters.class, LoveLetterGUIManager.class),
+    SeaSaltPaper(2, 4,
+            Arrays.asList(Cards, Deduction),
+            Arrays.asList(HandManagement, SetCollection),
+            SeaSaltPaperGameState.class, SeaSaltPaperForwardModel.class, SeaSaltPaperParameters.class, SSPGUIManager.class),
     Uno(2, 10,
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),

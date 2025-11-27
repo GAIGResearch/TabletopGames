@@ -1,0 +1,28 @@
+{
+	"class" : "players.mcts.MCTSParams",
+	"budgetType" : "BUDGET_TIME",
+	"budget" : 64,
+	"breakMS" : 0,
+	"K" : [0.1, 1.0, 3.0, 5.0],
+	"rolloutLength" : [0, 10, 15, 30, 50],
+	"maxTreeDepth" : [1, 3, 5, 15],
+	"rolloutTermination" : "DEFAULT",
+	"information" : "Open_Loop",
+	"selectionPolicy" : ["SIMPLE", "ROBUST"],
+	"treePolicy" : ["UCB","UCB_Tuned"],
+	"opponentTreePolicy" : ["OneTree", "MultiTree", "SelfOnly"],
+	"heuristic" : [
+		{
+			"class" : "games.seasaltpaper.heuristics.LeadHeuristic"
+		},
+		{
+			"class" : "games.seasaltpaper.heuristics.ScoreAndHandHeuristic"
+		}
+	],
+	"exploreEpsilon" : [0.03, 0.1, 0.3],
+	"expansionPolicy" :"RANDOM",
+	"rolloutType" : "RANDOM",
+	"biasVisits" : 0,
+	"progressiveWideningConstant" : 0.0,
+	"progressiveWideningExponent" : 0.2
+}

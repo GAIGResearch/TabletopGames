@@ -100,6 +100,11 @@ public class ForwardModelTestsWithRandom {
     }
 
     @Test
+    public void testSeaSaltPaper() {
+        ForwardModelTester fmt = new ForwardModelTester("game=SeaSaltPaper", "nGames=10", "nPlayers=4");
+    }
+
+    @Test
     public void testMastermind() {
         ForwardModelTester fmt = new ForwardModelTester("game=Mastermind", "nGames=2", "nPlayers=1");
     }
