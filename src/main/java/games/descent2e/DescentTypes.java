@@ -68,19 +68,19 @@ public class DescentTypes {
         Pit(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 2);}}),
         Block(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}});
 
-        HashMap<Figure.Attribute, Integer> moveCosts;
-        static HashSet<TerrainType> startingTerrains = new HashSet<TerrainType>() {{
+        final HashMap<Figure.Attribute, Integer> moveCosts;
+        static final HashSet<TerrainType> startingTerrains = new HashSet<TerrainType>() {{
             add(Plain);
             add(Water);
         }};
-        static HashSet<TerrainType> walkableTerrains = new HashSet<TerrainType>() {{
+        static final HashSet<TerrainType> walkableTerrains = new HashSet<TerrainType>() {{
             add(Plain);
             add(Water);
             add(Lava);
             add(Hazard);
 //                add(Pit);
         }};
-        static HashSet<TerrainType> marginTerrains = new HashSet<TerrainType>() {{
+        static final HashSet<TerrainType> marginTerrains = new HashSet<TerrainType>() {{
             add(Edge);
             add(Open);
             add(Null);
@@ -199,7 +199,10 @@ public class DescentTypes {
         WhiteObjective("whiteobjective.png", 1),
         MysteryObjective("mysteryobjective.png", 1),
         Door("door.png", 1);
-        String imgPath; int nImgOptions;
+
+        String imgPath;
+        int nImgOptions;
+
         DescentToken(String imgPath, int nImgOptions) {
             this.imgPath = imgPath;
             this.nImgOptions = nImgOptions;
@@ -211,6 +214,18 @@ public class DescentTypes {
                 path = split[0] + rnd.nextInt(nImgOptions) + "." + split[1];
             }
             return "tokens/" + path;
+        }
+
+        static final HashSet<DescentToken> objectives = new HashSet<DescentToken>() {{
+            add(BlueObjective);
+            add(GreenObjective);
+            add(RedObjective);
+            add(WhiteObjective);
+            add(MysteryObjective);
+        }};
+
+        public static boolean isObjective(DescentToken objective) {
+            return objective != null && objectives.contains(objective);
         }
     }
 
@@ -290,7 +305,7 @@ public class DescentTypes {
     }
 
     public enum AttackType {
-        NONE, MELEE, RANGED, BLAST, BOTH;
+        NONE, MELEE, RANGED, BOTH;
     }
 
 }

@@ -7,7 +7,7 @@ import core.components.Deck;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.actions.tokens.SearchAction;
+import games.descent2e.actions.tokens.Search;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -16,8 +16,8 @@ import utilities.Pair;
 
 import java.util.Objects;
 
-import static games.descent2e.actions.tokens.SearchAction.getShopItem;
-import static games.descent2e.actions.tokens.SearchAction.setItemAbilities;
+import static games.descent2e.actions.tokens.Search.getShopItem;
+import static games.descent2e.actions.tokens.Search.setItemAbilities;
 
 public class Appraisal extends DescentAction {
 
@@ -106,7 +106,7 @@ public class Appraisal extends DescentAction {
 
         Pair<Integer, AbstractAction> lastAction = Iterables.getLast(dgs.getHistory());
         if (!lastAction.a.equals(f.getOwnerId())) return false;
-        if (!(lastAction.b instanceof SearchAction search)) return false;
+        if (!(lastAction.b instanceof Search search)) return false;
         if (!Objects.equals(search.getItemID(), item)) return false;
 
         if (item.equals("Nothing")) return true;

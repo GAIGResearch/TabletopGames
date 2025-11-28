@@ -517,9 +517,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     executing the action (if this is at all relevant).
      */
     public Figure getActingFigure() {
-        // Find current monster group + monster playing
-        List<Monster> monsterGroup = getCurrentMonsterGroup();
-
         // Find currently acting figure (hero or monster)
         Figure actingFigure;
         // TODO Ensure monsterGroup deletes itself when empty
@@ -527,6 +524,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             // If hero player, get corresponding hero
             actingFigure = heroes.get(heroActingNext);
         } else {
+            // Find current monster group + monster playing
+            List<Monster> monsterGroup = getCurrentMonsterGroup();
+
             // Otherwise, monster is playing
             if (monsterActingNext == -1) {
                 throw new AssertionError("Monster index not set");

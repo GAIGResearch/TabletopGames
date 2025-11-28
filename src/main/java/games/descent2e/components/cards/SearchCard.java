@@ -3,8 +3,6 @@ package games.descent2e.components.cards;
 import core.CoreConstants;
 import core.components.Card;
 import core.components.Deck;
-import core.components.Dice;
-import games.descent2e.actions.tokens.SearchAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

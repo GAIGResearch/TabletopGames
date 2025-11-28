@@ -25,7 +25,7 @@ public class DeliverGameOver extends GameOverCondition {
     public CoreConstants.GameResult test(DescentGameState gs) {
 
         for (DToken token : gs.getTokens()) {
-            if (!Objects.equals(token.getTokenType(), tokenType)) continue;
+            if (!Objects.equals(token.getComponentName(), tokenType)) continue;
             if (token.getOwnerId() != -1) {
                 Figure f = (Figure) gs.getComponentById(token.getOwnerId());
                 if (figureName.toLowerCase().contains("hero")) {

@@ -4,7 +4,7 @@ import core.components.BoardNode;
 import core.components.Deck;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
-import games.descent2e.actions.tokens.SearchAction;
+import games.descent2e.actions.tokens.Search;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -15,7 +15,7 @@ import java.util.Set;
 
 import static games.descent2e.DescentHelper.*;
 
-public class Greedy extends SearchAction {
+public class Greedy extends Search {
     public Greedy() {
         super();
     }

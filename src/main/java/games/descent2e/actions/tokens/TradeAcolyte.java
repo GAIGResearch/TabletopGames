@@ -25,19 +25,19 @@ import static utilities.Utils.getNeighbourhood;
 /**
  * 2-step action to give acolyte token to an adjacent player. Player currently carrying the token chooses between adjacent players
  */
-public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implements IExtendedSequence {
+public class TradeAcolyte extends TokenAction<TradeAcolyte> implements IExtendedSequence {
     int receivingHeroIdx;
     boolean complete;
 
-    public TradeAcolyteAction() {
+    public TradeAcolyte() {
         super(-1, Triggers.ACTION_POINT_SPEND);
         this.receivingHeroIdx = -1;
     }
-    public TradeAcolyteAction(int acolyteComponentID) {
+    public TradeAcolyte(int acolyteComponentID) {
         super(acolyteComponentID, Triggers.ACTION_POINT_SPEND);
         this.receivingHeroIdx = -1;
     }
-    public TradeAcolyteAction(int acolyteComponentID, int receivingHeroIdx) {
+    public TradeAcolyte(int acolyteComponentID, int receivingHeroIdx) {
         super(acolyteComponentID, Triggers.ACTION_POINT_SPEND);
         this.receivingHeroIdx = receivingHeroIdx;
     }
@@ -70,7 +70,7 @@ public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implemen
                 for (Hero h : adjacentHeroes) {
                     if (h.getComponentID() != heroIdx) {
                         // Check if adjacent
-                        actions.add(new TradeAcolyteAction(tokenID, h.getComponentID()));
+                        actions.add(new TradeAcolyte(tokenID, h.getComponentID()));
                     }
                 }
             }
@@ -96,8 +96,8 @@ public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implemen
     }
 
     @Override
-    public TradeAcolyteAction _copy() {
-        TradeAcolyteAction taa = new TradeAcolyteAction(tokenID);
+    public TradeAcolyte _copy() {
+        TradeAcolyte taa = new TradeAcolyte(tokenID);
         taa.receivingHeroIdx = receivingHeroIdx;
         return taa;
     }
@@ -132,7 +132,7 @@ public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implemen
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o instanceof TradeAcolyteAction that) {
+        if (o instanceof TradeAcolyte that) {
             return super.equals(that) && receivingHeroIdx == that.receivingHeroIdx && complete == that.complete;
         }
         return false;

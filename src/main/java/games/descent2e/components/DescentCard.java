@@ -67,10 +67,6 @@ public class DescentCard extends Card {
         return attackType != AttackType.NONE;
     }
 
-    public boolean isAOE() {
-        return attackType == AttackType.BLAST;
-    }
-
     @Override
     public DescentCard copy() {
         DescentCard copy = new DescentCard(attackType, dicePool.copy(), weaponSurges, componentID, componentName);

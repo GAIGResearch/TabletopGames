@@ -29,7 +29,8 @@ import games.descent2e.actions.searchcards.UseCurseDoll;
 import games.descent2e.actions.searchcards.UseFireFlask;
 import games.descent2e.actions.searchcards.UseHealthPotion;
 import games.descent2e.actions.searchcards.UseStaminaPotion;
-import games.descent2e.actions.tokens.SearchAction;
+import games.descent2e.actions.tokens.InteractObjective;
+import games.descent2e.actions.tokens.Search;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
@@ -43,7 +44,6 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
@@ -339,7 +339,9 @@ public class DescentForwardModel extends StandardForwardModel {
                         }
                     }
                 } else {
-                    // A player should hold these tokens, not on the board, location is left null
+                    // This token should be left off the board
+                    // Either give it to a player or place it later
+                    // Location is left null
                 }
                 DToken token = new DToken(def.getTokenType(), location);
                 token.setEffects(def.getEffectsCopy());
@@ -348,9 +350,11 @@ public class DescentForwardModel extends StandardForwardModel {
                 }
                 token.setAttributeModifiers(def.getAttributeModifiers());
                 if (location == null) {
-                    // Make a hero owner of it TODO: players choose?
-                    int idx = rnd.nextInt(dgs.getHeroes().size() - 1);
-                    token.setOwnerId(dgs.getHeroes().get(idx).getComponentID(), dgs);
+                    if (tileName.equalsIgnoreCase("player")) {
+                        // Make a hero owner of it
+                        int idx = rnd.nextInt(dgs.getHeroes().size() - 1);
+                        token.setOwnerId(dgs.getHeroes().get(idx).getComponentID(), dgs);
+                    }
                 }
                 token.setComponentName(def.getAltName());
                 dgs.tokens.add(token);
@@ -569,21 +573,65 @@ public class DescentForwardModel extends StandardForwardModel {
                 throw new AssertionError("No monsters to activate - game should be over");
             }
 
-            // Call for Regeneration for all monsters with that passive (realistically, only Sir Alric Farrow)
-            regeneration(dgs.getMonsters());
+            if (!dgs.inSetup()) {
+                // Call for Regeneration for all monsters with that passive (realistically, only Sir Alric Farrow)
+                regeneration(dgs.getMonsters());
 
-            // And this is where the Bones of Woe (Overlord Relic) would go
-            // If I actually implemented Overlord Cards into the game
-            // As it stands, it is completely useless as a Relic, because Cards are too disruptive
-            // I did have another branch where they are available, but I'd need to call that back in for this
-            for (List<Monster> monsters : dgs.getMonsters()) {
-                for (Monster monster : monsters) {
-                    if (!monster.isLieutenant()) continue;
-                    if (monster.hasBonus(SkillBonus.BonesOfWoe)) {
-                        DicePool bonesOfWoe = DicePool.constructDicePool("BLUE");
-                        bonesOfWoe.roll(dgs.getRnd());
-                        if (bonesOfWoe.getSurge() >= 1) {
-                            System.out.println("Bones of Woe! Draw 1 Overlord Card!");
+                // Check for any rules that occur at the start of turn (that are not Fatigue related)
+                for (String[] rule : dgs.getCurrentQuest().getRules()) {
+                    if (!rule[1].toUpperCase().contains("START_TURN")) continue;
+                    if (!rule[0].contains("Replace")) continue;
+                    String tokenType = rule[0].split(":")[1];
+                    List<DToken> allTokens = dgs.getTokens();
+                    List<DToken> tokens = allTokens.stream().filter(t -> t.getTokenType().equals(tokenType)).filter(t -> t.getOwnerId() == -1).toList();
+                    if (tokens.isEmpty()) continue;
+                    int index = dgs.getRnd().nextInt(tokens.size());
+                    String swapRule = rule[2].split(":")[0];
+                    DToken token = tokens.get(index);
+                    String swapTo = "";
+                    if (token.getComponentName().toLowerCase().contains(swapRule.split(";")[0].toLowerCase()))
+                        swapTo = swapRule.split(";")[1];
+                    else if (swapRule.length() - swapRule.replace(";", "").length() == 2)
+                        swapTo = swapRule.split(";")[2];
+                    if (Objects.equals(swapTo, "")) continue;
+                    List<Vector2D> positions = new ArrayList<>();
+                    for (DToken t : allTokens) {
+                        if (t.getPosition() != null) {
+                            positions.add(t.getPosition());
+                            continue;
+                        }
+                        if (!t.getTokenType().contains(swapTo)) continue;
+                        String tile = rule[2].split(":")[1];
+                        String terrain = "plain";
+                        if (tile.contains(";")) {
+                            terrain = tile.split(";")[1];
+                            tile = tile.split(";")[0];
+                        }
+                        List<Vector2D> possible = new ArrayList<>(dgs.getGridReferences().get(tile).keySet());
+                        Vector2D spawn;
+                        do {
+                            spawn = possible.get(dgs.getRnd().nextInt(possible.size()));
+                        } while (positions.contains(spawn)
+                                || !dgs.getMasterBoard().getElement(spawn).getComponentName().equals(terrain));
+                        t.setPosition(spawn);
+                        allTokens.remove(token);
+                        break;
+                    }
+                }
+
+                // And this is where the Bones of Woe (Overlord Relic) would go
+                // If I actually implemented Overlord Cards into the game
+                // As it stands, it is completely useless as a Relic, because Cards are too disruptive
+                // I did have another branch where they are available, but I'd need to call that back in for this
+                for (List<Monster> monsters : dgs.getMonsters()) {
+                    for (Monster monster : monsters) {
+                        if (!monster.isLieutenant()) continue;
+                        if (monster.hasBonus(SkillBonus.BonesOfWoe)) {
+                            DicePool bonesOfWoe = DicePool.constructDicePool("BLUE");
+                            bonesOfWoe.roll(dgs.getRnd());
+                            if (bonesOfWoe.getSurge() >= 1) {
+                                System.out.println("Bones of Woe! Draw 1 Overlord Card!");
+                            }
                         }
                     }
                 }
@@ -605,6 +653,8 @@ public class DescentForwardModel extends StandardForwardModel {
         int nextMonster = dgs.nextMonster();
         if (nextMonster == -1) {
             // Check if we need to respawn any reinforcements
+            dgs.monsterGroupActingNext = 0;
+            dgs.monsterActingNext = 0;
             checkReinforcements(dgs, false);
             if (!dgs.getReinforcements().isEmpty()) {
                 dgs.startReinforcements();
@@ -635,8 +685,6 @@ public class DescentForwardModel extends StandardForwardModel {
             dgs.endReinforcing();
             dgs.activated.clear();
             dgs.overlord.resetRound();
-            dgs.monsterGroupActingNext = 0;
-            dgs.monsterActingNext = 0;
             dgs.heroActingNext = 0;
             while (dgs.getHeroes().get(dgs.heroActingNext).isDefeated() && dgs.heroActingNext < dgs.getHeroes().size()) {
                 dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
@@ -681,6 +729,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     noToSpawn = Math.min(maxMonsters.get(i) - mon.size(), Integer.parseInt(split[2]));
                 }
             }
+            else { System.out.println("Error: Unidentifiable monster: " + monsterName); }
 
             if (canSpawn) {
                 //System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
@@ -1197,8 +1246,18 @@ public class DescentForwardModel extends StandardForwardModel {
                             && token.getPosition() != null
                             && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
                         for (DescentAction da : token.getEffects()) {
-                            if (da instanceof SearchAction search)
+                            if (da instanceof Search search)
                                 search.setItemID(dgs);
+                            if (da.canExecute(dgs))
+                                actions.add(da.copy());
+                        }
+                    }
+                    if (DescentToken.isObjective(token.getDescentTokenType())
+                        && token.getPosition() != null
+                        && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
+                        for (DescentAction da : token.getEffects()) {
+                            if (da instanceof InteractObjective interact)
+                                interact.setFigureID(actingFigure.getComponentID());
                             if (da.canExecute(dgs))
                                 actions.add(da.copy());
                         }

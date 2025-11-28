@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
 import core.components.GridBoard;
-import core.properties.PropertyBoolean;
 import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
@@ -25,21 +24,21 @@ import static utilities.Utils.getNeighbourhood;
 /**
  * Draw random search card and add to player
  */
-public class SearchAction extends TokenAction<SearchAction> {
+public class Search extends TokenAction<Search> {
     protected boolean freeSearch = false;
     String item;
-    public SearchAction() {
+    public Search() {
         super(-1, Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
-    public SearchAction _copy() {
-        SearchAction search = new SearchAction();
+    public Search _copy() {
+        Search search = new Search();
         copyComponentsTo(search);
         return search;
     }
 
-    public void copyComponentsTo(SearchAction action) {
+    public void copyComponentsTo(Search action) {
         action.freeSearch = freeSearch;
         action.item = item;
     }
@@ -62,8 +61,8 @@ public class SearchAction extends TokenAction<SearchAction> {
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && o instanceof SearchAction
-                && ((SearchAction) o).freeSearch == freeSearch && ((SearchAction) o).item == item;
+        return super.equals(o) && o instanceof Search
+                && ((Search) o).freeSearch == freeSearch && ((Search) o).item == item;
     }
 
     @Override

@@ -1,30 +1,21 @@
 package games.descent2e.actions.archetypeskills;
 
 import core.AbstractGameState;
-import core.components.Card;
-import core.components.Deck;
-import core.components.GridBoard;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
-import games.descent2e.actions.Triggers;
-import games.descent2e.actions.tokens.SearchAction;
-import games.descent2e.actions.tokens.TokenAction;
+import games.descent2e.actions.tokens.Search;
 import games.descent2e.components.*;
-import games.descent2e.components.cards.SearchCard;
-import games.descent2e.components.tokens.DToken;
-import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static games.descent2e.components.DiceType.BROWN;
-import static utilities.Utils.getNeighbourhood;
 
 /**
  * Draw random search card and add to player
  */
-public class Lurk extends SearchAction {
+public class Lurk extends Search {
     public static int cardID = -1;
     public Lurk() {
         super();

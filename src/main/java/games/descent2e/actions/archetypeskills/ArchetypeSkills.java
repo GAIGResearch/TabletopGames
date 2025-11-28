@@ -13,7 +13,7 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.monsterfeats.Air;
-import games.descent2e.actions.tokens.SearchAction;
+import games.descent2e.actions.tokens.Search;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -375,7 +375,7 @@ public class ArchetypeSkills {
                 case "Appraisal" -> {
                     if (dgs.getHistory().isEmpty()) break;
                     Pair<Integer, AbstractAction> lastAction = Iterables.getLast(dgs.getHistory());
-                    if (lastAction.a == f.getOwnerId() && lastAction.b instanceof SearchAction search) {
+                    if (lastAction.a == f.getOwnerId() && lastAction.b instanceof Search search) {
                         if (dgs.getSearchCards().getSize() == 0) break;
                         String nextItem = dgs.getSearchCards().get(0).getComponentName();
                         Appraisal appraisal = new Appraisal(search.getItemID(), nextItem);
