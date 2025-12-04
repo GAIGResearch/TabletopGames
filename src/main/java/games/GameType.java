@@ -140,6 +140,10 @@ import gametemplate.GTForwardModel;
 import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
 import gametemplate.GTParameters;
+import games.pickomino.PickominoForwardModel;
+import games.pickomino.PickominoGUIManager;
+import games.pickomino.PickominoGameState;
+import games.pickomino.PickominoParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.*;
@@ -170,6 +174,10 @@ public enum GameType {
      * Game template example, see template in package {@link gametemplate}
      */
     GameTemplate(1, 8, null, null, GTGameState.class, GTForwardModel.class, GTParameters.class, GTGUIManager.class),
+    /**
+     * Pickomino game implementation
+     */
+    Pickomino(1, 8, null, null, PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class, PickominoGUIManager.class),
     /**
      * Each game in the framework corresponds to a enum value here, giving minimum players, maximum players,
      * a list of categories the game belongs to, and a list of mechanics the game uses.
