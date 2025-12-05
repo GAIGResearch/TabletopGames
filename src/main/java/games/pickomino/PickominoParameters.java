@@ -1,37 +1,96 @@
 package games.pickomino;
 
-import core.AbstractGameState;
 import core.AbstractParameters;
-import evaluation.optimisation.TunableParameters;
 
-/**
- * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
- * maximum number of rounds in the game etc.). These parameters should be used everywhere in the code instead of
- * local variables or hard-coded numbers, by accessing these parameters from the game state via {@link AbstractGameState#getGameParameters()}.</p>
- *
- * <p>It should then implement appropriate {@link #_copy()}, {@link #_equals(Object)} and {@link #hashCode()} functions.</p>
- *
- * <p>The class can optionally extend from {@link TunableParameters} instead, which allows to use
- * automatic game parameter optimisation tools in the framework.</p>
- */
+import static evaluation.RunArg.multiplier;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+
 public class PickominoParameters extends AbstractParameters {
+
+    protected int nPlayers = 2; // number of players
+    protected boolean canSteal = true;
+    protected int minTileValue = 21; // minimum value of the tiles
+    protected int maxTileValue = 36; // maximum value of the tiles
+    protected int[] tilesPointsSteps = new int[] {21, 25, 29, 33}; // points steps for the tiles (i.e. tiles from 21 to 24 will give 1 points, tiles from 25 to 28 will give 2 points, etc.)
+    protected int numberOfDices = 8; // number of dices used to roll the tiles
+    protected int maxScore;
+
+    public int getNPlayers() {
+        return nPlayers;
+    }
+
+    public boolean isCanSteal() {
+        return canSteal;
+    }
+
+    public int getMinTileValue() {
+        return minTileValue;
+    }
+
+    public int getMaxTileValue() {
+        return maxTileValue;
+    }
+
+    public int[] getTilesPointsSteps() {
+        return tilesPointsSteps;
+    }
+
+    public int getNumberOfDices() {
+        return numberOfDices;
+    }
+
+    public int getMaxScore() {
+        return maxScore;
+    }
+
+    PickominoParameters(){
+        computeMaxScore();
+    }
 
     @Override
     protected AbstractParameters _copy() {
-        // TODO: deep copy of all variables.
-        return this;
+        PickominoParameters copy = new PickominoParameters();
+        copy.nPlayers = this.nPlayers;
+        copy.canSteal = this.canSteal;
+        copy.minTileValue = this.minTileValue;
+        copy.maxTileValue = this.maxTileValue;
+        copy.tilesPointsSteps = this.tilesPointsSteps;
+        copy.numberOfDices = this.numberOfDices;
+        copy.maxScore = this.maxScore;
+        return copy;
     }
 
     @Override
     protected boolean _equals(Object o) {
-        // TODO: compare all variables.
-        return o instanceof PickominoParameters;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PickominoParameters that = (PickominoParameters) o;
+        return nPlayers == that.nPlayers &&
+                canSteal == that.canSteal &&
+                minTileValue == that.minTileValue &&
+                maxTileValue == that.maxTileValue &&
+                Arrays.equals(tilesPointsSteps, that.tilesPointsSteps) &&
+                numberOfDices == that.numberOfDices;
     }
 
     @Override
     public int hashCode() {
-        // TODO: include the hashcode of all variables.
-        return super.hashCode();
+        int result = Objects.hash(super.hashCode(), nPlayers, canSteal, minTileValue, maxTileValue, Arrays.hashCode(tilesPointsSteps), numberOfDices);
+        return result;
+    }
+
+    private void computeMaxScore(){
+        maxScore = 0;
+        int multiplier = 1;
+        for(int i = 1; i < tilesPointsSteps.length; ++i){
+            maxScore += (tilesPointsSteps[i] - tilesPointsSteps[i-1]) * multiplier;
+            ++multiplier;
+        }
+        maxScore += (maxTileValue - tilesPointsSteps[tilesPointsSteps.length - 1]) * multiplier;
+
     }
 }
 

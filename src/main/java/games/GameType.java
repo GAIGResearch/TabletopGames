@@ -177,7 +177,6 @@ public enum GameType {
     /**
      * Pickomino game implementation
      */
-    Pickomino(1, 8, null, null, PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class, PickominoGUIManager.class),
     /**
      * Each game in the framework corresponds to a enum value here, giving minimum players, maximum players,
      * a list of categories the game belongs to, and a list of mechanics the game uses.
@@ -333,7 +332,8 @@ public enum GameType {
     Chess(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),;
+            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),
+    Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling), PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class, PickominoGUIManager.class);
 
 
     // Core classes where the game is defined
