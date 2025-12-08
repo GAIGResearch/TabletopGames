@@ -848,7 +848,7 @@ public class Game {
         String gameType = Utils.getArg(args, "game", "PowerGrid");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 100);
-        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+        long seed = Utils.getArg(args, "seed", 12345L);
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
@@ -857,21 +857,22 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        players.add(new BasicMCTSPlayer());
-        //players.add(new OSLAPlayer());
+        //players.add(new BasicMCTSPlayer());
+        players.add(new OSLAPlayer());
         //players.add(new RMHCPlayer());
-
+        
+        /**
         RMHCParams params = new RMHCParams();
         params.horizon = 8;
         params.discountFactor = 0.99;
         params.heuristic = AbstractGameState::getHeuristicScore;
         AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
         players.add(rmhcPlayer);
+		**/
 
-
-
-        //players.add(new HumanGUIPlayer(ac));
+		MCTSParams mcts_params = new MCTSParams();
+		//players.add(new MCTSPlayer(mcts_params));
+        players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
          //players.add(new HumanGUIPlayer(ac));
     //    players.add(new HumanConsolePlayer());

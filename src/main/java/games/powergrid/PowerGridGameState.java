@@ -17,6 +17,7 @@ import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.*;
 
+//Module Created by Stephen Hornish with the Support of Johns Hopkins University for independent Study Project Fall 2025 
 
 public class PowerGridGameState extends AbstractGameState {
 

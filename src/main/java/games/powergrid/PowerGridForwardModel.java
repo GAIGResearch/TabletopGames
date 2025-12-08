@@ -473,11 +473,16 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 
 	    int gasFree = Math.max(0, gasCap - gasDedicatedUsed) + hybridFree;
 	    int oilFree = Math.max(0, oilCap - oilDedicatedUsed) + hybridFree;
-
-	    canBuy.put(PowerGridParameters.Resource.COAL,    coalFree);
-	    canBuy.put(PowerGridParameters.Resource.GAS,     gasFree);
-	    canBuy.put(PowerGridParameters.Resource.OIL,     oilFree);
-	    canBuy.put(PowerGridParameters.Resource.URANIUM, urFree);
+	    
+	    //limits the max purchase to match the action tree for RL
+	    int coalret = Math.min(coalFree, 9);
+	    int urret   = Math.min(urFree, 6);
+	    int gasret = Math.min(gasFree, 9);
+	    int oilret = Math.min(oilFree, 9);
+	    canBuy.put(PowerGridParameters.Resource.COAL,    coalret);
+	    canBuy.put(PowerGridParameters.Resource.GAS,     gasret);
+	    canBuy.put(PowerGridParameters.Resource.OIL,     oilret);
+	    canBuy.put(PowerGridParameters.Resource.URANIUM, urret);
 	    return canBuy;
 	}
 	

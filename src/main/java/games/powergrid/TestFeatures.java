@@ -60,7 +60,7 @@ public class TestFeatures {
     public static void main(String[] args) throws Exception {
         long seed = 10;
         Random rnd = new Random(seed);
-        int numberOfSteps = 300;
+        int numberOfSteps = 10;
 
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer(rnd));

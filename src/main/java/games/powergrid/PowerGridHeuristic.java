@@ -48,7 +48,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 	public double evaluateState(AbstractGameState gs, int playerId) {
 	    PowerGridGameState s = (PowerGridGameState) gs;
 	    if (s.isGameOver()) {
-	        return (gs.getWinner() == playerId) ? 10.0 : 0.0;
+	        return (gs.getWinner() == playerId) ? 1.0 : -1.0;
 	    }  
 	    //calculates the total resources the player has regardless of type required by the player
     	Deck<PowerGridCard> hand = s.getPlayerPlantDeck(playerId);
