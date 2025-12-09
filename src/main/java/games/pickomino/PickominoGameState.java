@@ -9,8 +9,6 @@ import games.GameType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -23,17 +21,18 @@ import java.util.stream.Collectors;
  */
 public class PickominoGameState extends AbstractGameState {
 
-    // Sorted list of remaining tiles
-    List<PickominoTile> remainingTiles;
+    // Sorted deck of remaining tiles
+    public Deck<PickominoTile> remainingTiles;
     // Tile stacks for each player
-    List<Deck<PickominoTile>> playerTiles;
+    public List<Deck<PickominoTile>> playerTiles;
     // Number of dices that have already been assigned:
     // assignedDices[0] is the number of "1" assigned, assignedDices[1] is the number of "2" assigned, etc.
-    int[] assignedDices = new int[6];
+    public int[] assignedDices = new int[6];
     // Dices that have just been rolled but not yet assigned
-    int[] currentRoll = new int[6];
+    public int[] currentRoll = new int[6];
     // Number of dices that have not been assigned yet
-    int remainingDices;
+    public int remainingDices;
+    public int totalDicesValue = 0;
 
     /**
      * @param gameParameters - game parameters.
@@ -60,7 +59,7 @@ public class PickominoGameState extends AbstractGameState {
     @Override
     protected List<Component> _getAllComponents() {
         List<Component> components = new ArrayList<>();
-        components.addAll(remainingTiles);
+        components.add(remainingTiles);
         components.addAll(playerTiles);
         return components;
     }
@@ -74,11 +73,12 @@ public class PickominoGameState extends AbstractGameState {
     @Override
     protected PickominoGameState _copy(int playerId) {
         PickominoGameState copy = new PickominoGameState(gameParameters, getNPlayers());
-        copy.remainingTiles = new ArrayList<>(remainingTiles);
+        copy.remainingTiles = remainingTiles.copy();
         copy.playerTiles = playerTiles.stream().map(Deck::copy).collect(Collectors.toList());
         copy.assignedDices = assignedDices.clone();
         copy.currentRoll = currentRoll.clone();
         copy.remainingDices = remainingDices;
+        copy.totalDicesValue = totalDicesValue;
         return copy;
     }
 
@@ -138,7 +138,9 @@ public class PickominoGameState extends AbstractGameState {
         // Compare remainingDices
         if (this.remainingDices != that.remainingDices) return false;
 
-        // If all variables are equal, return true
+        // Compare totalDicesValue
+        if (this.totalDicesValue != that.totalDicesValue) return false;
+
         return true;
     }
 
@@ -150,6 +152,7 @@ public class PickominoGameState extends AbstractGameState {
         result = 31 * result + Arrays.hashCode(assignedDices);
         result = 31 * result + Arrays.hashCode(currentRoll);
         result = 31 * result + remainingDices;
+        result = 31 * result + totalDicesValue;
         return result;
     }
 

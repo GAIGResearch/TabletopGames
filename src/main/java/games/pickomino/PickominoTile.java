@@ -9,40 +9,41 @@ import core.components.Component;
  */
 public class PickominoTile extends Component {
     
-    private int value;
-    private int score;
+    final private int value;
+    final private int score;
 
     public int getValue() {
         return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
     }
 
     public int getScore() {
         return score;
     }
 
-    public void setScore(int score) {
+    /**
+     * Creates a new PickominoTile. The component ID will be automatically assigned.
+     * @param name - name of the tile.
+     * @param value - value of the tile.
+     * @param score - score of the tile.
+     */
+    public PickominoTile(String name, int value, int score) {
+        super(CoreConstants.ComponentType.TOKEN, name);
+        this.value = value;
         this.score = score;
     }
 
     /**
-     * Creates a new PickominoTile with the given name.
-     * @param name - name of the tile.
-     */
-    public PickominoTile(String name) {
-        super(CoreConstants.ComponentType.TOKEN, name);
-    }
-
-    /**
      * Creates a new PickominoTile with the given name and component ID.
+     * Used for copying components.
      * @param name - name of the tile.
      * @param componentID - unique component ID.
+     * @param value - value of the tile.
+     * @param score - score of the tile.
      */
-    protected PickominoTile(String name, int componentID) {
+    protected PickominoTile(String name, int componentID, int value, int score) {
         super(CoreConstants.ComponentType.TOKEN, name, componentID);
+        this.value = value;
+        this.score = score;
     }
 
     /**
@@ -51,10 +52,8 @@ public class PickominoTile extends Component {
      */
     @Override
     public PickominoTile copy() {
-        PickominoTile copy = new PickominoTile(componentName, componentID);
+        PickominoTile copy = new PickominoTile(componentName, componentID, value, score);
         copyComponentTo(copy);
-        copy.value = value;
-        copy.score = score;
         return copy;
     }
 

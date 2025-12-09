@@ -175,9 +175,6 @@ public enum GameType {
      */
     GameTemplate(1, 8, null, null, GTGameState.class, GTForwardModel.class, GTParameters.class, GTGUIManager.class),
     /**
-     * Pickomino game implementation
-     */
-    /**
      * Each game in the framework corresponds to a enum value here, giving minimum players, maximum players,
      * a list of categories the game belongs to, and a list of mechanics the game uses.
      * Add here all games implemented.

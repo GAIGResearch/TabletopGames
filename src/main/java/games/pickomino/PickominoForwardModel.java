@@ -1,11 +1,15 @@
 package games.pickomino;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import games.pickomino.actions.PickominoAction;
+import core.components.Deck;
+import games.pickomino.actions.NullTurn;
+import games.pickomino.actions.SelectDicesAction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,19 +24,73 @@ import java.util.List;
 public class PickominoForwardModel extends StandardForwardModel {
 
     /**
-     * Initializes all variables in the given game state. Performs initial game setup according to game rules, e.g.:
-     * <ul>
-     *     <li>Sets up decks of cards and shuffles them</li>
-     *     <li>Gives player cards</li>
-     *     <li>Places tokens on boards</li>
-     *     <li>...</li>
-     * </ul>
-     *
      * @param firstState - the state to be modified to the initial game state.
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
-        // TODO: perform initialization of variables and game setup
+        PickominoGameState pGameState = (PickominoGameState) firstState;
+
+        // Prepare a start game state
+
+        // Create tiles with their values and scores
+        pGameState.remainingTiles = new Deck<PickominoTile>("Remaining Tiles", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        PickominoParameters pGameParameters = (PickominoParameters) pGameState.getGameParameters();
+        int currentScore = 0;
+        for (int tileValue = pGameParameters.minTileValue; tileValue <= pGameParameters.maxTileValue; ++tileValue) {
+            
+            if(currentScore < pGameParameters.tilesPointsSteps.length && tileValue == pGameParameters.tilesPointsSteps[currentScore]) currentScore++;
+
+            String tileName = "Tile " + tileValue + " (Score: " + currentScore + ")";
+            pGameState.remainingTiles.add(new PickominoTile(tileName, tileValue, currentScore));
+        }
+
+        // Create player tiles
+        pGameState.playerTiles = new ArrayList<>();
+        for (int playerID = 0; playerID < pGameState.getNPlayers(); ++playerID) {
+            pGameState.playerTiles.add(new Deck<PickominoTile>(
+                "Player " + playerID + " tiles",
+                playerID,
+                core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL
+            ));
+        }
+
+        pGameState.remainingDices = pGameParameters.numberOfDices;
+
+        // select the first player
+        pGameState.setFirstPlayer(pGameState.getRnd().nextInt(pGameState.getNPlayers()));
+
+        // prepare the first turn
+        setupTurn(pGameState);
+
+    }
+
+    private void setupTurn(PickominoGameState pGameState) {
+        PickominoParameters pGameParameters = (PickominoParameters) pGameState.getGameParameters();
+        pGameState.remainingDices = pGameParameters.numberOfDices;
+        Arrays.fill(pGameState.assignedDices,0);
+        pGameState.totalDicesValue = 0;
+        rollDices(pGameState);
+    }
+
+    private void rollDices(PickominoGameState pGameState) {
+        // roll the dices and store the result in the currentRoll array
+        Arrays.fill(pGameState.currentRoll,0);
+        for (int i = 0; i < pGameState.remainingDices; ++i) {
+            int roll = pGameState.getRnd().nextInt(6);
+            pGameState.currentRoll[roll]++;
+        }
+        if (pGameState.getCoreGameParameters().verbose) {
+            StringBuilder rollStr = new StringBuilder("Dice roll (p" + pGameState.getCurrentPlayer() + "): ");
+            boolean first = true;
+            for (int d = 0; d < 6; d++) {
+                if (pGameState.currentRoll[d] > 0) {
+                    if (!first) rollStr.append(", ");
+                    rollStr.append(pGameState.currentRoll[d]).append("x").append(d + 1);
+                    first = false;
+                }
+            }
+            System.out.println(rollStr);
+        }
     }
 
     /**
@@ -42,22 +100,55 @@ public class PickominoForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         List<AbstractAction> actions = new ArrayList<>();
-        // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
-        actions.add(new PickominoAction());
-        return actions;
-    }
+        PickominoGameState pgs = (PickominoGameState) gameState;
 
-    /**
-     * This is a method hook for any game-specific functionality that should run before an Action is executed
-     * by the forward model
-     *
-     * @param currentState - the current game state
-     * @param actionChosen - the action chosen by the current player, not yet applied to the game state
-     */
-    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
-        // override if needed
-        // TODO: implement any game-specific functionality that should run before an Action is executed
-        // TODO: (This is actually quite rare, and if not needed then remove this method)
+        // Compute the minimum value to reach to stop, and the values of other players top tiles
+        assert pgs.remainingTiles.getSize() != 0 : "No tiles left, should not happen when computing available actions";
+        int minValueToStop = pgs.remainingTiles.peek().getValue(); // we assume the deck is sorted.
+        int[] stealableValues = new int[pgs.getNPlayers() - 1];
+        Arrays.fill(stealableValues, -1);
+        int i = 0;
+        for(int playerID = 0; playerID < pgs.getNPlayers(); playerID++){
+            if(playerID != pgs.getCurrentPlayer()){
+                PickominoTile topTile = pgs.playerTiles.get(playerID).peek();
+                if(topTile != null) stealableValues[i] = topTile.getValue();
+                ++i;
+            }
+        }
+
+        // For each dice value, check if it is selectable and if the player can stop
+        // The player must stop if there are not enough dices after selection
+        for(int d=1; d<=6; ++d){
+            if(pgs.assignedDices[d-1] > 0 || pgs.currentRoll[d-1] == 0) continue; // if not selectable, skip
+
+            int valueIncrement = (d == 6 ? 5 : d) * pgs.currentRoll[d - 1]; // duplicated code, but it is easier to understand this way.
+            int totalValue = pgs.totalDicesValue + valueIncrement;
+            boolean canStop = false;
+            boolean hasWorms = pgs.assignedDices[5] > 0 || d == 6;
+            if(totalValue >= minValueToStop && hasWorms) {
+                canStop = true;
+            } else {
+                // It is possible to select this dice if another player has a tile with the same value
+                for(int value : stealableValues){
+                    if(value == totalValue && hasWorms) {
+                        canStop = true;
+                        break;
+                    }
+                }
+            }
+            if(canStop) actions.add(new SelectDicesAction(d, true));
+
+            if(pgs.remainingDices > pgs.currentRoll[d-1]) {
+                actions.add(new SelectDicesAction(d, false));
+            }
+        } // end for d
+
+        // If no action is available, the dice throw is null
+        if(actions.isEmpty()) {
+            actions.add(new NullTurn());
+        }
+
+        return actions;
     }
 
     /**
@@ -68,10 +159,46 @@ public class PickominoForwardModel extends StandardForwardModel {
      * @param actionTaken  the action taken by the current player, already applied to the game state
      */
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
-        // TODO: implement any game-specific functionality that should run after an Action is executed
-        // TODO: Unlike _beforeAction, this is almost always implemented
-        // TODO: This generally does things like checking for end of turn or round or game (and then doing the
-        // TODO: appropriate actions).
+        PickominoGameState pGameState = (PickominoGameState) currentState;
+
+        // Check for end of turn
+        boolean endOfTurn = false;
+        if(actionTaken instanceof NullTurn) endOfTurn = true;
+        if(actionTaken instanceof SelectDicesAction a) {
+            if(a.isStop()) endOfTurn = true;
+        }
+
+        // Check for end of game, when there is no tile left in the remaining tiles deck
+        if(endOfTurn && pGameState.remainingTiles.getSize() == 0) {
+            if (pGameState.getCoreGameParameters().verbose) {
+                System.out.println("Game over! All tiles have been taken.");
+            }
+            endGame(pGameState);
+            return;
+        }
+
+        if(endOfTurn) {
+            if (pGameState.getCoreGameParameters().verbose) {
+                System.out.println("End of turn for p" + pGameState.getCurrentPlayer());
+            }
+            endPlayerTurn(pGameState);
+            if(pGameState.getCurrentPlayer() == 0) {
+                if (pGameState.getCoreGameParameters().verbose) {
+                    System.out.println("End of round " + pGameState.getRoundCounter());
+                }
+                endRound(pGameState);
+            }
+            setupTurn(pGameState);
+            if (pGameState.getCoreGameParameters().verbose) {
+                System.out.println("Starting turn for p" + pGameState.getCurrentPlayer());
+            }
+            return;
+        }
+
+        // Otherwise, the action is valid and the turn continues
+        // Roll remaining dices. The player will have to choose again.
+        rollDices(pGameState);
+
     }
 
 
