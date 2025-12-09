@@ -1,0 +1,17 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "rolloutLength" : 3,
+  "MASTGamma" : 0.200,
+  "heuristic" : {
+    "class" : "players.heuristics.LeaderHeuristic"
+  },
+  "FPU" : 0.500,
+  "maxTreeDepth" : 1,
+  "treePolicy" : "Uniform",
+  "paranoid" : true,
+  "MAST" : "Both",
+  "rolloutType" : "MAST",
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

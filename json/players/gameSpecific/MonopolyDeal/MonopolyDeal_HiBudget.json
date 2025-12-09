@@ -1,0 +1,21 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "rolloutTermination" : "END_TURN",
+  "rolloutLength" : 30,
+  "opponentTreePolicy" : "SelfOnly",
+  "MASTGamma" : 0.200,
+  "heuristic" : {
+    "class" : "players.heuristics.LeaderHeuristic"
+  },
+  "FPU" : 0.500,
+  "exploreEpsilon" : 0.300,
+  "treePolicy" : "NoAveragingRM",
+  "reuseTree" : true,
+  "backupPolicy" : "MaxMC",
+  "MAST" : "Both",
+  "rolloutType" : "MAST",
+  "maxBackupThreshold" : 10,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

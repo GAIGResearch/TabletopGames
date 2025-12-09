@@ -1,0 +1,15 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutTermination" : "END_ROUND",
+  "rolloutLength" : 0,
+  "heuristic" : {
+    "class" : "players.heuristics.LeaderHeuristic"
+  },
+  "FPU" : 0.500,
+  "exploreEpsilon" : 0.300,
+  "maxTreeDepth" : 3,
+  "treePolicy" : "NoAveragingRM",
+  "reuseTree" : true,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

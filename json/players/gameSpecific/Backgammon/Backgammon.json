@@ -4,10 +4,8 @@
   "rolloutLength" : 100,
   "opponentTreePolicy" : "MultiTree",
   "heuristic" : {
-    "heuristicType" : "LEADER",
-    "class" : "players.heuristics.CoarseTunableHeuristic"
+    "class" : "players.heuristics.LeaderHeuristic"
   },
-  "FPU" : 1000000.0,
   "maxTreeDepth" : 1,
   "treePolicy" : "UCB_Tuned",
   "reuseTree" : true,

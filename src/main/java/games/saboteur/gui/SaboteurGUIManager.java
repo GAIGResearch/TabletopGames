@@ -30,8 +30,8 @@ import java.util.Set;
 public class SaboteurGUIManager extends AbstractGUIManager {
     //all subjected to change
     final static int playerAreaWidth = 200;
-    final static int playerAreaHeight = 100;
-    final static int boardSize = 500;
+    final static int playerAreaHeight = 150;
+    final static int boardSize = 400;
 
     SaboteurGameState gs;
     SaboteurForwardModel fm;
@@ -83,9 +83,9 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 // Find required size of window
                 int nPlayers = gameState.getNPlayers();
                 int nHorizAreas = 4;
-                double nVertAreas = Math.floor(nPlayers / 4.);
+                int nVertAreas = 2;
                 this.width = playerAreaWidth * nHorizAreas;
-                this.height = (int) (playerAreaHeight * nVertAreas) + boardSize;
+                this.height = (playerAreaHeight * nVertAreas) + boardSize;
                 ruleText.setPreferredSize(new Dimension(width + 50, height + defaultInfoPanelHeight));
 
                 parent.setBackground(ImageIO.GetInstance().getImage("data/loveletter/bg.png"));

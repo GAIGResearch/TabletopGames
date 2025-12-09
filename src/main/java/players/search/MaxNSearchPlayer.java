@@ -48,8 +48,6 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
         return (MaxNSearchParameters) this.parameters;
     }
 
-    // TODO: Use information from iterative deepening to improve the expansion order
-
     @Override
     public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
         // For each action we copy the state and recursively call the expand method

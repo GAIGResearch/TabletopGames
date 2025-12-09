@@ -1,0 +1,11 @@
+{
+  "game" : "CantStop",
+  "nPlayers" : 3,
+  "playerDirectory" : "CantStop_Agents/3P",
+  "mode" : "random",
+  "matchups" : 1000,
+  "verbose" : false,
+  "listener" : "GameResultsListener.json",
+  "destDir" : "SkillGrid_CantStop_3P",
+  "seed" : 740234
+}

@@ -24,7 +24,6 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static evaluation.RunArg.bicTimer;
 import static evaluation.RunArg.parseConfig;
 import static utilities.JSONUtils.loadClass;
 
@@ -38,7 +37,8 @@ public class ExpertIteration {
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
     FeatureListener stateListener, actionListener;
-    int nPlayers, matchups, iterations, iter, bicMultiplier, bicTimer, everyN, expertTime;
+    int nPlayers, matchups, iterations, iter, bicMultiplier, bicTimer, expertTime;
+    double sampleRate;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     boolean useRounds, useStateInAction;
@@ -70,7 +70,7 @@ public class ExpertIteration {
         gameToPlay = GameType.valueOf((String) config.get(RunArg.game));
         bicMultiplier = (int) config.get(RunArg.bicMultiplier);
         bicTimer = (int) config.get(RunArg.bicTimer);
-        everyN = (int) config.get(RunArg.everyN);
+        sampleRate = (double) config.get(RunArg.sampleRate);
         expertTime = (int) config.get(RunArg.expertTime);
 
         params = AbstractParameters.createFromFile(gameToPlay, (String) config.get(RunArg.gameParams));
@@ -180,8 +180,6 @@ public class ExpertIteration {
             long iterationStartTime = System.currentTimeMillis();
             // learn the heuristics from the data
             finished = gatherDataAndCheckConvergence();
-            //  stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%02d.txt", prefix, 0);
-            //   actionDataFilesByIteration[0] = dataDir + File.separator + String.format("Action_%s_%02d.txt", prefix, 0);
 
             long dataGatheringTime = System.currentTimeMillis() - iterationStartTime;
             if (finished)
@@ -257,7 +255,7 @@ public class ExpertIteration {
             String fileName = String.format("State_%s_%02d.txt", prefix, iter);
             stateDataFilesByIteration[iter] = dataDir + File.separator + fileName;
             if (stateListener != null) {
-                stateListener.setNth(everyN);
+                stateListener.setSampleRate(sampleRate);
                 stateListener.setLogger(new FileStatsLogger(fileName, "\t", false));
                 stateListener.setOutputDirectory(dataDir);
                 tournament.addListener(stateListener);
@@ -268,7 +266,6 @@ public class ExpertIteration {
             // For the oracle we set a high budget, and tweak parameters to ensure some exploration
             oracle.setName("Oracle");
             oracle.setBudget(budget * expertTime);
-            //           oracle.getParameters().setParameterValue("rolloutLength", 10);
             oracle.getParameters().setParameterValue("reuseTree", false); // we only look at occasional actions
             oracle.getParameters().setParameterValue("maxTreeDepth", 1000);
             if (((double) oracle.getParameters().getParameterValue("FPU")) < 1000.0)
@@ -285,7 +282,7 @@ public class ExpertIteration {
                         100, 0, false);
                 default -> throw new IllegalArgumentException("Unexpected value for expert: " + expert);
             };
-            actionListener.setNth(everyN);
+            actionListener.setSampleRate(sampleRate);
             String fileName = String.format("Action_%s_%02d.txt", prefix, iter);
             actionListener.setLogger(new FileStatsLogger(fileName, "\t", false));
             actionListener.setOutputDirectory(dataDir);
@@ -392,15 +389,7 @@ public class ExpertIteration {
             if (actionSearchSettings != null) {
                 if (actionSearchSpace != null) {   // on first iteration we have results of action search
                     // we can use the action search settings to initialise the value search settings
-                    List<String> valueNames = valueSearchSpace.getDimensions();
-                    for (int i = 0; i < actionSearchSettings.length; i++) {
-                        if (!valueNames.contains(actionSearchSpace.name(i))) {
-                            // usually we will have different parameters in the two searches, but if there is overlap we
-                            // 'forget' the previous value
-                            // otherwise we fix the non-optimised settings to the action search settings
-                            ntbea.fixTunableParameter(actionSearchSpace.name(i), actionSearchSpace.value(i, actionSearchSettings[i]));
-                        }
-                    }
+                    fixSSDimensions(ntbea, valueSearchSpace, actionSearchSettings, actionSearchSpace);
                 }
                 // as well as the old action-tuned settings, we also use the old action heuristic for which they were tuned
                 if (oldActionHeuristic != null) {
@@ -425,19 +414,11 @@ public class ExpertIteration {
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
             ntbea.setOpponents(Collections.singletonList(bestAgent));
             ntbea.fixTunableParameter("actionHeuristic", actionHeuristic);  // so this is used when tuning
-            ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);  // TODO: check if this is a parameter
+            ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);
 
             if (valueSearchSettings != null && valueSearchSpace != null) {
                 // we can use the value search settings to initialise the action search settings
-                List<String> actionNames = actionSearchSpace.getDimensions();
-                for (int i = 0; i < valueSearchSettings.length; i++) {
-                    if (!actionNames.contains(valueSearchSpace.name(i))) {
-                        // usually we will have different parameters in the two searches, but if there is overlap we
-                        // 'forget' the previous value
-                        // otherwise we fix the non-optimised settings to the value search settings
-                        ntbea.fixTunableParameter(valueSearchSpace.name(i), valueSearchSpace.value(i, valueSearchSettings[i]));
-                    }
-                }
+                fixSSDimensions(ntbea, actionSearchSpace, valueSearchSettings, valueSearchSpace);
 
                 // and also make sure we include the state heuristic in the action search
                 ntbea.fixTunableParameter("heuristic", stateHeuristic);
@@ -452,5 +433,17 @@ public class ExpertIteration {
         String agentName = String.format("NTBEA_%02d.json", iter);
         newTunedPlayer.setName(agentName);
         agents.add(newTunedPlayer);
+    }
+
+    private void fixSSDimensions(NTBEA ntbea, ITPSearchSpace<?> actionSearchSpace, int[] valueSearchSettings, ITPSearchSpace<?> valueSearchSpace) {
+        List<String> actionNames = actionSearchSpace.getDimensions();
+        for (int i = 0; i < valueSearchSettings.length; i++) {
+            if (!actionNames.contains(valueSearchSpace.name(i))) {
+                // usually we will have different parameters in the two searches, but if there is overlap we
+                // 'forget' the previous value
+                // otherwise we fix the non-optimised settings to the value search settings
+                ntbea.fixTunableParameter(valueSearchSpace.name(i), valueSearchSpace.value(i, valueSearchSettings[i]));
+            }
+        }
     }
 }

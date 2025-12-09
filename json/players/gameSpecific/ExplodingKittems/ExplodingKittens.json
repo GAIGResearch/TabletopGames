@@ -1,0 +1,13 @@
+{
+  "budgetType": "BUDGET_TIME",
+  "rolloutLength": 10,
+  "MASTGamma": 0,
+  "heuristic": {
+    "class": "players.heuristics.OrdinalPosition"
+  },
+  "MAST": "Both",
+  "rolloutType": "MAST",
+  "information": "Information_Set",
+  "class": "players.mcts.MCTSParams",
+  "budget": 40
+}

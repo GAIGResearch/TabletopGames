@@ -1,0 +1,19 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "rolloutLength" : 10,
+  "MASTGamma" : 0.200,
+  "heuristic" : {
+    "class" : "players.heuristics.LeaderHeuristic"
+  },
+  "exploreEpsilon" : 0.300,
+  "treePolicy" : "NoAveragingRM",
+  "paranoid" : true,
+  "reuseTree" : true,
+  "backupPolicy" : "MaxMC",
+  "MAST" : "Both",
+  "rolloutType" : "MAST",
+  "maxBackupThreshold" : 10,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

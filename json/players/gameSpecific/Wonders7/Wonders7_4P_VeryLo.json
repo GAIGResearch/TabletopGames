@@ -1,0 +1,17 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "rolloutTermination" : "END_TURN",
+  "rolloutLength" : 1,
+  "MASTGamma" : 0.200,
+  "heuristic" : {
+    "class" : "players.heuristics.WinPlusHeuristic"
+  },
+  "K" : 100,
+  "maxTreeDepth" : 3,
+  "paranoid" : true,
+  "reuseTree" : true,
+  "MAST" : "Both",
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}
