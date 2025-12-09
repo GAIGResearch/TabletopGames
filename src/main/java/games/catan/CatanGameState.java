@@ -25,7 +25,7 @@ public class CatanGameState extends AbstractGameState {
     protected int[] knights, roadLengths; // knight count and road length for each player
     protected List<Map<CatanParameters.Resource, Counter>> exchangeRates; // exchange rate with bank for each resource
     protected int largestArmyOwner; // playerID of the player currently holding the largest army
-    protected int longestRoadOwner; // playerID of the player currently holding the longest road
+    protected int longestRoadOwner; // playerID of the player currently holding the longest roaf
     protected int longestRoadLength, largestArmySize;
     int rollValue;
     Random diceRnd;
