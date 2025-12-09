@@ -39,16 +39,22 @@ public class PickominoForwardModelTest {
 
     @Test
     public void stopActionAvailableWhenThresholdReached() {
+        // Ensure remaining tiles deck has tiles (setup should have created them)
+        assertTrue("Remaining tiles deck should not be empty", gameState.remainingTiles.getSize() > 0);
+        
         Arrays.fill(gameState.assignedDices, 0);
         Arrays.fill(gameState.currentRoll, 0);
         gameState.totalDicesValue = 16; // selecting worms (6) adds 5 each, giving 26 in total
         gameState.currentRoll[5] = 2; // two worms rolled
-        gameState.remainingDices = parameters.numberOfDices;
+        gameState.currentRoll[0] = 1; // one more die to allow continue action
+        gameState.remainingDices = 3; // should match the sum of currentRoll
 
         List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
 
-        assertTrue(actions.contains(new SelectDicesAction(6, true)));
-        assertTrue(actions.contains(new SelectDicesAction(6, false)));
+        assertTrue("Stop action should be available when threshold is reached", 
+                   actions.contains(new SelectDicesAction(6, true)));
+        assertTrue("Continue action should be available when remainingDices > currentRoll count", 
+                   actions.contains(new SelectDicesAction(6, false)));
     }
 
     @Test
@@ -61,8 +67,8 @@ public class PickominoForwardModelTest {
         Arrays.fill(gameState.assignedDices, 0);
         Arrays.fill(gameState.currentRoll, 0);
         gameState.totalDicesValue = 16; // +5 from a single worm hits value 21
-        gameState.currentRoll[5] = 1;
-        gameState.remainingDices = parameters.numberOfDices;
+        gameState.currentRoll[5] = 1; // one worm rolled
+        gameState.remainingDices = 1; // should match the sum of currentRoll
 
         assertTrue(forwardModel.computeAvailableActions(gameState).contains(new SelectDicesAction(6, true)));
 
