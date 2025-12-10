@@ -57,7 +57,7 @@ public class PickominoForwardModel extends StandardForwardModel {
         pGameState.remainingDices = pGameParameters.numberOfDices;
 
         // select the first player
-        pGameState.setFirstPlayer(pGameState.getRnd().nextInt(pGameState.getNPlayers()));
+        pGameState.setFirstPlayer(0);
 
         // prepare the first turn
         setupTurn(pGameState);
@@ -122,6 +122,10 @@ public class PickominoForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         List<AbstractAction> actions = new ArrayList<>();
         PickominoGameState pgs = (PickominoGameState) gameState;
+
+        if(pgs.getCoreGameParameters().verbose) {
+            System.out.println(pgs.toString());
+        }
 
         // Compute the minimum value to reach to stop, and the values of other players top tiles
         assert pgs.remainingTiles.getSize() != 0 : "No tiles left, should not happen when computing available actions";

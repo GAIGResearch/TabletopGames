@@ -165,5 +165,19 @@ public class PickominoGameState extends AbstractGameState {
         return (double) maxPickomino;
     }
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Current player: ").append(getCurrentPlayer()).append("\n");
+        sb.append("Remaining tiles: ").append(remainingTiles.toString()).append("\n");
+        for(int i = 0; i < playerTiles.size(); i++) {
+            sb.append("Player ").append(i).append(" tiles: ").append(playerTiles.get(i).toString()).append("\n");
+        }
+        sb.append("Assigned dices: ").append(Arrays.toString(assignedDices)).append("\n");
+        sb.append("  Current roll: ").append(Arrays.toString(currentRoll)).append("\n");
+        sb.append("Remaining dices: ").append(remainingDices).append("\n");
+        sb.append("Total dices value: ").append(totalDicesValue).append("\n");
+        return sb.toString();
+    }
+
 }
 

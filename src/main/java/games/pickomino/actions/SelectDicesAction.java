@@ -60,8 +60,10 @@ public class SelectDicesAction extends AbstractAction {
             pgs.totalDicesValue += valueIncrement;
             if (pgs.getCoreGameParameters().verbose) {
                 String diceName = (diceValue == 6) ? "worm" : String.valueOf(diceValue);
-                System.out.println("p" + pgs.getCurrentPlayer() + " selects " + diceCount + "x" + diceName + 
+                System.out.print("p" + pgs.getCurrentPlayer() + " selects " + diceCount + "x" + diceName + 
                     " (value: " + valueIncrement + ", total: " + pgs.totalDicesValue + ")");
+                if(stop) System.out.println(" and stops.");
+                else System.out.println("and continues.");
             }
         }
 
@@ -89,7 +91,7 @@ public class SelectDicesAction extends AbstractAction {
             int highestValueBelowTotalDicesValueIndex = -1;
             for (int i = 0; i < pgs.remainingTiles.getSize(); i++) {
                 PickominoTile tile = pgs.remainingTiles.peek(i);
-                if (tile.getValue() < pgs.totalDicesValue && tile.getValue() > highestValueBelowTotalDicesValue) {
+                if (tile.getValue() <= pgs.totalDicesValue && tile.getValue() > highestValueBelowTotalDicesValue) {
                     highestValueBelowTotalDicesValue = tile.getValue();
                     highestValueBelowTotalDicesValueIndex = i;
                 }
@@ -99,15 +101,15 @@ public class SelectDicesAction extends AbstractAction {
                 PickominoTile tile = pgs.remainingTiles.pick(highestValueBelowTotalDicesValueIndex);
                 pgs.playerTiles.get(pgs.getCurrentPlayer()).add(tile);
                 if (pgs.getCoreGameParameters().verbose) {
-                    System.out.println("p" + pgs.getCurrentPlayer() + " picks up tile " + 
+                    System.out.print("p" + pgs.getCurrentPlayer() + " picks up tile " + 
                         tile.getValue() + " (score: " + tile.getScore() + ")");
                 }
                 return true;
             } else {
-                return false; // This should not happen, but it is better to be safe.
+                throw new AssertionError("No tile found with value below the total dices value. Total dices value: " + pgs.totalDicesValue);
             }
         }
-        return true;
+        return false; // This should not happen, but it is better to be safe.
     }
 
     /**
@@ -136,7 +138,7 @@ public class SelectDicesAction extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Select Dices: " + diceValue;
+        return "Select Dices: " + diceValue + (stop ? " and stop." : " and continue.");
     }
 
     /**
@@ -148,7 +150,7 @@ public class SelectDicesAction extends AbstractAction {
     @Override
     public String getString(AbstractGameState gameState) {
         PickominoGameState pgs = (PickominoGameState) gameState;
-        return "p" + pgs.getCurrentPlayer() + " selects dice " + diceValue;
+        return toString();
     }
 
     public boolean isStop() {
