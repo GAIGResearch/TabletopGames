@@ -89,6 +89,27 @@ public class PickominoForwardModel extends StandardForwardModel {
                     first = false;
                 }
             }
+            
+            // Add assigned dices information
+            boolean hasAssignedDices = false;
+            for (int d = 0; d < 6; d++) {
+                if (pGameState.assignedDices[d] > 0) {
+                    hasAssignedDices = true;
+                    break;
+                }
+            }
+            if (hasAssignedDices) {
+                rollStr.append(" | Assigned: ");
+                first = true;
+                for (int d = 0; d < 6; d++) {
+                    if (pGameState.assignedDices[d] > 0) {
+                        if (!first) rollStr.append(", ");
+                        rollStr.append(pGameState.assignedDices[d]).append("x").append(d + 1);
+                        first = false;
+                    }
+                }
+            }
+            
             System.out.println(rollStr);
         }
     }
@@ -104,7 +125,12 @@ public class PickominoForwardModel extends StandardForwardModel {
 
         // Compute the minimum value to reach to stop, and the values of other players top tiles
         assert pgs.remainingTiles.getSize() != 0 : "No tiles left, should not happen when computing available actions";
-        int minValueToStop = pgs.remainingTiles.peek().getValue(); // we assume the deck is sorted.
+        // To stop, player needs at least the value of the lowest remaining tile
+        int minValueToStop = Integer.MAX_VALUE;
+        for(int i = 0; i < pgs.remainingTiles.getSize(); i++){
+            if(pgs.remainingTiles.peek(i).getValue() < minValueToStop) minValueToStop = pgs.remainingTiles.peek(i).getValue();
+        }
+        assert minValueToStop < Integer.MAX_VALUE : "No tiles left, should not happen when computing available actions";
         int[] stealableValues = new int[pgs.getNPlayers() - 1];
         Arrays.fill(stealableValues, -1);
         int i = 0;

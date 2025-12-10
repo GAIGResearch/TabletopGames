@@ -68,7 +68,7 @@ public class SelectDicesAction extends AbstractAction {
         if (stop) {
             // select the tile to pick up
 
-            // If another player has exactly the tile with the value of the dicesn then steal the tile
+            // If another player has exactly the tile with the value of the dices then steal the tile
             for (int i = 0; i < pgs.getNPlayers(); i++) {
                 if (i != pgs.getCurrentPlayer()){
                     if(pgs.playerTiles.get(i).getSize() > 0

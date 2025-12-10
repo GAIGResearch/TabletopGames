@@ -17,7 +17,7 @@ public class PickominoForwardModelTest {
     private PickominoGameState gameState;
     private PickominoParameters parameters;
 
-    @Before
+    // @BeforeEach
     public void setUp() {
         parameters = new PickominoParameters();
         gameState = new PickominoGameState(parameters, 2);
@@ -27,6 +27,7 @@ public class PickominoForwardModelTest {
 
     @Test
     public void setupInitialisesTilesAndDice() {
+        setUp();
         assertEquals(parameters.maxTileValue - parameters.minTileValue + 1, gameState.remainingTiles.getSize());
         assertEquals(2, gameState.playerTiles.size());
         assertEquals(0, gameState.playerTiles.get(0).getSize());
@@ -39,6 +40,7 @@ public class PickominoForwardModelTest {
 
     @Test
     public void stopActionAvailableWhenThresholdReached() {
+        setUp();
         // Ensure remaining tiles deck has tiles (setup should have created them)
         assertTrue("Remaining tiles deck should not be empty", gameState.remainingTiles.getSize() > 0);
         
@@ -59,6 +61,7 @@ public class PickominoForwardModelTest {
 
     @Test
     public void stopActionStealsMatchingTileFromOpponent() {
+        setUp();
         int stealingPlayer = gameState.getCurrentPlayer();
         int otherPlayer = 1 - stealingPlayer;
         PickominoTile tile = new PickominoTile("Tile 21 (Score: 1)", 21, 1);
@@ -81,6 +84,7 @@ public class PickominoForwardModelTest {
 
     @Test
     public void nullTurnReturnedWhenNoSelectableDice() {
+        setUp();
 
         gameState.assignedDices[0] = 1;
         gameState.assignedDices[1] = 1;
@@ -103,5 +107,6 @@ public class PickominoForwardModelTest {
         assertEquals(1, actions.size());
         assertEquals(new NullTurn(), actions.get(0));
     }
+
 }
 

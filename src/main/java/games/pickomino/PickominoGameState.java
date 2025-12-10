@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class PickominoGameState extends AbstractGameState {
 
-    // Sorted deck of remaining tiles
+    // Deck of remaining tiles - not sorted for now, this is terdious to enforce order when picking up and returning tiles
     public Deck<PickominoTile> remainingTiles;
     // Tile stacks for each player
     public List<Deck<PickominoTile>> playerTiles;

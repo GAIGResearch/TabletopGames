@@ -14,26 +14,38 @@ public class NullTurn extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         PickominoGameState pgs = (PickominoGameState) gs;
-        PickominoTile tile = pgs.playerTiles.get(pgs.getCurrentPlayer()).draw();
-        if (tile != null) { // if the player has a tile
-            // insert the tile in the remaining tiles deck to keep it sorted
-            // and remove the highest tile from the remaining tiles deck
+        // fetch the lost tile and remove it from the player's tiles deck
+        PickominoTile lostTile = pgs.playerTiles.get(pgs.getCurrentPlayer()).draw();
+        if (lostTile != null) { // if the player has a tile
+            // Reinsert the lost tile and remove the highest-value tile from remainingTiles
+            // (no ordering assumption on the deck; we search for the current highest each time)
             assert pgs.remainingTiles.getSize() > 0 : "No tiles remaining when re-inserting player's lost tile";
-            PickominoTile highestTile = pgs.remainingTiles.peek(pgs.remainingTiles.getSize() - 1);
-            if(highestTile.getValue() < tile.getValue()) {
-                pgs.remainingTiles.addToBottom(tile);
-            } else {
-                for(int i = pgs.remainingTiles.getSize() - 1; i >= 0; i--) {
-                    if(pgs.remainingTiles.get(i).getValue() < tile.getValue()) {
-                        pgs.remainingTiles.add(tile, i + 1);
-                        break;
-                    }
+            // search for the tile with the highest value in the remaining tiles deck and for its index
+            int highestTileIndex = -1;
+            int highestTileValue = Integer.MIN_VALUE;
+            for(int i = 0; i < pgs.remainingTiles.getSize(); i++){
+                if(pgs.remainingTiles.peek(i).getValue() > highestTileValue) {
+                    highestTileIndex = i;
+                    highestTileValue = pgs.remainingTiles.peek(i).getValue();
                 }
-                pgs.remainingTiles.remove(pgs.remainingTiles.getSize() - 1);
             }
-            if (pgs.getCoreGameParameters().verbose) {
-                System.out.println("p" + pgs.getCurrentPlayer() + " loses turn and returns tile " + 
-                    tile.getValue() + " (score: " + tile.getScore() + ") to remaining tiles");
+            assert highestTileIndex != -1 : "No tile left in remaining tiles deck";
+
+            if(highestTileValue < lostTile.getValue()) {
+                pgs.remainingTiles.add(lostTile);
+                if(pgs.getCoreGameParameters().verbose) {
+                    System.out.println("p" + pgs.getCurrentPlayer() + " loses turn and returns tile (" + 
+                        lostTile.toString() + ") to remaining tiles");
+                }
+            } else {
+                // add the lost tile to the bottom of the remaining tiles deck (not keeping it sorted)
+                pgs.remainingTiles.addToBottom(lostTile);
+                String highestTileString = pgs.remainingTiles.peek(highestTileIndex).toString();
+                pgs.remainingTiles.remove(highestTileIndex);
+                if(pgs.getCoreGameParameters().verbose) {
+                    System.out.println("p" + pgs.getCurrentPlayer() + " loses turn and returns tile (" + 
+                        lostTile.toString() + ") to remaining tiles. Tile " + highestTileString + " is removed.");
+                }
             }
         } else {
             if (pgs.getCoreGameParameters().verbose) {
