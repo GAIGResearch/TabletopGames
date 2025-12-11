@@ -32,6 +32,7 @@ public class PickominoGameState extends AbstractGameState {
     public int[] currentRoll = new int[6];
     // Number of dices that have not been assigned yet
     public int remainingDices;
+    // Total value of the dices that have been assigned
     public int totalDicesValue = 0;
 
     /**
@@ -89,7 +90,21 @@ public class PickominoGameState extends AbstractGameState {
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return getGameScore(playerId) / ((PickominoParameters) gameParameters).getMaxScore();
+        PickominoParameters pp = (PickominoParameters) gameParameters;
+        // Current score of the player scaled between 0 and 1
+        double baseScore = getGameScore(playerId) / pp.getMaxScore();
+        // Value of the tie breaker between 0 and 1
+        double tiebreakerScore = getTiebreak(playerId, 1);
+        // Add an evaluation of the assigned dices between 0 and 1
+        double dicesScore = totalDicesValue / (5*pp.numberOfDices);
+        // adjust with the number of worms
+        double wormsDiscounter = remainingDices / pp.numberOfDices;
+        if(assignedDices[5] > 0) wormsDiscounter = 0;
+        dicesScore *= (1 - wormsDiscounter);
+
+        // scale the scores: baseScore between 0 and 0.9, tieBreakerScore bewteen 0 and 0.09, dicesScore between 0 and 0.01
+        double finalScore = baseScore * 0.9 + tiebreakerScore * 0.09 + dicesScore * 0.01;
+        return finalScore;
     }
 
     /**
@@ -162,7 +177,9 @@ public class PickominoGameState extends AbstractGameState {
         for(PickominoTile tile : playerTiles.get(playerId)){
             if(tile.getValue() > maxPickomino) maxPickomino = tile.getValue();
         }
-        return (double) maxPickomino;
+        // scale between 0 and 1
+        PickominoParameters pp = (PickominoParameters) gameParameters;
+        return (double) maxPickomino / pp.getMaxScore();
     }
 
     public String toString() {

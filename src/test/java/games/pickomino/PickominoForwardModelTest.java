@@ -3,7 +3,6 @@ package games.pickomino;
 import core.actions.AbstractAction;
 import games.pickomino.actions.NullTurn;
 import games.pickomino.actions.SelectDicesAction;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -106,6 +105,56 @@ public class PickominoForwardModelTest {
 
         assertEquals(1, actions.size());
         assertEquals(new NullTurn(), actions.get(0));
+    }
+
+    @Test
+    public void exactMatchStealsTopTileFromOpponentStack() {
+        setUp();
+
+        int stealingPlayer = 0;
+        int otherPlayer = 1;
+
+        // Opponent has a stack where value 21 is on top of value 22
+        PickominoTile tile22 = new PickominoTile("Tile 22 (Score: 1)", 22, 1);
+        PickominoTile tile21 = new PickominoTile("Tile 21 (Score: 1)", 21, 1);
+        PickominoTile tile36 = new PickominoTile("Tile 36 (Score: 1)", 36, 1);
+        gameState.playerTiles.get(otherPlayer).addToBottom(tile22);
+        gameState.playerTiles.get(otherPlayer).add(tile21);
+
+        // No reachable tile in the common deck
+        gameState.remainingTiles.clear();
+        gameState.remainingTiles.add(tile36);
+
+        // Current roll allows reaching exactly 21 (16 existing + worm worth 5)
+        Arrays.fill(gameState.assignedDices, 0);
+        // total = 16
+        gameState.assignedDices[0] = 1;
+        gameState.assignedDices[1] = 0;
+        gameState.assignedDices[2] = 0;
+        gameState.assignedDices[3] = 0;
+        gameState.assignedDices[4] = 4;
+        gameState.assignedDices[5] = 0;
+        gameState.totalDicesValue = 16;
+        Arrays.fill(gameState.currentRoll, 0);
+        gameState.currentRoll[0] = 2; // not selectable
+        gameState.currentRoll[1] = 0;
+        gameState.currentRoll[2] = 0;
+        gameState.currentRoll[3] = 0;
+        gameState.currentRoll[4] = 0;
+        gameState.currentRoll[5] = 1; // one worm available to select
+        gameState.remainingDices = 3;
+
+        List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
+
+        assertTrue("Should be able to stop to steal opponent's top tile",
+                actions.contains(new SelectDicesAction(6, true)));
+
+        forwardModel.next(gameState, new SelectDicesAction(6, true));
+
+        assertEquals(1, gameState.playerTiles.get(stealingPlayer).getSize());
+        assertEquals(1, gameState.playerTiles.get(otherPlayer).getSize());
+        assertEquals(21, gameState.playerTiles.get(stealingPlayer).peek().getValue());
+        assertEquals(22, gameState.playerTiles.get(otherPlayer).peek().getValue());
     }
 
 }
