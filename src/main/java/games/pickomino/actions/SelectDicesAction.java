@@ -149,12 +149,18 @@ public class SelectDicesAction extends AbstractAction {
      */
     @Override
     public String getString(AbstractGameState gameState) {
-        PickominoGameState pgs = (PickominoGameState) gameState;
         return toString();
     }
 
     public boolean isStop() {
         return this.stop;
+    }
+
+    /**
+     * @return the face value of the dice selected by this action (1-6).
+     */
+    public int getDiceValue() {
+        return diceValue;
     }
 
 }
