@@ -8,7 +8,6 @@ import evaluation.RunArg;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.Event;
 import evaluation.optimisation.TunableParameters;
-import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import gui.models.AITableModel;
