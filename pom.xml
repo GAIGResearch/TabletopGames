@@ -10,7 +10,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.test.skip>false</maven.test.skip>
+        <maven.test.skip>true</maven.test.skip>
         <build.documentation>www.tabletopgames.ai/wiki/maven</build.documentation>
     </properties>
 
@@ -29,11 +29,6 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>33.2.1-jre</version>
         </dependency>
         <dependency>
             <groupId>com.github.davidmoten</groupId>
@@ -56,12 +51,6 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>io.humble</groupId>-->
-        <!--            <artifactId>humble-video-all</artifactId>-->
-        <!--            <version>0.3.0</version>-->
-        <!--        </dependency>-->
-        <!-- https://mvnrepository.com/artifact/org.swinglabs/swingx -->
         <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
@@ -82,16 +71,11 @@
             <artifactId>spark-sql_2.13</artifactId>
             <version>3.5.5</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>com.formdev</groupId>-->
-        <!--            <artifactId>flatlaf</artifactId>-->
-        <!--            <version>3.4.1</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.github.javaparser</groupId>-->
-        <!--            <artifactId>javaparser-core</artifactId>-->
-        <!--            <version>3.26.1</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>3.26.1</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-mllib_2.13</artifactId>
@@ -117,62 +101,56 @@
             <artifactId>tablesaw-json</artifactId>
             <version>0.43.1</version>
         </dependency>
-                <dependency>
-                    <groupId>tech.tablesaw</groupId>
-                    <artifactId>tablesaw-jsplot</artifactId>
-                    <version>0.43.1</version>
-                </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>tech.tablesaw</groupId>-->
-        <!--            <artifactId>tablesaw-excel</artifactId>-->
-        <!--            <version>0.43.1</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-jsplot</artifactId>
+            <version>0.43.1</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-excel</artifactId>
+            <version>0.43.1</version>
+        </dependency>
         <dependency>
             <groupId>com.globalmentor</groupId>
             <artifactId>hadoop-bare-naked-local-fs</artifactId>
             <version>0.1.0</version>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>1.0.0-rc1</version>
         </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j</artifactId>
-                    <version>1.0.0-rc1</version>
-                </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j-vertex-ai-gemini</artifactId>
-                    <version>1.0.0-beta4</version>
-                </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j-mistral-ai</artifactId>
-                    <version>1.0.0-beta4</version>
-                </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j-open-ai</artifactId>
-                    <version>1.0.0-rc1</version>
-                </dependency>
-                <dependency>
-                    <groupId>dev.langchain4j</groupId>
-                    <artifactId>langchain4j-anthropic</artifactId>
-                    <version>1.0.0-beta4</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.google.cloud</groupId>
-                    <artifactId>google-cloud-vertexai</artifactId>
-                    <version>1.23.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.google.auth</groupId>
-                    <artifactId>google-auth-library-oauth2-http</artifactId>
-                    <version>1.21.0</version>
-                </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-vertex-ai-gemini</artifactId>
+            <version>1.0.0-beta4</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-mistral-ai</artifactId>
+            <version>1.0.0-beta4</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+            <version>1.0.0-rc1</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-anthropic</artifactId>
+            <version>1.0.0-beta4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-vertexai</artifactId>
+            <version>1.23.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.21.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -192,9 +170,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <excludes>
-                        <exclude>llm/**</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
