@@ -21,7 +21,7 @@ RUN mvn package -DskipTests
 # Use a lightweight JRE (Java Runtime Environment) base image for the final container
 FROM eclipse-temurin:17-jre-alpine
 
-# Set the working directory
+# Set the working directorypom_RunGames_Docker.xml
 WORKDIR /app
 
 # Copy the final JAR from the 'build' stage

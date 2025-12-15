@@ -1,4 +1,4 @@
-package gui;
+package llm;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import core.*;
@@ -10,6 +10,9 @@ import evaluation.metrics.Event;
 import evaluation.optimisation.TunableParameters;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
+import gui.AbstractGUIManager;
+import gui.GUI;
+import gui.GamePanel;
 import gui.models.AITableModel;
 import players.PlayerParameters;
 import players.PlayerType;

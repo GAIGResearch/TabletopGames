@@ -56,11 +56,11 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.humble</groupId>
-            <artifactId>humble-video-all</artifactId>
-            <version>0.3.0</version>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>io.humble</groupId>-->
+        <!--            <artifactId>humble-video-all</artifactId>-->
+        <!--            <version>0.3.0</version>-->
+        <!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.swinglabs/swingx -->
         <dependency>
             <groupId>org.swinglabs</groupId>
@@ -82,16 +82,16 @@
             <artifactId>spark-sql_2.13</artifactId>
             <version>3.5.5</version>
         </dependency>
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf</artifactId>
-            <version>3.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.javaparser</groupId>
-            <artifactId>javaparser-core</artifactId>
-            <version>3.26.1</version>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.formdev</groupId>-->
+        <!--            <artifactId>flatlaf</artifactId>-->
+        <!--            <version>3.4.1</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.javaparser</groupId>-->
+        <!--            <artifactId>javaparser-core</artifactId>-->
+        <!--            <version>3.26.1</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-mllib_2.13</artifactId>
@@ -117,16 +117,16 @@
             <artifactId>tablesaw-json</artifactId>
             <version>0.43.1</version>
         </dependency>
-        <dependency>
-            <groupId>tech.tablesaw</groupId>
-            <artifactId>tablesaw-jsplot</artifactId>
-            <version>0.43.1</version>
-        </dependency>
-        <dependency>
-            <groupId>tech.tablesaw</groupId>
-            <artifactId>tablesaw-excel</artifactId>
-            <version>0.43.1</version>
-        </dependency>
+                <dependency>
+                    <groupId>tech.tablesaw</groupId>
+                    <artifactId>tablesaw-jsplot</artifactId>
+                    <version>0.43.1</version>
+                </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>tech.tablesaw</groupId>-->
+        <!--            <artifactId>tablesaw-excel</artifactId>-->
+        <!--            <version>0.43.1</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>com.globalmentor</groupId>
             <artifactId>hadoop-bare-naked-local-fs</artifactId>
@@ -138,41 +138,41 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j</artifactId>
-            <version>1.0.0-rc1</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-vertex-ai-gemini</artifactId>
-            <version>1.0.0-beta4</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-mistral-ai</artifactId>
-            <version>1.0.0-beta4</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-open-ai</artifactId>
-            <version>1.0.0-rc1</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-anthropic</artifactId>
-            <version>1.0.0-beta4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-vertexai</artifactId>
-            <version>1.23.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.auth</groupId>
-            <artifactId>google-auth-library-oauth2-http</artifactId>
-            <version>1.21.0</version>
-        </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j</artifactId>
+                    <version>1.0.0-rc1</version>
+                </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-vertex-ai-gemini</artifactId>
+                    <version>1.0.0-beta4</version>
+                </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-mistral-ai</artifactId>
+                    <version>1.0.0-beta4</version>
+                </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-open-ai</artifactId>
+                    <version>1.0.0-rc1</version>
+                </dependency>
+                <dependency>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-anthropic</artifactId>
+                    <version>1.0.0-beta4</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.google.cloud</groupId>
+                    <artifactId>google-cloud-vertexai</artifactId>
+                    <version>1.23.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.google.auth</groupId>
+                    <artifactId>google-auth-library-oauth2-http</artifactId>
+                    <version>1.21.0</version>
+                </dependency>
     </dependencies>
 
     <build>
@@ -183,7 +183,7 @@
                 <version>2.22.2</version>
                 <configuration>
                     <excludes>
-            <!---            <exclude>test.players.mcts.MultiTreeMCTSTests</exclude> -->
+                        <!---            <exclude>test.players.mcts.MultiTreeMCTSTests</exclude> -->
                     </excludes>
                 </configuration>
             </plugin>
@@ -192,21 +192,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <compilerArgs>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <resources>
-                        <resource>
-                            <directory>data</directory>
-                        </resource>
-                    </resources>
+                    <excludes>
+                        <exclude>llm/**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -219,25 +207,25 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
                 <executions>
-                    <execution>
-                        <id>frontend</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>gui.Frontend</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>FrontEnd</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
+                    <!--                    <execution>-->
+                    <!--                        <id>frontend</id>-->
+                    <!--                        <configuration>-->
+                    <!--                            <descriptorRefs>-->
+                    <!--                                <descriptorRef>jar-with-dependencies</descriptorRef>-->
+                    <!--                            </descriptorRefs>-->
+                    <!--                            <archive>-->
+                    <!--                                <manifest>-->
+                    <!--                                    <mainClass>gui.Frontend</mainClass>-->
+                    <!--                                </manifest>-->
+                    <!--                            </archive>-->
+                    <!--                            <finalName>FrontEnd</finalName>-->
+                    <!--                            <appendAssemblyId>false</appendAssemblyId>-->
+                    <!--                        </configuration>-->
+                    <!--                        <phase>package</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>single</goal>-->
+                    <!--                        </goals>-->
+                    <!--                    </execution>-->
                     <execution>
                         <id>RunGames</id>
                         <configuration>
@@ -257,82 +245,82 @@
                             <goal>single</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>ParameterSearch</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>evaluation.optimisation.ParameterSearch</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>ParameterSearch</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>OneStepDeviations</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>evaluation.optimisation.OneStepDeviations</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>OneStepDeviations</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>ExpertIteration</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass> evaluation.ExpertIteration</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>ExpertIteration</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>SkillLadder</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>evaluation.tournaments.SkillLadder</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>SkillLadder</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
+                    <!--                    <execution>-->
+                    <!--                        <id>ParameterSearch</id>-->
+                    <!--                        <configuration>-->
+                    <!--                            <descriptorRefs>-->
+                    <!--                                <descriptorRef>jar-with-dependencies</descriptorRef>-->
+                    <!--                            </descriptorRefs>-->
+                    <!--                            <archive>-->
+                    <!--                                <manifest>-->
+                    <!--                                    <mainClass>evaluation.optimisation.ParameterSearch</mainClass>-->
+                    <!--                                </manifest>-->
+                    <!--                            </archive>-->
+                    <!--                            <finalName>ParameterSearch</finalName>-->
+                    <!--                            <appendAssemblyId>false</appendAssemblyId>-->
+                    <!--                        </configuration>-->
+                    <!--                        <phase>package</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>single</goal>-->
+                    <!--                        </goals>-->
+                    <!--                    </execution>-->
+                    <!--                    <execution>-->
+                    <!--                        <id>OneStepDeviations</id>-->
+                    <!--                        <configuration>-->
+                    <!--                            <descriptorRefs>-->
+                    <!--                                <descriptorRef>jar-with-dependencies</descriptorRef>-->
+                    <!--                            </descriptorRefs>-->
+                    <!--                            <archive>-->
+                    <!--                                <manifest>-->
+                    <!--                                    <mainClass>evaluation.optimisation.OneStepDeviations</mainClass>-->
+                    <!--                                </manifest>-->
+                    <!--                            </archive>-->
+                    <!--                            <finalName>OneStepDeviations</finalName>-->
+                    <!--                            <appendAssemblyId>false</appendAssemblyId>-->
+                    <!--                        </configuration>-->
+                    <!--                        <phase>package</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>single</goal>-->
+                    <!--                        </goals>-->
+                    <!--                    </execution>-->
+                    <!--                    <execution>-->
+                    <!--                        <id>ExpertIteration</id>-->
+                    <!--                        <configuration>-->
+                    <!--                            <descriptorRefs>-->
+                    <!--                                <descriptorRef>jar-with-dependencies</descriptorRef>-->
+                    <!--                            </descriptorRefs>-->
+                    <!--                            <archive>-->
+                    <!--                                <manifest>-->
+                    <!--                                    <mainClass> evaluation.ExpertIteration</mainClass>-->
+                    <!--                                </manifest>-->
+                    <!--                            </archive>-->
+                    <!--                            <finalName>ExpertIteration</finalName>-->
+                    <!--                            <appendAssemblyId>false</appendAssemblyId>-->
+                    <!--                        </configuration>-->
+                    <!--                        <phase>package</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>single</goal>-->
+                    <!--                        </goals>-->
+                    <!--                    </execution>-->
+                    <!--                    <execution>-->
+                    <!--                        <id>SkillLadder</id>-->
+                    <!--                        <configuration>-->
+                    <!--                            <descriptorRefs>-->
+                    <!--                                <descriptorRef>jar-with-dependencies</descriptorRef>-->
+                    <!--                            </descriptorRefs>-->
+                    <!--                            <archive>-->
+                    <!--                                <manifest>-->
+                    <!--                                    <mainClass>evaluation.tournaments.SkillLadder</mainClass>-->
+                    <!--                                </manifest>-->
+                    <!--                            </archive>-->
+                    <!--                            <finalName>SkillLadder</finalName>-->
+                    <!--                            <appendAssemblyId>false</appendAssemblyId>-->
+                    <!--                        </configuration>-->
+                    <!--                        <phase>package</phase>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>single</goal>-->
+                    <!--                        </goals>-->
+                    <!--                    </execution>-->
                 </executions>
             </plugin>
         </plugins>
