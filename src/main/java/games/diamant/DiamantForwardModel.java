@@ -109,12 +109,13 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DiamantGameState dgs = (DiamantGameState) currentState;
+        int startingRound = dgs.getRoundCounter();
         // If all players have an action, execute them
         if (dgs.actionsPlayed.size() == dgs.getNPlayers()) {
             playActions(dgs);
             dgs.actionsPlayed.clear();
         }
-        if (dgs.isNotTerminal())
+        if (dgs.getRoundCounter() == startingRound && dgs.isNotTerminal())
             endPlayerTurn(dgs);
     }
 

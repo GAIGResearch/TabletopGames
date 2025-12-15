@@ -164,6 +164,7 @@ public class PickominoGameState extends AbstractGameState {
         return result;
     }
 
+    @Override
     public double getTiebreak(int playerId, int tier){
         // Winning player has the tile with the highest value
         int maxPickomino = 0;
@@ -175,6 +176,7 @@ public class PickominoGameState extends AbstractGameState {
         return (double) maxPickomino / pp.getMaxScore();
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Current player: ").append(getCurrentPlayer()).append("\n");

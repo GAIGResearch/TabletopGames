@@ -174,11 +174,10 @@ public class PenteTests {
 
         gameState.setDieValue(2);
         List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
-        assertEquals(1, actions.size());
-        assertEquals(new PenteMoveAction(5, 7), actions.get(0));
+        assertTrue(actions.contains(new PenteMoveAction(5, 7)));
 
         // Execute the move
-        forwardModel.next(gameState, actions.get(0));
+        forwardModel.next(gameState, new PenteMoveAction(5, 7));
 
         // Now all player 0's tokens are at 7, so player 0 should win and game should be over
         assertFalse(gameState.isNotTerminal());

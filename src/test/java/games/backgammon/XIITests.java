@@ -317,7 +317,8 @@ public class XIITests {
         int[] countsDie1 = new int[6];
         int[] countsDie2 = new int[6];
 
-        for (int i = 0; i < 100; i++) {
+        double N = 1000;
+        for (int i = 0; i < N; i++) {
             gameState.rollDice();
             int[] values = gameState.getDiceValues();
             assertEquals(2, values.length);
@@ -327,10 +328,12 @@ public class XIITests {
             countsDie2[values[1] - 1]++;
         }
 
-        int[] expected = new int[] {5, 10, 10, 20, 25, 30};
+        int[] expected = new int[]{50, 100, 100, 200, 250, 300};
         for (int i = 0; i < 6; i++) {
-            assertEquals("Die 1 side " + (i+1) + " count mismatch", expected[i], countsDie1[i], 8);
-            assertEquals("Die 2 side " + (i+1) + " count mismatch", expected[i], countsDie2[i], 8);
+            int SDx3 = (int) (3 * Math.sqrt(expected[i] * (N - expected[i]) / N));
+            System.out.printf("Expected: %s, Actual: %s, 3xSD: %s%n", expected[i], countsDie1[i], SDx3);
+            assertEquals("Die 1 side " + (i + 1) + " count mismatch", expected[i], countsDie1[i], SDx3);
+            assertEquals("Die 2 side " + (i + 1) + " count mismatch", expected[i], countsDie2[i], SDx3);
         }
     }
 

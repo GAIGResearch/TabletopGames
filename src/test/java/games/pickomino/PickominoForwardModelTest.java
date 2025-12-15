@@ -161,7 +161,7 @@ public class PickominoForwardModelTest {
 
     @Test
     public void pickominoRunsWithGreedyAgent() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\PickominoGreedy.json");
+        new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\PickominoGreedy.json");
     }
 
 }
