@@ -12,12 +12,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
- * in the Forward Model or actions modifying the state of the game.</p>
- * <p>Most variables held here should be {@link Component} subclasses as much as possible.</p>
- * <p>No initialisation or game logic should be included here (not in the constructor either). This is all handled externally.</p>
- * <p>Computation may be included in functions here for ease of access, but only if this is querying the game state information.
- * Functions on the game state should never <b>change</b> the state of the game.</p>
+ * Game state for the Pickomino game.
+ * It contains the following components:
+ * - remainingTiles: Deck of remaining tiles that can be picked up by the players
+ * - playerTiles: List of stacks of tiles for each player
+ * - assignedDices: Number of dices that have already been set aside by the current player
+ * - currentRoll: Dices that have just been rolled by the current player
+ * - remainingDices: Number of dices that have not been set aside yet
+ * - totalDicesValue: Total value of the dices that have been set aside
  */
 public class PickominoGameState extends AbstractGameState {
 
@@ -133,22 +135,13 @@ public class PickominoGameState extends AbstractGameState {
         if (!this.remainingTiles.equals(that.remainingTiles)) return false;
 
         // Compare playerTiles (list of Decks)
-        if (this.playerTiles.size() != that.playerTiles.size()) return false;
-        for (int i = 0; i < this.playerTiles.size(); i++) {
-            if (!this.playerTiles.get(i).equals(that.playerTiles.get(i))) return false;
-        }
+        if (!this.playerTiles.equals(that.playerTiles)) return false;
 
         // Compare assignedDices
-        if (this.assignedDices.length != that.assignedDices.length) return false;
-        for (int i = 0; i < this.assignedDices.length; i++) {
-            if (this.assignedDices[i] != that.assignedDices[i]) return false;
-        }
+        if (!Arrays.equals(this.assignedDices, that.assignedDices)) return false;
 
         // Compare currentRoll
-        if (this.currentRoll.length != that.currentRoll.length) return false;
-        for (int i = 0; i < this.currentRoll.length; i++) {
-            if (this.currentRoll[i] != that.currentRoll[i]) return false;
-        }
+        if (!Arrays.equals(this.currentRoll, that.currentRoll)) return false;
 
         // Compare remainingDices
         if (this.remainingDices != that.remainingDices) return false;

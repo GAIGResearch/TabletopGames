@@ -8,6 +8,8 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import evaluation.ForwardModelTester;
+
 import static org.junit.Assert.*;
 
 public class PickominoForwardModelTest {
@@ -155,6 +157,11 @@ public class PickominoForwardModelTest {
         assertEquals(1, gameState.playerTiles.get(otherPlayer).getSize());
         assertEquals(21, gameState.playerTiles.get(stealingPlayer).peek().getValue());
         assertEquals(22, gameState.playerTiles.get(otherPlayer).peek().getValue());
+    }
+
+    @Test
+    public void pickominoRunsWithGreedyAgent() {
+        ForwardModelTester fmt = new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\PickominoGreedy.json");
     }
 
 }

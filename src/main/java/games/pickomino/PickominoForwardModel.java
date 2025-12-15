@@ -110,8 +110,8 @@ public class PickominoForwardModel extends StandardForwardModel {
                 }
             }
             
-            System.out.println(rollStr);
-        }
+            System.out.println(rollStr); // inside the if verbose block
+        } // end if verbose
     }
 
     /**
@@ -128,13 +128,17 @@ public class PickominoForwardModel extends StandardForwardModel {
         }
 
         // Compute the minimum value to reach to stop, and the values of other players top tiles
-        assert pgs.remainingTiles.getSize() != 0 : "No tiles left, should not happen when computing available actions";
+        if(pgs.remainingTiles.getSize() == 0) {
+            throw new AssertionError("No tiles left, should not happen when computing available actions");
+        }
         // To stop, player needs at least the value of the lowest remaining tile
         int minValueToStop = Integer.MAX_VALUE;
         for(int i = 0; i < pgs.remainingTiles.getSize(); i++){
             if(pgs.remainingTiles.peek(i).getValue() < minValueToStop) minValueToStop = pgs.remainingTiles.peek(i).getValue();
         }
-        assert minValueToStop < Integer.MAX_VALUE : "No tiles left, should not happen when computing available actions";
+        if(minValueToStop == Integer.MAX_VALUE) {
+            throw new AssertionError("No tiles left, should not happen when computing available actions");
+        }
         int[] stealableValues = new int[pgs.getNPlayers() - 1];
         Arrays.fill(stealableValues, -1);
         int i = 0;

@@ -19,7 +19,9 @@ public class NullTurn extends AbstractAction {
         if (lostTile != null) { // if the player has a tile
             // Reinsert the lost tile and remove the highest-value tile from remainingTiles
             // (no ordering assumption on the deck; we search for the current highest each time)
-            assert pgs.remainingTiles.getSize() > 0 : "No tiles remaining when re-inserting player's lost tile";
+            if(pgs.remainingTiles.getSize() == 0) {
+                throw new AssertionError("No tiles remaining when re-inserting player's lost tile");
+            }
             // search for the tile with the highest value in the remaining tiles deck and for its index
             int highestTileIndex = -1;
             int highestTileValue = Integer.MIN_VALUE;
@@ -29,7 +31,9 @@ public class NullTurn extends AbstractAction {
                     highestTileValue = pgs.remainingTiles.peek(i).getValue();
                 }
             }
-            assert highestTileIndex != -1 : "No tile left in remaining tiles deck";
+            if(highestTileIndex == -1) {
+                throw new AssertionError("No tile left in remaining tiles deck");
+            }
 
             if(highestTileValue < lostTile.getValue()) {
                 pgs.remainingTiles.add(lostTile);
