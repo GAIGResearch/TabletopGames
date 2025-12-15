@@ -2,8 +2,6 @@ package games.powergrid;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
@@ -21,7 +19,6 @@ import static core.CoreConstants.VisibilityMode.*;
 
 public class PowerGridGameState extends AbstractGameState {
 
-  
     protected PowerGridGraphBoard gameMap;
     protected PowerGridResourceMarket resourceMarket; 
     protected HashMap<Resource,Integer> resourceDiscardPile; 
@@ -30,60 +27,37 @@ public class PowerGridGameState extends AbstractGameState {
     protected Deck<PowerGridCard> currentMarket;
     protected Deck<PowerGridCard> futureMarket;
     
-    private List<Boolean> RewardGiven = new ArrayList<>();
-    
-    public List<Boolean> getRewardGiven() {
-		return RewardGiven;
-	}
-
-    public void setRewardGiven(int playerId) {
-        RewardGiven.set(playerId, true);
-    }
-
-    
-	public void setRewardGiven(List<Boolean> rewardGiven) {
-		RewardGiven = rewardGiven;
-	}
-
+    private List<Boolean> RewardGiven = new ArrayList<>();  
 	private List<Integer> turnOrder = new ArrayList<>();
     private List<Integer> roundOrder = new ArrayList<>();
     private List<Integer> bidOrder = new ArrayList<>();
-    private Set<Integer> plantsRan = new HashSet<>();
     
-  
-
+    private Set<Integer> plantsRan = new HashSet<>();
+	private Set<Integer> activeRegions;
+	private Set<Integer> invalidCities; 
+	private Set<Integer> validCities; 
+    	
 	private int turnOrderIndex = 0;
+    private int discountCard; 
+    private int step;
+    private int currentBidder = -1;    // Track the current highest bid 
+    private int currentBid = 0;
+    private int auctionPlantNumber = -1;    // Track which plant is currently being auctioned (-1 means none)
+
 	private int[] income; 
     private int[] playerMoney;
-    private int discountCard; 
     private int[] poweredCities; 
-    private int step;
-
-	
     private int[] cityCountByPlayer;
-    public int[] getPlayerMoney() {
-		return playerMoney;
-	}
 
-
-	public void setPlayerMoney(int[] playerMoney) {
-		this.playerMoney = playerMoney;
-	}
-
-
-	public void setPoweredCities(int[] poweredCities) {
-		this.poweredCities = poweredCities;
-	}
-
-
-	public void setCityCountByPlayer(int[] cityCountByPlayer) {
-		this.cityCountByPlayer = cityCountByPlayer;
-	}
-
-	private double[] oneHotRegion; 
-    private int[][] citySlotsById;          
+	private double[] oneHotRegion;
+	
+    private int[][] citySlotsById;
+    
     private Deck<PowerGridCard>[] ownedPlantsByPlayer;
     
+	
+
+  
     public enum PowerGridGamePhase implements IGamePhase{
     	PLAYER_ORDER,
     	AUCTION,
@@ -101,19 +75,9 @@ public class PowerGridGameState extends AbstractGameState {
 	    }
     }
 
-    // Track which plant is currently being auctioned (-1 means none)
-    private int auctionPlantNumber = -1;
 
-    // Track the current highest bid 
-    private int currentBid = 0;
-    // Tracks the current highest bidder
-    private int currentBidder = -1;
-	private Set<Integer> activeRegions;
-	private Set<Integer> invalidCities; 
-	private Set<Integer> validCities; 
+
   
-
-    
 
     public PowerGridGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -261,7 +225,6 @@ public class PowerGridGameState extends AbstractGameState {
 	    if (!Objects.equals(bidOrder, other.bidOrder)) return false;
 	    if (!Objects.equals(plantsRan, other.plantsRan)) return false;
 	    if (!Objects.equals(RewardGiven, other.RewardGiven)) return false;
-	    if (!Objects.equals(income, other.income)) return false;
 
 	    // Scalars
 	    if (turnOrderIndex != other.turnOrderIndex) return false;
@@ -272,6 +235,7 @@ public class PowerGridGameState extends AbstractGameState {
 	    if (currentBidder != other.currentBidder) return false;
 
 	    // Arrays
+	    if (!Arrays.equals(income, other.income)) return false;
 	    if (!Arrays.equals(playerMoney, other.playerMoney)) return false;
 	    if (!Arrays.equals(poweredCities, other.poweredCities)) return false;
 	    if (!Arrays.equals(cityCountByPlayer, other.cityCountByPlayer)) return false;
@@ -288,7 +252,38 @@ public class PowerGridGameState extends AbstractGameState {
 	    return true;
 	}
 
+    
+    public List<Boolean> getRewardGiven() {
+		return RewardGiven;
+	}
 
+    public void setRewardGiven(int playerId) {
+        RewardGiven.set(playerId, true);
+    }
+
+    
+	public void setRewardGiven(List<Boolean> rewardGiven) {
+		RewardGiven = rewardGiven;
+	}
+
+    public int[] getPlayerMoney() {
+		return playerMoney;
+	}
+
+
+	public void setPlayerMoney(int[] playerMoney) {
+		this.playerMoney = playerMoney;
+	}
+
+
+	public void setPoweredCities(int[] poweredCities) {
+		this.poweredCities = poweredCities;
+	}
+
+
+	public void setCityCountByPlayer(int[] cityCountByPlayer) {
+		this.cityCountByPlayer = cityCountByPlayer;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public void initFuelStorage() {
@@ -451,8 +446,8 @@ public class PowerGridGameState extends AbstractGameState {
 	}
 	
 	public int increasePlayerMoney(int playerId, int amount) {
-		playerMoney[playerId] += amount;
-		return playerMoney[playerId];
+	    playerMoney[playerId] = Math.min(PowerGridParameters.MAX_MONEY, playerMoney[playerId] + amount);
+	    return playerMoney[playerId];
 	}
 	
 	public int decreasePlayerMoney(int playerId, int amount) {
@@ -818,79 +813,32 @@ public class PowerGridGameState extends AbstractGameState {
     }
     
     /**
-     * Computes the game score for the given player, used for intermediate
-     * reward shaping and final outcome scoring. This is what PyTAG uses so this does not 
-     * necessarily reflect the "Score" of a game. 
-     *
-     * <p>After the Bureaucracy phase, the score is calculated based on a 
-     * a weighted combination of:
-     * <ul>
-     *   <li>Normalized city count (progress toward game-end city target)</li>
-     *   <li>Normalized income (based on powered cities)</li>
-     * </ul>
-     *
-     * <p>At game end:
-     * <ul>
-     *   <li>Winners receive +4.0</li>
-     *   <li>All non-winners receive −2.0</li>
-     * </ul>
+     * Returns the player's cities ran as a score metric since this is what determines the winner. The players 
+     * income is converted to a decimal and added to the integer number of powered cities so that a tie between players who have 
+     * tied number of cities can be broken. 
      *
      * @param playerId the player whose score is being calculated
-     * @return a reward value reflecting current progress or final result
+     * @return number of powered generators/cities for the player (raw count) + Money as a decimal
      */
-
     @Override
     public double getGameScore(int playerId) {
-        final PowerGridGamePhase phase = (PowerGridGamePhase) getGamePhase();
-        
-        final double wCities = 0.8;
-        final double wIncome = 1.2;
-        
- 
-       //if the player wins at the end they get a reward else they get penalized 
-        if (this.getGameStatus() == CoreConstants.GameResult.GAME_END) {
-            CoreConstants.GameResult[] res = getPlayerResults();
-            CoreConstants.GameResult r = (res != null && playerId < res.length) ? res[playerId] : null;
-            if (r == CoreConstants.GameResult.WIN_GAME) {
-                return 4.0;
-            } else {
-                return -2.0;  
-            }
+        if (poweredCities == null || playerId < 0 || playerId >= poweredCities.length) {
+            return 0.0;
         }
 
-        double base = 0.0;
-        if (phase == PowerGridGamePhase.BUREAUCRACY) {      
-            int cityTarget = 0;
-            try {
-                PowerGridParameters params = (PowerGridParameters) getGameParameters();
-                if (params != null && params.citiesToTriggerEnd != null &&
-                    params.citiesToTriggerEnd.length >= getNPlayers()) {
-                    cityTarget = params.citiesToTriggerEnd[getNPlayers() - 1];
-                }
-            } catch (Exception ignored) {}
-            if (cityTarget <= 0) cityTarget = Math.max(1, getMaxCitiesOwned());
+        int cities = poweredCities[playerId];
+        int money  = getPlayersMoney(playerId);
 
-            int cities = getCityCountByPlayer(playerId);
+        double scale = PowerGridParameters.MAX_MONEY + 1.0;
 
-            double normCities = clamp01((double) cities / cityTarget);
-            double normIncome = clamp01((double) poweredCities[playerId]/20);
-        
-            base = (wCities * normCities + wIncome * normIncome); 
-        }
-        
-        
-        return base;
+        return cities + (money / scale);
     }
 
-
-    private static double clamp01(double x) {
-        return x < 0 ? 0 : (x > 1 ? 1 : x);
-    }
 
 
     @Override
     public int hashCode() {
-        int result = 1;
+        int result = super.hashCode(); 
 
         // Components / markets
         result = 31 * result + Objects.hashCode(gameMap);
@@ -900,11 +848,12 @@ public class PowerGridGameState extends AbstractGameState {
         result = 31 * result + Objects.hashCode(currentMarket);
         result = 31 * result + Objects.hashCode(futureMarket);
 
-        // Orders & sets
+        // Orders, sets, lists
         result = 31 * result + Objects.hashCode(turnOrder);
         result = 31 * result + Objects.hashCode(roundOrder);
         result = 31 * result + Objects.hashCode(bidOrder);
         result = 31 * result + Objects.hashCode(plantsRan);
+        result = 31 * result + Objects.hashCode(RewardGiven); 
 
         // Scalars
         result = 31 * result + Integer.hashCode(turnOrderIndex);
@@ -914,13 +863,15 @@ public class PowerGridGameState extends AbstractGameState {
         result = 31 * result + Integer.hashCode(currentBid);
         result = 31 * result + Integer.hashCode(currentBidder);
 
-        // Arrays
+        // Arrays (primitives)
         result = 31 * result + Arrays.hashCode(playerMoney);
+        result = 31 * result + Arrays.hashCode(income);       
         result = 31 * result + Arrays.hashCode(poweredCities);
         result = 31 * result + Arrays.hashCode(cityCountByPlayer);
+        result = 31 * result + Arrays.hashCode(oneHotRegion);  
         result = 31 * result + Arrays.deepHashCode(citySlotsById);
 
-        // Arrays of maps / decks
+        // Arrays of references
         result = 31 * result + Arrays.hashCode(fuelByPlayer);
         result = 31 * result + Arrays.hashCode(ownedPlantsByPlayer);
 
@@ -931,6 +882,7 @@ public class PowerGridGameState extends AbstractGameState {
 
         return result;
     }
+
 
 
 }

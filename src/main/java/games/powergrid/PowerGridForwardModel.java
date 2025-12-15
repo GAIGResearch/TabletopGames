@@ -349,47 +349,6 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 	}
 	
 	
-	/**
-	 * Determines and records the winner at game end using Power Grid’s standard scoring:
-	 * <ol>
-	 *   <li>Highest number of powered cities this round wins;</li>
-	 *   <li>Ties are broken by most money on hand.</li>
-	 * </ol>
-	 *
-	 * <p>Exactly one winner is selected. In the rare case of a perfect tie on both
-	 * powered cities and money, the implementation resolves the tie by iteration order
-	 * (i.e., the later player in the loop that matches the best metrics becomes winner).
-	 *
-	 * <p>All players are first marked {@code LOSE_GAME}; the chosen winner is then marked
-	 * {@code WIN_GAME}.
-	 *
-	 * @param gs the current {@link core.AbstractGameState}; must be a {@link games.powergrid.PowerGridGameState}
-	 */
-	
-    @Override
-	protected void endGame(AbstractGameState gs) {
-        PowerGridGameState state = (PowerGridGameState) gs;
-        int winner = 0;
-        int highestCities = -1;
-        int highestMoney = -1;
-
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            int poweredCities = state.getPoweredCities(i);
-            int money = state.getPlayersMoney(i);
-
-            if (poweredCities > highestCities ||(poweredCities == highestCities && money > highestMoney)) {               
-                winner = i;
-                highestCities = poweredCities;
-                highestMoney = money;
-            }
-        }
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            gs.setPlayerResult(LOSE_GAME, i);
-        }
-        gs.setPlayerResult(WIN_GAME, winner);
-		state.setGameStatus(CoreConstants.GameResult.GAME_END);
-		
-    }
 
     /**
      * Awards money to each player based on how many cities they powered this round.
@@ -993,7 +952,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
                 " auctionPlant=" + s.getAuctionPlantNumber() +
                 " currentBid=" + s.getCurrentBid() +
                 " currentBidder=" + s.getCurrentBidder() +
-                " roundPassed(pid)=" + s.getRoundOrder());  // or your equivalent
+                " roundPassed(pid)=" + s.getRoundOrder());  
         System.out.print(" market:");
         for (var c : s.getCurrentMarket()) System.out.print(" " + c.getNumber());
         System.out.println();

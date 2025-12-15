@@ -4,6 +4,7 @@ package games.powergrid;
 import java.util.Map;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Deck;
 import core.interfaces.IStateHeuristic;
 import games.powergrid.PowerGridParameters.Resource;
@@ -28,7 +29,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 	 *   <li>Resource reserves vs. required fuel</li>
 	 * </ul>
 	 * Each component is scaled, weighted, and combined into a single heuristic value.
-	 * If the game is over, this function returns {@code 10.0} for a win and {@code 0.0} otherwise.
+	 * If the game is over, this function returns {@code 1.0} for a win and {@code -1.0} otherwise.
 	 * <p>
 	 * The function relies on helper methods like {@code getMaxExcluding()} to determine the
 	 * leader in each category (excluding the current player) and {@code shapedGap()} to apply
@@ -37,7 +38,7 @@ public class PowerGridHeuristic implements IStateHeuristic {
 	 * @param gs        the current abstract game state, expected to be an instance of {@link PowerGridGameState}
 	 * @param playerId  the ID of the player whose perspective the state is being evaluated from
 	 * @return a normalized heuristic value in [0, 1] representing the player’s standing compared to the current leaders;
-	 *         returns {@code 10.0} if the player is the winner, {@code 0.0} if the player has lost
+	 *         returns {@code 1.0} if the player is the winner, {@code -1.0} if the player has lost
 	 *
 	 * @see PowerGridGameState
 	 * @see #getMaxExcluding(int[], int)
@@ -48,8 +49,13 @@ public class PowerGridHeuristic implements IStateHeuristic {
 	public double evaluateState(AbstractGameState gs, int playerId) {
 	    PowerGridGameState s = (PowerGridGameState) gs;
 	    if (s.isGameOver()) {
-	        return (gs.getWinner() == playerId) ? 1.0 : -1.0;
-	    }  
+	        CoreConstants.GameResult[] res = s.getPlayerResults();
+	        CoreConstants.GameResult r =
+	                (res != null && playerId >= 0 && playerId < res.length) ? res[playerId] : null;
+
+	        return (r == CoreConstants.GameResult.WIN_GAME) ? 1.0 : -1.0;
+	    }
+
 	    //calculates the total resources the player has regardless of type required by the player
     	Deck<PowerGridCard> hand = s.getPlayerPlantDeck(playerId);
     	int totalPlayerFuel = 0;
@@ -117,7 +123,6 @@ public class PowerGridHeuristic implements IStateHeuristic {
 
 	    double norm01 = (sumScore + Wneg) / (Wneg + Wpos); 
 	    double heuristic = clamp01(norm01);
-
 	    return heuristic;
 	}
 

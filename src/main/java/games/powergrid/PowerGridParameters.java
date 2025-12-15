@@ -18,6 +18,8 @@ public class PowerGridParameters extends AbstractParameters{
     
     public int maxRounds = 100;
     public int startingMoney = 50;
+    public static int MAX_MONEY = 500;
+
     
     public int[] citySlotPrices = new int[]{10, 15, 20};
     public int[] startinResources = new int[]{23, 18, 14,2};
