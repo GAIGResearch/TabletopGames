@@ -144,6 +144,10 @@ import gametemplate.GTForwardModel;
 import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
 import gametemplate.GTParameters;
+import games.pickomino.PickominoForwardModel;
+import games.pickomino.PickominoGUIManager;
+import games.pickomino.PickominoGameState;
+import games.pickomino.PickominoParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.*;
@@ -333,7 +337,8 @@ public enum GameType {
     Chess(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),;
+            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),
+    Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling), PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class, PickominoGUIManager.class);
 
 
     // Core classes where the game is defined

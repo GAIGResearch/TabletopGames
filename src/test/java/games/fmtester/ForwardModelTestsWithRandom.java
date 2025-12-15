@@ -12,6 +12,11 @@ public class ForwardModelTestsWithRandom {
     }
 
     @Test
+    public void testPickomino() {
+        ForwardModelTester fmt = new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=2");
+    }
+
+    @Test
     public void testMonopolyDeal() {
         ForwardModelTester fmt = new ForwardModelTester("game=MonopolyDeal", "nGames=2", "nPlayers=2");
     }
