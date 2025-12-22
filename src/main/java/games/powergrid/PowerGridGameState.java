@@ -834,7 +834,26 @@ public class PowerGridGameState extends AbstractGameState {
 
         return cities + (money / scale);
     }
-    
+    /**
+     * Computes the game score for the given player, used for intermediate
+     * reward shaping and final outcome scoring. 
+     *
+     * <p>After the Bureaucracy phase, the score is calculated based on a 
+     * a weighted combination of:
+     * <ul>
+     *   <li>Normalized city count (progress toward game-end city target)</li>
+     *   <li>Normalized income (based on powered cities)</li>
+     * </ul>
+     *
+     * <p>At game end:
+     * <ul>
+     *   <li>Winners receive +4.0</li>
+     *   <li>All non-winners receive −2.0</li>
+     * </ul>
+     *
+     * @param playerId the player whose score is being calculated
+     * @return a reward value reflecting current progress or final result
+     */
     @Override 
     public double getReward(int playerId) {
     	 final PowerGridGamePhase phase = (PowerGridGamePhase) getGamePhase();
