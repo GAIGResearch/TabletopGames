@@ -13,6 +13,7 @@ import java.io.*;
 import java.util.List;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -334,30 +335,25 @@ public abstract class Utils {
         return defaultValue;
     }
 
-    public static String createDirectory(String[] nestedDirectories) {
-        String folder = "";
-        boolean success = true;
-        for (String nestedDir : nestedDirectories) {
-            folder = folder + nestedDir + File.separator;
-            File outFolder = new File(folder);
-            if (!outFolder.exists()) {
-                success = outFolder.mkdirs();
-            }
-            if (!success)
-                throw new AssertionError("Unable to create output directory" + outFolder.getAbsolutePath());
+    public static String createDirectory(String fullDirectoryPath) {
+        File folder =  new File(fullDirectoryPath);
+        if (!folder.exists()) {
+            folder.mkdirs();
         }
-        return folder;
+        if (!folder.exists()) {
+            throw new AssertionError("Unable to create output directory" + folder.getAbsolutePath());
+        }
+        return folder.getAbsolutePath();
     }
 
-    public static String createDirectory(String fullDirectoryPath) {
-        String[] nestedDirectories = fullDirectoryPath.split(Pattern.quote(File.separator));
-        return createDirectory(nestedDirectories);
+    public static String createDirectory(String... nestedDirectories) {
+        return createDirectory(String.join(File.separator, nestedDirectories));
     }
 
     /**
      *
      * Loads in tab-delimitted data from a file, and returns the data as a List of the
-     *  raw data, plus a separate list of the header row
+     * raw data, plus a separate list of the header row
      *
      * @param files files to load (all must have same format)
      * @return Pair<List<String>, List<double[]>> The first item is the header details, the second
@@ -381,6 +377,7 @@ public abstract class Utils {
         }
         return Pair.of(header, data);
     }
+
     public static void writeDataWithHeader(String delimiter, List<String> newFeatureNames, List<List<Object>> newDataRows, String outputFile) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
             // Write the header

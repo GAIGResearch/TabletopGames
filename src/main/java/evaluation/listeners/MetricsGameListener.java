@@ -103,7 +103,7 @@ public class MetricsGameListener implements IGameListener {
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
             // If the "metrics/out/" does not exist, create it
             String folder = createDirectory(nestedDirectories);
-            destDir = new File(folder).getAbsolutePath() + File.separator;
+            destDir = folder + File.separator;
         }
         return success;
     }
