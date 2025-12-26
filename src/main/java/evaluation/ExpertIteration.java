@@ -435,7 +435,7 @@ public class ExpertIteration {
         agents.add(newTunedPlayer);
     }
 
-    private void fixSSDimensions(NTBEA ntbea, ITPSearchSpace<?> actionSearchSpace, int[] valueSearchSettings, ITPSearchSpace<?> valueSearchSpace) {
+    public static void fixSSDimensions(NTBEA ntbea, ITPSearchSpace<?> actionSearchSpace, int[] valueSearchSettings, ITPSearchSpace<?> valueSearchSpace) {
         List<String> actionNames = actionSearchSpace.getDimensions();
         for (int i = 0; i < valueSearchSettings.length; i++) {
             if (!actionNames.contains(valueSearchSpace.name(i))) {
@@ -443,6 +443,27 @@ public class ExpertIteration {
                 // 'forget' the previous value
                 // otherwise we fix the non-optimised settings to the value search settings
                 ntbea.fixTunableParameter(valueSearchSpace.name(i), valueSearchSpace.value(i, valueSearchSettings[i]));
+            }
+        }
+
+        // Safety check for non-tuned parameters that differ between the two search spaces
+        Map<String, Object> actionNonTuned = actionSearchSpace.getNonTunedParametersAndValues();
+        Map<String, Object> valueNonTuned = valueSearchSpace.getNonTunedParametersAndValues();
+
+        for (String param : actionNonTuned.keySet()) {
+            boolean failure = false;
+            if (valueNonTuned.containsKey(param)) {
+                Object actionVal = actionNonTuned.get(param);
+                Object valueVal = valueNonTuned.get(param);
+
+                if (actionVal != null && !actionVal.equals(valueVal)) {
+                    System.err.printf("Warning: Non-tuned parameter '%s' has different values: ActionSS=%s, ValueSS=%s%n",
+                            param, actionVal, valueVal);
+                    failure = true;
+                }
+            }
+            if (failure) {
+                throw new AssertionError("Incompatible Action and Value default parameters - adjust search spaces");
             }
         }
     }
