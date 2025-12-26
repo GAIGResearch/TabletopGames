@@ -264,7 +264,7 @@ public class PyTAG {
     }
 
     public double getReward(){
-        return gameState.getGameScore(gameState.getCurrentPlayer());
+        return gameState.getReward(gameState.getCurrentPlayer());
     }
 
     public List<AbstractAction> getActions(){
@@ -424,6 +424,7 @@ public class PyTAG {
 //                    double[] obs = env.getObservationVector();
 //                    String json = env.getObservationJson();
                     double reward = env.getReward();
+                    System.out.println("REWARD: " +  reward);
 //                    System.out.println("at step " + steps + " the reward is " + reward + "player ID " + env.gameState.getCurrentPlayer());
 
                     // step the environment

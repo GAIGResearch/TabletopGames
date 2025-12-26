@@ -2,6 +2,7 @@ package games.powergrid;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
@@ -833,6 +834,73 @@ public class PowerGridGameState extends AbstractGameState {
 
         return cities + (money / scale);
     }
+    /**
+     * Computes the game score for the given player, used for intermediate
+     * reward shaping and final outcome scoring. 
+     *
+     * <p>After the Bureaucracy phase, the score is calculated based on a 
+     * a weighted combination of:
+     * <ul>
+     *   <li>Normalized city count (progress toward game-end city target)</li>
+     *   <li>Normalized income (based on powered cities)</li>
+     * </ul>
+     *
+     * <p>At game end:
+     * <ul>
+     *   <li>Winners receive +4.0</li>
+     *   <li>All non-winners receive −2.0</li>
+     * </ul>
+     *
+     * @param playerId the player whose score is being calculated
+     * @return a reward value reflecting current progress or final result
+     */
+    @Override 
+    public double getReward(int playerId) {
+    	 final PowerGridGamePhase phase = (PowerGridGamePhase) getGamePhase();
+         
+         final double wCities = 0.8;
+         final double wIncome = 1.2;
+         
+  
+        //if the player wins at the end they get a reward else they get penalized 
+         if (this.getGameStatus() == CoreConstants.GameResult.GAME_END) {
+             CoreConstants.GameResult[] res = getPlayerResults();
+             CoreConstants.GameResult r = (res != null && playerId < res.length) ? res[playerId] : null;
+             if (r == CoreConstants.GameResult.WIN_GAME) {
+                 return 4.0;
+             } else {
+                 return -2.0;  
+             }
+         }
+
+         double base = 0.0;
+         if (phase == PowerGridGamePhase.BUREAUCRACY) {      
+             int cityTarget = 0;
+             try {
+                 PowerGridParameters params = (PowerGridParameters) getGameParameters();
+                 if (params != null && params.citiesToTriggerEnd != null &&
+                     params.citiesToTriggerEnd.length >= getNPlayers()) {
+                     cityTarget = params.citiesToTriggerEnd[getNPlayers() - 1];
+                 }
+             } catch (Exception ignored) {}
+             if (cityTarget <= 0) cityTarget = Math.max(1, getMaxCitiesOwned());
+
+             int cities = getCityCountByPlayer(playerId);
+
+             double normCitiesOwned = clamp01((double) cities / cityTarget);
+             double normPoweredCities = clamp01((double) poweredCities[playerId]/20);
+         
+             base = (wCities * normCitiesOwned + wIncome * normPoweredCities ); 
+         }
+         
+         
+         return base;
+    	
+    }
+    private static double clamp01(double x) {
+        return x < 0 ? 0 : (x > 1 ? 1 : x);
+    }
+    
 
 
 

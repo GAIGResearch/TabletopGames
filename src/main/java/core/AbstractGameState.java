@@ -681,6 +681,24 @@ public abstract class AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }
+    
+    /**
+     * Returns the reward signal for reinforcement-learning style environments (e.g., PyTAG).
+     * <p>
+     * By default, this method returns the game score for the specified player
+     * (see {@link #getGameScore(int)}). Games may override this method to provide
+     * an alternative or intermediate reward signal (e.g., phase-based or shaped rewards)
+     * while leaving the official game score unchanged.
+     * <p>
+     * If overridden, PyTAG will use this method as the reward signal instead of the
+     * default score-based reward.
+     *
+     * @param playerId the player for whom the reward is being computed
+     * @return the reward value for the given player
+     */
+    public double getReward(int playerId) {
+        return getGameScore(playerId);
+    }
 
     /**
      * HashCodeArray compiles all necessary hash codes for each individual game state.
