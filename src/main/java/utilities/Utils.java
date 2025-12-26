@@ -338,7 +338,15 @@ public abstract class Utils {
     public static String createDirectory(String fullDirectoryPath) {
         File folder =  new File(fullDirectoryPath);
         if (!folder.exists()) {
-            folder.mkdirs();
+            int count = 0;
+            do {
+                count++;
+                folder.mkdirs();
+                try {
+                    Thread.sleep(50);
+                }  catch (InterruptedException e) {}
+                // try 3 times in case of resource contention (when launching many
+            } while (!folder.exists() && count <= 3);
         }
         if (!folder.exists()) {
             throw new AssertionError("Unable to create output directory" + folder.getAbsolutePath());
