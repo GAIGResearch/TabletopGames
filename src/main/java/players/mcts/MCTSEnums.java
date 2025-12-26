@@ -7,7 +7,7 @@ public class MCTSEnums {
     }
 
     public enum Information {
-        Closed_Loop, Open_Loop, Information_Set
+        Closed_Loop, Open_Loop, Information_Set, Perfect_Information
     }
 
     public enum MASTType {
@@ -22,6 +22,10 @@ public class MCTSEnums {
 
     public enum TreePolicy {
         UCB, UCB_Tuned, AlphaGo, EXP3, RegretMatching, NoAveragingRM, Uniform, Greedy
+    }
+
+    public enum PerfectInformationPolicy{
+        SingleVote, TotalValue, AverageValue, TotalVisits
     }
 
     public enum BackupPolicy {

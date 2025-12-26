@@ -330,6 +330,7 @@ public class SingleTreeNode {
                     setActionsFromOpenLoopState(state);
                     break;
                 case Open_Loop:
+                case Perfect_Information:
                     setActionsFromOpenLoopState(state.copy());
                     copyCount++;
                     break;
