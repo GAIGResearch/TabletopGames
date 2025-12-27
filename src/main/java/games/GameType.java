@@ -109,6 +109,10 @@ import games.saboteur.SaboteurForwardModel;
 import games.saboteur.SaboteurGameParameters;
 import games.saboteur.SaboteurGameState;
 import games.saboteur.gui.SaboteurGUIManager;
+import games.spades.SpadesForwardModel;
+import games.spades.SpadesGameState;
+import games.spades.SpadesParameters;
+import games.spades.gui.SpadesGUIManager;
 import games.stratego.StrategoForwardModel;
 import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
@@ -338,7 +342,12 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
             ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),
-    Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling), PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class, PickominoGUIManager.class);
+    Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling),
+            PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class,
+            PickominoGUIManager.class),
+    Spades(4,4,Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement, TakeThat),
+            SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class);
 
 
     // Core classes where the game is defined
