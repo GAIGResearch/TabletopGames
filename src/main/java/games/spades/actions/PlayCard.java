@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IPrintable;
 import games.spades.SpadesGameState;
+import utilities.Pair;
 
 import java.util.AbstractMap;
 import java.util.Objects;
@@ -15,22 +16,17 @@ import java.util.Objects;
  */
 public class PlayCard extends AbstractAction implements IPrintable {
     
-    public final int playerId;
     public final FrenchCard card;
     
-    public PlayCard(int playerId, FrenchCard card) {
-        this.playerId = playerId;
+    public PlayCard(FrenchCard card) {
         this.card = card;
     }
     
     @Override
     public boolean execute(AbstractGameState gameState) {
         SpadesGameState state = (SpadesGameState) gameState;
-        
-        if (state.getCurrentPlayer() != playerId) {
-            throw new AssertionError("Player " + playerId + " tried to play out of turn");
-        }
-        
+        int playerId = state.getCurrentPlayer();
+
         if (state.getSpadesGamePhase() != SpadesGameState.Phase.PLAYING) {
             throw new AssertionError("PlayCard action called outside of playing phase");
         }
@@ -44,7 +40,7 @@ public class PlayCard extends AbstractAction implements IPrintable {
         }
         
         // Add card to current trick
-        state.getCurrentTrick().add(new AbstractMap.SimpleEntry<>(playerId, card));
+        state.getCurrentTrick().add(new Pair<>(playerId, card));
         
         return true;
     }
@@ -57,19 +53,18 @@ public class PlayCard extends AbstractAction implements IPrintable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PlayCard)) return false;
-        PlayCard playCard = (PlayCard) o;
-        return playerId == playCard.playerId && Objects.equals(card, playCard.card);
+        if (!(o instanceof PlayCard playCard)) return false;
+        return Objects.equals(card, playCard.card);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, card);
+        return card.hashCode() + 2798;
     }
     
     @Override
     public void printToConsole() {
-        System.out.println(toString());
+        System.out.println(this);
     }
     
     @Override
@@ -79,6 +74,6 @@ public class PlayCard extends AbstractAction implements IPrintable {
     
     @Override
     public String toString() {
-        return "Player " + playerId + " plays " + card.toString();
+        return "Plays " + card.toString();
     }
 } 

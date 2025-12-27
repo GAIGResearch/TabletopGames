@@ -4,6 +4,7 @@ import core.components.FrenchCard;
 import gui.views.CardView;
 import games.spades.SpadesGameState;
 import utilities.ImageIO;
+import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class SpadesTrickView extends JPanel {
     
     private final String dataPath;
-    private List<Map.Entry<Integer, FrenchCard>> currentTrick;
+    private List<Pair<Integer, FrenchCard>> currentTrick;
     private Image backOfCard;
     private int leadPlayer = -1;
     
@@ -78,7 +79,7 @@ public class SpadesTrickView extends JPanel {
             // Defensive check to prevent IndexOutOfBoundsException
             if (i >= currentTrick.size()) break;
             
-            Map.Entry<Integer, FrenchCard> entry;
+            Pair<Integer, FrenchCard> entry;
             try {
                 entry = currentTrick.get(i);
             } catch (IndexOutOfBoundsException e) {
@@ -88,8 +89,8 @@ public class SpadesTrickView extends JPanel {
             
             if (entry == null) continue;
             
-            int playerId = entry.getKey();
-            FrenchCard card = entry.getValue();
+            int playerId = entry.a;
+            FrenchCard card = entry.b;
             
             if (card == null) continue;
             

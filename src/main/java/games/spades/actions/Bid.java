@@ -12,16 +12,14 @@ import java.util.Objects;
  */
 public class Bid extends AbstractAction {
     
-    public final int playerId;
     public final int bidAmount;
     public final boolean blind; // true for Blind Nil
     
-    public Bid(int playerId, int bidAmount) {
-        this(playerId, bidAmount, false);
+    public Bid(int bidAmount) {
+        this(bidAmount, false);
     }
 
-    public Bid(int playerId, int bidAmount, boolean blind) {
-        this.playerId = playerId;
+    public Bid(int bidAmount, boolean blind) {
         this.bidAmount = bidAmount;
         this.blind = blind;
     }
@@ -30,13 +28,10 @@ public class Bid extends AbstractAction {
     public boolean execute(AbstractGameState gameState) {
         SpadesGameState state = (SpadesGameState) gameState;
         
-        if (state.getCurrentPlayer() != playerId) {
-            throw new AssertionError("Player " + playerId + " tried to bid out of turn");
-        }
-        
         if (state.getSpadesGamePhase() != SpadesGameState.Phase.BIDDING) {
             throw new AssertionError("Bid action called outside of bidding phase");
         }
+        int playerId = state.getCurrentPlayer();
         
         state.setPlayerBid(playerId, bidAmount);
         if (bidAmount == 0) {
@@ -56,19 +51,18 @@ public class Bid extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Bid)) return false;
-        Bid bid = (Bid) o;
-        return playerId == bid.playerId && bidAmount == bid.bidAmount && blind == bid.blind;
+        if (!(o instanceof Bid bid)) return false;
+        return bidAmount == bid.bidAmount && blind == bid.blind;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, bidAmount, blind);
+        return Objects.hash(bidAmount, blind);
     }
     
     @Override
     public void printToConsole() {
-        System.out.println(toString());
+        System.out.println(this);
     }
     
     @Override
@@ -78,6 +72,6 @@ public class Bid extends AbstractAction {
     
     @Override
     public String toString() {
-        return "Player " + playerId + " bids " + (bidAmount == 0 ? (blind ? "Blind Nil" : "Nil") : bidAmount);
+        return "Bids " + (bidAmount == 0 ? (blind ? "Blind Nil" : "Nil") : bidAmount);
     }
 } 

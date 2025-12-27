@@ -10,6 +10,7 @@ import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
 import utilities.DeterminisationUtilities;
+import utilities.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,7 @@ import java.util.Objects;
 public class SpadesGameState extends AbstractGameState implements IPrintable {
 
     List<Deck<FrenchCard>> playerHands;
-    public List<Map.Entry<Integer, FrenchCard>> currentTrick = new ArrayList<>();
+    public List<Pair<Integer, FrenchCard>> currentTrick = new ArrayList<>();
     public List<List<Deck<FrenchCard>>> tricksWon;
     public int[] playerBids;
     public int[] tricksTaken;
@@ -82,8 +83,8 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
             }
         }
 
-        for (Map.Entry<Integer, FrenchCard> entry : currentTrick) {
-            components.add(entry.getValue());
+        for (Pair<Integer, FrenchCard> entry : currentTrick) {
+            components.add(entry.b);
         }
 
         return components;
@@ -94,16 +95,12 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         SpadesGameState copy = new SpadesGameState(gameParameters, getNPlayers());
 
         copy.currentTrick = new ArrayList<>();
-        for (Map.Entry<Integer, FrenchCard> entry : currentTrick) {
-            copy.currentTrick.add(new HashMap.SimpleEntry<>(entry.getKey(), entry.getValue().copy()));
-        }
+        // the Pair<Integer, FrenchCard> that represents a trick is immutable
+        copy.currentTrick.addAll(currentTrick);
 
         copy.tricksWon = new ArrayList<>();
         for (List<Deck<FrenchCard>> playerTricks : tricksWon) {
-            List<Deck<FrenchCard>> copyTricks = new ArrayList<>();
-            for (Deck<FrenchCard> trick : playerTricks) {
-                copyTricks.add(trick.copy());
-            }
+            List<Deck<FrenchCard>> copyTricks = new ArrayList<>(playerTricks);
             copy.tricksWon.add(copyTricks);
         }
 
@@ -236,7 +233,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         this.leadPlayer = playerId;
     }
 
-    public List<Map.Entry<Integer, FrenchCard>> getCurrentTrick() {
+    public List<Pair<Integer, FrenchCard>> getCurrentTrick() {
         return currentTrick;
     }
 
@@ -269,7 +266,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), playerHands, currentTrick, tricksWon,
-                leadPlayer, gamePhase, leadSuit.ordinal(), spadesBroken);
+                leadPlayer, gamePhase, leadSuit == null ? -1 : leadSuit.ordinal(), spadesBroken);
         result = 31 * result + Arrays.hashCode(playerBids);
         result = 31 * result + Arrays.hashCode(tricksTaken);
         result = 31 * result + Arrays.hashCode(teamScores);
@@ -287,8 +284,8 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         // Current trick information
         if (!currentTrick.isEmpty()) {
             System.out.println("\nCurrent Trick (Lead Suit: " + leadSuit + "):");
-            for (Map.Entry<Integer, FrenchCard> entry : currentTrick) {
-                System.out.println("  Player " + entry.getKey() + ": " + entry.getValue());
+            for (Pair<Integer, FrenchCard> entry : currentTrick) {
+                System.out.println("  Player " + entry.a + ": " + entry.b);
             }
         }
 

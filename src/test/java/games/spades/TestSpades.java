@@ -101,7 +101,6 @@ public class TestSpades {
         for (int i = 0; i < 14; i++) {
             assertTrue("所有动作都应该是Bid动作", actions.get(i) instanceof Bid);
                          Bid bid = (Bid) actions.get(i);
-             assertEquals("叫牌应该由当前玩家执行", gameState.getCurrentPlayer(), bid.playerId);
              assertTrue("叫牌值应该在0-13范围内", bid.bidAmount >= 0 && bid.bidAmount <= 13);
         }
     }
@@ -117,7 +116,7 @@ public class TestSpades {
     @Test
     public void testBiddingExecution() {
         // 玩家1叫5
-        Bid bid1 = new Bid(1, 5);
+        Bid bid1 = new Bid(5);
         forwardModel.next(gameState, bid1);
         
         assertEquals("玩家1的叫牌应该被记录", 5, gameState.getPlayerBid(1));
@@ -125,12 +124,12 @@ public class TestSpades {
         assertEquals("仍然应该处于叫牌阶段", SpadesGameState.Phase.BIDDING, gameState.getSpadesGamePhase());
         
         // 其他玩家完成叫牌
-        forwardModel.next(gameState, new Bid(2, 3));
-        forwardModel.next(gameState, new Bid(3, 4));
+        forwardModel.next(gameState, new Bid(3));
+        forwardModel.next(gameState, new Bid( 4));
         assertEquals("应该轮到玩家0", 0, gameState.getCurrentPlayer());
         
         // 最后一个玩家叫牌
-        forwardModel.next(gameState, new Bid(0, 2));
+        forwardModel.next(gameState, new Bid(2));
         assertEquals("所有玩家叫牌后应该转换到出牌阶段", SpadesGameState.Phase.PLAYING, gameState.getSpadesGamePhase());
         assertEquals("出牌阶段应该从玩家1开始（庄家左边）", 1, gameState.getCurrentPlayer());
     }
@@ -143,10 +142,10 @@ public class TestSpades {
     @Test
     public void testTeamBidCalculation() {
         // 完成所有叫牌
-        forwardModel.next(gameState, new Bid(1, 5)); // 团队1
-        forwardModel.next(gameState, new Bid(2, 3)); // 团队0  
-        forwardModel.next(gameState, new Bid(3, 4)); // 团队1
-        forwardModel.next(gameState, new Bid(0, 2)); // 团队0
+        forwardModel.next(gameState, new Bid(5)); // 团队1
+        forwardModel.next(gameState, new Bid( 3)); // 团队0
+        forwardModel.next(gameState, new Bid( 4)); // 团队1
+        forwardModel.next(gameState, new Bid(2)); // 团队0
         
         // 验证团队叫牌总和
         int team0Bid = gameState.getPlayerBid(0) + gameState.getPlayerBid(2); // 2 + 3 = 5
@@ -178,8 +177,6 @@ public class TestSpades {
         // 验证所有动作都是PlayCard动作
         for (AbstractAction action : actions) {
             assertTrue("所有动作都应该是PlayCard动作", action instanceof PlayCard);
-            PlayCard playAction = (PlayCard) action;
-            assertEquals("出牌应该由当前玩家执行", gameState.getCurrentPlayer(), playAction.playerId);
         }
     }
 
@@ -254,7 +251,7 @@ public class TestSpades {
         FrenchCard heartAce = new FrenchCard(FrenchCard.FrenchCardType.Ace, FrenchCard.Suite.Hearts);
         player1Hand.add(heartAce);
         
-        forwardModel.next(gameState, new PlayCard(1, heartAce));
+        forwardModel.next(gameState, new PlayCard(heartAce));
         
         // 现在轮到玩家2，设置玩家2的手牌（有红心和其他花色）
         Deck<FrenchCard> player2Hand = gameState.getPlayerHands().get(2);
@@ -286,7 +283,7 @@ public class TestSpades {
         FrenchCard heartAce = new FrenchCard(FrenchCard.FrenchCardType.Ace, FrenchCard.Suite.Hearts);
         player1Hand.add(heartAce);
         
-        forwardModel.next(gameState, new PlayCard(1, heartAce));
+        forwardModel.next(gameState, new PlayCard( heartAce));
         
         // 设置玩家2没有红心
         Deck<FrenchCard> player2Hand = gameState.getPlayerHands().get(2);
@@ -547,10 +544,10 @@ public class TestSpades {
      * 让所有玩家完成叫牌，进入出牌阶段
      */
     private void completeBiddingPhase() {
-        forwardModel.next(gameState, new Bid(1, 3));
-        forwardModel.next(gameState, new Bid(2, 4));
-        forwardModel.next(gameState, new Bid(3, 2));
-        forwardModel.next(gameState, new Bid(0, 4));
+        forwardModel.next(gameState, new Bid( 3));
+        forwardModel.next(gameState, new Bid(4));
+        forwardModel.next(gameState, new Bid(2));
+        forwardModel.next(gameState, new Bid(4));
     }
 
     /**
@@ -575,15 +572,15 @@ public class TestSpades {
     private void playCompleteRound(FrenchCard card1, FrenchCard card2, FrenchCard card3, FrenchCard card4) {
         // 添加牌到对应玩家手中并出牌
         gameState.getPlayerHands().get(1).add(card1);
-        forwardModel.next(gameState, new PlayCard(1, card1));
+        forwardModel.next(gameState, new PlayCard(card1));
         
         gameState.getPlayerHands().get(2).add(card2);
-        forwardModel.next(gameState, new PlayCard(2, card2));
+        forwardModel.next(gameState, new PlayCard(card2));
         
         gameState.getPlayerHands().get(3).add(card3);
-        forwardModel.next(gameState, new PlayCard(3, card3));
+        forwardModel.next(gameState, new PlayCard( card3));
         
         gameState.getPlayerHands().get(0).add(card4);
-        forwardModel.next(gameState, new PlayCard(0, card4));
+        forwardModel.next(gameState, new PlayCard( card4));
     }
 }
