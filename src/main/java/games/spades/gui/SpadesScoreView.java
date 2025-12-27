@@ -116,7 +116,7 @@ public class SpadesScoreView extends JPanel {
         // Game phase
         g2d.setFont(new Font("Arial", Font.ITALIC, 10));
         g2d.setColor(Color.GRAY);
-        String phase = gameState.getSpadesGamePhase().name();
+        String phase = gameState.getGamePhase().toString();
         g2d.drawString("Phase: " + phase, 15, y);
         
         // Spades broken indicator

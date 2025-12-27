@@ -29,8 +29,6 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
     public int[] teamScores;
     public int[] teamSandbags;
     public boolean[] playerBlindNil;
-    public int leadPlayer;
-    public Phase gamePhase = Phase.BIDDING;
     public FrenchCard.Suite leadSuit;
     public boolean spadesBroken = false;
 
@@ -52,7 +50,6 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         teamScores = new int[2];
         teamSandbags = new int[2];
         playerBlindNil = new boolean[4];
-        leadPlayer = 0;
 
         for (int i = 0; i < 4; i++) {
             Deck<FrenchCard> hand = new Deck<>("Player" + i + "Hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
@@ -109,8 +106,6 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         copy.teamScores = Arrays.copyOf(teamScores, teamScores.length);
         copy.teamSandbags = Arrays.copyOf(teamSandbags, teamSandbags.length);
         copy.playerBlindNil = Arrays.copyOf(playerBlindNil, playerBlindNil.length);
-        copy.leadPlayer = leadPlayer;
-        copy.gamePhase = gamePhase;
         copy.leadSuit = leadSuit;
         copy.spadesBroken = spadesBroken;
 
@@ -201,14 +196,6 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         teamSandbags[team] += sandbags;
     }
 
-    public Phase getSpadesGamePhase() {
-        return gamePhase;
-    }
-
-    public void setSpadesGamePhase(Phase phase) {
-        this.gamePhase = phase;
-    }
-
     public boolean isSpadesBroken() {
         return spadesBroken;
     }
@@ -223,14 +210,6 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
 
     public void setLeadSuit(FrenchCard.Suite suit) {
         this.leadSuit = suit;
-    }
-
-    public int getLeadPlayer() {
-        return leadPlayer;
-    }
-
-    public void setLeadPlayer(int playerId) {
-        this.leadPlayer = playerId;
     }
 
     public List<Pair<Integer, FrenchCard>> getCurrentTrick() {
@@ -257,8 +236,6 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
                 Arrays.equals(teamScores, that.teamScores) &&
                 Arrays.equals(teamSandbags, that.teamSandbags) &&
                 Arrays.equals(playerBlindNil, that.playerBlindNil) &&
-                leadPlayer == that.leadPlayer &&
-                gamePhase == that.gamePhase &&
                 leadSuit == that.leadSuit &&
                 spadesBroken == that.spadesBroken;
     }
@@ -266,7 +243,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), playerHands, currentTrick, tricksWon,
-                leadPlayer, gamePhase, leadSuit == null ? -1 : leadSuit.ordinal(), spadesBroken);
+                leadSuit == null ? -1 : leadSuit.ordinal(), spadesBroken);
         result = 31 * result + Arrays.hashCode(playerBids);
         result = 31 * result + Arrays.hashCode(tricksTaken);
         result = 31 * result + Arrays.hashCode(teamScores);

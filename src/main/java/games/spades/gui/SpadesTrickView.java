@@ -19,8 +19,7 @@ public class SpadesTrickView extends JPanel {
     private final String dataPath;
     private List<Pair<Integer, FrenchCard>> currentTrick;
     private Image backOfCard;
-    private int leadPlayer = -1;
-    
+
     public static final int CARD_WIDTH = 60;
     public static final int CARD_HEIGHT = 80;
     public static final int TRICK_AREA_WIDTH = 300;
@@ -119,12 +118,6 @@ public class SpadesTrickView extends JPanel {
                     break;
             }
             
-            // Highlight lead card
-            if (playerId == leadPlayer) {
-                g.setColor(new Color(255, 255, 0, 150)); // Yellow highlight
-                g.fillRoundRect(x - 3, y - 3, CARD_WIDTH + 6, CARD_HEIGHT + 6, 10, 10);
-            }
-            
             // Draw the card
             Image cardImage = getCardImage(card);
             CardView.drawCard(g, x, y, CARD_WIDTH, CARD_HEIGHT, card, cardImage, backOfCard, true);
@@ -154,22 +147,13 @@ public class SpadesTrickView extends JPanel {
         if (gameState != null) {
             try {
                 this.currentTrick = gameState.getCurrentTrick();
-                this.leadPlayer = gameState.getLeadPlayer();
             } catch (Exception e) {
                 // If there's an error, clear the trick
                 this.currentTrick = null;
-                this.leadPlayer = -1;
             }
         } else {
             this.currentTrick = null;
-            this.leadPlayer = -1;
         }
-        repaint();
-    }
-    
-    public void clearTrick() {
-        this.currentTrick = null;
-        this.leadPlayer = -1;
         repaint();
     }
 } 

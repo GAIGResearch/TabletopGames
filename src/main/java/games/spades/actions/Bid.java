@@ -28,7 +28,7 @@ public class Bid extends AbstractAction {
     public boolean execute(AbstractGameState gameState) {
         SpadesGameState state = (SpadesGameState) gameState;
         
-        if (state.getSpadesGamePhase() != SpadesGameState.Phase.BIDDING) {
+        if (state.getGamePhase() != SpadesGameState.Phase.BIDDING) {
             throw new AssertionError("Bid action called outside of bidding phase");
         }
         int playerId = state.getCurrentPlayer();

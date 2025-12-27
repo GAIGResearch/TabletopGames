@@ -28,7 +28,7 @@ public class SpadesHeuristic implements IStateHeuristic {
             }
 
             // Add tactical evaluation based on current game phase
-            if (state.getSpadesGamePhase() == SpadesGameState.Phase.PLAYING) {
+            if (state.getGamePhase() == SpadesGameState.Phase.PLAYING) {
                 int ourBid = state.getPlayerBid(playerId) + state.getPlayerBid((playerId + 2) % 4);
                 int ourTricks = state.getTricksTaken(playerId) + state.getTricksTaken((playerId + 2) % 4);
 
@@ -46,7 +46,7 @@ public class SpadesHeuristic implements IStateHeuristic {
                 // Add hand strength evaluation
                 double handStrength = evaluateHandStrength(state, playerId);
                 scoreAdvantage += handStrength * 0.2;
-            } else if (state.getSpadesGamePhase() == SpadesGameState.Phase.BIDDING) {
+            } else if (state.getGamePhase() == SpadesGameState.Phase.BIDDING) {
                 // During bidding, focus more on hand strength
                 double handStrength = evaluateHandStrength(state, playerId);
                 scoreAdvantage += handStrength * 0.4;

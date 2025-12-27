@@ -14,7 +14,6 @@ public class SpadesParameters extends AbstractParameters {
     public final int blindNilBonusPoints = 200;
     public final int blindNilPenaltyPoints = 200;
     
-    public final int minBid = 0;
     public final int maxBid = 13;
     
     public boolean allowBlindNil = false;

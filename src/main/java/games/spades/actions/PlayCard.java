@@ -27,7 +27,7 @@ public class PlayCard extends AbstractAction implements IPrintable {
         SpadesGameState state = (SpadesGameState) gameState;
         int playerId = state.getCurrentPlayer();
 
-        if (state.getSpadesGamePhase() != SpadesGameState.Phase.PLAYING) {
+        if (state.getGamePhase() != SpadesGameState.Phase.PLAYING) {
             throw new AssertionError("PlayCard action called outside of playing phase");
         }
         
