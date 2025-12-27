@@ -9,10 +9,7 @@ import evaluation.optimisation.ntbea.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -275,9 +272,9 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         }
     }
 
-    public Map<String, Object> getNonTunedParametersAndValues() {
+    public Map<String, Object> getNonTunedParametersAndValues(Set<String> exclusions) {
         return itp.getParameterNames().stream()
-                .filter(s -> !searchDimensions.contains(s))
+                .filter(s -> !searchDimensions.contains(s) && !exclusions.contains(s))
                 .filter(s -> itp.getParameterValue(s) != null)
                 .filter(s -> !s.equals("randomSeed"))
                 .collect(Collectors.toMap(s -> s, s -> itp.getParameterValue(s)));

@@ -387,14 +387,14 @@ public class ExpertIteration {
             ntbea.fixTunableParameter("heuristic", stateHeuristic);  // so this is used when tuning
 
             if (actionSearchSettings != null) {
-                if (actionSearchSpace != null) {   // on first iteration we have results of action search
-                    // we can use the action search settings to initialise the value search settings
-                    fixSSDimensions(ntbea, valueSearchSpace, actionSearchSettings, actionSearchSpace);
-                }
                 // as well as the old action-tuned settings, we also use the old action heuristic for which they were tuned
                 if (oldActionHeuristic != null) {
                     ntbea.fixTunableParameter("actionHeuristic", oldActionHeuristic);
                     ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", oldActionHeuristic);
+                }
+                if (actionSearchSpace != null) {   // on first iteration we have results of action search
+                    // we can use the action search settings to initialise the value search settings
+                    fixSSDimensions(ntbea, valueSearchSpace, actionSearchSettings, actionSearchSpace, Set.of("valueHeuristic"));
                 }
             }
 
@@ -417,11 +417,10 @@ public class ExpertIteration {
             ntbea.fixTunableParameter("rolloutPolicyParams.actionHeuristic", actionHeuristic);
 
             if (valueSearchSettings != null && valueSearchSpace != null) {
-                // we can use the value search settings to initialise the action search settings
-                fixSSDimensions(ntbea, actionSearchSpace, valueSearchSettings, valueSearchSpace);
-
                 // and also make sure we include the state heuristic in the action search
                 ntbea.fixTunableParameter("heuristic", stateHeuristic);
+                // we can use the value search settings to initialise the action search settings
+                fixSSDimensions(ntbea, actionSearchSpace, valueSearchSettings, valueSearchSpace, Set.of("actionHeuristic"));
             }
 
             ntbeaParams.printSearchSpaceDetails();
@@ -435,7 +434,11 @@ public class ExpertIteration {
         agents.add(newTunedPlayer);
     }
 
-    public static void fixSSDimensions(NTBEA ntbea, ITPSearchSpace<?> actionSearchSpace, int[] valueSearchSettings, ITPSearchSpace<?> valueSearchSpace) {
+    public static void fixSSDimensions(NTBEA ntbea,
+                                       ITPSearchSpace<?> actionSearchSpace,
+                                       int[] valueSearchSettings,
+                                       ITPSearchSpace<?> valueSearchSpace,
+                                       Set<String> exclusions) {
         List<String> actionNames = actionSearchSpace.getDimensions();
         for (int i = 0; i < valueSearchSettings.length; i++) {
             if (!actionNames.contains(valueSearchSpace.name(i))) {
@@ -447,8 +450,8 @@ public class ExpertIteration {
         }
 
         // Safety check for non-tuned parameters that differ between the two search spaces
-        Map<String, Object> actionNonTuned = actionSearchSpace.getNonTunedParametersAndValues();
-        Map<String, Object> valueNonTuned = valueSearchSpace.getNonTunedParametersAndValues();
+        Map<String, Object> actionNonTuned = actionSearchSpace.getNonTunedParametersAndValues(exclusions);
+        Map<String, Object> valueNonTuned = valueSearchSpace.getNonTunedParametersAndValues(exclusions);
 
         for (String param : actionNonTuned.keySet()) {
             boolean failure = false;

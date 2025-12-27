@@ -8,6 +8,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import players.mcts.MCTSParams;
 
+import java.util.Collections;
+import java.util.Set;
+
 import static org.mockito.Mockito.*;
 
 public class ExpertIterationTest {
@@ -30,7 +33,7 @@ public class ExpertIterationTest {
         ITPSearchSpace<AbstractPlayer> ss1 = new ITPSearchSpace<>(p1, searchSpace);
         ITPSearchSpace<AbstractPlayer> ss2 = new ITPSearchSpace<>(p2, searchSpace);
         
-        ExpertIteration.fixSSDimensions(ntbea, ss1, new int[ss2.nDims()], ss2);
+        ExpertIteration.fixSSDimensions(ntbea, ss1, new int[ss2.nDims()], ss2, Collections.emptySet());
         Mockito.verify(ntbea, never()).fixTunableParameter(any(String.class), any(Object.class));
     }
 
@@ -46,7 +49,7 @@ public class ExpertIterationTest {
         ITPSearchSpace<AbstractPlayer> ss1 = new ITPSearchSpace<>(p1, searchSpace1);
         ITPSearchSpace<AbstractPlayer> ss2 = new ITPSearchSpace<>(p2, searchSpace2);
         
-        ExpertIteration.fixSSDimensions(ntbea, ss1, new int[ss2.nDims()], ss2);
+        ExpertIteration.fixSSDimensions(ntbea, ss1, new int[ss2.nDims()], ss2, Collections.emptySet());
         Mockito.verify(ntbea, never()).fixTunableParameter(any(String.class), any(Object.class));
     }
 
@@ -62,7 +65,7 @@ public class ExpertIterationTest {
         ITPSearchSpace<AbstractPlayer> ss1 = new ITPSearchSpace<>(p1, searchSpace1);
         ITPSearchSpace<AbstractPlayer> ss2 = new ITPSearchSpace<>(p2, searchSpace2);
 
-        ExpertIteration.fixSSDimensions(ntbea, ss2, new int[ss1.nDims()], ss1);
+        ExpertIteration.fixSSDimensions(ntbea, ss2, new int[ss1.nDims()], ss1, Collections.emptySet());
         Mockito.verify(ntbea, times(8)).fixTunableParameter(any(String.class), any(Object.class));
     }
 
@@ -78,6 +81,22 @@ public class ExpertIterationTest {
         ITPSearchSpace<AbstractPlayer> ss1 = new ITPSearchSpace<>(p1, searchSpace1);
         ITPSearchSpace<AbstractPlayer> ss2 = new ITPSearchSpace<>(p2, searchSpace2);
 
-        ExpertIteration.fixSSDimensions(ntbea, ss1, new int[ss2.nDims()], ss2);
+        ExpertIteration.fixSSDimensions(ntbea, ss1, new int[ss2.nDims()], ss2, Collections.emptySet());
+    }
+
+    @Test
+    public void testMismatchingNonTunedParametersDoesNotThrowErrorIfExcluded() {
+        // Case 3: Search spaces with non-matching static (non-tuned) parameters
+        MCTSParams p1 = new MCTSParams();
+        MCTSParams p2 = new MCTSParams();
+
+        String searchSpace1 = "src/test/java/evaluation/MCTSSearch_Heuristic.json";
+        String searchSpace2 = "src/test/java/evaluation/MCTSSearch_HeuristicSampleIncorrectII.json";
+
+        ITPSearchSpace<AbstractPlayer> ss1 = new ITPSearchSpace<>(p1, searchSpace1);
+        ITPSearchSpace<AbstractPlayer> ss2 = new ITPSearchSpace<>(p2, searchSpace2);
+
+        ExpertIteration.fixSSDimensions(ntbea, ss1, new int[ss2.nDims()], ss2, Set.of("maxTreeDepth"));
+        Mockito.verify(ntbea, never()).fixTunableParameter(any(String.class), any(Object.class));
     }
 }
