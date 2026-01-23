@@ -259,7 +259,7 @@ public class DescentForwardModel extends StandardForwardModel {
             // TODO let overlord pick locations if not fixed
             String tileName = null;
             List<Integer> previousKeys = new ArrayList<>();
-            List<Integer> previousRandom = new ArrayList<>();
+            List<String> previousRandom = new ArrayList<>();
             if (def.getLocations().length == 1) tileName = def.getLocations()[0];
             for (int i = 0; i < n; i++) {
                 Vector2D location = null;
@@ -281,33 +281,34 @@ public class DescentForwardModel extends StandardForwardModel {
                     tileName = null;
                 } else if (tileName.equals("random")) {
                     List<String> randomLoc = firstQuest.getRandomLocations();
-                    int idx = rnd.nextInt(randomLoc.size());
-                    while (previousRandom.contains(idx)) idx = rnd.nextInt(randomLoc.size());
-                    String loc = randomLoc.get(idx);
-                    if (loc.contains("-")) {
-                        Map tile = dgs.gridReferences.get(loc.split("-")[0]);
-                        String coords = loc.split("-")[1];
-                        Vector2D pos = new Vector2D(Integer.parseInt(coords.split(";")[0]), Integer.parseInt(coords.split(";")[1]));
-                        for (int j = 0; j < tile.size(); j++) {
-                            if (tile.values().toArray()[j].equals(pos)) {
-                                location = (Vector2D) tile.keySet().toArray()[j];
-                                break;
+                    String loc = null;
+                    while (location == null) {
+                        do loc = randomLoc.get(rnd.nextInt(randomLoc.size()));
+                        while (previousRandom.contains(loc));
+                        if (loc.contains("-")) {
+                            Map<Vector2D, Vector2D> tile = dgs.gridReferences.get(loc.split("-")[0]);
+                            String coords = loc.split("-")[1];
+                            Vector2D pos = new Vector2D(Integer.parseInt(coords.split(";")[0]), Integer.parseInt(coords.split(";")[1]));
+                            List<Vector2D> possible = List.copyOf(tile.values());
+
+                            if (possible.contains(pos))
+                                location = (Vector2D) tile.keySet().toArray()[possible.indexOf(pos)];
+                        } else {
+                            int idx;
+                            do idx = rnd.nextInt(dgs.gridReferences.get(loc).size());
+                            while (previousKeys.contains(idx));
+                            int k = 0;
+                            for (Vector2D key : dgs.gridReferences.get(loc).keySet()) {
+                                if (k == idx) {
+                                    location = key;
+                                    previousKeys.add(idx);
+                                    break;
+                                }
+                                k++;
                             }
-                        }
-                    } else {
-                        do idx = rnd.nextInt(dgs.gridReferences.get(loc).size());
-                        while (previousKeys.contains(idx));
-                        int k = 0;
-                        for (Vector2D key : dgs.gridReferences.get(loc).keySet()) {
-                            if (k == idx) {
-                                location = key;
-                                previousKeys.add(idx);
-                                break;
-                            }
-                            k++;
                         }
                     }
-                    previousRandom.add(idx);
+                    previousRandom.add(loc);
                 }
                 else if (!tileName.equalsIgnoreCase("player") && !tileName.equalsIgnoreCase("")) {
                     // Get a specific tile
@@ -1797,7 +1798,13 @@ public class DescentForwardModel extends StandardForwardModel {
         // StartX / Y Will need to be adjusted to not draw on top of existing things
 
         // Find first tile, as board node in the board configuration graph board
-        BoardNode firstTile = config.getBoardNodes().iterator().next();
+        int x = 0;
+        BoardNode firstTile = (BoardNode) config.getBoardNodeMap().values().toArray()[x];
+        while (!firstTile.getComponentName().contains("exit1") && !firstTile.getComponentName().contains("entrance1")) {
+            x++;
+            firstTile = (BoardNode) config.getBoardNodeMap().values().toArray()[x];
+            }
+        System.out.println("First tile:" + firstTile.getComponentName());
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard tile = tileConfigs.get(firstTile.getComponentID());
@@ -1922,7 +1929,7 @@ public class DescentForwardModel extends StandardForwardModel {
                         gridReferences.get(s).remove(new Vector2D(j, i));
                     }
                     gridReferences.get(tile.getComponentName()).put(new Vector2D(j, i), new Vector2D(j - x, i - y));
-                    // System.out.println(tile.getComponentName() + "; (x,y): (" + x + "," + y + "); (j,i): (" + j + "," + i + "); (j-x, i-y): (" + (j - x) + "," + (i - y) + ")");
+                    System.out.println(tile.getComponentName() + "; (x,y): (" + x + "," + y + "); (j,i): (" + j + "," + i + "); (j-x, i-y): (" + (j - x) + "," + (i - y) + ")");
                 }
             }
 

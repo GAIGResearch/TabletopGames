@@ -10,7 +10,7 @@ public class MeleeAttackOverride extends MeleeAttack {
     DicePool defence;
 
     public MeleeAttackOverride(int attackingFigure, int defendingFigure, DicePool attack, DicePool defence) {
-        super(attackingFigure, defendingFigure);
+        super(attackingFigure, defendingFigure, false);
         this.attack = attack;
         this.defence = defence;
     }

@@ -31,7 +31,7 @@ public class PickupObjective extends InteractObjective {
         token.setOwnerId(f.getComponentID());
         token.setPosition(null);
 
-        //System.out.println("Obtained " + token.getComponentName());
+        System.out.println("Obtained " + token.getComponentName());
 
         complete = true;
     }

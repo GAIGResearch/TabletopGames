@@ -6,6 +6,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.MeleeAttack;
+import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -192,11 +193,11 @@ public class DescentGUI extends AbstractGUIManager {
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
         DescentGameState dgs = (DescentGameState)gameState;
-        if (dgs.getCurrentPlayer() == dgs.getOverlordPlayer()) {
-            actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName());
-        } else {
-            actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName());
-        }
+        //Figure f = dgs.getActingFigure();
+        //if (f != null) {
+            //System.out.println(f.getComponentName());
+        //    actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName());
+        //}
         currentQuestLabel.setText("Quest: " + dgs.getCurrentQuest().getName());
     }
 
