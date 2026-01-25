@@ -279,7 +279,6 @@ public enum GameType {
     ),
     Jaipur(2,2, new ArrayList<>(), new ArrayList<>(),
             JaipurGameState.class, JaipurForwardModel.class, JaipurParameters.class, JaipurGUIManager.class),
-            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
     Descent2e(2,5,
             new ArrayList<>(),
             new ArrayList<>(),
