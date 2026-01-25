@@ -13,8 +13,8 @@ import static games.dominion.DominionConstants.*;
 
 public class DiscardCard extends AbstractAction {
 
-    final int player;
-    final CardType type;
+    public final int player;
+    public final CardType type;
 
     public DiscardCard(CardType type, int playerId) {
         this.type = type;

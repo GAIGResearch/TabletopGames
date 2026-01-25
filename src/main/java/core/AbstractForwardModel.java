@@ -93,13 +93,6 @@ public abstract class AbstractForwardModel {
         return _computeAvailableActions(gameState);
     }
 
-    /**
-     * Gets a copy of the FM with a new random number generator.
-     *
-     * @return - new forward model with different random seed (keeping logic).
-     */
-    protected abstract AbstractForwardModel _copy();
-
     protected abstract void endPlayerTurn(AbstractGameState state);
 
     /**
@@ -215,19 +208,6 @@ public abstract class AbstractForwardModel {
         if (gs.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gs.getPlayerResults()));
         }
-    }
-
-
-    /**
-     * Returns a copy of this forward model with a new random seed.
-     *
-     * @return a new Forward Model instance with a different random object.
-     */
-    public final AbstractForwardModel copy() {
-        AbstractForwardModel retValue = _copy();
-        retValue.decorators = new ArrayList<>(decorators);
-        retValue.decisionPlayerID = decisionPlayerID;
-        return retValue;
     }
 
     public void addPlayerDecorator(IPlayerDecorator decorator) {

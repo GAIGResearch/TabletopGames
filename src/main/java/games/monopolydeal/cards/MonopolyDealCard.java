@@ -46,15 +46,16 @@ public class MonopolyDealCard extends Card{
         if(!(isPropertyCard()))
             return this;
         else {
-            MonopolyDealCard cardCopy = new MonopolyDealCard(this.cardType(), componentID);
+            MonopolyDealCard cardCopy = new MonopolyDealCard(type, componentID);
             cardCopy.useAs = this.useAs;
             return cardCopy;
         }
     }
 
+    // We do not use super.hashCode/equals as part of this.hashCode/equals because we want cards to be the same, even if they have different component ids
     @Override
     public int hashCode(){
-        return Objects.hash(super.hashCode(), type, useAs);
+        return Objects.hash(type.ordinal(), useAs.ordinal());
     }
 
     @Override

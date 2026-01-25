@@ -47,11 +47,11 @@ public class PayCardFrom extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PayCardFrom that = (PayCardFrom) o;
-        return Objects.equals(cardType, that.cardType) && from == that.from && type == that.type;
+        return cardType == that.cardType && from == that.from && type == that.type;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(cardType, from, type);
+        return Objects.hash(cardType.ordinal(), from, type);
     }
     @Override
     public String toString() {

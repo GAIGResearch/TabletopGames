@@ -37,7 +37,7 @@ public class AbstractGameData {
     }
 
     public GridBoard findGridBoard(String name) {
-        for (GridBoard<?> c : gridBoards) {
+        for (GridBoard c : gridBoards) {
             if (name.equalsIgnoreCase(c.getComponentName())) {
                 return c.copy();
             }

@@ -171,11 +171,11 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PlayActionCard that = (PlayActionCard) o;
-        return playerID == that.playerID;
+        return playerID == that.playerID && executed == that.executed;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID);
+        return Objects.hash(playerID, executed);
     }
     @Override
     public String toString() {

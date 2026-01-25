@@ -1,0 +1,32 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLength" : 3,
+  "opponentTreePolicy" : "SelfOnly",
+  "heuristic" : {
+    "features" : {
+      "features" : [
+      ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.loveletter.features.LLStateFeaturesReduced"
+      },
+      "class" : "evaluation.features.AutomatedFeatures"
+    },
+    "coefficients" : {
+      "PRINCESS" : 0.332,
+      "BIAS" : -1.16,
+      "AFFECTION:ADVANTAGE" : 1.05,
+      "ADVANTAGE" : 2.29,
+      "AFFECTION" : 1.12,
+      "COUNTESS" : 0.207
+    },
+    "class" : "players.heuristics.LinearStateHeuristic",
+    "defaultHeuristic" : {
+      "class" : "players.heuristics.LeaderHeuristic"
+    }
+  },
+  "maxTreeDepth" : 1,
+  "treePolicy" : "Uniform",
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

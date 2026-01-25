@@ -6,6 +6,7 @@ import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
+import org.apache.spark.sql.catalyst.expressions.Abs;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,16 +27,15 @@ public class ActionFeatureListener extends FeatureListener {
     protected IActionFeatureVector psiFn;
     protected IStateFeatureVector phiFn;
     protected double[] cachedPhi;
-    private Map<String, Map<AbstractAction, Double>> actionValues = new HashMap<>();
+    protected Object[] cachedObjectPhi;
+    protected Map<String, Map<AbstractAction, Number>> actionValues = new HashMap<>();
 
-
-    public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken, String fileName) {
+    public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken) {
         super(frequency, true);
         if (psi == null) throw new AssertionError("Action Features must be provided and cannot be null");
         this.psiFn = psi;
         this.phiFn = phi;
         this.includeActionsNotTaken = includeActionsNotTaken;
-        logger = new FileStatsLogger(fileName);
     }
 
     @Override
@@ -51,28 +51,48 @@ public class ActionFeatureListener extends FeatureListener {
 
 
     @Override
-    public double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+    public double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         // We put phi in first, and then psi
-        double[] retValue = new double[psiFn.names().length + phiFn.names().length];
-        double[] phi = cachedPhi == null ?
-                phiFn != null ? phiFn.featureVector(state, perspectivePlayer) : new double[0]
-                : cachedPhi;
-        System.arraycopy(phi, 0, retValue, 0, phi.length);
-        double[] psi = psiFn.featureVector(action, state, perspectivePlayer);
-        System.arraycopy(psi, 0, retValue, phi.length, psi.length);
+        double[] retValue = new double[psiFn.names().length + (phiFn == null ? 0 : phiFn.names().length)];
+        if (cachedPhi == null) {
+            // we need to compute the phi vector
+            if (phiFn != null) {
+                cachedPhi = phiFn.doubleVector(state, perspectivePlayer);
+            } else {
+                cachedPhi = new double[0];
+            }
+        }
+        System.arraycopy(cachedPhi, 0, retValue, 0, cachedPhi.length);
+        double[] psi = psiFn.doubleVector(action, state, perspectivePlayer);
+        System.arraycopy(psi, 0, retValue, cachedPhi.length, psi.length);
         return retValue;
     }
 
-    protected void processStateWithTargets(AbstractGameState state, AbstractAction action, Map<String, Map<AbstractAction, Double>> targets) {
-        actionValues = targets;
-        processState(state, action);
+    @Override
+    public Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+        // We put phi in first, and then psi
+        Object[] retValue = new Object[psiFn.names().length + (phiFn == null ? 0 : phiFn.names().length)];
+        if (cachedObjectPhi == null) {
+            // we need to compute the phi vector
+            if (phiFn != null) {
+                cachedObjectPhi = phiFn.featureVector(state, perspectivePlayer);
+            } else {
+                cachedObjectPhi = new Object[0];
+            }
+        }
+        System.arraycopy(cachedObjectPhi, 0, retValue, 0, cachedObjectPhi.length);
+        Object[] psi = psiFn.featureVector(action, state, perspectivePlayer);
+        System.arraycopy(psi, 0, retValue, cachedObjectPhi.length, psi.length);
+        return retValue;
     }
 
     @Override
     public void processState(AbstractGameState state, AbstractAction action) {
         // we override this from FeatureListener, because we want to record the feature vector for each action
+        // we record this once, and cache the results for all actions
         if (action == null) return; // we do not record data for the GAME_OVER event
-        cachedPhi = null;
+        cachedPhi = null;  // relevant phi cache will be recomputed on the first call to the relevant method
+        cachedObjectPhi = null;
         List<AbstractAction> availableActions = game.getForwardModel().computeAvailableActions(state);
         if (availableActions.size() == 1) {
             // only one action available, so no decision to take
@@ -80,25 +100,41 @@ public class ActionFeatureListener extends FeatureListener {
         }
         if (actionValues.isEmpty()) {
             // the default if not provided
-            Map<AbstractAction, Double> av = availableActions.stream().collect(toMap(a -> a, a -> 0.0));
+            Map<AbstractAction, Number> av = availableActions.stream().collect(toMap(a -> a, a -> 0.0));
             av.put(action, 1.0);
             actionValues.put("CHOSEN", av);
         }
         int p = state.getCurrentPlayer();
-        double[] phi = extractFeatureVector(action, state, p);
-        currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, getActionScores(action)));  // chosen
+        double[] doubleData = new double[0];
+        Object[] objectData = new Object[0];
+        try {
+            doubleData = extractDoubleVector(action, state, p);
+        } catch (UnsupportedOperationException e) {
+            objectData = extractFeatureVector(action, state, p);
+        }
+        if (objectData.length == 0) {
+            currentData.add(LocalDataWrapper.factory(p, doubleData, names(), state, getActionScores(action)));  // chosen
+        } else {
+            currentData.add(LocalDataWrapper.factory(p, objectData, names(), state, getActionScores(action)));  // chosen
+        }
         if (includeActionsNotTaken) {
+            // State data will not be recalculated for each other action
             for (AbstractAction alternativeAction : availableActions) {
                 if (alternativeAction.equals(action)) continue;
-                phi = extractFeatureVector(alternativeAction, state, p);
-                currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, getActionScores(alternativeAction))); // not chosen
+                if (objectData.length == 0) {
+                    double[] f = extractDoubleVector(alternativeAction, state, p);
+                    currentData.add(LocalDataWrapper.factory(p, f, names(), state, getActionScores(alternativeAction))); // not chosen
+                } else {
+                    Object[] f = extractFeatureVector(alternativeAction, state, p);
+                    currentData.add(LocalDataWrapper.factory(p, f, names(), state, getActionScores(alternativeAction))); // not chosen
+                }
             }
         }
         actionValues.clear();
     }
 
-    private Map<String, Double> getActionScores(AbstractAction action) {
-        Map<String, Double> retValue = new HashMap<>();
+    protected Map<String, Number> getActionScores(AbstractAction action) {
+        Map<String, Number> retValue = new HashMap<>();
         for (String key : actionValues.keySet()) {
             retValue.put(key, actionValues.get(key).get(action));
         }
@@ -108,10 +144,12 @@ public class ActionFeatureListener extends FeatureListener {
     }
 
 
-    @Override
-    public String injectAgentAttributes(String raw) {
-        return raw.replaceAll(Pattern.quote("*PSI*"), psiFn.getClass().getCanonicalName())
-                .replaceAll(Pattern.quote("*PHI*"), phiFn != null ? phiFn.getClass().getCanonicalName() : "NONE");
+    public IStateFeatureVector getPhiFn() {
+        return phiFn;
+    }
+
+    public IActionFeatureVector getPsiFn() {
+        return psiFn;
     }
 
 }

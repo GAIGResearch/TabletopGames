@@ -31,7 +31,7 @@ public class TargetPlayer extends AbstractAction {
     }
     @Override
     public int hashCode() {
-        return Objects.hash(target);
+        return target + 2793;
     }
     @Override
     public String toString() {

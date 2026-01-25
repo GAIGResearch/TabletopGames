@@ -35,7 +35,7 @@ public class CCGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             add(starBoard);
         }};
     }

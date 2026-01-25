@@ -15,12 +15,12 @@ public class TicTacToeStateVector implements IStateFeatureVector {
     ).toArray(String[]::new);
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerID) {
+    public double[] doubleVector(AbstractGameState gs, int playerID) {
         TicTacToeGameState state = (TicTacToeGameState) gs;
-        String playerChar = TicTacToeConstants.playerMapping.get(playerID).getTokenType();
+        String playerChar = TicTacToeConstants.playerMapping.get(playerID).getComponentName();
 
         return Arrays.stream(state.gridBoard.flattenGrid()).mapToDouble(c -> {
-            String pos = ((Token) c).getTokenType();
+            String pos = c.getComponentName();
             if (pos.equals(playerChar)) {
                 return 1.0;
             } else if (pos.equals(TicTacToeConstants.emptyCell)) {

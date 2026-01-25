@@ -4,12 +4,13 @@ import core.*;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import games.dominion.cards.*;
+import org.json.simple.JSONArray;
 
 import java.util.*;
 
 public class DominionParameters extends TunableParameters {
 
-    List<CardType> cardsUsed = new ArrayList<>();
+    public List<CardType> cardsUsed = new ArrayList<>();
     String dataPath = "data/dominion/";
     public int initialShuffleSeed = -1;
 
@@ -24,6 +25,20 @@ public class DominionParameters extends TunableParameters {
     public int GOLD_SUPPLY = 30;
     public int[] VICTORY_CARDS_PER_PLAYER = {-1, -1, 8, 12, 12}; // 2-4 players only
 
+    // Default cards, based on first game cardset
+    public String[] DEFAULT_CARDS = new String[]{
+            CardType.CELLAR.toString(),
+            CardType.MARKET.toString(),
+            CardType.MERCHANT.toString(),
+            CardType.MILITIA.toString(),
+            CardType.MINE.toString(),
+            CardType.MOAT.toString(),
+            CardType.REMODEL.toString(),
+            CardType.SMITHY.toString(),
+            CardType.VILLAGE.toString(),
+            CardType.WORKSHOP.toString(),
+    };
+
 
     public DominionParameters() {
         addTunableParameter("HAND_SIZE", 5, Arrays.asList(3,5,7,10));
@@ -36,6 +51,7 @@ public class DominionParameters extends TunableParameters {
         addTunableParameter("SILVER_SUPPLY", 40, Arrays.asList(10,20,30,40,50));
         addTunableParameter("GOLD_SUPPLY", 30, Arrays.asList(10,20,30,40,50));
         addTunableParameter("initialShuffleSeed", -1);
+        addStaticParameter("CARDS", Arrays.asList(DEFAULT_CARDS));
         _reset();
     }
 
@@ -51,6 +67,14 @@ public class DominionParameters extends TunableParameters {
         SILVER_SUPPLY = (int) getParameterValue("SILVER_SUPPLY");
         GOLD_SUPPLY = (int) getParameterValue("GOLD_SUPPLY");
         initialShuffleSeed = (int) getParameterValue("initialShuffleSeed");
+
+        cardsUsed.clear();
+        List<Object> cardsJSON = (List<Object>) getParameterValue("CARDS");
+        //if (!cardsJSON.isEmpty() && cardsJSON.size() != 10) throw new IllegalArgumentException("CardsUsed has a size of " + cardsJSON.size() + " instead of 10");
+        for (Object o : cardsJSON) {
+            CardType card = CardType.valueOf((String) o);
+            cardsUsed.add(card);
+        }
     }
 
     public DominionParameters(String[] cards) {

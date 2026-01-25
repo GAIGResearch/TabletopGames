@@ -1,10 +1,8 @@
 package players.mcts;
 
 import core.AbstractGameState;
-import core.interfaces.IPrintable;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
-import org.knowm.xchart.style.markers.None;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -109,7 +107,7 @@ public class TreeRecorder {
     }
 
     String getFeaturesJson(AbstractGameState state, int player) {
-        double[] stateVector = stateFeatures.featureVector(state, player);
+        double[] stateVector = stateFeatures.doubleVector(state, player);
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         for (int i = 0; i < stateVector.length; i++) {

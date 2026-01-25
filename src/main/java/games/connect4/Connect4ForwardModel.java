@@ -3,8 +3,8 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.BoardNode;
 import core.components.GridBoard;
-import core.components.Token;
 import core.forwardModels.SequentialActionForwardModel;
 import utilities.Pair;
 
@@ -21,7 +21,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         Connect4GameParameters c4gp = (Connect4GameParameters) firstState.getGameParameters();
         int gridSize = c4gp.gridSize;
         Connect4GameState state = (Connect4GameState) firstState;
-        state.gridBoard = new GridBoard<>(gridSize, gridSize, new Token(Connect4Constants.emptyCell));
+        state.gridBoard = new GridBoard(gridSize, gridSize, new BoardNode(Connect4Constants.emptyCell));
         state.winnerCells = new LinkedList<>();
     }
 
@@ -38,8 +38,8 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
                 while(!end)
                 {
                     boolean newCol = false;
-                    if (c4gs.gridBoard.getElement(x, y).getTokenType().equals(Connect4Constants.emptyCell)) {
-                        actions.add(new SetGridValueAction<>(c4gs.gridBoard.getComponentID(), x, y, Connect4Constants.playerMapping.get(player)));
+                    if (c4gs.gridBoard.getElement(x, y).getComponentName().equals(Connect4Constants.emptyCell)) {
+                        actions.add(new SetGridValueAction(c4gs.gridBoard.getComponentID(), x, y, Connect4Constants.playerMapping.get(player).getComponentID()));
                         newCol = true;
                     }
 
@@ -67,7 +67,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
      * @param gameState - game state to check game end.
      */
     private boolean checkGameEnd(Connect4GameState gameState) {
-        GridBoard<Token> gridBoard = gameState.getGridBoard();
+        GridBoard gridBoard = gameState.getGridBoard();
         Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         boolean gap = false;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();;
@@ -78,16 +78,16 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
             String lastToken = null;
             winning.clear();
             for (int y = gridBoard.getHeight() - 1; y >= 0; y--) {
-                Token c = gridBoard.getElement(x, y);
-                if (c.getTokenType().equals(Connect4Constants.emptyCell)) {
+                BoardNode c = gridBoard.getElement(x, y);
+                if (c.getComponentName().equals(Connect4Constants.emptyCell)) {
                     count = 0;
                     lastToken = null;
                     winning.clear();
                     gap = true;
-                } else if (lastToken == null || !lastToken.equals(c.getTokenType())) {
+                } else if (lastToken == null || !lastToken.equals(c.getComponentName())) {
                     winning.clear();
                     count = 1;
-                    lastToken = c.getTokenType();
+                    lastToken = c.getComponentName();
                     winning.add(new Pair<>(x, y));
                 } else {
                     {
@@ -98,7 +98,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
                             return true;
                         }
                     }
-                    lastToken = c.getTokenType();
+                    lastToken = c.getComponentName();
                 }
             }
         }
@@ -109,15 +109,15 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
             String lastToken = null;
             winning.clear();
             for (int x = 0; x < gridBoard.getWidth(); x++) {
-                Token c = gridBoard.getElement(x, y);
-                if (c.getTokenType().equals(Connect4Constants.emptyCell)) {
+                BoardNode c = gridBoard.getElement(x, y);
+                if (c.getComponentName().equals(Connect4Constants.emptyCell)) {
                     count = 0;
                     lastToken = null;
                     winning.clear();
-                } else if (lastToken == null || !lastToken.equals(c.getTokenType())) {
+                } else if (lastToken == null || !lastToken.equals(c.getComponentName())) {
                     winning.clear();
                     count = 1;
-                    lastToken = c.getTokenType();
+                    lastToken = c.getComponentName();
                     winning.add(new Pair<>(x, y));
                 } else {
                     {
@@ -128,7 +128,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
                             return true;
                         }
                     }
-                    lastToken = c.getTokenType();
+                    lastToken = c.getComponentName();
                 }
             }
         }
@@ -166,23 +166,23 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
 
     private boolean checkMainDiagonals(Connect4GameState gameState, int xStart, int yStart)
     {
-        GridBoard<Token> gridBoard = gameState.getGridBoard();
+        GridBoard gridBoard = gameState.getGridBoard();
         Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         int count = 0;
         String lastToken = null;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
 
         for (int x = xStart, y = yStart; x < gridBoard.getWidth() && y >=0; x++, y--) {
-            Token c = gridBoard.getElement(x, y);
+            BoardNode c = gridBoard.getElement(x, y);
 
-            if (c.getTokenType().equals(Connect4Constants.emptyCell)) {
+            if (c.getComponentName().equals(Connect4Constants.emptyCell)) {
                 count = 0;
                 lastToken = null;
                 winning.clear();
-            } else if (lastToken == null || !lastToken.equals(c.getTokenType())) {
+            } else if (lastToken == null || !lastToken.equals(c.getComponentName())) {
                 winning.clear();
                 count = 1;
-                lastToken = c.getTokenType();
+                lastToken = c.getComponentName();
                 winning.add(new Pair<>(x, y));
             } else {
                 count++;
@@ -191,7 +191,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
                     registerWinner(gameState, c, winning);
                     return true;
                 }
-                lastToken = c.getTokenType();
+                lastToken = c.getComponentName();
             }
         }
         return false;
@@ -199,23 +199,23 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
 
     private boolean checkInvDiagonals(Connect4GameState gameState, int xStart, int yStart)
     {
-        GridBoard<Token> gridBoard = gameState.getGridBoard();
+        GridBoard gridBoard = gameState.getGridBoard();
         Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         int count = 0;
         String lastToken = null;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
 
         for (int x = xStart, y = yStart; x >= 0 && y >= 0; x--, y--) {
-            Token c = gridBoard.getElement(x, y);
+            BoardNode c = gridBoard.getElement(x, y);
 
-            if (c.getTokenType().equals(Connect4Constants.emptyCell)) {
+            if (c.getComponentName().equals(Connect4Constants.emptyCell)) {
                 count = 0;
                 lastToken = null;
                 winning.clear();
-            } else if (lastToken == null || !lastToken.equals(c.getTokenType())) {
+            } else if (lastToken == null || !lastToken.equals(c.getComponentName())) {
                 winning.clear();
                 count = 1;
-                lastToken = c.getTokenType();
+                lastToken = c.getComponentName();
                 winning.add(new Pair<>(x, y));
             } else {
                 count++;
@@ -224,7 +224,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
                     registerWinner(gameState, c, winning);
                     return true;
                 }
-                lastToken = c.getTokenType();
+                lastToken = c.getComponentName();
             }
         }
         return false;
@@ -235,7 +235,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
      *
      * @param winnerSymbol - which player won.
      */
-    private void registerWinner(Connect4GameState gameState, Token winnerSymbol, LinkedList<Pair<Integer, Integer>> winPos) {
+    private void registerWinner(Connect4GameState gameState, BoardNode winnerSymbol, LinkedList<Pair<Integer, Integer>> winPos) {
         gameState.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winningPlayer = Connect4Constants.playerMapping.indexOf(winnerSymbol);
         gameState.setPlayerResult(CoreConstants.GameResult.WIN_GAME, winningPlayer);

@@ -69,11 +69,11 @@ public class Counter extends Component {
         return increment(1);
     }
 
-        /**
-         * Decrement the value of this counter.
-         * @param amount - how much to decrease this counter by.
-         * @return - true if succeeded, false if capped at min
-         */
+    /**
+     * Decrement the value of this counter.
+     * @param amount - how much to decrease this counter by.
+     * @return - true if succeeded, false if capped at min
+     */
     public boolean decrement(int amount) {
         this.valueIdx -= amount;
         return clamp();
@@ -168,6 +168,14 @@ public class Counter extends Component {
      */
     public void setValue(int i) {
         this.valueIdx = i;
+    }
+
+    public void setToMax() {
+        this.valueIdx = maximum;
+    }
+
+    public void setToMin() {
+        this.valueIdx = minimum;
     }
 
     /**

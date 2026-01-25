@@ -54,4 +54,12 @@ public abstract class AbstractTournament implements IGameRunner {
 
         this.nPlayers = nPlayerPerGame;
     }
+
+    public void setResultsFile(String resultsFile) {
+        this.resultsFile = resultsFile;
+    }
+
+    public Game getGame() {
+        return game;
+    }
 }

@@ -31,6 +31,8 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     LoveLetterCard removedCard;
     Random redeterminisationRnd = new Random(System.currentTimeMillis());
 
+    boolean[] currentlyActive; // If true: player is currently active in the game (not knocked out)
+
     // If true: player cannot be effected by any card effects
     boolean[] effectProtection;
 
@@ -79,6 +81,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             llgs.playerDiscardCards.add(playerDiscardCards.get(i).copy());
         }
         llgs.effectProtection = effectProtection.clone();
+        llgs.currentlyActive = currentlyActive.clone();
         llgs.affectionTokens = affectionTokens.clone();
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
@@ -134,7 +137,8 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                 Objects.equals(reserveCards, that.reserveCards) &&
                 Objects.equals(removedCard, that.removedCard) &&
                 Arrays.equals(effectProtection, that.effectProtection) &&
-                Arrays.equals(affectionTokens, that.affectionTokens);
+                Arrays.equals(affectionTokens, that.affectionTokens) &&
+                Arrays.equals(currentlyActive, that.currentlyActive);
     }
 
     @Override
@@ -142,6 +146,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         int result = Objects.hash(super.hashCode(), playerHandCards, playerDiscardCards, drawPile, reserveCards, removedCard);
         result = 31 * result + Arrays.hashCode(effectProtection);
         result = 31 * result + Arrays.hashCode(affectionTokens);
+        result = 31 * result + Arrays.hashCode(currentlyActive);
         return result;
     }
 
@@ -185,7 +190,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
      * @param cardType     - card used to kill
      */
     public void killPlayer(int whoKill, int targetPlayer, CardType cardType) {
-        setPlayerResult(CoreConstants.GameResult.LOSE_ROUND, targetPlayer);
+        currentlyActive[targetPlayer] = false;
 
         // a losing player needs to discard all cards
         while (playerHandCards.get(targetPlayer).getSize() > 0)
@@ -206,6 +211,10 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     /** Player is protected by the Handmaid */
     public boolean isProtected(int playerID) {
         return effectProtection[playerID];
+    }
+
+    public boolean isCurrentlyActive(int playerID) {
+        return currentlyActive[playerID];
     }
 
     public void setProtection(int playerID, boolean protection) {
@@ -235,6 +244,48 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
      */
     public int[] getAffectionTokens() {
         return affectionTokens;
+    }
+
+    public List<Integer> getRoundWinners() {
+        // Highest number in hand wins the round
+        List<Integer> bestPlayers = new ArrayList<>();
+        int bestValue = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (isCurrentlyActive(i)) {
+                int points = playerHandCards.get(i).peek().cardType.getValue();
+                if (points > bestValue) {
+                    bestValue = points;
+                    bestPlayers.clear();
+                    bestPlayers.add(i);
+                } else if (points == bestValue) {
+                    bestPlayers.add(i);
+                }
+            }
+        }
+
+        if (bestPlayers.size() == 1) {
+            // This is the winner of the round, 1 affection token
+            return bestPlayers;
+        } else {
+            // If tie, add numbers in discard pile, highest wins
+            bestValue = 0;
+            List<Integer> bestPlayersByDiscardPoints = new ArrayList<>();
+            for (int i : bestPlayers) {
+                int points = 0;
+                for (LoveLetterCard card : playerDiscardCards.get(i).getComponents()) {
+                    points += card.cardType.getValue();
+                }
+                if (points > bestValue) {
+                    bestValue = points;
+                    bestPlayersByDiscardPoints.clear();
+                    bestPlayersByDiscardPoints.add(i);
+                } else if (points == bestValue) {
+                    bestPlayersByDiscardPoints.add(i);
+                }
+            }
+            // Everyone tied for most points here wins the round
+            return bestPlayersByDiscardPoints;
+        }
     }
 
     /**

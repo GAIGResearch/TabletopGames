@@ -38,7 +38,6 @@ public class Workshop extends DominionAction implements IExtendedSequence {
                 .collect(toList());
         if (retValue.isEmpty()) {
             retValue.add(new DoNothing());
-            executed = true;
         }
         return retValue;
     }
@@ -52,6 +51,11 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (action instanceof GainCard && ((GainCard) action).buyingPlayer == player)
             executed = true;
+
+        // There are no cards that can be obtained with the workshop
+        else if (action instanceof DoNothing) {
+            executed = true;
+        }
     }
 
     @Override

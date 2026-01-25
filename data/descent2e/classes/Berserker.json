@@ -1,0 +1,85 @@
+[
+  {
+    "name": ["String","Berserker"],
+    "visibility" : "VISIBLE_TO_ALL",
+    "cards":
+    [
+      {
+        "name": ["String","Rage"],
+        "XP": ["Integer", 0],
+        "fatigue": ["Integer", 1],
+        "exhaust": ["Boolean", false],
+        "action": ["String", "Perform an attack with a Melee weapon. This attack gains +1 damage."]
+      },
+      {
+        "name": ["String","Chipped Greataxe"],
+        "XP": ["Integer", 0],
+        "fatigue": ["Integer", 0],
+        "exhaust": ["Boolean", false],
+        "attackType": ["String", "melee"],
+        "attackPower": ["String[]", ["blue", "red"]],
+        "equipmentType": ["String[]", ["Axe"]],
+        "weaponSurges": ["String[]", ["DAMAGE_PLUS_1", "DAMAGE_PLUS_1_TWICE"]],
+        "equipSlots": ["String[]", ["hand", "hand"]],
+        "cost": ["Integer", 25],
+        "action": ["String", "Attack"]
+      },
+      {
+        "name": ["String","Counter Attack"],
+        "XP": ["Integer", 1],
+        "fatigue": ["Integer", 1],
+        "exhaust": ["Boolean", true],
+        "passive": ["String", "After an adjacent monster resolves an attack that affects you, exhaust this card to perform an attack with a Melee weapon against the attacking monster. After this attack is resolved, if the monster was not defeated, it may continue its activation."]
+      },
+      {
+        "name": ["String","Cripple"],
+        "XP": ["Integer", 1],
+        "fatigue": ["Integer", 2],
+        "exhaust": ["Boolean", true],
+        "action": ["String", "Exhaust this card during your turn to choose a monster adjacent to you and test Might. If you pass, the monster is Immobilized."]
+      },
+      {
+        "name": ["String","Brute"],
+        "XP": ["Integer", 1],
+        "fatigue": ["Integer", 0],
+        "exhaust": ["Boolean", false],
+        "passive": ["String", "You gain +4 Health. Whenever you stand up or are revived by another hero, you recover 2 additional Heart."]
+      },
+      {
+        "name": ["String","Charge"],
+        "XP": ["Integer", 2],
+        "fatigue": ["Integer", 2],
+        "exhaust": ["Boolean", false],
+        "action": ["String", "Move up to your Speed and then perform an attack with a Melee weapon."]
+      },
+      {
+        "name": ["String","Weapon Mastery"],
+        "XP": ["Integer", 2],
+        "fatigue": ["Integer", 0],
+        "exhaust": ["Boolean", false],
+        "passive": ["String", "Each time you perform an attack with either 1 Melee weapon with 2 Hand icons or 2 Melee weapons with 1 hand icon each, you may exhaust this card to add 1 Surge to the results."]
+      },
+      {
+        "name": ["String","Whirlwind"],
+        "XP": ["Integer", 2],
+        "fatigue": ["Integer", 1],
+        "exhaust": ["Boolean", false],
+        "action": ["String", "Perform an attack with a Melee weapon targeting all adjacent monsters. You make 1 attack roll and each monster rolls its defense dice separately."]
+      },
+      {
+        "name": ["String","Execute"],
+        "XP": ["Integer", 3],
+        "fatigue": ["Integer", 0],
+        "exhaust": ["Boolean", true],
+        "passive": ["String", "When performing an attack with a Melee weapon, after the dice are rolled, exhaust this card to gain +X Heart, where X is the amount of Fatigue suffered to use this skill."]
+      },
+      {
+        "name": ["String","Death Rage"],
+        "XP": ["Integer", 3],
+        "fatigue": ["Integer", 2],
+        "exhaust": ["Boolean", false],
+        "action": ["String", "Perform an attack with a Melee weapon. This attack gains: Surge: +1 Heart for every 2 Heart on your Hero sheet."]
+      }
+    ]
+  }
+]

@@ -5,8 +5,8 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.BoardNode;
 import core.components.GridBoard;
-import core.components.Token;
 
 import java.util.*;
 
@@ -17,8 +17,8 @@ public class MMForwardModel extends StandardForwardModel {
         MMGameState mmgs = (MMGameState) firstState;
         MMParameters mmp = (MMParameters) mmgs.getGameParameters();
 
-        mmgs.guessBoard = new GridBoard<>(mmp.boardWidth, mmp.boardHeight, new Token(MMConstants.emptyPeg));
-        mmgs.resultBoard = new GridBoard<>(mmp.boardWidth, mmp.boardHeight, new Token(MMConstants.emptyPeg));
+        mmgs.guessBoard = new GridBoard(mmp.boardWidth, mmp.boardHeight, new BoardNode(MMConstants.emptyPeg));
+        mmgs.resultBoard = new GridBoard(mmp.boardWidth, mmp.boardHeight, new BoardNode(MMConstants.emptyPeg));
         mmgs.activeRow = 0;
         mmgs.activeCol = 0;
         mmgs.answerCode = mmgs.generateRandomShuffledAnswerCode(mmp.boardWidth, mmgs.getRnd());
@@ -28,8 +28,8 @@ public class MMForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         MMGameState mmgs = (MMGameState) gameState;
         ArrayList<AbstractAction> availableActions = new ArrayList<>();
-        for (Token colour : MMConstants.guessColours) {
-            availableActions.add(new SetGridValueAction<>(mmgs.guessBoard.getComponentID(), mmgs.activeCol, mmgs.activeRow, colour));
+        for (BoardNode colour : MMConstants.guessColours) {
+            availableActions.add(new SetGridValueAction(mmgs.guessBoard.getComponentID(), mmgs.activeCol, mmgs.activeRow, colour.getComponentID()));
         }
         return availableActions;
     }
@@ -84,7 +84,7 @@ public class MMForwardModel extends StandardForwardModel {
         boolean gameEnd = true;
 
         for (int i=0; i<mmp.boardWidth; i++) {
-            if (gameState.guessBoard.getElement(i,gameState.activeRow) != gameState.answerCode.get(i)) {
+            if (!gameState.guessBoard.getElement(i,gameState.activeRow).getComponentName().equals(gameState.answerCode.get(i).getComponentName())) {
                 win = false;
                 gameEnd = false;
                 break;

@@ -45,6 +45,8 @@ public interface IDataLogger
      */
     IDataProcessor getDefaultProcessor();
 
+    void flush();
+
     IDataLogger copy();
     IDataLogger emptyCopy();
     IDataLogger create();

@@ -1,0 +1,24 @@
+{
+        "class":"players.mcts.MCTSParams",
+        "K" : 1.0,
+        "rolloutLength" : 30,
+        "maxTreeDepth" : 100,
+        "budgetType" : "BUDGET_TIME",
+        "information" : "Information_Set",
+        "selectionPolicy" : "SIMPLE",
+        "treePolicy" : "UCB_Tuned",
+        "paranoid" : false,
+        "rolloutType" : "MAST",
+        "MAST" : "Both",
+        "MASTGamma" : 0.5,
+        "MASTBoltzmann" : 0.01,
+        "budget" : 40,
+        "epsilon" : 1e-6,
+        "breakMS" : 0,
+        "exploreEpsilon" : 0.30,
+        "rolloutTermination" : "EXACT",
+        "maintainMasterState" : false,
+        "heuristic" : {
+                "class" : "players.heuristics.WinOnlyHeuristic"
+        }
+}

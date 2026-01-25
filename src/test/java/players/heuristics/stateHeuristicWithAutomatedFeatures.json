@@ -1,0 +1,23 @@
+{
+	"features" : {
+		"defaultBuckets" : 1,
+		"underlyingState" : {
+			"class" : "games.dominion.metrics.DomStateFeaturesReduced"
+		},
+		"class" : "evaluation.features.AutomatedFeatures"
+	},
+	"coefficients" : {
+		"provinceCount" : 6.110112681411764,
+		"BIAS" : -1.2988663044789461,
+		"treasureValue:totalCards" : -0.012495109115765733,
+		"treasureValue" : 0.9840346436822138,
+		"duchyCount" : -0.45313761838342737,
+		"estateCount" : -0.9191623434294867,
+		"totalCards" : -0.7260896152706188,
+		"duchyCount:estateCount" : 0.5056753891584228
+	},
+	"class" : "players.heuristics.LinearStateHeuristic",
+	"defaultHeuristic" : {
+		"class" : "players.heuristics.LeaderHeuristic"
+	}
+}

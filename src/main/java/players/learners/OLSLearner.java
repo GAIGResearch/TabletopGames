@@ -1,26 +1,49 @@
 package players.learners;
 
 
+import core.interfaces.IActionFeatureVector;
+import core.interfaces.IStateFeatureVector;
 import org.apache.spark.ml.feature.RFormula;
-import org.apache.spark.ml.regression.LinearRegression;
-import org.apache.spark.ml.regression.LinearRegressionModel;
+import org.apache.spark.ml.regression.GeneralizedLinearRegression;
+import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-
-import java.io.FileWriter;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import players.heuristics.*;
 
 public class OLSLearner extends ApacheLearner {
 
     double[] coefficients;
+    double regParam = 0.1;
 
-    public OLSLearner(double gamma, Target target) {
-        super(gamma, target);
+    public OLSLearner() {
+        super();
+    }
+    public OLSLearner(double gamma, double regParam, Target target) {
+        this(gamma, regParam, target, null, null);
+    }
+
+    public OLSLearner(Target target, IStateFeatureVector stateFeatureVector) {
+        super(1.0, target, stateFeatureVector);
+    }
+
+    public OLSLearner(Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        super(1.0, target, stateFeatureVector, actionFeatureVector);
+    }
+
+    public OLSLearner(double gamma, double regParam, Target target,
+                      IStateFeatureVector stateFeatureVector) {
+        super(gamma, target, stateFeatureVector);
+        this.regParam = regParam;
+    }
+
+    public OLSLearner(double gamma, double regParam, Target target,
+                      IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        super(gamma, target, stateFeatureVector, actionFeatureVector);
+        this.regParam = regParam;
     }
 
     @Override
-    void learnFromApacheData() {
+    Object learnFromApacheData() {
 
         RFormula formula = new RFormula()
                 .setFormula("target ~ " + String.join(" + ", descriptions))
@@ -32,33 +55,45 @@ public class OLSLearner extends ApacheLearner {
         if (debug)
             training.show(10);
 
-        LinearRegression lr = new LinearRegression()
+//        LinearRegression lr = new LinearRegression()
+//                .setFitIntercept(true)
+//                .setMaxIter(10)
+//                .setRegParam(regParam)
+//                .setElasticNetParam(elasticNetParam)
+//                .setLabelCol("target")
+//                .setFeaturesCol("features");
+//
+//        LinearRegressionModel lrModel = lr.fit(training);
+        GeneralizedLinearRegression lr = new GeneralizedLinearRegression()
                 .setFitIntercept(true)
                 .setMaxIter(10)
-                .setRegParam(0.1)
+                .setFamily("gaussian")
+                .setLink("identity")
+                .setRegParam(regParam)
                 .setLabelCol("target")
                 .setFeaturesCol("features");
 
-        LinearRegressionModel lrModel = lr.fit(training);
+        GeneralizedLinearRegressionModel lrModel = lr.fit(training);
 
         if (debug)
             System.out.println(lrModel.coefficients());
 
-        coefficients = new double[descriptions.length + 1];
-        coefficients[0] = lrModel.intercept();
-        double[] coeffs = lrModel.coefficients().toArray();
-        System.arraycopy(coeffs, 0, coefficients, 1, coeffs.length);
-    }
-
-    @Override
-    public void writeToFile(String prefix) {
-        String file = prefix + ".txt";
-        try (FileWriter writer = new FileWriter(file, false)) {
-            writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
-            writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t")));
-            writer.write("\n");
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (this.actionFeatureVector == null) {
+            // return the learned OLS heuristic
+            LinearStateHeuristic retValue = new LinearStateHeuristic(stateFeatureVector, coefficients,
+                    switch (targetType) {
+                        case ORDINAL, ORD_MEAN, ORD_SCALE, ORD_MEAN_SCALE -> new OrdinalPosition();
+                        case SCORE -> new PureScoreHeuristic();
+                        case SCORE_DELTA -> new LeaderHeuristic();
+                        default -> new WinOnlyHeuristic();
+                    });
+            retValue.setModel(lrModel);
+            return retValue;
+        } else {
+            // return the learned OLS heuristic
+            LinearActionHeuristic retValue = new LinearActionHeuristic(actionFeatureVector, stateFeatureVector, coefficients);
+            retValue.setModel(lrModel);
+            return retValue;
         }
     }
 

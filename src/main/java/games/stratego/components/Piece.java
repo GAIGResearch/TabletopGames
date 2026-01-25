@@ -1,9 +1,9 @@
 package games.stratego.components;
 
+import core.components.BoardNode;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.components.GridBoard;
-import core.components.Token;
 import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
 import games.stratego.actions.AttackMove;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Piece extends Token {
+public class Piece extends BoardNode {
 
     protected Vector2D position;
     protected final PieceType pieceType;
@@ -23,7 +23,7 @@ public class Piece extends Token {
     private boolean pieceKnown;
 
     public Piece(PieceType pieceType, Alliance alliance, Vector2D position) {
-        super(pieceType.name());
+        super(-1, pieceType.name());
         this.pieceType = pieceType;
         this.alliance = alliance;
         this.position = position;
@@ -31,7 +31,7 @@ public class Piece extends Token {
     }
 
     protected Piece(PieceType pieceType, Alliance alliance, Vector2D position, boolean known, int ID) {
-        super(pieceType.name(), ID);
+        super(-1, pieceType.name(), ID);
         this.pieceType = pieceType;
         this.alliance = alliance;
         this.position = position;
@@ -68,7 +68,7 @@ public class Piece extends Token {
 
     public List<AbstractAction> calculateMoves(StrategoGameState gs, ActionSpace actionSpace) {
 
-        GridBoard<Piece> board = gs.getGridBoard();
+        GridBoard board = gs.getGridBoard();
         StrategoParams params = (StrategoParams) gs.getGameParameters();
 
         List<AbstractAction> moves = new ArrayList<>();
@@ -85,7 +85,7 @@ public class Piece extends Token {
                 Vector2D dirCustom = dir.vector2D.mult(j);
                 Vector2D newPos = position.copy();
                 newPos = newPos.add(dirCustom);
-                Piece pieceAtTile = board.getElement(newPos.getX(), newPos.getY());
+                Piece pieceAtTile = (Piece) board.getElement(newPos.getX(), newPos.getY());
                 if (params.isTileValid(newPos.getX(), newPos.getY())  // Must be walkable tile
                         && (pieceAtTile == null // Ok if empty tile, we can move there
                         || pieceAtTile.getPieceAlliance() != alliance)) {  // Ok if enemy piece at tile, we attack
@@ -100,9 +100,9 @@ public class Piece extends Token {
         return moves;
     }
 
-    private void addMove(GridBoard<Piece> board, List<AbstractAction> moves, Vector2D newPos,
+    private void addMove(GridBoard board, List<AbstractAction> moves, Vector2D newPos,
                             Vector2D dir, ActionSpace actionSpace) {
-        Piece pieceAtTile = board.getElement(newPos.getX(), newPos.getY());
+        Piece pieceAtTile = (Piece) board.getElement(newPos.getX(), newPos.getY());
         if (pieceAtTile == null) {
             // Just move
             if (actionSpace.context == ActionSpace.Context.Dependent) {

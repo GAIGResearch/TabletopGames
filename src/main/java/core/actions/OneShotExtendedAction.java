@@ -13,22 +13,18 @@ import java.util.function.Function;
  *
  *  This is a wrapper around a function that computes the available actions for the next step in the sequence.
  */
-public class OneShotExtendedAction extends AbstractAction implements IExtendedSequence {
+public class OneShotExtendedAction implements IExtendedSequence {
 
-    protected int player;
+    protected final int player;
     protected boolean executed;
     final String name;
     final Function<AbstractGameState, List<AbstractAction>> actionFunction;
 
-    public OneShotExtendedAction(String name, Function<AbstractGameState, List<AbstractAction>> computeAvailableActions) {
+    public OneShotExtendedAction(String name, int player,
+                                 Function<AbstractGameState, List<AbstractAction>> computeAvailableActions) {
         actionFunction = computeAvailableActions;
+        this.player = player;
         this.name = name;
-    }
-
-    public boolean execute(AbstractGameState gs) {
-        player = gs.getCurrentPlayer();
-        gs.setActionInProgress(this);
-        return true;
     }
 
     @Override
@@ -52,32 +48,26 @@ public class OneShotExtendedAction extends AbstractAction implements IExtendedSe
 
     @Override
     public OneShotExtendedAction copy() {
-        OneShotExtendedAction retValue = new OneShotExtendedAction(name, actionFunction);
-        retValue.player = player;
+        OneShotExtendedAction retValue = new OneShotExtendedAction(name, player, actionFunction);
         retValue.executed = executed;
         return retValue;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, executed, actionFunction);
+        return Objects.hash(player, executed, name);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof OneShotExtendedAction) {
-            OneShotExtendedAction other = (OneShotExtendedAction) obj;
-            return player == other.player && executed == other.executed && actionFunction.equals(other.actionFunction);
+        if (obj instanceof OneShotExtendedAction other) {
+            return player == other.player && executed == other.executed && name.equals(other.name);
         }
         return false;
     }
 
     @Override
     public String toString() {
-        return name;
-    }
-    @Override
-    public String getString(AbstractGameState state) {
         return name;
     }
 

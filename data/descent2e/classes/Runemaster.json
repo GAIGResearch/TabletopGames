@@ -1,0 +1,87 @@
+ [
+   {
+     "name": ["String","Runemaster"],
+     "visibility" : "VISIBLE_TO_ALL",
+     "cards":
+     [
+      {
+        "name": ["String","Runic Knowledge"],
+        "XP": ["Integer", 0],
+        "fatigue": ["Integer", 0],
+        "exhaust": ["Boolean", false],
+        "passive": ["String", "While you have a Magic or Rune weapon equipped, each of your attacks gains:\nSurge: Suffer 1 Fatigue to gain +2 Heart."],
+        "weaponSurges": ["String[]", ["RUNIC_KNOWLEDGE"]]
+      },
+       {
+         "name": ["String","Arcane Bolt"],
+         "XP": ["Integer", 0],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "attackType": ["String", "ranged"],
+         "attackPower": ["String[]", ["blue", "yellow"]],
+         "weaponSurges": ["String[]", ["RANGE_PLUS_1", "PIERCE_2"]],
+         "equipmentType": ["String[]", ["Magic", "Rune"]],
+         "equipSlots": ["String[]", ["hand", "hand"]],
+         "cost": ["Integer", 25],
+         "action": ["String", "Attack"]
+       },
+       {
+         "name": ["String","Exploding Rune"],
+         "XP": ["Integer", 1],
+         "fatigue": ["Integer", 1],
+         "exhaust": ["Boolean", false],
+         "action": ["String", "Perform an attack with a Rune weapon. The attack gains Blast."]
+       },
+       {
+         "name": ["String","Ghost Armor"],
+         "XP": ["Integer", 1],
+         "fatigue": ["Integer", 1],
+         "exhaust": ["Boolean", false],
+         "action": ["String", "After your defense roll, use this card to add 1 Shield to the results."]
+       },
+       {
+         "name": ["String","Inscribe Rune"],
+         "XP": ["Integer", 1],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "passive": ["String", "Any weapon you equip gains the Rune trait while equipped."]
+       },
+       {
+         "name": ["String","Iron Will"],
+         "XP": ["Integer", 2],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "bonus": ["String", "+1 stamina"],
+         "passive": ["String", "Each time you spend 1 Surge during an attack to recover 1 Fatigue, you instead recover 2 Fatigue."]
+       },
+       {
+         "name": ["String","Rune Mastery"],
+         "XP": ["Integer", 2],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", true],
+         "passive": ["String", "When you attack with a Rune weapon, you may exhaust this card to add 1 Surge to the result."]
+       },
+       {
+         "name": ["String","Runic Sorcery"],
+         "XP": ["Integer", 2],
+         "fatigue": ["Integer", 1],
+         "exhaust": ["Boolean", false],
+         "action": ["String", "Perform an attack with a Rune weapon. If this attack deals at least 1 Heart (after rolling defense dice), choose 1 condition. The target suffers the chosen condition."]
+       },
+       {
+         "name": ["String","Break the Rune"],
+         "XP": ["Integer", 3],
+         "fatigue": ["Integer", 4],
+         "exhaust": ["Boolean", false],
+         "action": ["String", "Perform an attack with a Rune weapon. This attack ignores range and targets each other figure within 3 spaces and in your line of sight. Each figure rolls defense dice separately."]
+       },
+       {
+         "name": ["String","Quick Casting"],
+         "XP": ["Integer", 3],
+         "fatigue": ["Integer", 2],
+         "exhaust": ["Boolean", true],
+         "passive": ["String", "After you perform an attack with a Rune weapon, exhaust this card to immediately perform an additional attack."]
+       }
+     ]
+   }
+]

@@ -13,9 +13,9 @@ import static java.util.stream.Collectors.*;
 
 public class TrashCard extends AbstractAction {
 
-    final int player;
-    final CardType trashedCard;
-    final DeckType fromDeck;
+    public final int player;
+    public final CardType trashedCard;
+    public final DeckType fromDeck;
 
     public TrashCard(CardType trash, int playerId) {
         this(trash, playerId, DeckType.HAND);

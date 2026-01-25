@@ -1,0 +1,99 @@
+[
+  {
+    "id": "Acolyte of Saradyn",
+    "act": 1,
+    "monsters": [
+      ["Goblin Archer:group", "5A"],
+      ["Barghest:group", "4A", "all:Health:+2"]
+    ],
+    "tokens": [
+      ["Villager", "Wounded Clergy", "nHeroes", ["8A"], ""],
+      ["Search", "Search action", "nHeroes", ["21A-3;1", "9A-3;3", "11A-1;3", "4A-3;1"], ""],
+      ["WhiteObjective", "Acolyte", "1", ["player"], ""]
+    ],
+    "rules": [
+      ["overlord fatigue", "START_TURN", "if(count(Goblin Archer,9A)>0) AttributeModifier:Fatigue:+1"],
+      ["overlord fatigue", "END_TURN", "if(count(Goblin Archer,9A)>0) AttributeModifier:Fatigue:+1"],
+      ["overlord reinforcements", "END_TURN", "SpawnMonster:Goblin Archer:2:4A"]
+    ],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Barghest"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "Attribute",
+          "attribute": "Fatigue",
+          "figureNameContains": "Overlord"
+        },
+        "target": 6,
+        "comparison-type": "More",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      }
+    ],
+    "common-rewards": [{
+      "rewardType": "Attribute",
+      "attribute": "XP",
+      "value": 1.0
+    }],
+    "overlord-rewards": [{
+      "rewardType": "Attribute",
+      "attribute": "XP",
+      "value": 1.0,
+      "mustWinToReceive": true
+    }],
+    "hero-rewards": [{
+      "rewardType": "Token",
+      "token": "Villager",
+      "value": 1.0,
+      "mustLoseToReceive": true,
+      "apply": "Set"
+    }, {
+      "rewardType": "Attribute",
+      "attribute": "Gold",
+      "value": 25.0,
+      "multiplier": {
+        "type": "Token",
+        "token": "Villager"
+      }
+    }],
+    "boards": [
+      "board1"
+    ],
+    "starting-locations": [
+      [[1, 15],
+      [1, 16],
+      [2, 15],
+      [2, 16]]
+    ],
+    "next-quest": ["Rellegar's Rest", "Siege of Skytower"],
+    "next-side-quests": [0, 1]
+  },
+  {
+    "id": "Rellegar's Rest"
+  },
+  {
+    "id": "Siege of Skytower"
+  }
+]

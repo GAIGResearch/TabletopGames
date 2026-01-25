@@ -3,6 +3,7 @@ package core.components;
 import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import utilities.Hash;
 import core.CoreConstants.ComponentType;
 
 import java.util.*;
@@ -105,7 +106,7 @@ public abstract class Component {
      * Get the full map of properties.
      * @return - mapping from property integer key to property objects.
      */
-    public HashMap<Integer, Property> getProperties() {
+    public Map<Integer, Property> getProperties() {
         return properties;
     }
 
@@ -119,6 +120,10 @@ public abstract class Component {
         return properties.get(propId);
     }
 
+    public Property getProperty(String hashString) {
+        return properties.get(Hash.GetInstance().hash(hashString));
+    }
+
     /**
      * Adds a property with an id and a Property object
      * @param prop property to add
@@ -128,7 +133,7 @@ public abstract class Component {
         properties.put(prop.getHashKey(), prop);
     }
 
-    public void setProperties(HashMap<Integer, Property> props) {
+    public void setProperties(Map<Integer, Property> props) {
         for (Property p: props.values()) {
             setProperty(p);
         }
@@ -232,8 +237,7 @@ public abstract class Component {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Component)) return false;
-        Component component = (Component) o;
+        if (!(o instanceof Component component)) return false;
         return componentID == component.componentID;
     }
 

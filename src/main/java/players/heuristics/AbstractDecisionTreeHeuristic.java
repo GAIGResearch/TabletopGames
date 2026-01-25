@@ -4,6 +4,7 @@ import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.sql.SparkSession;
+import org.jspecify.annotations.NonNull;
 
 public abstract class AbstractDecisionTreeHeuristic {
 
@@ -18,9 +19,15 @@ public abstract class AbstractDecisionTreeHeuristic {
     }
 
     protected DecisionTreeRegressionModel drModel;
+    protected String modelDirectory = "";
+
+    public AbstractDecisionTreeHeuristic(DecisionTreeRegressionModel drModel) {
+        this.drModel = drModel;
+    }
 
     public AbstractDecisionTreeHeuristic(String directory) {
         // load in the Decision Tree model from the directory
+        modelDirectory = directory;
         if (directory == null || directory.isEmpty()) {
             System.out.println("No directory specified for Decision Tree model");
             return;
@@ -36,7 +43,34 @@ public abstract class AbstractDecisionTreeHeuristic {
         for (int i = featureNames.length-1; i >= 0; i--) {
             debugString = debugString.replace("feature " + i, featureNames[i]);
         }
+        // then we want to replace the "__[If|Else|Predict]" with
+        // "____|"
+        String[] lines = debugString.split("\n");
+        StringBuilder result = new StringBuilder();
+        for (String line : lines) {
+            StringBuilder newLine = getStringBuilder(line);
+            result.append(newLine).append("\n");
+        }
+        debugString = result.toString();
+
         return debugString;
+    }
+
+    private static @NonNull StringBuilder getStringBuilder(String line) {
+        int leadingSpaces = 0;
+        while (leadingSpaces < line.length() && line.charAt(leadingSpaces) == ' ') {
+            leadingSpaces++;
+        }
+        int pairs = leadingSpaces / 2;
+        StringBuilder newLine = new StringBuilder();
+        for (int i = 0; i < pairs - 1; i++) {
+            newLine.append("    |");
+        }
+        if (pairs > 0) {
+            newLine.append("    ");
+        }
+        newLine.append(line.substring(leadingSpaces));
+        return newLine;
     }
 
 }

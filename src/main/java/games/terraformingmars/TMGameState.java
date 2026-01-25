@@ -34,7 +34,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     // General state info
     int generation;
-    GridBoard<TMMapTile> board;
+    GridBoard board;
     HashSet<TMMapTile> extraTiles;
     HashMap<TMTypes.GlobalParameter, GlobalParameter> globalParameters;
     HashSet<Bonus> bonuses;
@@ -419,7 +419,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         return playerResources;
     }
 
-    public GridBoard<TMMapTile> getBoard() {
+    public GridBoard getBoard() {
         return board;
     }
 
@@ -828,7 +828,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         // Add cities on board
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
-                TMMapTile mt = board.getElement(j, i);
+                TMMapTile mt = (TMMapTile) board.getElement(j, i);
                 if (mt != null && mt.getTilePlaced() == TMTypes.Tile.City) {
                     // Count adjacent greeneries
                     points += PlaceTile.nAdjacentTiles(this, mt, TMTypes.Tile.Greenery);
@@ -865,7 +865,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
                         TMMapTile mt = (TMMapTile) getComponentById(card.mapTileIDTilePlaced);
                         List<Vector2D> neighbours = PlaceTile.getNeighbours(new Vector2D(mt.getX(), mt.getY()));
                         for (Vector2D n : neighbours) {
-                            TMMapTile e = board.getElement(n.getX(), n.getY());
+                            TMMapTile e = (TMMapTile) board.getElement(n.getX(), n.getY());
                             if (e != null && e.getTilePlaced() == card.pointsTile) {
                                 points += card.nPoints;
                             }

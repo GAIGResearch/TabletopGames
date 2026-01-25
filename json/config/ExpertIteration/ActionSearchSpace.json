@@ -1,0 +1,21 @@
+{
+        "class":"players.mcts.MCTSParams",
+        "rolloutType" : "PARAMS",
+        "rolloutLength" : [0, 1, 3, 10, 30],
+        "rolloutPolicyParams" : {
+                "class" : "players.simple.BoltzmannActionParams",
+                "temperature" : [0.01, 0.1, 1.0, 10.0],
+                "epsilon" : [0.0, 0.1, 0.3, 1.0]
+        },
+        "oppModelType" : ["DEFAULT", "RANDOM"],
+        "MAST" : "None",
+        "budgetType" : "BUDGET_TIME",
+        "FPU" : [1.0, 100.0, 10000.0, 1000000.0],
+        "backupPolicy" : "MaxMC",
+        "pUCT" : [false, true],
+        "pUCTTemperature" : [0.0, 0.01, 0.1, 1.0, 10.0],
+        "budget" : -999,
+        "epsilon" : 1e-6,
+        "breakMS" : 0,
+        "exploreEpsilon" : 0.30
+}

@@ -1,0 +1,112 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "rolloutTermination" : "END_TURN",
+  "rolloutLength" : 10,
+  "actionHeuristic" : {
+    "coefficients" : {
+      "cardType_GOLD" : 0.0356,
+      "treasureInHand:actionSize:cardType_GOLD" : -0.0519,
+      "BIAS" : 1.05,
+      "cardType_DUCHY" : -0.000549,
+      "cardType_SILVER" : 0.0219,
+      "actionSize:cardType_PROVINCE" : 0.496,
+      "actionSize:cardType_GOLD" : 0.693,
+      "provincesLeft" : -0.0612,
+      "actionSize" : -0.295,
+      "actionSize:cardType_DUCHY" : 0.278,
+      "provincesLeft:cardType_SILVER" : 0.416,
+      "treasureInHand" : -0.199,
+      "cardType_PROVINCE" : -0.00521
+    },
+    "actionFeatures" : {
+      "features" : [
+        {
+          "enumValue" : "DUCHY",
+          "name" : "cardType_DUCHY",
+          "index" : 46,
+          "type" : "ENUM"
+        },
+        {
+          "enumValue" : "PROVINCE",
+          "name" : "cardType_PROVINCE",
+          "index" : 46,
+          "type" : "ENUM"
+        },
+        {
+          "enumValue" : "SILVER",
+          "name" : "cardType_SILVER",
+          "index" : 46,
+          "type" : "ENUM"
+        },
+        {
+          "enumValue" : "GOLD",
+          "name" : "cardType_GOLD",
+          "index" : 46,
+          "type" : "ENUM"
+        }                       ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.dominion.metrics.DomStateFeaturesWithCardTypes"
+      },
+      "class" : "evaluation.features.AutomatedFeatures",
+      "underlyingAction" : {
+        "class" : "games.dominion.metrics.DomActionFeatures"
+      }
+    },
+    "class" : "players.heuristics.LogisticActionHeuristic"
+  },
+  "opponentTreePolicy" : "SelfOnly",
+  "MASTGamma" : 0.200,
+  "heuristic" : {
+    "features" : {
+      "features" : [
+      ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.dominion.metrics.DomStateFeaturesWithCardTypes"
+      },
+      "class" : "evaluation.features.AutomatedFeatures"
+    },
+    "coefficients" : {
+      "WORKSHOP" : 2.27,
+      "provinceCount:provincesLeft" : 0.772,
+      "BIAS" : 2.26,
+      "emptyDecks" : 4.03,
+      "currentLead" : 0.867,
+      "provincesLeft:totalCards:CELLAR" : 0.00972,
+      "REMODEL" : 2.56,
+      "MOAT:COPPER:treasureValue:provincesLeft" : 0.0476,
+      "COPPER" : -0.253,
+      "MERCHANT" : 2.53,
+      "VILLAGE" : 2.53,
+      "MILITIA" : 2.23,
+      "emptyDecks:provinceCount:provincesLeft" : -0.238,
+      "MOAT" : 2.44,
+      "COPPER:treasureValue:provincesLeft" : -0.255,
+      "totalCards:CELLAR" : -0.0853,
+      "provinceCount" : 1.32,
+      "provincesLeft" : -4.34,
+      "CELLAR" : 5.34,
+      "SMITHY" : 3.10,
+      "treasureValue" : -6.09,
+      "totalCards" : -0.224,
+      "actionCards" : -109,
+      "treasureValue:provincesLeft" : 5.76
+    },
+    "class" : "players.heuristics.LinearStateHeuristic",
+    "defaultHeuristic" : {
+      "class" : "players.heuristics.LeaderHeuristic"
+    }
+  },
+  "exploreEpsilon" : 0.300,
+  "maxTreeDepth" : 1,
+  "treePolicy" : "UCB_Tuned",
+  "reuseTree" : true,
+  "backupPolicy" : "MaxMC",
+  "MAST" : "Both",
+  "rolloutType" : "MAST",
+  "maxBackupThreshold" : 10,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

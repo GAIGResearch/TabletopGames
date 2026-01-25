@@ -1,0 +1,868 @@
+[
+  {
+    "id": "11A",
+    "size": [6, 6],
+    "class": "String",
+    "grid":
+      [
+        ["null", "null", "null", "null", "null", "null"],
+        ["null", "plain", "plain", "plain", "plain", "null"],
+        ["open", "plain", "plain", "plain", "plain", "open"],
+        ["open", "plain", "plain", "plain", "plain", "open"],
+        ["null", "plain", "plain", "plain", "plain", "null"],
+        ["null", "null", "null", "null", "null", "null"]
+      ]
+  },
+  {
+    "id": "11B",
+    "size": [6, 6],
+    "class": "String",
+    "grid" :
+      [
+        ["null", "null", "null", "null", "null", "null"],
+        ["null", "plain", "plain", "plain", "plain", "null"],
+        ["open", "plain", "plain", "plain", "plain", "open"],
+        ["open", "plain", "plain", "plain", "plain", "open"],
+        ["null", "plain", "plain", "plain", "plain", "null"],
+        ["null", "null", "null", "null", "null", "null"]
+      ]
+  },
+  {
+  "id": "10A",
+  "size": [6, 6],
+  "img": "",
+  "class": "String",
+  "grid":
+  [
+    ["null", "null", "null", "null", "null", "null"],
+    ["null", "plain", "plain", "plain", "plain", "null"],
+    ["open", "plain", "plain", "plain", "plain", "open"],
+    ["open", "plain", "plain", "plain", "plain", "open"],
+    ["null", "plain", "plain", "plain", "plain", "null"],
+    ["null", "null", "null", "null", "null", "null"]
+  ]
+},
+  {
+    "id": "10B",
+    "size": [6, 6],
+    "class": "String",
+    "grid" :
+    [
+      ["null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "20A",
+    "size": [5, 10],
+    "class": "String",
+    "grid" :
+      [
+        ["null", "open", "open", "null", "null"],
+        ["null", "plain", "plain", "plain", "null"],
+        ["null", "plain", "plain", "plain", "null"],
+        ["null", "null", "plain", "plain", "null"],
+        ["null", "null", "plain", "plain", "null"],
+        ["null", "null", "plain", "plain", "null"],
+        ["null", "null", "plain", "plain", "null"],
+        ["open", "plain", "plain", "plain", "null"],
+        ["open", "plain", "plain", "plain", "null"],
+        ["null", "null", "null", "null", "null"]
+      ]
+  },
+  {
+    "id" : "20B",
+    "size": [5, 10],
+    "class": "String",
+    "grid":
+      [
+        ["null", "null", "open", "open", "null"],
+        ["null", "plain", "plain", "plain", "null"],
+        ["null", "plain", "plain", "plain", "null"],
+        ["null", "plain", "plain", "null", "null"],
+        ["null", "plain", "plain", "null", "null"],
+        ["null", "plain", "plain", "null", "null"],
+        ["null", "plain", "plain", "null", "null"],
+        ["null", "plain", "plain", "plain", "open"],
+        ["null", "plain", "plain", "plain", "open"],
+        ["null", "null", "null", "null", "null"]
+      ]
+  },
+  {
+    "id": "13A1",
+    "size": [6, 3],
+    "class": "String",
+    "grid":
+      [
+        ["null", "null", "open", "open", "null", "null"],
+        ["null","plain", "plain", "plain", "plain", "null"],
+        ["null", "null", "open", "open", "null", "null"]
+      ]
+  },
+  {
+    "id": "13A2",
+    "size": [8, 7],
+    "class": "String",
+    "grid":
+    [
+      ["null", "null","null", "open", "open", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "null", "null", "null", "null", "null"],
+      ["null", "open", "open", "null", "null", "null", "null", "null"]
+    ]
+  },{
+  "id": "28A",
+  "size": [6, 4],
+  "img": "",
+  "class": "String",
+  "grid": [
+    ["null", "null", "null", "open", "open", "null"],
+    ["null", "plain", "plain", "plain", "plain", "null"],
+    ["null", "plain", "plain", "plain", "plain", "null"],
+    ["null", "open", "open", "null", "null", "null"]
+  ]
+},
+  {
+    "id": "28B",
+    "size": [6, 4],
+    "class": "String",
+    "grid": [
+      ["null", "open", "open", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "open", "open", "null"]
+    ]
+  },
+  {
+    "id": "27A",
+    "size": [4, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null"],
+      ["null", "plain", "plain", "open"],
+      ["null", "plain", "plain", "open"],
+      ["open", "plain", "plain", "null"],
+      ["open", "plain", "plain", "null"],
+      ["null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "27B",
+    "size": [4, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null"],
+      ["open", "plain", "plain", "null"],
+      ["open", "plain", "plain", "null"],
+      ["null", "plain", "plain", "open"],
+      ["null", "plain", "plain", "open"],
+      ["null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "26A",
+    "size": [6, 5],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "null", "plain", "plain", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "26B",
+    "size": [6, 5],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "null", "plain", "plain", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "25A",
+    "size": [4, 8],
+    "class": "String",
+    "grid": [
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["open", "plain", "plain", "null"],
+      ["open", "plain", "plain", "null"],
+      ["null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "25B",
+    "size": [4, 8],
+    "class": "String",
+    "grid": [
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "open"],
+      ["null", "plain", "plain", "open"],
+      ["null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "24A",
+    "size": [8, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "open", "open", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "24B",
+    "size": [8, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "open", "open", "null"]
+    ]
+  },
+  {
+    "id": "23A",
+    "size": [8, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "23B",
+    "size": [8, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "22A",
+    "size": [8, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "22B",
+    "size": [8, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "21A",
+    "size": [8, 5],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "water", "plain", "water", "water", "plain", "open"],
+      ["open", "plain", "water", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "water", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "21B",
+    "size": [8, 5],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "water", "water", "plain", "plain", "null"],
+      ["open", "plain", "plain", "water", "water", "plain", "plain", "open"],
+      ["null", "plain", "plain", "water", "water", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "19A",
+    "size": [5, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "19B",
+    "size": [5, 8],
+    "class": "String",
+    "grid": [
+      ["null", "open", "open", "null", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "null"],
+      ["null", "null", "open", "open", "null"]
+    ]
+  },
+  {
+    "id": "30A",
+    "size": [6, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "30B",
+    "size": [6, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "29A",
+    "size": [6, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "29B",
+    "size": [6, 4],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "18A",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "open", "open", "null"],
+      ["null", "null", "null", "plain", "plain", "null"],
+      ["null", "null", "null", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "17A",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "open", "open", "null"],
+      ["null", "null", "null", "plain", "plain", "null"],
+      ["null", "null", "null", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "18B",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "open", "open", "null", "null", "null"],
+      ["null", "plain", "plain", "null", "null", "null"],
+      ["null", "plain", "plain", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "17B",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "open", "open", "null", "null", "null"],
+      ["null", "plain", "plain", "null", "null", "null"],
+      ["null", "plain", "plain", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "16A",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "null", "plain", "plain", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "plain", "plain", "null", "null"],
+      ["null", "null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "16B",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "null", "plain", "plain", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "plain", "plain", "null", "null"],
+      ["null", "null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "15A",
+    "size": [7, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "open", "open", "null", "null"],
+      ["null", "null", "null", "plain", "plain", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null", "null", "null", "null"],
+      ["null", "open", "open", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "15B",
+    "size": [7, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null", "null"],
+      ["null", "null", "plain", "plain", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "open", "open", "null"]
+    ]
+  },
+  {
+    "id": "14A",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null"],
+      ["null", "null", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "null", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "14B",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "null", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "null", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "13B",
+    "size": [8, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "open", "open", "null", "null", "null"],
+      ["null", "null", "plain", "plain", "plain", "plain", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "open", "open", "null"]
+    ]
+  },
+  {
+    "id": "12A",
+    "size": [7, 7],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null"],
+      ["null", "null", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "water", "water", "water", "plain", "null"],
+      ["open", "plain", "water", "water", "water", "plain", "null"],
+      ["null", "null", "null", "water", "water", "plain", "null"],
+      ["null", "null", "null", "plain", "plain", "null", "null"],
+      ["null", "null", "null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "12B",
+    "size": [7, 7],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "lava", "lava", "plain", "open"],
+      ["null", "plain", "plain", "lava", "null", "null", "null"],
+      ["null", "null", "plain", "plain", "null", "null", "null"],
+      ["null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "9A",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "9B",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "8A",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "8B",
+    "size": [6, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "7A",
+    "size": [8, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "open", "open", "null", "null"],
+      ["null", "plain", "plain", "block", "plain", "plain", "block", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "block", "plain", "plain", "block", "plain", "plain", "null"],
+      ["null", "null", "open", "open", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "7B",
+    "size": [8, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "5A",
+    "size": [8, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "5B",
+    "size": [8, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "3A",
+    "size": [8, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["null", "water", "water", "water", "water", "water", "water", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "3B",
+    "size": [8, 6],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "6B",
+    "size": [6, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "6A",
+    "size": [6, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "open", "open", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "water", "water", "water", "water", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "open", "open", "null", "null"]
+    ]
+  },
+  {
+    "id": "4A",
+    "size": [8, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "open", "open", "null", "null", "null"],
+      ["null", "block", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "block", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "block", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "block", "null"],
+      ["null", "plain", "plain", "plain", "plain", "block", "null", "null"],
+      ["null", "null", "null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "4B",
+    "size": [8, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "open", "open", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "pit", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "pit", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "pit", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "pit", "plain", "open"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "pit", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "2A",
+    "size": [8, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "open", "open", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "water", "water", "water", "water", "null"],
+      ["null", "plain", "plain", "water", "water", "plain", "plain", "null"],
+      ["null", "water", "water", "water", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "2B",
+    "size": [8, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "open", "open", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "open", "open", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "1B",
+    "size": [10, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "open", "open", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "block", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "block", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["open", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "block", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "block", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "open", "open", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id": "1A",
+    "size": [10, 8],
+    "class": "String",
+    "grid": [
+      ["null", "null", "null", "null", "open", "open", "null", "null", "null", "null"],
+      ["null", "water", "water", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "water", "water", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "water", "water", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "water", "water", "plain", "plain", "plain", "plain", "plain", "plain", "open"],
+      ["null", "water", "water", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "water", "water", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "open", "open", "null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id" : "endcap1A",
+    "size": [4, 3],
+    "class": "String",
+    "grid":
+    [
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id" : "extender1A",
+    "size": [4, 3],
+    "class": "String",
+    "grid":
+    [
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "open", "open", "null"]
+    ]
+  },
+  {
+    "id" : "transition1A",
+    "size": [4, 4],
+    "class": "String",
+    "grid":
+    [
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "open", "open", "null"]
+    ]
+  },
+  {
+    "id" : "entrance1A",
+    "size": [4, 4],
+    "class": "String",
+    "grid":
+    [
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "null", "null", "null"]
+    ]
+  },
+  {
+    "id" : "exit1A",
+    "size": [4, 4],
+    "class": "String",
+    "grid":
+    [
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "null", "null", "null"]
+    ]
+  }
+]

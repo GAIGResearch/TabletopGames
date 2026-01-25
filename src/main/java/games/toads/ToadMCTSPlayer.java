@@ -152,4 +152,12 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         return root;
     }
 
+    @Override
+    public ToadMCTSPlayer copy() {
+        ToadMCTSPlayer copy = new ToadMCTSPlayer(getParameters());
+        copy.setForwardModel(getForwardModel());
+        copy.functionalityApplies = functionalityApplies;
+        copy.flankAction = flankAction == null ? null : flankAction.copy();
+        return copy;
+    }
 }

@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
+import players.mcts.IMASTUser;
+import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
@@ -18,7 +20,7 @@ import java.util.*;
  *  Hence, it can be used to implement an epsilon-greedy strategy by setting temperature to
  *  a large negative number and epsilon to a value > 0.
  */
-public class BoltzmannActionPlayer extends AbstractPlayer {
+public class BoltzmannActionPlayer extends AbstractPlayer implements IMASTUser {
 
     final public double temperature;
     final public double epsilon;
@@ -88,5 +90,12 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
 
     public void setActionHeuristic(IActionHeuristic actionHeuristic) {
         this.actionHeuristic = actionHeuristic;
+    }
+
+    @Override
+    public void setMASTStats(List<Map<Object, Pair<Integer, Double>>> MASTStats) {
+        if (actionHeuristic instanceof IMASTUser) {
+            ((IMASTUser) actionHeuristic).setMASTStats(MASTStats);
+        }
     }
 }

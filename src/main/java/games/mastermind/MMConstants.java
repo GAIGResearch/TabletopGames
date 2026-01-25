@@ -1,30 +1,31 @@
 package games.mastermind;
 
+import core.components.BoardNode;
 import core.components.Token;
 
 import java.util.ArrayList;
 
 public class MMConstants {
-    public static final ArrayList<Token> resultColours = new ArrayList<Token>() {{
-            add(new Token("b"));
-            add(new Token("w"));
-            add(new Token("x"));
+    public static final ArrayList<BoardNode> resultColours = new ArrayList<>() {{
+        add(new BoardNode("b"));
+        add(new BoardNode("w"));
+        add(new BoardNode("x"));
     }};
 
-    public static final ArrayList<Token> guessColours = new ArrayList<Token>() {{
-        add(new Token("R"));
-        add(new Token("O"));
-        add(new Token("Y"));
-        add(new Token("G"));
-        add(new Token("B"));
-        add(new Token("V"));
+    public static final ArrayList<BoardNode> guessColours = new ArrayList<>() {{
+        add(new BoardNode("R"));
+        add(new BoardNode("O"));
+        add(new BoardNode("Y"));
+        add(new BoardNode("G"));
+        add(new BoardNode("B"));
+        add(new BoardNode("V"));
     }};
 
     static String emptyPeg = ".";
 
-    protected static ArrayList<Token> copyGuessColours() {
-        ArrayList<Token> copy = new ArrayList<>();
-        for (Token t : guessColours) {
+    protected static ArrayList<BoardNode> copyGuessColours() {
+        ArrayList<BoardNode> copy = new ArrayList<>();
+        for (BoardNode t : guessColours) {
             copy.add(t.copy());
         }
         return copy;

@@ -98,7 +98,6 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
-
     public static class StateSpace extends AbstractMetric {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -163,18 +162,17 @@ public class GameMetrics implements IMetricsCollection {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
+            return new HashMap<>() {{
                 put("Percentage", Double.class);
             }};
         }
     }
 
-
     public static class ComputationTimes extends AbstractMetric {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
+            return new HashMap<>() {{
                 put("Next (ms)", Double.class);
                 put("Copy (ms)", Double.class);
                 put("Actions Available Compute (ms)", Double.class);
@@ -236,7 +234,7 @@ public class GameMetrics implements IMetricsCollection {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
+            return new HashMap<>() {{
                 put("ActionsPerTurn (Sum)", Integer.class);
                 put("Decisions", Integer.class);
                 put("DecisionPoints (Mean)", Double.class);
@@ -407,8 +405,8 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public HashMap<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            return new HashMap<>() {{
                 put("PlayerIdx", String.class);
             }};
         }

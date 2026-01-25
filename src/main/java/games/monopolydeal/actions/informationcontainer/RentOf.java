@@ -49,7 +49,7 @@ public class RentOf extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pSetId, pSetType, rent);
+        return Objects.hash(pSetId, pSetType.ordinal(), rent);
     }
 
     @Override

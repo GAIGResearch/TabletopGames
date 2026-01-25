@@ -1,0 +1,17 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "rolloutLength" : 1,
+  "opponentTreePolicy" : "SelfOnly",
+  "heuristic" : {
+    "class" : "players.heuristics.LeaderHeuristic"
+  },
+  "FPU" : 100.0,
+  "K" : 100.0,
+  "maxTreeDepth" : 1,
+  "treePolicy" : "UCB_Tuned",
+  "paranoid" : true,
+  "reuseTree" : true,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

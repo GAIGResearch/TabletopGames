@@ -26,7 +26,7 @@ public interface IDataProcessor
      * @param logger - logger that contains the raw data
      * @param folderName - name of the folder to save the file to
      */
-    void processRawDataToFile(IDataLogger logger, String folderName);
+    void processRawDataToFile(IDataLogger logger, String folderName, boolean append);
 
 
     /**

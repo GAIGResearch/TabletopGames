@@ -2,6 +2,7 @@ package games.dominion.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.PartialObservableDeck;
 import games.dominion.*;
 import games.dominion.DominionConstants.*;
 import games.dominion.cards.*;
@@ -67,8 +68,9 @@ public class Militia extends DominionAttackAction {
 
     @Override
     public boolean isAttackComplete(int currentTarget, DominionGameState state) {
-        // Does the victim now have 3 or fewer cards in hand?
-        return state.getDeck(DeckType.HAND, currentTarget).getSize() <= OTHERS_DISCARD_DOWN_TO;
+        PartialObservableDeck<DominionCard> hand = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, currentTarget);
+        // Does the victim now have 3 or fewer cards in hand? (a revealed MOAT card would not get this far...the defended flag on the game state is used instead)
+        return hand.getSize() <= OTHERS_DISCARD_DOWN_TO;
     }
 
     @Override

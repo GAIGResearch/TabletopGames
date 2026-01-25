@@ -2,6 +2,7 @@ package evaluation.optimisation;
 
 import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import utilities.JSONUtils;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * A sub-class of AbstractParameters that implements the ITunableParameters interface
@@ -26,11 +28,12 @@ import static java.util.stream.Collectors.toList;
  * <p>
  * Any inheriting class does not need to explicitly copy any data inserted via addTunableParameter(...)
  */
-public abstract class TunableParameters extends AbstractParameters implements ITunableParameters {
+public abstract class TunableParameters<T> extends AbstractParameters implements ITunableParameters<T> {
 
     private static boolean debug = false;
     private JSONObject rawJSON;
     protected boolean resetOn = true; // if set to false while setting many parameter values, the _reset() method will not be called (for efficiency)
+    List<String> staticParameters = new ArrayList<>();
     List<String> parameterNames = new ArrayList<>();
     Map<String, List<Object>> possibleValues = new HashMap<>();
     Map<String, Object> defaultValues = new HashMap<>();
@@ -42,7 +45,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      *
      * @param filename The file with the JSON format data
      */
-    public static void loadFromJSONFile(TunableParameters params, String filename) {
+    public static void loadFromJSONFile(TunableParameters<?> params, String filename) {
         try {
             FileReader reader = new FileReader(filename);
             JSONParser jsonParser = new JSONParser();
@@ -56,19 +59,28 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     /**
      * Instantiate parameters from a JSONObject
      */
-    public static void loadFromJSON(TunableParameters params, JSONObject rawData) {
+    @SuppressWarnings("unchecked")
+    public static void loadFromJSON(TunableParameters<?> params, JSONObject rawData) {
         List<String> allParams = params.getParameterNames();
+
+        // Static parameter, load from json and exclude from tuning
+        // THIS IS UNCHECKED
+        // TODO Add validation once I figure
+        for (String pName : params.staticParameters) {
+            params.currentValues.put(pName, rawData.getOrDefault(pName, params.getDefaultParameterValue(pName)));
+        }
+
         for (String pName : allParams) {
             if (debug)
                 System.out.println("\tLoading " + pName);
             if (isParamArray(pName, rawData)) {
                 List<?> pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
-                params.addTunableParameter(pName, params.getDefaultParameterValue(pName),
+                params.addTunableParameter(pName, params.getParameterType(pName), params.getDefaultParameterValue(pName),
                         new ArrayList<>(pValue));
             } else {
                 Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
                 if (pValue != null)
-                    params.addTunableParameter(pName, pValue);
+                    params.addTunableParameter(pName, params.getParameterType(pName), pValue);
             }
         }
         params._reset();
@@ -77,52 +89,62 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         allParams.add("class");
         allParams.add("args"); // this may be present if there are non-configurable parameters needed for the constructor
         for (Object key : rawData.keySet()) {
-            if (key instanceof String && !allParams.contains(key)) {
+            if (key instanceof String && !(allParams.contains(key) || params.staticParameters.contains(key))) {
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
             }
         }
+    }
+
+    private Class<?> getParameterType(String pName) {
+        Class<?> type = parameterTypes.get(pName);
+        if (type == null) {
+            throw new AssertionError("No type found for parameter " + pName + " in " + this.getClass().getSimpleName());
+        }
+        return type;
     }
 
     /**
      * @param name         Name of the parameter. This will be validated as one of a possible set of expectedKeys
      * @param json         The JSONObject containing the data we want to extract the parameter from.
      * @param defaultValue The default value to use for the parameter if we can't find it in json.
-     * @param <T>          The class of the parameter (anticipated as one of Integer, Double, String, Boolean)
+     * @param <K>          The class of the parameter (anticipated as one of Integer, Double, String, Boolean)
      * @return The value of the parameter found.
      */
     @SuppressWarnings("unchecked")
-    private static <T> T getParam(String name, JSONObject json, T defaultValue, TunableParameters params) {
+    private static <K> K getParam(String name, JSONObject json, K defaultValue, TunableParameters<?> params) {
         Object finalData = json.getOrDefault(name, defaultValue);
         if (finalData == null)
             return null;
         Object data = (finalData instanceof Long) ? Integer.valueOf(((Long) finalData).intValue()) : finalData;
         if (finalData instanceof JSONObject subJson) {
-            T retValue = JSONUtils.loadClassFromJSON(subJson);
-            if (retValue instanceof TunableParameters subParams) {
-         //       TunableParameters.loadFromJSON(subParams, subJson);
+            K retValue = JSONUtils.loadClassFromJSON(subJson);
+            if (retValue instanceof TunableParameters<?> subParams) {
+                //       TunableParameters.loadFromJSON(subParams, subJson);
                 params.setParameterValue(name, subParams);
                 //    params.registerChild(name, subJson);
             }
             return retValue;
         }
         Class<?> requiredClass = params.getParameterTypes().get(name);
-        if (data.getClass() == requiredClass)
-            return (T) data;
+        if (requiredClass.isAssignableFrom(data.getClass()))
+            return (K) data;
         if (data.getClass() == Integer.class && requiredClass == Double.class)
-            return (T) Double.valueOf((Integer) data);
+            return (K) Double.valueOf((Integer) data);
         if (data.getClass() == String.class && requiredClass.isEnum()) {
             Optional<?> matchingValue = Arrays.stream(requiredClass.getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
             if (matchingValue.isPresent()) {
-                return (T) matchingValue.get();
+                return (K) matchingValue.get();
             }
             throw new AssertionError("No Enum match found for " + name + " [" + data + "] in " + Arrays.toString(requiredClass.getEnumConstants()));
+        } else if (data.getClass() == String.class) {
+            return JSONUtils.loadClass(data.toString());
         }
         System.out.println("Warning: parsing param " + name + "; couldn't find correct type, assigning default value: " + defaultValue);
         return defaultValue;
     }
 
     private static boolean isParamArray(String name, JSONObject json) {
-        return (json.get(name) instanceof List);
+        return (json.get(name) instanceof JSONArray);
     }
 
     private static boolean isParamJSON(String name, JSONObject json) {
@@ -185,6 +207,19 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         return tunable;
     }
 
+
+    /**
+     * Adds a static parameter to the game. This value CANNOT be tuned, but can be loaded in from JSON
+     * @param name The name of the parameter to add
+     * @param defaultValue The value this parameter should take if no value is suppled through JSON
+     * @param <T> The type of the parameter
+     */
+    public <T> void addStaticParameter(String name, T defaultValue) {
+        staticParameters.add(name);
+        defaultValues.put(name, defaultValue);
+        currentValues.put(name, defaultValue);
+    }
+
     /**
      * Use this to add a non-Tunable Parameter (i.e. one with a single value that does not change)
      * While this is not tuned, it means that a value for it can be defined in a JSON input file
@@ -227,6 +262,9 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         currentValues.put(name, defaultValue);
     }
 
+    public <T> void addTunableParameter(String name, Class<? extends T> parameterClass, T defaultValue) {
+        addTunableParameter(name, parameterClass, defaultValue, Collections.singletonList(defaultValue));
+    }
 
     public <T> void addTunableParameter(String name, Class<T> classType) {
         if (!parameterNames.contains(name)) parameterNames.add(name);
@@ -267,6 +305,15 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         return defaultValues.get(parameterName);
     }
 
+    public Object getDefaultOverride(String parameterName) {
+        // we first see if this parameter is in the rawJSON
+        if (rawJSON != null && rawJSON.containsKey(parameterName)
+                && !(rawJSON.get(parameterName) instanceof JSONArray)) {
+            return rawJSON.get(parameterName);
+        }
+        return getDefaultParameterValue(parameterName);
+    }
+
     /**
      * Sets the value of the given parameter.
      *
@@ -275,6 +322,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      */
     @Override
     public void setParameterValue(String parameterName, Object value) {
+        //    System.out.println("Setting " + parameterName + " to " + value);
         if (parameterName.split(Pattern.quote(".")).length > 1) {
             // in this case we pass on to the subParam (as well as updating here)
             String[] split = parameterName.split(Pattern.quote("."));
@@ -297,7 +345,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         }
         // Then, if value is TunableParameter itself, we 'lift' its attributes up to the top level
         // and remove any previous ones
-        if (value instanceof TunableParameters subParams) {
+        if (value instanceof TunableParameters<?> subParams) {
             List<String> oldParamNames = parameterNames.stream().filter(n -> n.startsWith(parameterName + ".")).toList();
             // we now remove these
             oldParamNames.forEach(parameterNames::remove);
@@ -358,29 +406,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     }
 
     @Override
-    public String getJSONDescription() {
-        JSONObject retValue = new JSONObject();
-        retValue.put("parametersType", this.getClass().getName());
-        parameterNames.forEach(name -> {
-            Class<?> clazz = parameterTypes.get(name);
-            if (possibleValues.getOrDefault(name, Collections.emptyList()).size() > 1) {
-                List<Object> values = possibleValues.get(name);
-                if (clazz.isEnum())
-                    values = values.stream().map(Object::toString).collect(toList());
-                // TODO: Possibly something here to allow for JSONObjects to be passed in as well
-                retValue.put(name, values);
-            } else {
-                // we have a single value, or a missing
-                Object value = defaultValues.getOrDefault(name, null);
-                if (clazz.isEnum()) value = value.toString();
-                retValue.put(name, value);
-            }
-        });
-        return retValue.toJSONString();
-    }
-
-
-    @Override
     public ITunableParameters instanceFromJSON(JSONObject jsonObject) {
         return JSONUtils.loadClassFromJSON(jsonObject);
     }
@@ -388,11 +413,13 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     public void setRawJSON(JSONObject json) {
         rawJSON = json;
     }
+    public JSONObject getRawJSON() {
+        return rawJSON;
+    }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public JSONObject instanceToJSON(boolean excludeDefaults) {
-        // this is very similar to getJSONDescription(), but only
-        // considers the current Parameter settings
+    public JSONObject instanceToJSON(boolean excludeDefaults, Map<String, Integer> settings) {
         // we will recurse over nested ITunableParameters (but do not jump over intervening non-Tunable objects)
         JSONObject retValue = new JSONObject();
         retValue.put("class", this.getClass().getName());
@@ -403,26 +430,47 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             }
             Object value = getParameterValue(name);
             if (value != null) {
-                // check for defaults
-                if (excludeDefaults && value.equals(getDefaultParameterValue(name))) {
-                    continue;
-                }
-                if (value instanceof ITunableParameters tp) {
-                    value = tp.instanceToJSON(excludeDefaults);
-                } else if (value instanceof Enum) {
-                    value = value.toString();
-                } else if (!(value instanceof Integer || value instanceof Long ||
-                        value instanceof Double || value instanceof String ||
-                        value instanceof Boolean)) {
-                    // in this case we need to extract from the original rawJSON
-                    if (rawJSON == null) {
-                        if (getDefaultParameterValue(name).equals(value))
-                            continue; // in this case we have the default, so no need to pull in
-                        throw new AssertionError("No rawJSON available to extract value for " + name);
+                if (value instanceof ITunableParameters<?> tp) {
+                    // settings need to have namespace adapted (remove the top level)
+                    Map<String, Integer> subSettings = settings.entrySet().stream()
+                            .filter(e -> e.getKey().contains("."))
+                            .collect(toMap(e -> e.getKey().substring(e.getKey().indexOf(".") + 1), Map.Entry::getValue));
+                    value = tp.instanceToJSON(excludeDefaults, subSettings);
+                } else {
+                    if (value instanceof Enum) {
+                        value = value.toString();
+                    } else if (!(value instanceof Integer || value instanceof Long ||
+                            value instanceof Double || value instanceof String ||
+                            value instanceof Boolean)) {
+                        // in this case we need to extract from the original rawJSON
+                        if (rawJSON == null) {
+                            if (JSONUtils.areValuesEqual(value, getDefaultParameterValue(name)))
+                                continue; // in this case we have the default, so no need to pull in
+                            throw new AssertionError("No rawJSON available to extract value for " + name);
+                        }
+                        Object rawValue = rawJSON.get(name);
+                        if (rawValue instanceof JSONArray arr) {
+                            value = arr.get(settings.get(name));
+                        }
                     }
-                    value = rawJSON.get(name);
+                    // check for defaults
+                    if (excludeDefaults && JSONUtils.areValuesEqual(value, getDefaultParameterValue(name))) {
+                        continue;
+                    }
                 }
                 retValue.put(name, value);
+            }
+        }
+        // We now add in any non-default values in rawJSON (i.e. ones not parameterised via settings)
+        if (rawJSON != null) {
+            for (Object key : rawJSON.keySet()) {
+                if (key instanceof String && !settings.containsKey(key) && !retValue.containsKey(key)) {
+                    // check for default
+                    if (excludeDefaults && JSONUtils.areValuesEqual(rawJSON.get(key), getDefaultParameterValue(key.toString()))) {
+                        continue;
+                    }
+                    retValue.put(key, rawJSON.get(key));
+                }
             }
         }
         return retValue;

@@ -1,0 +1,16 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args":  [
+    {"enum" : "evaluation.metrics.IDataLogger$ReportDestination", "value" : "ToFile"},
+    [
+      {"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "RawDataPerEvent"}
+    ],
+    [
+      {"class": "evaluation.metrics.GameMetrics$FinalScore" },
+      {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
+      {"class": "evaluation.metrics.GameMetrics$PlayerType" },
+      {"class": "evaluation.metrics.GameMetrics$ActionsReduced" },
+      {"class": "players.mcts.MCTSMetrics$TreeStats" },
+      {"class": "players.mcts.MCTSMetrics$MultiTreeStats" }
+    ]]
+}

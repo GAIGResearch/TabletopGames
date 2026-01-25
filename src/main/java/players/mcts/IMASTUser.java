@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface IMASTUser {
 
-    void setStats(List<Map<Object, Pair<Integer, Double>>> MASTStats);
+    void setMASTStats(List<Map<Object, Pair<Integer, Double>>> MASTStats);
 }

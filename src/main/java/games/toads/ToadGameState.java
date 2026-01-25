@@ -204,9 +204,7 @@ public class ToadGameState extends AbstractGameState {
     public void revealFlankCards() {
         for (int i = 0; i < 2; i++) {
             if (hiddenFlankCards[i] != null) {
-                if (!playerHands.get(i).remove(hiddenFlankCards[i])) {
-                    throw new AssertionError("Flank card not in hand");
-                }
+                playerHands.get(i).remove(hiddenFlankCards[i]);
             }
         }
     }

@@ -21,9 +21,7 @@ public class RecycleCard extends AbstractAction {
             return true;
         // i.e. we discard nothing
         int player = state.getCurrentPlayer();
-        if (!state.getPlayerHand(player).remove(discardedCard)) {
-            throw new AssertionError("Card not found in player hand : " + discardedCard);
-        }
+        state.getPlayerHand(player).remove(discardedCard);
         // we move the card to the bottom of the Deck, and mark it as known to us
         PartialObservableDeck<ToadCard> playerDeck = state.getPlayerDeck(player);
         playerDeck.addToBottom(discardedCard);

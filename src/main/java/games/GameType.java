@@ -1,27 +1,63 @@
 package games;
 
-import core.*;
+import core.AbstractForwardModel;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.Game;
 import core.rules.AbstractRuleBasedForwardModel;
-import games.battlelore.*;
+import games.XIIScripta.XIIGUIManager;
+import games.XIIScripta.XIIParameters;
+import games.backgammon.*;
+import games.battlelore.BattleloreForwardModel;
+import games.battlelore.BattleloreGameParameters;
+import games.battlelore.BattleloreGameState;
 import games.battlelore.gui.BattleloreGUI;
-import games.blackjack.*;
+import games.blackjack.BlackjackForwardModel;
+import games.blackjack.BlackjackGameState;
+import games.blackjack.BlackjackParameters;
 import games.blackjack.gui.BlackjackGUIManager;
-import games.cantstop.*;
+import games.cantstop.CantStopForwardModel;
+import games.cantstop.CantStopGameState;
+import games.cantstop.CantStopParameters;
 import games.cantstop.gui.CantStopGUIManager;
-import games.catan.*;
+import games.catan.CatanForwardModel;
+import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 import games.catan.gui.CatanGUI;
 import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
 import games.chinesecheckers.gui.CCGUIManager;
-import games.coltexpress.*;
+import games.chess.ChessForwardModel;
+import games.chess.ChessGameState;
+import games.chess.ChessParameters;
+import games.chess.ChessGUIManager;
+import games.coltexpress.ColtExpressForwardModel;
+import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUIManager;
-import games.connect4.*;
+import games.connect4.Connect4ForwardModel;
+import games.connect4.Connect4GameParameters;
+import games.connect4.Connect4GameState;
 import games.connect4.gui.Connect4GUIManager;
+import games.descent2e.DescentForwardModel;
+import games.descent2e.DescentGameState;
+import games.descent2e.DescentParameters;
+import games.descent2e.gui.DescentGUI;
 import games.diamant.*;
+import games.diamant.DiamantForwardModel;
+import games.diamant.DiamantGameState;
+import games.diamant.DiamantParameters;
+import games.diamant.gui.DiamantGUIManager;
+import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
-import games.dotsboxes.*;
-import games.explodingkittens.*;
+import games.dotsboxes.DBForwardModel;
+import games.dotsboxes.DBGUIManager;
+import games.dotsboxes.DBGameState;
+import games.dotsboxes.DBParameters;
+import games.explodingkittens.ExplodingKittensForwardModel;
+import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.jaipurskeleton.*;
 import games.hanabi.HanabiForwardModel;
@@ -32,37 +68,75 @@ import games.hearts.HeartsForwardModel;
 import games.hearts.HeartsGameState;
 import games.hearts.HeartsParameters;
 import games.hearts.gui.HeartsGUIManager;
-import games.loveletter.*;
+import games.loveletter.LoveLetterForwardModel;
+import games.loveletter.LoveLetterGameState;
+import games.loveletter.LoveLetterParameters;
 import games.loveletter.gui.LoveLetterGUIManager;
+import games.mastermind.MMForwardModel;
+import games.mastermind.MMGameState;
+import games.mastermind.MMParameters;
 import games.monopolydeal.gui.MonopolyDealGUIManager;
 import games.mastermind.*;
 import games.mastermind.gui.MMGUIManager;
-import games.pandemic.*;
+import games.pandemic.PandemicForwardModel;
+import games.pandemic.PandemicGameState;
+import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUIManager;
-import games.puertorico.*;
+import games.pentegrammai.PenteForwardModel;
+import games.pentegrammai.PenteGUIManager;
+import games.pentegrammai.PenteGameState;
+import games.pentegrammai.PenteParameters;
+import games.poker.PokerForwardModel;
+import games.poker.PokerGameParameters;
+import games.poker.PokerGameState;
+import games.poker.gui.PokerGUIManager;
+import games.puertorico.PuertoRicoForwardModel;
+import games.puertorico.PuertoRicoGameState;
+import games.puertorico.PuertoRicoParameters;
 import games.puertorico.gui.PuertoRicoGUI;
+import games.powergrid.PowerGridForwardModel;
+import games.powergrid.PowerGridGameState;
+import games.powergrid.PowerGridParameters;
+import games.powergrid.gui.PowerGridGUI;
 import games.resistance.ResForwardModel;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.gui.ResGUIManager;
-import games.terraformingmars.*;
-import games.terraformingmars.gui.TMGUI;
-import games.poker.*;
-import games.poker.gui.*;
-import games.stratego.*;
+import games.root.RootForwardModel;
+import games.root.RootGameState;
+import games.root.RootParameters;
+import games.root.gui.RootGUIManager;
+import games.saboteur.SaboteurForwardModel;
+import games.saboteur.SaboteurGameParameters;
+import games.saboteur.SaboteurGameState;
+import games.saboteur.gui.SaboteurGUIManager;
+import games.stratego.StrategoForwardModel;
+import games.stratego.StrategoGameState;
+import games.stratego.StrategoParams;
 import games.stratego.gui.StrategoGUIManager;
-import games.sushigo.*;
+import games.sushigo.SGForwardModel;
+import games.sushigo.SGGameState;
+import games.sushigo.SGParameters;
 import games.sushigo.gui.SGGUIManager;
-import games.tictactoe.*;
-import games.tictactoe.gui.*;
+import games.terraformingmars.TMForwardModel;
+import games.terraformingmars.TMGameParameters;
+import games.terraformingmars.TMGameState;
+import games.terraformingmars.gui.TMGUI;
+import games.tictactoe.TicTacToeForwardModel;
+import games.tictactoe.TicTacToeGameParameters;
+import games.tictactoe.TicTacToeGameState;
+import games.tictactoe.gui.TicTacToeGUIManager;
 import games.toads.ToadForwardModel;
 import games.toads.ToadGUIManager;
 import games.toads.ToadGameState;
 import games.toads.ToadParameters;
-import games.uno.*;
-import games.uno.gui.*;
-import games.virus.*;
-import games.dominion.*;
+import games.uno.UnoForwardModel;
+import games.uno.UnoGameParameters;
+import games.uno.UnoGameState;
+import games.uno.gui.UnoGUIManager;
+import games.virus.VirusForwardModel;
+import games.virus.VirusGameParameters;
+import games.virus.VirusGameState;
 import games.wonders7.Wonders7ForwardModel;
 import games.wonders7.Wonders7GameParameters;
 import games.wonders7.Wonders7GameState;
@@ -71,6 +145,12 @@ import gametemplate.GTForwardModel;
 import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
 import gametemplate.GTParameters;
+import games.pickomino.PickominoForwardModel;
+import games.pickomino.PickominoGUIManager;
+import games.pickomino.PickominoGameState;
+import games.pickomino.PickominoParameters;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import gui.*;
 import llm.DocumentSummariser;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -83,7 +163,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static core.CoreConstants.*;
-import static games.GameType.Category.Number;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
 import games.monopolydeal.*;
@@ -154,8 +233,12 @@ public enum GameType {
     Diamant(2, 6,
             Arrays.asList(Adventure, Bluffing, Exploration),
             Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
-            DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, null),
+            DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, DiamantGUIManager.class),
     Dominion(2, 4,
+            Arrays.asList(Cards, Strategy),
+            Collections.singletonList(DeckManagement),
+            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+    DominionFG(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
             DominionGameState.class, DominionForwardModel.class, DominionFGParameters.class, DominionGUIManager.class),
@@ -177,8 +260,9 @@ public enum GameType {
             Arrays.asList(SetCollection, PushYourLuck, SimultaneousActionSelection),
             SGGameState.class, SGForwardModel.class, SGParameters.class, SGGUIManager.class),
     Catan(3, 4,
-            Arrays.asList(Strategy, Cards),
-            Arrays.asList(Memory, GridMovement, ModularBoard),
+            Arrays.asList(Strategy, Cards, Economic),
+            Arrays.asList(Memory, GridMovement, ModularBoard, Negotiation, DiceRolling, Income, HexagonGrid,
+                    NetworkAndRouteBuilding, Race, RandomProduction, Trading, VariableSetup),
             CatanGameState.class, CatanForwardModel.class, CatanParameters.class, CatanGUI.class),
     TerraformingMars(1, 5,
             Arrays.asList(Economic, Environmental, Manufacturing, TerritoryBuilding, Cards, Strategy, Exploration),
@@ -195,6 +279,11 @@ public enum GameType {
     ),
     Jaipur(2,2, new ArrayList<>(), new ArrayList<>(),
             JaipurGameState.class, JaipurForwardModel.class, JaipurParameters.class, JaipurGUIManager.class),
+            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
+    Descent2e(2,5,
+            new ArrayList<>(),
+            new ArrayList<>(),
+            DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class),
     MonopolyDeal(2, 5,
             Arrays.asList(Strategy, Cards, Economic),
             Arrays.asList(SetCollection, HandManagement, TakeThat),
@@ -204,6 +293,10 @@ public enum GameType {
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
             PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
+    PowerGrid(3, 6,
+    		Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
+            Arrays.asList(EndGameBonus, TilePlacement, EngineBuilding),
+            PowerGridGameState.class, PowerGridForwardModel.class, PowerGridParameters.class, PowerGridGUI.class),
     Wonders7(3, 7,
             Arrays.asList(Strategy, Civilization, Ancient, Cards, CityBuilding, Economic),
             Arrays.asList(ClosedDrafting, HandManagement, NeighbourScope, SetCollection, SimultaneousActionSelection, VariablePlayerPowers),
@@ -217,16 +310,41 @@ public enum GameType {
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
-            Arrays.asList(GridMovement),
+            List.of(GridMovement),
             CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Backgammon(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement, DiceRolling),
+            BGGameState.class, BGForwardModel.class, BGParameters.class, BGGUIManager.class),
+    XIIScripta(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement, DiceRolling),
+            BGGameState.class, BGForwardModel.class, XIIParameters.class, XIIGUIManager.class),
+    PenteGrammai(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement, DiceRolling),
+            PenteGameState .class, PenteForwardModel.class, PenteParameters.class, PenteGUIManager.class),
     Mastermind(1,1,
-            Arrays.asList(Simple, Abstract, CodeBreaking),
-            Arrays.asList(),
+            Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
+            List.of(PatternBuilding),
             MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
     WarOfTheToads(2, 2,
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
-            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class);
+            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class),
+    Root(2, 4, Arrays.asList(Strategy,Wargame), Arrays.asList(ActionPoints, ActionQueue,
+            ActionRetrieval, AreaMajority, AreaMovement, DiceRolling, HandManagement, MultiUseCards, Negotiation,
+            PointToPointMovement, Race, SuddenDeathEnding, TakeThat, VariablePlayerPowers, VariableSetup), RootGameState.class, RootForwardModel.class, RootParameters.class, RootGUIManager.class),
+    Saboteur(3, 10,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(TakeThat, VariablePlayerPowers),
+            SaboteurGameState.class, SaboteurForwardModel.class, SaboteurGameParameters.class, SaboteurGUIManager.class),
+    Chess(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement),
+            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),
+    Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling), PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class, PickominoGUIManager.class);
+
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
@@ -285,8 +403,13 @@ public enum GameType {
             }
         }
 
-        DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
-        String rulesText = summariser.processText("game rules and strategy", 500);
+        String rulesText;
+        try {
+            DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
+            rulesText = summariser.processText("game rules and strategy", 500);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError("Error reading rulebook file: " + pdfFilePath, e);
+        }
         // Then write this to file
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));
@@ -402,7 +525,6 @@ public enum GameType {
             for (int i = 0; i < game.getPlayers().size(); i++) {
                 if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
                     human.add(i);
-                    break;
                 }
             }
         }
@@ -581,7 +703,7 @@ public enum GameType {
         CommandCards,
         MoveThroughDeck,
         TrickTaking,
-        RoleSelection, ClosedDrafting, NeighbourScope;
+        RoleSelection, ClosedDrafting, NeighbourScope, ActionRetrieval, AreaMajority, AreaMovement, Race, SuddenDeathEnding, MultiUseCards, Negotiation, VariableSetup, NetworkAndRouteBuilding, RandomProduction;
 
         /**
          * @return a list of all games using this mechanic.

@@ -1,0 +1,15 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+      {"enum" : "evaluation.metrics.IDataLogger$ReportDestination", "value" : "ToFile"},
+    [
+	{"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "RawDataPerEvent"}
+    ],
+    [
+      {"class": "evaluation.metrics.GameMetrics$ComputationTimes"},
+      {"class": "evaluation.metrics.GameMetrics$FinalScore" },
+      {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
+      {"class": "evaluation.metrics.GameMetrics$PlayerType" }
+  ]]
+}
+

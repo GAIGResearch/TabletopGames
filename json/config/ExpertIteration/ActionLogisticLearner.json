@@ -1,0 +1,7 @@
+{
+	"class" : "players.learners.LogisticLearner",
+	"args" : [
+		1.0, 0.1, 
+		{"enum" : "players.learners.AbstractLearner$Target", "value" : "ACTION_CHOSEN"}
+	]
+}

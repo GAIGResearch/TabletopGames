@@ -4,7 +4,7 @@ public class Distance {
 
     /**
      * Credit: https://github.com/haifengl/smile/blob/master/math/src/main/java/smile/math/distance/MinkowskiDistance.java
-     *
+     * <p>
      * Minkowski distance between the two arrays of type double.
      * NaN will be treated as missing values and will be excluded from the
      * calculation. Let m be the number non-missing values, and n be the
@@ -29,12 +29,13 @@ public class Distance {
 
         dist = n * dist / m;
 
-        return Math.pow(dist, 1.0/p);
+        return Math.pow(dist, 1.0 / p);
     }
 
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
      * Calculates Manhattan distance.
+     *
      * @param x - array with N dimensions
      * @param y - array with N dimensions
      * @return double
@@ -46,17 +47,18 @@ public class Distance {
 
         double ret = 0.0;
         for (int i = 0; i < x.length; i++) {
-            ret += Math.abs(x[i]-y[i]);
+            ret += Math.abs(x[i] - y[i]);
         }
         return ret;
     }
+
     public static double manhattan_distance(int[] x, int[] y) {
         if (x.length != y.length)
             throw new IllegalArgumentException(String.format("Arrays have different length: x[%d], y[%d]", x.length, y.length));
 
         double ret = 0.0;
         for (int i = 0; i < x.length; i++) {
-            ret += Math.abs(x[i]-y[i]);
+            ret += Math.abs(x[i] - y[i]);
         }
         return ret;
     }
@@ -67,6 +69,7 @@ public class Distance {
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
      * Calculates Euclidian distance.
+     *
      * @param x - array with N dimensions
      * @param y - array with N dimensions
      * @return double
@@ -78,17 +81,18 @@ public class Distance {
 
         double ret = 0.0;
         for (int i = 0; i < x.length; i++) {
-            ret += Math.pow((x[i]-y[i]), 2);
+            ret += Math.pow((x[i] - y[i]), 2);
         }
         return Math.sqrt(ret);
     }
+
     public static double euclidian_distance(int[] x, int[] y) {
         if (x.length != y.length)
             throw new IllegalArgumentException(String.format("Arrays have different length: x[%d], y[%d]", x.length, y.length));
 
         double ret = 0.0;
         for (int i = 0; i < x.length; i++) {
-            ret += Math.pow((x[i]-y[i]), 2);
+            ret += Math.pow((x[i] - y[i]), 2);
         }
         return Math.sqrt(ret);
     }
@@ -96,6 +100,7 @@ public class Distance {
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
      * Calculates Chebyshev distance.
+     *
      * @param x - array with N dimensions
      * @param y - array with N dimensions
      * @return double
@@ -115,9 +120,17 @@ public class Distance {
         return ret;
     }
 
+    public static double chebyshev_distance(Vector2D x, Vector2D y) {
+        return chebyshev_distance(
+                new double[]{x.getX(), x.getY()},
+                new double[]{y.getX(), y.getY()}
+        );
+    }
+
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
      * Calculates cosine distance.
+     *
      * @param x - array with N dimensions
      * @param y - array with N dimensions
      * @return double
@@ -135,12 +148,13 @@ public class Distance {
             x_norm += x[i] * x[i];
             y_norm += y[i] * y[i];
         }
-        return 1.0 - xy_dot/(Math.sqrt(x_norm) * Math.sqrt(y_norm));
+        return 1.0 - xy_dot / (Math.sqrt(x_norm) * Math.sqrt(y_norm));
     }
 
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
      * Calculates Haversine distance.
+     *
      * @param x - array with N dimensions
      * @param y - array with N dimensions
      * @return double
@@ -158,8 +172,8 @@ public class Distance {
         double lon_y = radians * y[1];
         double dlon = lon_y - lon_x;
         double dlat = lat_y - lat_x;
-        double a = (Math.pow(Math.sin(dlat/2.0), 2.0) + Math.cos(lat_x) *
-                Math.cos(lat_y) * Math.pow(Math.sin(dlon/2.0), 2.0));
+        double a = (Math.pow(Math.sin(dlat / 2.0), 2.0) + Math.cos(lat_x) *
+                Math.cos(lat_y) * Math.pow(Math.sin(dlon / 2.0), 2.0));
         return R * 2 * Math.asin(Math.sqrt(a));
     }
 }

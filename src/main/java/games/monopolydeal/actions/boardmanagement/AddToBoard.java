@@ -105,11 +105,11 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AddToBoard that = (AddToBoard) o;
-        return playerID == that.playerID;
+        return playerID == that.playerID && executed == that.executed;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID);
+        return Objects.hash(playerID, executed);
     }
     @Override
     public String toString() { return "Add to Board"; }

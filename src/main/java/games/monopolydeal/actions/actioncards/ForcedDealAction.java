@@ -162,11 +162,19 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ForcedDealAction that = (ForcedDealAction) o;
-        return playerID == that.playerID;
+        return playerID == that.playerID &&
+                target == that.target &&
+                reaction == that.reaction &&
+                executed == that.executed &&
+                actionState == that.actionState &&
+                Objects.equals(take, that.take) &&
+                Objects.equals(give, that.give) &&
+                Objects.equals(tFrom, that.tFrom) &&
+                Objects.equals(gFrom, that.gFrom);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID);
+        return Objects.hash(playerID, target, reaction, executed, actionState, take, give, tFrom, gFrom);
     }
     @Override
     public String toString() { return "ForcedDeal action"; }

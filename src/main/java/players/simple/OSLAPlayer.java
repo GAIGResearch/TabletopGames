@@ -66,7 +66,7 @@ public class OSLAPlayer extends AbstractPlayer {
     @Override
     public OSLAPlayer copy() {
         OSLAPlayer retValue = new OSLAPlayer(heuristic, new Random(rnd.nextInt()));
-        retValue.setForwardModel(getForwardModel().copy());
+        retValue.setForwardModel(getForwardModel());
         return retValue;
     }
 

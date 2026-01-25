@@ -1,0 +1,16 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutTermination" : ["END_TURN", "END_ROUND", "EXACT"],
+  "oppModelType" : ["RANDOM", "DEFAULT"],
+  "rolloutLength" : [1, 0, 3, 5, 10],
+  "actionHeuristic" : "src/test/java/evaluation/Dom_Action_EI02_006.json",
+  "heuristic" : "src/test/java/evaluation/Dom_State_EI02_006.json",
+  "K" : [100, 1, 10, 1000],
+  "maxTreeDepth" : [1, 2, 3, 5, 10],
+  "treePolicy" : ["AlphaGo", "UCB", "UCB_Tuned"],
+  "opponentTreePolicy" : ["OneTree", "MultiTree", "SelfOnly"],
+  "MAST" : "Both",
+  "MASTGamma" : 0.2,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

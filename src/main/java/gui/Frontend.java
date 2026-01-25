@@ -190,7 +190,7 @@ public class Frontend extends GUI {
         }
         JButton updateNPlayers = new JButton("Update");
         updateNPlayers.addActionListener(e -> {
-            if (!nPlayerField.getText().equals("")) {
+            if (!nPlayerField.getText().isEmpty()) {
                 int nP = Integer.parseInt(nPlayerField.getText());
                 if (nP > 0 && nP < nMaxPlayers) {
                     for (int i = 0; i < nP; i++) {
@@ -234,13 +234,13 @@ public class Frontend extends GUI {
         CoreParameters coreParameters = new CoreParameters();
         JPanel gameRunParamSelect = new JPanel();
         gameRunParamSelect.setLayout(new BoxLayout(gameRunParamSelect, BoxLayout.Y_AXIS));
-        HashMap<String, JComboBox<Object>> coreParameterValueOptions = new HashMap<>();
+        Map<String, JComboBox<Object>> coreParameterValueOptions = new HashMap<>();
         for (String param : coreParameters.getParameterNames()) {
             JPanel paramPanel = new JPanel();
             paramPanel.setLayout(new BorderLayout(5, 5));
             paramPanel.add(BorderLayout.WEST, new JLabel(String.format("  %-40s", param)));
             paramPanel.add(BorderLayout.CENTER, new JPanel());
-            List<Object> values = coreParameters.getPossibleValues(param);
+            List<?> values = coreParameters.getPossibleValues(param);
             JComboBox<Object> valueOptions = new JComboBox<>(values.toArray());
             valueOptions.setSelectedItem(coreParameters.getDefaultParameterValue(param));
             coreParameterValueOptions.put(param, valueOptions);

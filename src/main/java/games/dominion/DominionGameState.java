@@ -71,11 +71,14 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
         deck.add(newCard);
     }
 
+    public int getEmptyDeckCount() {
+        return Math.toIntExact(cardsIncludedInGame.values().stream().filter(i -> i == 0).count());
+    }
 
     public boolean gameOver() {
         DominionParameters params = (DominionParameters) gameParameters;
         return cardsIncludedInGame.get(CardType.PROVINCE) == 0 ||
-                cardsIncludedInGame.values().stream().filter(i -> i == 0).count() >= params.PILES_EXHAUSTED_FOR_GAME_END;
+                getEmptyDeckCount() >= params.PILES_EXHAUSTED_FOR_GAME_END;
     }
 
     public boolean drawCard(int playerId) {
@@ -103,23 +106,19 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
         return true;
     }
 
-    public boolean moveCard(CardType type, int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
+    public void moveCard(CardType type, int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
         DominionCard cardToMove = getDeck(fromDeck, fromPlayer).stream()
                 .filter(c -> c.cardType() == type)
                 .findFirst().orElse(null);
         if (cardToMove == null)
-            return false;
+            throw new IllegalArgumentException("Card of type " + type + " not found in deck " + fromDeck + " of player " + fromPlayer);
 
-        return moveCard(cardToMove, fromPlayer, fromDeck, toPlayer, toDeck);
+        moveCard(cardToMove, fromPlayer, fromDeck, toPlayer, toDeck);
     }
 
-    public boolean moveCard(DominionCard cardToMove, int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
-        boolean cardFound = getDeck(fromDeck, fromPlayer).remove(cardToMove);
-        if (cardFound) {
-            getDeck(toDeck, toPlayer).add(cardToMove);
-            return true;
-        }
-        return false;
+    public void moveCard(DominionCard cardToMove, int fromPlayer, DeckType fromDeck, int toPlayer, DeckType toDeck) {
+        getDeck(fromDeck, fromPlayer).remove(cardToMove);
+        getDeck(toDeck, toPlayer).add(cardToMove);
     }
 
     /**
@@ -268,7 +267,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected AbstractGameState _copy(int playerId) {
-        DominionGameState retValue = new DominionGameState(((DominionParameters)gameParameters).shallowCopy(), nPlayers);
+        DominionGameState retValue = new DominionGameState(((DominionParameters) gameParameters).shallowCopy(), nPlayers);
         for (CardType ct : cardsIncludedInGame.keySet()) {
             retValue.cardsIncludedInGame.put(ct, cardsIncludedInGame.get(ct));
         }
@@ -433,9 +432,9 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(cardsIncludedInGame, trashPile, buysLeftForCurrentPlayer, gamePhase, gameStatus,
-                actionsLeftForCurrentPlayer, spentSoFar, additionalSpendAvailable, actionsInProgress, delayedActions);
-        result = result + 31 * Arrays.hashCode(playerResults) + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
+        int result = Objects.hash(cardsIncludedInGame, trashPile, buysLeftForCurrentPlayer,
+                actionsLeftForCurrentPlayer, spentSoFar, additionalSpendAvailable, delayedActions, super.hashCode());
+        result = result + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
                 11 * Arrays.hashCode(playerTableaux) + 41 * Arrays.hashCode(playerDrawPiles) + Arrays.hashCode(defenceStatus);
         return result;
     }

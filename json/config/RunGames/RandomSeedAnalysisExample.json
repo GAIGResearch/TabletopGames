@@ -1,0 +1,13 @@
+{
+        "game" : "PenteGrammai",
+        "nPlayers" : 2,
+        "playerDirectory" : "json/players/gameSpecific/PenteGrammai/Pente_Vanilla.json",
+        "gameParams" : "data/pentegrammai/Pente_Schaedler.json",
+        "mode" : "random",
+        "matchups" : 1000,
+        "distinctRandomSeeds" : 100,
+        "budget" : 16,
+        "verbose" : false,
+        "listener" : "GameResultsListener.json",
+        "destDir" : "Pente/Schaedler/2D/RandomSeeds"
+}

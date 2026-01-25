@@ -63,7 +63,7 @@ public class PlayerBoard extends JComponent implements IScreenHighlight {
                 plantationClicked = null;
                 cropClicked = null;
                 int currentPlayer = gs.getCurrentPlayer();
-                if (currentPlayer != playerId && !gui.getHumanPlayerId().contains(playerId)) return;
+                if (currentPlayer != playerId && !gui.getHumanPlayerIds().contains(playerId)) return;
                 PuertoRicoConstants.Role currentRole = gs.getCurrentRole();
 
                 for (Rectangle r : buildingRectMap.keySet()) {
@@ -152,12 +152,12 @@ public class PlayerBoard extends JComponent implements IScreenHighlight {
 
         Graphics2D g = (Graphics2D) gg;
 
-        boolean highlightCropStore = playerId == gs.getCurrentPlayer() && gui.getHumanPlayerId().contains(playerId) &&
+        boolean highlightCropStore = playerId == gs.getCurrentPlayer() && gui.getHumanPlayerIds().contains(playerId) &&
                 (gs.getCurrentRole() == PuertoRicoConstants.Role.TRADER ||
                         gs.getCurrentRole() == PuertoRicoConstants.Role.CAPTAIN ||
                         gs.getCurrentRole() == PuertoRicoConstants.Role.DISCARD ||
                         gs.getCurrentRole() == PuertoRicoConstants.Role.CRAFTSMAN);
-        boolean highlightPlantationOrBuilding = playerId == gs.getCurrentPlayer() && gui.getHumanPlayerId().contains(playerId) &&
+        boolean highlightPlantationOrBuilding = playerId == gs.getCurrentPlayer() && gui.getHumanPlayerIds().contains(playerId) &&
                 gs.getCurrentRole() == PuertoRicoConstants.Role.MAYOR;
 
         int width = size.width-borderPadX*2;

@@ -46,4 +46,33 @@ public class GTForwardModel extends StandardForwardModel {
         actions.add(new GTAction());
         return actions;
     }
+
+    /**
+     * This is a method hook for any game-specific functionality that should run before an Action is executed
+     * by the forward model
+     *
+     * @param currentState - the current game state
+     * @param actionChosen - the action chosen by the current player, not yet applied to the game state
+     */
+    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
+        // override if needed
+        // TODO: implement any game-specific functionality that should run before an Action is executed
+        // TODO: (This is actually quite rare, and if not needed then remove this method)
+    }
+
+    /**
+     * This is a method hook for any game-specific functionality that should run after an Action is executed
+     * by the forward model
+     *
+     * @param currentState the current game state
+     * @param actionTaken  the action taken by the current player, already applied to the game state
+     */
+    protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
+        // TODO: implement any game-specific functionality that should run after an Action is executed
+        // TODO: Unlike _beforeAction, this is almost always implemented
+        // TODO: This generally does things like checking for end of turn or round or game (and then doing the
+        // TODO: appropriate actions).
+    }
+
+
 }

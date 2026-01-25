@@ -68,7 +68,7 @@ public class RHEAPlayer extends AbstractPlayer implements IAnyTimePlayer {
                         .collect(Collectors.toList());
             }
             mastPlayer = new MASTPlayer(null, 1.0, 0.0, System.currentTimeMillis(), 0.0);
-            mastPlayer.setStats(MASTStatistics);
+            mastPlayer.setMASTStats(MASTStatistics);
         }
         // Initialise individuals
         if (params.shiftLeft && !population.isEmpty()) {
@@ -132,7 +132,7 @@ public class RHEAPlayer extends AbstractPlayer implements IAnyTimePlayer {
         RHEAParams newParams = (RHEAParams) parameters.copy();
         newParams.setRandomSeed(rnd.nextInt());
         RHEAPlayer retValue = new RHEAPlayer(newParams, toString());
-        retValue.setForwardModel(getForwardModel().copy());
+        retValue.setForwardModel(getForwardModel());
         return retValue;
     }
 

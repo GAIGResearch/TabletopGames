@@ -18,7 +18,7 @@ public class PuertoRicoFeaturesBase implements IStateFeatureVector {
                 "PlantationVacancies", "Doubloons", "ProductionCapacity", "ProductionVariety", "StoreVolume", "StoreVariety"};
     }
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerID) {
+    public double[] doubleVector(AbstractGameState gs, int playerID) {
         PuertoRicoGameState state = (PuertoRicoGameState) gs;
         double[] retValue = new double[names().length];
 
@@ -45,7 +45,7 @@ public class PuertoRicoFeaturesBase implements IStateFeatureVector {
                 goodVolume += plantationsByCrop.get(c);
             } else if (plantationsByCrop.get(c) > 0 && productionByCrop.getOrDefault(c, 0) > 0) {
                 goodTypes++;
-                goodVolume += Math.min(plantationsByCrop.get(c), productionByCrop.get(c));
+                goodVolume += (int) Math.min(plantationsByCrop.get(c), productionByCrop.get(c));
             }
         }
         retValue[8] = goodVolume;

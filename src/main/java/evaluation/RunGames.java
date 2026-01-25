@@ -111,7 +111,8 @@ public class RunGames implements IGameRunner {
                 // Add listeners
                 //noinspection unchecked
                 for (String listenerClass : ((List<String>) config.get(listener))) {
-                    IGameListener gameTracker = IGameListener.createListener(listenerClass);
+                    try {
+                        IGameListener gameTracker = IGameListener.createListener(listenerClass);
                     tournament.addListener(gameTracker);
                     String outputDir = (String) config.get(destDir);
                     List<String> directories = new ArrayList<>(Arrays.asList(outputDir.split(Pattern.quote(File.separator))));
@@ -122,6 +123,10 @@ public class RunGames implements IGameRunner {
                     if ((boolean) config.get(addTimeStamp))
                         directories.add(timeDir);
                     gameTracker.setOutputDirectory(directories.toArray(new String[0]));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Error creating listener: " + e.getMessage());
+                        // this is not a problem as such, we'll still report win rate information which may be all the user wants
+                    }
                 }
 
                 // run tournament

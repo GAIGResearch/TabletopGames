@@ -8,31 +8,33 @@ import gui.views.ComponentView;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static gui.GUI.defaultItemSize;
 
 public class CCGraphView extends ComponentView implements IScreenHighlight {
 
-    ArrayList<Rectangle> dots = new ArrayList<Rectangle>();
+    Map<Integer, Rectangle> dots = new HashMap<>();
     StarBoard starBoard;
 
     public CCGraphView(StarBoard starBoard) {
         super(starBoard, defaultItemSize, defaultItemSize);
 
         this.starBoard = starBoard;
-        for (int i = 0; i < starBoard.getBoardNodes().size(); i++) {
-            dots.add(new Rectangle(((CCNode) starBoard.getBoardNodes().get(i)).getX(), ((CCNode) starBoard.getBoardNodes().get(i)).getY(), 10, 10));
-            //System.out.println(((CCNode)starBoard.getBoardNodes().get(i)).getX() + " " + ((CCNode)starBoard.getBoardNodes().get(i)).getY());
+        for (CCNode node : starBoard.getBoardNodes()) {
+            dots.put(node.getID(), new Rectangle(node.getX(), node.getY(), 10, 10));
         }
     }
 
     void drawNodes(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        for (int i = 0; i < starBoard.getBoardNodes().size(); i++) {
-            g2d.setColor(starBoard.getBoardNodes().get(i).getBaseColour().toGraphicsColor());
+        for (Integer nodeID : dots.keySet()) {
+            CCNode node = starBoard.getNodeById(nodeID);
+            g2d.setColor(node.getBaseColour().toGraphicsColor());
 
-            int x = dots.get(i).x;
-            int y = dots.get(i).y;
+            int x = node.getX();
+            int y = node.getY();
             int scale = 30;
             int size = 15;
             boolean shift = false;
@@ -48,6 +50,39 @@ public class CCGraphView extends ComponentView implements IScreenHighlight {
                 g2d.fillOval(x + 72, y + 23, size, size);
             } else {
                 g2d.fillOval(x + 57, y + 23, size, size);
+            }
+
+            for (int side = 0; side < 6; side++) {
+                CCNode neighbour = starBoard.getNodeById(node.getNeighbourBySide(side));
+                // now draw lines from this node to its neighbours
+                if (neighbour != null) {
+                    int neighbourX = neighbour.getX() * scale;
+                    int neighbourY = neighbour.getY() * scale;
+
+                    boolean neighbourShift = false;
+                    if (neighbour.getY() % 2 != 0) {
+                        neighbourShift = true;
+                    }
+                    if (neighbourShift) {
+                        neighbourX += 72;
+                        neighbourY += 23;
+                    } else {
+                        neighbourX += 57;
+                        neighbourY += 23;
+                    }
+                    if (shift) {
+                        g2d.drawLine(x + 79,
+                                y + 30,
+                                neighbourX + 7,
+                                neighbourY + 7);
+                    } else {
+                        g2d.drawLine(x + 64,
+                                y + 30,
+                                neighbourX + 7,
+                                neighbourY + 7);
+                    }
+                }
+
             }
         }
     }

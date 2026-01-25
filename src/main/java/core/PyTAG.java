@@ -9,6 +9,10 @@ import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.diamant.DiamantFeatures;
 import games.loveletter.features.LLStateFeaturesReduced;
+import games.powergrid.PowerGridFeatures;
+import games.powergrid.PowerGridGameState;
+import games.powergrid.PowerGridParameters;
+import games.powergrid.components.PowerGridCard;
 import games.stratego.StrategoFeatures;
 import games.sushigo.SGFeatures;
 import games.tictactoe.TTTFeatures;
@@ -18,23 +22,25 @@ import players.python.PythonAgent;
 import players.simple.RandomPlayer;
 import utilities.ActionTreeNode;
 
-import games.explodingkittens.*;
-
-
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.IntStream;
 
 enum FeatureExtractors {
     /* Every game implementing the RL interfaces should be registered here, PyTAG uses this to reference the correct features extractors and action spaces
     * In case that an interface is not implemented they can be set to null*/
-    ExplodingKittens( ExplodingKittensFeatures.class, null),
+  //  ExplodingKittens( ExplodingKittensFeatures.class, null),
     LoveLetter(LLStateFeaturesReduced.class, null),
     Stratego(StrategoFeatures.class, null),
     SushiGo(null, SGFeatures.class),
     TicTacToe(TTTFeatures.class, TTTFeatures.class),
-    Diamant(DiamantFeatures.class, DiamantFeatures.class);
+    Diamant(DiamantFeatures.class, DiamantFeatures.class),
+	PowerGrid(PowerGridFeatures.class, null); //gets both the JSON and Vector observation 
     Class<? extends IStateFeatureVector> stateFeatureVector;
     Class<? extends IStateFeatureJSON> stateFeatureJSON;
     FeatureExtractors(Class<? extends IStateFeatureVector> stateFeatureVector, Class<? extends IStateFeatureJSON> stateFeatureJSON) {
@@ -172,7 +178,7 @@ public class PyTAG {
     public double[] getObservationVector() throws Exception {
         AbstractGameState gs = gameState.copy(gameState.getCurrentPlayer());
         if (stateVectoriser != null){
-            return stateVectoriser.featureVector(gs, gs.getCurrentPlayer());
+            return stateVectoriser.doubleVector(gs, gs.getCurrentPlayer());
         }
         else throw new Exception("Observation vectoriser function is not implemented");
     }
@@ -217,7 +223,6 @@ public class PyTAG {
 
     // --End of Wrapper Functions--
 
-
     public void reset(){
         // Reset game instance, run built-in agents until a python agent is required to make a decision
         this.game.reset(players);
@@ -230,8 +235,10 @@ public class PyTAG {
         this.forwardModel = game.getForwardModel();
         this.availableActions = forwardModel.computeAvailableActions(gameState);
 
+        
         // execute the game if needed until Python agent is required to make a decision
         boolean isTerminal = nextDecision();
+        
 
         // get action tree for current player
         if (this.root == null){
@@ -244,6 +251,9 @@ public class PyTAG {
         this.root = ((ITreeActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
         this.leaves = root.getLeafNodes();
     }
+
+
+   
 
     public int getPlayerID(){
         return gameState.getCurrentPlayer();
@@ -450,6 +460,6 @@ public class PyTAG {
         System.out.println("Run finished won " + wins + " out of " + episodes);
 
 
-    }
-
+    }  
+ 
 }

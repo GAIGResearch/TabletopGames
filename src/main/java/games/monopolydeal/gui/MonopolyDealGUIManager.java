@@ -179,7 +179,7 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
                     }
                 }
                 if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || humanPlayerId.contains(i)
+                        || humanPlayerIds.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerViews[i].hand.setFront(true);
                     playerViews[i].hand.setFocusable(true);

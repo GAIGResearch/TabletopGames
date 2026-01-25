@@ -1,0 +1,14 @@
+{
+        "budgetType" : "BUDGET_TIME",
+        "rolloutLength" : 2,
+        "opponentTreePolicy" : "SelfOnly",
+        "MASTGamma" : 0.200,
+        "heuristic" : {
+                "class" : "players.heuristics.LeaderHeuristic"
+        },
+        "maxTreeDepth" : 1,
+        "MAST" : "Both",
+        "rolloutType" : "MAST",
+        "class" : "players.mcts.MCTSParams",
+        "budget" : -999
+}

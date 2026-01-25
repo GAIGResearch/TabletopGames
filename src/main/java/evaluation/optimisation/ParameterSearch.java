@@ -5,7 +5,6 @@ import games.GameType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -34,7 +33,7 @@ public class ParameterSearch {
                 FileReader reader = new FileReader(setupFile);
                 JSONParser parser = new JSONParser();
                 JSONObject json = (JSONObject) parser.parse(reader);
-                config = parseConfig(json, RunArg.Usage.ParameterSearch);
+                config = parseConfig(json, RunArg.Usage.ParameterSearch, true);
             } catch (FileNotFoundException ignored) {
                 throw new AssertionError("Config file not found : " + setupFile);
                 //    parseConfig(runGames, args);
@@ -65,17 +64,7 @@ public class ParameterSearch {
         NTBEAParameters params = new NTBEAParameters(config);
         params.printSearchSpaceDetails();
 
-        switch (params.mode) {
-            case NTBEA:
-            case CoopNTBEA:
-            case StableNTBEA:
-                NTBEA singleNTBEA = new NTBEA(params, game, nPlayers);
-                singleNTBEA.run();
-                break;
-            case MultiNTBEA:
-                MultiNTBEA multiNTBEA = new MultiNTBEA(params, game, nPlayers);
-                multiNTBEA.run();
-                break;
-        }
+        NTBEA singleNTBEA = params.instantiate();
+        singleNTBEA.run();
     }
 }

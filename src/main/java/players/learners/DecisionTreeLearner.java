@@ -1,11 +1,13 @@
 package players.learners;
 
+import core.interfaces.IActionFeatureVector;
+import core.interfaces.IStateFeatureVector;
 import org.apache.spark.ml.feature.RFormula;
 import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.regression.DecisionTreeRegressor;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import players.heuristics.DecisionTreeActionHeuristic;
+import players.heuristics.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,13 +21,27 @@ public class DecisionTreeLearner extends ApacheLearner {
     double minInfoGain;
     double minWeightFractionPerNode;
 
+    public DecisionTreeLearner() {
+        super();
+    }
 
     public DecisionTreeLearner(double gamma, Target target) {
         this(gamma, target, 10, 1, 0.00, 0.005);
     }
 
     public DecisionTreeLearner(double gamma, Target target, int maxDepth, int minInstancesPerNode, double minInfoGain, double minWeightFractionPerNode) {
-        super(gamma, target);
+        this(gamma, target, maxDepth, minInstancesPerNode, minInfoGain, minWeightFractionPerNode, null, null);
+    }
+
+    public DecisionTreeLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        this(gamma, target, 10, 1, 0.00, 0.005, stateFeatureVector, actionFeatureVector);
+    }
+
+    public DecisionTreeLearner(double gamma, Target target, int maxDepth, int minInstancesPerNode,
+                               double minInfoGain, double minWeightFractionPerNode,
+                               IStateFeatureVector stateFeatureVector,
+                               IActionFeatureVector actionFeatureVector) {
+        super(gamma, target, stateFeatureVector, actionFeatureVector);
         this.maxDepth = maxDepth;
         this.minInstancesPerNode = minInstancesPerNode;
         this.minInfoGain = minInfoGain;
@@ -34,7 +50,7 @@ public class DecisionTreeLearner extends ApacheLearner {
 
 
     @Override
-    public void learnFromApacheData() {
+    public Object learnFromApacheData() {
 
         RFormula formula = new RFormula()
                 .setFormula("target ~ " + String.join(" + ", descriptions))
@@ -61,22 +77,19 @@ public class DecisionTreeLearner extends ApacheLearner {
         if (debug)
             System.out.println(DecisionTreeActionHeuristic.prettifyDecisionTreeDescription(drModel, descriptions));
 
-    }
-
-    @Override
-    public void writeToFile(String file) {
-        try {
-            drModel.write().overwrite().save(file);
-            BufferedWriter writer = new BufferedWriter(new java.io.FileWriter(file + File.separator + "Description.txt"));
-            writer.write(DecisionTreeActionHeuristic.prettifyDecisionTreeDescription(drModel, descriptions));
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Failed to save decision tree model");
-            drModel.toDebugString();
+        if (this.actionFeatureVector == null) {
+            return new DecisionTreeStateHeuristic(stateFeatureVector, drModel, switch (targetType) {
+                case ORDINAL, ORD_MEAN, ORD_SCALE, ORD_MEAN_SCALE -> new OrdinalPosition();
+                case SCORE -> new PureScoreHeuristic();
+                case SCORE_DELTA -> new LeaderHeuristic();
+                default -> new WinOnlyHeuristic();
+            });
+        } else {
+            return new DecisionTreeActionHeuristic(stateFeatureVector, actionFeatureVector, drModel);
         }
-
     }
+
+
 
     @Override
     public String name() {

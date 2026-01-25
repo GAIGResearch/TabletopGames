@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.BoardNode;
 import core.components.Token;
 import games.GameType;
 import games.loveletter.*;
@@ -23,8 +24,8 @@ public class OMATests {
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
 
-    Token x = TicTacToeConstants.playerMapping.get(0);
-    Token o = TicTacToeConstants.playerMapping.get(1);
+    BoardNode x = TicTacToeConstants.playerMapping.get(0);
+    BoardNode o = TicTacToeConstants.playerMapping.get(1);
 
     AbstractForwardModel ticTacToeForwardModel = new TicTacToeForwardModel();
     AbstractForwardModel loveLetterForwardModel = new LoveLetterForwardModel();
@@ -140,10 +141,10 @@ public class OMATests {
             if (n.getOMAParent().isPresent()) {
                 OMATreeNode OMAParent = n.getOMAParent().get();
                 Set<AbstractAction> parentActions = OMAParent.getChildren().keySet();
-                Token expected = node.getActor() == 0 ? x : o;
+                BoardNode expected = node.getActor() == 0 ? x : o;
                 return parentActions.stream().flatMap(a -> OMAParent.getOMAChildrenActions(a).stream())
                         .filter(Objects::nonNull)
-                        .allMatch(c -> ((SetGridValueAction<Token>) c).getValue().equals(expected));
+                        .allMatch(c -> ((SetGridValueAction) c).getValue(state).equals(expected));
             } else return true;
         });
         assertEquals(0, problemNodes.size());

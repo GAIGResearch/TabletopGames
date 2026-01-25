@@ -1,34 +1,33 @@
 package evaluation.optimisation;
 
 import core.interfaces.ITunableParameters;
-import evodef.AgentSearchSpace;
-import org.jetbrains.annotations.NotNull;
+import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import utilities.JSONUtils;
-import utilities.Pair;
+import evaluation.optimisation.ntbea.*;
 
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 /**
  * This is a wrapper around ITunableParameters<T> (the TAG standard) to implement the AgentSearchSpace
  * interface used by the NTBEA library.
  */
-public class ITPSearchSpace extends AgentSearchSpace<Object> {
+
+
+public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
+
+    public record ParameterSettings(String name, Class<?> clazz, List<Object> values) {
+    }
 
     static boolean debug = false;
-    ITunableParameters itp;
-    Map<Integer, String> tunedIndexToParameterName = new HashMap<>();
+    ITunableParameters<T> itp;
 
     /**
      * Constructor of a SearchSpace to use all the default values defined by an
@@ -36,9 +35,14 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
      *
      * @param tunableParameters The ITunableParameters object we want to optimise over.
      */
-    public ITPSearchSpace(ITunableParameters tunableParameters) {
-        super(convertToSuperFormatString(tunableParameters.getJSONDescription(), tunableParameters), tunableParameters.getParameterTypes());
-        initialiseITP(tunableParameters);
+    public ITPSearchSpace(ITunableParameters<T> tunableParameters) {
+        itp = tunableParameters;
+        List<String> parameterNames = itp.getParameterNames();
+        List<ParameterSettings> settings = new ArrayList<>();
+        for (String name : parameterNames) {
+            settings.add(new ParameterSettings(name, itp.getParameterTypes().get(name), itp.getPossibleValues(name)));
+        }
+        super.initialise(settings);
     }
 
     /**
@@ -61,28 +65,36 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
      * @param jsonFile          The location of a JSON file to override the defaults of the ITunableParameters
      *                          interface.
      */
-    public ITPSearchSpace(ITunableParameters tunableParameters, String jsonFile) {
-        super(convertToSuperFormatFile(jsonFile, tunableParameters), tunableParameters.getParameterTypes());
-        initialiseITP(tunableParameters);
+    public ITPSearchSpace(ITunableParameters<T> tunableParameters, String jsonFile) {
+        this(tunableParameters, JSONUtils.loadJSONFile(jsonFile));
     }
 
-    public ITPSearchSpace(ITunableParameters tunableParameters, JSONObject json) {
-        super(convertToSuperFormatJSON(json, tunableParameters),
-                allParameterTypesWithRecursion(json, tunableParameters));
-        initialiseITP(tunableParameters);
+    public ITPSearchSpace(ITunableParameters<T> tunableParameters, JSONObject json) {
+        itp = tunableParameters;
+        List<ParameterSettings> parameterTypes = extractRecursiveParameters("", json, itp);
+        super.initialise(parameterTypes);
         if (tunableParameters instanceof TunableParameters tp) {
             tp.setRawJSON(json);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Pair<String, Class<?>>> extractRecursiveParameters(String nameSpace, JSONObject json, ITunableParameters itp) {
-        List<Pair<String, Class<?>>> retValue = new ArrayList<>();
+/**
+ * This returns a List of ParameterSettings objects that define the parameters to be optimised over.
+ *
+ */
+    private static List<ParameterSettings> extractRecursiveParameters(String nameSpace, JSONObject json, ITunableParameters<?> itp) {
+        List<ParameterSettings> retValue = new ArrayList<>();
         for (Object baseKey : json.keySet()) {
             if (baseKey instanceof String) {
                 if (itp.getParameterNames().contains(baseKey)) {
                     Object data = json.get(baseKey);
                     String key = "".equals(nameSpace) ? (String) baseKey : nameSpace + "." + baseKey;
+                    // check to see if this is a json file
+                    if (data instanceof String str) {
+                        if (str.endsWith(".json"))
+                            data = JSONUtils.loadJSONFile(str);
+                    }
                     if (data instanceof JSONObject) {
                         // in this case we have nesting, and need to recurse to get all the relevant parameters
                         // we use key as the nameSpace
@@ -91,7 +103,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             subJSON.get("class");
                             if (debug)
                                 System.out.println("Starting recursion on " + key);
-                            Object child =  JSONUtils.loadClassFromJSON(subJSON);
+                            Object child = JSONUtils.loadClassFromJSON(subJSON);
                             itp.setParameterValue((String) baseKey, child);
                             if (child instanceof ITunableParameters)
                                 retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, (ITunableParameters) child));
@@ -99,14 +111,28 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             e.printStackTrace();
                             throw new AssertionError(e.getMessage() + " problem creating SearchSpace " + data);
                         }
-
                     } else if (data instanceof JSONArray arr) {
                         // we have a set of options for this parameter
-                        String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
-                                "\n";
+                        // We need to instantiate the JSONArray arr into List<?> values (should be instances of clazz)
+                        Class<?> clazz = itp.getParameterTypes().get(baseKey);
+                        List<Object> values = arr.stream().map(o -> {
+                            if (o instanceof JSONObject localJSON) {
+                                try {
+                                    return JSONUtils.loadClassFromJSON(localJSON);
+                                } catch (Exception e) {
+                                    throw new AssertionError(e.getMessage() + " problem instantiating from  " + localJSON);
+                                }
+                            } else {
+                                return o;
+                            }
+                        }).toList();
                         if (debug)
-                            System.out.println(baseKey + " : adding " + results);
-                        retValue.add(new Pair<>(results, itp.getDefaultParameterValue((String) baseKey).getClass()));
+                            System.out.println(baseKey + " : adding " + arr);
+                        if (clazz.isEnum()) {
+                            Class<? extends Enum> enumCl = (Class<? extends Enum>) clazz;
+                            values = arr.stream().map(o -> Enum.valueOf(enumCl, (String) o)).toList();
+                        }
+                        retValue.add(new ParameterSettings(key, clazz, values));
                     } else {
                         // this defines a default we should be using in itp
                         if (data == null)
@@ -124,72 +150,134 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         return retValue;
     }
 
-    private static Map<String, Class<?>> allParameterTypesWithRecursion(JSONObject json, ITunableParameters itp) {
-        return extractRecursiveParameters("", json, itp).stream()
-                .collect(
-                        toMap(p -> p.a.split("=")[0], p -> p.b)
-                );
-    }
-
-    private static List<String> convertToSuperFormatJSON(JSONObject json, ITunableParameters itp) {
-        return extractRecursiveParameters("", json, itp).stream().map(p -> p.a).collect(toList());
-    }
-
-    private static List<String> convertToSuperFormatString(String json, ITunableParameters itp) {
-        try {
-            JSONParser jsonParser = new JSONParser();
-            JSONObject rawData = (JSONObject) jsonParser.parse(json);
-            return convertToSuperFormatJSON(rawData, itp);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getClass() + " : " + e.getMessage() + " : problem loading ITPSearchSpace from String " + json);
-        }
-
-    }
-
-    private static List<String> convertToSuperFormatFile(String jsonFile, ITunableParameters itp) {
-        try {
-            FileReader reader = new FileReader(jsonFile);
-            JSONParser jsonParser = new JSONParser();
-            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
-            return convertToSuperFormatJSON(rawData, itp);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getMessage() + " : problem loading ITPSearchSpace from file " + jsonFile);
-        }
-
-    }
-
-    private void initialiseITP(ITunableParameters tunableParameters) {
-        itp = tunableParameters;
-        tunedIndexToParameterName = IntStream.range(0, nDims()).boxed()
-                .collect(toMap(i -> i, i -> getSearchKeys().get(i)));
-    }
-
-    public int getIndexOf(String parameter) {
-        if (!getSearchKeys().contains(parameter))
-            return -1;
-        return getSearchKeys().indexOf(parameter);
-    }
-
-    public Object getAgent(@NotNull int[] settings) {
+    @Override
+    public T instantiate(int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
         setTo(settings);
         return itp.instantiate();
     }
-    public JSONObject getAgentJSON(int[] settings) {
+
+    /*
+     * This method returns the default settings for the search space.
+     * If the actual default value is not in the search space, then the value will be -1.
+     */
+    public int[] defaultSettings() {
+        int[] settings = new int[searchDimensions.size()];
+        Arrays.fill(settings, -1);
+        for (int i = 0; i < searchDimensions.size(); i++) {
+            Object defaultValue = itp.getDefaultParameterValue(searchDimensions.get(i));
+            List<Object> possibleValues = values.get(i);
+            for (int j = 0; j < possibleValues.size(); j++) {
+                if (JSONUtils.areValuesEqual(possibleValues.get(j), defaultValue)) {
+                    settings[i] = j;
+                    break;
+                }
+            }
+        }
+        return settings;
+    }
+
+    public int[] settingsFromJSON(String fileName) {
+        JSONObject json = JSONUtils.loadJSONFile(fileName);
+        return settingsFromJSON(json);
+    }
+
+    // This will read in a JSON file and instantiate an agent from it
+    // it will throw an error if the contents of the JSON file do not match the SearchSpace
+    // The return value is settings that will instantiate the agent from the search space
+    public int[] settingsFromJSON(JSONObject json) {
+
+        int[] settings = new int[searchDimensions.size()];
+        // We now iterate through all the tunable parameters and find the setting that corresponds
+        // to the json content; if none provided then we use the default
+        for (int i = 0; i < searchDimensions.size(); i++) {
+            String fullParameterName = searchDimensions.get(i);
+            String[] name = fullParameterName.split("\\.");
+            Object value = json;
+            for (String s : name) {
+                value = ((JSONObject) value).get(s);
+            }
+            if (value == null) {
+                // we use the default value
+                value = itp.getDefaultParameterValue(fullParameterName);
+            }
+            if (value instanceof String str) {
+                // if the value is a string, we need to check if it is a JSON file
+                if (str.endsWith(".json")) {
+                    // we load the JSON file and use that as the value
+                    value = JSONUtils.loadClassFromFile(str);
+                }
+            }
+            // we need to find the index of the value in the list of possible values
+            List<Object> possibleValues = values.get(i);
+            int index = -1;
+            for (int j = 0; j < possibleValues.size(); j++) {
+                if (JSONUtils.areValuesEqual(possibleValues.get(j), value)) {
+                    index = j;
+                    break;
+                }
+            }
+            if (index == -1) {
+                throw new AssertionError("Value " + value + " not found in possible values in search space for " + fullParameterName);
+            }
+            settings[i] = index;
+        }
+
+        // Then we check all the parameters in the JSON file are valid for the ITunableParameters
+        // If any have values that are not the same as the searchspace values (or do not
+        // match the default value for that parameter), then we throw an error
+        // This is recursive as needed over any nested ITunableParameters in the JSON
+        for (Object key : json.keySet()) {
+            String keyName = (String) key;
+            if (keyName.equals("class") || keyName.equals("args") || keyName.equals("budget") || searchDimensions.contains(keyName)) {
+                continue;
+            }
+            Object value = json.get(keyName);
+            // we do not check recursively here (possible future enhancement)
+            if (value instanceof JSONObject)
+                continue;
+            // slightly awkward...TunableParameters has a rawJSON set of data that should be used to provide local overrides to the
+            // global defaults specific to the main parameter definition
+            Object defaultValue = itp instanceof TunableParameters<?> tp ? tp.getDefaultOverride(keyName) : itp.getDefaultParameterValue(keyName);
+            if (!JSONUtils.areValuesEqual(value, defaultValue)) {
+                throw new AssertionError("Value " + value + " for parameter " + keyName + " does not match default value " + defaultValue);
+            }
+        }
+        return settings;
+    }
+
+
+    public JSONObject constructAgentJSON(int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
         setTo(settings);
-        return itp.instanceToJSON(true);
+        Map<String, Integer> settingsMap = IntStream.range(0, settings.length).boxed().collect(toMap(this::name, i -> settings[i]));
+        return itp.instanceToJSON(true, settingsMap);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void writeAgentJSON(int[] settings, String fileName) {
+        JSONObject json = constructAgentJSON(settings);
+        int budget = (int) itp.getParameterValue("budget");
+        if (budget > 0)
+            json.put("budget", budget);
+        JSONUtils.writeJSON(json, fileName);
     }
 
     private void setTo(int[] settings) {
         for (int i = 0; i < settings.length; i++) {
-            String pName = tunedIndexToParameterName.get(i);
+            String pName = name(i);
             Object value = value(i, settings[i]);
             //   Object value = itp.getPossibleValues(pName).get(settings[i]);
             itp.setParameterValue(pName, value);
         }
+    }
+
+    public Map<String, Object> getNonTunedParametersAndValues(Set<String> exclusions) {
+        return itp.getParameterNames().stream()
+                .filter(s -> !searchDimensions.contains(s) && !exclusions.contains(s))
+                .filter(s -> itp.getParameterValue(s) != null)
+                .filter(s -> !s.equals("randomSeed"))
+                .collect(Collectors.toMap(s -> s, s -> itp.getParameterValue(s)));
     }
 
 }

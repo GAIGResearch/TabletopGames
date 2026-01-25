@@ -18,7 +18,7 @@ public class DominionCard extends Card {
         return switch (type) {
             case GOLD, COPPER, SILVER, ESTATE, DUCHY, PROVINCE, CURSE, VILLAGE, SMITHY, LABORATORY, MARKET, FESTIVAL,
                  CELLAR, MILITIA, MOAT, REMODEL, MERCHANT, MINE, WORKSHOP, ARTISAN, MONEYLENDER, POACHER, WITCH, CHAPEL,
-                 HARBINGER, THRONE_ROOM, BANDIT, BUREAUCRAT, SENTRY -> new DominionCard(type);
+                 HARBINGER, THRONE_ROOM, BANDIT, BUREAUCRAT, SENTRY, VASSAL, LIBRARY, COUNCIL_ROOM -> new DominionCard(type);
             case GARDENS -> new Gardens();
             default -> throw new AssertionError("Not yet implemented : " + type);
         };
@@ -81,6 +81,12 @@ public class DominionCard extends Card {
                 return new Bureaucrat(playerId, dummy);
             case SENTRY:
                 return new Sentry(playerId, dummy);
+            case LIBRARY:
+                return new Library(playerId, dummy);
+            case VASSAL:
+                return new Vassal(playerId, dummy);
+            case COUNCIL_ROOM:
+                return new CouncilRoom(playerId, dummy);
             default:
                 throw new AssertionError("No action for : " + type);
         }

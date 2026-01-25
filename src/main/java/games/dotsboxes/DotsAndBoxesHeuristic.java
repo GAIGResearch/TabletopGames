@@ -59,7 +59,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
         if (!state.isNotTerminal())
             return playerResult.value;
 
-        double[] featureVector = featureDefinition.featureVector(state, playerId);
+        double[] featureVector = featureDefinition.doubleVector(state, playerId);
 
         double retValue = POINTS * featureVector[0]  +
                 POINT_ADVANTAGE * featureVector[1]  +

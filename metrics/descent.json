@@ -1,0 +1,27 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    {"enum" : "evaluation.metrics.IDataLogger$ReportDestination", "value" : "ToFile"},
+    [
+      {"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "RawData"},
+      {"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "RawDataPerEvent"}
+    ],
+    [
+      {"class": "evaluation.metrics.GameMetrics$GameScore" },
+      {"class": "evaluation.metrics.GameMetrics$FinalScore" },
+      {"class": "games.descent2e.DescentMetrics$WinnerType" },
+      {"class": "games.descent2e.DescentMetrics$HealthPoints" },
+      {"class": "games.descent2e.DescentMetrics$Heroes"},
+      {"class": "games.descent2e.DescentMetrics$Heuristics"},
+      {"class": "games.descent2e.DescentMetrics$Kills"},
+      {"class": "games.descent2e.DescentMetrics$Positions"},
+      {"class": "games.descent2e.DescentMetrics$Distances"},
+      {"class": "games.descent2e.DescentMetrics$NarrativeActions"},
+      {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
+      {"class": "evaluation.metrics.GameMetrics$Winner" },
+      {"class": "evaluation.metrics.GameMetrics$ActionsReduced" },
+      {"class": "evaluation.metrics.GameMetrics$ComputationTimes" },
+      {"class": "evaluation.metrics.GameMetrics$StateSpace" },
+      {"class": "evaluation.metrics.GameMetrics$RoundCounter" }
+    ]]
+}

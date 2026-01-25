@@ -61,6 +61,6 @@ public class DiscardCard extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, type);
+        return Objects.hash(player, type.ordinal());
     }
 }

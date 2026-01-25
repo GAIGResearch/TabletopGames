@@ -10,11 +10,11 @@ import games.wonders7.cards.Wonder7Card;
 import java.util.Objects;
 
 public class DiscardCard extends DrawCard {
-    public final String cardName;
+    public final Wonder7Card.CardType cardType;
     public final int player;
 
-    public DiscardCard(String cardName, int player){
-        this.cardName = cardName;
+    public DiscardCard(Wonder7Card.CardType cardType, int player){
+        this.cardType = cardType;
         this.player = player;
     }
 
@@ -22,27 +22,14 @@ public class DiscardCard extends DrawCard {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
 
         // Finds card being removed in player Hand
-        Wonder7Card card = null;
-        for (Wonder7Card cardSearch: wgs.getPlayerHand(player).getComponents()){ // Goes through each card in the playerHand
-            if (cardName.equals(cardSearch.cardName)){ // If cardName is the one searching for (being played)
-                card = cardSearch;
-                break;
-            }
-        }
-
-        if (card == null) {
-            throw new AssertionError("Card not found in player hand");
-        }
+        Wonder7Card card = wgs.findCardInHand(player, cardType);
 
         // Player gets 3 coins from discarding card
         int playerValue = wgs.getPlayerResources(player).get(Wonders7Constants.Resource.Coin); // No. Coins player has
         wgs.getPlayerResources(player).put(Wonders7Constants.Resource.Coin,  playerValue+ ((Wonders7GameParameters)wgs.getGameParameters()).nCoinsDiscard); // Adds 3 coins to player coin count
 
         // Removes card from player hand and adds to discarded cards deck
-        boolean cardFound = wgs.getPlayerHand(player).remove(card); // remove
-        if (!cardFound) {
-            throw new AssertionError("Card not found in player hand");
-        }
+        wgs.getPlayerHand(player).remove(card); // remove
         wgs.getDiscardPile().add(card); // add
 
         return true;
@@ -52,7 +39,7 @@ public class DiscardCard extends DrawCard {
 
     @Override
     public String toString() {
-        return "Player " + player + " discards card " + cardName;
+        return "Player " + player + " discards card " + cardType;
     }
 
     @Override
@@ -66,12 +53,12 @@ public class DiscardCard extends DrawCard {
         if (!(o instanceof DiscardCard)) return false;
         if (!super.equals(o)) return false;
         DiscardCard that = (DiscardCard) o;
-        return player == that.player && Objects.equals(cardName, that.cardName);
+        return player == that.player && cardType == that.cardType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardName, player);
+        return Objects.hash(super.hashCode(), cardType.ordinal(), player);
     }
 
     @Override

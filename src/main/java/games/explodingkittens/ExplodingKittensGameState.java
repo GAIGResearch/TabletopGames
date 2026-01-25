@@ -1,23 +1,20 @@
 package games.explodingkittens;
 
-import core.AbstractGameStateWithTurnOrder;
+import core.AbstractGameState;
 import core.AbstractParameters;
 import core.CoreConstants;
-import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.interfaces.IGamePhase;
-import core.interfaces.IPrintable;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
-import static core.CoreConstants.VisibilityMode;
-
-public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class ExplodingKittensGameState extends AbstractGameState {
 
     // Cards in each player's hand, index corresponds to player ID
     List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards;
@@ -25,19 +22,15 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
     PartialObservableDeck<ExplodingKittensCard> drawPile;
     // Cards in the discard pile
     Deck<ExplodingKittensCard> discardPile;
-    // Player ID of the player currently getting a favor
-    int playerGettingAFavor;
-    // Current stack of actions
-    Stack<AbstractAction> actionStack;
+    Deck<ExplodingKittensCard> inPlay;
+    int currentPlayerTurnsLeft = 0;
+    int nextAttackLevel = 0;
+    boolean skip = false;
+
     int[] orderOfPlayerDeath;
+
     public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        playerGettingAFavor = -1;
-        playerHandCards = new ArrayList<>();
-    }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new ExplodingKittensTurnOrder(nPlayers);
     }
 
     @Override
@@ -47,22 +40,30 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
-            add(drawPile);
-            add(discardPile);
-            addAll(playerHandCards);
-        }};
+        List<Component> ret = new ArrayList<>();
+        ret.add(drawPile);
+        ret.add(discardPile);
+        ret.addAll(playerHandCards);
+        return ret;
+    }
+
+    // when a card is played to the table, but before
+    public void setInPlay(ExplodingKittensCard.CardType cardType, int playerID) {
+        ExplodingKittensCard card = playerHandCards.get(playerID).stream()
+                .filter(c -> c.cardType == cardType)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Player " + playerID + " does not have card " + cardType + " to play"));
+        inPlay.add(card);
+        playerHandCards.get(playerID).remove(card);
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected ExplodingKittensGameState _copy(int playerId) {
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
         ekgs.discardPile = discardPile.copy();
-        ekgs.playerGettingAFavor = playerGettingAFavor;
-        ekgs.actionStack = new Stack<>();
-        for (AbstractAction a : actionStack) {
-            ekgs.actionStack.add(a.copy());
-        }
+        ekgs.currentPlayerTurnsLeft = currentPlayerTurnsLeft;
+        ekgs.nextAttackLevel = nextAttackLevel;
+        ekgs.inPlay = inPlay.copy();
         ekgs.orderOfPlayerDeath = orderOfPlayerDeath.clone();
         ekgs.playerHandCards = new ArrayList<>();
         for (PartialObservableDeck<ExplodingKittensCard> d : playerHandCards) {
@@ -92,7 +93,7 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
 
             // Shuffles only hidden cards in draw pile, if player knows what's on top those will stay in place
             ekgs.drawPile.redeterminiseUnknown(redeterminisationRnd, playerId);
-            Deck<ExplodingKittensCard> explosive = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
+            Deck<ExplodingKittensCard> explosive = new Deck<>("tmp", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
@@ -122,19 +123,28 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
         return ekgs;
     }
 
+    public void setNextAttackLevel(int value) {
+        nextAttackLevel = value;
+    }
+
+    public int getCurrentPlayerTurnsLeft() {
+        return currentPlayerTurnsLeft;
+    }
+    public void setCurrentPlayerTurnsLeft(int value) {
+        currentPlayerTurnsLeft = value;
+    }
+
+    public boolean skipNext() {
+        return skip;
+    }
+    public void setSkip(boolean skip) {
+        this.skip = skip;
+    }
     @Override
     protected double _getHeuristicScore(int playerId) {
         return new ExplodingKittensHeuristic().evaluateState(this, playerId);
     }
 
-    /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
-     * of victory points, etc.
-     * If a game does not support this directly, then just return 0.0
-     *
-     * @param playerId
-     * @return - double, score of current state
-     */
     @Override
     public double getGameScore(int playerId) {
         if (playerResults[playerId] == CoreConstants.GameResult.LOSE_GAME)
@@ -144,147 +154,37 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
         return Arrays.stream(playerResults).filter(status -> status == CoreConstants.GameResult.LOSE_GAME).count() + 1;
     }
 
-    @Override
-    public int getOrdinalPosition(int playerId) {
-        if (playerResults[playerId] == CoreConstants.GameResult.WIN_GAME)
-            return 1;
-        if (playerResults[playerId] == CoreConstants.GameResult.LOSE_GAME)
-            return getNPlayers() - orderOfPlayerDeath[playerId] + 1;
-        return 1;  // anyone still alive is jointly winning
+
+    public PartialObservableDeck<ExplodingKittensCard> getPlayerHand(int playerId) {
+        return playerHandCards.get(playerId);
+    }
+    public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
+        return drawPile;
+    }
+    public Deck<ExplodingKittensCard> getDiscardPile() {
+        return discardPile;
+    }
+    public Deck<ExplodingKittensCard> getInPlay() {
+        return inPlay;
     }
 
     @Override
     protected boolean _equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ExplodingKittensGameState)) return false;
-        if (!super.equals(o)) return false;
-        ExplodingKittensGameState gameState = (ExplodingKittensGameState) o;
-        return playerGettingAFavor == gameState.playerGettingAFavor &&
-                Objects.equals(playerHandCards, gameState.playerHandCards) &&
-                Objects.equals(drawPile, gameState.drawPile) &&
-                Objects.equals(discardPile, gameState.discardPile) &&
-                Objects.equals(actionStack, gameState.actionStack);
+        if (o instanceof ExplodingKittensGameState other) {
+            return discardPile.equals(other.discardPile) &&
+                    Arrays.equals(orderOfPlayerDeath, other.orderOfPlayerDeath) &&
+                    playerHandCards.equals(other.playerHandCards) &&
+                    currentPlayerTurnsLeft == other.currentPlayerTurnsLeft &&
+                    nextAttackLevel == other.nextAttackLevel &&
+                    inPlay.equals(other.inPlay) &&
+                    drawPile.equals(other.drawPile);
+        };
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerHandCards, drawPile, discardPile, playerGettingAFavor, actionStack);
+        return Objects.hash(discardPile, playerHandCards, drawPile, inPlay, nextAttackLevel, currentPlayerTurnsLeft) + 31 * Arrays.hashCode(orderOfPlayerDeath);
     }
 
-    /**
-     * Marks a player as dead.
-     *
-     * @param playerID - player who was killed in a kitten explosion.
-     */
-    public void killPlayer(int playerID) {
-        setPlayerResult(CoreConstants.GameResult.LOSE_GAME, playerID);
-        int nPlayersActive = 0;
-        for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) nPlayersActive++;
-        }
-        orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
-        if (nPlayersActive == 1) {
-            this.gameStatus = CoreConstants.GameResult.GAME_END;
-            for (int i = 0; i < getNPlayers(); i++) {
-                // set winner
-                if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) {
-                    playerResults[i] = CoreConstants.GameResult.WIN_GAME;
-                }
-            }
-            turnOrder.endGame(this);
-        }
-
-        ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
-
-    }
-
-    // Getters, setters
-    public int getPlayerGettingAFavor() {
-        return playerGettingAFavor;
-    }
-
-    public void setPlayerGettingAFavor(int playerGettingAFavor) {
-        this.playerGettingAFavor = playerGettingAFavor;
-    }
-
-    public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
-        return drawPile;
-    }
-
-    protected void setDrawPile(PartialObservableDeck<ExplodingKittensCard> drawPile) {
-        this.drawPile = drawPile;
-    }
-
-    public Deck<ExplodingKittensCard> getDiscardPile() {
-        return discardPile;
-    }
-
-    // Protected, only accessible in this package and subclasses
-    protected void setDiscardPile(Deck<ExplodingKittensCard> discardPile) {
-        this.discardPile = discardPile;
-    }
-
-    public Stack<AbstractAction> getActionStack() {
-        return actionStack;
-    }
-
-    protected void setActionStack(Stack<AbstractAction> actionStack) {
-        this.actionStack = actionStack;
-    }
-
-    public List<PartialObservableDeck<ExplodingKittensCard>> getPlayerHandCards() {
-        return playerHandCards;
-    }
-
-    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards) {
-        this.playerHandCards = playerHandCards;
-    }
-
-    public void printToConsole() {
-        System.out.println(toString());
-    }
-
-
-    // Printing functions for the game state and decks.
-
-    @Override
-    public String toString() {
-        String s = "============================\n";
-
-        int currentPlayer = turnOrder.getCurrentPlayer(this);
-
-        for (int i = 0; i < getNPlayers(); i++) {
-            if (currentPlayer == i)
-                s += ">>> Player " + i + ":";
-            else
-                s += "Player " + i + ":";
-            s += playerHandCards.get(i).toString() + "\n";
-        }
-
-        s += "\nDrawPile: ";
-        s += drawPile.toString() + "\n";
-
-        s += "DiscardPile: ";
-        s += discardPile.toString() + "\n";
-
-        s += "Action stack: ";
-        for (AbstractAction a : actionStack) {
-            s += a.toString() + ",";
-        }
-        s = s.substring(0, s.length() - 1);
-        s += "\n\n";
-
-        s += "Current GamePhase: " + gamePhase + "\n";
-        s += "Missing Draws: " + ((ExplodingKittensTurnOrder) turnOrder).requiredDraws + "\n";
-        s += "============================\n";
-        return s;
-    }
-
-    // Exploding kittens adds 4 phases on top of default ones.
-    public enum ExplodingKittensGamePhase implements IGamePhase {
-        Nope,
-        Defuse,
-        Favor,
-        SeeTheFuture
-    }
 }

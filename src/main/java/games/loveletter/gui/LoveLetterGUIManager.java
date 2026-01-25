@@ -232,7 +232,6 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
         return wrapper;
     }
 
-    @Override
     protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
         actionPanel.setOpaque(false);
@@ -321,7 +320,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             llgs = (LoveLetterGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || humanPlayerId.contains(i)
+                        || humanPlayerIds.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
                 playerHands[i].update(llgs, front);
 

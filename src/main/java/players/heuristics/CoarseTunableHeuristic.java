@@ -26,7 +26,8 @@ public class CoarseTunableHeuristic extends TunableParameters implements IStateH
         ORDINAL (new OrdinalPosition()),
         SCORE_ONLY (new PureScoreHeuristic()),
         SCORE_PLUS (new ScoreHeuristic()),
-        LEADER (new LeaderHeuristic());
+        LEADER (new LeaderHeuristic()),
+        HEURISTIC (new GameDefaultHeuristic());
 
         HeuristicType(IStateHeuristic heuristic) {
             this.heuristic = heuristic;

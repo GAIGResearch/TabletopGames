@@ -8,6 +8,7 @@ import games.puertorico.PuertoRicoConstants;
 import games.puertorico.PuertoRicoGameState;
 import games.puertorico.actions.SelectRole;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.*;
 
 public abstract class PuertoRicoRole<T extends PuertoRicoRole<T>> implements IExtendedSequence {
@@ -74,6 +75,11 @@ public abstract class PuertoRicoRole<T extends PuertoRicoRole<T>> implements IEx
             state.setCurrentRole(null);
             postPhaseProcessing(state);
         }
+    }
+
+    @Override
+    public void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
+        throw new AssertionError("Should not be reachable");
     }
 
     private void setNextPlayerWithAvailableAction(PuertoRicoGameState state, int fromPlayer) {

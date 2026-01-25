@@ -1,6 +1,7 @@
 package games.stratego;
 
 import core.AbstractGameState;
+import core.components.BoardNode;
 import core.interfaces.IStateFeatureVector;
 import games.stratego.components.Piece;
 
@@ -20,7 +21,7 @@ public class StrategoFeatures implements IStateFeatureVector {
     // Index = position on board
     // Value = Piece Type
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractGameState state, int playerID) {
         /* Scheme
         * 1 Unknown Player Piece (I don't think this ever happens)
         * 2 - 13 Player Piece Type
@@ -28,12 +29,13 @@ public class StrategoFeatures implements IStateFeatureVector {
         * -2 - -13 Opponent Piece Type
         * 0 Empty Space */
         StrategoGameState sgs = (StrategoGameState) state;
-        List<Piece> pieces = sgs.gridBoard.getComponents();
+        List<BoardNode> pieces = sgs.gridBoard.getComponents();
         List<Double> values = new ArrayList<>();
         int changeSignRed = playerID == 0 ? 1 : -1;
         int changeSignBlue = playerID == 0 ? -1 : 1;
 
-        for (Piece piece : pieces) {
+        for (BoardNode bn : pieces) {
+            Piece piece = (Piece) bn;
             if (piece != null) {
 
                 // Player is Red

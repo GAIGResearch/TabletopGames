@@ -1,0 +1,15 @@
+{
+  "budgetType": "BUDGET_TIME",
+  "rolloutLength": 100,
+  "opponentTreePolicy": "SelfOnly",
+  "heuristic": {
+    "class": "players.heuristics.PureScoreHeuristic"
+  },
+  "K": 1,
+  "exploreEpsilon": 0.1,
+  "treePolicy": "UCB",
+  "rolloutType": "RANDOM",
+  "information": "Information_Set",
+  "class": "players.mcts.MCTSParams",
+  "budget": -999
+}

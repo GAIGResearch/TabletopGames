@@ -1,0 +1,150 @@
+{
+	"coefficients" : {
+		"cardType_GOLD" : -0.07765427490387194,
+		"actionSize:cardType_SILVER" : 0.10607014877168938,
+		"cardType_MERCHANT" : 0.08252076625148476,
+		"cardType_MARKET" : 0.10099212571758151,
+		"actionSize:cardType_PROVINCE" : 0.25591935265985133,
+		"cardType_WORKSHOP" : -0.0793371135674905,
+		"cardType_REMODEL" : 0.0011751434446908595,
+		"cardType_SMITHY" : -0.006656491964319801,
+		"cardType_ESTATE" : 0.2983223198425243,
+		"cardType_CELLAR" : -0.0537127658971301,
+		"actionSize:cardType_DUCHY" : 0.1586751498650275,
+		"cardType_MOAT" : -0.16732454886123663,
+		"cardType_PROVINCE" : -0.04154921784919158,
+		"cardType_MINE" : -0.004760576506468591,
+		"cardType_COPPER" : 0.07922675611960366,
+		"treasureInHand:actionType_PLAY" : 0.2483752153406519,
+		"BIAS" : -0.1399298593458686,
+		"cardType_DUCHY" : 0.03801307473809187,
+		"cardType_SILVER" : -0.05206605840583842,
+		"cardType_MILITIA" : 0.5195586347419078,
+		"actionSize:cardType_GOLD" : 0.12612142354603664,
+		"actionType_PLAY" : 0.17258252525450438,
+		"actionSize" : -0.20518405783018512,
+		"actionType_BUY" : 0.018926434863914956,
+		"cardType_VILLAGE" : 0.011298935036417712,
+		"treasureInHand" : -0.03438062348507604
+	},
+	"actionFeatures" : {
+		"features" : [
+			{
+				"enumValue" : "PLAY",
+				"name" : "actionType_PLAY",
+				"index" : 15,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "BUY",
+				"name" : "actionType_BUY",
+				"index" : 15,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "ESTATE",
+				"name" : "cardType_ESTATE",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "DUCHY",
+				"name" : "cardType_DUCHY",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "PROVINCE",
+				"name" : "cardType_PROVINCE",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "COPPER",
+				"name" : "cardType_COPPER",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "SILVER",
+				"name" : "cardType_SILVER",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "GOLD",
+				"name" : "cardType_GOLD",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "CELLAR",
+				"name" : "cardType_CELLAR",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "MOAT",
+				"name" : "cardType_MOAT",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "MERCHANT",
+				"name" : "cardType_MERCHANT",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "VILLAGE",
+				"name" : "cardType_VILLAGE",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "WORKSHOP",
+				"name" : "cardType_WORKSHOP",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "MILITIA",
+				"name" : "cardType_MILITIA",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "REMODEL",
+				"name" : "cardType_REMODEL",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "SMITHY",
+				"name" : "cardType_SMITHY",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "MARKET",
+				"name" : "cardType_MARKET",
+				"index" : 16,
+				"type" : "ENUM"
+			},
+			{
+				"enumValue" : "MINE",
+				"name" : "cardType_MINE",
+				"index" : 16,
+				"type" : "ENUM"
+			}		],
+		"defaultBuckets" : 1,
+		"underlyingState" : {
+			"class" : "games.dominion.metrics.DomStateFeaturesReduced"
+		},
+		"class" : "evaluation.features.AutomatedFeatures",
+		"underlyingAction" : {
+			"class" : "games.dominion.metrics.DomActionFeatures"
+		}
+	},
+	"class" : "players.heuristics.LogisticActionHeuristic"
+}

@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
+import core.components.BoardNode;
 import core.components.GridBoard;
 import core.interfaces.ITreeActionSpace;
 import games.stratego.actions.AttackMove;
@@ -32,7 +33,7 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
     protected void _setup(AbstractGameState firstState) {
         StrategoParams params = (StrategoParams) firstState.getGameParameters();
         StrategoGameState state = (StrategoGameState) firstState;
-        state.gridBoard = new GridBoard<>(params.gridSize, params.gridSize);
+        state.gridBoard = new GridBoard(params.gridSize, params.gridSize);
 
         StrategoConstants.PieceSetups[] setups = StrategoConstants.PieceSetups.values();
         StrategoConstants.PieceSetups RedSetup = setups[state.getRnd().nextInt(setups.length)];
@@ -59,7 +60,7 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
-        List<Piece> pieces = state.gridBoard.getComponents();
+        List<BoardNode> pieces = state.gridBoard.getComponents();
 
         if (pieces.isEmpty()){
             throw new AssertionError("Error: No Pieces Found");
@@ -67,7 +68,8 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
             //           return actions;
         }
 
-        for (Piece piece : pieces){
+        for (BoardNode bn : pieces){
+            Piece piece = (Piece) bn;
             if (piece != null){
                 if (piece.getPieceAlliance() == playerAlliance) {
 
@@ -144,9 +146,10 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = state.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
-        List<Piece> pieces = state.gridBoard.getComponents();
+        List<BoardNode> pieces = state.gridBoard.getComponents();
         int c = 0;
-        for (Piece piece : pieces){
+        for (BoardNode bn : pieces){
+            Piece piece = (Piece) bn;
             if (piece != null){
                 if (piece.getPieceAlliance() == playerAlliance) {
                     List<AbstractAction> moves = piece.calculateMoves(state, ActionSpace.Default);

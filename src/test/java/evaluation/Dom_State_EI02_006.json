@@ -1,0 +1,41 @@
+{
+                "features" : {
+                        "features" : [
+                        ],
+                        "defaultBuckets" : 1,
+                        "underlyingState" : {
+                                "class" : "games.dominion.metrics.DomStateFeaturesWithCardTypes"
+                        },
+                        "class" : "evaluation.features.AutomatedFeatures"
+                },
+                "coefficients" : {
+                        "WORKSHOP" : 2.27,
+                        "provinceCount:provincesLeft" : 0.772,
+                        "BIAS" : 2.26,
+                        "emptyDecks" : 4.03,
+                        "currentLead" : 0.867,
+                        "provincesLeft:totalCards:CELLAR" : 0.00972,
+                        "REMODEL" : 2.56,
+                        "MOAT:COPPER:treasureValue:provincesLeft" : 0.0476,
+                        "COPPER" : -0.253,
+                        "MERCHANT" : 2.53,
+                        "VILLAGE" : 2.53,
+                        "MILITIA" : 2.23,
+                        "emptyDecks:provinceCount:provincesLeft" : -0.238,
+                        "MOAT" : 2.44,
+                        "COPPER:treasureValue:provincesLeft" : -0.255,
+                        "totalCards:CELLAR" : -0.0853,
+                        "provinceCount" : 1.32,
+                        "provincesLeft" : -4.34,
+                        "CELLAR" : 5.34,
+                        "SMITHY" : 3.10,
+                        "treasureValue" : -6.09,
+                        "totalCards" : -0.224,
+                        "actionCards" : -109,
+                        "treasureValue:provincesLeft" : 5.76
+                },
+                "class" : "players.heuristics.LinearStateHeuristic",
+                "defaultHeuristic" : {
+                        "class" : "players.heuristics.LeaderHeuristic"
+                }
+        }

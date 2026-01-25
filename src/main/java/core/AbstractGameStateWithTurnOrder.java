@@ -27,6 +27,7 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
     public AbstractGameStateWithTurnOrder(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
         this.turnOrder = _createTurnOrder(nPlayers);
+        reset();
     }
 
     protected abstract TurnOrder _createTurnOrder(int nPlayers);

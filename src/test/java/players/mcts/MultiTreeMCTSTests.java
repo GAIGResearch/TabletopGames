@@ -6,7 +6,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
-import core.components.Token;
+import core.components.BoardNode;
 import games.GameType;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
@@ -26,8 +26,8 @@ public class MultiTreeMCTSTests {
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
 
-    Token x = TicTacToeConstants.playerMapping.get(0);
-    Token o = TicTacToeConstants.playerMapping.get(1);
+    BoardNode x = TicTacToeConstants.playerMapping.get(0);
+    BoardNode o = TicTacToeConstants.playerMapping.get(1);
 
     AbstractForwardModel fm = new TicTacToeForwardModel();
     private final Predicate<SingleTreeNode> childrenVisitsAddUp = node ->
@@ -103,15 +103,15 @@ public class MultiTreeMCTSTests {
         TicTacToeGameState state = (TicTacToeGameState) ttt.getGameState();
         int board = state.getGridBoard().getComponentID();
 
-        fm.next(state, new SetGridValueAction<>(board, 1, 0, x));
-        fm.next(state, new SetGridValueAction<>(board, 0, 0, o));
-        fm.next(state, new SetGridValueAction<>(board, 0, 2, x));
-        fm.next(state, new SetGridValueAction<>(board, 1, 1, o));
+        fm.next(state, new SetGridValueAction(board, 1, 0, x.getComponentID()));
+        fm.next(state, new SetGridValueAction(board, 0, 0, o.getComponentID()));
+        fm.next(state, new SetGridValueAction(board, 0, 2, x.getComponentID()));
+        fm.next(state, new SetGridValueAction(board, 1, 1, o.getComponentID()));
 
         // o (p1) is now set to win on their next turn
 
         AbstractAction action = mctsPlayer._getAction(state, fm.computeAvailableActions(state));
-        assertEquals(new SetGridValueAction<>(board, 2, 2, x), action);
+        assertEquals(new SetGridValueAction(board, 2, 2, x.getComponentID()), action);
         // this is the only logical move to prevent the o player winning on their turn
 
         SingleTreeNode root = mctsPlayer.getRoot(0);
@@ -136,15 +136,15 @@ public class MultiTreeMCTSTests {
         TicTacToeGameState state = (TicTacToeGameState) ttt.getGameState();
         int board = state.getGridBoard().getComponentID();
 
-        fm.next(state, new SetGridValueAction<>(board, 1, 0, x));
-        fm.next(state, new SetGridValueAction<>(board, 0, 0, o));
-        fm.next(state, new SetGridValueAction<>(board, 0, 2, x));
-        fm.next(state, new SetGridValueAction<>(board, 1, 1, o));
+        fm.next(state, new SetGridValueAction(board, 1, 0, x.getComponentID()));
+        fm.next(state, new SetGridValueAction(board, 0, 0, o.getComponentID()));
+        fm.next(state, new SetGridValueAction(board, 0, 2, x.getComponentID()));
+        fm.next(state, new SetGridValueAction(board, 1, 1, o.getComponentID()));
 
         // o (p1) is now set to win on their next turn
 
         AbstractAction action = mctsPlayer._getAction(state, fm.computeAvailableActions(state));
-        assertEquals(new SetGridValueAction<>(board, 2, 2, x), action);
+        assertEquals(new SetGridValueAction(board, 2, 2, x.getComponentID()), action);
         // this is the only logical move to prevent the o player winning on their turn
 
         SingleTreeNode root = mctsPlayer.getRoot(0);

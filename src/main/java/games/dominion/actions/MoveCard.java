@@ -34,6 +34,13 @@ public class MoveCard extends AbstractAction {
                 .filter(card -> card.cardType() == this.type).findFirst();
 
         if (cardToMove.isPresent()) {
+
+            // Moving to discard pile was causing a casting error Deck -> PartialObservableDeck
+            if (toDeck == DeckType.DISCARD) {
+                state.moveCard(cardToMove.get(), playerFrom, fromDeck, playerTo, toDeck);
+                return true;
+            }
+
             DominionCard card = cardToMove.get();
             state.moveCard(card, playerFrom, fromDeck, playerTo, toDeck);
             PartialObservableDeck<DominionCard> destination = (PartialObservableDeck<DominionCard>) state.getDeck(toDeck, playerTo);

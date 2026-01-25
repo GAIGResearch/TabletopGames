@@ -1,0 +1,96 @@
+ [
+   {
+     "name": ["String","Disciple"],
+     "visibility" : "VISIBLE_TO_ALL",
+     "cards":
+     [
+      {
+        "name": ["String","Prayer of Healing"],
+        "XP": ["Integer", 0],
+        "fatigue": ["Integer", 1],
+        "exhaust": ["Boolean", true],
+        "passive": ["String", "Exhaust this card during your turn and choose yourself or an adjacent hero. Roll 1 red power die. The chosen hero recovers Heart equal to the Heart rolled."]
+      },
+       {
+         "name": ["String","Iron Mace"],
+         "XP": ["Integer", 0],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "attackType": ["String", "melee"],
+         "attackPower": ["String[]", ["blue", "yellow"]],
+         "equipmentType": ["String[]", ["Hammer"]],
+         "weaponSurges": ["String[]", ["STUN"]],
+         "equipSlots": ["String[]", ["hand"]],
+         "cost": ["Integer", 25],
+         "action": ["String", "Attack"]
+       },
+       {
+         "name": ["String","Wooden Shield"],
+         "XP": ["Integer", 0],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", true],
+         "equipmentType": ["String[]", ["Shield"]],
+         "equipSlots": ["String[]", ["hand"]],
+         "cost": ["Integer", 25],
+         "action": ["String", "Exhaust this card after rolling defense dice to add 1 Shield to the results; Effect:Shield:1"]
+       },
+       {
+         "name": ["String","Armor of Faith"],
+         "XP": ["Integer", 1],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "passive": ["String", "Each time you use Prayer of Healing on a hero, that hero adds 1 additional brown die to his defense pool until the start of your next turn.\nPlace a hero token belonging to that hero on this card as a reminder."]
+       },
+       {
+         "name": ["String","Blessed Strike"],
+         "XP": ["Integer", 1],
+         "fatigue": ["Integer", 1],
+         "exhaust": ["Boolean", false],
+         "action": ["String", "Perform an attack with a Melee weapon. If you deal at least 1 Heart (after rolling defense dice), you and 1 hero of your choice adjacent to you each recover 2 Heart."]
+       },
+       {
+         "name": ["String","Cleansing Touch"],
+         "XP": ["Integer", 1],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "passive": ["String", "Each time you use Prayer of Healing on a hero, that hero may also discard 1 of his Condition cards."]
+       },
+       {
+         "name": ["String","Divine Fury"],
+         "XP": ["Integer", 2],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "passive": ["String", "Each time you use Prayer of Healing on a hero, that hero adds 1 additional yellow power die to his attack pool on his next attack this round.\nPlace a hero token belonging to that hero on this card as a reminder."]
+       },
+       {
+         "name": ["String","Prayer of Peace"],
+         "XP": ["Integer", 2],
+         "fatigue": ["Integer", 2],
+         "exhaust": ["Boolean", true],
+         "passive": ["String", "While this card is exhausted, monsters cannot perform an attack while adjacent to you."],
+         "action": ["String", "Exhaust this card."]
+       },
+       {
+         "name": ["String","Time of Need"],
+         "XP": ["Integer", 2],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "action": ["String", "You receive 2 movement points and recover 2 Fatigue."]
+       },
+       {
+         "name": ["String","Holy Power"],
+         "XP": ["Integer", 3],
+         "fatigue": ["Integer", 0],
+         "exhaust": ["Boolean", false],
+         "passive": ["String", "Your Prayer of Healing may now affect 2 different heroes. If you roll a Surge on the red power die when using Prayer of Healing, both heroes recover 1 Fatigue."]
+       },
+       {
+         "name": ["String","Radiant Light"],
+         "XP": ["Integer", 3],
+         "fatigue": ["Integer", 3],
+         "exhaust": ["Boolean", false],
+         "action": ["String", "Roll 1 red power die. Each hero in your line of sight (including yourself) recovers the amount of Heart rolled. Each monster in your line of sight suffers the amount of Heart rolled."]
+       }
+     ]
+   }
+]

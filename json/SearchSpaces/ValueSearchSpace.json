@@ -1,0 +1,25 @@
+{
+        "class":"players.mcts.MCTSParams",
+        "rolloutLength" : [1, 3, 10, 30],
+        "rolloutLengthPerPlayer" : true,
+        "rolloutTermination" : ["EXACT", "END_TURN", "END_ROUND"],
+        "rolloutType" : "PARAMS",
+        "rolloutPolicyParams" : {
+        	"class" : "players.simple.BoltzmannActionParams",
+        	"temperature" : 1.0,
+        	"epsilon" : 1.0
+        },
+        "MAST" : "None",
+        "budgetType" : "BUDGET_TIME",
+        "selectionPolicy" : "SIMPLE",
+        "maxTreeDepth" : [1, 3, 10, 1000],
+        "K" : [0.01, 1.0, 100.0],
+        "treePolicy" : ["AlphaGo", "UCB", "UCB_Tuned", "Uniform"],
+        "opponentTreePolicy" : ["SelfOnly", "OneTree", "MultiTree"],
+        "reuseTree" : [false, true],
+        "backupPolicy" : "MaxMC",
+        "maxBackupThreshold" : [10, 100, 1000000],        
+        "budget" : -999,
+        "epsilon" : 1e-6,
+        "breakMS" : 0
+}

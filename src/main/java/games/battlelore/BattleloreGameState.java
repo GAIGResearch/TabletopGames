@@ -29,7 +29,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     int[] playerScores;
-    GridBoard<MapTile> gameBoard;
+    GridBoard gameBoard;
     List<Unit> unitTypes;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
@@ -62,9 +62,9 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public void AddUnit(int locX, int locY, Unit unit) {
-        MapTile tile = gameBoard.getElement(locX, locY);
+        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
         if (tile != null) {
-            gameBoard.getElement(locX, locY).AddUnit(unit);
+            tile.AddUnit(unit);
         }
     }
 
@@ -73,16 +73,16 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public void SetUnitsAsOrderable(int locX, int locY) {
-        MapTile tile = gameBoard.getElement(locX, locY);
+        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
         if (tile != null) {
-            gameBoard.getElement(locX, locY).SetAsOrderable();
+            tile.SetAsOrderable();
         }
     }
 
     public void RemoveUnit(int locX, int locY) {
-        MapTile tile = gameBoard.getElement(locX, locY);
+        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
         if (tile != null) {
-            gameBoard.getElement(locX, locY).RemoveUnit();
+            tile.RemoveUnit();
         }
     }
 
@@ -91,7 +91,7 @@ public class BattleloreGameState extends AbstractGameState {
 
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
-                MapTile tile = gameBoard.getElement(x, y);
+                MapTile tile = (MapTile) gameBoard.getElement(x, y);
                 if (tile.GetUnits() != null && tile.GetFaction() == faction &&
                         tile.GetUnits().get(0).CanMove()) {
                     tiles.add(tile);
@@ -105,7 +105,7 @@ public class BattleloreGameState extends AbstractGameState {
         ArrayList<MapTile> tiles = new ArrayList<MapTile>();
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
-                MapTile tile = gameBoard.getElement(x, y);
+                MapTile tile = (MapTile) gameBoard.getElement(x, y);
                 if (tile.GetUnits() != null && tile.GetFaction() == faction &&
                         tile.GetUnits().get(0).CanAttack()) {
                     tiles.add(tile);
@@ -132,7 +132,7 @@ public class BattleloreGameState extends AbstractGameState {
                 possibleLocations[x][0] = -1;
                 possibleLocations[x][1] = -1;
 
-                MapTile possibleTile = gameBoard.getElement(x, y);
+                MapTile possibleTile = (MapTile) gameBoard.getElement(x, y);
                 if (possibleTile.GetUnits() == null) {
                     double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - tile.getLocationX()), 2) +
                             Math.pow(Math.abs(possibleTile.getLocationY() - tile.getLocationY()), 2));
@@ -157,7 +157,7 @@ public class BattleloreGameState extends AbstractGameState {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
                 possibleLocations[x][0] = -1;
                 possibleLocations[x][1] = -1;
-                MapTile possibleTile = gameBoard.getElement(x, y);
+                MapTile possibleTile = (MapTile) gameBoard.getElement(x, y);
                 if (possibleTile.GetUnits() != null && possibleTile.GetFaction() != attackUnit.GetFaction()) {
                     double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - attackUnit.getLocationX()), 2) +
                             Math.pow(Math.abs(possibleTile.getLocationY() - attackUnit.getLocationY()), 2));
@@ -172,7 +172,7 @@ public class BattleloreGameState extends AbstractGameState {
         return possibleLocations;
     }
 
-    public GridBoard<MapTile> getBoard() {
+    public GridBoard getBoard() {
         return gameBoard;
     }
 
@@ -200,7 +200,7 @@ public class BattleloreGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        /**
+        /*
          * This provides the current score in game turns. This will only be relevant for games that have the concept
          * of victory points, etc.
          * If a game does not support this directly, then just return 0.0
@@ -220,9 +220,8 @@ public class BattleloreGameState extends AbstractGameState {
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BattleloreGameState)) return false;
+        if (!(o instanceof BattleloreGameState that)) return false;
         if (!super.equals(o)) return false;
-        BattleloreGameState that = (BattleloreGameState) o;
         return Arrays.equals(playerScores, that.playerScores) && Objects.equals(gameBoard, that.gameBoard) && Objects.equals(unitTypes, that.unitTypes);
     }
 

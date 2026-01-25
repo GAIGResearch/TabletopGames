@@ -31,4 +31,17 @@ public class ScoreHeuristic implements IStateHeuristic {
     public double maxValue() {
         return Double.POSITIVE_INFINITY;
     }
+
+    @Override
+    public String toString() {
+        return "ScoreHeuristic";
+    }
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof ScoreHeuristic;
+    }
+    @Override
+    public int hashCode() {
+        return 3;
+    }
 }
