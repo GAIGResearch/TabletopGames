@@ -79,8 +79,6 @@ public class JaipurForwardModel extends StandardForwardModel {
     }
 
     private void setupRound(JaipurGameState gs, JaipurParameters jp) {
-        Random r = new Random(jp.getRandomSeed());
-
         // Market initialisation
         // Place 3 camel cards in the market
         for (JaipurCard.GoodType gt: JaipurCard.GoodType.values()) {
@@ -121,7 +119,7 @@ public class JaipurForwardModel extends StandardForwardModel {
             JaipurCard card = new JaipurCard(JaipurCard.GoodType.Camel);
             gs.drawDeck.add(card);
         }
-        gs.drawDeck.shuffle(r);
+        gs.drawDeck.shuffle(gs.getRnd());
 
         // Deal N cards to each player
         for (int i = 0; i < gs.getNPlayers(); i++) {
@@ -220,7 +218,7 @@ public class JaipurForwardModel extends StandardForwardModel {
                 tokenDeck.add(new JaipurToken(v));
             }
             // Shuffle
-            tokenDeck.shuffle(r);
+            tokenDeck.shuffle(gs.getRnd());
             gs.bonusTokens.put(nSold, tokenDeck);
         }
 

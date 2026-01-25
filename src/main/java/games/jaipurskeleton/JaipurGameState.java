@@ -234,14 +234,24 @@ public class JaipurGameState extends AbstractGameState {
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof JaipurGameState)) return false;
+        if (!(o instanceof JaipurGameState that)) return false;
         if (!super.equals(o)) return false;
-        JaipurGameState that = (JaipurGameState) o;
-        return Objects.equals(playerHands, that.playerHands) && Objects.equals(playerHerds, that.playerHerds) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(market, that.market) && Objects.equals(goodTokens, that.goodTokens) && Objects.equals(nGoodTokensSold, that.nGoodTokensSold) && Objects.equals(bonusTokens, that.bonusTokens) && Objects.equals(playerScores, that.playerScores) && Objects.equals(playerNRoundsWon, that.playerNRoundsWon) && Objects.equals(playerNBonusTokens, that.playerNBonusTokens) && Objects.equals(playerNGoodTokens, that.playerNGoodTokens);
+        return Objects.equals(playerHands, that.playerHands) &&
+                Objects.equals(playerHerds, that.playerHerds) &&
+                Objects.equals(drawDeck, that.drawDeck) &&
+                Objects.equals(market, that.market) &&
+                Objects.equals(goodTokens, that.goodTokens) &&
+                Objects.equals(nGoodTokensSold, that.nGoodTokensSold) &&
+                Objects.equals(bonusTokens, that.bonusTokens) &&
+                Objects.equals(playerScores, that.playerScores) &&
+                Objects.equals(playerNRoundsWon, that.playerNRoundsWon) &&
+                Objects.equals(playerNBonusTokens, that.playerNBonusTokens) &&
+                Objects.equals(playerNGoodTokens, that.playerNGoodTokens);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerHands, playerHerds, drawDeck, market, goodTokens, nGoodTokensSold, bonusTokens, playerScores, playerNRoundsWon, playerNBonusTokens, playerNGoodTokens);
+        return Objects.hash(super.hashCode(), playerHands, playerHerds, drawDeck, market, goodTokens,
+                nGoodTokensSold, bonusTokens, playerScores, playerNRoundsWon, playerNBonusTokens, playerNGoodTokens);
     }
 }
