@@ -19,7 +19,7 @@ import java.util.Objects;
  * automatic game parameter optimisation tools in the framework.</p>
  */
 public class JaipurParameters extends AbstractParameters {
-    Map<JaipurCard.GoodType, Integer> goodNCardsMinimumSell = new HashMap<JaipurCard.GoodType, Integer>() {{
+    Map<JaipurCard.GoodType, Integer> goodNCardsMinimumSell = new HashMap<>() {{
         put(JaipurCard.GoodType.Diamonds, 2);
         put(JaipurCard.GoodType.Gold, 2);
         put(JaipurCard.GoodType.Silver, 2);
@@ -27,10 +27,10 @@ public class JaipurParameters extends AbstractParameters {
         put(JaipurCard.GoodType.Spice, 1);
         put(JaipurCard.GoodType.Leather, 1);
     }};
-    Map<Integer, Integer[]> bonusTokensAvailable = new HashMap<Integer, Integer[]>() {{
-        put(3, new Integer[]{1,1,2,2,2,3,3});
-        put(4, new Integer[]{4,4,5,5,6,6});
-        put(5, new Integer[]{8,8,9,10,10});
+    Map<Integer, Integer[]> bonusTokensAvailable = new HashMap<>() {{
+        put(3, new Integer[]{1, 1, 2, 2, 2, 3, 3});
+        put(4, new Integer[]{4, 4, 5, 5, 6, 6});
+        put(5, new Integer[]{8, 8, 9, 10, 10});
     }};
 
     int nPointsMostCamels = 5;
