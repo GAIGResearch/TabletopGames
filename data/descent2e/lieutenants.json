@@ -379,7 +379,7 @@
     "act2": [
       {
         "instance": ["Integer", 2],
-        "Health": ["Integer", 10],
+        "Health": ["Integer", 16],
         "defence": ["String[]", ["black", "grey"]],
         "attack": ["String[]", ["blue", "red", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
@@ -387,7 +387,7 @@
       },
       {
         "instance": ["Integer", 3],
-        "Health": ["Integer", 13],
+        "Health": ["Integer", 18],
         "defence": ["String[]", ["black", "grey", "brown"]],
         "attack": ["String[]", ["blue", "red", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],
@@ -395,7 +395,7 @@
       },
       {
         "instance": ["Integer", 4],
-        "Health": ["Integer", 16],
+        "Health": ["Integer", 20],
         "defence": ["String[]", ["black", "grey", "grey"]],
         "attack": ["String[]", ["blue", "red", "red"]],
         "passive": ["String[]", ["Surge: Pierce 2", "Surge: Subdue"]],

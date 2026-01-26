@@ -78,7 +78,7 @@
         "MovePoints": ["Integer", 4],
         "Health": ["Integer", 6],
         "defence": ["String[]", ["grey"]],
-        "attack": ["String[]", ["blue", "yellow"]],
+        "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["NightStalker", "Surge: +2 Heart"]],
         "action": ["String[]", ["Howl"]]
       }
