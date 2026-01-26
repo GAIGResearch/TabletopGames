@@ -20,7 +20,8 @@ public class CountGameFeature {
     public int count(DescentGameState gs) {
         ArrayList<Figure> figures = new ArrayList<>();
         for (Component c: gs.getAllComponents().getComponents()) {
-            if (c instanceof Figure && c.getComponentName().contains(figureNameContains)) {
+            if (c instanceof Figure && c.getComponentName().contains(figureNameContains)
+            || c instanceof Monster && figureNameContains.contains("Monster")) {
                 if (c instanceof Monster) {
                     // We only want to count the Monsters that have been spawned on the map
                     // Not the ones held in reserve to copy in for reinforcements
