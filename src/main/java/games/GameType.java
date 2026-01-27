@@ -121,6 +121,10 @@ import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.gui.TMGUI;
+import games.thegame.TheGameForwardModel;
+import games.thegame.TheGameGUIManager;
+import games.thegame.TheGameGameState;
+import games.thegame.TheGameParameters;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -183,6 +187,11 @@ public enum GameType {
      * a list of categories the game belongs to, and a list of mechanics the game uses.
      * Add here all games implemented.
      */
+    TheGame(1, 5,
+            Arrays.asList(Cards, Number),
+            Arrays.asList(HandManagement, Cooperative, CommunicationLimits),
+            TheGameGameState.class, TheGameForwardModel.class, TheGameParameters.class, TheGameGUIManager.class,
+            "data/thegame"),
     Pandemic(2, 4,
             Arrays.asList(Strategy, Medical),
             Arrays.asList(ActionPoints, Cooperative, HandManagement, PointToPointMovement, SetCollection, Trading, VariablePlayerPowers),
@@ -698,7 +707,9 @@ public enum GameType {
         CommandCards,
         MoveThroughDeck,
         TrickTaking,
-        RoleSelection, ClosedDrafting, NeighbourScope, ActionRetrieval, AreaMajority, AreaMovement, Race, SuddenDeathEnding, MultiUseCards, Negotiation, VariableSetup, NetworkAndRouteBuilding, RandomProduction;
+        RoleSelection, ClosedDrafting, NeighbourScope, ActionRetrieval, AreaMajority,
+        AreaMovement, Race, SuddenDeathEnding, MultiUseCards, Negotiation, VariableSetup,
+        NetworkAndRouteBuilding, RandomProduction, CommunicationLimits;
 
         /**
          * @return a list of all games using this mechanic.
