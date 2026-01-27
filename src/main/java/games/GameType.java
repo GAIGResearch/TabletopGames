@@ -44,7 +44,6 @@ import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.gui.DescentGUI;
-import games.diamant.*;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
@@ -75,7 +74,6 @@ import games.mastermind.MMForwardModel;
 import games.mastermind.MMGameState;
 import games.mastermind.MMParameters;
 import games.monopolydeal.gui.MonopolyDealGUIManager;
-import games.mastermind.*;
 import games.mastermind.gui.MMGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
@@ -123,7 +121,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.gui.TMGUI;
 import games.thegame.TheGameForwardModel;
 import games.thegame.TheGameGUIManager;
-import games.thegame.TheGameGameState;
+import games.thegame.TheGameGS;
 import games.thegame.TheGameParameters;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
@@ -154,7 +152,6 @@ import games.pickomino.PickominoGameState;
 import games.pickomino.PickominoParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.*;
 import llm.DocumentSummariser;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import players.human.ActionController;
@@ -190,8 +187,7 @@ public enum GameType {
     TheGame(1, 5,
             Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, Cooperative, CommunicationLimits),
-            TheGameGameState.class, TheGameForwardModel.class, TheGameParameters.class, TheGameGUIManager.class,
-            "data/thegame"),
+            TheGameGS.class, TheGameForwardModel.class, TheGameParameters.class, TheGameGUIManager.class),
     Pandemic(2, 4,
             Arrays.asList(Strategy, Medical),
             Arrays.asList(ActionPoints, Cooperative, HandManagement, PointToPointMovement, SetCollection, Trading, VariablePlayerPowers),

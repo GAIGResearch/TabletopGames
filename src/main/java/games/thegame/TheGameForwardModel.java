@@ -1,11 +1,15 @@
 package games.thegame;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.components.Deck;
+import games.thegame.components.TheGameCard;
 import gametemplate.actions.GTAction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class TheGameForwardModel extends StandardForwardModel {
@@ -23,7 +27,42 @@ public class TheGameForwardModel extends StandardForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
-        // TODO: perform initialization of variables and game setup
+        TheGameGS gs = (TheGameGS) firstState;
+        TheGameParameters params = (TheGameParameters) firstState.getGameParameters();
+
+        // Create the rows and add the starting cards.
+        gs.ascCardRows = new ArrayList<>();
+        for(int i = 0; i < params.numAscendingRows; ++i) {
+            gs.ascCardRows.add(new Deck<>("Ascending Row " + i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
+            gs.ascCardRows.get(i).add(new TheGameCard("" + params.minCardNumber, params.minCardNumber));
+        }
+        gs.descCardRows = new ArrayList<>();
+        for(int i = 0; i < params.numDescendingRows; ++i) {
+            gs.descCardRows.add(new Deck<>("Descending Row " + i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
+            gs.descCardRows.get(i).add(new TheGameCard("" + params.maxCardNumber, params.maxCardNumber));
+        }
+
+        // Create fill and shuffle the row deck
+        gs.drawDeck = new Deck<>("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        for(int i = params.minCardNumber+1; i < params.maxCardNumber; ++i)
+            gs.drawDeck.add(new TheGameCard("" + i , i));
+        gs.drawDeck.shuffle(gs.getRnd());
+
+        // Create the player hands and deal cards to them. Also no selected rows at start.
+        gs.playerHands = new ArrayList<>();
+        gs.selectedRows = new HashMap<>();
+
+        for(int i = 0; i < gs.getNPlayers(); ++i) {
+            gs.playerHands.add(new Deck<>("Player " + i + " hand", i, params.playerHandVisibility));
+            //Deal cards depending on player count.
+            for(int k = 0; k < params.handSize[gs.getNPlayers()]; ++k)
+                    gs.playerHands.get(i).add(gs.drawDeck.draw());
+            gs.selectedRows.put(i, -1);
+        }
+
+        TheGameGS fullyCopied = (TheGameGS) gs.copy(-1);
+        System.out.println(fullyCopied.equals(gs));
+        int a= 0 ;
     }
 
     /**

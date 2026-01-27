@@ -1,49 +1,35 @@
 package games.thegame.components;
-
-import core.CoreConstants;
 import core.components.Card;
-import core.components.Component;
-import gametemplate.components.GTComponent;
+
+import java.util.Objects;
 
 public class TheGameCard extends Card {
 
-    public TheGameCard(CoreConstants.ComponentType type, String name) {
+    private final int number;
+
+    public TheGameCard(String name, int number) {
         super(name);
+        this.number = number;
     }
 
-    protected TheGameCard(CoreConstants.ComponentType type, String name, int componentID) {
+    protected TheGameCard(String name, int number, int componentID) {
         super(name, componentID);
+        this.number = number;
     }
-
-
-    /**
-     * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
-     * Make sure the return type is this class (e.g. GTComponent) and NOT the super class Component.
-     * <p>
-     * <b>IMPORTANT</b>: This should have the same componentID
-     * (using the protected constructor on the Component super class which takes this as an argument).
-     * </p>
-     * <p>The function should also call the {@link Component#copyComponentTo(Component)} method, passing in as an
-     * argument the new copy you've made.</p>
-     * <p>If all variables in this class are final or effectively final, then you can just return <code>`this`</code>.</p>
-     */
     @Override
     public TheGameCard copy() {
-        TheGameCard copy = new TheGameCard(type, componentName, componentID);
-        // TODO: copy here all non-final class variables.
-        copyComponentTo(copy);
-        return copy;
+        return this;
     }
 
     @Override
     public boolean equals(Object o) {
-        // TODO: compare all class variables (if any).
-        return (o instanceof GTComponent) && super.equals(o);
+        if (o instanceof TheGameCard card)
+            return card.number == this.number;
+        return false;
     }
 
     @Override
     public int hashCode() {
-        // TODO: include all class variables (if any).
-        return super.hashCode();
+        return Objects.hash(number);
     }
 }

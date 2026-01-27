@@ -2,11 +2,13 @@ package games.thegame;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
+import core.components.Deck;
 import games.GameType;
+import games.thegame.components.TheGameCard;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
@@ -17,13 +19,21 @@ import java.util.List;
  * Functions on the game state should never <b>change</b> the state of the game.</p>
  */
 
-public class TheGameGameState extends AbstractGameState{
+public class TheGameGS extends AbstractGameState{
+    public List<Deck<TheGameCard>> playerHands;
+    public List<Deck<TheGameCard>> ascCardRows;
+    public List<Deck<TheGameCard>> descCardRows;
+    public Deck<TheGameCard> drawDeck;
+
+    public Map<Integer, Integer> selectedRows;
+
     /**
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players in the game
      */
-    public TheGameGameState(AbstractParameters gameParameters, int nPlayers) {
+    public TheGameGS(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+
     }
 
     /**
@@ -42,8 +52,12 @@ public class TheGameGameState extends AbstractGameState{
      */
     @Override
     protected List<Component> _getAllComponents() {
-        // TODO: add all components to the list
-        return new ArrayList<>();
+        ArrayList<Component> components = new ArrayList<>();
+        components.addAll(playerHands);
+        components.addAll(ascCardRows);
+        components.addAll(descCardRows);
+        components.add(drawDeck);
+        return components;
     }
 
     /**
@@ -64,9 +78,47 @@ public class TheGameGameState extends AbstractGameState{
      * @param playerId - player observing this game state.
      */
     @Override
-    protected gametemplate.GTGameState _copy(int playerId) {
-        gametemplate.GTGameState copy = new gametemplate.GTGameState(gameParameters, getNPlayers());
-        // TODO: deep copy all variables to the new game state.
+    protected TheGameGS _copy(int playerId) {
+        TheGameGS copy = new TheGameGS(gameParameters, getNPlayers());
+
+        copy.ascCardRows = new ArrayList<>();
+        copy.descCardRows = new ArrayList<>();
+        copy.selectedRows = new HashMap<>();
+        copy.playerHands = new ArrayList<>();
+
+        // Fully observable bits
+        for(int i = 0; i < ascCardRows.size(); ++i)
+            copy.ascCardRows.add(this.ascCardRows.get(i).copy());
+        for(int i = 0; i < descCardRows.size(); ++i)
+            copy.descCardRows.add(this.descCardRows.get(i).copy());
+        for(int i = 0; i < selectedRows.size(); ++i)
+            copy.selectedRows.put(i, this.selectedRows.get(i));
+
+        // PO bits
+
+        //First all copied as if fully observable
+        copy.drawDeck = this.drawDeck.copy();
+        for(int i = 0; i < playerHands.size(); ++i)
+            copy.playerHands.add(this.playerHands.get(i).copy());
+
+        if(playerId != -1){
+            //Redeterminization of the PO bits
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    copy.drawDeck.add(copy.playerHands.get(i));
+                    copy.playerHands.get(i).clear();
+                }
+            }
+            copy.drawDeck.shuffle(redeterminisationRnd);
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    for (int j = 0; j < playerHands.get(i).getSize(); j++) {
+                        copy.playerHands.get(i).add(copy.drawDeck.draw());
+                    }
+                }
+            }
+        }
+
         return copy;
     }
 
@@ -77,9 +129,11 @@ public class TheGameGameState extends AbstractGameState{
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
+        TheGameParameters params = (TheGameParameters) gameParameters;
+        int originalCardsInDrawDeck = params.maxCardNumber - params.minCardNumber - 1;
         if (isNotTerminal()) {
             // TODO calculate an approximate value
-            return 0;
+            return originalCardsInDrawDeck - drawDeck.getSize();
         } else {
             // The game finished, we can instead return the actual result of the game for the given player.
             return getPlayerResults()[playerId].value;
@@ -92,22 +146,25 @@ public class TheGameGameState extends AbstractGameState{
      */
     @Override
     public double getGameScore(int playerId) {
-        // TODO: What is this player's score (if any)?
-        return 0;
+        return _getHeuristicScore(0);
     }
 
     @Override
-    protected boolean _equals(Object o) {
-        // TODO: compare all variables in the state
-        return o instanceof gametemplate.GTGameState;
+    public boolean _equals(Object o) {
+        if(o == this) return true;
+        if(o == null) return false;
+        if(o instanceof TheGameGS theGameGS) {
+            return Objects.equals(playerHands, theGameGS.playerHands) && Objects.equals(ascCardRows, theGameGS.ascCardRows) &&
+                    Objects.equals(descCardRows, theGameGS.descCardRows) && Objects.equals(drawDeck, theGameGS.drawDeck) &&
+                    Objects.equals(selectedRows, theGameGS.selectedRows);
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        // TODO: include the hash code of all variables
-        return super.hashCode();
+        return Objects.hash(super.hashCode(), playerHands, ascCardRows, descCardRows, drawDeck, selectedRows);
     }
-
 
     // TODO: Review the methods below...these are all supported by the default implementation in AbstractGameState
     // TODO: So you do not (and generally should not) implement your own versions - take advantage of the framework!
