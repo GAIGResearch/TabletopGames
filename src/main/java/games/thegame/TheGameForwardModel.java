@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import games.thegame.actions.PlayingCards;
 import games.thegame.actions.SelectRows;
 import games.thegame.components.TheGameCard;
 import games.thegame.components.TheGameDeck;
@@ -62,7 +63,7 @@ public class TheGameForwardModel extends StandardForwardModel {
             gs.selectedRows.put(i, -1);
         }
 
-        gs.gamePhase = TheGameGS.TheGamePhase.SelectingRow;
+//        gs.gamePhase = TheGameGS.TheGamePhase.SelectingRow;
 
     }
 
@@ -74,31 +75,24 @@ public class TheGameForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         List<AbstractAction> actions = new ArrayList<>();
         TheGameGS gs = (TheGameGS) gameState;
+        actions.add(new PlayingCards(gs.getCurrentPlayer()));
 
-        switch (gs.gamePhase)
-        {
-            case SelectingRow -> {
-                actions.add(new SelectRows(gs.getCurrentPlayer()));
-            }
-        }
+//        switch (gs.gamePhase)
+//        {
+////            case SelectingRow -> {
+////                actions.add(new SelectRows(gs.getCurrentPlayer()));
+////            }
+//
+//            case PlayingCards -> {
+//
+//            }
+//        }
 
         // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
         actions.add(new GTAction());
         return actions;
     }
 
-    /**
-     * This is a method hook for any game-specific functionality that should run before an Action is executed
-     * by the forward model
-     *
-     * @param currentState - the current game state
-     * @param actionChosen - the action chosen by the current player, not yet applied to the game state
-     */
-    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
-        // override if needed
-        // TODO: implement any game-specific functionality that should run before an Action is executed
-        // TODO: (This is actually quite rare, and if not needed then remove this method)
-    }
 
     /**
      * This is a method hook for any game-specific functionality that should run after an Action is executed
@@ -112,6 +106,31 @@ public class TheGameForwardModel extends StandardForwardModel {
         // TODO: Unlike _beforeAction, this is almost always implemented
         // TODO: This generally does things like checking for end of turn or round or game (and then doing the
         // TODO: appropriate actions).
+
+        TheGameGS gs = (TheGameGS) currentState;
+
+        if (gs.isActionInProgress())
+            return;  // we always wait for any EAS to finish
+
+        int nextPlayer = (gs.getCurrentPlayer() + 1) % gs.getNPlayers(); // we increment one more
+        endPlayerTurn(gs, nextPlayer);
+
+        boolean canPlay = new PlayingCards(gs.getCurrentPlayer()).canBePlayed(gs);
+        if(!canPlay)
+        {
+            //Game over.
+            TheGameParameters params = (TheGameParameters) gs.getGameParameters();
+            int originalCardsInDrawDeck = params.maxCardNumber - params.minCardNumber - 1;
+            int gameScore = (int) gs.getGameScore(0);
+            CoreConstants.GameResult result = (originalCardsInDrawDeck == gameScore) ?  CoreConstants.GameResult.WIN_GAME :
+                    CoreConstants.GameResult.LOSE_GAME;
+
+            for(int i = 0; i < gs.getNPlayers(); ++i)
+                gs.setPlayerResult(result, i);
+            gs.setGameStatus(result);
+            System.out.println("Game End (" + result + "). Score: " + gameScore);
+        }
+
     }
 
 

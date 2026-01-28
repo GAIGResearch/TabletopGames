@@ -2,9 +2,9 @@ package games.thegame.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
-import games.root.actions.choosers.ChooseNumber;
 import games.thegame.TheGameGS;
 import games.thegame.TheGameParameters;
 import games.thegame.components.TheGameCard;
@@ -13,6 +13,7 @@ import gametemplate.actions.GTAction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -24,17 +25,24 @@ import java.util.List;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link GTAction} apply here as well.</p>
  */
-public class SelectRows extends AbstractAction implements IExtendedSequence {
+public class PlayingCards extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
 
-    public SelectRows(int playerID) {
+    public int cardsPlayed;
+
+    public boolean completed;
+
+    public PlayingCards(int playerID) {
         this.playerID = playerID;
+        this.completed = false;
     }
 
-
-
+    public boolean canBePlayed(AbstractGameState state)
+    {
+        return _computeAvailableActions(state).size() > 0;
+    }
 
     /**
      * Forward Model delegates to this from {@link core.StandardForwardModel#computeAvailableActions(AbstractGameState)}
@@ -46,27 +54,22 @@ public class SelectRows extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+
         List<AbstractAction> actions = new ArrayList<>();
         TheGameGS gs = (TheGameGS) state;
-
         Deck<TheGameCard> playerHand = gs.playerHands.get(playerID);
-        int deckN = 0;
-        //TODO: To modify, I need to be able to play at least params.nCardsToPlay. This may only be possible
-        for(TheGameDeck<TheGameCard> row : gs.cardRows)
-        {
-            boolean canPlay = false;
-            for(TheGameCard card : playerHand)
-            {
-                if(gs.canPlayInRow(card, row))
-                {
-                    canPlay = true;
-                    break;
+        int row = 0;
+        for(TheGameDeck<TheGameCard> r : gs.cardRows) {
+            for (TheGameCard card : playerHand) {
+                if (gs.canPlayInRow(card, r)) {
+                    actions.add(new PlayCard(card.number, row));
                 }
             }
-            if(canPlay)
-                actions.add(new ChooseNumber(playerID, deckN));
-            deckN++;
+            row++;
         }
+
+        if(cardsPlayed >= gs.getCardsToPlay())
+            actions.add(new DoNothing());
 
         return actions;
     }
@@ -96,9 +99,18 @@ public class SelectRows extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        // TODO: Process the action that was taken.
         TheGameGS gs = (TheGameGS) state;
-        int rowSelected = ((ChooseNumber) action).number;
-        gs.selectedRows.put(playerID, rowSelected);
+        if(action instanceof PlayCard pc)
+        {
+            pc.execute(state);
+            cardsPlayed++;
+        }else if(action instanceof DoNothing)
+        {
+            //We're done;
+            completed = true;
+        }
+
     }
 
     /**
@@ -107,8 +119,7 @@ public class SelectRows extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        // TODO is execution of this sequence of actions complete?
-        return true;
+        return completed;
     }
 
     /**
@@ -123,7 +134,6 @@ public class SelectRows extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
-        // TODO: Some functionality applied which changes the given game state.
         gs.setActionInProgress(this);
         return true;
     }
@@ -135,27 +145,29 @@ public class SelectRows extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public SelectRows copy() {
-        // TODO: copy non-final variables appropriately
-        return this;
+    public PlayingCards copy() {
+        PlayingCards copy = new PlayingCards(this.playerID);
+        copy.completed = this.completed;
+        copy.cardsPlayed = this.cardsPlayed;
+        return copy;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof GTAction;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlayingCards that = (PlayingCards) o;
+        return playerID == that.playerID && cardsPlayed == that.cardsPlayed && completed == that.completed;
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(playerID, cardsPlayed, completed);
     }
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "Playing cards. Cards played: " + cardsPlayed + (completed?" (Completed)":"");
     }
 
     /**

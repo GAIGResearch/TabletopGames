@@ -23,10 +23,11 @@ import java.util.*;
 
 public class TheGameGS extends AbstractGameState{
 
-    public enum TheGamePhase implements IGamePhase{
-        SelectingRow,
-        PlayingCards
-    }
+
+//    public enum TheGamePhase implements IGamePhase{
+//        SelectingRow,
+//        PlayingCards
+//    }
 
 
 
@@ -35,7 +36,7 @@ public class TheGameGS extends AbstractGameState{
     public Deck<TheGameCard> drawDeck;
 
     public Map<Integer, Integer> selectedRows;
-    public TheGamePhase gamePhase;
+//    public TheGamePhase gamePhase;
 
     /**
      * @param gameParameters - game parameters.
@@ -186,6 +187,24 @@ public class TheGameGS extends AbstractGameState{
     public int hashCode() {
         return Objects.hash(super.hashCode(), playerHands, cardRows, drawDeck, selectedRows);
     }
+
+
+    public boolean canPlayInRow(TheGameCard playerCard, TheGameDeck<TheGameCard> row)
+    {
+        int backwardsTrickValue = ((TheGameParameters) gameParameters).backwardsTrickValue;
+        TheGameCard top = row.peek();
+        boolean ascending = row.isAscending();
+        if(ascending && (playerCard.number > top.number || playerCard.number == top.number - backwardsTrickValue)) return true; //ascending valid card
+        return !ascending && (playerCard.number < top.number || playerCard.number == top.number + backwardsTrickValue); //descending valid card
+    }
+
+
+    public int getCardsToPlay() {
+        TheGameParameters params = (TheGameParameters) gameParameters;
+        if(drawDeck.getSize() > 0) return params.nCardsToPlay;
+        else return params.nCardsToPlayNoDrawDeck;
+    }
+
 
     // TODO: Review the methods below...these are all supported by the default implementation in AbstractGameState
     // TODO: So you do not (and generally should not) implement your own versions - take advantage of the framework!
