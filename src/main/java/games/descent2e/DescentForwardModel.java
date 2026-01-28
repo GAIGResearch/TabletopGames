@@ -326,7 +326,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
                     // Find random location on tile
                     else {
-                        System.out.println(tileName);
+                        // System.out.println(tileName);
                         int idx = rnd.nextInt(dgs.gridReferences.get(tileName).size());
                         while (previousKeys.contains(idx)) idx = rnd.nextInt(dgs.gridReferences.get(tileName).size());
                         int k = 0;
@@ -1804,7 +1804,7 @@ public class DescentForwardModel extends StandardForwardModel {
             x++;
             firstTile = (BoardNode) config.getBoardNodeMap().values().toArray()[x];
             }
-        System.out.println("First tile:" + firstTile.getComponentName());
+        // System.out.println("First tile:" + firstTile.getComponentName());
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard tile = tileConfigs.get(firstTile.getComponentID());
@@ -1929,7 +1929,7 @@ public class DescentForwardModel extends StandardForwardModel {
                         gridReferences.get(s).remove(new Vector2D(j, i));
                     }
                     gridReferences.get(tile.getComponentName()).put(new Vector2D(j, i), new Vector2D(j - x, i - y));
-                    System.out.println(tile.getComponentName() + "; (x,y): (" + x + "," + y + "); (j,i): (" + j + "," + i + "); (j-x, i-y): (" + (j - x) + "," + (i - y) + ")");
+                    // System.out.println(tile.getComponentName() + "; (x,y): (" + x + "," + y + "); (j,i): (" + j + "," + i + "); (j-x, i-y): (" + (j - x) + "," + (i - y) + ")");
                 }
             }
 
@@ -2307,6 +2307,8 @@ public class DescentForwardModel extends StandardForwardModel {
         int players = dgs.getNPlayers();
         players = Math.max(players - 1, 2); // Exclude Overlord from count, minimum 2 Heroes
 
+        List<String> monsterNames = new ArrayList<>();
+
         for (String[] mDef : monsters) {
             List<Monster> monsterGroup = new ArrayList<>();
             List<Monster> monsterOriginalGroup = new ArrayList<>();
@@ -2314,7 +2316,7 @@ public class DescentForwardModel extends StandardForwardModel {
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
             String tile = mDef[1];
-            boolean isOpen = name.contains("open");
+            boolean isOpen = name.toLowerCase().contains("open");
             boolean isLieutenant = nameDef.contains("lieutenant");
             Set<Vector2D> tileCoords = dgs.gridReferences.get(tile).keySet();
             int act = quest.getAct();
@@ -2329,11 +2331,13 @@ public class DescentForwardModel extends StandardForwardModel {
                         if (possible.contains(monster)) continue;
                         String monName = monster.a;
                         boolean skip = false;
-                        for (String[] m : monsters)
-                            if (m[0].contains(monName)) {
+                        for (String[] m : monsters) {
+                            // Check that we haven't already tried to spawn the monster, either in this Open group or another group
+                            if (m[0].contains(monName) || monsterNames.contains(monName)) {
                                 skip = true;
                                 break;
                             }
+                        }
                         if (skip) continue;
                         possible.add(monster);
                     }
@@ -2347,6 +2351,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     monsterDef = _data.findLieutenant(name);
                 else monsterDef = _data.findMonster(name);
             }
+            monsterNames.add(name);
             Monster superDef = monsterDef.get("super");
             PropertyString spawnpoint = new PropertyString("spawn", tile);
             superDef.setProperty(spawnpoint);
