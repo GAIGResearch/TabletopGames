@@ -6,8 +6,16 @@
       ["Goblin Archer:group", "5A"],
       ["Barghest:group", "4A", "all:Health:+2"]
     ],
-    "tokens": [],
-    "rules": [],
+    "tokens": [
+      ["Villager", "Wounded Clergy", "nHeroes", ["8A"], ""],
+      ["Search", "Search action", "nHeroes", ["21A-3;1", "9A-3;3", "11A-1;3", "4A-3;1"], "Effect:Search; Effect:Greedy:Skill; Effect:Lurk:Skill"],
+      ["WhiteObjective", "Acolyte", "1", ["player"], "Effect:AcolyteAction;Effect:TradeAcolyte"]
+    ],
+    "rules": [
+      ["overlord fatigue", "START_TURN", "if(count(Goblin Archer,9A)>0);AttributeModifier:Fatigue:+1"],
+      ["overlord fatigue", "END_TURN", "if(count(Goblin Archer,9A)>0);AttributeModifier:Fatigue:+1"],
+      ["overlord reinforcements", "END_TURN", "SpawnMonster:Goblin Archer:2:4A"]
+    ],
     "game-over": [
       {
         "id": "CountGameOver",
@@ -24,12 +32,24 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Barghest"
         },
         "target": 0,
         "comparison-type": "Equal",
         "result-heroes": "WIN_GAME",
         "result-overlord": "LOSE_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "Attribute",
+          "attribute": "Fatigue",
+          "figureNameContains": "Overlord"
+        },
+        "target": 6,
+        "comparison-type": "More",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
       }
     ],
     "common-rewards": [{
@@ -43,10 +63,33 @@
       "value": 1.0,
       "mustWinToReceive": true
     }],
+    "hero-rewards": [{
+      "rewardType": "Token",
+      "token": "Villager",
+      "value": 1.0,
+      "mustLoseToReceive": true,
+      "apply": "Set"
+    }, {
+      "rewardType": "Attribute",
+      "attribute": "Gold",
+      "value": 25.0,
+      "multiplier": {
+        "type": "Token",
+        "token": "Villager"
+      }
+    }],
     "boards": [
       "acolyte-of-saradyn"
     ],
-    "starting-tile": "exit1A"
+    "starting-tile" : "exit1A",
+    "starting-locations": [
+      [[1, 15],
+      [1, 16],
+      [2, 15],
+      [2, 16]]
+    ],
+    "next-quest": ["Rellegar's Rest 1", "Siege of Skytower"],
+    "next-side-quests": [0, 1]
   },
   {
     "id": "Rellegar's Rest 1",
@@ -57,8 +100,18 @@
       ["Goblin Archer:group", "6A"],
       ["open:group", "12A"]
     ],
-    "tokens": [],
-    "rules": [],
+    "tokens": [
+      ["Search", "Search action", "nHeroes", ["6A-1;2", "3A-4;4", "21A-1;3", "12A-4;1"], ""],
+      ["MysteryObjective", "???", "5", ["random"], "Effect:PickupObjective"],
+      ["BlueObjective", "Not", "4", [""], "Effect:PickupObjective"],
+      ["RedObjective", "Key", "1", [""], "Effect:PickupObjective"]
+    ],
+    "rules": [
+      ["Token:MysteryObjective", "START_GAME", "ComponentName:Key:Random"],
+      ["Replace:MysteryObjective", "START_TURN", "Key;Red;Blue:12A;water"],
+      ["overlord fatigue", "START_TURN", "AttributeModifier:Fatigue:+1"],
+      ["overlord reinforcements", "END_TURN", "SpawnMonster:Goblin Archer:1:exit1A"]
+    ],
     "game-over": [
       {
         "id": "CountGameOver",
@@ -74,30 +127,37 @@
       {
         "id": "CountGameOver",
         "count": {
-          "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "type": "Attribute",
+          "attribute": "Fatigue",
+          "figureNameContains": "Overlord"
         },
-        "target": 0,
-        "comparison-type": "Equal",
+        "target": 5,
+        "comparison-type": "More",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "DeliverGameOver",
+        "token": "Key",
+        "figure": "Hero",
+        "destination": "entrance1A",
         "result-heroes": "WIN_GAME",
         "result-overlord": "LOSE_GAME"
       }
     ],
-    "common-rewards": [{
-      "rewardType": "Attribute",
-      "attribute": "XP",
-      "value": 1.0
-    }],
-    "overlord-rewards": [{
-      "rewardType": "Attribute",
-      "attribute": "XP",
-      "value": 1.0,
-      "mustWinToReceive": true
-    }],
     "boards": [
       "rellegars-rest-1"
     ],
-    "starting-tile" : "exit1A"
+    "starting-tile" : "exit1A",
+    "starting-locations": [
+      [[3, 5],
+        [3, 6],
+        [4, 6],
+        [4, 3]]
+    ],
+    "random-tokens" : ["3A-0;1","3A-1;1","3A-2;1","3A-3;1","3A-4;1","3A-5;1","3A-6;1"],
+    "next-quest": ["Rellegar's Rest 2"],
+    "next-side-quests": [0, 1]
   },
   {
     "id": "Rellegar's Rest 2",
@@ -106,10 +166,14 @@
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "13B"],
       ["Goblin Archer:group", "19B"],
-      ["Open:group", "3B"]
+      ["Elemental:group", "3B"]
     ],
-    "tokens": [],
-    "rules": [],
+    "tokens": [
+      ["Search", "Search action", "nHeroes", [null, null, "13B-4;4", null], ""]
+    ],
+    "rules": [
+      ["overlord reinforcements", "END_TURN", "SpawnMonster:Goblin Archer:1:entrance1B"]
+    ],
     "game-over": [
       {
         "id": "CountGameOver",
@@ -126,41 +190,40 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Goblin Archer"
         },
         "target": 0,
         "comparison-type": "Equal",
         "result-heroes": "WIN_GAME",
         "result-overlord": "LOSE_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "Attribute",
+          "attribute": "Fatigue",
+          "figureNameContains": "Overlord"
+        },
+        "target": 6,
+        "comparison-type": "More",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
       }
     ],
-    "common-rewards": [{
-      "rewardType": "Attribute",
-      "attribute": "XP",
-      "value": 1.0
-    }],
-    "overlord-rewards": [{
-      "rewardType": "Attribute",
-      "attribute": "XP",
-      "value": 1.0,
-      "mustWinToReceive": true
-    }],
     "boards": [
       "rellegars-rest-2"
     ],
-    "starting-tile" : "exit1B"
+    "starting-tile" : "entrance1B",
+    "next-quest": ["Blood Will Tell", "The Baron Returns"],
+    "next-side-quests": [0, 1]
   },
   {
     "id": "Siege of Skytower",
     "act": 1,
     "traits": ["Building", "Civilized", "Mountain"],
     "monsters": [
-      ["Sir Alric Farrow:lieutenant", "11A"],
-      ["Belthir:lieutenant", "1A"],
-      ["Goblin Archer:group", "1A"],
-      ["Cave Spider:group", "15B"],
-      ["Open:group", "8B"],
-      ["OpenSmall:group", "1A"]
+      ["Elemental:group", "8B"],
+      ["Goblin Archer:group", "1A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -180,7 +243,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Elemental"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -198,12 +261,8 @@
     "act": 1,
     "traits": ["Cave", "Cursed", "Dark"],
     "monsters": [
-      ["Lady Eliza Farrow:lieutenant", "6B"],
-      ["Flesh Moulder:group", "6B"],
-      ["Zombie:group", "16B"],
-      ["Open:group", "8B"],
-      ["Open:group", "9B"],
-      ["Open:group", "5B"]
+      ["Elemental:group", "6B"],
+      ["Goblin Archer:group", "5B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -223,7 +282,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Elemental"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -241,10 +300,8 @@
     "act": 1,
     "traits": ["Building", "Cursed", "Wilderness"],
     "monsters": [
-      ["Lady Eliza Farrow:lieutenant", "exit1B"],
-      ["Zombie:group", "3B"],
-      ["Goblin Archer:group", "19B"],
-      ["Open:group", "5B"]
+      ["Elemental:group", "19B"],
+      ["Goblin Archer:group", "5B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -264,7 +321,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Elemental"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -282,10 +339,8 @@
     "act": 1,
     "traits": ["Building", "Cave", "Civilized"],
     "monsters": [
-      ["Baron Zachareth:lieutenant", "1B"],
-      ["Open:group", "1B"],
-      ["Open:group", "5B"],
-      ["Open:group", "3B"]
+      ["Elemental:group", "1B"],
+      ["Goblin Archer:group", "3B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -305,7 +360,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Elemental"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -323,9 +378,8 @@
     "act": 1,
     "traits": ["Building", "Hot", "Mountain", "Wilderness"],
     "monsters": [
-      ["Ettin:group", "25B"],
-      ["Open:group", "5B"],
-      ["Open:group", "9B"]
+      ["Elemental:group", "5B"],
+      ["Goblin Archer:group", "9B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -345,7 +399,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Elemental"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -356,7 +410,7 @@
     "boards": [
       "archive-of-arrizon-1"
     ],
-    "starting-tile" : "entrance1B"
+    "starting-tile" : "exit1B"
   },
   {
     "id": "Archive of Arrizon 2",
@@ -364,10 +418,7 @@
     "traits": ["Building", "Cave", "Dark", "Hot", "Mountain"],
     "monsters": [
       ["Lady Eliza Farrow:lieutenant", "4B"],
-      ["Ettin:group", "8B"],
-      ["Open:group", "4B"],
-      ["Open:group", "13B"],
-      ["Open:group", "14B"]
+      ["Ettin:group", "4B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -387,7 +438,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -398,7 +449,7 @@
     "boards": [
       "archive-of-arrizon-2"
     ],
-    "starting-tile" : "exit1B"
+    "starting-tile" : "entrance1B"
   },
   {
     "id": "Rise of Urthko 1",
@@ -406,8 +457,7 @@
     "traits": ["Cave", "Cursed", "Hot"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "entrance1B"],
-      ["Ettin:group", "5B"],
-      ["Open:group", "4B"]
+      ["Ettin:group", "4B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -427,7 +477,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -446,9 +496,7 @@
     "traits": ["Cave", "Cursed", "Dark"],
     "monsters": [
       ["Sir Alric Farrow:lieutenant", "2B"],
-      ["Barghest:group", "2B"],
-      ["Ettin:group", "5B"],
-      ["OpenSmall:group", "9B"]
+      ["Ettin:group", "2B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -468,7 +516,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -486,9 +534,8 @@
     "act": 1,
     "traits": ["Civilized", "Cursed", "Wilderness"],
     "monsters": [
-      ["Goblin Archer:group", "8A"],
-      ["Open:group", "15A"],
-      ["Open:group", "13A"]
+      ["Lady Eliza Farrow:lieutenant", "3A"],
+      ["Ettin:group", "3A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -508,7 +555,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -526,14 +573,8 @@
     "act": 1,
     "traits": ["Building", "Cursed", "Mountain", "Wilderness"],
     "monsters": [
-      ["Splig:lieutenant", "endcap1A-1"],
-      ["Belthir:lieutenant", "endcap1A-1"],
-      ["Baron Zachareth:lieutenant", "endcap1A-2"],
-      ["Open:group", "5A"],
-      ["Open:group", "23A"],
-      ["Open:group", "8A"],
-      ["Open:group", "24A"],
-      ["Open:group", "2A"]
+      ["Lady Eliza Farrow:lieutenant", "2A"],
+      ["Ettin:group", "2A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -553,7 +594,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -564,20 +605,15 @@
     "boards": [
       "caladens-crossing-2"
     ],
-    "starting-tile" : "19A"
+    "starting-tile" : "entrance1A"
   },
   {
     "id": "From The Wreckage",
     "act": 1,
     "traits": ["Cursed", "Mountain", "Wilderness"],
     "monsters": [
-      ["Lord Merick Farrow:lieutenant", "1B"],
-      ["Lady Eliza Farrow:lieutenant", "exit1A"],
-      ["Goblin Archer:group", "11A"],
-      ["Merriod:group", "19A"],
-      ["Open:group", "1B"],
-      ["Open:group", "2B"],
-      ["Open:group", "4B"]
+      ["Lady Eliza Farrow:lieutenant", "11A"],
+      ["Ettin:group", "1B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -597,7 +633,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -608,19 +644,15 @@
     "boards": [
       "from-the-wreckage"
     ],
-    "starting-tile" : "9A"
+    "starting-tile" : "11A"
   },
   {
     "id": "Saradyn In Flames",
     "act": 1,
     "traits": ["Building", "Cursed", "Hot"],
     "monsters": [
-      ["Lady Eliza Farrow:lieutenant", "17B"],
-      ["Sir Alric Farrow:lieutenant", "19B"],
-      ["Cave Spider:group", "15B"],
-      ["Zombie:group", "10B"],
-      ["Open:group", "21B"],
-      ["Open:group", "5B"]
+      ["Lady Eliza Farrow:lieutenant", "5B"],
+      ["Ettin:group", "5B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -640,7 +672,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -658,12 +690,8 @@
     "act": 2,
     "traits": ["Cursed", "Dark", "Water", "Wilderness"],
     "monsters": [
-      ["Splig:lieutenant", "12A"],
-      ["Belthir:lieutenant", "16A"],
-      ["Baron Zachareth:lieutenant", "23A"],
-      ["Zombie:group", "14A"],
-      ["Ettin:group", "10B"],
-      ["Open:group", "2A"]
+      ["Lady Eliza Farrow:lieutenant", "2A"],
+      ["Ettin:group", "2A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -683,7 +711,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -701,9 +729,8 @@
     "act": 2,
     "traits": ["Building", "Cursed", "Wilderness"],
     "monsters": [
-      ["Zombie:group", "8B"],
-      ["Cave Spider:group", "20A"],
-      ["Open:group", "3B"]
+      ["Lady Eliza Farrow:lieutenant", "3B"],
+      ["Ettin:group", "3B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -723,7 +750,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -741,13 +768,8 @@
     "act": 2,
     "traits": ["Building", "Cave", "Cursed", "Dark"],
     "monsters": [
-      ["Splig:lieutenant", "exit1B"],
-      ["Baron Zachareth:lieutenant", "exit1B"],
-      ["Zombie:group", "9B"],
-      ["Cave Spider:group", "4B"],
-      ["Open:group", "5B"],
-      ["Open:group", "14B"],
-      ["Open:group", "24B"]
+      ["Lady Eliza Farrow:lieutenant", "5B"],
+      ["Ettin:group", "5B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -767,7 +789,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -785,9 +807,8 @@
     "act": 2,
     "traits": ["Building", "Cold", "Hot", "Mountain"],
     "monsters": [
-      ["Lord Merick Farrow:lieutenant", "10A"],
-      ["Flesh Moulder:group", "10A"],
-      ["Open:group", "11A"]
+      ["Lord Merick Farrow:lieutenant", "10"],
+      ["Ettin:group", "11A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -807,7 +828,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -826,8 +847,7 @@
     "traits": ["Cave", "Cold", "Hot", "Water"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "24B"],
-      ["Elemental:group", "3B"],
-      ["Open:group", "7B"]
+      ["Ettin:group", "7B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -847,7 +867,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -865,9 +885,8 @@
     "act": 2,
     "traits": ["Building", "Mountain", "Water", "Wilderness"],
     "monsters": [
-      ["Zombie:group", "26B"],
-      ["Cave Spider:group", "27A"],
-      ["Open:group", "8A"]
+      ["Zombie:group", "5A"],
+      ["Ettin:group", "3A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -887,7 +906,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -903,16 +922,9 @@
   {
     "id": "Rite Of The Red Dawn",
     "act": 2,
-    "traits": ["All"],
     "monsters": [
-      ["Goblin Archer:group", "24A"],
-      ["Flesh Moulder:group", "13B"],
-      ["Zombie:group", "20A"],
       ["Lady Eliza Farrow:lieutenant", "16A"],
-      ["Open:group", "4A"],
-      ["Open:group", "5A"],
-      ["Open:group", "19A"],
-      ["Open:group", "17A"]
+      ["Ettin:group", "4A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -932,7 +944,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -949,11 +961,8 @@
     "id": "Shadowfall Mountain 1",
     "act": 2,
     "monsters": [
-      ["Cave Spider:group", "7A"],
-      ["Goblin Archer:group", "6A"],
-      ["Zombie:group", "28A"],
-      ["Flesh Moulder:group", "12A"],
-      ["Barghest:group", "5A"]
+      ["Lady Eliza Farrow:lieutenant", "6A"],
+      ["Ettin:group", "6A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -973,7 +982,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -984,21 +993,14 @@
     "boards": [
       "shadowfall-mountain-1"
     ],
-    "starting-tile" : "exit1A"
+    "starting-tile" : "entrance1A"
   },
   {
     "id": "Shadowfall Mountain 2",
     "act": 2,
     "monsters": [
-      ["Elemental:0", "3A"],
-      ["Merriod:0", "1A"],
-      ["Ettin:0", "5A"],
-      ["Shadow Dragon:0", "9A"],
-      ["Cave Spider:group", "2A"],
-      ["Goblin Archer:group", "2A"],
-      ["Zombie:group", "2A"],
-      ["Flesh Moulder:group", "1A"],
-      ["Barghest:group", "1A"]
+      ["Lady Eliza Farrow:lieutenant", "2A"],
+      ["Ettin:group", "1A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1018,7 +1020,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1036,10 +1038,8 @@
     "act": 2,
     "traits": ["Building", "Dark", "Wilderness"],
     "monsters": [
-      ["Sir Alric Farrow:lieutenant", "endcap1B-1"],
-      ["Cave Spider:group", "4B"],
-      ["Goblin Archer:group", "5B"],
-      ["Open:group", "8B"]
+      ["Lady Eliza Farrow:lieutenant", "4B"],
+      ["Ettin:group", "4B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1059,7 +1059,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1077,12 +1077,8 @@
     "act": 2,
     "traits": ["Building", "Cave", "Civilized", "Cursed"],
     "monsters": [
-      ["Sir Alric Farrow:lieutenant", "9B"],
-      ["Lord Merick Farrow:lieutenant", "1B"],
-      ["Barghest:group", "3B"],
-      ["Flesh Moulder:group", "26B"],
-      ["Open:group", "6B"],
-      ["Open:group", "1B"]
+      ["Lady Eliza Farrow:lieutenant", "1B"],
+      ["Ettin:group", "1B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1102,7 +1098,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1120,10 +1116,8 @@
     "act": 2,
     "traits": ["Building", "Dark", "Wilderness"],
     "monsters": [
-      ["Barghest:group", "14A"],
-      ["Ettin:group", "4A"],
-      ["Goblin Archer:group", "4A"],
-      ["Open:group", "2B"]
+      ["Lady Eliza Farrow:lieutenant", "2B"],
+      ["Ettin:group", "2B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1143,7 +1137,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1161,11 +1155,8 @@
     "act": 2,
     "traits": ["Building", "Civilized", "Cursed"],
     "monsters": [
-      ["Sir Alric Farrow:lieutenant", "1B"],
-      ["Lord Merick Farrow:lieutenant", "1B"],
-      ["Flesh Moulder:group", "16B"],
-      ["Open:group", "3B"],
-      ["Open:group", "5B"]
+      ["Lady Eliza Farrow:lieutenant", "1B"],
+      ["Ettin:group", "1B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1185,7 +1176,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1203,15 +1194,8 @@
     "act": 2,
     "traits": ["Building", "Cursed", "Wilderness"],
     "monsters": [
-      ["Baron Zachareth:lieutenant", "8A"],
-      ["Baron Zachareth:lieutenant", "4A"],
-      ["Baron Zachareth:lieutenant", "5A"],
-      ["Zombie:group", "8A"],
-      ["Elemental:group", "3A"],
-      ["Open:group", "2A"],
-      ["Open:group", "9A"],
-      ["Open:group", "5A"],
-      ["Open:group", "12A"]
+      ["Lady Eliza Farrow:lieutenant", "2A"],
+      ["Ettin:group", "2A"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1231,7 +1215,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1249,13 +1233,8 @@
     "act": 2,
     "traits": ["Building", "Cave", "Cursed", "Dark"],
     "monsters": [
-      ["Lord Merick Farrow:lieutenant", "6B"],
-      ["Sir Alric Farrow:lieutenant", "6B"],
-      ["Cave Spider:group", "5B"],
-      ["Open:group", "13B"],
-      ["Open:group", "6B"],
-      ["Open:group", "9B"],
-      ["Open:group", "8B"]
+      ["Lady Eliza Farrow:lieutenant", "6B"],
+      ["Ettin:group", "6B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1275,7 +1254,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1293,13 +1272,8 @@
     "act": 2,
     "traits": ["Cave", "Cursed", "Dark", "Hot"],
     "monsters": [
-      ["Lord Merick Farrow:lieutenant", "13B"],
-      ["Sir Alric Farrow:lieutenant", "21B"],
-      ["Cave Spider:group", "26A"],
-      ["Open:group", "13B"],
-      ["Open:group", "21B"],
-      ["Open:group", "11A"],
-      ["Open:group", "12B"]
+      ["Lady Eliza Farrow:lieutenant", "13B"],
+      ["Ettin:group", "13B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1319,7 +1293,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1338,15 +1312,7 @@
     "traits": ["Building", "Cave", "Cursed", "Dark"],
     "monsters": [
       ["Lady Eliza Farrow:lieutenant", "1B"],
-      ["Lord Merick Farrow:lieutenant", "14B"],
-      ["Sir Alric Farrow:lieutenant", "14B"],
-      ["Shadow Dragon:group", "2B"],
-      ["Zombie:group", "9B"],
-      ["Flesh Moulder:group", "16B"],
-      ["Open:group", "8B"],
-      ["Open:group", "1B"],
-      ["Open:group", "3B"],
-      ["Open:group", "5B"]
+      ["Ettin:group", "1B"]
     ],
     "tokens" : [],
     "rules": [],
@@ -1366,7 +1332,7 @@
         "id": "CountGameOver",
         "count": {
           "type": "NFiguresAlive",
-          "figureNameContains": "Monster"
+          "figureNameContains": "Ettin"
         },
         "target": 0,
         "comparison-type": "Equal",
@@ -1378,5 +1344,88 @@
       "blood-and-betrayal-3"
     ],
     "starting-tile" : "exit1B"
+  },
+  {
+    "id": "Test",
+    "act": 1,
+    "traits": ["Building", "Water", "Wilderness"],
+    "monsters": [
+      ["Elemental:group", "4A-1"],
+      ["Goblin Archer:group", "4A-2"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Elemental"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "test"
+    ],
+    "starting-tile" : "4A-3",
+    "starting-locations": [
+      [[3, 4],
+        [3, 5],
+        [3, 6],
+        [3, 7]]
+    ]
+  },
+  {
+    "id": "TestBuild",
+    "act": 1,
+    "traits": ["Building", "Water", "Wilderness"],
+    "monsters": [
+      ["Goblin Archer:group", "6A"]
+    ],
+    "tokens" : [],
+    "rules": [],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
+      },
+      {
+        "id": "CountGameOver",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Goblin Archer"
+        },
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
+      }
+    ],
+    "boards": [
+      "testbuild"
+    ],
+    "starting-tile" : "entrance1A"
   }
 ]

@@ -136,7 +136,7 @@
     "nodes" :
     [
       {
-        "name": ["String", "entrance1B"],
+        "name": ["String", "exit1B"],
         "orientation": ["Integer", 0],
         "neighbours": ["String[]", ["19B"]],
         "connections": ["String[]", ["N-0"]]
@@ -144,7 +144,7 @@
       {
         "name": ["String", "19B"],
         "orientation": ["Integer", 2],
-        "neighbours": ["String[]", ["3B", "entrance1B"]],
+        "neighbours": ["String[]", ["3B", "exit1B"]],
         "connections": ["String[]", ["N-0", "S-0"]]
       },
       {
@@ -624,7 +624,7 @@
     "nodes" :
     [
       {
-        "name": ["String", "exit1B"],
+        "name": ["String", "entrance1B"],
         "orientation": ["Integer", 3],
         "neighbours": ["String[]", ["23B"]],
         "connections": ["String[]", ["W-0"]]
@@ -632,7 +632,7 @@
       {
         "name": ["String", "23B"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["exit1B", "29B", "5B"]],
+        "neighbours": ["String[]", ["entrance1B", "29B", "5B"]],
         "connections": ["String[]", ["E-0", "W-0", "S-0"]]
       },
       {
@@ -706,7 +706,7 @@
     "nodes" :
     [
       {
-        "name": ["String", "entrance1B"],
+        "name": ["String", "exit1B"],
         "orientation": ["Integer", 1],
         "neighbours": ["String[]", ["8B"]],
         "connections": ["String[]", ["E-0"]]
@@ -714,7 +714,7 @@
       {
         "name": ["String", "8B"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["entrance1B", "4B"]],
+        "neighbours": ["String[]", ["exit1B", "4B"]],
         "connections": ["String[]", ["W-0", "N-0"]]
       },
       {
@@ -1074,7 +1074,7 @@
     "nodes" :
     [
       {
-        "name": ["String", "entrance1A"],
+        "name": ["String", "exit1A"],
         "orientation": ["Integer", 0],
         "neighbours": ["String[]", ["19A"]],
         "connections": ["String[]", ["N-0"]]
@@ -1082,7 +1082,7 @@
       {
         "name": ["String", "19A"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["entrance1A", "9A"]],
+        "neighbours": ["String[]", ["exit1A", "9A"]],
         "connections": ["String[]", ["S-0","N-0"]]
       },
       {
