@@ -1799,10 +1799,11 @@ public class DescentForwardModel extends StandardForwardModel {
 
         // Find first tile, as board node in the board configuration graph board
         int x = 0;
-        BoardNode firstTile = (BoardNode) config.getBoardNodeMap().values().toArray()[x];
-        while (!firstTile.getComponentName().contains("exit1") && !firstTile.getComponentName().contains("entrance1")) {
+        List<Object> nodes = Arrays.asList(config.getBoardNodeMap().values().toArray());
+        BoardNode firstTile = (BoardNode) nodes.get(x);
+        while (!firstTile.getComponentName().contains("exit1") && !firstTile.getComponentName().contains("entrance1") && x < nodes.size() - 1) {
             x++;
-            firstTile = (BoardNode) config.getBoardNodeMap().values().toArray()[x];
+            firstTile = (BoardNode) nodes.get(x);
             }
         // System.out.println("First tile:" + firstTile.getComponentName());
         if (firstTile != null) {
