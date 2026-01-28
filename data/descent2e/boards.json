@@ -2152,11 +2152,11 @@
       {
         "name": ["String", "27B"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["14B", "endcap1A-1"]],
+        "neighbours": ["String[]", ["14B", "endcap1B-1"]],
         "connections": ["String[]", ["W-0", "E-0"]]
       },
       {
-        "name": ["String", "endcap1A-1"],
+        "name": ["String", "endcap1B-1"],
         "orientation": ["Integer", 3],
         "neighbours": ["String[]", ["27B"]],
         "connections": ["String[]", ["W-0"]]
@@ -2184,6 +2184,12 @@
         "orientation": ["Integer", 1],
         "neighbours": ["String[]", ["8B", "endcap1B-2"]],
         "connections": ["String[]", ["N-0", "S-0"]]
+      },
+      {
+        "name": ["String", "endcap1B-2"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["10B"]],
+        "connections": ["String[]", ["N-0"]]
       }
     ]
   },
