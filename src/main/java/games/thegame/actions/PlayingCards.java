@@ -99,11 +99,20 @@ public class PlayingCards extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        // TODO: Process the action that was taken.
         TheGameGS gs = (TheGameGS) state;
         if(action instanceof PlayCard pc)
         {
             cardsPlayed++;
+
+            boolean mustKeepPlaying = cardsPlayed < gs.getCardsToPlay();
+            boolean canPlay = canBePlayed(state);
+            if(mustKeepPlaying && !canPlay)
+            {
+                //Game is over
+                gs.gameOver();
+                completed = true;
+            }
+
         }else if(action instanceof DoNothing)
         {
             //We're done;

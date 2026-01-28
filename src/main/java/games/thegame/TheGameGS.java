@@ -140,6 +140,7 @@ public class TheGameGS extends AbstractGameState{
         return copy;
     }
 
+
     /**
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
@@ -148,18 +149,11 @@ public class TheGameGS extends AbstractGameState{
     @Override
     protected double _getHeuristicScore(int playerId) {
         TheGameParameters params = (TheGameParameters) gameParameters;
-        int originalCardsInDrawDeck = params.maxCardNumber - params.minCardNumber - 1;
         int cardsInHands = 0;
         for(int i = 0; i < getNPlayers(); ++i)
             cardsInHands += playerHands.get(i).getSize();
 
-        if (isNotTerminal()) {
-            // This is the number of cards missing to be placed in rows.
-            return originalCardsInDrawDeck - (drawDeck.getSize() + cardsInHands);
-        } else {
-            // The game finished, we can instead return the actual result of the game for the given player.
-            return getPlayerResults()[playerId].value;
-        }
+        return params.maxScore - (drawDeck.getSize() + cardsInHands);
     }
 
     /**
@@ -203,6 +197,18 @@ public class TheGameGS extends AbstractGameState{
         TheGameParameters params = (TheGameParameters) gameParameters;
         if(drawDeck.getSize() > 0) return params.nCardsToPlay;
         else return params.nCardsToPlayNoDrawDeck;
+    }
+
+    public void gameOver()
+    {
+        TheGameParameters params = (TheGameParameters) gameParameters;
+        int gameScore = (int) getGameScore(0);
+        CoreConstants.GameResult result = (params.maxScore == gameScore) ?  CoreConstants.GameResult.WIN_GAME :
+                CoreConstants.GameResult.LOSE_GAME;
+
+        for(int i = 0; i < getNPlayers(); ++i)
+            setPlayerResult(result, i);
+        setGameStatus(CoreConstants.GameResult.GAME_END);
     }
 
 

@@ -22,6 +22,7 @@ public class TheGameParameters extends AbstractParameters {
     public final int nCardsToPlayNoDrawDeck = 1;
     public final int backwardsTrickValue = 10;
 
+    public final int maxScore = maxCardNumber - minCardNumber -1;
 
     public TheGameParameters() {}
 

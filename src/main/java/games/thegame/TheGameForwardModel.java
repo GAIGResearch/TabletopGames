@@ -62,7 +62,7 @@ public class TheGameForwardModel extends StandardForwardModel {
             gs.playerHands.add(new Deck<>("Player " + i + " hand", i, params.playerHandVisibility));
             //Deal cards depending on player count.
             for(int k = 0; k < params.handSize[gs.getNPlayers()]; ++k)
-                    gs.playerHands.get(i).add(gs.drawDeck.draw());
+                gs.playerHands.get(i).add(gs.drawDeck.draw());
             gs.selectedRows.put(i, -1);
         }
 
@@ -111,9 +111,19 @@ public class TheGameForwardModel extends StandardForwardModel {
         // TODO: appropriate actions).
 
         TheGameGS gs = (TheGameGS) currentState;
+        TheGameParameters params = (TheGameParameters) gs.getGameParameters();
 
         if (gs.isActionInProgress())
             return;  // we always wait for any EAS to finish
+
+        if(gs.getGameStatus() == CoreConstants.GameResult.GAME_END) {
+            System.out.println("Game End (" + gs.getPlayerResults()[gs.getCurrentPlayer()] + "). Score: " +
+                    gs.getGameScore(0) + " / " + params.maxScore);
+            return;
+        }
+
+        while(gs.playerHands.get(gs.getCurrentPlayer()).getSize() < params.handSize[gs.getNPlayers()] && gs.drawDeck.getSize() > 0)
+            gs.playerHands.get(gs.getCurrentPlayer()).add(gs.drawDeck.draw());
 
         int nextPlayer = (gs.getCurrentPlayer() + 1) % gs.getNPlayers(); // we increment one more
         endPlayerTurn(gs, nextPlayer);
@@ -122,16 +132,9 @@ public class TheGameForwardModel extends StandardForwardModel {
         if(!canPlay)
         {
             //Game over.
-            TheGameParameters params = (TheGameParameters) gs.getGameParameters();
-            int originalCardsInDrawDeck = params.maxCardNumber - params.minCardNumber - 1;
-            int gameScore = (int) gs.getGameScore(0);
-            CoreConstants.GameResult result = (originalCardsInDrawDeck == gameScore) ?  CoreConstants.GameResult.WIN_GAME :
-                    CoreConstants.GameResult.LOSE_GAME;
-
-            for(int i = 0; i < gs.getNPlayers(); ++i)
-                gs.setPlayerResult(result, i);
-            gs.setGameStatus(result);
-            System.out.println("Game End (" + result + "). Score: " + gameScore + " / " + originalCardsInDrawDeck);
+            gs.gameOver();
+            System.out.println("Game End (" + gs.getPlayerResults()[gs.getCurrentPlayer()] + "). Score: " +
+                    gs.getGameScore(0) + " / " + params.maxScore);
         }
 
     }
