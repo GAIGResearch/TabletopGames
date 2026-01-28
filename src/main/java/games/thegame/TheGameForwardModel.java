@@ -131,7 +131,7 @@ public class TheGameForwardModel extends StandardForwardModel {
             for(int i = 0; i < gs.getNPlayers(); ++i)
                 gs.setPlayerResult(result, i);
             gs.setGameStatus(result);
-            System.out.println("Game End (" + result + "). Score: " + gameScore);
+            System.out.println("Game End (" + result + "). Score: " + gameScore + " / " + originalCardsInDrawDeck);
         }
 
     }
