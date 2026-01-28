@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class TheGameCard extends Card {
 
-    private final int number;
+    public final int number;
 
     public TheGameCard(String name, int number) {
         super(name);

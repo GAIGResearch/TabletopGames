@@ -5,7 +5,9 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import games.thegame.actions.SelectRows;
 import games.thegame.components.TheGameCard;
+import games.thegame.components.TheGameDeck;
 import gametemplate.actions.GTAction;
 
 import java.util.ArrayList;
@@ -31,15 +33,15 @@ public class TheGameForwardModel extends StandardForwardModel {
         TheGameParameters params = (TheGameParameters) firstState.getGameParameters();
 
         // Create the rows and add the starting cards.
-        gs.ascCardRows = new ArrayList<>();
+        gs.cardRows = new ArrayList<>();
         for(int i = 0; i < params.numAscendingRows; ++i) {
-            gs.ascCardRows.add(new Deck<>("Ascending Row " + i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
-            gs.ascCardRows.get(i).add(new TheGameCard("" + params.minCardNumber, params.minCardNumber));
+            gs.cardRows.add(new TheGameDeck<>("Row " + i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL, true));
+            gs.cardRows.get(i).add(new TheGameCard("" + params.minCardNumber, params.minCardNumber));
         }
-        gs.descCardRows = new ArrayList<>();
+
         for(int i = 0; i < params.numDescendingRows; ++i) {
-            gs.descCardRows.add(new Deck<>("Descending Row " + i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
-            gs.descCardRows.get(i).add(new TheGameCard("" + params.maxCardNumber, params.maxCardNumber));
+            gs.cardRows.add(new TheGameDeck<>("Row " + i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL, false));
+            gs.cardRows.get(i).add(new TheGameCard("" + params.maxCardNumber, params.maxCardNumber));
         }
 
         // Create fill and shuffle the row deck
@@ -60,9 +62,8 @@ public class TheGameForwardModel extends StandardForwardModel {
             gs.selectedRows.put(i, -1);
         }
 
-        TheGameGS fullyCopied = (TheGameGS) gs.copy(-1);
-        System.out.println(fullyCopied.equals(gs));
-        int a= 0 ;
+        gs.gamePhase = TheGameGS.TheGamePhase.SelectingRow;
+
     }
 
     /**
@@ -72,6 +73,15 @@ public class TheGameForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         List<AbstractAction> actions = new ArrayList<>();
+        TheGameGS gs = (TheGameGS) gameState;
+
+        switch (gs.gamePhase)
+        {
+            case SelectingRow -> {
+                actions.add(new SelectRows(gs.getCurrentPlayer()));
+            }
+        }
+
         // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
         actions.add(new GTAction());
         return actions;

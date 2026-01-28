@@ -5,8 +5,10 @@ import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
+import core.interfaces.IGamePhase;
 import games.GameType;
 import games.thegame.components.TheGameCard;
+import games.thegame.components.TheGameDeck;
 
 import java.util.*;
 
@@ -20,12 +22,20 @@ import java.util.*;
  */
 
 public class TheGameGS extends AbstractGameState{
+
+    public enum TheGamePhase implements IGamePhase{
+        SelectingRow,
+        PlayingCards
+    }
+
+
+
     public List<Deck<TheGameCard>> playerHands;
-    public List<Deck<TheGameCard>> ascCardRows;
-    public List<Deck<TheGameCard>> descCardRows;
+    public List<TheGameDeck<TheGameCard>> cardRows;
     public Deck<TheGameCard> drawDeck;
 
     public Map<Integer, Integer> selectedRows;
+    public TheGamePhase gamePhase;
 
     /**
      * @param gameParameters - game parameters.
@@ -54,8 +64,7 @@ public class TheGameGS extends AbstractGameState{
     protected List<Component> _getAllComponents() {
         ArrayList<Component> components = new ArrayList<>();
         components.addAll(playerHands);
-        components.addAll(ascCardRows);
-        components.addAll(descCardRows);
+        components.addAll(cardRows);
         components.add(drawDeck);
         return components;
     }
@@ -80,17 +89,17 @@ public class TheGameGS extends AbstractGameState{
     @Override
     protected TheGameGS _copy(int playerId) {
         TheGameGS copy = new TheGameGS(gameParameters, getNPlayers());
+        boolean visiblePlayerHands = ((TheGameParameters)gameParameters).playerHandVisibility == CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
-        copy.ascCardRows = new ArrayList<>();
-        copy.descCardRows = new ArrayList<>();
+        copy.gamePhase = this.gamePhase;
+
+        copy.cardRows = new ArrayList<>();
         copy.selectedRows = new HashMap<>();
         copy.playerHands = new ArrayList<>();
 
         // Fully observable bits
-        for(int i = 0; i < ascCardRows.size(); ++i)
-            copy.ascCardRows.add(this.ascCardRows.get(i).copy());
-        for(int i = 0; i < descCardRows.size(); ++i)
-            copy.descCardRows.add(this.descCardRows.get(i).copy());
+        for(int i = 0; i < cardRows.size(); ++i)
+            copy.cardRows.add(this.cardRows.get(i).copy());
         for(int i = 0; i < selectedRows.size(); ++i)
             copy.selectedRows.put(i, this.selectedRows.get(i));
 
@@ -103,17 +112,25 @@ public class TheGameGS extends AbstractGameState{
 
         if(playerId != -1){
             //Redeterminization of the PO bits
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    copy.drawDeck.add(copy.playerHands.get(i));
-                    copy.playerHands.get(i).clear();
+
+            if(visiblePlayerHands)
+                //Only shuffle the draw deck.
+                copy.drawDeck.shuffle(redeterminisationRnd);
+            else{
+
+                //Shuffle both the draw deck and the player hands.
+                for (int i = 0; i < getNPlayers(); i++) {
+                    if (i != playerId) {
+                        copy.drawDeck.add(copy.playerHands.get(i));
+                        copy.playerHands.get(i).clear();
+                    }
                 }
-            }
-            copy.drawDeck.shuffle(redeterminisationRnd);
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    for (int j = 0; j < playerHands.get(i).getSize(); j++) {
-                        copy.playerHands.get(i).add(copy.drawDeck.draw());
+                copy.drawDeck.shuffle(redeterminisationRnd);
+                for (int i = 0; i < getNPlayers(); i++) {
+                    if (i != playerId) {
+                        for (int j = 0; j < playerHands.get(i).getSize(); j++) {
+                            copy.playerHands.get(i).add(copy.drawDeck.draw());
+                        }
                     }
                 }
             }
@@ -131,9 +148,13 @@ public class TheGameGS extends AbstractGameState{
     protected double _getHeuristicScore(int playerId) {
         TheGameParameters params = (TheGameParameters) gameParameters;
         int originalCardsInDrawDeck = params.maxCardNumber - params.minCardNumber - 1;
+        int cardsInHands = 0;
+        for(int i = 0; i < getNPlayers(); ++i)
+            cardsInHands += playerHands.get(i).getSize();
+
         if (isNotTerminal()) {
-            // TODO calculate an approximate value
-            return originalCardsInDrawDeck - drawDeck.getSize();
+            // This is the number of cards missing to be placed in rows.
+            return originalCardsInDrawDeck - (drawDeck.getSize() + cardsInHands);
         } else {
             // The game finished, we can instead return the actual result of the game for the given player.
             return getPlayerResults()[playerId].value;
@@ -154,8 +175,8 @@ public class TheGameGS extends AbstractGameState{
         if(o == this) return true;
         if(o == null) return false;
         if(o instanceof TheGameGS theGameGS) {
-            return Objects.equals(playerHands, theGameGS.playerHands) && Objects.equals(ascCardRows, theGameGS.ascCardRows) &&
-                    Objects.equals(descCardRows, theGameGS.descCardRows) && Objects.equals(drawDeck, theGameGS.drawDeck) &&
+            return Objects.equals(playerHands, theGameGS.playerHands) &&
+                    Objects.equals(cardRows, theGameGS.cardRows) && Objects.equals(drawDeck, theGameGS.drawDeck) &&
                     Objects.equals(selectedRows, theGameGS.selectedRows);
         }
         return false;
@@ -163,7 +184,7 @@ public class TheGameGS extends AbstractGameState{
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerHands, ascCardRows, descCardRows, drawDeck, selectedRows);
+        return Objects.hash(super.hashCode(), playerHands, cardRows, drawDeck, selectedRows);
     }
 
     // TODO: Review the methods below...these are all supported by the default implementation in AbstractGameState
