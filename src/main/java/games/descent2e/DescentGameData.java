@@ -156,7 +156,7 @@ public class DescentGameData extends AbstractGameData {
             String name = monsters.keySet().toArray()[i].toString();
             Monster monster = ((Monster) ((HashMap) monsters.values().toArray()[i]).values().toArray()[0]);
             String[] traits = ((PropertyStringArray) monster.getProperty("traits")).getValues();
-            if (Arrays.asList(traits).contains(trait))
+            if (trait.contains("All") || Arrays.asList(traits).contains(trait))
                 possible.add(new Pair<>(name, monsters.get(name)));
         }
         return possible;
