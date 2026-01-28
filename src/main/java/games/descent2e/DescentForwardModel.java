@@ -1801,7 +1801,8 @@ public class DescentForwardModel extends StandardForwardModel {
         int x = 0;
         List<Object> nodes = Arrays.asList(config.getBoardNodeMap().values().toArray());
         BoardNode firstTile = (BoardNode) nodes.get(x);
-        while (!firstTile.getComponentName().contains("exit1") && !firstTile.getComponentName().contains("entrance1") && x < nodes.size() - 1) {
+        String startingTileName = dgs.getCurrentQuest().getStartingTile();
+        while (!firstTile.getComponentName().contains(startingTileName) && x < nodes.size() - 1) {
             x++;
             firstTile = (BoardNode) nodes.get(x);
             }
