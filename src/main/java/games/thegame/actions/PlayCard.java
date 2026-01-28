@@ -28,10 +28,12 @@ import java.util.Objects;
 public class PlayCard extends AbstractAction {
 
     private final int number;
+    private final int componentID;
     private final int row;
 
-    public PlayCard(int number, int row)
+    public PlayCard(int number, int componentID, int row)
     {
+        this.componentID = componentID;
         this.number = number;
         this.row = row;
     }
@@ -46,7 +48,7 @@ public class PlayCard extends AbstractAction {
     public boolean execute(AbstractGameState state) {
         TheGameGS gs = (TheGameGS) state;
         Deck<TheGameCard> playerHand = gs.playerHands.get(state.getCurrentPlayer());
-        TheGameCard c = (TheGameCard) gs.getComponentById(number);
+        TheGameCard c = (TheGameCard) gs.getComponentById(componentID);
         playerHand.remove(c);
         gs.cardRows.get(row).add(c);
         return true;
@@ -68,12 +70,12 @@ public class PlayCard extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PlayCard playCard = (PlayCard) o;
-        return number == playCard.number && row == playCard.row;
+        return number == playCard.number && componentID == playCard.componentID && row == playCard.row;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(number, row);
+        return Objects.hash(number, componentID, row);
     }
 
     @Override

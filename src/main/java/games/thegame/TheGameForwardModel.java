@@ -35,14 +35,17 @@ public class TheGameForwardModel extends StandardForwardModel {
 
         // Create the rows and add the starting cards.
         gs.cardRows = new ArrayList<>();
+        int cardRowIdx = 0;
         for(int i = 0; i < params.numAscendingRows; ++i) {
-            gs.cardRows.add(new TheGameDeck<>("Row " + i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL, true));
-            gs.cardRows.get(i).add(new TheGameCard("" + params.minCardNumber, params.minCardNumber));
+            gs.cardRows.add(new TheGameDeck<>("Row " + cardRowIdx, CoreConstants.VisibilityMode.VISIBLE_TO_ALL, true));
+            gs.cardRows.get(cardRowIdx).add(new TheGameCard("" + params.minCardNumber, params.minCardNumber));
+            cardRowIdx++;
         }
 
         for(int i = 0; i < params.numDescendingRows; ++i) {
-            gs.cardRows.add(new TheGameDeck<>("Row " + i, CoreConstants.VisibilityMode.VISIBLE_TO_ALL, false));
-            gs.cardRows.get(i).add(new TheGameCard("" + params.maxCardNumber, params.maxCardNumber));
+            gs.cardRows.add(new TheGameDeck<>("Row " + cardRowIdx, CoreConstants.VisibilityMode.VISIBLE_TO_ALL, false));
+            gs.cardRows.get(cardRowIdx).add(new TheGameCard("" + params.maxCardNumber, params.maxCardNumber));
+            cardRowIdx++;
         }
 
         // Create fill and shuffle the row deck

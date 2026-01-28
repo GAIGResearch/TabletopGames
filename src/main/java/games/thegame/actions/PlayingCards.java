@@ -41,7 +41,7 @@ public class PlayingCards extends AbstractAction implements IExtendedSequence {
 
     public boolean canBePlayed(AbstractGameState state)
     {
-        return _computeAvailableActions(state).size() > 0;
+        return !_computeAvailableActions(state).isEmpty();
     }
 
     /**
@@ -62,7 +62,7 @@ public class PlayingCards extends AbstractAction implements IExtendedSequence {
         for(TheGameDeck<TheGameCard> r : gs.cardRows) {
             for (TheGameCard card : playerHand) {
                 if (gs.canPlayInRow(card, r)) {
-                    actions.add(new PlayCard(card.number, row));
+                    actions.add(new PlayCard(card.number, card.getComponentID(), row));
                 }
             }
             row++;
@@ -103,7 +103,6 @@ public class PlayingCards extends AbstractAction implements IExtendedSequence {
         TheGameGS gs = (TheGameGS) state;
         if(action instanceof PlayCard pc)
         {
-            pc.execute(state);
             cardsPlayed++;
         }else if(action instanceof DoNothing)
         {
