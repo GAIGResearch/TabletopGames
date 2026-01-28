@@ -2322,6 +2322,7 @@ public class DescentForwardModel extends StandardForwardModel {
             int act = quest.getAct();
             Map<String, Monster> monsterDef;
             if (isOpen) {
+                boolean noLarge = name.toLowerCase().contains("small");
                 List<Pair<String, HashMap<String, Monster>>> possible = new ArrayList<>();
                 // Go through all the traits
                 for (String trait : quest.getMonsterTraits()) {
@@ -2330,10 +2331,17 @@ public class DescentForwardModel extends StandardForwardModel {
                         // Eliminate the ones that we already have, either from previous traits or from other groups
                         if (possible.contains(monster)) continue;
                         String monName = monster.a;
+                        if (monsterNames.contains(monName)) continue;
+                        // If we're only spawning Non-Large Monsters, we can only spawn Small (1x1) or Medium (1x2)
+                        if (noLarge) {
+                            String monSize = ((PropertyString) _data.findMonster(monName).get("super").getProperty(sizeHash)).value;
+                            // Any Large (2x2) or Huge (3x2) Monster will not have a '1' in their size string
+                            if (!monSize.contains("1")) continue;
+                        }
                         boolean skip = false;
                         for (String[] m : monsters) {
-                            // Check that we haven't already tried to spawn the monster, either in this Open group or another group
-                            if (m[0].contains(monName) || monsterNames.contains(monName)) {
+                            // Check that we haven't already tried to spawn the monster
+                            if (m[0].contains(monName)) {
                                 skip = true;
                                 break;
                             }
