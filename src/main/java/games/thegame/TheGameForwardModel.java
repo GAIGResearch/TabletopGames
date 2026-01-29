@@ -113,14 +113,9 @@ public class TheGameForwardModel extends StandardForwardModel {
         TheGameGS gs = (TheGameGS) currentState;
         TheGameParameters params = (TheGameParameters) gs.getGameParameters();
 
-        if (gs.isActionInProgress())
+        if (gs.isActionInProgress() || gs.getGameStatus() == CoreConstants.GameResult.GAME_END)
             return;  // we always wait for any EAS to finish
 
-        if(gs.getGameStatus() == CoreConstants.GameResult.GAME_END) {
-            System.out.println("Game End (" + gs.getPlayerResults()[gs.getCurrentPlayer()] + "). Score: " +
-                    gs.getGameScore(0) + " / " + params.maxScore);
-            return;
-        }
 
         while(gs.playerHands.get(gs.getCurrentPlayer()).getSize() < params.handSize[gs.getNPlayers()] && gs.drawDeck.getSize() > 0)
             gs.playerHands.get(gs.getCurrentPlayer()).add(gs.drawDeck.draw());
@@ -133,10 +128,16 @@ public class TheGameForwardModel extends StandardForwardModel {
         {
             //Game over.
             gs.gameOver();
-            System.out.println("Game End (" + gs.getPlayerResults()[gs.getCurrentPlayer()] + "). Score: " +
-                    gs.getGameScore(0) + " / " + params.maxScore);
         }
 
+    }
+
+    protected void endGame(AbstractGameState abstractGameState)
+    {
+        TheGameGS gs = (TheGameGS) abstractGameState;
+        TheGameParameters params = (TheGameParameters) gs.getGameParameters();
+        System.out.println("Game End (" + gs.getPlayerResults()[gs.getCurrentPlayer()] + "). Score: " +
+                gs.getGameScore(0) + " / " + params.maxScore);
     }
 
 
