@@ -1898,6 +1898,12 @@
         "connections": ["String[]", ["W-0", "N-0", "S-0", "E-0"]]
       },
       {
+        "name": ["String", "endcap1A-2"],
+        "orientation": ["Integer", 2],
+        "neighbours": ["String[]", ["16A"]],
+        "connections": ["String[]", ["S-0"]]
+      },
+      {
         "name": ["String", "transition-1"],
         "orientation": ["Integer", 0],
         "neighbours": ["String[]", ["16A", "13B"]],
