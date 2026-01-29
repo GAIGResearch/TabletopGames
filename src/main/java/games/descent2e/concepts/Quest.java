@@ -27,6 +27,8 @@ public class Quest {
     private List<Quest> nextMainQuests;
     private List<Quest> nextSideQuests;
     private int act;
+    private int startingXP;
+    private int gold;
 
     public String getName() {
         return name;
@@ -87,6 +89,18 @@ public class Quest {
     }
     public int getAct() {
         return act;
+    }
+    public void setStartingXP(int xp) {
+        startingXP = xp;
+    }
+    public int getStartingXP() {
+        return startingXP;
+    }
+    public void setGold(int gold) {
+        this.gold = gold;
+    }
+    public int getGold() {
+        return gold;
     }
     public void setTokens(List<DToken.DTokenDef> tokens) {
         this.tokens = tokens;
@@ -151,6 +165,8 @@ public class Quest {
             Collections.copy(q.monsterTraits, monsterTraits);
         }
         q.act = act;
+        q.startingXP = startingXP;
+        q.gold = gold;
         if (tokens != null)
         {
             q.tokens = new ArrayList<>();
@@ -219,7 +235,8 @@ public class Quest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Quest quest = (Quest) o;
-        return act == quest.act && Objects.equals(name, quest.name) && Objects.equals(monsters, quest.monsters) &&
+        return act == quest.act && startingXP == quest.startingXP && gold == quest.gold &&
+                Objects.equals(name, quest.name) && Objects.equals(monsters, quest.monsters) &&
                 Objects.equals(monsterTraits, quest.monsterTraits) && Objects.equals(tokens, quest.tokens) &&
                 Objects.equals(rules, quest.rules) && Objects.equals(gameOverConditions, quest.gameOverConditions) &&
                 Objects.equals(overlordRewards, quest.overlordRewards) && Objects.equals(heroRewards, quest.heroRewards) &&
@@ -232,6 +249,6 @@ public class Quest {
     @Override
     public int hashCode() {
         return Objects.hash(name, monsters, monsterTraits, tokens, rules, gameOverConditions, overlordRewards, heroRewards,
-                commonRewards, boards, startingLocations, startingTile, randomLocations, nextMainQuests, nextSideQuests, act);
+                commonRewards, boards, startingLocations, startingTile, randomLocations, nextMainQuests, nextSideQuests, act, startingXP, gold);
     }
 }

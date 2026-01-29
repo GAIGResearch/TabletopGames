@@ -52,8 +52,7 @@ import static games.descent2e.actions.archetypeskills.ArchetypeSkills.getArchety
 import static games.descent2e.actions.monsterfeats.Air.removeAirImmunity;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
-import static games.descent2e.components.Figure.Attribute.Health;
-import static games.descent2e.components.Figure.Attribute.MovePoints;
+import static games.descent2e.components.Figure.Attribute.*;
 import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends StandardForwardModel {
@@ -144,6 +143,10 @@ public class DescentForwardModel extends StandardForwardModel {
             figure.getNActionsExecuted().setMaximum(nActionsPerFigure);
             figure.setComponentName("Hero: " + figure.getComponentName());  // For reference in rules
 
+            // If this is the first Quest in the playthrough, and we are not starting from the Tutorial, get the expected XP and Gold
+            figure.setAttribute(XP, dgs.currentQuest.getStartingXP());
+            figure.setAttribute(Gold, dgs.currentQuest.getGold());
+
             String archetypeName = figure.getProperty("archetype").toString();
             Archetype archetype = Archetype.valueOf(archetypeName);
             archetypes.remove(archetype);
@@ -164,10 +167,16 @@ public class DescentForwardModel extends StandardForwardModel {
 
             // Assign starting skills and equipment from chosen class
             // Equipping them also sets up Surge abilities
+            // For the time being, if we're supposed to have starting XP, purchase random Skills here
             Deck<Card> classDeck = _data.findDeck(heroClass.name());
-            for (Card c : classDeck.getComponents()) {
-                if (((PropertyInt) c.getProperty(xpHash)).value <= figure.getAttribute(Figure.Attribute.XP).getValue()) {
+            List<Card> classSkills = new ArrayList<>(classDeck.getComponents());
+            Collections.shuffle(classSkills);
+            int xp = figure.getAttributeValue(XP);
+            for (Card c : classSkills) {
+                if (((PropertyInt) c.getProperty(xpHash)).value <= xp) {
                     figure.equip(new DescentCard(c));
+                    xp -= ((PropertyInt) c.getProperty(xpHash)).value;
+                    figure.setProperty(new PropertyInt("XP", xp));
                 }
             }
 

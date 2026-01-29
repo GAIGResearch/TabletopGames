@@ -183,6 +183,22 @@ public class DescentGameData extends AbstractGameData {
                 }
                 q.setAct(act);
 
+                // Find expected XP for the Quest
+                int xp = 0;
+                Object xpObj = obj.get("starting-xp");
+                if (xpObj != null) {
+                    xp = (int) (long) xpObj;
+                }
+                q.setStartingXP(xp);
+
+                // Find expected Gold for the Quest
+                int gold = 0;
+                Object goldObj = obj.get("starting-gold");
+                if (goldObj != null) {
+                    gold = (int) (long) goldObj;
+                }
+                q.setGold(gold);
+
                 // Find all boards for the quest
                 ArrayList<String> boards = new ArrayList<>();
                 JSONArray bs = (JSONArray) obj.get("boards");
