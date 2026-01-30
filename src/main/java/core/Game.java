@@ -2,27 +2,25 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.communication.Blackboard;
+import core.communication.Communication;
+import core.communication.Message;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
-import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import games.pandemic.PandemicForwardModel;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
+import players.basicMCTS.BasicMCTSParams;
 import players.basicMCTS.BasicMCTSPlayer;
+import players.comms.NameCommunicator;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCParams;
-import players.rmhc.RMHCPlayer;
-import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -33,6 +31,8 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static core.communication.Communication.*;
 
 
 public class Game {
@@ -70,6 +70,10 @@ public class Game {
     int snapsPerSecond = 10;
     private int turnPause;
 
+    protected Blackboard blackboard;
+    Communication commMode;
+
+
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
      * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
@@ -82,6 +86,7 @@ public class Game {
         this.gameType = type;
         this.gameState = gameState;
         this.forwardModel = realModel;
+        this.blackboard = new Blackboard();
         reset(players);
     }
 
@@ -96,6 +101,7 @@ public class Game {
         this.gameType = type;
         this.forwardModel = model;
         this.gameState = gameState;
+        this.blackboard = new Blackboard();
         reset(Collections.emptyList(), gameState.gameParameters.randomSeed);
     }
 
@@ -211,6 +217,7 @@ public class Game {
         if (debug) System.out.println("Game Seed: " + newRandomSeed);
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
+        this.blackboard = new Blackboard();
 
         // set forward models for all players
         for (AbstractPlayer player : players) {
@@ -273,6 +280,7 @@ public class Game {
     public final void run() {
 
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, gameState)));
+        commMode = gameState.getCoreGameParameters().commMode;;
 
         boolean firstEnd = true;
 
@@ -424,6 +432,9 @@ public class Game {
             ((IPrintable) observation).printToConsole();
         }
 
+        if(commMode == BEFORE_ACTION || commMode == BEFORE_AND_AFTER_ACTION)
+            currentPlayer.speak(this, observation, observedActions);
+
         // Start the timer for this decision
         gameState.playerTimer[activePlayer].resume();
 
@@ -485,6 +496,12 @@ public class Game {
 
         lastPlayer = activePlayer;
 
+        if(commMode == AFTER_ACTION || commMode == BEFORE_AND_AFTER_ACTION)
+        {
+            currentPlayer.speak(this, observation, action);
+            blackboard.broadcastLast(players);
+        }
+
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
         AbstractAction finalAction1 = action;
@@ -520,6 +537,18 @@ public class Game {
         for (AbstractPlayer player : players) {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
+    }
+
+    /** Agent communication tools **/
+
+    public void post(int playerIdFrom, Message.Receiver rec, Object message){
+        post(playerIdFrom, -1, rec, message);
+    }
+
+    public void post(int playerIdFrom, int playerIdTo, Message.Receiver rec, Object message){
+        Message msg = new Message(playerIdFrom, playerIdTo, rec, message);
+        msg.setTick(gameState.getGameTick());
+        blackboard.post(msg, gameState);
     }
 
     /**
@@ -706,8 +735,12 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
+
+        BasicMCTSParams params = new BasicMCTSParams();
+        params.comms = new NameCommunicator();
+
+        players.add(new BasicMCTSPlayer(params, "MCTS 1"));
+        players.add(new BasicMCTSPlayer(params, "MCTS 2"));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
         // players.add(new HumanGUIPlayer(ac));

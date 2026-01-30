@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.communication.Message;
 import core.interfaces.IPlayerDecorator;
 import evaluation.metrics.Event;
 import players.PlayerParameters;
@@ -176,4 +177,22 @@ public abstract class AbstractPlayer {
     public Random getRnd() {
         return rnd;
     }
+
+    public final void speak(Game game, AbstractGameState state, AbstractAction action)
+    {
+        if(parameters.comms != null)  parameters.comms.send(game, state, action,this);
+    }
+
+    public final void speak(Game game, AbstractGameState state, List<AbstractAction> availableActions)
+    {
+        if(parameters.comms != null) parameters.comms.send(game, state, availableActions, this);
+    }
+
+    public void listen(List<Message> messages){
+//        for(Message m : messages)
+//            System.out.println("["+ this.name + "("+ this.playerID+")] I've received a message from player " +
+//                    m.from + ": " + m.msg);
+
+    }
+
 }

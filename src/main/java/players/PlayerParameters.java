@@ -1,6 +1,7 @@
 package players;
 
 import core.AbstractPlayer;
+import core.interfaces.ICommunicator;
 import core.interfaces.IPlayerDecorator;
 import core.actions.ActionSpace;
 import core.interfaces.IStateHeuristic;
@@ -30,6 +31,7 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
     // Action space type for this player
     public ActionSpace actionSpace = new ActionSpace();
     public IPlayerDecorator decorator = null;
+    public ICommunicator comms = null;
 
     public PlayerParameters() {
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
@@ -42,6 +44,7 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
         addTunableParameter("resetSeedEachGame", false);
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("actionRestriction", IPlayerDecorator.class);
+        addTunableParameter("comms", ICommunicator.class);
     }
 
     @Override
@@ -49,6 +52,7 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
         PlayerParameters params = new PlayerParameters();
         // only need to copy fields that are not Tuned (those are done in the super class)
         params.gameHeuristic = gameHeuristic;
+        params.comms = comms;
         return params;
     }
 
@@ -72,7 +76,10 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
         if (o instanceof PlayerParameters that) {
             if (gameHeuristic == null && that.gameHeuristic == null) return true;
             if (gameHeuristic == null || that.gameHeuristic == null) return false;
-            return gameHeuristic.equals(that.gameHeuristic);
+            if (comms == null && that.comms == null) return true;
+            if (comms == null || that.comms == null) return false;
+
+            return gameHeuristic.equals(that.gameHeuristic) && comms.equals(that.comms);
         }
         return false;
     }
