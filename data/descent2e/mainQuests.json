@@ -7,7 +7,7 @@
     "traits": [],
     "monsters": [
       ["Goblin Archer:group", "5A"],
-      ["Barghest:group", "4A", "all:Health:+2"]
+      ["Barghest:group", "4A"]
     ],
     "tokens": [],
     "rules": [],
@@ -60,7 +60,7 @@
     "monsters": [
       ["Splig:lieutenant", "3A"],
       ["Goblin Archer:group", "6A"],
-      ["open:group", "12A"]
+      ["Open:group", "12A"]
     ],
     "tokens": [],
     "rules": [],
