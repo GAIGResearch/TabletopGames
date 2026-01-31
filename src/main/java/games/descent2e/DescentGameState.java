@@ -529,9 +529,12 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
             // Otherwise, monster is playing
             if (monsterActingNext == -1) {
+
+                //monsterActingNext = 0;
                 throw new AssertionError("Monster index not set");
             }
             if (monsterActingNext >= monsterGroup.size()) {
+                //nextMonster();
                 throw new AssertionError("Monster group index out of bounds");
             }
             actingFigure = monsterGroup.get(monsterActingNext);

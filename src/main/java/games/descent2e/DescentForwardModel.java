@@ -144,8 +144,8 @@ public class DescentForwardModel extends StandardForwardModel {
             figure.setComponentName("Hero: " + figure.getComponentName());  // For reference in rules
 
             // If this is the first Quest in the playthrough, and we are not starting from the Tutorial, get the expected XP and Gold
-            figure.setAttribute(XP, dgs.currentQuest.getStartingXP());
-            figure.setAttribute(Gold, dgs.currentQuest.getGold());
+            //figure.setAttribute(XP, dgs.currentQuest.getStartingXP());
+            //figure.setAttribute(Gold, dgs.currentQuest.getGold());
 
             String archetypeName = figure.getProperty("archetype").toString();
             Archetype archetype = Archetype.valueOf(archetypeName);
