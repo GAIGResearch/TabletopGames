@@ -1,5 +1,6 @@
 package games.descent2e.actions.attack;
 
+import com.google.common.collect.Iterables;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
@@ -51,5 +52,12 @@ public class EndCurrentPhase extends AbstractAction {
     @Override
     public String toString() {
         return "End current decision phase";
+    }
+
+    public boolean canExecute(DescentGameState dgs) {
+        if (dgs.getHistory().isEmpty()) return false;
+        if (Iterables.getLast(dgs.getHistory()).b instanceof EndCurrentPhase)
+            return false;
+        return true;
     }
 }

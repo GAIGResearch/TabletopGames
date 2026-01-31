@@ -884,8 +884,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // now we filter this for any that have been used
 
         if (phase == PRE_SURGE) {
-            if (!retValue.isEmpty())
-                retValue.add(new EndCurrentPhase());
+            if (!retValue.isEmpty()) {
+                EndCurrentPhase endphase = new EndCurrentPhase();
+                if (endphase.canExecute(state))
+                    retValue.add(new EndCurrentPhase());
+            }
         }
 
         if (phase == SURGE_DECISIONS) {
@@ -922,7 +925,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             }
             if (reroll)
                 retValue.add(new EndRerollPhase());
-            //else retValue.add(new EndCurrentPhase());
+            else {
+                EndCurrentPhase endphase = new EndCurrentPhase();
+                if (endphase.canExecute(state))
+                    retValue.add(new EndCurrentPhase());
+            }
         }
         if (phase == PRE_DEFENCE_ROLL) {
             // Applying Subdue should override any subsequent actions
@@ -948,7 +955,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             }
         }
         if (phase == POST_DEFENCE_ROLL || phase == PRE_DAMAGE) {
-            retValue.add(new EndCurrentPhase());
+            EndCurrentPhase endphase = new EndCurrentPhase();
+            if (endphase.canExecute(state))
+                retValue.add(new EndCurrentPhase());
         }
 
         // We check for any interrupt attacks that can be used after this attack has concluded
@@ -1105,7 +1114,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 retValue.addAll(interruptAttacks);
                 // We don't have to make the attack if we don't want to
                 // e.g. if the only legal target for Fire Breath to hit is the Dragon itself
-                retValue.add(new EndCurrentPhase());
+                EndCurrentPhase endphase = new EndCurrentPhase();
+                if (endphase.canExecute(state))
+                    retValue.add(new EndCurrentPhase());
             }
 
         }
