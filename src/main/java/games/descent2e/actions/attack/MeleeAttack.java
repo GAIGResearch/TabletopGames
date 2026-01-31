@@ -922,7 +922,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             }
             if (reroll)
                 retValue.add(new EndRerollPhase());
-            else retValue.add(new EndCurrentPhase());
+            //else retValue.add(new EndCurrentPhase());
         }
         if (phase == PRE_DEFENCE_ROLL) {
             // Applying Subdue should override any subsequent actions

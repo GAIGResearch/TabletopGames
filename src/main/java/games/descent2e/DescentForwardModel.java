@@ -2433,7 +2433,10 @@ public class DescentForwardModel extends StandardForwardModel {
 
                 placeMonster(dgs, lieutenant, new ArrayList<>(tileCoords), rnd, superDef);
                 lieutenant.setOwnerId(dgs.overlordPlayer);
-                monsterGroup.add(lieutenant);
+
+                // Failsafe - do not spawn the Monster if for whatever reason its position is null
+                if (lieutenant.getPosition() != null)
+                    monsterGroup.add(lieutenant);
                 monsterOriginalGroup.add(lieutenant.copyNewID());
             }
 
@@ -2480,7 +2483,11 @@ public class DescentForwardModel extends StandardForwardModel {
                 if (spawnMaster) {
                     placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
                     master.setOwnerId(dgs.overlordPlayer);
-                    monsterGroup.add(master);
+
+                    // Failsafe - do not spawn the Monster if for whatever reason its position is null
+                    if (master.getPosition() != null)
+                        monsterGroup.add(master);
+
                     monsterOriginalGroup.add(master.copyNewID());
                 }
 
@@ -2537,7 +2544,10 @@ public class DescentForwardModel extends StandardForwardModel {
                         minion.setAttributeToMax(Figure.Attribute.Health);
                     }
 
-                    monsterGroup.add(minion);
+                    // Failsafe - do not spawn the Monster if for whatever reason its position is null
+                    if (minion.getPosition() != null)
+                        monsterGroup.add(minion);
+
                     monsterOriginalGroup.add(minion.copyNewID());
                 }
             }

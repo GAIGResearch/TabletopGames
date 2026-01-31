@@ -96,6 +96,8 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         heuristics.add(-1 * FACTOR_OVERLORD_FATIGUE * isOverlord * ((double) overlord.getAttributeValue(Fatigue) / (double) overlord.getAttributeMax(Fatigue)));
         if (isOverlord < 0)
             heuristics.add(-1 * FACTOR_OVERLORD_THREAT * isOverlord * (getOverlordThreat(dgs, questName)));
+        else
+            heuristics.add(0.0);
 
 
         switch (questName)
@@ -118,6 +120,8 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
 
         if (isOverlord > 0)
             heuristics.add(FACTOR_HEROES_THREAT * isOverlord * (getHeroesThreat(dgs, questName) / dgs.heroes.size()));
+        else
+            heuristics.add(0.0);
 
         // Penalise the current player if they immediately End Turn
         // This is to encourage the AI to do something, even if it's just moving a figure
@@ -259,6 +263,10 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                         Vector2D closest = new Vector2D(0,0);
                         double distance = 10000.0;
                         Vector2D position = m.getPosition();
+                        if (position == null) {
+                            retVal -= 1.0;
+                            continue;
+                        }
                         for (Hero h : dgs.heroes) {
                             if (DescentHelper.checkAdjacent(dgs, m, h)) {
                                 distance = 0.0;
@@ -366,6 +374,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     for (int i = 0; i < monsters.size(); i++) {
                         if (distance <= 1.0) break;
                         Monster m = monsters.get(i);
+                        if (m.getPosition() == null) continue;
                         double dist = getDistance(position, m.getPosition());
                         if (dist < distance) {
                             distance = dist;
