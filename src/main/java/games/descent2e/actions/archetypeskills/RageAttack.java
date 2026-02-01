@@ -6,6 +6,8 @@ import games.descent2e.DescentTypes;
 import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.components.Figure;
 
+import java.util.Objects;
+
 import static games.descent2e.DescentHelper.getAttackType;
 
 public class RageAttack extends MeleeAttack {
@@ -42,5 +44,10 @@ public class RageAttack extends MeleeAttack {
     @Override
     public String toString() {
         return String.format("Rage Attack by %d on %d", attackingFigure, defendingFigure);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), Figure.Attribute.Fatigue);
     }
 }

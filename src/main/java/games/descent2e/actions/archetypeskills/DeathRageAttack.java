@@ -8,6 +8,8 @@ import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.components.Figure;
 
+import java.util.Objects;
+
 import static games.descent2e.DescentHelper.getAttackType;
 
 public class DeathRageAttack extends MeleeAttack {
@@ -59,5 +61,10 @@ public class DeathRageAttack extends MeleeAttack {
     @Override
     public String toString() {
         return String.format("Death Rage Attack by %d on %d", attackingFigure, defendingFigure);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), Figure.Attribute.Fatigue, Figure.Attribute.Fatigue);
     }
 }
