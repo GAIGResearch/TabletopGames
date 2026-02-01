@@ -18,13 +18,13 @@ import java.util.List;
 public class DescentHeuristic extends TunableParameters implements IStateHeuristic {
 
     // The total HP of the Heroes   - Beneficial to the Heroes
-    double FACTOR_HERO_HP = 0.4;
+    double FACTOR_HERO_HP = 0.7;
 
     // The number of Heroes defeated - Beneficial to the Overlord
     double FACTOR_HERO_DEFEATED = 0.7;
 
     // The total HP of the monsters - Beneficial to the Overlord
-    double FACTOR_MONSTERS_HP = 0.4;
+    double FACTOR_MONSTERS_HP = 0.7;
 
     // The number of monsters defeated - Beneficial to the Heroes
     double FACTOR_MONSTERS_DEFEATED = 0.7;
@@ -33,10 +33,10 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
     double FACTOR_OVERLORD_FATIGUE = 0.7;
 
     // How close the Overlord is to increasing their fatigue - Beneficial to the Overlord
-    double FACTOR_OVERLORD_THREAT = 0.8;
+    double FACTOR_OVERLORD_THREAT = 0.6;
 
     // How close the Heroes are to winning - Beneficial to the Heroes
-    double FACTOR_HEROES_THREAT = 0.8;
+    double FACTOR_HEROES_THREAT = 0.6;
 
     // Penalise the current player if they End Turn poorly - Penalises both Heroes and Overlord
     double FACTOR_DONE_NOTHING = 0.0;

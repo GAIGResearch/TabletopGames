@@ -356,7 +356,7 @@ public class DescentHelper {
         return range;
     }
 
-    public static boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
+    public static boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint) {
         int counter = 0;
         boolean hasLineOfSight = true;
 
@@ -370,7 +370,11 @@ public class DescentHelper {
 
         boolean ignoreAdjacent = false;
         if (start != -1)    // Make sure that we actually have a Figure to start with
-            ignoreAdjacent = ((Figure) dgs.getComponentById(start)).hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+        {
+            Figure f = ((Figure) dgs.getComponentById(start));
+            if (f == null) return false;
+            ignoreAdjacent = f.hasBonus(DescentTypes.SkillBonus.AdjacentLineOfSight);
+        }
 
         // For each coordinate in the line, check:
         // 1) Does the coordinate have its board node
@@ -1108,9 +1112,9 @@ public class DescentHelper {
             // Remove from board
             Move.remove(dgs, m);
 
-            if (dgs.webMonstersIDs.contains(m.getComponentID())) {
+            /*if (dgs.webMonstersIDs.contains(m.getComponentID())) {
                 dgs.webMonstersIDs.remove(m.getComponentID());
-            }
+            }*/
 
             // Remove from state lists
             for (List<Monster> monsterGroup: dgs.getMonsters()) {
