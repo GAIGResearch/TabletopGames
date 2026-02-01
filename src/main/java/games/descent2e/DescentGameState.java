@@ -449,8 +449,22 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return monsters;
     }
 
+    public List<Monster> getAllMonsters() {
+        List<Monster> allMonsters = new ArrayList<>();
+        for (List<Monster> monster : monsters)
+            allMonsters.addAll(monster);
+        return allMonsters;
+    }
+
     public List<List<Monster>> getOriginalMonsters() {
         return monstersOriginal;
+    }
+
+    public List<Monster> getAllOriginalMonsters() {
+        List<Monster> allMonsters = new ArrayList<>();
+        for (List<Monster> monster : monstersOriginal)
+            allMonsters.addAll(monster);
+        return allMonsters;
     }
 
     public List<Integer> getMonstersPerGroup() {
