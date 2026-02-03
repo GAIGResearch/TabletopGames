@@ -55,7 +55,7 @@
     "id": "Rellegar's Rest 1",
     "act": 1,
     "starting-xp": 1,
-    "starting-gold": 0,
+    "starting-gold": 25,
     "traits": ["Building", "Water", "Wilderness"],
     "monsters": [
       ["Splig:lieutenant", "3A"],
@@ -108,7 +108,7 @@
     "id": "Rellegar's Rest 2",
     "act": 1,
     "starting-xp": 1,
-    "starting-gold": 0,
+    "starting-gold": 25,
     "traits": ["Building", "Dark"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "13B"],
@@ -161,7 +161,7 @@
     "id": "Siege of Skytower",
     "act": 1,
     "starting-xp": 1,
-    "starting-gold": 0,
+    "starting-gold": 25,
     "traits": ["Building", "Civilized", "Mountain"],
     "monsters": [
       ["Sir Alric Farrow:lieutenant", "11A"],
@@ -206,7 +206,7 @@
     "id": "Blood Will Tell",
     "act": 1,
     "starting-xp": 2,
-    "starting-gold": 0,
+    "starting-gold": 50,
     "traits": ["Cave", "Cursed", "Dark"],
     "monsters": [
       ["Lady Eliza Farrow:lieutenant", "6B"],
@@ -251,7 +251,7 @@
     "id": "The Baron Returns 1",
     "act": 1,
     "starting-xp": 2,
-    "starting-gold": 0,
+    "starting-gold": 50,
     "traits": ["Building", "Cursed", "Wilderness"],
     "monsters": [
       ["Lady Eliza Farrow:lieutenant", "exit1B"],
@@ -294,7 +294,7 @@
     "id": "The Baron Returns 2",
     "act": 1,
     "starting-xp": 2,
-    "starting-gold": 0,
+    "starting-gold": 50,
     "traits": ["Building", "Cave", "Civilized"],
     "monsters": [
       ["Baron Zachareth:lieutenant", "1B"],
@@ -337,7 +337,7 @@
     "id": "Archive of Arrizon 1",
     "act": 1,
     "starting-xp": 2,
-    "starting-gold": 0,
+    "starting-gold": 50,
     "traits": ["Building", "Hot", "Mountain", "Wilderness"],
     "monsters": [
       ["Ettin:group", "25B"],
@@ -379,7 +379,7 @@
     "id": "Archive of Arrizon 2",
     "act": 1,
     "starting-xp": 2,
-    "starting-gold": 0,
+    "starting-gold": 50,
     "traits": ["Building", "Cave", "Dark", "Hot", "Mountain"],
     "monsters": [
       ["Lady Eliza Farrow:lieutenant", "4B"],
@@ -423,7 +423,7 @@
     "id": "Rise of Urthko 1",
     "act": 1,
     "starting-xp": 3,
-    "starting-gold": 0,
+    "starting-gold": 75,
     "traits": ["Cave", "Cursed", "Hot"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "entrance1B"],
@@ -465,7 +465,7 @@
     "id": "Rise of Urthko 2",
     "act": 1,
     "starting-xp": 3,
-    "starting-gold": 0,
+    "starting-gold": 75,
     "traits": ["Cave", "Cursed", "Dark"],
     "monsters": [
       ["Sir Alric Farrow:lieutenant", "2B"],
@@ -508,7 +508,7 @@
     "id": "Caladen's Crossing 1",
     "act": 1,
     "starting-xp": 3,
-    "starting-gold": 0,
+    "starting-gold": 75,
     "traits": ["Civilized", "Cursed", "Wilderness"],
     "monsters": [
       ["Goblin Archer:group", "8A"],
@@ -550,7 +550,7 @@
     "id": "Caladen's Crossing 2",
     "act": 1,
     "starting-xp": 3,
-    "starting-gold": 0,
+    "starting-gold": 75,
     "traits": ["Building", "Cursed", "Mountain", "Wilderness"],
     "monsters": [
       ["Splig:lieutenant", "endcap1A-1"],
@@ -597,7 +597,7 @@
     "id": "From The Wreckage",
     "act": 1,
     "starting-xp": 4,
-    "starting-gold": 0,
+    "starting-gold": 100,
     "traits": ["Cursed", "Mountain", "Wilderness"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "1B"],
@@ -643,7 +643,7 @@
     "id": "Saradyn In Flames",
     "act": 1,
     "starting-xp": 4,
-    "starting-gold": 0,
+    "starting-gold": 100,
     "traits": ["Building", "Cursed", "Hot"],
     "monsters": [
       ["Lady Eliza Farrow:lieutenant", "17B"],
@@ -688,7 +688,7 @@
     "id": "Army Of Dal'Zunm",
     "act": 2,
     "starting-xp": 5,
-    "starting-gold": 0,
+    "starting-gold": 125,
     "traits": ["Cursed", "Dark", "Water", "Wilderness"],
     "monsters": [
       ["Splig:lieutenant", "12A"],
@@ -733,7 +733,7 @@
     "id": "Prison Of Khinn 1",
     "act": 2,
     "starting-xp": 5,
-    "starting-gold": 0,
+    "starting-gold": 125,
     "traits": ["Building", "Cursed", "Wilderness"],
     "monsters": [
       ["Zombie:group", "8B"],
@@ -775,7 +775,7 @@
     "id": "Prison of Khinn 2",
     "act": 2,
     "starting-xp": 5,
-    "starting-gold": 0,
+    "starting-gold": 125,
     "traits": ["Building", "Cave", "Cursed", "Dark"],
     "monsters": [
       ["Splig:lieutenant", "exit1B"],
@@ -821,7 +821,7 @@
     "id": "Lord Of Flame 1",
     "act": 2,
     "starting-xp": 6,
-    "starting-gold": 0,
+    "starting-gold": 150,
     "traits": ["Building", "Cold", "Hot", "Mountain"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "10A"],
@@ -863,7 +863,7 @@
     "id": "Lord Of Flame 2",
     "act": 2,
     "starting-xp": 6,
-    "starting-gold": 0,
+    "starting-gold": 150,
     "traits": ["Cave", "Cold", "Hot", "Water"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "24B"],
@@ -905,7 +905,7 @@
     "id": "Dead Or Drowning",
     "act": 2,
     "starting-xp": 6,
-    "starting-gold": 0,
+    "starting-gold": 150,
     "traits": ["Building", "Mountain", "Water", "Wilderness"],
     "monsters": [
       ["Zombie:group", "26B"],
@@ -947,7 +947,7 @@
     "id": "Rite Of The Red Dawn",
     "act": 2,
     "starting-xp": 6,
-    "starting-gold": 0,
+    "starting-gold": 150,
     "traits": ["All"],
     "monsters": [
       ["Goblin Archer:group", "24A"],
@@ -994,7 +994,7 @@
     "id": "Shadowfall Mountain 1",
     "act": 2,
     "starting-xp": 6,
-    "starting-gold": 0,
+    "starting-gold": 150,
     "traits": ["All"],
     "monsters": [
       ["Cave Spider:group", "7A"],
@@ -1038,7 +1038,7 @@
     "id": "Shadowfall Mountain 2",
     "act": 2,
     "starting-xp": 6,
-    "starting-gold": 0,
+    "starting-gold": 150,
     "traits": ["All"],
     "monsters": [
       ["Elemental:0", "3A"],
@@ -1086,7 +1086,7 @@
     "id": "Edge Of Dawn 1",
     "act": 2,
     "starting-xp": 7,
-    "starting-gold": 0,
+    "starting-gold": 175,
     "traits": ["Building", "Dark", "Wilderness"],
     "monsters": [
       ["Sir Alric Farrow:lieutenant", "endcap1B-1"],
@@ -1129,7 +1129,7 @@
     "id": "Edge Of Dawn 2",
     "act": 2,
     "starting-xp": 7,
-    "starting-gold": 0,
+    "starting-gold": 175,
     "traits": ["Building", "Cave", "Civilized", "Cursed"],
     "monsters": [
       ["Sir Alric Farrow:lieutenant", "9B"],
@@ -1174,7 +1174,7 @@
     "id": "Piercing Darkness 1",
     "act": 2,
     "starting-xp": 7,
-    "starting-gold": 0,
+    "starting-gold": 175,
     "traits": ["Building", "Dark", "Wilderness"],
     "monsters": [
       ["Barghest:group", "14A"],
@@ -1217,7 +1217,7 @@
     "id": "Piercing Darkness 2",
     "act": 2,
     "starting-xp": 7,
-    "starting-gold": 0,
+    "starting-gold": 175,
     "traits": ["Building", "Civilized", "Cursed"],
     "monsters": [
       ["Sir Alric Farrow:lieutenant", "1B"],
@@ -1261,7 +1261,7 @@
     "id": "Blood And Betrayal 1",
     "act": 2,
     "starting-xp": 8,
-    "starting-gold": 0,
+    "starting-gold": 200,
     "traits": ["Building", "Cursed", "Wilderness"],
     "monsters": [
       ["Baron Zachareth:lieutenant", "8A"],
@@ -1309,7 +1309,7 @@
     "id": "Blood And Betrayal 2A",
     "act": 2,
     "starting-xp": 8,
-    "starting-gold": 0,
+    "starting-gold": 200,
     "traits": ["Building", "Cave", "Cursed", "Dark"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "6B"],
@@ -1355,7 +1355,7 @@
     "id": "Blood And Betrayal 2B",
     "act": 2,
     "starting-xp": 8,
-    "starting-gold": 0,
+    "starting-gold": 200,
     "traits": ["Cave", "Cursed", "Dark", "Hot"],
     "monsters": [
       ["Lord Merick Farrow:lieutenant", "13B"],
@@ -1401,7 +1401,7 @@
     "id": "Blood And Betrayal 3",
     "act": 2,
     "starting-xp": 8,
-    "starting-gold": 0,
+    "starting-gold": 200,
     "traits": ["Building", "Cave", "Cursed", "Dark"],
     "monsters": [
       ["Lady Eliza Farrow:lieutenant", "1B"],
