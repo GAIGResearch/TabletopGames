@@ -375,7 +375,7 @@
         "name": ["String", "15B"],
         "orientation": ["Integer", 0],
         "neighbours": ["String[]", ["5B", "16B"]],
-        "connections": ["String[]", ["N-0","W-0"]]
+        "connections": ["String[]", ["N-0","S-0"]]
       },
       {
         "name": ["String", "16B"],
@@ -394,12 +394,6 @@
         "orientation": ["Integer", 0],
         "neighbours": ["String[]", ["23B", "16B"]],
         "connections": ["String[]", ["W-0","N-0"]]
-      },
-      {
-        "name": ["String", "20B"],
-        "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["23B", "extender1B"]],
-        "connections": ["String[]", ["E-0","N-0"]]
       },
       {
         "name": ["String", "6B"],

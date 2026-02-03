@@ -4,7 +4,7 @@
     "act": 1,
     "starting-xp": 0,
     "starting-gold": 0,
-    "traits": [],
+    "traits": ["All"],
     "monsters": [
       ["Goblin Archer:group", "5A"],
       ["Barghest:group", "4A"]
@@ -995,7 +995,7 @@
     "act": 2,
     "starting-xp": 6,
     "starting-gold": 0,
-    "traits": [],
+    "traits": ["All"],
     "monsters": [
       ["Cave Spider:group", "7A"],
       ["Goblin Archer:group", "6A"],
@@ -1039,7 +1039,7 @@
     "act": 2,
     "starting-xp": 6,
     "starting-gold": 0,
-    "traits": [],
+    "traits": ["All"],
     "monsters": [
       ["Elemental:0", "3A"],
       ["Merriod:0", "1A"],

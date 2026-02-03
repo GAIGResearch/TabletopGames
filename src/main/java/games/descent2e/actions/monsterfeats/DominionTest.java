@@ -69,7 +69,7 @@ public class DominionTest extends AttributeTest {
 
         if (result)
         {
-            System.out.println("Passed Dominion (Willpower) Test!");
+            //System.out.println("Passed Dominion (Willpower) Test!");
 
             // This is only for Baron Zachareth's test on himself
             // Nothing happens if the second test is passed
@@ -81,7 +81,7 @@ public class DominionTest extends AttributeTest {
         }
         else
         {
-            System.out.println("Failed Dominion (Willpower) Test!");
+            //System.out.println("Failed Dominion (Willpower) Test!");
 
             // This is only for the target's test as the second part
             // Nothing happens if the first test is failed
