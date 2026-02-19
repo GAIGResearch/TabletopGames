@@ -9,8 +9,8 @@ import core.interfaces.ICommunicator;
 
 import java.util.List;
 
-// Example class. It just communicates the action played or the number of available actions it has before playing.
-public class NameCommunicator implements ICommunicator {
+// Example class. It just communicates the action played or the number of available actions it has before playing to ALL players.
+public class BasicCommunicator implements ICommunicator {
 
     @Override
     public void send(Game game, AbstractGameState state, AbstractAction action, AbstractPlayer emitter) {

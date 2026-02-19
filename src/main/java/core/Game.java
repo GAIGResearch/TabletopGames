@@ -17,7 +17,7 @@ import gui.GUI;
 import gui.GamePanel;
 import players.basicMCTS.BasicMCTSParams;
 import players.basicMCTS.BasicMCTSPlayer;
-import players.comms.NameCommunicator;
+import players.comms.BasicCommunicator;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
@@ -432,8 +432,10 @@ public class Game {
             ((IPrintable) observation).printToConsole();
         }
 
-        if(commMode == BEFORE_ACTION || commMode == BEFORE_AND_AFTER_ACTION)
+        if(commMode == BEFORE_ACTION || commMode == BEFORE_AND_AFTER_ACTION) {
             currentPlayer.speak(this, observation, observedActions);
+            blackboard.broadcastLast(players);
+        }
 
         // Start the timer for this decision
         gameState.playerTimer[activePlayer].resume();
@@ -537,18 +539,6 @@ public class Game {
         for (AbstractPlayer player : players) {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
-    }
-
-    /** Agent communication tools **/
-
-    public void post(int playerIdFrom, Message.Receiver rec, Object message){
-        post(playerIdFrom, -1, rec, message);
-    }
-
-    public void post(int playerIdFrom, int playerIdTo, Message.Receiver rec, Object message){
-        Message msg = new Message(playerIdFrom, playerIdTo, rec, message);
-        msg.setTick(gameState.getGameTick());
-        blackboard.post(msg, gameState);
     }
 
     /**
@@ -711,6 +701,42 @@ public class Game {
         return gameType.toString();
     }
 
+    /** Agent communication tools **/
+
+    /**
+     * Broadcasts a message to the blackboard of messages. All players will receive this.
+     * @param playerIdFrom Who writes the message
+     * @param rec Receiver type for this message. Can't be "Player"
+     * @param message Message to post
+     */
+    public void post(int playerIdFrom, Message.Receiver rec, Object message){
+        assert rec != Message.Receiver.Player: "Can't send messages to 1 player only with this method. Use post(int, int, Object)";
+        post(playerIdFrom, -1, rec, message);
+    }
+
+    /**
+     * Sends a message to a specific player.
+     * @param playerIdFrom Who writes the message
+     * @param playerIdTo Who receives the message
+     * @param message Message being sent.
+     */
+    public void post(int playerIdFrom, int playerIdTo, Object message){
+        post(playerIdFrom, playerIdTo, Message.Receiver.Player, message);
+    }
+
+    /**
+     * Actually posts the message in the blackboard
+     * @param playerIdFrom Who sends the message.
+     * @param playerIdTo Who receives the message. -1 if the receiver type is more than 1 player.
+     * @param rec Receiver type.
+     * @param message
+     */
+    private void post(int playerIdFrom, int playerIdTo, Message.Receiver rec, Object message){
+        Message msg = new Message(playerIdFrom, playerIdTo, rec, message);
+        msg.setTick(gameState.getGameTick());
+        blackboard.post(msg, gameState);
+    }
+
     /**
      * The recommended way to run a game using the GUI is via evaluations.Frontend or evaluations.FrontEndSimple,
      * and for experiments of many games use evaluations.RunGames, which provides more useful tools for gathering results.
@@ -737,7 +763,7 @@ public class Game {
 //        players.add(new RandomPlayer());
 
         BasicMCTSParams params = new BasicMCTSParams();
-        params.comms = new NameCommunicator();
+        params.comms = new BasicCommunicator();
 
         players.add(new BasicMCTSPlayer(params, "MCTS 1"));
         players.add(new BasicMCTSPlayer(params, "MCTS 2"));

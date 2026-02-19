@@ -68,6 +68,7 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
                                         (ActionSpace.Flexibility) getParameterValue("actionSpaceFlexibility"),
                                         (ActionSpace.Context) getParameterValue("actionSpaceContext"));
         decorator = (IPlayerDecorator) getParameterValue("actionRestriction");
+        comms = (ICommunicator) getParameterValue("comms");
     }
 
     @Override
