@@ -2,6 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.communication.Message;
+import core.communication.NullMessage;
 import core.interfaces.IPlayerDecorator;
 import evaluation.metrics.Event;
 import players.PlayerParameters;
@@ -179,38 +180,16 @@ public abstract class AbstractPlayer {
     }
 
 
-    /**
-     * Function is called by Game before this player is due to play an action in the game. It just wraps the
-     * to the communicator (from its player parameters). Can't be overridden.
-     * @param game Current game being played
-     * @param state State before applying the action due immediately.
-     * @param availableActions List of available actions to play in "state" by this player.
-     */
-    public final void speak(Game game, AbstractGameState state, List<AbstractAction> availableActions)
-    {
-        if(parameters.comms != null) parameters.comms.send(game, state, availableActions, this);
-    }
 
-    /**
-     * Function is called by Game after this player has played an "action" in the game. It just wraps the
-     * call to the communicator (from its player parameters). Can't be overridden.
-     * @param game Current game being played.
-     * @param state Current state (after action was played).
-     * @param action Action just executed.
-     */
-    public final void speak(Game game, AbstractGameState state, AbstractAction action)
-    {
-        if(parameters.comms != null)  parameters.comms.send(game, state, action,this);
-    }
 
     /**
      * Function to be implemented by the player to listen to incoming communication. If not overridden, messages are ignored.
      * @param messages Set of messages that are meant to be received by this player.
      */
     public void listen(List<Message> messages){
-//        for(Message m : messages)
-//            System.out.println("["+ this.name + "("+ this.playerID+")] I've received a message from player " +
-//                    m.from + ": " + m.msg);
+        for(Message m : messages)
+            System.out.println("["+ this.name + "("+ this.playerID+")] I've received a message from player " +
+                   m.from + ": " + m.msg);
 
     }
 

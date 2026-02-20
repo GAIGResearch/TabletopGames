@@ -98,7 +98,7 @@ public class Blackboard {
         {
             ArrayList<Message> lastMessages = pollLast(player.getPlayerID());
             if(lastMessages != null)
-                player. listen(lastMessages);
+                player.listen(lastMessages);
         }
     }
 

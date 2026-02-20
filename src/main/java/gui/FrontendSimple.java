@@ -11,6 +11,8 @@ import utilities.Utils;
 import java.io.File;
 import java.util.*;
 
+import static core.communication.GameCommunicator.CommMode.NO_COMMS;
+
 public class FrontendSimple {
 
     public static void main(String[] args) {
@@ -46,7 +48,7 @@ public class FrontendSimple {
         String gameParams = null;
 
         /* Run! */
-        Game.runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, ac, turnPause);
+        Game.runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, ac, turnPause, NO_COMMS);
     }
 
     // stage 2 is then to feed in a directory of agents

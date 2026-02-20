@@ -4,6 +4,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.communication.GameCommunicator;
 import evaluation.listeners.IGameListener;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.loggers.SummaryLogger;
@@ -42,7 +43,7 @@ public class PandemicGame extends Game {
             Long s = seed;
             if (s == -1) s = System.currentTimeMillis();
             s += offset;
-            game = runOne(GameType.Pandemic, parameterConfigFile, players, s, randomizeParameters, listeners, ac, 0);
+            game = runOne(GameType.Pandemic, parameterConfigFile, players, s, randomizeParameters, listeners, ac, 0, GameCommunicator.CommMode.NO_COMMS);
             if (game != null) {
                 statSummary.add(game.getGameState().getGameStatus().value);
                 offset = game.getGameState().getRoundCounter() * game.getGameState().getNPlayers();

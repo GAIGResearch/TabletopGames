@@ -4,6 +4,7 @@ public class Message
 {
 
     public enum Receiver{
+        None,
         Player,
         All,
         Teammates
@@ -40,6 +41,8 @@ public class Message
     public int getSubtick() {
         return subtick;
     }
+
+    public boolean isNull() {return false;}
 
 
     public Message copy() {

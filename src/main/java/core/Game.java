@@ -2,8 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.communication.Blackboard;
-import core.communication.Communication;
+import core.communication.GameCommunicator;
 import core.communication.Message;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
@@ -17,7 +16,7 @@ import gui.GUI;
 import gui.GamePanel;
 import players.basicMCTS.BasicMCTSParams;
 import players.basicMCTS.BasicMCTSPlayer;
-import players.comms.BasicCommunicator;
+import players.comms.BasicPlayerCommunicator;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
@@ -32,7 +31,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static core.communication.Communication.*;
 
 
 public class Game {
@@ -69,9 +67,7 @@ public class Game {
     String codecName = null;
     int snapsPerSecond = 10;
     private int turnPause;
-
-    protected Blackboard blackboard;
-    Communication commMode;
+    public GameCommunicator comms;
 
 
     /**
@@ -86,7 +82,6 @@ public class Game {
         this.gameType = type;
         this.gameState = gameState;
         this.forwardModel = realModel;
-        this.blackboard = new Blackboard();
         reset(players);
     }
 
@@ -101,7 +96,6 @@ public class Game {
         this.gameType = type;
         this.forwardModel = model;
         this.gameState = gameState;
-        this.blackboard = new Blackboard();
         reset(Collections.emptyList(), gameState.gameParameters.randomSeed);
     }
 
@@ -115,7 +109,7 @@ public class Game {
      * @return - game instance created for the run
      */
     public static Game runOne(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause) {
+                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause, GameCommunicator.CommMode comms) {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
@@ -125,6 +119,8 @@ public class Game {
 
         if (game == null)
             System.out.println("Error game: " + gameToPlay);
+
+        game.comms = comms.createComms();
 
         if (listeners != null) {
             Set<String> agentNames = players.stream()
@@ -217,7 +213,8 @@ public class Game {
         if (debug) System.out.println("Game Seed: " + newRandomSeed);
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
-        this.blackboard = new Blackboard();
+        if(comms != null)
+            comms.reset();
 
         // set forward models for all players
         for (AbstractPlayer player : players) {
@@ -280,7 +277,8 @@ public class Game {
     public final void run() {
 
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, gameState)));
-        commMode = gameState.getCoreGameParameters().commMode;;
+
+        comms.setup(this, players);
 
         boolean firstEnd = true;
 
@@ -432,10 +430,8 @@ public class Game {
             ((IPrintable) observation).printToConsole();
         }
 
-        if(commMode == BEFORE_ACTION || commMode == BEFORE_AND_AFTER_ACTION) {
-            currentPlayer.speak(this, observation, observedActions);
-            blackboard.broadcastLast(players);
-        }
+        // Action request comms.
+        comms.OnBeforeAction(currentPlayer, observation, observedActions);
 
         // Start the timer for this decision
         gameState.playerTimer[activePlayer].resume();
@@ -498,11 +494,8 @@ public class Game {
 
         lastPlayer = activePlayer;
 
-        if(commMode == AFTER_ACTION || commMode == BEFORE_AND_AFTER_ACTION)
-        {
-            currentPlayer.speak(this, observation, action);
-            blackboard.broadcastLast(players);
-        }
+        // Action executed comms
+        comms.OnAfterAction(currentPlayer, observation, action);
 
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
@@ -701,42 +694,6 @@ public class Game {
         return gameType.toString();
     }
 
-    /** Agent communication tools **/
-
-    /**
-     * Broadcasts a message to the blackboard of messages. All players will receive this.
-     * @param playerIdFrom Who writes the message
-     * @param rec Receiver type for this message. Can't be "Player"
-     * @param message Message to post
-     */
-    public void post(int playerIdFrom, Message.Receiver rec, Object message){
-        assert rec != Message.Receiver.Player: "Can't send messages to 1 player only with this method. Use post(int, int, Object)";
-        post(playerIdFrom, -1, rec, message);
-    }
-
-    /**
-     * Sends a message to a specific player.
-     * @param playerIdFrom Who writes the message
-     * @param playerIdTo Who receives the message
-     * @param message Message being sent.
-     */
-    public void post(int playerIdFrom, int playerIdTo, Object message){
-        post(playerIdFrom, playerIdTo, Message.Receiver.Player, message);
-    }
-
-    /**
-     * Actually posts the message in the blackboard
-     * @param playerIdFrom Who sends the message.
-     * @param playerIdTo Who receives the message. -1 if the receiver type is more than 1 player.
-     * @param rec Receiver type.
-     * @param message
-     */
-    private void post(int playerIdFrom, int playerIdTo, Message.Receiver rec, Object message){
-        Message msg = new Message(playerIdFrom, playerIdTo, rec, message);
-        msg.setTick(gameState.getGameTick());
-        blackboard.post(msg, gameState);
-    }
-
     /**
      * The recommended way to run a game using the GUI is via evaluations.Frontend or evaluations.FrontEndSimple,
      * and for experiments of many games use evaluations.RunGames, which provides more useful tools for gathering results.
@@ -755,6 +712,7 @@ public class Game {
         boolean useGUI = Utils.getArg(args, "gui", false);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+        GameCommunicator.CommMode comms = Utils.getArg(args, "comms", GameCommunicator.CommMode.BASIC);
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
@@ -763,7 +721,7 @@ public class Game {
 //        players.add(new RandomPlayer());
 
         BasicMCTSParams params = new BasicMCTSParams();
-        params.comms = new BasicCommunicator();
+        params.comms = new BasicPlayerCommunicator();
 
         players.add(new BasicMCTSPlayer(params, "MCTS 1"));
         players.add(new BasicMCTSPlayer(params, "MCTS 2"));
@@ -776,7 +734,7 @@ public class Game {
         String gameParams = null;
 
         /* Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause, comms);
     }
 
 

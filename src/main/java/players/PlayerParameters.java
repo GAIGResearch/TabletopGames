@@ -1,11 +1,12 @@
 package players;
 
 import core.AbstractPlayer;
-import core.interfaces.ICommunicator;
+import core.communication.GameCommunicator;
 import core.interfaces.IPlayerDecorator;
 import core.actions.ActionSpace;
 import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
+import players.comms.IPlayerCommunicator;
 
 import java.util.Arrays;
 
@@ -31,7 +32,7 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
     // Action space type for this player
     public ActionSpace actionSpace = new ActionSpace();
     public IPlayerDecorator decorator = null;
-    public ICommunicator comms = null;
+    public IPlayerCommunicator comms;
 
     public PlayerParameters() {
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
@@ -44,7 +45,7 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
         addTunableParameter("resetSeedEachGame", false);
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("actionRestriction", IPlayerDecorator.class);
-        addTunableParameter("comms", ICommunicator.class);
+        addTunableParameter("comms", IPlayerCommunicator.class);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
                                         (ActionSpace.Flexibility) getParameterValue("actionSpaceFlexibility"),
                                         (ActionSpace.Context) getParameterValue("actionSpaceContext"));
         decorator = (IPlayerDecorator) getParameterValue("actionRestriction");
-        comms = (ICommunicator) getParameterValue("comms");
+        comms = (IPlayerCommunicator) getParameterValue("comms");
     }
 
     @Override
