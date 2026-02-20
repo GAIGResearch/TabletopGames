@@ -4,12 +4,12 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Deck;
-import games.thegame.actions.PlayingCards;
-import games.thegame.actions.SelectRows;
+import games.root.actions.choosers.ChooseNumber;
+import games.thegame.actions.PlayCard;
 import games.thegame.components.TheGameCard;
 import games.thegame.components.TheGameDeck;
-import gametemplate.actions.GTAction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public class TheGameForwardModel extends StandardForwardModel {
             gs.selectedRows.put(i, -1);
         }
 
-//        gs.gamePhase = TheGameGS.TheGamePhase.SelectingRow;
+        gs.gamePhase = TheGameGS.TheGamePhase.SelectingRow;
 
     }
 
@@ -78,21 +78,48 @@ public class TheGameForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         List<AbstractAction> actions = new ArrayList<>();
         TheGameGS gs = (TheGameGS) gameState;
-        actions.add(new PlayingCards(gs.getCurrentPlayer()));
+        int playerID = gs.getCurrentPlayer();
 
-//        switch (gs.gamePhase)
-//        {
-////            case SelectingRow -> {
-////                actions.add(new SelectRows(gs.getCurrentPlayer()));
-////            }
-//
-//            case PlayingCards -> {
-//
-//            }
-//        }
 
-        // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
-        actions.add(new GTAction());
+        switch (gs.gamePhase)
+        {
+            case TheGameGS.TheGamePhase.SelectingRow ->
+            {
+                actions = availableRows(gs, playerID);
+                boolean mustKeepPlaying = gs.currentPlayerPlayedCards < gs.getCardsToPlay();
+                if(!mustKeepPlaying)
+                    actions.add(new DoNothing());
+
+            }
+            case TheGameGS.TheGamePhase.PlayingCards ->
+            {
+                Deck<TheGameCard> playerHand = gs.playerHands.get(playerID);
+                int row = gs.selectedRows.get(playerID);
+                TheGameDeck<TheGameCard> r = gs.cardRows.get(row);
+                for (TheGameCard card : playerHand) {
+                    if (gs.canPlayInRow(card, r)) {
+                        actions.add(new PlayCard(card.number, card.getComponentID(), row));
+                    }
+                }
+            }
+        }
+//        actions.add(new PlayingCards(gs.getCurrentPlayer()));
+        return actions;
+    }
+
+    private List<AbstractAction> availableRows(TheGameGS gs, int playerID ){
+        List<AbstractAction> actions = new ArrayList<>();
+        Deck<TheGameCard> playerHand = gs.playerHands.get(playerID);
+        int row = 0;
+        for(TheGameDeck<TheGameCard> r : gs.cardRows) {
+            for (TheGameCard card : playerHand) {
+                if (gs.canPlayInRow(card, r)) {
+                    actions.add(new ChooseNumber(playerID, row));
+                    break;
+                }
+            }
+            row++;
+        }
         return actions;
     }
 
@@ -116,20 +143,52 @@ public class TheGameForwardModel extends StandardForwardModel {
         if (gs.isActionInProgress() || gs.getGameStatus() == CoreConstants.GameResult.GAME_END)
             return;  // we always wait for any EAS to finish
 
+        switch (gs.gamePhase) {
+            case TheGameGS.TheGamePhase.SelectingRow -> {
+                if(actionTaken instanceof ChooseNumber cn)
+                {
+                    gs.selectedRows.put(gs.getCurrentPlayer(), cn.number);
+                    gs.gamePhase = TheGameGS.TheGamePhase.PlayingCards;
+                }else if(actionTaken instanceof DoNothing)
+                {
+                    advancePlayer(gs, params);
+                }
+            }
+            case TheGameGS.TheGamePhase.PlayingCards ->
+            {
+                if(actionTaken instanceof PlayCard pc)
+                {
+                    gs.currentPlayerPlayedCards++;
+                    boolean mustKeepPlaying = gs.currentPlayerPlayedCards < gs.getCardsToPlay();
 
+                    if(mustKeepPlaying && availableRows(gs, gs.getCurrentPlayer()).isEmpty())
+                        gs.gameOver();
+
+                    else gs.gamePhase = TheGameGS.TheGamePhase.SelectingRow;
+                    gs.selectedRows.clear();
+                }
+            }
+        }
+
+    }
+
+    protected void advancePlayer(TheGameGS gs, TheGameParameters params)
+    {
         while(gs.playerHands.get(gs.getCurrentPlayer()).getSize() < params.handSize[gs.getNPlayers()] && gs.drawDeck.getSize() > 0)
             gs.playerHands.get(gs.getCurrentPlayer()).add(gs.drawDeck.draw());
 
-        int nextPlayer = (gs.getCurrentPlayer() + 1) % gs.getNPlayers(); // we increment one more
-        endPlayerTurn(gs, nextPlayer);
+        gs.currentPlayerPlayedCards = 0;
+        gs.selectedRows.clear();
 
-        boolean canPlay = new PlayingCards(gs.getCurrentPlayer()).canBePlayed(gs);
-        if(!canPlay)
+        endPlayerTurn(gs);
+
+        //Game over?
+        if(availableRows(gs, gs.getCurrentPlayer()).isEmpty())
         {
-            //Game over.
             gs.gameOver();
         }
 
+        gs.gamePhase = TheGameGS.TheGamePhase.SelectingRow;
     }
 
     protected void endGame(AbstractGameState abstractGameState)

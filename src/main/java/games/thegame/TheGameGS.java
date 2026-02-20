@@ -24,19 +24,18 @@ import java.util.*;
 public class TheGameGS extends AbstractGameState{
 
 
-//    public enum TheGamePhase implements IGamePhase{
-//        SelectingRow,
-//        PlayingCards
-//    }
-
-
+    public enum TheGamePhase implements IGamePhase{
+        SelectingRow,
+        PlayingCards
+    }
 
     public List<Deck<TheGameCard>> playerHands;
     public List<TheGameDeck<TheGameCard>> cardRows;
     public Deck<TheGameCard> drawDeck;
 
+    public int currentPlayerPlayedCards;
     public Map<Integer, Integer> selectedRows;
-//    public TheGamePhase gamePhase;
+    public TheGamePhase gamePhase;
 
     /**
      * @param gameParameters - game parameters.
@@ -97,10 +96,14 @@ public class TheGameGS extends AbstractGameState{
         copy.cardRows = new ArrayList<>();
         copy.selectedRows = new HashMap<>();
         copy.playerHands = new ArrayList<>();
+        copy.currentPlayerPlayedCards = currentPlayerPlayedCards;
 
         // Fully observable bits
         for(int i = 0; i < cardRows.size(); ++i)
             copy.cardRows.add(this.cardRows.get(i).copy());
+
+        copy.selectedRows.putAll(selectedRows);
+
         for(int i = 0; i < selectedRows.size(); ++i)
             copy.selectedRows.put(i, this.selectedRows.get(i));
 
@@ -170,16 +173,16 @@ public class TheGameGS extends AbstractGameState{
         if(o == this) return true;
         if(o == null) return false;
         if(o instanceof TheGameGS theGameGS) {
-            return Objects.equals(playerHands, theGameGS.playerHands) &&
+            return Objects.equals(playerHands, theGameGS.playerHands) && currentPlayerPlayedCards == theGameGS.currentPlayerPlayedCards &&
                     Objects.equals(cardRows, theGameGS.cardRows) && Objects.equals(drawDeck, theGameGS.drawDeck) &&
-                    Objects.equals(selectedRows, theGameGS.selectedRows);
+                    Objects.equals(selectedRows, theGameGS.selectedRows) && Objects.equals(gamePhase, theGameGS.gamePhase);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerHands, cardRows, drawDeck, selectedRows);
+        return Objects.hash(super.hashCode(), playerHands, cardRows, drawDeck, selectedRows, gamePhase, currentPlayerPlayedCards);
     }
 
 
