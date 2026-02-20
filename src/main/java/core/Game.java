@@ -16,6 +16,7 @@ import gui.GUI;
 import gui.GamePanel;
 import players.basicMCTS.BasicMCTSParams;
 import players.basicMCTS.BasicMCTSPlayer;
+import players.comms.BasicMCTSCommunicator;
 import players.comms.BasicPlayerCommunicator;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
@@ -721,7 +722,7 @@ public class Game {
 //        players.add(new RandomPlayer());
 
         BasicMCTSParams params = new BasicMCTSParams();
-        params.comms = new BasicPlayerCommunicator();
+        params.comms = new BasicMCTSCommunicator();
 
         players.add(new BasicMCTSPlayer(params, "MCTS 1"));
         players.add(new BasicMCTSPlayer(params, "MCTS 2"));
