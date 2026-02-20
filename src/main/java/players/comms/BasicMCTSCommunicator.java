@@ -26,7 +26,10 @@ public class BasicMCTSCommunicator implements IPlayerCommunicator{
 
     public void listen(AbstractPlayer receiver, List<Message> messages){
         for(Message m : messages)
-            System.out.println("["+ receiver.getName() + "("+ receiver.getPlayerID() +")] I've received a message from player " +
+            System.out.println("["+ receiver.getName() + "("+ receiver.getPlayerID() +")] I've received a message (" +
+                    m.getTick() + ":" + m.getSubtick()
+
+                    + ") from player " +
                     m.from + ": " + m.msg);
 
     }
