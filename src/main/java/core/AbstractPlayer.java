@@ -179,18 +179,6 @@ public abstract class AbstractPlayer {
         return rnd;
     }
 
-
-
-
-    /**
-     * Function to be implemented by the player to listen to incoming communication. If not overridden, messages are ignored.
-     * @param messages Set of messages that are meant to be received by this player.
-     */
-    public void listen(List<Message> messages){
-        for(Message m : messages)
-            System.out.println("["+ this.name + "("+ this.playerID+")] I've received a message from player " +
-                   m.from + ": " + m.msg);
-
-    }
+    public String getName() {return name;}
 
 }
