@@ -12,7 +12,7 @@ public class BasicGameCommunicator extends GameCommunicator {
     @Override
     public void _OnBeforeAction(IPlayerCommunicator comms, AbstractPlayer currentPlayer, AbstractGameState observation, List<AbstractAction> avActions) {
         Message msg = comms.sendMessage(game, observation, avActions, currentPlayer);
-        if(!msg.isNull()) {
+        if(msg != null) {
             blackboard.post(msg, observation);
             blackboard.broadcastLast(players);
         }
@@ -21,7 +21,7 @@ public class BasicGameCommunicator extends GameCommunicator {
     @Override
     public void _OnAfterAction(IPlayerCommunicator comms, AbstractPlayer currentPlayer, AbstractGameState observation, AbstractAction action) {
         Message msg = comms.sendMessage(game, observation, action, currentPlayer);
-        if (!msg.isNull()) {
+        if (msg != null) {
             blackboard.post(msg, observation);
             blackboard.broadcastLast(players);
         }
