@@ -77,7 +77,7 @@ public class MultiGameCommunicator extends GameCommunicator {
     {
         int tries = 0;
         AbstractGameState observation = gameState.copy(ap.getPlayerID());
-        List<AbstractAction> actions = actions = model.computeAvailableActions(observation, ap.getParameters().actionSpace);
+        List<AbstractAction> actions = model.computeAvailableActions(observation, ap.getParameters().actionSpace);
         while(actions.isEmpty() && tries < redetTolerance)
         {
             // The game says there's no actions for the root player, which is impossible. This is because
