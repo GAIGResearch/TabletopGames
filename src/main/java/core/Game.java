@@ -432,7 +432,7 @@ public class Game {
         }
 
         // Action request comms.
-        comms.OnBeforeAction(currentPlayer, observation, observedActions);
+        comms.OnBeforeAction(players, gameState, forwardModel);
 
         // Start the timer for this decision
         gameState.playerTimer[activePlayer].resume();
@@ -496,7 +496,7 @@ public class Game {
         lastPlayer = activePlayer;
 
         // Action executed comms
-        comms.OnAfterAction(currentPlayer, observation, action);
+        comms.OnAfterAction(players, lastPlayer, gameState, action);
 
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
@@ -713,7 +713,7 @@ public class Game {
         boolean useGUI = Utils.getArg(args, "gui", false);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
-        GameCommunicator.CommMode comms = Utils.getArg(args, "comms", GameCommunicator.CommMode.BASIC);
+        GameCommunicator.CommMode comms = Utils.getArg(args, "comms", GameCommunicator.CommMode.MULTI);
         ActionController ac = new ActionController();
 
         /* Set up players for the game */

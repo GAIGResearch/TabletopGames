@@ -10,12 +10,12 @@ import java.util.List;
 public class NullGameCommunicator extends GameCommunicator {
 
     @Override
-    public void _OnBeforeAction(IPlayerCommunicator comms, AbstractPlayer currentPlayer, AbstractGameState observation, List<AbstractAction> avActions) {
+    public void OnBeforeActionPlayer(IPlayerCommunicator comms, AbstractPlayer currentPlayer, AbstractGameState observation, List<AbstractAction> avActions) {
         //Nothing
     }
 
     @Override
-    public void _OnAfterAction(IPlayerCommunicator comms, AbstractPlayer currentPlayer, AbstractGameState observation, AbstractAction action) {
+    public void OnAfterActionPlayer(IPlayerCommunicator comms, AbstractPlayer currentPlayer, AbstractGameState observation, AbstractAction action) {
         //Nothing
     }
 }
