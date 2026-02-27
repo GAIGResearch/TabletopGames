@@ -114,7 +114,7 @@ public class TheGameForwardModel extends StandardForwardModel {
         for(TheGameDeck<TheGameCard> r : gs.cardRows) {
             for (TheGameCard card : playerHand) {
                 if (gs.canPlayInRow(card, r)) {
-                    actions.add(new ChooseNumber(playerID, row));
+                    actions.add(new ChooseNumber(playerID, row, "Select row " + row));
                     break;
                 }
             }

@@ -34,8 +34,9 @@ public interface IPlayerCommunicator {
 
     /**
      * Function to be implemented by the player to listen to incoming communication.
+     * @param state Current Game State.
      * @param receiver The player that receives this message.
      * @param messages Set of messages that are meant to be received by this player.
      */
-    void listen(AbstractPlayer receiver, List<Message> messages);
+    void listen(AbstractGameState state, AbstractPlayer receiver, List<Message> messages);
 }

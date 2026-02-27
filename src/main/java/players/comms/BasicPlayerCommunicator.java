@@ -23,7 +23,7 @@ public class BasicPlayerCommunicator implements IPlayerCommunicator {
         return new Message(emitter.getPlayerID(), -1, Message.Receiver.All, msgStr);
     }
 
-    public void listen(AbstractPlayer receiver, List<Message> messages){
+    public void listen(AbstractGameState state, AbstractPlayer receiver, List<Message> messages){
         for(Message m : messages)
             System.out.println("["+ receiver.getName() + "("+ receiver.getPlayerID() +")] I've received a message from player " +
                     m.from + ": " + m.msg);

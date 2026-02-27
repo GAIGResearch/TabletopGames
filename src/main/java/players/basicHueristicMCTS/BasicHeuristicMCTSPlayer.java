@@ -1,4 +1,4 @@
-package players.basicMCTS;
+package players.basicHueristicMCTS;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
@@ -14,20 +14,22 @@ import java.util.Random;
  * It strips out some of the additional configuration of MCTSPlayer. It uses BasicTreeNode in place of
  * SingleTreeNode.
  */
-public class BasicMCTSPlayer extends AbstractPlayer {
+public class BasicHeuristicMCTSPlayer extends AbstractPlayer {
 
-    public BasicMCTSPlayer() {
+    public BasicHeurTreeNode root;
+
+    public BasicHeuristicMCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
-    public BasicMCTSPlayer(long seed) {
-        super(new BasicMCTSParams(), "Basic MCTS");
+    public BasicHeuristicMCTSPlayer(long seed) {
+        super(new BasicHeurMCTSParams(), "Basic MCTS");
         // for clarity we create a new set of parameters here, but we could just use the default parameters
         parameters.setRandomSeed(seed);
         rnd = new Random(seed);
 
         // These parameters can be changed, and will impact the Basic MCTS algorithm
-        BasicMCTSParams params = getParameters();
+        BasicHeurMCTSParams params = getParameters();
         params.K = Math.sqrt(2);
         params.rolloutLength = 10;
         params.maxTreeDepth = 5;
@@ -35,11 +37,11 @@ public class BasicMCTSPlayer extends AbstractPlayer {
 
     }
 
-    public BasicMCTSPlayer(BasicMCTSParams params) {
+    public BasicHeuristicMCTSPlayer(BasicHeurMCTSParams params) {
         this(params, "Basic MCTS");
     }
 
-    public BasicMCTSPlayer(BasicMCTSParams params, String name) {
+    public BasicHeuristicMCTSPlayer(BasicHeurMCTSParams params, String name) {
         super(params, name);
         rnd = new Random(params.getRandomSeed());
     }
@@ -48,7 +50,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
 
         // Search for best action from the root
-        BasicTreeNode root = new BasicTreeNode(this, null, gameState, rnd);
+        root = new BasicHeurTreeNode(this, null, gameState, rnd);
 
         // mctsSearch does all of the hard work
         root.mctsSearch();
@@ -58,8 +60,8 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public BasicMCTSParams getParameters() {
-        return (BasicMCTSParams) parameters;
+    public BasicHeurMCTSParams getParameters() {
+        return (BasicHeurMCTSParams) parameters;
     }
 
     public void setStateHeuristic(IStateHeuristic heuristic) {
@@ -73,7 +75,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public BasicMCTSPlayer copy() {
-        return new BasicMCTSPlayer((BasicMCTSParams) parameters.copy());
+    public BasicHeuristicMCTSPlayer copy() {
+        return new BasicHeuristicMCTSPlayer((BasicHeurMCTSParams) parameters.copy());
     }
 }

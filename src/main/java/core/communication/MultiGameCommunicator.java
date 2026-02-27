@@ -36,38 +36,18 @@ public class MultiGameCommunicator extends GameCommunicator {
         // Then the rest
         for (AbstractPlayer ap : players)
             if(ap != currentPlayer & ap.parameters.comms != null) {
-                int tries = 0;
                 avActions = new ArrayList<>();
                 redeterminizeState(model, gameState, ap, avActions);
                 OnBeforeActionPlayer(ap.parameters.comms, ap, observation, avActions);
-//
-//                observation = gameState.copy(ap.getPlayerID());
-//                avActions = model.computeAvailableActions(observation, ap.getParameters().actionSpace);
-//                while(avActions.isEmpty() && tries < redetTolerance)
+
+//                try {
+//                    OnBeforeActionPlayer(ap.parameters.comms, ap, observation, avActions);
+//                }catch(AssertionError er)
 //                {
-//                    // The game says there's no actions for the root player, which is impossible. This is because
-//                    // of the determinization of the hidden state. Try again resampling the state.
 //                    observation = gameState.copy(ap.getPlayerID());
 //                    avActions = model.computeAvailableActions(observation, ap.getParameters().actionSpace);
-//                    tries++;
+//                    OnBeforeActionPlayer(ap.parameters.comms, ap, observation, avActions);
 //                }
-//
-//                if(avActions.isEmpty())
-//                {
-//                    //We didn't manage to get a determinization that is compatible with having available actions.
-//                    //"Cheat" using the actual game state.
-//                    observation = gameState.copy(-1);
-//                    avActions = model.computeAvailableActions(observation, ap.getParameters().actionSpace);
-//                }
-
-                try {
-                    OnBeforeActionPlayer(ap.parameters.comms, ap, observation, avActions);
-                }catch(AssertionError er)
-                {
-                    observation = gameState.copy(ap.getPlayerID());
-                    avActions = model.computeAvailableActions(observation, ap.getParameters().actionSpace);
-                    OnBeforeActionPlayer(ap.parameters.comms, ap, observation, avActions);
-                }
             }
 
     }

@@ -8,11 +8,20 @@ import java.util.Objects;
 public class ChooseNumber extends AbstractAction {
     public final int playerID;
     public final int number;
+    public final String meaning;  // What is this number? Used for string info
 
     public ChooseNumber(int playerID, int number){
         this.playerID = playerID;
         this.number = number;
+        this.meaning = "";
     }
+
+    public ChooseNumber(int playerID, int number, String meaning){
+        this.playerID = playerID;
+        this.number = number;
+        this.meaning = meaning;
+    }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         //this action serves purely as a placeholder for the amount of warriors to be moved in the next action -> to reduce the action space
@@ -40,7 +49,7 @@ public class ChooseNumber extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Player " + playerID + " chooses " + number;
+        return "Player " + playerID + " chooses " + number + (!meaning.isEmpty() ? " (" + meaning + ")" : "");
     }
 
     @Override

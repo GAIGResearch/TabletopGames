@@ -93,12 +93,12 @@ public class Blackboard {
     }
 
 
-    public void broadcastLast(List<AbstractPlayer> players, int fromGameTick) {
+    public void broadcastLast(List<AbstractPlayer> players, AbstractGameState observation) {
         for(AbstractPlayer player : players)
         {
             ArrayList<Message> lastMessages = pollLast(player.getPlayerID());
-            if(lastMessages != null && player.parameters.comms != null && lastMessages.getFirst().getTick() == fromGameTick)
-                player.parameters.comms.listen(player, lastMessages);
+            if(lastMessages != null && player.parameters.comms != null && lastMessages.getFirst().getTick() == observation.getGameTick())
+                player.parameters.comms.listen(observation, player, lastMessages);
         }
     }
 

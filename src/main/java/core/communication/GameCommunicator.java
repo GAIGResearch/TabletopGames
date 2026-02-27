@@ -99,7 +99,7 @@ public class GameCommunicator {
         if(msg != null) {
             msg.setTick(observation.getGameTick());
             blackboard.post(msg, observation);
-            blackboard.broadcastLast(players, observation.getGameTick());
+            blackboard.broadcastLast(players, observation);
         }
     }
 
@@ -118,7 +118,7 @@ public class GameCommunicator {
         if (msg != null) {
             msg.setTick(observation.getGameTick());
             blackboard.post(msg, observation);
-            blackboard.broadcastLast(players, observation.getGameTick());
+            blackboard.broadcastLast(players, observation);
         }
     }
 
