@@ -223,7 +223,6 @@ public class JSONUtils {
         return loadClassFromJSON(first).getClass();
     }
 
-    @SuppressWarnings("unchecked")
     public static void writeJSON(JSONObject json, String fileName) {
         try (FileWriter writer = new FileWriter(fileName)) {
             writer.write(JSONUtils.prettyPrint(json, 1));

@@ -17,9 +17,9 @@
     },
     "coefficients" : {
       "BorneOff" : 2.55,
-      "BIAS" : -1.30e-13,
-      "PiecesOnBoard_Opp" : -0.0804,
-      "PiecesOnBoard" : 0.0804,
+      "BIAS" : 0.0,
+      "MeanToHome_Opp" : -0.0804,
+      "MeanToHome" : 0.0804,
       "BorneOff_Opp" : -2.55
     },
     "class" : "players.heuristics.LinearStateHeuristic",

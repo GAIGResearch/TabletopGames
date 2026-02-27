@@ -21,23 +21,22 @@ public class DecisionTreeLearner extends ApacheLearner {
     double minInfoGain;
     double minWeightFractionPerNode;
 
-
-    public DecisionTreeLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector) {
-        this(gamma, target, 10, 1, 0.00, 0.005, stateFeatureVector);
+    public DecisionTreeLearner() {
+        super();
     }
+
+    public DecisionTreeLearner(double gamma, Target target) {
+        this(gamma, target, 10, 1, 0.00, 0.005);
+    }
+
+    public DecisionTreeLearner(double gamma, Target target, int maxDepth, int minInstancesPerNode, double minInfoGain, double minWeightFractionPerNode) {
+        this(gamma, target, maxDepth, minInstancesPerNode, minInfoGain, minWeightFractionPerNode, null, null);
+    }
+
     public DecisionTreeLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
         this(gamma, target, 10, 1, 0.00, 0.005, stateFeatureVector, actionFeatureVector);
     }
 
-    public DecisionTreeLearner(double gamma, Target target, int maxDepth, int minInstancesPerNode,
-                               double minInfoGain, double minWeightFractionPerNode,
-                               IStateFeatureVector stateFeatureVector) {
-        super(gamma, target, stateFeatureVector);
-        this.maxDepth = maxDepth;
-        this.minInstancesPerNode = minInstancesPerNode;
-        this.minInfoGain = minInfoGain;
-        this.minWeightFractionPerNode = minWeightFractionPerNode;
-    }
     public DecisionTreeLearner(double gamma, Target target, int maxDepth, int minInstancesPerNode,
                                double minInfoGain, double minWeightFractionPerNode,
                                IStateFeatureVector stateFeatureVector,
@@ -90,19 +89,7 @@ public class DecisionTreeLearner extends ApacheLearner {
         }
     }
 
-    public void writeToFile(String file) {
-        try {
-            drModel.write().overwrite().save(file);
-            BufferedWriter writer = new BufferedWriter(new java.io.FileWriter(file + File.separator + "Description.txt"));
-            writer.write(DecisionTreeActionHeuristic.prettifyDecisionTreeDescription(drModel, descriptions));
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Failed to save decision tree model");
-            drModel.toDebugString();
-        }
 
-    }
 
     @Override
     public String name() {

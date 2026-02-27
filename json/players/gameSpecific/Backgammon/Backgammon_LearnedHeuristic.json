@@ -37,9 +37,9 @@
     },
     "coefficients" : {
       "BIAS" : -5.08e-12,
-      "PiecesOnBoard_Opp" : -0.0563,
+      "MeanToHome_Opp" : -0.0563,
       "Stacks:BorneOff:Stacks_Opp" : 0.00127,
-      "PiecesOnBoard" : 0.0563,
+      "MeanToHome" : 0.0563,
       "BorneOff_Opp" : -0.676,
       "BorneOff:Stacks_Opp" : 0.0313,
       "Bar" : -2.67,

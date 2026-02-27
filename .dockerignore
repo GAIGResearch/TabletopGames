@@ -1,0 +1,10 @@
+# Ignore Maven output
+target/
+
+# Ignore local system files
+.mvn/
+.idea/
+.vscode/
+
+# Ignore Git files
+.git

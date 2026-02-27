@@ -1,6 +1,5 @@
 package players.mcts;
 
-import com.google.apps.card.v1.Card;
 import core.AbstractGameState;
 import core.Game;
 import core.actions.AbstractAction;

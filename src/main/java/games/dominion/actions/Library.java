@@ -11,6 +11,7 @@ import games.dominion.DominionGameState;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
+import utilities.Pair;
 
 /**
  * Action to play the Library card. This card allows the player to draw until they have 7 cards in hand, allowing them to discard any action cards drawn in the process.
@@ -32,17 +33,10 @@ public class Library extends DominionAction implements IExtendedSequence {
         DominionGameState dgs = (DominionGameState) state;
         List<AbstractAction> actions = new ArrayList<>();
 
-        boolean couldDraw = dgs.drawCard(player);
         actions.add(new DoNothing());
 
-        // Edge case if they have no hands left in play (discard and draw pile is empty)
-        if (!couldDraw) {
-            return actions;
-        }
-
+        // If the drawn card is an action they have the option to discard it
         DominionCard drawnCard = dgs.getDeck(DeckType.HAND,player).peek();
-
-        // If it is an action card they have the option to discard it
         if (drawnCard.isActionCard()) {
             actions.add(new MoveCard(drawnCard.cardType(), player, DeckType.HAND, player, DeckType.DISCARD, true));
         }
@@ -63,6 +57,16 @@ public class Library extends DominionAction implements IExtendedSequence {
         if (dgs.getDeck(DeckType.HAND, player).getSize() >= 7) {
             executed = true;
         }
+
+        // Else draw another card
+        else {
+            boolean couldDraw = dgs.drawCard(player);
+
+            // Edge case if they have no hands left in play (discard and draw pile is empty)
+            if (!couldDraw) {
+                executed = true;
+            }
+        }
     }
 
     @Override
@@ -72,7 +76,12 @@ public class Library extends DominionAction implements IExtendedSequence {
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.setActionInProgress(this);
+        boolean couldDraw = state.drawCard(player);
+
+        // Edge case if they have no hands left in play (discard and draw pile is empty)
+        if (couldDraw) {
+            state.setActionInProgress(this);
+        }
         return true;
     }
 

@@ -44,7 +44,6 @@ import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.gui.DescentGUI;
-import games.diamant.*;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
@@ -59,6 +58,10 @@ import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.gofish.GoFishForwardModel;
+import games.gofish.GoFishGameState;
+import games.gofish.GoFishParameters;
+import games.gofish.gui.GoFishGUIManager;
 import games.hanabi.HanabiForwardModel;
 import games.hanabi.HanabiGameState;
 import games.hanabi.HanabiParameters;
@@ -75,7 +78,6 @@ import games.mastermind.MMForwardModel;
 import games.mastermind.MMGameState;
 import games.mastermind.MMParameters;
 import games.monopolydeal.gui.MonopolyDealGUIManager;
-import games.mastermind.*;
 import games.mastermind.gui.MMGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
@@ -101,6 +103,10 @@ import games.resistance.ResForwardModel;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.gui.ResGUIManager;
+import games.seasaltpaper.SeaSaltPaperForwardModel;
+import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.SeaSaltPaperParameters;
+import games.seasaltpaper.gui.SSPGUIManager;
 import games.root.RootForwardModel;
 import games.root.RootGameState;
 import games.root.RootParameters;
@@ -144,9 +150,12 @@ import gametemplate.GTForwardModel;
 import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
 import gametemplate.GTParameters;
+import games.pickomino.PickominoForwardModel;
+import games.pickomino.PickominoGUIManager;
+import games.pickomino.PickominoGameState;
+import games.pickomino.PickominoParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.*;
 import llm.DocumentSummariser;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import players.human.ActionController;
@@ -160,6 +169,7 @@ import java.util.*;
 import static core.CoreConstants.*;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
+
 import games.monopolydeal.*;
 
 /**
@@ -196,10 +206,21 @@ public enum GameType {
             Arrays.asList(Strategy, Animals, Cards, ComicBook, Humour),
             Arrays.asList(HandManagement, HotPotato, PlayerElimination, PushYourLuck, SetCollection, TakeThat),
             ExplodingKittensGameState.class, ExplodingKittensForwardModel.class, ExplodingKittensParameters.class, ExplodingKittensGUIManager.class),
+    GoFish(2, 6,
+            Arrays.asList(Cards, Simple),
+            Arrays.asList(HandManagement, SetCollection, TakeThat),
+            GoFishGameState.class,
+            GoFishForwardModel.class,
+            GoFishParameters.class,
+            GoFishGUIManager.class),
     LoveLetter(2, 4,
             Arrays.asList(Cards, Deduction, Renaissance),
             Arrays.asList(HandManagement, PlayerElimination),
             LoveLetterGameState.class, LoveLetterForwardModel.class, LoveLetterParameters.class, LoveLetterGUIManager.class),
+    SeaSaltPaper(2, 4,
+            Arrays.asList(Cards, Deduction),
+            Arrays.asList(HandManagement, SetCollection),
+            SeaSaltPaperGameState.class, SeaSaltPaperForwardModel.class, SeaSaltPaperParameters.class, SSPGUIManager.class),
     Uno(2, 10,
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
@@ -271,7 +292,7 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
-    Descent2e(2,5,
+    Descent2e(2, 5,
             new ArrayList<>(),
             new ArrayList<>(),
             DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class),
@@ -296,7 +317,7 @@ public enum GameType {
             Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
             Arrays.asList(Memory, GridMovement),
             ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
-    Hearts(3,7,Arrays.asList(Cards, Number),
+    Hearts(3, 7, Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
@@ -323,7 +344,7 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
             ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class),
-    Root(2, 4, Arrays.asList(Strategy,Wargame), Arrays.asList(ActionPoints, ActionQueue,
+    Root(2, 4, Arrays.asList(Strategy, Wargame), Arrays.asList(ActionPoints, ActionQueue,
             ActionRetrieval, AreaMajority, AreaMovement, DiceRolling, HandManagement, MultiUseCards, Negotiation,
             PointToPointMovement, Race, SuddenDeathEnding, TakeThat, VariablePlayerPowers, VariableSetup), RootGameState.class, RootForwardModel.class, RootParameters.class, RootGUIManager.class),
     Saboteur(3, 10,
@@ -333,7 +354,8 @@ public enum GameType {
     Chess(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),;
+            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),
+    Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling), PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class, PickominoGUIManager.class);
 
 
     // Core classes where the game is defined

@@ -5,7 +5,8 @@
 *.log
 
 # Eclipse metadata
-.classpath
+.classpath/
+.project/
 
 # BlueJ files
 *.ctxt
@@ -26,6 +27,7 @@
 hs_err_pid*
 
 .idea/
+.settings/
 target/
 *.iml
 *.kotlin_module

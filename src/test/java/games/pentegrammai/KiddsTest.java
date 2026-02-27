@@ -6,6 +6,7 @@ import core.components.Token;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -136,6 +137,9 @@ public class KiddsTest {
             t.setOwnerId(0);
             state.board.get(7).add(t);
         }
+
+        // Move player 1 pieces on spot 7 off the board
+        state.board.get(7).removeIf(piece -> piece.getOwnerId() == 1);
 
         // Move one of player 0's tokens from 7 to 5
         if (!state.canPlace(5))

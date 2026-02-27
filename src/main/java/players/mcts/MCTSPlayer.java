@@ -4,7 +4,6 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IActionHeuristic;
 import evaluation.listeners.IGameListener;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
@@ -14,8 +13,6 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -247,8 +244,15 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         if (newRoot == null) {
             if (getParameters().opponentTreePolicy == MultiTree)
                 root = new MultiTreeNode(this, gameState, rnd);
-            else
-                root = SingleTreeNode.createRootNode(this, gameState, rnd, getFactory());
+            else {
+                if(getParameters().numDeterminizations > 1)
+                {
+                    root = new ForestNode(this, gameState, rnd);
+                }
+                else {
+                    root = SingleTreeNode.createRootNode(this, gameState, rnd, getFactory());
+                }
+            }
         } else {
             root = newRoot;
         }

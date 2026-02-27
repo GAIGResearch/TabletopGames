@@ -10,8 +10,8 @@ public class BGStateFeatures implements IStateFeatureVector {
             "Bar", "Bar_Opp",
             "HomeBoard", "HomeBoard_Opp",
             "Singletons", "Singletons_Opp",
-            "MeanToHome", "MeanToHome_Opp",
             "PiecesOnBoard", "PiecesOnBoard_Opp",
+            "MeanToHome", "MeanToHome_Opp",
             "Stacks", "Stacks_Opp"
     };
 

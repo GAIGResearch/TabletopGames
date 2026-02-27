@@ -17,13 +17,13 @@
     },
     "coefficients" : {
       "MeanToHome_Opp:PiecesOnBoard_Opp" : -0.00264,
-      "MeanToHome" : 0.000864,
+      "PiecesOnBoard" : 0.000864,
       "BorneOff" : 1.95,
       "MeanToHome:PiecesOnBoard" : 0.00264,
       "BIAS" : -2.69e-13,
-      "MeanToHome_Opp" : -0.000864,
-      "PiecesOnBoard_Opp" : 0.00845,
-      "PiecesOnBoard" : -0.00845,
+      "PiecesOnBoard_Opp" : -0.000864,
+      "MeanToHome_Opp" : 0.00845,
+      "MeanToHome" : -0.00845,
       "BorneOff_Opp" : -1.95
     },
     "class" : "players.heuristics.LinearStateHeuristic",

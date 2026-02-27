@@ -202,6 +202,16 @@ public abstract class DeckView<T extends Component> extends ComponentView {
         return new Dimension(rect.width, rect.height);
     }
 
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(rect.width, rect.height);
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return new Dimension(rect.width, rect.height);
+    }
+
     // Getters, setters
     public int getCardHighlight() {
         return cardHighlight;

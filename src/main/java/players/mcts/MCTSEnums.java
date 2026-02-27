@@ -24,6 +24,10 @@ public class MCTSEnums {
         UCB, UCB_Tuned, AlphaGo, EXP3, RegretMatching, NoAveragingRM, Uniform, Greedy
     }
 
+    public enum PerfectInformationPolicy{
+        SingleVote, AverageValue, TotalVisits
+    }
+
     public enum BackupPolicy {
         MonteCarlo, Lambda, MaxLambda, MaxMC
         // MonteCarlo is the standard backup policy

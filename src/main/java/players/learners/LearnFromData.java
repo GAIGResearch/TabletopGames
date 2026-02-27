@@ -87,6 +87,7 @@ public class LearnFromData {
 
     public Object learn() {
         long startTime = System.currentTimeMillis();
+        long iterationStart = startTime;
         File dataFile = new File(data);
         String convertedDataFile = data.replaceAll("\\.[^.]+$", "_ASF$0");
         String[] dataFiles = new String[]{data};
@@ -97,7 +98,7 @@ public class LearnFromData {
 
         AutomatedFeatures asf = new AutomatedFeatures(stateFeatures, actionFeatures);
         // construct the output file by adding _ASF before the suffix (which can be anything)
-        List<List<Object>> convertedData = asf.processData(true, convertedDataFile, maxRecords, dataFiles);
+        List<List<Object>> convertedData = asf.processData(convertedDataFile, maxRecords, dataFiles);
 
         // this will have created the raw data from which we now learn
         // whichever of state/action features is not null will prompt the type of Heuristic learned
@@ -110,8 +111,18 @@ public class LearnFromData {
         Object learnedThing = learner.learnFrom(convertedDataFile);
 
         // we are now in a position to modify the features in a loop
-        learnedThing = improveModel(learnedThing, learner, convertedData.size(), convertedDataFile);
+        // if we have a GLM
+        // TODO: Can generalise this to consider validation error with feature removal to reduce overfitting
+        if (learnedThing instanceof GLMHeuristic glm) {
+            learnedThing = improveModel(glm, learner, convertedData.size(), convertedDataFile);
+        }
 
+        String dataFileName = "";
+        if (learnedThing instanceof IToFile toFile) {
+            // replace any suffix with a ".data"
+            dataFileName = outputFileName.replaceAll("\\.[^.]+$", "");
+            toFile.writeToFile(dataFileName);
+        }
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
             JSONUtils.writeJSON(json, outputFileName);
@@ -138,200 +149,223 @@ public class LearnFromData {
         return learnedThing;
     }
 
-    private Object improveModel(Object startingHeuristic,
+    private Object improveModel(GLMHeuristic startingHeuristic,
                                 AbstractLearner learner,
                                 int n,
                                 String... dataFiles) {
 
         long startTime = System.currentTimeMillis();
-        if (startingHeuristic instanceof GLMHeuristic glm) {
-            AutomatedFeatures asf = (AutomatedFeatures) (learner.getActionFeatureVector() != null ? learner.getActionFeatureVector() : learner.getStateFeatureVector());
-            String bestFeatureDescription = "";
-            double baseBIC = bicFromAic(glm.getModel().summary().aic(), asf.names().length, n);
-            double bestBIC = baseBIC;
-            System.out.println("Starting modified BIC: " + baseBIC);
-            List<String> excludedFeatures = new ArrayList<>();
-            List<String> excludedBucketFeatures = new ArrayList<>();
-            List<String> excludedInteractionFeatures = new ArrayList<>();
-            List<String> featuresToKeep = new ArrayList<>();
-            int iteration = 0;
-            String dataDirectory = dataFiles[0].substring(0, dataFiles[0].lastIndexOf(File.separator));
-            String outputFile = dataDirectory + File.separator + "ImproveModel_tmp.txt";
+        long startIteration = startTime;
+        AutomatedFeatures asf = (AutomatedFeatures) (learner.getActionFeatureVector() != null ? learner.getActionFeatureVector() : learner.getStateFeatureVector());
+        String bestFeatureDescription = "";
+        double baseBIC = bicFromAic(startingHeuristic.getModel().summary().aic(), asf.names().length, n);
+        double bestBIC = baseBIC;
+        System.out.println("Starting modified BIC: " + baseBIC);
+        List<String> excludedFeatures = new ArrayList<>();
+        List<String> excludedBucketFeatures = new ArrayList<>();
+        List<String> excludedInteractionFeatures = new ArrayList<>();
+        List<String> featuresToKeep = new ArrayList<>();
+        int iteration = 0;
+        String dataDirectory = dataFiles[0].substring(0, dataFiles[0].lastIndexOf(File.separator));
+        String outputFile = dataDirectory + File.separator + "ImproveModel_tmp.txt";
 
-            String[] rawData = dataFiles;
-            AutomatedFeatures bestFeatures;
+        String[] rawData = dataFiles;
+        AutomatedFeatures bestFeatures;
+        FeatureAnalysisResult bestResult = null;
 
-            // we check for any zero coefficients in startingHeuristic
-            // and exclude those features from the search
+        // we check for any zero coefficients in startingHeuristic
+        // and exclude those features from the search
+        for (int i = 0; i < asf.names().length; i++) {
+            if (Math.abs(startingHeuristic.coefficients()[i + 1]) < 0.00001) {
+                excludedFeatures.add(asf.names()[i]);
+            }
+        }
+        if (!excludedFeatures.isEmpty()) {
+            System.out.println("Excluding features with zero coefficients: " + excludedFeatures);
+            removeExcludedFeatures(excludedFeatures, asf);
+        }
+
+        do {
+            bestFeatures = null;
+            if (debug)
+                System.out.printf("Iteration %d, current feature count %d / %d%n", iteration, asf.names().length, learner.featureCount());
+            baseBIC = bestBIC;  // reset baseline
             for (int i = 0; i < asf.names().length; i++) {
-                if (Math.abs(glm.coefficients()[i + 1]) < 0.00001) {
-                    excludedFeatures.add(asf.names()[i]);
-                }
-            }
-            if (!excludedFeatures.isEmpty()) {
-                System.out.println("Excluding features with zero coefficients: " + excludedFeatures);
-                removeExcludedFeatures(excludedFeatures, asf);
-            }
 
-            do {
-                bestFeatures = null;
-                if (debug)
-                    System.out.printf("Iteration %d, current feature count %d / %d%n", iteration, asf.names().length, learner.featureCount());
-                baseBIC = bestBIC;  // reset baseline
-                for (int i = 0; i < asf.names().length; i++) {
+                String firstFeature = asf.names()[i];
+                AutomatedFeatures.featureType type1 = asf.getFeatureType(i);
 
-                    String firstFeature = asf.names()[i];
-                    AutomatedFeatures.featureType type1 = asf.getFeatureType(i);
+                if (unfinalisedRangeFeature(i, asf, excludedBucketFeatures))
+                    continue;
 
-                    if (type1 == RANGE) {
-                        int underlyingIndex = asf.getUnderlyingIndex(i);
-                        String underlyingFeature = asf.names()[underlyingIndex];
-                        if (!excludedBucketFeatures.contains(underlyingFeature))
-                            continue;  // we only consider RANGE features for interactions once the bucketing is fixed
-                    }
-                    if (type1 == AutomatedFeatures.featureType.RAW && !excludedBucketFeatures.contains(firstFeature)) {
-                        // once a feature is below the base AIC, we save time by not checking it for bucketing again
-                        AutomatedFeatures adjustedASF = asf.copy();
-                        int underlyingIndex = asf.getUnderlyingIndex(i);
-                        adjustedASF.setBuckets(underlyingIndex, asf.getBuckets(underlyingIndex) + BUCKET_INCREMENT);
+                if (type1 == RAW && !excludedBucketFeatures.contains(firstFeature)) {
+                    // once a feature is below the base AIC, we save time by not checking it for bucketing again
+                    AutomatedFeatures adjustedASF = asf.copy();
+                    int underlyingIndex = asf.getUnderlyingIndex(i);
+                    adjustedASF.setBuckets(underlyingIndex, asf.getBuckets(underlyingIndex) + BUCKET_INCREMENT);
 
-                        FeatureAnalysisResult result = processNewFeature(adjustedASF, outputFile, rawData, learner, n);
-
-                        if (result.newBIC < bestBIC) {
-                            bestBIC = result.newBIC;
-                            bestFeatures = result.adjustedASF;
-                            startingHeuristic = result.newHeuristic;
-                            bestFeatureDescription = firstFeature + " (Buckets: " + result.adjustedASF.getBuckets(underlyingIndex) + ")";
-                        } else if (result.newBIC > baseBIC) {
-                            if (debug)
-                                System.out.println("Excluding feature " + firstFeature + " with buckets " +
-                                        adjustedASF.getBuckets(underlyingIndex) + " as it did not improve BIC");
-                            excludedBucketFeatures.add(firstFeature);
-                        }
+                    FeatureAnalysisResult result = processNewFeature(adjustedASF, outputFile, rawData, learner, n);
+                    if (debug) {
+                        System.out.printf("\tConsidered interaction: %s, new BIC: %.2f%n",
+                                firstFeature + " (Buckets: " + result.adjustedASF.getBuckets(underlyingIndex) + ")",
+                                result.newBIC);
                     }
 
-                    for (int j = i; j < asf.names().length; j++) {
-                        String secondFeature = asf.names()[j];
-                        String interactionName = firstFeature + ":" + secondFeature;
-                        AutomatedFeatures.featureType type2 = asf.getFeatureType(j);
-
-                        if (type2 == RANGE) {
-                            int underlyingIndex = asf.getUnderlyingIndex(j);
-                            String underlyingFeature = asf.names()[underlyingIndex];
-                            if (!excludedBucketFeatures.contains(underlyingFeature))
-                                continue;  // we only consider RANGE features for interactions once the bucketing is fixed
-                        }
-
-                        if (excludedInteractionFeatures.contains(interactionName))
-                            continue;  // we've already checked this one and it failed to help
-
-                        // check that this is not an interaction between two mutually exclusive ENUM/RANGE features
-                        if ((asf.getFeatureType(j) == ENUM || asf.getFeatureType(j) == RANGE) &&
-                                asf.getUnderlyingIndex(i) == asf.getUnderlyingIndex(j)) {
-                            continue;
-                        }
-
-                        // check that this is not already an interaction
-                        if (asf.getColumnDetails().stream().anyMatch(r -> r.type() == INTERACTION &&
-                                r.name().equals(interactionName))) {
-                            //  System.out.println("Already an interaction: " + firstFeature + " : " + secondFeature);
-                            continue;
-                        }
-
-                        // Consider the interaction of features
-                        AutomatedFeatures adjustedASF = asf.copy();
-                        adjustedASF.addInteraction(i, j);
-                        FeatureAnalysisResult result = processNewFeature(adjustedASF, outputFile, rawData, learner, n);
-
+                    if (result.newBIC < bestBIC) {
+                        bestResult = result;
+                        bestBIC = result.newBIC;
+                        bestFeatures = result.adjustedASF;
+                        startingHeuristic = result.newHeuristic;
+                        bestFeatureDescription = firstFeature + " (Buckets: " + result.adjustedASF.getBuckets(underlyingIndex) + ")";
+                    } else if (result.newBIC > baseBIC) {
                         if (debug)
-                            System.out.printf("\tConsidered interaction: %s, new BIC: %.2f%n", interactionName, result.newBIC);
+                            System.out.println("Excluding feature " + firstFeature + " with buckets " +
+                                    adjustedASF.getBuckets(underlyingIndex) + " as it did not improve BIC");
+                        excludedBucketFeatures.add(firstFeature);
+                    }
+                }
+
+                for (int j = i; j < asf.names().length; j++) {
+                    String secondFeature = asf.names()[j];
+                    String interactionName = firstFeature + ":" + secondFeature;
+
+                    if (unfinalisedRangeFeature(j, asf, excludedBucketFeatures))
+                        continue;
+
+                    if (excludedInteractionFeatures.contains(interactionName))
+                        continue;  // we've already checked this one and it failed to help
+
+                    // Skip any features that have two different one-hot features derived from the same underlying feature
+                    List<Integer> oneHotIndicesA = asf.underlyingOneHotIndices(i);
+                    List<Integer> oneHotIndicesB = asf.underlyingOneHotIndices(j);
+                    if (oneHotIndicesA.stream().anyMatch(oneHotIndicesB::contains)) {
+                        excludedInteractionFeatures.add(interactionName);
+                        if (debug)
+                            System.out.println("Skipping " + interactionName + " due to one-hot clash");
+                        continue;
+                    }
+
+                    // check that this is not already an interaction (because we've already added it)
+                    if (asf.getColumnDetails().stream().anyMatch(r -> r.type() == INTERACTION &&
+                            r.name().equals(interactionName))) {
+                        //  System.out.println("Already an interaction: " + firstFeature + " : " + secondFeature);
+                        continue;
+                    }
+
+                    // Consider the interaction of features
+                    AutomatedFeatures adjustedASF = asf.copy();
+                    adjustedASF.addInteraction(i, j);
+                    FeatureAnalysisResult result = processNewFeature(adjustedASF, outputFile, rawData, learner, n);
+
+                    if (debug)
+                        System.out.printf("\tConsidered interaction: %s, new BIC: %.2f%n", interactionName, result.newBIC);
 //                        System.out.printf("\tCoefficients: %s%n",
 //                                result.newHeuristic.coefficients() != null ?
 //                                        Arrays.stream(result.newHeuristic.coefficients()).mapToObj(d -> String.format("%.2f", d)).collect(joining("|")) : "[]");
 
-                        if (result.newBIC < bestBIC) {
-                            bestBIC = result.newBIC;
-                            bestFeatures = result.adjustedASF;
-                            startingHeuristic = result.newHeuristic;
-                            bestFeatureDescription = interactionName;
-                        } else if (result.newBIC > baseBIC) {
-                            // if an interaction worsens the BIC, then we exclude it from future consideration
-                            // on the basis that this is *unlikely* to improve in future iterations [although it might]
-                            excludedInteractionFeatures.add(interactionName);
-                        }
-                    }
-
-                    // Then consider removing this feature (if it is not part of an interaction, and we have finished bucketing)
-                    String featureToRemove = asf.names()[i];
-                    // we *can* remove interactions that are in other interactions (just not RANGE or RAW features)
-                    if (asf.getFeatureType(i) != INTERACTION && (featuresToKeep.contains(featureToRemove) || usedInInteraction(asf, featureToRemove)))
-                        continue; // we don't want to remove a RAW/RANGE feature that is part of an interaction, or that previous removal damaged BIC
-
-                    AutomatedFeatures adjustedASF = asf.copy();
-                    adjustedASF.removeFeature(i);
-
-                    // we always use the data file from this iteration of building the model (as this has all the data)
-                    FeatureAnalysisResult result = processNewFeature(adjustedASF, outputFile, new String[0], learner, n);
-
-                    if (debug)
-                        System.out.printf("\tConsidered feature removal: %s, new BIC: %.2f%n", featureToRemove, result.newBIC);
-//                    System.out.printf("\tCoefficients: %s%n",
-//                            result.newHeuristic.coefficients() != null ?
-//                                    Arrays.stream(result.newHeuristic.coefficients()).mapToObj(d -> String.format("%.2f", d)).collect(joining("|")) : "[]");
                     if (result.newBIC < bestBIC) {
+                        bestResult = result;
                         bestBIC = result.newBIC;
                         bestFeatures = result.adjustedASF;
                         startingHeuristic = result.newHeuristic;
-                        bestFeatureDescription = String.format("Removed Feature %s", featureToRemove);
-                    } else if (result.newBIC > baseBIC + bicMultiplier * asf.names().length) {
-                        featuresToKeep.add(featureToRemove);
+                        bestFeatureDescription = interactionName;
+                    } else if (result.newBIC > baseBIC) {
+                        // if an interaction worsens the BIC, then we exclude it from future consideration
+                        // on the basis that this is *unlikely* to improve in future iterations [although it might]
+                        excludedInteractionFeatures.add(interactionName);
                     }
                 }
 
-                if (bestFeatureDescription.startsWith("Removed Feature")) {
-                    // If the best is a removal, we need to add to excludedFeatures so that we exclude it from future iterations
-                    // otherwise processNewData will keep adding it back in
-                    excludedFeatures.add(bestFeatureDescription.substring(bestFeatureDescription.lastIndexOf("is ") + 3));
-                }
-                // We then also need to set up the data file to be used as the baseline for the next iteration
-                if (bestFeatures != null) {
-                    String newFileName = dataDirectory + File.separator + "ImproveModel_Iter_" + iteration + ".txt";
-                    bestFeatures.processData(false, newFileName, maxRecords, rawData);
-                    // then remove excluded features from the bestFeatures (these are always in the file so it always contains the original raw data)
-                    removeExcludedFeatures(excludedFeatures, bestFeatures);
-                    iteration++;
-                    rawData = new String[]{newFileName};
-                }
+                // Then consider removing this feature (if it is not part of an interaction, and we have finished bucketing)
+                String featureToRemove = asf.names()[i];
+                // we *can* remove INTERACTION features that are in other interactions, but
+                // we don't want to remove a RAW/RANGE/ENUM feature that is part of an interaction, or that previous removal damaged BIC
+                if (
+                        (asf.getFeatureType(i) != INTERACTION) &&
+                        (featuresToKeep.contains(featureToRemove) || usedInInteraction(asf, featureToRemove))
+                )
+                    continue;
 
-                // We then update to the single best change (provided it improved on the BIC)
-                if (bestFeatures == null) {
-                    System.out.println("No feature changes improved BIC");
-                } else {
-                    System.out.printf("Best feature with BIC: %.2f is %s%n", bestBIC, bestFeatureDescription);
-                    if (debug) {
-                        System.out.printf("\tCoefficients: %s%n",
-                                glm.coefficients() != null ?
-                                        Arrays.stream(glm.coefficients()).mapToObj(d -> String.format("%.2f", d)).collect(joining("|")) : "[]");
-                    }
-                    asf = bestFeatures;
-                }
+                AutomatedFeatures adjustedASF = asf.copy();
+                adjustedASF.removeFeature(i);
 
-                // increment bicMultiplier if time is getting on
-                int minutesElapsed = (int) ((System.currentTimeMillis() - startTime) / 60000);
-                if (minutesElapsed > bicTimer) {
-                    System.out.printf("Time elapsed: %d minutes, increasing BIC multiplier from %d to %d%n",
-                            minutesElapsed, bicMultiplier, bicMultiplier + baseBicMultiplier);
-                    startTime = System.currentTimeMillis();
-                    bicMultiplier = bicMultiplier + baseBicMultiplier;
-                    // then adjust current bestBIC to reflect the new multiplier
-                    bestBIC = bicFromAic(glm.getModel().summary().aic(), asf.names().length, n);
-                }
-            } while (bestFeatures != null);
+                // For a feature removal we can save a bit of time by not recalculating all features
+                // We can safely use the previous iterations final file
+                String fileToUse = dataDirectory + File.separator +
+                        (iteration > 0 ? "ImproveModel_Iter_" + (iteration - 1) : "ImproveModel_tmp") +
+                        ".txt";
+                FeatureAnalysisResult result = processNewFeature(adjustedASF, fileToUse, new String[0], learner, n);
 
-        } else {
-            throw new RuntimeException("Invalid starting Model " + startingHeuristic.getClass());
-        }
+                if (debug)
+                    System.out.printf("\tConsidered feature removal: %s, new BIC: %.2f%n", featureToRemove, result.newBIC);
+//                    System.out.printf("\tCoefficients: %s%n",
+//                            result.newHeuristic.coefficients() != null ?
+//                                    Arrays.stream(result.newHeuristic.coefficients()).mapToObj(d -> String.format("%.2f", d)).collect(joining("|")) : "[]");
+                if (result.newBIC < bestBIC) {
+                    bestResult = result;
+                    bestBIC = result.newBIC;
+                    bestFeatures = result.adjustedASF;
+                    startingHeuristic = result.newHeuristic;
+                    bestFeatureDescription = String.format("Removed Feature %s", featureToRemove);
+                } else if (result.newBIC > baseBIC + bicMultiplier * asf.names().length) {
+                    featuresToKeep.add(featureToRemove);
+                }
+            }
+
+            if (bestFeatureDescription.startsWith("Removed Feature")) {
+                // If the best is a removal, we need to add to excludedFeatures so that we exclude it from future iterations
+                // otherwise processNewData will keep adding it back in
+                excludedFeatures.add(bestFeatureDescription.substring(bestFeatureDescription.lastIndexOf("is ") + 3));
+            }
+            // We then also need to set up the data file to be used as the baseline for the next iteration
+            if (bestFeatures != null) {
+                String newFileName = dataDirectory + File.separator + "ImproveModel_Iter_" + iteration + ".txt";
+                bestFeatures.processData(newFileName, maxRecords, rawData);
+                // then remove excluded features from the bestFeatures (these are always in the file so it always contains the original raw data)
+                removeExcludedFeatures(excludedFeatures, bestFeatures);
+                iteration++;
+                rawData = new String[]{newFileName};
+            }
+
+            // We then update to the single best change (provided it improved on the BIC)
+            if (bestFeatures == null) {
+                System.out.println("No feature changes improved BIC");
+            } else {
+                System.out.printf("Best feature with BIC: %.2f is %s after %sm %ss%n", bestBIC, bestFeatureDescription,
+                        (System.currentTimeMillis() - startIteration) / 60_000, ((System.currentTimeMillis() - startIteration) % 60_000) / 1_000);
+                startIteration = System.currentTimeMillis();
+                if (debug && bestResult != null) {
+                    System.out.printf("\tCoefficients: %s%n",
+                            bestResult.newHeuristic.getModel().coefficients() != null ?
+                                    Arrays.stream(startingHeuristic.coefficients())
+                                            .mapToObj(d -> String.format("%.2f", d))
+                                            .collect(joining("|")) : "[]");
+                }
+                asf = bestFeatures;
+            }
+
+            // increment bicMultiplier if time is getting on
+            int minutesElapsed = (int) ((System.currentTimeMillis() - startTime) / 60000);
+            if (minutesElapsed > bicTimer) {
+                System.out.printf("Time elapsed: %d minutes, increasing BIC multiplier from %d to %d%n",
+                        minutesElapsed, bicMultiplier, bicMultiplier + baseBicMultiplier);
+                startTime = System.currentTimeMillis();
+                bicMultiplier = bicMultiplier + baseBicMultiplier;
+                // then adjust current bestBIC to reflect the new multiplier
+                bestBIC = bicFromAic(bestResult.newHeuristic.getModel().summary().aic(), asf.names().length, n);
+            }
+        } while (bestFeatures != null);
         return startingHeuristic;
+    }
+
+    private boolean unfinalisedRangeFeature(int i, AutomatedFeatures asf, List<String> excludedBucketFeatures) {
+        if (asf.getFeatureType(i) == RANGE) {
+            int underlyingIndex = asf.getUnderlyingIndex(i);
+            String underlyingFeature = asf.getUnderlyingName(underlyingIndex);
+            if (!excludedBucketFeatures.contains(underlyingFeature))
+                return true;  // we only consider RANGE features for interactions once the bucketing is fixed
+        }
+        return false;
     }
 
     private void removeExcludedFeatures(List<String> excludedFeatures, AutomatedFeatures asf) {
@@ -341,7 +375,7 @@ public class LearnFromData {
         // remove in reverse order to avoid index shifting
         for (int i = indicesToRemove.size() - 1; i >= 0; i--) {
             int indexToRemove = indicesToRemove.get(i);
-            //         System.out.println("Removing feature: " + finalAsf.names()[indexToRemove]);
+            System.out.println("Removing feature: " + asf.names()[indexToRemove]);
             asf.removeFeature(indexToRemove);
         }
     }
@@ -374,8 +408,13 @@ public class LearnFromData {
                                             int n) {
 
         AutomatedFeatures localASF = asf.copy();
-        if (rawData != null && rawData.length > 0)
-            localASF.processData(false, outputFile, maxRecords, rawData);
+        if (rawData != null && rawData.length > 0) {
+//            if (debug)
+//                System.out.println("Processing data for " + localASF + " to file " + outputFile);
+            localASF.processData(outputFile, maxRecords, rawData);
+//            if (debug)
+//                System.out.println("Finished processing data for " + localASF);
+        }
 
         if (learner.actionFeatureVector != null)
             learner.setActionFeatureVector(localASF);

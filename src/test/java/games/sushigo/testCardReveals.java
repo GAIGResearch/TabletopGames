@@ -26,9 +26,11 @@ public class testCardReveals {
 
     @Test
     public void testTwoDumplings() {
-        // first we add two dumplings to player 0's hand
+        // first we add three dumplings to player 0's hand
         state.getPlayerHands().get(0).draw();
         state.getPlayerHands().get(0).draw();
+        state.getPlayerHands().get(0).draw();
+        state.getPlayerHands().get(0).add(new SGCard(SGCard.SGCardType.Dumpling));
         state.getPlayerHands().get(0).add(new SGCard(SGCard.SGCardType.Dumpling));
         state.getPlayerHands().get(0).add(new SGCard(SGCard.SGCardType.Dumpling));
         for (int i = 0; i < 8; i++) {

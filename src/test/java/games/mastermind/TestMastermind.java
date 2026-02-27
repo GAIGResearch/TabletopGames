@@ -15,9 +15,7 @@ import players.simple.RandomPlayer;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.junit.Assert.*;
 
 public class TestMastermind {
     Game mastermind;

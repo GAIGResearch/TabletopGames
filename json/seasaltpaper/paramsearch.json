@@ -1,0 +1,15 @@
+{
+  "game": "SeaSaltPaper",
+  "destDir": "param-optimisation/",
+  "repeats": 5,
+  "iterations": 100,
+  "evalGames": 20,
+  "matchups": 50,
+  "samplingRate": 1,
+  "neighbourhood": 100,
+  "evalMethod": "Heuristic",
+  "nPlayers": 4,
+  "output": "results_optimisation_mcts64ms.txt",
+  "searchSpace": "json/seasaltpaper/mcts-seasalt-64ms.json",
+  "verbose": true
+}

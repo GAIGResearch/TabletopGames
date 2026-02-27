@@ -253,7 +253,7 @@ public enum RunArg {
             "a value approaching infinity is equivalent to a Max function.",
             1.0,
             new Usage[]{Usage.ParameterSearch, Usage.ExpertIteration}),
-    maxData("The maxim,um number of data items to use when learning a heuristic\n" +
+    maxData("The maximum number of data items to use when learning a heuristic\n" +
             "Algorithms such as least squares can O(n^3), in which case we need to limit this (and you may have memory limits)\n",
             10000,
             new Usage[]{Usage.ExpertIteration}),

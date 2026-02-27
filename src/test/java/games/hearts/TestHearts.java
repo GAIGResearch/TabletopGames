@@ -8,9 +8,6 @@ import core.components.Deck;
 import java.util.List;
 
 import games.hearts.actions.Play;
-import games.hearts.HeartsForwardModel;
-import games.hearts.HeartsGameState;
-import games.hearts.HeartsParameters;
 import games.hearts.actions.Pass;
 import org.junit.*;
 import core.components.FrenchCard;
