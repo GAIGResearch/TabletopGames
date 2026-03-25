@@ -16,7 +16,7 @@ public interface IPlayerDecorator {
      * @param possibleActions
      * @return
      */
-    abstract List<AbstractAction> actionFilter(AbstractGameState state, List<AbstractAction> possibleActions);
+    List<AbstractAction> actionFilter(AbstractGameState state, List<AbstractAction> possibleActions);
 
     /**
      * This method needs to apply logic after the decision is made.
