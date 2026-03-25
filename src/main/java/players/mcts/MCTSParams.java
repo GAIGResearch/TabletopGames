@@ -252,6 +252,11 @@ public class MCTSParams extends PlayerParameters {
         return rolloutPolicy;
     }
 
+    // this is primarily intended for testing
+    public void setRolloutPolicy(AbstractPlayer rolloutPolicy) {
+        this.rolloutPolicy = rolloutPolicy;
+    }
+
     private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {
         return switch (type) {
             case RANDOM -> new RandomPlayer(new Random(getRandomSeed()));
