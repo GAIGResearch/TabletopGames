@@ -85,8 +85,10 @@ public class MultiTreeMASTRolloutTest {
     @Test
     public void checkRollOutPolicyIsCalled() {
         params.budget = 1000;
+        params.rolloutLength = 10;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         params.rolloutType = MCTSEnums.Strategies.MAST;
+        params.oppModelType = MCTSEnums.Strategies.DEFAULT;
         params.useMAST = true;
         params.MAST = MCTSEnums.MASTType.Both;
 
@@ -104,8 +106,36 @@ public class MultiTreeMASTRolloutTest {
         game.getPlayers().get(state.getCurrentPlayer())
                 .getAction(state, fm.computeAvailableActions(state));
 
-        verify(mockPlayer, atLeast(1000)).getAction(any(), any());
-        verify(mockPlayer, atMost(20000)).getAction(any(), any());
+        verify(mockPlayer, atLeast(8000)).getAction(any(), any());
+        verify(mockPlayer, atMost(16000)).getAction(any(), any());
+    }
+
+
+    @Test
+    public void checkRollOutPolicyIsCalledLessWithRNDOpponents() {
+        params.budget = 1000;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        params.rolloutType = MCTSEnums.Strategies.MAST;
+        params.oppModelType = MCTSEnums.Strategies.RANDOM;
+        params.useMAST = true;
+        params.MAST = MCTSEnums.MASTType.Both;
+
+        fm = new LoveLetterForwardModel();
+        Game game = createLoveLetter(params);
+        LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
+
+        MASTPlayer mockPlayer = Mockito.mock(MASTPlayer.class);
+        when(mockPlayer.getAction(any(), any())).thenAnswer(invocation -> {
+            List<AbstractAction> actions = invocation.getArgument(1);
+            return actions.getFirst();
+        });
+        params.setRolloutPolicy(mockPlayer);
+
+        game.getPlayers().get(state.getCurrentPlayer())
+                .getAction(state, fm.computeAvailableActions(state));
+
+        verify(mockPlayer, atLeast(8000)).getAction(any(), any());
+        verify(mockPlayer, atMost(16000)).getAction(any(), any());
     }
 
 }
