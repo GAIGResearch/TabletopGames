@@ -80,6 +80,7 @@ public class PenteGameState extends AbstractGameState {
     public PenteParameters getParams() {
         return (PenteParameters) getGameParameters();
     }
+
     /**
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
@@ -152,14 +153,28 @@ public class PenteGameState extends AbstractGameState {
 
     public boolean canPlace(int pos) {
         // Only one piece per point except sacred points (can have any number, both players)
-        if (getParams().kiddsVariant) {
-            // backgammon like rules
-            int otherPlayersPieces = getPiecesAt(pos, 1 - getCurrentPlayer());
+        int otherPlayersPieces = getPiecesAt(pos, 1 - getCurrentPlayer());
+        int ownPieces =  getPiecesAt(pos, getCurrentPlayer());
+        if (getParams().blotRuleActive) {
+            if (getParams().onePieceLimitOffSacredLine) {
+                // we do not care who is there
+                return (otherPlayersPieces + ownPieces) < 2;
+            } else {
+
+            }
+            // backgammon like rules: can land on any space not occupied by multiple opponent pieces
             return otherPlayersPieces < 2; // can place if less than 2 pieces of
         } else {
+
+        }
+        if (getParams().onePieceLimitOffSacredLine) {
             return isSacred(pos) || board.get(pos).isEmpty();
             // Only one piece per point (not sacred)
+        } else {
+            return
         }
+        // TODO: blotRuleActive may coexist with onePieceLimit
+        // TODO: Multiple pieces on sacred line should only on on one's own target space? [I think Schaedler allows both]
     }
 
     public int getPiecesAtGoal(int playerId) {
@@ -179,6 +194,7 @@ public class PenteGameState extends AbstractGameState {
     public void setOffBoard(Token removed) {
         offBoard.add(removed);
     }
+
     public int getOffBoard(int player) {
         int count = 0;
         for (Token t : offBoard) {

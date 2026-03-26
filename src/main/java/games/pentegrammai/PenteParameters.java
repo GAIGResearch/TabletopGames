@@ -15,8 +15,9 @@ public class PenteParameters extends TunableParameters {
     public boolean mustMoveFromSacredLine;
     public boolean onePieceLimitOffSacredLine;
     public boolean blotRuleActive;
-    // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true
-    // Schaedler's variant is startOffBoard=false, blotRuleActive = false, onePieceLimitOffSacredLine = true, mustMoveFromSacredLine = false
+    public boolean bearOffFromSacredLine;
+    // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
+    // Schaedler's variant is startOffBoard=false, blotRuleActive = false, onePieceLimitOffSacredLine = true, mustMoveFromSacredLine = false, bearOffFromSacredLine = false
     public String diceJSON = "";
     public Dice customDie = null;
 
