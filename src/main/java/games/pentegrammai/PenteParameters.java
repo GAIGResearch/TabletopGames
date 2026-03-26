@@ -11,7 +11,12 @@ public class PenteParameters extends TunableParameters {
     public int boardSize = 10;
     public int dieSides = 6;
     public int[] sacredPoints = {2, 7};
-    public boolean kiddsVariant = false;
+    public boolean startOffBoard;
+    public boolean mustMoveFromSacredLine;
+    public boolean onePieceLimitOffSacredLine;
+    public boolean blotRuleActive;
+    // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true
+    // Schaedler's variant is startOffBoard=false, blotRuleActive = false, onePieceLimitOffSacredLine = true, mustMoveFromSacredLine = false
     public String diceJSON = "";
     public Dice customDie = null;
 
@@ -33,7 +38,6 @@ public class PenteParameters extends TunableParameters {
     public void _reset() {
         boardSize = (int) getParameterValue("boardSize");
         dieSides = (int) getParameterValue("dieSides");
-        kiddsVariant = (boolean) getParameterValue("kiddsVariant");
         sacredPoints = new int[]{boardSize / 4, 3 * boardSize / 4}; // default sacred points
         diceJSON = (String) getParameterValue("diceJSON");
         if (!diceJSON.isBlank()) {

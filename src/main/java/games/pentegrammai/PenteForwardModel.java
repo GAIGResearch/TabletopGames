@@ -59,7 +59,7 @@ public class PenteForwardModel extends StandardForwardModel {
             for (int i = 0; i < piecesPerPlayer; i++) {
                 Token t = new Token("P" + player + "_T" + i);
                 t.setOwnerId(player);
-                if (state.getParams().kiddsVariant) {
+                if (state.getParams().startOffBoard) {
                     state.setOffBoard(t);
                 } else {
                     state.board.get(entry + i).add(t);
