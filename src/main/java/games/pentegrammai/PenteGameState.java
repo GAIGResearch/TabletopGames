@@ -154,27 +154,24 @@ public class PenteGameState extends AbstractGameState {
     public boolean canPlace(int pos) {
         // Only one piece per point except sacred points (can have any number, both players)
         int otherPlayersPieces = getPiecesAt(pos, 1 - getCurrentPlayer());
-        int ownPieces =  getPiecesAt(pos, getCurrentPlayer());
+        int ownPieces = getPiecesAt(pos, getCurrentPlayer());
         if (getParams().blotRuleActive) {
             if (getParams().onePieceLimitOffSacredLine) {
-                // we do not care who is there
-                return (otherPlayersPieces + ownPieces) < 2;
+                // we do not care who is there, as long as there is not more than 1
+                return isSacred(pos) || (otherPlayersPieces + ownPieces) < 2;
             } else {
-
+                return otherPlayersPieces < 2; // any number of our own pieces are fine
             }
-            // backgammon like rules: can land on any space not occupied by multiple opponent pieces
-            return otherPlayersPieces < 2; // can place if less than 2 pieces of
         } else {
-
+            if (getParams().onePieceLimitOffSacredLine) {
+                // any piece blocks us
+                return isSacred(pos) || (ownPieces + otherPlayersPieces < 1);
+            } else {
+                return otherPlayersPieces < 1; // any number of our own pieces are fine; jus cannot move to an opponent
+            }
         }
-        if (getParams().onePieceLimitOffSacredLine) {
-            return isSacred(pos) || board.get(pos).isEmpty();
-            // Only one piece per point (not sacred)
-        } else {
-            return
-        }
-        // TODO: blotRuleActive may coexist with onePieceLimit
-        // TODO: Multiple pieces on sacred line should only on on one's own target space? [I think Schaedler allows both]
+        // TODO: Multiple pieces on sacred line should only on one's own target space? [I think Schaedler allows both]
+        // TODO: SacredPos moves not possible if the other player occupies it (add unit test, tghen fix)
     }
 
     public int getPiecesAtGoal(int playerId) {
