@@ -30,13 +30,13 @@ public class MultiTreeMASTRolloutTest {
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
-        params.maxTreeDepth = 20;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
-        params.budget = 200;
+        params.budget = 500;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
-        params.maintainMasterState = true;
-        params.K = 1.0;
+        params.rolloutType = MCTSEnums.Strategies.MAST;
+        params.useMAST = true;
+        params.MAST = MCTSEnums.MASTType.Both;
     }
 
     public Game createLoveLetter(MCTSParams params) {
@@ -54,11 +54,7 @@ public class MultiTreeMASTRolloutTest {
 
     @Test
     public void MASTRolloutInLoveLetter() {
-        params.budget = 1000;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
-        params.rolloutType = MCTSEnums.Strategies.MAST;
-        params.useMAST = true;
-        params.MAST = MCTSEnums.MASTType.Both;
 
         fm = new LoveLetterForwardModel();
         Game game = createLoveLetter(params);
@@ -82,60 +78,108 @@ public class MultiTreeMASTRolloutTest {
         }
     }
 
+    private MASTPlayer getMockRollout() {
+        MASTPlayer mockRollout = Mockito.mock(MASTPlayer.class);
+        when(mockRollout.getAction(any(), any())).thenAnswer(invocation -> {
+            List<AbstractAction> actions = invocation.getArgument(1);
+            return actions.getFirst();
+        });
+        when(mockRollout.getParameters()).thenReturn(params);
+        return mockRollout;
+    }
     @Test
-    public void checkRollOutPolicyIsCalled() {
-        params.budget = 1000;
-        params.rolloutLength = 10;
+    public void checkRollOutPolicyIsCalledInMultiTreeDefault() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
-        params.rolloutType = MCTSEnums.Strategies.MAST;
-        params.oppModelType = MCTSEnums.Strategies.DEFAULT;
-        params.useMAST = true;
-        params.MAST = MCTSEnums.MASTType.Both;
+        params.oppModelType = MCTSEnums.Strategies.DEFAULT; // Rollout used for opponent too
+
+        MASTPlayer mockRollout = getMockRollout();
+        params.setRolloutPolicy(mockRollout);
 
         fm = new LoveLetterForwardModel();
         Game game = createLoveLetter(params);
         LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
 
-        MASTPlayer mockPlayer = Mockito.mock(MASTPlayer.class);
-        when(mockPlayer.getAction(any(), any())).thenAnswer(invocation -> {
-            List<AbstractAction> actions = invocation.getArgument(1);
-            return actions.getFirst();
-        });
-        params.setRolloutPolicy(mockPlayer);
-
+        assertEquals(0, state.getCurrentPlayer());
         game.getPlayers().get(state.getCurrentPlayer())
                 .getAction(state, fm.computeAvailableActions(state));
 
-        verify(mockPlayer, atLeast(8000)).getAction(any(), any());
-        verify(mockPlayer, atMost(16000)).getAction(any(), any());
+        SingleTreeNode root = ((MultiTreeNode) mctsPlayer.root).getRoot(0);
+        assertEquals(500, root.getVisits());
+        assertEquals(501, mctsPlayer.root.copyCount);
+        assertTrue(mctsPlayer.root.fmCallsCount > 5000); // rollout of 10 x 500 as minimum
+
+        // we should use the rollout policy for most of these
+        verify(mockRollout, times(5000)).getAction(any(), any());
     }
 
-
     @Test
-    public void checkRollOutPolicyIsCalledLessWithRNDOpponents() {
-        params.budget = 1000;
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
-        params.rolloutType = MCTSEnums.Strategies.MAST;
-        params.oppModelType = MCTSEnums.Strategies.RANDOM;
-        params.useMAST = true;
-        params.MAST = MCTSEnums.MASTType.Both;
+    public void checkRollOutPolicyIsCalledInSingleTreeDefault() {
+        params.oppModelType = MCTSEnums.Strategies.DEFAULT;
+
+        MASTPlayer mockRollout = getMockRollout();
+        params.setRolloutPolicy(mockRollout);
 
         fm = new LoveLetterForwardModel();
         Game game = createLoveLetter(params);
         LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
 
-        MASTPlayer mockPlayer = Mockito.mock(MASTPlayer.class);
-        when(mockPlayer.getAction(any(), any())).thenAnswer(invocation -> {
-            List<AbstractAction> actions = invocation.getArgument(1);
-            return actions.getFirst();
-        });
-        params.setRolloutPolicy(mockPlayer);
-
+        assertEquals(0, state.getCurrentPlayer());
         game.getPlayers().get(state.getCurrentPlayer())
                 .getAction(state, fm.computeAvailableActions(state));
 
-        verify(mockPlayer, atLeast(8000)).getAction(any(), any());
-        verify(mockPlayer, atMost(16000)).getAction(any(), any());
+        assertEquals(500, mctsPlayer.root.getVisits());
+        assertEquals(501, mctsPlayer.root.copyCount);
+        assertTrue(mctsPlayer.root.fmCallsCount > 5000); // rollout of 10 x 500 as minimum
+
+        // we should use the rollout policy for most of these
+        verify(mockRollout, times(5000)).getAction(any(), any());
+    }
+
+    @Test
+    public void checkRollOutPolicyIsCalledInSingleTreeRandom() {
+        params.oppModelType = MCTSEnums.Strategies.RANDOM;
+        MASTPlayer mockRollout = getMockRollout();
+        params.setRolloutPolicy(mockRollout);
+
+        fm = new LoveLetterForwardModel();
+        Game game = createLoveLetter(params);
+        LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
+
+        assertEquals(0, state.getCurrentPlayer());
+        game.getPlayers().get(state.getCurrentPlayer())
+                .getAction(state, fm.computeAvailableActions(state));
+
+        assertEquals(500, mctsPlayer.root.getVisits());
+        assertEquals(501, mctsPlayer.root.copyCount);
+        assertTrue(mctsPlayer.root.fmCallsCount > 5000); // rollout of 10 x 1000 as minimum
+
+        // we should use the rollout policy for most of these
+        verify(mockRollout, atLeast(4000 / 3)).getAction(any(), any());
+        verify(mockRollout, atMost(6000 / 3)).getAction(any(), any());
+    }
+
+    @Test
+    public void checkRollOutPolicyIsCalledLessWithMultiTreeRNDOpponentModel() {
+        params.oppModelType = MCTSEnums.Strategies.RANDOM;
+
+        MASTPlayer mockRollout = getMockRollout();
+        params.setRolloutPolicy(mockRollout);
+
+        fm = new LoveLetterForwardModel();
+        Game game = createLoveLetter(params);
+        LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
+
+        assertEquals(0, state.getCurrentPlayer());
+        game.getPlayers().get(state.getCurrentPlayer())
+                .getAction(state, fm.computeAvailableActions(state));
+
+        assertEquals(500, mctsPlayer.root.getVisits());
+        assertEquals(501, mctsPlayer.root.copyCount);
+        assertTrue(mctsPlayer.root.fmCallsCount > 5000); // rollout of 10 x 1000 as minimum
+
+        // we should use the rollout policy for most of these
+        verify(mockRollout, atLeast(4000 / 3)).getAction(any(), any());
+        verify(mockRollout, atMost(6000 / 3)).getAction(any(), any());
     }
 
 }

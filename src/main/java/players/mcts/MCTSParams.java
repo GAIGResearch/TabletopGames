@@ -237,6 +237,10 @@ public class MCTSParams extends PlayerParameters {
         return opponentModel;
     }
 
+    public void setOpponentModel(AbstractPlayer opponentModel) {
+        this.opponentModel = opponentModel;
+    }
+
     public AbstractPlayer getRolloutStrategy() {
         if (rolloutPolicy == null) {
             if (rolloutType == PARAMS) {
