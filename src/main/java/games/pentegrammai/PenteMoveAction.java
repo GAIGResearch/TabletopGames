@@ -41,7 +41,7 @@ public class PenteMoveAction extends AbstractAction {
             state.board.get(from).remove(tokenToMove);
 
         // Now check for blot
-        if (state.getParams().kiddsVariant) {
+        if (state.getParams().blotRuleActive) {
             // In Kidd's variant, we can capture if the target is occupied by exactly one of the opponent's pieces
             if (state.getPiecesAt(to, 1 - playerId) == 1) {
                 if (state.getPiecesAt(to, playerId) != 0) {
@@ -53,7 +53,12 @@ public class PenteMoveAction extends AbstractAction {
             }
         }
 
-        state.board.get(to).add(tokenToMove);
+        // Now check for bearing off
+        if (state.getParams().bearOffFromSacredLine && state.playerGoal[playerId] == to) {
+            state.borneOff[playerId]++;
+        } else {
+            state.board.get(to).add(tokenToMove);
+        }
         return true;
     }
 

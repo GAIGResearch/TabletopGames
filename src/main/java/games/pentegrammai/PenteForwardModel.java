@@ -38,6 +38,7 @@ public class PenteForwardModel extends StandardForwardModel {
         PenteParameters params = state.getParams();
         state.playerGoal = new int[2];
         state.blotCount = new int[2];
+        state.borneOff = new int[2];
         state.playerGoal[0] = params.sacredPoints[1];
         state.playerGoal[1] = params.sacredPoints[0];
         state.offBoard = new ArrayList<>();
@@ -86,22 +87,28 @@ public class PenteForwardModel extends StandardForwardModel {
         int player = state.getCurrentPlayer();
         int dieValue = state.die.getValue();
 
+        boolean allMovesAreFromTargetSpace = true;
         if (!state.offBoard.isEmpty() && state.offBoard.stream().anyMatch(t -> t.getOwnerId() == player)) {
             // we have to move pieces that are off the board first
             int from = -1;
             int to = (state.playerEntry[player] + dieValue - 1) % state.board.size();
             if (state.canPlace(to)) {
                 actions.add(new PenteMoveAction(from, to));
+                if (state.playerGoal[player] == to)
+                    allMovesAreFromTargetSpace = false;
             }
         } else {
             for (int from = 0; from < state.board.size(); from++) {
                 int to = (from + dieValue) % state.board.size();
                 if (state.canPlace(to) && state.getPiecesAt(from, player) > 0) {
                     actions.add(new PenteMoveAction(from, to));
+                    if (state.playerGoal[player] == to)
+                        allMovesAreFromTargetSpace = false;
                 }
             }
         }
-        if (actions.isEmpty()) {
+        if (actions.isEmpty() ||
+                (allMovesAreFromTargetSpace && !((PenteGameState) gameState).getParams().mustMoveFromSacredLine)) {
             actions.add(new DoNothing());
         }
         return actions;

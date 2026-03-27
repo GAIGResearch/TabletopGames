@@ -11,22 +11,27 @@ public class PenteParameters extends TunableParameters {
     public int boardSize = 10;
     public int dieSides = 6;
     public int[] sacredPoints = {2, 7};
-    public boolean startOffBoard;
-    public boolean mustMoveFromSacredLine;
-    public boolean onePieceLimitOffSacredLine;
-    public boolean blotRuleActive;
-    public boolean bearOffFromSacredLine;
+    public boolean startOffBoard = false;
+    public boolean mustMoveFromSacredLine = true;
+    public boolean onePieceLimitOffSacredLine = true;
+    public boolean blotRuleActive = false;
+    public boolean bearOffFromSacredLine = false;
     // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
-    // Schaedler's variant is startOffBoard=false, blotRuleActive = false, onePieceLimitOffSacredLine = true, mustMoveFromSacredLine = false, bearOffFromSacredLine = false
+    // Schaedler's variant is startOffBoard=false, blotRuleActive = false, onePieceLimitOffSacredLine = true, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
     public String diceJSON = "";
     public Dice customDie = null;
 
     public PenteParameters() {
         addTunableParameter("boardSize", 10);
         addTunableParameter("dieSides", 6, List.of(4, 6, 10));
-        addTunableParameter("kiddsVariant", false, List.of(false, true));
         addTunableParameter("diceJSON", "");
         addTunableParameter("maxRounds", 500);
+        addTunableParameter("startOffBoard", false, List.of(false, true));
+        addTunableParameter("mustMoveFromSacredLine", true, List.of(false, true));
+        addTunableParameter("onePieceLimitOffSacredLine", true, List.of(false, true));
+        addTunableParameter("blotRuleActive", false, List.of(false, true));
+        addTunableParameter("bearOffFromSacredLine", false, List.of(false, true));
+        // TODO: Another one to add is whether two players can share the Holy Line (this is assumed to be the case if blotRuleActive=false currently; in line with Schaedler
         maxRounds = 500;
     }
 
@@ -45,6 +50,11 @@ public class PenteParameters extends TunableParameters {
             customDie = new Dice(diceJSON);
         }
         maxRounds = (int) getParameterValue("maxRounds");
+        blotRuleActive = (boolean) getParameterValue("blotRuleActive");
+        startOffBoard = (boolean) getParameterValue("startOffBoard");
+        mustMoveFromSacredLine = (boolean) getParameterValue("mustMoveFromSacredLine");
+        bearOffFromSacredLine = (boolean) getParameterValue("bearOffFromSacredLine");
+        onePieceLimitOffSacredLine = (boolean) getParameterValue("onePieceLimitOffSacredLine");
     }
 
     @Override

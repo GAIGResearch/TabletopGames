@@ -19,6 +19,7 @@ public class PenteGameState extends AbstractGameState {
     int[] blotCount;
     protected int[] playerGoal;
     protected int[] playerEntry;
+    protected int[] borneOff; // number of pieces borne off for each player (if bearOffFromSacredLine is true)
     protected Dice die; // single die for the game
     List<Token> offBoard = new ArrayList<>(); // tokens that are off the board (due to blots)
 
@@ -110,7 +111,7 @@ public class PenteGameState extends AbstractGameState {
      */
     @Override
     public double getGameScore(int playerId) {
-        return getPiecesAtGoal(playerId);
+        return getPiecesAtGoal(playerId) + getBorneOff(playerId);
     }
 
     @Override
@@ -122,6 +123,7 @@ public class PenteGameState extends AbstractGameState {
                 Arrays.equals(blotCount, that.blotCount) &&
                 Arrays.equals(playerGoal, that.playerGoal) &&
                 Arrays.equals(playerEntry, that.playerEntry) &&
+                Arrays.equals(borneOff, that.borneOff) &&
                 Objects.equals(die, that.die);
     }
 
@@ -131,7 +133,8 @@ public class PenteGameState extends AbstractGameState {
                 31 * Arrays.hashCode(sacredPoints) +
                 31 * 31 * Arrays.hashCode(playerGoal) +
                 31 * 31 * Arrays.hashCode(playerEntry) +
-                31 * 31 * 31 * Arrays.hashCode(blotCount);
+                31 * 31 * 31 * Arrays.hashCode(blotCount) +
+                31 * 31 * 31 * 31 * Arrays.hashCode(borneOff);
     }
 
     public int distanceToGoal(int playerId, int pos) {
@@ -151,14 +154,18 @@ public class PenteGameState extends AbstractGameState {
         return !board.get(pos).isEmpty();
     }
 
+    public int getBorneOff(int player) {
+        return borneOff[player];
+    }
+
     public boolean canPlace(int pos) {
         // Only one piece per point except sacred points (can have any number, both players)
         int otherPlayersPieces = getPiecesAt(pos, 1 - getCurrentPlayer());
         int ownPieces = getPiecesAt(pos, getCurrentPlayer());
-        if (getParams().blotRuleActive) {
+        if (getParams().blotRuleActive) { // Currently the BlotRule also means that we cannot have multiple players on the Sacred Line
             if (getParams().onePieceLimitOffSacredLine) {
                 // we do not care who is there, as long as there is not more than 1
-                return isSacred(pos) || (otherPlayersPieces + ownPieces) < 2;
+                return (otherPlayersPieces + ownPieces) < 2;
             } else {
                 return otherPlayersPieces < 2; // any number of our own pieces are fine
             }
@@ -167,11 +174,9 @@ public class PenteGameState extends AbstractGameState {
                 // any piece blocks us
                 return isSacred(pos) || (ownPieces + otherPlayersPieces < 1);
             } else {
-                return otherPlayersPieces < 1; // any number of our own pieces are fine; jus cannot move to an opponent
+                return isSacred(pos) || otherPlayersPieces < 1; // any number of our own pieces are fine; just cannot move to an opponent
             }
         }
-        // TODO: Multiple pieces on sacred line should only on one's own target space? [I think Schaedler allows both]
-        // TODO: SacredPos moves not possible if the other player occupies it (add unit test, tghen fix)
     }
 
     public int getPiecesAtGoal(int playerId) {

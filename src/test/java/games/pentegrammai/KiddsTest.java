@@ -20,7 +20,12 @@ public class KiddsTest {
     @Before
     public void setUp() {
         params = new PenteParameters();
-        params.setParameterValue("kiddsVariant", true);
+        // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
+        params.setParameterValue("startOffBoard", true);
+        params.setParameterValue("blotRuleActive", true);
+        params.setParameterValue("onePieceLimitOffSacredLine", false);
+        params.setParameterValue("bearOffFromSacredLine", false);
+        params.setParameterValue("mustMoveFromSacredLine", true);
         state = new PenteGameState(params, 2);
         fm = new PenteForwardModel();
         fm.setup(state);
