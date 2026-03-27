@@ -19,8 +19,7 @@ public class MCTSMetrics implements IMetricsCollection {
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             AbstractPlayer player = listener.getGame().getPlayers().get(e.state.getCurrentPlayer());
-            if (!(player instanceof MCTSPlayer)) return false;
-            MCTSPlayer mctsPlayer = (MCTSPlayer) player;
+            if (!(player instanceof MCTSPlayer mctsPlayer)) return false;
             SingleTreeNode root = mctsPlayer.root;
             if (root instanceof MultiTreeNode) {
                 root = Arrays.stream(((MultiTreeNode) root).roots).filter(Objects::nonNull)
@@ -68,7 +67,7 @@ public class MCTSMetrics implements IMetricsCollection {
                     records.put("ActionValue", actionValueEstimates.get(e.action).valueOf(e.playerID));
                     AbstractAction secondAction = sortedActions.get(1); // we know there are at least 2 actions
                     records.put("SecondAction", secondAction.getString(e.state));
-                    if ( actionValueEstimates.get(secondAction).valueOf(e.playerID) > actionValueEstimates.get(e.action).valueOf(e.playerID)) {
+                    if (actionValueEstimates.get(secondAction).valueOf(e.playerID) > 0.00001 + actionValueEstimates.get(e.action).valueOf(e.playerID)) {
                         System.out.println("Warning: second action has higher value than chosen action" +
                                 String.format(" (%.4f to %.4f)",
                                         actionValueEstimates.get(secondAction).valueOf(e.playerID),
