@@ -91,6 +91,7 @@ public class MCTSMetrics implements IMetricsCollection {
                     throw new AssertionError("as above");
                 }
                 records.put("ActionsAtRoot", root.actionValues.size());
+                records.put("ActionsConsidered", actionsConsidered.size());
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
                 records.put("time", mctsPlayer.root.timeTaken);
@@ -130,6 +131,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("WorstAction", String.class);
             cols.put("WorstActionValue", Double.class);
             cols.put("ActionsAtRoot", Integer.class);
+            cols.put("ActionsConsidered", Integer.class);
             cols.put("fmCalls", Integer.class);
             cols.put("copyCalls", Integer.class);
             cols.put("time", Double.class);
@@ -167,6 +169,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("MeanActionsAtNode", treeStats.stream().mapToDouble(ts -> ts.meanActionsAtNode).average().orElse(0.0));
                 records.put("MeanActionsExpanded", treeStats.stream().mapToDouble(ts -> ts.meanActionsExpanded).average().orElse(0.0));
                 records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.actionValues.size()).average().orElse(0.0));
+                records.put("ActionsConsidered", otherRoots.stream().mapToInt(node -> node.actionsToConsider(node.actionsFromOpenLoopState).size()).average().orElse(0.0));
                 return true;
             }
             return false;
@@ -191,6 +194,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("MeanActionsAtNode", Double.class);
             cols.put("MeanActionsExpanded", Double.class);
             cols.put("ActionsAtRoot", Double.class);
+            cols.put("ActionsConsidered", Double.class);
             return cols;
         }
     }
