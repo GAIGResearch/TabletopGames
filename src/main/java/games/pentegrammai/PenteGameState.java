@@ -70,6 +70,7 @@ public class PenteGameState extends AbstractGameState {
         copy.blotCount = Arrays.copyOf(blotCount, blotCount.length);
         copy.playerGoal = Arrays.copyOf(playerGoal, playerGoal.length);
         copy.playerEntry = Arrays.copyOf(playerEntry, playerEntry.length);
+        copy.borneOff = Arrays.copyOf(borneOff, borneOff.length);
         copy.offBoard = new ArrayList<>();
         for (Token t : this.offBoard) {
             copy.offBoard.add(t.copy());

@@ -69,6 +69,10 @@ public class BearOffTests {
         assertEquals(2, actions.size());
         assertEquals(new PenteMoveAction(7, 0), actions.get(0));
         assertEquals(new DoNothing(), actions.get(1));
+
+        // then check that DoNothing moves on turn
+        fm.next(state, new DoNothing());
+        assertEquals(1, state.getCurrentPlayer());
     }
 
 }
