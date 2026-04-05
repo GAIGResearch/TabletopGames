@@ -291,7 +291,7 @@ public class ExpertIteration {
                 }
                 try {
                     // we now copy the file for the agent
-                    File oldFile = new File(dataDir + File.separator + originalFileName);
+                    File oldFile = new File(originalFileName);
                     File newFile = new File(dataDir + File.separator + "FinalAgents" + File.separator + newFileName);
                     FileUtils.copyFile(oldFile, newFile);
                 } catch (IOException e) {

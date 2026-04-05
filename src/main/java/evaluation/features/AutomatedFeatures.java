@@ -523,6 +523,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     List<ColumnDetails> original = startingFeatures.stream()
                             .filter(r -> r.type == featureType.RANGE && r.underlyingIndex == finalI)
                             .toList();
+                    // TODO: Understand why this is 1 + getBuckets, and not getBuckets?
                     if (original.size() == 1 + getBuckets(i)) {
                         for (ColumnDetails columnDetail : original) {
                             newColumnDetails.add(columnDetail);
