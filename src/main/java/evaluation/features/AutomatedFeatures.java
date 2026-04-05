@@ -523,8 +523,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     List<ColumnDetails> original = startingFeatures.stream()
                             .filter(r -> r.type == featureType.RANGE && r.underlyingIndex == finalI)
                             .toList();
-                    // TODO: Understand why this is 1 + getBuckets, and not getBuckets?
-                    if (original.size() == 1 + getBuckets(i)) {
+                    if (original.size() == getBuckets(i)) {
                         for (ColumnDetails columnDetail : original) {
                             newColumnDetails.add(columnDetail);
                             // we need to find the range field in the data
@@ -542,6 +541,11 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                         newColumnDetails.add(missingColumn.a);
                         newDataColumns.add(missingColumn.b);
                         if (debug) System.out.println("Adding Range column " + columnName);
+                    }
+                    // If the algorithm was unable to bucket neatly, then ensure buckets is in line
+                    if (missingColumns.size() != buckets[i]) {
+                        buckets[i] = missingColumns.size();
+                        System.out.println("Warning: Bucketing algorithm was unable to bucket neatly, so buckets has been adjusted to " + buckets[i]);
                     }
                 }
             } else if (columnType.isEnum()) {
@@ -850,7 +854,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
             // we now create one Range for each of the excluded values
             for (Number exclusion : newExclusions) {
-                // we then need to find the value in the data that bracket the exclusion (defaulting to +/- infinity)
+                // we then need to find the values in the data that bracket the exclusion (defaulting to +/- infinity)
                 Number nextHighestValue = Double.POSITIVE_INFINITY;
                 for (T value : numericValues) {  // this relies on the fact that the values are sorted
                     if (value.doubleValue() > exclusion.doubleValue()) {
