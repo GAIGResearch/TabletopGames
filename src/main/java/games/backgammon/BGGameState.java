@@ -139,14 +139,12 @@ public class BGGameState extends AbstractGameState {
 
 
     // generally used after the other player was detected cheating
-    public void moveAllPiecesToEnd(int i) {
-        for (int p = 0; p < getNPlayers(); p++) {
-            for (int point = 0; point < counters.size(); point++) {
-                List<Token> tokens = new ArrayList<>(counters.get(point));
-                for (Token t : tokens) {
-                    if (t.getOwnerId() == p) {
-                        movePiece(p, point, -1);
-                    }
+    public void moveAllPiecesToEnd(int p) {
+        for (int point = 0; point < counters.size(); point++) {
+            List<Token> tokens = new ArrayList<>(counters.get(point));
+            for (Token t : tokens) {
+                if (t.getOwnerId() == p) {
+                    movePiece(p, point, -1);
                 }
             }
         }

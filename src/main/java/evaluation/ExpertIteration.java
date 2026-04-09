@@ -314,7 +314,7 @@ public class ExpertIteration {
                 else {
                     // format is XXX_03.json"
                     int originalIteration = Integer.parseInt(agent.toString().split("_")[1].replaceAll("\\D+", ""));
-                    originalFileName = String.format("%sNTBEA_%02d.json", config.get(RunArg.valueSS).equals("") ? "Action" : "Value", originalIteration);
+                    originalFileName = dataDir + File.separator + String.format("%sNTBEA_%02d.json", config.get(RunArg.valueSS).equals("") ? "Action" : "Value", originalIteration);
                 }
                 try {
                     // we now copy the file for the agent

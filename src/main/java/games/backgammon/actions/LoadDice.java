@@ -39,7 +39,6 @@ public class LoadDice extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         BGGameState state = (BGGameState) gs;
-        BGParameters params = (BGParameters) gs.getGameParameters();
 
         double[] originalPDF = state.getDicePdf(die);
         state.setDicePdf(die, newPDF);
