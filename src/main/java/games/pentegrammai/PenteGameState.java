@@ -19,9 +19,9 @@ public class PenteGameState extends AbstractGameState {
     int[] blotCount;
     protected int[] playerGoal;
     protected int[] playerEntry;
-    protected int[] borneOff; // number of pieces borne off for each player (if bearOffFromSacredLine is true)
     protected Dice die; // single die for the game
-    List<Token> offBoard = new ArrayList<>(); // tokens that are off the board (due to blots)
+    List<Token> tokensToStart = new ArrayList<>(); // tokens that are off the board and need to be moved on (in some variants)
+    List<Token> tokensBorneOff = new ArrayList<>(); // tokens that have been removed from the board (due to bear off, where this variant is on)
 
     public int[] sacredPoints;
 
@@ -70,10 +70,13 @@ public class PenteGameState extends AbstractGameState {
         copy.blotCount = Arrays.copyOf(blotCount, blotCount.length);
         copy.playerGoal = Arrays.copyOf(playerGoal, playerGoal.length);
         copy.playerEntry = Arrays.copyOf(playerEntry, playerEntry.length);
-        copy.borneOff = Arrays.copyOf(borneOff, borneOff.length);
-        copy.offBoard = new ArrayList<>();
-        for (Token t : this.offBoard) {
-            copy.offBoard.add(t.copy());
+        copy.tokensToStart = new ArrayList<>();
+        for (Token t : this.tokensToStart) {
+            copy.tokensToStart.add(t.copy());
+        }
+        copy.tokensToStart = new ArrayList<>();
+        for (Token t : this.tokensToStart) {
+            copy.tokensToStart.add(t.copy());
         }
         copy.sacredPoints = Arrays.copyOf(sacredPoints, sacredPoints.length);
         return copy;
@@ -112,30 +115,29 @@ public class PenteGameState extends AbstractGameState {
      */
     @Override
     public double getGameScore(int playerId) {
-        return getPiecesAtGoal(playerId) + getBorneOff(playerId);
+        return getPiecesAtGoal(playerId);
     }
 
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PenteGameState that)) return false;
-        return board.equals(that.board) && offBoard.equals(that.offBoard) &&
+        return board.equals(that.board) && tokensToStart.equals(that.tokensToStart) &&
+                tokensBorneOff.equals(that.tokensBorneOff) &&
                 Arrays.equals(sacredPoints, that.sacredPoints) &&
                 Arrays.equals(blotCount, that.blotCount) &&
                 Arrays.equals(playerGoal, that.playerGoal) &&
                 Arrays.equals(playerEntry, that.playerEntry) &&
-                Arrays.equals(borneOff, that.borneOff) &&
                 Objects.equals(die, that.die);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, offBoard, die, super.hashCode()) +
+        return Objects.hash(board, tokensToStart, die, super.hashCode(), tokensBorneOff, tokensToStart) +
                 31 * Arrays.hashCode(sacredPoints) +
                 31 * 31 * Arrays.hashCode(playerGoal) +
                 31 * 31 * Arrays.hashCode(playerEntry) +
-                31 * 31 * 31 * Arrays.hashCode(blotCount) +
-                31 * 31 * 31 * 31 * Arrays.hashCode(borneOff);
+                31 * 31 * 31 * Arrays.hashCode(blotCount);
     }
 
     public int distanceToGoal(int playerId, int pos) {
@@ -155,9 +157,6 @@ public class PenteGameState extends AbstractGameState {
         return !board.get(pos).isEmpty();
     }
 
-    public int getBorneOff(int player) {
-        return borneOff[player];
-    }
 
     public boolean canPlace(int pos) {
         // Only one piece per point except sacred points (can have any number, both players)
@@ -182,10 +181,16 @@ public class PenteGameState extends AbstractGameState {
 
     public int getPiecesAtGoal(int playerId) {
         int goal = playerGoal[playerId];
-        return getPiecesAt(goal, playerId);
+        return getPiecesAt(goal, playerId) + (int) tokensBorneOff.stream()
+                .filter(t -> t.getOwnerId() == playerId)
+                .count();
     }
 
+
+    // We have special codes of -1 for not yet on the board, and 10 (board size) for pieces borne off (slid to middle)
     public int getPiecesAt(int from, int player) {
+        if (from == -1) return (int) tokensToStart.stream().filter(t -> t.getOwnerId() == player).count();
+        if (from >= board.size()) return (int) tokensBorneOff.stream().filter(t -> t.getOwnerId() == player).count();
         int count = 0;
         for (Token t : board.get(from)) {
             if (t.getOwnerId() == player) count++;
@@ -194,13 +199,13 @@ public class PenteGameState extends AbstractGameState {
     }
 
 
-    public void setOffBoard(Token removed) {
-        offBoard.add(removed);
+    public void setTokensToStart(Token removed) {
+        tokensToStart.add(removed);
     }
 
     public int getOffBoard(int player) {
         int count = 0;
-        for (Token t : offBoard) {
+        for (Token t : tokensToStart) {
             if (t.getOwnerId() == player) count++;
         }
         return count;

@@ -14,6 +14,7 @@ public class PenteParameters extends TunableParameters<PenteParameters> {
     public boolean startOffBoard = false;
     public boolean mustMoveFromSacredLine = true;
     public boolean onePieceLimitOffSacredLine = true;
+    public boolean canMovePiecesBackOnToBoardAfterRemoval = true;
     public boolean blotRuleActive = false;
     public boolean slideToMiddleOnSacredLine = false;
     // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
@@ -31,6 +32,7 @@ public class PenteParameters extends TunableParameters<PenteParameters> {
         addTunableParameter("onePieceLimitOffSacredLine", true, List.of(false, true));
         addTunableParameter("blotRuleActive", false, List.of(false, true));
         addTunableParameter("slideToMiddleOnSacredLine", false, List.of(false, true));
+        addTunableParameter("canMovePiecesBackOnToBoardAfterRemoval", true, List.of(false, true));
         // TODO: Another one to add is whether two players can share the Holy Line (this is assumed to be the case if blotRuleActive=false currently; in line with Schaedler
         maxRounds = 500;
     }
@@ -55,6 +57,7 @@ public class PenteParameters extends TunableParameters<PenteParameters> {
         mustMoveFromSacredLine = (boolean) getParameterValue("mustMoveFromSacredLine");
         slideToMiddleOnSacredLine = (boolean) getParameterValue("slideToMiddleOnSacredLine");
         onePieceLimitOffSacredLine = (boolean) getParameterValue("onePieceLimitOffSacredLine");
+        canMovePiecesBackOnToBoardAfterRemoval = (boolean) getParameterValue("canMovePiecesBackOnToBoardAfterRemoval");
     }
 
     @Override

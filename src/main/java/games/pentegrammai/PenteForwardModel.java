@@ -38,10 +38,10 @@ public class PenteForwardModel extends StandardForwardModel {
         PenteParameters params = state.getParams();
         state.playerGoal = new int[2];
         state.blotCount = new int[2];
-        state.borneOff = new int[2];
         state.playerGoal[0] = params.sacredPoints[1];
         state.playerGoal[1] = params.sacredPoints[0];
-        state.offBoard = new ArrayList<>();
+        state.tokensToStart = new ArrayList<>();
+        state.tokensBorneOff = new ArrayList<>();
 
         // player entry only used in Kidd's variant
         state.playerEntry = new int[2];
@@ -61,7 +61,7 @@ public class PenteForwardModel extends StandardForwardModel {
                 Token t = new Token("P" + player + "_T" + i);
                 t.setOwnerId(player);
                 if (state.getParams().startOffBoard) {
-                    state.setOffBoard(t);
+                    state.setTokensToStart(t);
                 } else {
                     state.board.get(entry + i).add(t);
                 }
@@ -83,12 +83,13 @@ public class PenteForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         PenteGameState state = (PenteGameState) gameState;
+        PenteParameters params = state.getParams();
         List<AbstractAction> actions = new ArrayList<>();
         int player = state.getCurrentPlayer();
         int dieValue = state.die.getValue();
 
         boolean allMovesAreFromTargetSpace = true;
-        if (!state.offBoard.isEmpty() && state.offBoard.stream().anyMatch(t -> t.getOwnerId() == player)) {
+        if (!state.tokensToStart.isEmpty() && state.tokensToStart.stream().anyMatch(t -> t.getOwnerId() == player)) {
             // we have to move pieces that are off the board first
             int from = -1;
             int to = (state.playerEntry[player] + dieValue - 1) % state.board.size();
@@ -106,9 +107,13 @@ public class PenteForwardModel extends StandardForwardModel {
                         allMovesAreFromTargetSpace = false;
                 }
             }
+            if (params.canMovePiecesBackOnToBoardAfterRemoval && !state.tokensBorneOff.isEmpty() && state.tokensBorneOff.stream().anyMatch(t -> t.getOwnerId() == player)) {
+                // we have borne pieces off, but are allowed to move them back on again
+                actions.add(new PenteMoveAction(params.boardSize, state.playerEntry[player] + dieValue - 1));
+            }
         }
         if (actions.isEmpty() ||
-                (allMovesAreFromTargetSpace && !((PenteGameState) gameState).getParams().mustMoveFromSacredLine)) {
+                (allMovesAreFromTargetSpace && !params.mustMoveFromSacredLine)) {
             actions.add(new DoNothing());
         }
         return actions;

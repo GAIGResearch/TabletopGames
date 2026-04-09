@@ -1,12 +1,10 @@
 package games.pentegrammai;
 
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.components.Token;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -24,7 +22,7 @@ public class KiddsTest {
         params.setParameterValue("startOffBoard", true);
         params.setParameterValue("blotRuleActive", true);
         params.setParameterValue("onePieceLimitOffSacredLine", false);
-        params.setParameterValue("bearOffFromSacredLine", false);
+        params.setParameterValue("slideToMiddleOnSacredLine", false);
         params.setParameterValue("mustMoveFromSacredLine", true);
         state = new PenteGameState(params, 2);
         fm = new PenteForwardModel();
@@ -74,8 +72,8 @@ public class KiddsTest {
     public void testBlotWorks() {
         // to set this up we first move all player 1's tokens to 5
         for (int i = 0; i < params.boardSize / 2; i++) {
-            List<Token> tokens = state.offBoard.stream().filter(t -> t.getOwnerId() == 1).toList();
-            state.offBoard.removeAll(tokens);
+            List<Token> tokens = state.tokensToStart.stream().filter(t -> t.getOwnerId() == 1).toList();
+            state.tokensToStart.removeAll(tokens);
             for (Token t : tokens) {
                 state.board.get(5).add(t);
             }
@@ -136,7 +134,7 @@ public class KiddsTest {
         for (int i = 0; i < params.boardSize; i++) {
             state.board.get(i).removeIf(t -> t.getOwnerId() == 0);
         }
-        state.offBoard.removeIf(t -> t.getOwnerId() == 0);
+        state.tokensToStart.removeIf(t -> t.getOwnerId() == 0);
         for (int i = 0; i < params.boardSize / 2; i++) {
             Token t = new Token("P0_T" + i);
             t.setOwnerId(0);

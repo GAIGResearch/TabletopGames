@@ -20,7 +20,7 @@ public class PenteMoveAction extends AbstractAction {
         // Find a token belonging to the current player at 'from'
         Token tokenToMove;
         if (from == -1) {
-            tokenToMove = state.offBoard.stream().filter(t -> t.getOwnerId() == playerId)
+            tokenToMove = state.tokensToStart.stream().filter(t -> t.getOwnerId() == playerId)
                     .findFirst()
                     .orElse(null);
         } else {
@@ -36,7 +36,7 @@ public class PenteMoveAction extends AbstractAction {
             throw new IllegalArgumentException("Cannot place token at position " + to + " (occupied and not sacred)");
         }
         if (from == -1)
-            state.offBoard.remove(tokenToMove);
+            state.tokensToStart.remove(tokenToMove);
         else
             state.board.get(from).remove(tokenToMove);
 
@@ -47,15 +47,15 @@ public class PenteMoveAction extends AbstractAction {
                 if (state.getPiecesAt(to, playerId) != 0) {
                     throw new AssertionError("Both players cannot have pieces on the same point in Kidd's variant");
                 }
-                Token removed = state.board.get(to).remove(0); // Remove the opponent's piece
-                state.setOffBoard(removed);
+                Token removed = state.board.get(to).removeFirst(); // Remove the opponent's piece
+                state.setTokensToStart(removed);
                 state.blotCount[playerId]++;
             }
         }
 
         // Now check for bearing off
         if (state.getParams().slideToMiddleOnSacredLine && state.playerGoal[playerId] == to) {
-            state.borneOff[playerId]++;
+            state.tokensBorneOff.add(tokenToMove);
         } else {
             state.board.get(to).add(tokenToMove);
         }
