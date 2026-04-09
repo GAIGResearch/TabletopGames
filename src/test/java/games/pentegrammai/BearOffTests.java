@@ -47,6 +47,12 @@ public class BearOffTests {
         assertEquals(0, state.getGameScore(1), 0.001);
     }
 
+    public void testCanReEnterAfterBearingOff() {
+        // The plan here is to move a piece off the board with slide activated
+        // and confirm we have options to move from 'off' to on, but startig from the Holy Line target space
+        fail("Not yet implemented");
+    }
+
     @Test
     public void testAbleToPassWithNoZugZwang() {
         params.setParameterValue("bearOffFromSacredLine", false);

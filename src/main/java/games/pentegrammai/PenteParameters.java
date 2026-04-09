@@ -6,7 +6,7 @@ import evaluation.optimisation.TunableParameters;
 import java.util.Arrays;
 import java.util.List;
 
-public class PenteParameters extends TunableParameters {
+public class PenteParameters extends TunableParameters<PenteParameters> {
 
     public int boardSize = 10;
     public int dieSides = 6;
@@ -15,7 +15,7 @@ public class PenteParameters extends TunableParameters {
     public boolean mustMoveFromSacredLine = true;
     public boolean onePieceLimitOffSacredLine = true;
     public boolean blotRuleActive = false;
-    public boolean bearOffFromSacredLine = false;
+    public boolean slideToMiddleOnSacredLine = false;
     // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
     // Schaedler's variant is startOffBoard=false, blotRuleActive = false, onePieceLimitOffSacredLine = true, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
     public String diceJSON = "";
@@ -30,7 +30,7 @@ public class PenteParameters extends TunableParameters {
         addTunableParameter("mustMoveFromSacredLine", true, List.of(false, true));
         addTunableParameter("onePieceLimitOffSacredLine", true, List.of(false, true));
         addTunableParameter("blotRuleActive", false, List.of(false, true));
-        addTunableParameter("bearOffFromSacredLine", false, List.of(false, true));
+        addTunableParameter("slideToMiddleOnSacredLine", false, List.of(false, true));
         // TODO: Another one to add is whether two players can share the Holy Line (this is assumed to be the case if blotRuleActive=false currently; in line with Schaedler
         maxRounds = 500;
     }
@@ -53,7 +53,7 @@ public class PenteParameters extends TunableParameters {
         blotRuleActive = (boolean) getParameterValue("blotRuleActive");
         startOffBoard = (boolean) getParameterValue("startOffBoard");
         mustMoveFromSacredLine = (boolean) getParameterValue("mustMoveFromSacredLine");
-        bearOffFromSacredLine = (boolean) getParameterValue("bearOffFromSacredLine");
+        slideToMiddleOnSacredLine = (boolean) getParameterValue("slideToMiddleOnSacredLine");
         onePieceLimitOffSacredLine = (boolean) getParameterValue("onePieceLimitOffSacredLine");
     }
 

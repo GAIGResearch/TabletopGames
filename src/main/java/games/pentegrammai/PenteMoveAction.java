@@ -54,7 +54,7 @@ public class PenteMoveAction extends AbstractAction {
         }
 
         // Now check for bearing off
-        if (state.getParams().bearOffFromSacredLine && state.playerGoal[playerId] == to) {
+        if (state.getParams().slideToMiddleOnSacredLine && state.playerGoal[playerId] == to) {
             state.borneOff[playerId]++;
         } else {
             state.board.get(to).add(tokenToMove);
