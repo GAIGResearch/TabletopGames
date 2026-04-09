@@ -1,6 +1,7 @@
 package games.backgammon;
 
 import core.AbstractForwardModel;
+import core.CoreConstants;
 import core.DecoratedForwardModel;
 import core.actions.AbstractAction;
 import core.interfaces.IPlayerDecorator;
@@ -389,7 +390,7 @@ public class CheatingAgentTests {
             AbstractAction actionTaken = decoratedMCTSPlayer.getAction(gameState, forwardModel.computeAvailableActions(gameState));
             // now check the rollout
             SingleTreeNode root = decoratedMCTSPlayer.getRoot();
-            List<Pair<Integer, AbstractAction>> rolloutActions =  root.getActionsInRollout();
+            List<Pair<Integer, AbstractAction>> rolloutActions = root.getActionsInRollout();
             AbstractAction previousAction = null;
             for (Pair<Integer, AbstractAction> pair : rolloutActions) {
                 if (pair.b instanceof RollDice || pair.b instanceof LoadDice) {
@@ -419,7 +420,7 @@ public class CheatingAgentTests {
         assertEquals(1, gameState.getCurrentPlayer());
 
         List<AbstractAction> actions = decoratedMCTSPlayer.getForwardModel().computeAvailableActions(gameState);
-        assertEquals(3,  actions.size());
+        assertEquals(3, actions.size());
         for (int i = 0; i < 10; i++) {
             forwardModel.next(gameState, actions.get(2)); // we take the one-off shift
             assertEquals(1, gameState.availableDiceValues[0]);
@@ -427,8 +428,9 @@ public class CheatingAgentTests {
         }
 
     }
+
     @Test
-    public void cheatingDetectionEndsGame() {
+    public void cheatingDetectionEndsGameWithCheaterLosing() {
         int detections = 0;
         int trials = 100;
 
@@ -445,6 +447,13 @@ public class CheatingAgentTests {
             forwardModel.next(state, loadDice);
             if (state.isGameOver()) {
                 detections++;
+                assertEquals(15.0, state.getGameScore(1), 0.001);
+                assertEquals(0.0, state.getGameScore(0), 0.001);
+                assertEquals(1, state.getOrdinalPosition(1));
+                assertEquals(2, state.getOrdinalPosition(0));
+                assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[0]);
+                assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[1]);
+                assertEquals(Set.of(1), state.getWinners());
             }
         }
 
