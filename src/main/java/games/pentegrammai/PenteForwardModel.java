@@ -107,7 +107,7 @@ public class PenteForwardModel extends StandardForwardModel {
             }
             if (params.canMovePiecesBackOnToBoardAfterRemoval && !state.tokensBorneOff.isEmpty() && state.tokensBorneOff.stream().anyMatch(t -> t.getOwnerId() == player)) {
                 // we have borne pieces off, but are allowed to move them back on again (and they move as if from the sacred line)
-                actions.add(new PenteMoveAction(params.boardSize, state.playerGoal[player] + dieValue));
+                actions.add(new PenteMoveAction(params.boardSize, (state.playerGoal[player] + dieValue) % state.board.size()));
             }
         }
         if (actions.isEmpty() ||
