@@ -47,7 +47,7 @@ public class BearOffTests {
     }
 
     @Test
-    public void testCanReEnterAfterBearingOff() {
+    public void testCanReEnterAfterBearingOffAndNotPassIfOtherOption() {
         params.setParameterValue("slideToMiddleOnSacredLine", true);
         params.setParameterValue("mustMoveFromSacredLine", false);
         params.setParameterValue("canMovePiecesBackOnToBoardAfterRemoval", true);
@@ -61,31 +61,88 @@ public class BearOffTests {
         state.tokensBorneOff.add(state.tokensToStart.getFirst());
         assertEquals(1, state.getGameScore(0), 0.01);
         assertEquals(0, state.getGameScore(1), 0.01);
-        state.board.get(2).add(state.tokensToStart.getLast());  // block the 2 position onto the board
-        state.board.get(3).add(state.tokensToStart.getLast());  // block the 3 position onto the board
-
-        // we also need to move all of the other pieces on to the board, else we *must* play them
-        for (int i = 0; i < 4; i++) {
-            state.board.get(1).add(state.tokensToStart.get(i));
-        }
+        state.board.get(1).add(state.tokensToStart.removeLast());  // block the 2 position onto the board
+        state.board.get(2).add(state.tokensToStart.removeLast());  // block the 3 position onto the board
 
         state.setDieValue(2);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertEquals(new DoNothing(), actions.getFirst());
+        // the above checks that we cannot move off the Holy Line (or any piece), until we have moved all pieces onto the board
+
+        // we also need to move all of the other pieces on to the board, else we *must* play them
+        for (int i = 0; i < 5; i++) {
+            state.board.get(0).add(state.tokensToStart.removeFirst());
+        }
+
+        actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
-        assertTrue(actions.contains(new PenteMoveAction(-1, 9)));
-        assertTrue(actions.contains(new DoNothing()));
+        assertEquals(new PenteMoveAction(0, 2), actions.get(0));   // we do not block sharing on the sacred line with these rules
+        assertEquals(new PenteMoveAction(10, 9), actions.get(1));
+    }
+
+
+    @Test
+    public void testCanReEnterAfterBearingOffOrPassIfNoOtherMove() {
+        params.setParameterValue("slideToMiddleOnSacredLine", true);
+        params.setParameterValue("mustMoveFromSacredLine", false);
+        params.setParameterValue("canMovePiecesBackOnToBoardAfterRemoval", true);
+        params.setParameterValue("blotRuleActive", false);
+        params.setParameterValue("startOffBoard", true);
+        fm.setup(state);
+        // The plan here is to move a piece off the board with slide activated
+        // and confirm we have options to move from 'off' to on, but starting from the Holy Line target space
+
+        // we set one piece off
+        state.tokensBorneOff.add(state.tokensToStart.getFirst());
+        assertEquals(1, state.getGameScore(0), 0.01);
+        assertEquals(0, state.getGameScore(1), 0.01);
+        state.board.get(0).add(state.tokensToStart.removeLast());  // block the 1 position onto the board
+        state.board.get(1).add(state.tokensToStart.removeLast());  // block the 2 position onto the board
+
+        state.setDieValue(1);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertEquals(new DoNothing(), actions.getFirst());
+        // the above checks that we cannot move off the Holy Line (or any piece), until we have moved all pieces onto the board
+
+        // we also need to move all of the other pieces on to the board, else we *must* play them
+        for (int i = 0; i < 5; i++) {
+            state.board.get(0).add(state.tokensToStart.removeFirst());
+        }
+
+        actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertEquals(new PenteMoveAction(10, 8), actions.get(0));   // we do not block sharing on the sacred line with these rules
+        assertEquals(new DoNothing(), actions.get(1));
     }
 
     @Test
     public void testMustReEnterAfterBearingOff() {
         params.setParameterValue("slideToMiddleOnSacredLine", true);
         params.setParameterValue("mustMoveFromSacredLine", true);
+        params.setParameterValue("canMovePiecesBackOnToBoardAfterRemoval", true);
         params.setParameterValue("blotRuleActive", false);
-        // The plan here is to move a piece off the board with slide activated
-        // and confirm we have options to move from 'off' to on, but starting from the Holy Line target space
+        params.setParameterValue("startOffBoard", true);
+        fm.setup(state);
 
-        // and also that we do not *have* to move once borne off, as we are not
-        fail("Not yet implemented");
+        // we set one piece off
+        state.tokensBorneOff.add(state.tokensToStart.getFirst());
+        assertEquals(1, state.getGameScore(0), 0.01);
+        assertEquals(0, state.getGameScore(1), 0.01);
+        state.board.get(1).add(state.tokensToStart.removeLast());  // block the 2 position onto the board
+        state.board.get(2).add(state.tokensToStart.removeLast());  // block the 3 position onto the board
+
+        state.setDieValue(2);
+        // we also need to move all of the other pieces on to the board, else we *must* play them
+        for (int i = 0; i < 5; i++) {
+            state.board.get(0).add(state.tokensToStart.removeFirst());
+        }
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertEquals(new PenteMoveAction(0, 2), actions.get(0));   // we do not block sharing on the sacred line with these rules
+        assertEquals(new PenteMoveAction(10, 9), actions.get(1));
     }
 
     @Test

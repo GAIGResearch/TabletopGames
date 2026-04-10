@@ -95,21 +95,19 @@ public class PenteForwardModel extends StandardForwardModel {
             int to = (state.playerEntry[player] + dieValue - 1) % state.board.size();
             if (state.canPlace(to)) {
                 actions.add(new PenteMoveAction(from, to));
-                if (state.playerGoal[player] == to)
-                    allMovesAreFromTargetSpace = false;
             }
         } else {
             for (int from = 0; from < state.board.size(); from++) {
                 int to = (from + dieValue) % state.board.size();
                 if (state.canPlace(to) && state.getPiecesAt(from, player) > 0) {
                     actions.add(new PenteMoveAction(from, to));
-                    if (state.playerGoal[player] == to)
+                    if (state.playerGoal[player] != from)
                         allMovesAreFromTargetSpace = false;
                 }
             }
             if (params.canMovePiecesBackOnToBoardAfterRemoval && !state.tokensBorneOff.isEmpty() && state.tokensBorneOff.stream().anyMatch(t -> t.getOwnerId() == player)) {
-                // we have borne pieces off, but are allowed to move them back on again
-                actions.add(new PenteMoveAction(params.boardSize, state.playerEntry[player] + dieValue - 1));
+                // we have borne pieces off, but are allowed to move them back on again (and they move as if from the sacred line)
+                actions.add(new PenteMoveAction(params.boardSize, state.playerGoal[player] + dieValue));
             }
         }
         if (actions.isEmpty() ||
