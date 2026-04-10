@@ -48,4 +48,7 @@ public interface IPlayerDecorator {
         return this;  // default assumption is stateless
     }
 
+    default void initialiseBeforeGame() {    }
+    default void finaliseAfterGame() { }
+
 }
