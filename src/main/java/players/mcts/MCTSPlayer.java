@@ -65,6 +65,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         oldGraphKeys = new HashMap<>();
         getParameters().getRolloutStrategy().initializePlayer(state);
         getParameters().getOpponentModel().initializePlayer(state);
+        super.initializePlayer(state);
     }
 
     /**

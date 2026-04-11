@@ -1,7 +1,7 @@
 {
   "class" : "games.backgammon.actions.LoadedDiceDecorator",
   "sides" : 6,
-  "detectionChance" : -1,
+  "detectionChance" : -1.0,
   "isPermanent" : false,
   "probabilities" : [
     0.167, 0.167, 0.166, 0.166, 0.167, 0.167,

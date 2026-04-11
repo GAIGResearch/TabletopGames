@@ -13,13 +13,17 @@ import java.util.List;
 
 public class LoadedDiceDecorator implements IPlayerDecorator {
 
+    double MAX_DETECTION_CHANCE = 0.10;
+
     final List<double[]> pdfs;
     final boolean permanentChange;
-    final double detectionChance;
+    double detectionChance;
+    final boolean randomiseDetectionChance;
     // currently we only load the first die (the second/third will not be changed)
 
     public LoadedDiceDecorator(int sides, double[] probabilities, boolean permanentChange, double chance) {
         pdfs = new ArrayList<>(probabilities.length / sides);
+        this.randomiseDetectionChance = chance < 0.0;
         this.permanentChange = permanentChange;
         this.detectionChance = chance;
         int nDice = probabilities.length / sides;
@@ -38,6 +42,8 @@ public class LoadedDiceDecorator implements IPlayerDecorator {
         int sides = json.get("sides") != null ? ((Long) json.get("sides")).intValue() : 6; // default to 6 sides if not specified
         List<Double> probabilities = (List<Double>) json.get("probabilities");
         detectionChance = json.get("detectionChance") != null ? (Double) json.get("detectionChance") : 0.0;
+        randomiseDetectionChance = detectionChance < 0.0;
+        MAX_DETECTION_CHANCE = json.get("maxDetectionChance") != null ? (Double) json.get("maxDetectionChance") : MAX_DETECTION_CHANCE;
         permanentChange = json.get("isPermanent") != null ? (Boolean) json.get("isPermanent") : false; // default to false if not specified
         double[] pdf = new double[sides];
         for (int i = 0; i < probabilities.size(); i++) {
@@ -108,6 +114,15 @@ public class LoadedDiceDecorator implements IPlayerDecorator {
     @Override
     public boolean decisionPlayerOnly() {
         return true; // the opponent is not modelled as being able to cheat
+    }
+
+    @Override
+    public void initialiseBeforeGame() {
+        IPlayerDecorator.super.initialiseBeforeGame();
+        if (randomiseDetectionChance) {
+            // we randomise up to max detection chance
+            detectionChance = Math.random() * MAX_DETECTION_CHANCE;
+        }
     }
 
     public boolean isPermanent() {
