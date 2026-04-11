@@ -67,7 +67,6 @@ public class Game {
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
     private boolean pause, stop;
     private boolean debug = false;
-    private boolean actionValidation = true;
     // Video recording
     private Rectangle areaBounds;
     private boolean recordingVideo = false;
@@ -671,10 +670,6 @@ public class Game {
 
     public void setStopped(boolean stopped) {
         this.stop = stopped;
-    }
-
-    public void setActionValidation(boolean actionValidation) {
-        this.actionValidation = actionValidation;
     }
 
     public CoreParameters getCoreParameters() {
