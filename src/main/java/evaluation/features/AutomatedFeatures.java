@@ -545,7 +545,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     // If the algorithm was unable to bucket neatly, then ensure buckets is in line
                     if (missingColumns.size() != buckets[i]) {
                         buckets[i] = missingColumns.size();
-                        System.out.println("Warning: Bucketing algorithm was unable to bucket neatly, so buckets has been adjusted to " + buckets[i]);
                     }
                 }
             } else if (columnType.isEnum()) {

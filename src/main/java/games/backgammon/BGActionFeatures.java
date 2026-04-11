@@ -54,7 +54,7 @@ public class BGActionFeatures implements IActionFeatureVector {
             features[8] = ld.getDetectionChance();
             double[] currentPdf = bgState.getDicePdf(ld.getDieNumber());
             for (int dieRoll = 1; dieRoll <= 6; dieRoll++) {
-                features[7 + dieRoll] = ld.getPdf()[dieRoll - 1] - currentPdf[dieRoll - 1];
+                features[8 + dieRoll] = ld.getPdf()[dieRoll - 1] - currentPdf[dieRoll - 1];
             }
         }
 

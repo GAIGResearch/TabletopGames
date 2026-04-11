@@ -71,6 +71,8 @@ public class ExpertIteration {
     int[] actionSearchSettings;
     ITPSearchSpace<?> valueSearchSpace = null;
     ITPSearchSpace<?> actionSearchSpace = null;
+    ActionTarget actionTarget;
+    ValueTarget valueTarget;
 
     public enum ValueTarget {Base, MCTS, Rollout, None}
 
@@ -128,6 +130,11 @@ public class ExpertIteration {
         } else if (actionLearnerFile == null && stateLearnerFile == null) {
             throw new IllegalArgumentException("Must specify at least one learner");
         }
+
+        actionTarget = (ActionTarget) config.get(RunArg.actionTarget);
+        valueTarget = (ValueTarget) config.get(RunArg.valueTarget);
+        if (valueTarget == ValueTarget.None) stateLearnerFile = null;
+        if (actionTarget == ActionTarget.None) actionLearnerFile = null;
     }
 
     public static void main(String[] args) {
@@ -531,10 +538,7 @@ public class ExpertIteration {
 
     private RoundRobinTournament runTournament(List<AbstractPlayer> localAgents, Map<RunArg, Object> runGamesConfig) {
 
-        ActionTarget actionTarget = (ActionTarget) config.get(RunArg.actionTarget);
-        ValueTarget valueTarget = (ValueTarget) config.get(RunArg.valueTarget);
-        if (valueTarget == ValueTarget.None) stateLearnerFile = null;
-        if (actionTarget == ActionTarget.None) actionLearnerFile = null;
+
         boolean allDataAsOne = config.get(RunArg.expertTrainingMode) == TrainingMode.Exponential;
         RoundRobinTournament tournament = new RoundRobinTournament(localAgents, gameToPlay, nPlayers, params, runGamesConfig);
         tournament.setTournamentResults(runningTournamentResults);

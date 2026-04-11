@@ -3,15 +3,18 @@ package games.backgammon.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IPlayerDecorator;
+import core.interfaces.IToJSON;
 import games.backgammon.BGGamePhase;
 import games.backgammon.BGGameState;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class LoadedDiceDecorator implements IPlayerDecorator {
+public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
 
     double MAX_DETECTION_CHANCE = 0.10;
 
@@ -64,6 +67,26 @@ public class LoadedDiceDecorator implements IPlayerDecorator {
                 System.out.println("Unexpected key in LoadedDiceDecorator JSON: " + key);
             }
         }
+    }
+
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("class", this.getClass().getCanonicalName());
+        json.put("sides", pdfs.getFirst().length);
+        JSONArray probabilities = new JSONArray();
+        for (double[] pdf : pdfs) {
+            for (double prob : pdf) {
+                probabilities.add(prob);
+            }
+        }
+        json.put("probabilities", probabilities);
+        json.put("isPermanent", permanentChange);
+        json.put("detectionChance", detectionChance);
+        if (MAX_DETECTION_CHANCE != 0.10)
+            json.put("maxDetectionChance", MAX_DETECTION_CHANCE);
+        return json;
     }
 
     public double[] getPDF(int n) {
@@ -128,4 +151,15 @@ public class LoadedDiceDecorator implements IPlayerDecorator {
     public boolean isPermanent() {
         return permanentChange;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        LoadedDiceDecorator that = (LoadedDiceDecorator) obj;
+        return pdfs.equals(that.pdfs) && permanentChange == that.permanentChange &&
+                detectionChance == that.detectionChance &&
+                randomiseDetectionChance == that.randomiseDetectionChance;
+    }
+
 }
