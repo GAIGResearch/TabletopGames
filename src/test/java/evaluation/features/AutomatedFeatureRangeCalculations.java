@@ -63,11 +63,32 @@ public class AutomatedFeatureRangeCalculations {
     public void testComplexBucketingIII() {
         // in which the break occurs before the large number of identical values
         asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/ComplexBucketData_3.txt");
-        assertEquals(4, asf.getBuckets(estateIndex));
-        assertEquals(5, asf.names().length);
+        assertEquals(3, asf.getBuckets(estateIndex));
+        assertEquals(4, asf.names().length);
+        assertEquals(Pair.of(Double.NEGATIVE_INFINITY, 6.0), asf.getColumnDetails().get(1).range());
+        assertEquals(Pair.of(6.0, 7.0), asf.getColumnDetails().get(2).range());
+        assertEquals(Pair.of(7.0, Double.POSITIVE_INFINITY), asf.getColumnDetails().get(3).range());
+    }
+
+    @Test
+    public void testComplexBucketingIV() {
+        // in which we have a large number of items at one extreme
+        asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/ComplexBucketData_4.txt");
+        assertEquals(2, asf.getBuckets(estateIndex));
+        assertEquals(3, asf.names().length);
+        assertEquals(Pair.of(Double.NEGATIVE_INFINITY, 6.0), asf.getColumnDetails().get(1).range());
+        assertEquals(Pair.of(6.0, Double.POSITIVE_INFINITY), asf.getColumnDetails().get(2).range());
+    }
+
+    @Test
+    public void testComplexBucketingV() {
+        // in which we have a large number of items at one extreme
+        asf.setBuckets(estateIndex, 7);
+        asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/ComplexBucketData_4.txt");
+        assertEquals(3, asf.getBuckets(estateIndex));
+        assertEquals(4, asf.names().length);
         assertEquals(Pair.of(Double.NEGATIVE_INFINITY, 5.0), asf.getColumnDetails().get(1).range());
         assertEquals(Pair.of(5.0, 6.0), asf.getColumnDetails().get(2).range());
-        assertEquals(Pair.of(6.0, 7.0), asf.getColumnDetails().get(3).range());
-        assertEquals(Pair.of(7.0, Double.POSITIVE_INFINITY), asf.getColumnDetails().get(4).range());
+        assertEquals(Pair.of(6.0, Double.POSITIVE_INFINITY), asf.getColumnDetails().get(3).range());
     }
 }
