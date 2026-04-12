@@ -83,7 +83,7 @@ public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
         }
         json.put("probabilities", probabilities);
         json.put("isPermanent", permanentChange);
-        json.put("detectionChance", detectionChance);
+        json.put("detectionChance", randomiseDetectionChance ? -1.0 : detectionChance);
         if (MAX_DETECTION_CHANCE != 0.10)
             json.put("maxDetectionChance", MAX_DETECTION_CHANCE);
         return json;
@@ -157,8 +157,16 @@ public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         LoadedDiceDecorator that = (LoadedDiceDecorator) obj;
-        return pdfs.equals(that.pdfs) && permanentChange == that.permanentChange &&
-                detectionChance == that.detectionChance &&
+        // check pdfs
+        if (pdfs.size() != that.pdfs.size()) return false;
+        for (int i = 0; i < pdfs.size(); i++) {
+            for (int j = 0; j < pdfs.get(i).length; j++) {
+                if (Math.abs(pdfs.get(i)[j] - that.pdfs.get(i)[j]) > 0.0001) return false;
+            }
+        }
+        return permanentChange == that.permanentChange &&
+                (detectionChance == that.detectionChance || randomiseDetectionChance) &&
+                MAX_DETECTION_CHANCE == that.MAX_DETECTION_CHANCE &&
                 randomiseDetectionChance == that.randomiseDetectionChance;
     }
 
