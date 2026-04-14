@@ -50,7 +50,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
         oracle.setForwardModel(game.getForwardModel());
         oracle.getAction(state, availableActions);
         // recordData will call the super.processState() method, which will then record the feature vectors
-        recordData(oracle.root);
+        recordData(oracle.root, availableActions);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             stateRecorder.writeDataWithStandardHeaders(state);
     }
 
-    public void recordData(SingleTreeNode root) {
+    public void recordData(SingleTreeNode root, List<AbstractAction> actionsFromState) {
 
         if (root instanceof MultiTreeNode) {
             // access the root for the acting player instead
@@ -113,7 +113,6 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             // we record its depth, value, visits, and the full feature list
             int player = node.getActor();
             double stateValue = node.nodeValue(player);
-            List<AbstractAction> actionsFromState = game.getForwardModel().computeAvailableActions(node.state);
             actionValues = new HashMap<>();
             actionValues.put("CHOSEN", new HashMap<>());
             actionValues.put("VISIT_PROPORTION", new HashMap<>());

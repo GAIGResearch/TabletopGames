@@ -117,7 +117,7 @@ public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
     public List<AbstractAction> actionFilter(AbstractGameState state, List<AbstractAction> possibleActions) {
         // we add the LoadDice action to the list of possible actions for the decision player
         if (state.getGamePhase() == BGGamePhase.RollDice) {
-            List<AbstractAction> newPossibleActions = new ArrayList<>(possibleActions);
+            List<AbstractAction> newPossibleActions = new ArrayList<>();
             BGGameState bgs = (BGGameState) state;
             double[] currentPDF = bgs.getDicePdf(0);
             for (double[] pdf : pdfs) {
@@ -129,7 +129,12 @@ public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
                     newPossibleActions.add(LoadDice.getOneOffShift(0, pdf, detectionChance));
                 }
             }
-            return newPossibleActions;
+            List<AbstractAction> allActions = new ArrayList<>(possibleActions);
+            for (AbstractAction a : newPossibleActions) {
+                if (!allActions.contains(a))
+                    allActions.add(a);
+            }
+            return allActions;
         }
         return possibleActions;
     }
