@@ -1,33 +1,20 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
+import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
-import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
-import games.seasaltpaper.heuristics.LeadHeuristic;
-import games.seasaltpaper.heuristics.ScoreAndHandHeuristic;
-import games.seasaltpaper.heuristics.ScoreHeuristic;
 import games.pandemic.PandemicForwardModel;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
 import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
-import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSEnums;
-import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
-import players.rhea.RHEAPlayer;
-import players.rmhc.RMHCParams;
-import players.rmhc.RMHCPlayer;
-import players.simple.FirstActionPlayer;
-import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -358,6 +345,50 @@ public class Game {
         return this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
     }
 
+
+
+
+
+
+
+
+
+
+    public final SimultaneousAction SimultaneousAction() {
+        List<Integer> activePlayers = gameState.getCurrentSimultaneousPlayers();
+        Map<Integer, AbstractAction> playerActions = new HashMap<>();
+
+        for (int activePlayer : activePlayers) {
+            AbstractAction action = makeDecisionForPlayer(activePlayer);
+            playerActions.put(activePlayer, action);
+        }
+
+        SimultaneousAction wrappedAction = new SimultaneousAction(playerActions);
+        forwardModel.next(gameState, wrappedAction);
+        return wrappedAction;
+    }
+
+
+    private AbstractAction makeDecisionForPlayer(int activePlayer){
+        AbstractPlayer currPlayer = players.get(activePlayer);
+        AbstractGameState observation = gameState.copy(activePlayer);
+
+        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currPlayer.getParameters().actionSpace);
+
+        if (observedActions.size() == 1 && !currPlayer.considerSingletonActions){
+            currPlayer.registerUpdatedObservation(observation);
+            return observedActions.getFirst();
+        }
+
+        return currPlayer.getAction(observation, observedActions);
+    }
+
+
+
+
+
+
+
     public final AbstractAction oneAction() {
 
         // we pause before each action is taken if running with a delay (e.g. for video recording with random players)
@@ -376,6 +407,12 @@ public class Game {
             throw new AssertionError("Player " + activePlayer + " is not allowed to move");
         AbstractPlayer currentPlayer = players.get(activePlayer);
         if (debug) System.out.printf("Starting oneAction for player %s%n", activePlayer);
+
+
+        // This handles the simultaneous actions keeping the single player logic the same
+        if (gameState.getCurrentSimultaneousPlayers().size() > 1) {
+            return SimultaneousAction();
+        }
 
         // Get player observation, and time how long it takes
         double s = System.nanoTime();

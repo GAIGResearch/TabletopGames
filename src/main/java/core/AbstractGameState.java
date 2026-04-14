@@ -132,9 +132,30 @@ public abstract class AbstractGameState {
      * in child classes if relevant to the game
      */
     public int getTeam(int player) { return player;}
+
+
+
+
+
     public int getCurrentPlayer() {
         return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }
+
+    /**
+     * This new method retrns a list of the players in a game state that is simltaenois
+     *
+     *
+     */
+
+    public List<Integer> getCurrentSimultaneousPlayers(){
+        return Collections.singletonList(getCurrentPlayer());
+    }
+
+
+
+
+
+
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final Set<Integer> getWinners() {
         Set<Integer> winners = new HashSet<>();
