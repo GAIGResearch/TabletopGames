@@ -180,9 +180,11 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         if (interactionIndices.size() != numberOfInteractions) {
             throw new AssertionError("Invalid interaction indices for interaction: " + first + ", " + second);
         }
+
+        String featureName = featureNames.get(first) + ":" + featureNames.get(second);
         addFeature(
                 new AutomatedFeatures.ColumnDetails(
-                        featureNames.get(first) + ":" + featureNames.get(second),
+                        featureName,
                         featureType.INTERACTION, null, null, -1, Double.class,
                         interactionIndices
                 )

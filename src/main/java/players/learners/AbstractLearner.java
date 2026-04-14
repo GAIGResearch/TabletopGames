@@ -17,6 +17,7 @@ public abstract class AbstractLearner implements ILearner {
     protected double[][] target;
     protected double[][] currentScore;
     String[] descriptions;
+    String[] sparkDescriptions;
     double gamma;
     Target targetType;
     IStateFeatureVector stateFeatureVector;
@@ -54,7 +55,8 @@ public abstract class AbstractLearner implements ILearner {
         this(1.0, Target.ACTION_SCORE, stateFeatureVector, actionFeatureVector);
     }
 
-    public AbstractLearner(){}
+    public AbstractLearner() {
+    }
 
     public AbstractLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector) {
         this.gamma = gamma;
@@ -82,6 +84,7 @@ public abstract class AbstractLearner implements ILearner {
     public IActionFeatureVector getActionFeatureVector() {
         return actionFeatureVector;
     }
+
     public IStateFeatureVector getStateFeatureVector() {
         return stateFeatureVector;
     }
@@ -90,6 +93,7 @@ public abstract class AbstractLearner implements ILearner {
         this.gamma = gamma;
         return this;
     }
+
     public AbstractLearner setTarget(Target target) {
         this.targetType = target;
         return this;
@@ -116,6 +120,8 @@ public abstract class AbstractLearner implements ILearner {
         // and validate that the data matches the feature vector
         descriptions = stateFeatureVector == null ?
                 actionFeatureVector.names() : stateFeatureVector.names();
+        // A colon in squared interaction names can cause issues with Spark (reason not clear, but using an underscore solves the problem)
+        sparkDescriptions = Arrays.stream(descriptions).map(s -> s.replace(":", "_")).toArray(String[]::new);
         List<String> expectedNames = Arrays.stream(descriptions).collect(toList());
         Map<String, Integer> indexForDescriptions = new HashMap<>();
         for (int i = 0; i < header.length; i++) {
@@ -145,9 +151,12 @@ public abstract class AbstractLearner implements ILearner {
         for (int i = 0; i < dataArray.length; i++) {
             List<String> allData = rawData.b.get(i);
             // calculate the number of turns from this point until the end of the game
-            double turns = Double.parseDouble(allData.get(indexForSpecialColumns.get("TotalTurns"))) -
-                    Double.parseDouble(allData.get(indexForSpecialColumns.get("Turn")));
-            double playerCount = Double.parseDouble(allData.get(indexForSpecialColumns.get("PlayerCount")));
+            double turns = 1.0;
+            if (indexForSpecialColumns.get("TotalTurns") != null && indexForSpecialColumns.get("Turn") != null) {
+                turns = Double.parseDouble(allData.get(indexForSpecialColumns.get("TotalTurns"))) -
+                        Double.parseDouble(allData.get(indexForSpecialColumns.get("Turn")));
+            }
+            double playerCount = indexForSpecialColumns.get("PlayerCount") == null ? 2.0 : Double.parseDouble(allData.get(indexForSpecialColumns.get("PlayerCount")));
             int targetIndex = indexForSpecialColumns.getOrDefault(targetType.header, -1);
             if (targetIndex == -1) {
                 throw new IllegalArgumentException("Target " + targetType.header + " not found in data");
@@ -170,7 +179,8 @@ public abstract class AbstractLearner implements ILearner {
             if (targetType == Target.ORD_MEAN_SCALE || targetType == Target.ORD_SCALE)
                 target[i][0] = (playerCount - target[i][0]) / (playerCount - 1.0);  // scale to [0, 1]
 
-            currentScore[i][0] = Double.parseDouble(allData.get(indexForSpecialColumns.get("CurrentScore")));
+            if (indexForSpecialColumns.get("CurrentScore") != null)
+                currentScore[i][0] = Double.parseDouble(allData.get(indexForSpecialColumns.get("CurrentScore")));
             double[] regressionData = new double[descriptions.length + 1];
             regressionData[0] = 1.0; // the bias term
             // then copy the rest of the data into the regression data

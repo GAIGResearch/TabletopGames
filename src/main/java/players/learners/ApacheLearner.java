@@ -51,8 +51,8 @@ public abstract class ApacheLearner extends AbstractLearner {
         double[][] apacheDataArray = new double[dataArray.length][dataArray[0].length];
         for (int i = 0; i < dataArray.length; i++) {
             // we skip the BIAS at the front here, as we add that in separately
-            System.arraycopy(dataArray[i], 1, apacheDataArray[i], 0, descriptions.length);
-            apacheDataArray[i][descriptions.length] = target[i][0]; // add target to end
+            System.arraycopy(dataArray[i], 1, apacheDataArray[i], 0, sparkDescriptions.length);
+            apacheDataArray[i][sparkDescriptions.length] = target[i][0]; // add target to end
         }
         // convert the raw data into Rows
         List<Row> rowList = Arrays.stream(apacheDataArray)
@@ -60,9 +60,9 @@ public abstract class ApacheLearner extends AbstractLearner {
                 .map(RowFactory::create)
                 .collect(toList());
         // use the header to get the names, and all of them are double by design
-        String[] apacheHeader = new String[descriptions.length + 1];
-        System.arraycopy(descriptions, 0, apacheHeader, 0, descriptions.length);
-        apacheHeader[descriptions.length] = "target";
+        String[] apacheHeader = new String[sparkDescriptions.length + 1];
+        System.arraycopy(sparkDescriptions, 0, apacheHeader, 0, sparkDescriptions.length);
+        apacheHeader[sparkDescriptions.length] = "target";
         // set up the column names
         StructType schema = new StructType(Arrays.stream(apacheHeader)
                 .map(name -> new StructField(name, DataTypes.DoubleType, true, Metadata.empty()))
