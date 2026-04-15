@@ -299,40 +299,21 @@ public class ExpertIteration {
         // where X is a unique identifier for the agent (e.g. its rank in the final tournament)
         // and YY is the alpha rank of the agent in the final tournament.
 
-        ParetoAnalysis paretoAnalysis = new ParetoAnalysis();
-        Map<String, Pair<Double, Double>> paretoRankings = paretoAnalysis.getRanking(runningTournamentResults);
-
-        List<String> firstParetoFront = paretoRankings.entrySet().stream()
-                .filter(e -> e.getValue().a == 1.0)
-                .map(Map.Entry::getKey)
-                .toList();
-
-        AlphaRankAnalysis alphaRankAnalysis = new AlphaRankAnalysis(false);
-        Map<String, Pair<Double, Double>> alphaRankings = alphaRankAnalysis.getRanking(runningTournamentResults);
-        agents.sort(comparingDouble(a -> -alphaRankings.get(a.toString()).a)); // then sort by alpha rank00
-        for (int i = 0; i < agents.size(); i++) {
-            if (firstParetoFront.contains(agents.get(i).toString())) {
-                // only save those agents on the Pareto Front
-                AbstractPlayer agent = agents.get(i);
-                String newFileName = String.format("FinalAgent_R%02d_A%2d.json", i + 1, Math.round(alphaRankings.get(agent.toString()).a * 100.0));
-                String originalFileName;
-                if (agents.get(i).toString().equals(originalOpponentName))
-                    originalFileName = player;
-                else {
-                    // format is XXX_03.json"
-                    int originalIteration = Integer.parseInt(agent.toString().split("_")[1].replaceAll("\\D+", ""));
-                    originalFileName = dataDir + File.separator + String.format("%sNTBEA_%02d.json", config.get(RunArg.valueSS).equals("") ? "Action" : "Value", originalIteration);
-                }
-                try {
-                    // we now copy the file for the agent
-                    File oldFile = new File(originalFileName);
-                    File newFile = new File(dataDir + File.separator + "FinalAgents" + File.separator + newFileName);
-                    FileUtils.copyFile(oldFile, newFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        List<File> agentFiles = new ArrayList<>();
+        for (AbstractPlayer agent : agents) {
+            String originalFileName;
+            if (agent.toString().equals(originalOpponentName))
+                originalFileName = player;
+            else {
+                // format is XXX_03.json"
+                int originalIteration = Integer.parseInt(agent.toString().split("_")[1].replaceAll("\\D+", ""));
+                originalFileName = dataDir + File.separator + String.format("%sNTBEA_%02d.json", config.get(RunArg.valueSS).equals("") ? "Action" : "Value", originalIteration);
             }
+            agentFiles.add(new File(originalFileName));
         }
+
+        AgentArchiver archiver = new AgentArchiver();
+        archiver.archive(runningTournamentResults, agents, agentFiles, dataDir);
     }
 
 
@@ -465,36 +446,14 @@ public class ExpertIteration {
             }
             if (toRemove > 0) {
                 // we now see if there are clusters of agents, and remove the worst agent from the largest cluster
-                List<String> poorClusterPerformers = new ArrayList<>();
+                final List<String> poorClusterPerformers = new ArrayList<>();
                 double[] thresholds = new double[]{0.02, 0.05, 0.1, 0.2};
                 for (double threshold : thresholds) {
-                    Map<String, List<String>> clusters = alphaRankAnalysis.calculateClusters(runningTournamentResults, threshold);
-                    Map<String, List<String>> clustersWithMoreThanOneMember = clusters.keySet().stream()
-                            .filter(cName -> clusters.get(cName).size() > 1)
-                            .collect(Collectors.toMap(c -> c, clusters::get));
-                    if (clustersWithMoreThanOneMember.isEmpty()) {
-                        System.out.printf("No clusters with a threshold of %.2f%n", threshold);
-                        continue; // try next largest thresholds
+                    List<String> identified = alphaRankAnalysis.identifyCloseDuplicates(runningTournamentResults, alphaRankings, threshold);
+                    if (!identified.isEmpty()) {
+                        poorClusterPerformers.addAll(identified);
+                        break;  // we stop once we've found the narrowest clusters
                     }
-
-                    System.out.printf("%d clusters found at threshold of %2f (%s)%n\t",
-                            clustersWithMoreThanOneMember.size(), threshold,
-                            clustersWithMoreThanOneMember.values().stream().map(List::toString).collect(Collectors.joining(", ")));
-                    System.out.println();
-                    // Now we find the poorest performer in each cluster
-                    for (String clusterName : clustersWithMoreThanOneMember.keySet()) {
-                        String poorestPerformer = "";
-                        double performance = Double.POSITIVE_INFINITY;
-                        for (String agent : clustersWithMoreThanOneMember.get(clusterName)) {
-                            double p = alphaRankings.get(agent).a;
-                            if (p < performance) {
-                                performance = p;
-                                poorestPerformer = agent;
-                            }
-                        }
-                        poorClusterPerformers.add(poorestPerformer);
-                    }
-                    break;  // we stop once we've found the narrowest clusters
                 }
                 agents.removeIf(a -> poorClusterPerformers.contains(a.toString()));
                 for (String removed : poorClusterPerformers) {

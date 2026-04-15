@@ -7,6 +7,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import utilities.Pair;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.sqrt;
 
@@ -177,6 +178,48 @@ public class AlphaRankAnalysis implements IResultsAnalysis {
             clusters.get(cluster).add(agents.get(i));
         }
         return clusters;
+    }
+
+    /**
+     * Identifies agents that are close duplicates of each other based on their performance
+     * and clusters. For each cluster of duplicates, the poorest performer based on AlphaRank
+     * is identified for removal.
+     *
+     * @param results        The tournament results.
+     * @param alphaRankings  The AlphaRank values for each agent.
+     * @param threshold      The threshold for clustering.
+     * @return A list of agent names that are identified as poor cluster performers and should be removed.
+     */
+    public List<String> identifyCloseDuplicates(TournamentResults results, Map<String, Pair<Double, Double>> alphaRankings, double threshold) {
+        Map<String, List<String>> clusters = calculateClusters(results, threshold);
+        Map<String, List<String>> clustersWithMoreThanOneMember = clusters.entrySet().stream()
+                .filter(entry -> entry.getValue().size() > 1)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        if (clustersWithMoreThanOneMember.isEmpty()) {
+            System.out.printf("No clusters with a threshold of %.2f%n", threshold);
+            return Collections.emptyList();
+        }
+
+        System.out.printf("%d clusters found at threshold of %2f (%s)%n\t",
+                clustersWithMoreThanOneMember.size(), threshold,
+                clustersWithMoreThanOneMember.values().stream().map(List::toString).collect(Collectors.joining(", ")));
+        System.out.println();
+
+        List<String> poorClusterPerformers = new ArrayList<>();
+        for (String clusterName : clustersWithMoreThanOneMember.keySet()) {
+            String poorestPerformer = "";
+            double performance = Double.POSITIVE_INFINITY;
+            for (String agent : clustersWithMoreThanOneMember.get(clusterName)) {
+                double p = alphaRankings.getOrDefault(agent, new Pair<>(0.0, 0.0)).a;
+                if (p < performance) {
+                    performance = p;
+                    poorestPerformer = agent;
+                }
+            }
+            poorClusterPerformers.add(poorestPerformer);
+        }
+        return poorClusterPerformers;
     }
 }
 
