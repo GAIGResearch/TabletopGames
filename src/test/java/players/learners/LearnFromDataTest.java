@@ -40,7 +40,7 @@ public class LearnFromDataTest {
     }
 
     @Test
-    public void testlinearInteraction() {
+    public void testLinearInteraction() {
         LearnFromData learnFromData = new LearnFromData("src\\test\\java\\players\\learners\\InteractionTest.txt",
                 new TestFeatures(), null,
                 "src\\test\\java\\players\\learners\\LinearResults.txt",
