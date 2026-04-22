@@ -13,6 +13,11 @@ public class ForwardModelTestsWithRandom {
     }
 
     @Test
+    public void testSpades() {
+        new ForwardModelTester("game=Spades", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
     public void testPickomino() {
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=2");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=3");
