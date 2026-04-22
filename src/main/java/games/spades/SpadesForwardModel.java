@@ -20,12 +20,19 @@ public class SpadesForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         SpadesGameState state = (SpadesGameState) firstState;
+        state.playerHands = new ArrayList<>();
+        state.tricksWon = new ArrayList<>();
+        for (int i = 0; i < state.getNPlayers(); i++) {
+            Deck<FrenchCard> hand = new Deck<>("Player" + i + "Hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+            hand.setOwnerId(i);
+            state.playerHands.add(hand);
+            state.tricksWon.add(new ArrayList<>());
+        }
         Arrays.fill(state.teamScores, 0);
         Arrays.fill(state.teamSandbags, 0);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < state.getNPlayers(); i++) {
             state.playerBids[i] = -1;
             state.tricksTaken[i] = 0;
-            state.tricksWon.get(i).clear();
         }
         state.currentTrick.clear();
         state.spadesBroken = false;
@@ -42,10 +49,9 @@ public class SpadesForwardModel extends StandardForwardModel {
 
         if (state.getGamePhase() == SpadesGameState.Phase.BIDDING) {
             int team = state.getTeam(currentPlayer);
-            boolean nilAllowed = params.allowNilOverbid || state.getTeamScore(team) < 500;
+            boolean nilAllowed = params.allowNilOverbid || state.getTeamScore(team) < params.winningScore;
             int minBid = 0;
-            int maxBid = Math.min(13, params.maxBid);
-            for (int bid = minBid; bid <= maxBid; bid++) {
+            for (int bid = minBid; bid <= params.maxBid; bid++) {
                 if (bid == 0 && !nilAllowed) continue; // restrict Nil if house rule disallows it at high scores
                 actions.add(new Bid(bid));
             }
@@ -174,11 +180,9 @@ public class SpadesForwardModel extends StandardForwardModel {
      * Gets the value of a card for comparison (higher is better)
      */
     private int getCardValue(FrenchCard card) {
-        if (card.type == FrenchCard.FrenchCardType.Ace) return 14;
-        if (card.type == FrenchCard.FrenchCardType.King) return 13;
-        if (card.type == FrenchCard.FrenchCardType.Queen) return 12;
-        if (card.type == FrenchCard.FrenchCardType.Jack) return 11;
-        return card.number;
+        if (card.type == FrenchCard.FrenchCardType.Number)
+            return card.number;
+        return card.type.getNumber();
     }
 
     /**
@@ -246,7 +250,7 @@ public class SpadesForwardModel extends StandardForwardModel {
 
         if (gameEnded) {
             int winningTeam = state.getTeamScore(0) > state.getTeamScore(1) ? 0 : 1;
-            for (int p = 0; p < 4; p++) {
+            for (int p = 0; p < state.getNPlayers(); p++) {
                 if (state.getTeam(p) == winningTeam) {
                     state.setPlayerResult(CoreConstants.GameResult.WIN_GAME, p);
                 } else {
@@ -268,7 +272,7 @@ public class SpadesForwardModel extends StandardForwardModel {
      * Starts a new round of play
      */
     private void startNewRound(SpadesGameState state) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < state.getNPlayers(); i++) {
             state.playerBids[i] = -1;
             state.tricksTaken[i] = 0;
             state.tricksWon.get(i).clear();
@@ -279,7 +283,7 @@ public class SpadesForwardModel extends StandardForwardModel {
         state.setSpadesBroken(false);
         state.leadSuit = null;
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < state.getNPlayers(); i++) {
             Deck<FrenchCard> hand = state.getPlayerHands().get(i);
             hand.clear();
         }
@@ -288,7 +292,7 @@ public class SpadesForwardModel extends StandardForwardModel {
         deck.shuffle(state.getRnd());
 
         for (int i = 0; i < 13; i++) {
-            for (int p = 0; p < 4; p++) {
+            for (int p = 0; p < state.getNPlayers(); p++) {
                 FrenchCard card = deck.draw();
                 state.getPlayerHands().get(p).add(card);
                 card.setOwnerId(p);
@@ -304,10 +308,10 @@ public class SpadesForwardModel extends StandardForwardModel {
         int team0 = state.getTeamScore(0);
         int team1 = state.getTeamScore(1);
         if (team0 == team1) {
-            for (int p = 0; p < 4; p++) state.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, p);
+            for (int p = 0; p < state.getNPlayers(); p++) state.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, p);
         } else {
             int winningTeam = team0 > team1 ? 0 : 1;
-            for (int p = 0; p < 4; p++) {
+            for (int p = 0; p < state.getNPlayers(); p++) {
                 if (state.getTeam(p) == winningTeam) state.setPlayerResult(CoreConstants.GameResult.WIN_GAME, p);
                 else state.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, p);
             }

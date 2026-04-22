@@ -69,15 +69,16 @@ public class SpadesScoreView extends JPanel {
         g2d.setFont(new Font("Arial", Font.PLAIN, 11));
         
         // Show bids and tricks for each player
-        String[] playerNames = {"P0", "P1", "P2", "P3"};
-        Color[] playerColors = {
-            new Color(0, 100, 0),    // P0 - Green
-            new Color(100, 0, 0),    // P1 - Red  
-            new Color(0, 100, 0),    // P2 - Green
-            new Color(100, 0, 0)     // P3 - Red
-        };
+        int nPlayers = gameState.getNPlayers();
+        String[] playerNames = new String[nPlayers];
+        Color[] playerColors = new Color[nPlayers];
+        for (int i = 0; i < nPlayers; i++) {
+            playerNames[i] = "P" + i;
+            playerColors[i] = (i % 2 == 0) ? new Color(0, 100, 0) : new Color(100, 0, 0);
+        }
+        // Alternate red and green around players
         
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < nPlayers; i++) {
             try {
                 g2d.setColor(playerColors[i]);
                 

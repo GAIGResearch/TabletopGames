@@ -1,20 +1,21 @@
 package games.spades;
 
 import core.AbstractParameters;
+import evaluation.optimisation.TunableParameters;
 
 import java.util.Objects;
 
-public class SpadesParameters extends AbstractParameters {
+public class SpadesParameters extends TunableParameters<SpadesParameters> {
     
-    public final int winningScore = 500;
-    public final int sandbagsPerPenalty = 10;
-    public final int sandbagsRandPenalty = 100;
-    public final int nilBonusPoints = 100;
-    public final int nilPenaltyPoints = 100;
-    public final int blindNilBonusPoints = 200;
-    public final int blindNilPenaltyPoints = 200;
+    public int winningScore = 500;
+    public int sandbagsPerPenalty = 10;
+    public int sandbagsRandPenalty = 100;
+    public int nilBonusPoints = 100;
+    public int nilPenaltyPoints = 100;
+    public int blindNilBonusPoints = 200;
+    public int blindNilPenaltyPoints = 200;
     
-    public final int maxBid = 13;
+    public int maxBid = 13;
     
     public boolean allowBlindNil = false;
     public boolean allowNilOverbid = false; // Nil can be bid even if team has >= 500 points
@@ -24,6 +25,30 @@ public class SpadesParameters extends AbstractParameters {
         // Use maxRounds to end by score comparison; disable TIMEOUT endings
         setMaxRounds(30);
         setTimeoutRounds(-1);
+        addTunableParameter("winningScore", 500);
+        addTunableParameter("sandbagsPerPenalty", 10);
+        addTunableParameter("sandbagsRandPenalty", 100);
+        addTunableParameter("nilBonusPoints", 100);
+        addTunableParameter("nilPenaltyPoints", 200);
+        addTunableParameter("blindNilBonusPoints", 200);
+        addTunableParameter("blindNilPenaltyPoints", 200);
+        addTunableParameter("maxBid", 13);
+        addTunableParameter("allowBlindNil", false);
+        addTunableParameter("allowNilOverbid", false);
+    }
+
+    @Override
+    public void _reset() {
+        winningScore = (int) getParameterValue("winningScore");
+        sandbagsPerPenalty = (int) getParameterValue("sandbagsPerPenalty");
+        sandbagsRandPenalty = (int) getParameterValue("sandbagsRandPenalty");
+        nilBonusPoints = (int) getParameterValue("nilBonusPoints");
+        nilPenaltyPoints = (int) getParameterValue("nilPenaltyPoints");
+        blindNilBonusPoints = (int) getParameterValue("blindNilBonusPoints");
+        blindNilPenaltyPoints = (int) getParameterValue("blindNilPenaltyPoints");
+        maxBid = (int) getParameterValue("maxBid");
+        allowBlindNil = (boolean) getParameterValue("allowBlindNil");
+        allowNilOverbid = (boolean) getParameterValue("allowNilOverbid");
     }
     
     public SpadesParameters(long seed) {
@@ -44,16 +69,13 @@ public class SpadesParameters extends AbstractParameters {
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SpadesParameters)) return false;
-        if (!super.equals(o)) return false;
-        
-        SpadesParameters that = (SpadesParameters) o;
-        return allowBlindNil == that.allowBlindNil &&
-               allowNilOverbid == that.allowNilOverbid;
+        return o instanceof SpadesParameters;
     }
-    
+
     @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), allowBlindNil, allowNilOverbid);
+    public SpadesParameters instantiate() {
+        return this;
     }
-} 
+
+
+}

@@ -29,8 +29,8 @@ public class SpadesHeuristic implements IStateHeuristic {
 
             // Add tactical evaluation based on current game phase
             if (state.getGamePhase() == SpadesGameState.Phase.PLAYING) {
-                int ourBid = state.getPlayerBid(playerId) + state.getPlayerBid((playerId + 2) % 4);
-                int ourTricks = state.getTricksTaken(playerId) + state.getTricksTaken((playerId + 2) % 4);
+                int ourBid = state.getPlayerBid(playerId) + state.getPlayerBid((playerId + 2) % state.getNPlayers());
+                int ourTricks = state.getTricksTaken(playerId) + state.getTricksTaken((playerId + 2) % state.getNPlayers());
 
                 // Evaluate bid progress
                 if (ourBid > 0) {

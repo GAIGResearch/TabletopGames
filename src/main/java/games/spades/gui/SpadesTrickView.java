@@ -67,8 +67,7 @@ public class SpadesTrickView extends JPanel {
         
         // Take a snapshot to avoid concurrent modification
         int cardCount = currentTrick.size();
-        if (cardCount == 0) return;
-        
+
         // Position cards in a cross pattern (North, East, South, West)
         int centerX = getWidth() / 2;
         int centerY = getHeight() / 2;

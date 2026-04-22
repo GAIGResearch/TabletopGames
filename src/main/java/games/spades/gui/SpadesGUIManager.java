@@ -86,10 +86,11 @@ public class SpadesGUIManager extends AbstractGUIManager {
         // Get game parameters
         SpadesParameters params = (SpadesParameters) gameState.getGameParameters();
         String dataPath = "data/FrenchCards/";
-        
+
+        int nPlayers = gameState.getNPlayers();
         // Initialize player views
-        playerViews = new SpadesPlayerView[4];
-        playerBorders = new Border[4];
+        playerViews = new SpadesPlayerView[nPlayers];
+        playerBorders = new Border[nPlayers];
         
         // Create center area with trick view and score
         JPanel centerPanel = new JPanel(new BorderLayout());
@@ -108,7 +109,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
         gameArea.setOpaque(false);
         
         // Create player panels for each position
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < nPlayers; i++) {
             SpadesPlayerView playerView = new SpadesPlayerView(gameState.getPlayerHands().get(i), i, dataPath);
             playerViews[i] = playerView;
             
@@ -130,15 +131,14 @@ public class SpadesGUIManager extends AbstractGUIManager {
             playerView.setBorder(border);
             
             // Position players around the game area
-            String position;
-            switch (i) {
-                case 0: position = BorderLayout.SOUTH; break;  // Bottom
-                case 1: position = BorderLayout.WEST; break;   // Left
-                case 2: position = BorderLayout.NORTH; break;  // Top
-                case 3: position = BorderLayout.EAST; break;   // Right
-                default: position = BorderLayout.CENTER; break;
-            }
-            
+            String position = switch (i) {
+                case 0 -> BorderLayout.SOUTH;  // Bottom
+                case 1 -> BorderLayout.WEST;   // Left
+                case 2 -> BorderLayout.NORTH;  // Top
+                case 3 -> BorderLayout.EAST;   // Right
+                default -> BorderLayout.CENTER;
+            };
+
             gameArea.add(playerView, position);
         }
         

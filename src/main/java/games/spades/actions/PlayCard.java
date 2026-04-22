@@ -15,7 +15,10 @@ import java.util.Objects;
  * Action representing playing a card in Spades.
  */
 public class PlayCard extends AbstractAction implements IPrintable {
-    
+
+    // FrenchCard is immutable. It is hence safe to store this within the Action as a reference
+    // This deviates from the general (strict) guidelines that only primitive values should be stored to avoid
+    // issues with deep copies. The full principle is that only immutable values should be stored (including primitives)
     public final FrenchCard card;
     
     public PlayCard(FrenchCard card) {

@@ -44,19 +44,12 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
 
         playerHands = new ArrayList<>();
         tricksWon = new ArrayList<>();
-        playerBids = new int[4];
+        playerBids = new int[nPlayers];
         Arrays.fill(playerBids, -1); // -1 means not bid yet
-        tricksTaken = new int[4];
+        tricksTaken = new int[nPlayers];
         teamScores = new int[2];
         teamSandbags = new int[2];
-        playerBlindNil = new boolean[4];
-
-        for (int i = 0; i < 4; i++) {
-            Deck<FrenchCard> hand = new Deck<>("Player" + i + "Hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-            hand.setOwnerId(i);
-            playerHands.add(hand);
-            tricksWon.add(new ArrayList<>());
-        }
+        playerBlindNil = new boolean[nPlayers];
     }
 
     @Override
@@ -224,10 +217,9 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SpadesGameState)) return false;
+        if (!(o instanceof SpadesGameState that)) return false;
         if (!super.equals(o)) return false;
 
-        SpadesGameState that = (SpadesGameState) o;
         return Objects.equals(playerHands, that.playerHands) &&
                 Objects.equals(currentTrick, that.currentTrick) &&
                 Objects.equals(tricksWon, that.tricksWon) &&
@@ -268,7 +260,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
 
         // Player information
         System.out.println("\nPLAYERS:");
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < getNPlayers(); i++) {
             String marker = (i == getCurrentPlayer()) ? ">>> " : "    ";
             System.out.print(marker + "Player " + i + " (Team " + getTeam(i) + ")");
 
@@ -300,7 +292,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         // Game status
         if (!isNotTerminal()) {
             System.out.println("\nGAME OVER!");
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < getNPlayers(); i++) {
                 System.out.println("Player " + i + " result: " + getPlayerResults()[i]);
             }
         }
