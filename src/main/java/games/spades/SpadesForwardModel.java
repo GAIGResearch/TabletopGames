@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class SpadesForwardModel extends StandardForwardModel {
 
@@ -191,9 +192,12 @@ public class SpadesForwardModel extends StandardForwardModel {
     private void nextRound(SpadesGameState state) {
         SpadesParameters params = (SpadesParameters) state.getGameParameters();
 
-        for (int team = 0; team < 2; team++) {
-            // Teams in Spades are (0,2) and (1,3)
-            int[] teamPlayers = new int[] {team, team + 2};
+        for (int team = 0; team < state.getNTeams(); team++) {
+            // Teams in Spades alternate players
+            int finalTeam = team;
+            int[] teamPlayers = IntStream.range(0, state.getNPlayers())
+                    .filter(p -> state.getTeam(p) == finalTeam)
+                    .toArray();
 
             int teamScore = state.getTeamScore(team);
             int teamTricks = 0;
@@ -216,7 +220,7 @@ public class SpadesForwardModel extends StandardForwardModel {
             // Team contract score (for non-nil bids)
             if (teamBid > 0) {
                 if (teamTricks >= teamBid) {
-                    int basePoints = teamBid * 10;
+                    int basePoints = teamBid * params.pointsPerTrick;
                     int sandBags = teamTricks - teamBid;
                     teamScore += basePoints + sandBags;
 
@@ -229,7 +233,7 @@ public class SpadesForwardModel extends StandardForwardModel {
                 } else {
                     // If any teammate bid Nil, do not double-penalize the team for missing the non-nil contract.
                     // Standard house rules apply contract penalty regardless; keep it simple but bounded.
-                    int penalty = teamBid * 10;
+                    int penalty = teamBid * params.pointsPerTrick;
                     teamScore -= penalty;
                 }
             } else {

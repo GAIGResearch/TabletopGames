@@ -14,6 +14,7 @@ public class SpadesParameters extends TunableParameters<SpadesParameters> {
     public int nilPenaltyPoints = 100;
     public int blindNilBonusPoints = 200;
     public int blindNilPenaltyPoints = 200;
+    public int pointsPerTrick = 10;
     
     public int maxBid = 13;
     
@@ -35,6 +36,7 @@ public class SpadesParameters extends TunableParameters<SpadesParameters> {
         addTunableParameter("maxBid", 13);
         addTunableParameter("allowBlindNil", false);
         addTunableParameter("allowNilOverbid", false);
+        addTunableParameter("pointsPerTrick", 10);
     }
 
     @Override
@@ -49,6 +51,7 @@ public class SpadesParameters extends TunableParameters<SpadesParameters> {
         maxBid = (int) getParameterValue("maxBid");
         allowBlindNil = (boolean) getParameterValue("allowBlindNil");
         allowNilOverbid = (boolean) getParameterValue("allowNilOverbid");
+        pointsPerTrick = (int) getParameterValue("pointsPerTrick");
     }
     
     public SpadesParameters(long seed) {
@@ -60,10 +63,7 @@ public class SpadesParameters extends TunableParameters<SpadesParameters> {
     
     @Override
     protected AbstractParameters _copy() {
-        SpadesParameters copy = new SpadesParameters(getRandomSeed());
-        copy.allowBlindNil = this.allowBlindNil;
-        copy.allowNilOverbid = this.allowNilOverbid;
-        return copy;
+        return new SpadesParameters();
     }
     
     @Override
