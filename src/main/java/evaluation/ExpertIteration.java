@@ -51,6 +51,7 @@ public class ExpertIteration {
     FeatureListener stateListener, actionListener;
     int nPlayers, matchups, iterations, iter, bicMultiplier, bicTimer, expertTime, maxRecords;
     double stateSampleRate, actionSampleRate;
+    double baselineStateSampleRate, baselineActionSampleRate;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     int[] stateRowsPerIteration, actionRowsPerIteration;
@@ -95,8 +96,10 @@ public class ExpertIteration {
         gameToPlay = GameType.valueOf((String) config.get(RunArg.game));
         bicMultiplier = (int) config.get(RunArg.bicMultiplier);
         bicTimer = (int) config.get(RunArg.bicTimer);
-        stateSampleRate = (double) config.get(RunArg.sampleRate);
-        actionSampleRate = (double) config.get(RunArg.sampleRate);
+        baselineActionSampleRate = (double) config.get(RunArg.sampleRate);
+        baselineStateSampleRate = (double) config.get(RunArg.sampleRate);
+        stateSampleRate = baselineStateSampleRate;
+        actionSampleRate = baselineActionSampleRate;
         expertTime = (int) config.get(RunArg.expertTime);
         maxRecords = (int) config.get(RunArg.maxRecords);
 
@@ -271,17 +274,27 @@ public class ExpertIteration {
                 );
 
                 // record the amount of data gathered for this iteration
-                stateRowsPerIteration[iter] = getTotalDataSize("state");
-                if (iter > 0) stateRowsPerIteration[iter] -= stateRowsPerIteration[iter - 1];
-                actionRowsPerIteration[iter] = getTotalDataSize("action");
-                if (iter > 0) actionRowsPerIteration[iter] -= actionRowsPerIteration[iter - 1];
+                int totalStateRecords = getTotalDataSize("state");
+                TrainingMode trainingMode = (TrainingMode) config.get(RunArg.expertTrainingMode);
+                stateRowsPerIteration[iter] = switch (trainingMode) {
+                    case Batch -> totalStateRecords;  // we just have the current set of data
+                    case Exponential -> totalStateRecords - Arrays.stream(stateRowsPerIteration).sum(); // data is gathered incrementally
+                    default -> throw new IllegalArgumentException("Unknown training mode: " + trainingMode);
+                };
+
+                int totalActionRecords = getTotalDataSize("action");
+                actionRowsPerIteration[iter] = switch(trainingMode) {
+                    case Batch -> totalActionRecords;
+                    case Exponential -> totalActionRecords - Arrays.stream(actionRowsPerIteration).sum();
+                    default -> throw new IllegalArgumentException("Unknown training mode: " + trainingMode);
+                };
 
                 // we can now adjust some parameters based on empirical data (data gathered per iteration, and time taken)
-                // generally speaking we want each iteration to generate about 10% of the total data
+                // generally speaking we want each iteration to generate about 10-15% of the total data
                 // we therefore calculate sample rates for each of value and actions to achieve this
-                stateSampleRate = Math.min(0.05, stateSampleRate * maxRecords / 10.0 / (double) stateRowsPerIteration[iter]);
+                stateSampleRate = Math.min(0.05, baselineStateSampleRate * maxRecords / 8.0 / (double) stateRowsPerIteration[iter]);
                 // we do not want to sample more than about 5% of state to avoid over-correlation between samples (not such an issue for actions)
-                actionSampleRate = Math.min(1.0, actionSampleRate * maxRecords / 10.0 / (double) actionRowsPerIteration[iter]);
+                actionSampleRate = Math.min(1.0, baselineActionSampleRate * maxRecords / 8.0 / (double) actionRowsPerIteration[iter]);
                 System.out.printf("State records gathered: %d, Action records gathered: %d%n", stateRowsPerIteration[iter], actionRowsPerIteration[iter]);
                 System.out.printf("State sample rate: %.3f, Action sample rate: %.3f\n", stateSampleRate, actionSampleRate);
 
