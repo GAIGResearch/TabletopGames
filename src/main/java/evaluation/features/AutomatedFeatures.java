@@ -877,16 +877,16 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             if (currentPoint != Double.NEGATIVE_INFINITY) {
                 throw new AssertionError("First feature range should not start with negative infinity");
             }
-            List<Pair<Number, Number>> newFeatureRanges = new ArrayList<>();
+            List<Pair<Number, Number>> featuresToAdd = new ArrayList<>();
             for (Pair<Number, Number> range : featureRanges) {
                 if (currentPoint != range.a.doubleValue()) {
                     // we are missing a bit of the number line
-                    newFeatureRanges.add(new Pair<>(currentPoint, range.a));
+                    featuresToAdd.add(new Pair<>(currentPoint, range.a));
                 }
                 // move to the end of this feature range
                 currentPoint = range.b.doubleValue();
             }
-            featureRanges.addAll(newFeatureRanges);
+            featureRanges.addAll(featuresToAdd);
 
             if (currentPoint != Double.POSITIVE_INFINITY) {
                 // add final feature range
