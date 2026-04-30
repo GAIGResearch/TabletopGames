@@ -224,13 +224,15 @@ public class ExpertIteration {
 
             // the above code has loaded all agents...we now cut this down to just the ones that were in the
             // running at the point from which we are reloading
+            List<AbstractPlayer> toRemove =  new ArrayList<>();
             for (AbstractPlayer agent : agents) {
                 if (runningTournamentResults.getPlayerResults(agent.toString()).isEmpty()) {
                     // has already been removed
                     runningTournamentResults.filterPlayer(agent.toString());
-                    agents.remove(agent);
+                    toRemove.add(agent);
                 }
             }
+            agents.removeAll(toRemove);
             // then work out who the current best agent is
             WinRateAnalysis winRateAnalysis = new WinRateAnalysis();
             String bestAgentName = winRateAnalysis.getRanking(runningTournamentResults).firstEntry().getKey();
