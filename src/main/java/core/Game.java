@@ -75,6 +75,7 @@ public class Game {
     String codecName = null;
     int snapsPerSecond = 10;
     private int turnPause;
+    protected AbstractAction overrideAction;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -481,7 +482,12 @@ public class Game {
         } else {
             // Resolve action and game rules, time it
             s = System.nanoTime();
-            // we copy the action before using it..so that the action returned by oneAction() does not have a state link
+            if (overrideAction != null) {
+                action = overrideAction;
+                System.out.println("Overriding action with " + overrideAction);
+                overrideAction = null;
+            }
+            // we copy the action before using it...so that the action returned by oneAction() does not have a state link
             forwardModel.next(gameState, action.copy());
             nextTime = (System.nanoTime() - s);
         }
@@ -579,6 +585,14 @@ public class Game {
      */
     public double getActionComputeTime() {
         return actionComputeTime;
+    }
+
+    /**
+     * May be called by a third party observer (i.e. a listener) if it interjects an action to override a player
+     * @param overrideAction
+     */
+    public void setOverrideAction(AbstractAction overrideAction) {
+        this.overrideAction = overrideAction;
     }
 
     /**
