@@ -36,7 +36,9 @@ public abstract class TunableStateFeatures extends TunableParameters implements 
         for (int i = 0; i < allNames.length; i++) {
             active[i] = (Boolean) getParameterValue(allNames[i]);
         }
-        namesUsed = IntStream.range(0, allNames.length).filter(i -> active[i]).mapToObj(i -> allNames[i]).toArray(String[]::new);
+        namesUsed = IntStream.range(0, allNames.length)
+                .filter(i -> active[i])
+                .mapToObj(i -> allNames[i]).toArray(String[]::new);
     }
 
     @Override

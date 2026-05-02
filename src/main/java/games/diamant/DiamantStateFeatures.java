@@ -1,21 +1,18 @@
 package games.diamant;
 
 import core.AbstractGameState;
-import evaluation.features.TunableStateFeatures;
+import core.interfaces.IStateFeatureVector;
 import games.diamant.cards.DiamantCard;
 import players.heuristics.LeaderHeuristic;
 
-public class DiamantSimpleFeatures extends TunableStateFeatures {
+public class DiamantStateFeatures implements IStateFeatureVector {
     LeaderHeuristic heuristic = new LeaderHeuristic();
 
-    static String[] allNames =  new String[]{"TreasureChests", "GemsOnPath", "PlayersInCave", "Cave", "Hazards",
+    String[] allNames =  new String[]{"TreasureChests", "GemsOnPath", "PlayersInCave", "Cave", "Hazards",
         "PlayerOrdinalPos", "PlayersStillInCaveEncoded", "LeaderHeuristic", "Tiles"};
 
-    public DiamantSimpleFeatures() {
-        super(allNames);
-    }
     @Override
-    public double[] fullFeatureVector(AbstractGameState gameState, int playerId) {
+    public double[] doubleVector(AbstractGameState gameState, int playerId) {
         DiamantGameState gs = (DiamantGameState) gameState;
 
         double[] retVal = new double[allNames.length];
@@ -46,17 +43,8 @@ public class DiamantSimpleFeatures extends TunableStateFeatures {
         return retVal;
     }
 
-    public int getObservationSpace() {
-        return names().length;
-    }
-
     @Override
-    protected DiamantSimpleFeatures _copy() {
-        return new DiamantSimpleFeatures();
-    }
-
-    @Override
-    public Object getKey(AbstractGameState state) {
-        return super.getKey(state);
+    public String[] names() {
+        return allNames;
     }
 }
