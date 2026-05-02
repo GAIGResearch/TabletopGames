@@ -425,7 +425,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return columnDetails;
     }
 
-    public List<List<Object>> processData(String outputFile, int maxRecords, String... inputFiles) {
+    public List<List<Object>> processData(String outputFile, int maxRecords, boolean initialProcessing, String... inputFiles) {
         // inputFiles contain the raw data.
         // There can be two types of columns:
         // 1. Columns that refer to existing featureNames. These are detected by matching the names.
@@ -445,7 +445,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         //          if this already exists in the data, we do not add it again
 
         List<ColumnDetails> newColumnDetails = new ArrayList<>(); // will be populated with new columns
-        Map<Integer, Integer> underlyingIndexToDataIndex = new HashMap<>();
         List<ColumnDetails> startingFeatures = getColumnDetails();
 
         // load files...the columns should correspond to the underlying vector
@@ -474,6 +473,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 break; // Stop processing if we reached the maximum number of records
             }
         }
+
         List<List<?>> newDataColumns = new ArrayList<>(); // set up to take the new data (especially where we can just copy this from the old)
 
         // Loop over all underlyingNames/Types to determine if the current features match with the data
@@ -490,7 +490,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             }
 
             int columnIndex = headers.indexOf(columnName);
-            underlyingIndexToDataIndex.put(i, columnIndex);
 
             if (columnType.equals(Boolean.class)) {
                 // Boolean column: Just add raw column directly (no bucketing is relevant here)
@@ -658,7 +657,25 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             }
         }
 
-
+        if (initialProcessing) {
+            // Now check for any column which has no variance (all values are the same).
+            // These can be removed
+            List<Integer> removedIndices = new ArrayList<>();
+            for (int i = 0; i < newColumnDetails.size(); i++) {
+                if (newColumnDetails.get(i).type == featureType.TARGET)
+                    continue;  // except for columns not used in the learning process
+                Object reference = newDataColumns.get(i).getFirst();
+                if (newDataColumns.get(i).stream().allMatch(v -> v.equals(reference))) {
+                    System.out.println("Removing column with no variance: " + newColumnDetails.get(i).name);
+                    removedIndices.add(i);
+                }
+            }
+            // we need to remove backwards (otherwise the indices will shift as we remove)
+            for (int removedIndex : removedIndices.reversed()) {
+                newColumnDetails.remove(removedIndex);
+                newDataColumns.remove(removedIndex);
+            }
+        }
         // The logic so far has constructed a RAW column for each underlying feature
         // Then a RANGE column per bucket for that underlying feature
         // And similarly a number of ENUM column per underlying feature that is an enum
@@ -706,11 +723,9 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     newDataColumns.remove(i);
                 }
             }
-
         }
 
-
-        // We now have all the column, to write to file we need to convert this into a set of rows
+        // We now have all the columns, to write to file we need to convert this into a set of rows
         List<List<Object>> newDataRows = new ArrayList<>();
         for (List<?> columnData : newDataColumns) {
             for (int j = 0; j < columnData.size(); j++) {
@@ -935,6 +950,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return featureRanges;
     }
 
+
     private List<Pair<Number, Number>> calculateFeatureRanges(List<String> columnData, int buckets, Class<?> clazz) {
         List<Double> doubleValues;
         List<Integer> integerValues;
@@ -970,7 +986,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
                 booleanValues.add(Boolean.parseBoolean(value));
             } else {
-                Double number = Double.parseDouble(value);
+                double number = Double.parseDouble(value);
                 if (number == 0.0) {
                     booleanValues.add(false);
                 } else if (number == 1.0) {

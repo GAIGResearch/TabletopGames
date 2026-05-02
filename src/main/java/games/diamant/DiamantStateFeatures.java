@@ -18,7 +18,7 @@ public class DiamantStateFeatures implements IStateFeatureVector {
         double[] retVal = new double[allNames.length];
         retVal[0] = gs.getTreasureChests().get(playerId).getValue();
         retVal[1] = gs.path.getComponents().get(gs.path.getSize()-1).getValue(); // nGemsOnPath;
-        retVal[2] = gs.playerInCave.size();
+        retVal[2] = gs.playerInCave.stream().filter(b -> b).count() / (double) gs.getNPlayers();
         retVal[3] = gs.nCave;
 
         // hazards on path - we only care about if we have seen a type or not
