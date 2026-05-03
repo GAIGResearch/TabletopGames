@@ -172,18 +172,6 @@ public class LearnFromData {
         AutomatedFeatures bestFeatures;
         FeatureAnalysisResult bestResult = null;
 
-        // we check for any features which have identical values for all records
-//        for (int i = 0; i < asf.names().length; i++) {
-//            if (Math.abs(startingHeuristic.coefficients()[i + 1]) < 0.00001) {
-//                // then check for equality
-//
-//                excludedFeatures.add(asf.names()[i]);
-//            }
-//        }
-//        if (!excludedFeatures.isEmpty()) {
-//            System.out.println("Excluding features with zero coefficients: " + excludedFeatures);
-//            removeExcludedFeatures(excludedFeatures, asf);
-//        }
         // TODO Test with Dominion to check correct dealing with ENUMs from Card Types.
         // TODO: ....and the specifically why State heuristic seems fine, but Action heuristic leaves in all the State features?
 

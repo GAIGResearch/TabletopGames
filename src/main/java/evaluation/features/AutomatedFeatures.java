@@ -672,6 +672,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             }
             // we need to remove backwards (otherwise the indices will shift as we remove)
             for (int removedIndex : removedIndices.reversed()) {
+                removedFeatureNames.add(newColumnDetails.get(removedIndex).name);  // to avoid it being resurrected on later iterations
                 newColumnDetails.remove(removedIndex);
                 newDataColumns.remove(removedIndex);
             }
