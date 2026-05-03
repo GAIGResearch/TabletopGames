@@ -204,7 +204,7 @@ public class SingleTreeNode {
                 throw new AssertionError("Duplicate actions found in action list: " +
                         actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
             if ((params.useActionHeuristicForMoveOrdering && nVisits < actionsFromOpenLoopState.size())
-                    || params.pUCTTemperature <= 10000.0  || params.progressiveWideningConstant > 1.0
+                    || params.pUCTTemperature <= 10000.0 || params.progressiveWideningConstant > 1.0
                     || params.progressiveBias > 0 || params.initialiseVisits > 0) {
                 // We only need to calculate actionValueEstimates if we are going to be using the data in one of these variants
                 // If not, then we can save processing time by not calculating them
@@ -711,6 +711,7 @@ public class SingleTreeNode {
     public List<Pair<Integer, AbstractAction>> getActionsInRollout() {
         return actionsInRollout;
     }
+
     public List<Pair<Integer, AbstractAction>> getActionsInTree() {
         return actionsInTree;
     }
@@ -1196,20 +1197,14 @@ public class SingleTreeNode {
                 if (!actionValues.containsKey(action)) {
                     throw new AssertionError("Hashcode / equals contract issue for " + action);
                 }
-                if (actionValues.get(action) != null) {
-                    ActionStats stats = actionValues.get(action);
-                    double childValue = stats.nVisits; // if ROBUST
-                    if (policy == SIMPLE)
-                        childValue = stats.totValue[decisionPlayer] / (stats.nVisits + params.noiseEpsilon);
+                double childValue = getValue(action);
+                // Apply small noise to break ties randomly
+                childValue = noise(childValue, params.noiseEpsilon, rnd.nextDouble());
 
-                    // Apply small noise to break ties randomly
-                    childValue = noise(childValue, params.noiseEpsilon, rnd.nextDouble());
-
-                    // Save best value
-                    if (childValue > bestValue) {
-                        bestValue = childValue;
-                        bestAction = action;
-                    }
+                // Save best value
+                if (childValue > bestValue) {
+                    bestValue = childValue;
+                    bestAction = action;
                 }
             }
         }
@@ -1223,6 +1218,17 @@ public class SingleTreeNode {
         }
 
         return bestAction;
+    }
+
+    public double getValue(AbstractAction action) {
+        if (actionValues.get(action) != null) {
+            ActionStats stats = actionValues.get(action);
+            if (params.selectionPolicy == SIMPLE)
+                return stats.totValue[decisionPlayer] / (stats.nVisits + params.noiseEpsilon);
+            else
+                return stats.nVisits;  // ROBUST
+        }
+        return 0.0;
     }
 
     protected void updateRegretMatchingAverage(List<AbstractAction> actionsToConsider) {

@@ -3,6 +3,7 @@ package players.mcts;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import utilities.Pair;
+
 import java.util.*;
 
 /**
@@ -10,11 +11,11 @@ import java.util.*;
  * Uses multiple determinised SingleTreeNode roots to create several
  * determinisations, running MCTS on each determinised state, and then aggregating the suggested
  * root actions across trees using a chosen aggregation policy.
- *
+ * <p>
  * This class does the following:
- *  - Build N determinized trees from the decision point.
- *  - Runs MCTS on each determinized root.
- *  - Aggregates action statistics to inform the final choice.
+ * - Build N determinized trees from the decision point.
+ * - Runs MCTS on each determinized root.
+ * - Aggregates action statistics to inform the final choice.
  */
 public class ForestNode extends SingleTreeNode {
     //One root MCTS tree per determinisation
@@ -48,7 +49,7 @@ public class ForestNode extends SingleTreeNode {
         roots = new SingleTreeNode[params.numDeterminizations];
     }
 
-     //Run PI-MCTS search where for each determinisation, state is copied, a SingleTreeNode root is created, and MCTS search is performed.
+    //Run PI-MCTS search where for each determinisation, state is copied, a SingleTreeNode root is created, and MCTS search is performed.
 
     @Override
     public void mctsSearch(long initialisationTime) {
@@ -65,36 +66,28 @@ public class ForestNode extends SingleTreeNode {
     }
 
 
-     //The choice is made by aggregating recommendations across determinisations using the chosen PerfectInformationPolicy.
+    //The choice is made by aggregating recommendations across determinisations using the chosen PerfectInformationPolicy.
 
     @Override
-    public AbstractAction bestAction()
-    {
-        AbstractAction calculatedAction = null;
+    public AbstractAction bestAction() {
+        return switch (params.perfectInformationPolicy) {
+            case SingleVote -> bestAction_SingleVote();
+            case AverageValue -> bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy.AverageValue);
+            case TotalVisits -> bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy.TotalVisits);
+        };
+    }
 
-        switch (params.perfectInformationPolicy)
-        {
-            case SingleVote :
-            {
-                return bestAction_SingleVote();
-            }
-            case AverageValue:
-            {
-                return bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy.AverageValue);
-            }
-            case TotalVisits:
-            {
-                return  bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy.TotalVisits);
-            }
-        }
-        return calculatedAction;
+    @Override
+    public double getValue(AbstractAction action) {
+        // we average over the value for all roots
+        return Arrays.stream(roots).mapToDouble(r -> r.getValue(action)).average().orElse(0.0);
     }
 
     /**
      * Single-vote aggregation:
-     *  - Let each determinised root pick its own best action.
-     *  - Aggregate votes for actions across all determinisations.
-     *  - Pick the action with the highest count with tiny noise to break ties.
+     * - Let each determinised root pick its own best action.
+     * - Aggregate votes for actions across all determinisations.
+     * - Pick the action with the highest count with tiny noise to break ties.
      */
     AbstractAction bestAction_SingleVote() {
         //Voting
@@ -107,9 +100,9 @@ public class ForestNode extends SingleTreeNode {
         AbstractAction bestAction_vote = null;
         double maxCount = -1;
         for (Map.Entry<AbstractAction, Integer> entry : actionCounts.entrySet()) {
-            double totValue = entry.getValue() +( rnd.nextGaussian() * params.noiseEpsilon);
+            double totValue = entry.getValue() + (rnd.nextGaussian() * params.noiseEpsilon);
             if (totValue > maxCount) {
-                maxCount = totValue ;
+                maxCount = totValue;
                 bestAction_vote = entry.getKey();
             }
         }
@@ -118,9 +111,9 @@ public class ForestNode extends SingleTreeNode {
 
     /**
      * Aggregation by accumulated statistics from all determinised roots based on selected aggregation policy
-     *  TotalValue:   Total Value for decisionPlayer per action node
-     *  TotalVisits:  total visits to the action node
-     *  AverageValue: TotalValue / TotalVisits
+     * TotalValue:   Total Value for decisionPlayer per action node
+     * TotalVisits:  total visits to the action node
+     * AverageValue: TotalValue / TotalVisits
      */
     AbstractAction bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy policy) {
         accumulatedActionStats = new HashMap<>();
@@ -152,10 +145,10 @@ public class ForestNode extends SingleTreeNode {
                 double totValue = 0.0;
                 switch (policy) {
                     case AverageValue:
-                        totValue = (stats.totValue[decisionPlayer] + (rnd.nextGaussian() * params.noiseEpsilon)) / (stats.nVisits +( rnd.nextGaussian() * params.noiseEpsilon)) ;
+                        totValue = (stats.totValue[decisionPlayer] + (rnd.nextGaussian() * params.noiseEpsilon)) / (stats.nVisits + (rnd.nextGaussian() * params.noiseEpsilon));
                         break;
                     case TotalVisits:
-                        totValue = stats.nVisits + (rnd.nextGaussian() * params.noiseEpsilon) ;
+                        totValue = stats.nVisits + (rnd.nextGaussian() * params.noiseEpsilon);
                 }
                 if (totValue > bestValue) {
                     bestValue = totValue;

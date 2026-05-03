@@ -182,6 +182,12 @@ public class MultiTreeNode extends SingleTreeNode {
         return roots[decisionPlayer].bestAction();
     }
 
+    @Override
+    public double getValue(AbstractAction action) {
+        // delegate to the root for the decision player
+        return roots[decisionPlayer].getValue(action);
+    }
+
     public SingleTreeNode getRoot(int player) {
         return roots[player];
     }

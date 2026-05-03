@@ -2,13 +2,17 @@ package players.observers;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.actions.AbstractAction;
 
 public class UnderdogAdviser implements IAdviceFilter {
+
     @Override
-    public boolean advise(AbstractGameState state, AbstractPlayer player) {
-        // TODO: We need to determine if they are behind.
-        // We need a heuristic to estimate this....which could be a full oracle searh, but I'm happier for the moment if we just
-        // make this a prelearned heuristic.
-        return false;
+    public boolean payAttention(AbstractGameState state, AbstractAction proposedAction, AbstractPlayer advisee) {
+        return false; // TODO
+    }
+
+    @Override
+    public boolean provideAdvice(AbstractGameState state, AbstractAction proposedAction, AbstractPlayer advisee, AbstractAction advice, GameAdviser adviser) {
+        return false; // TODO
     }
 }

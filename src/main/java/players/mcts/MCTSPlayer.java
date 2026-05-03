@@ -306,6 +306,14 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         return lastAction.b.copy();
     }
 
+    public double getValue(AbstractAction action) {
+        if (root.actionValues.containsKey(action)) {
+            return root.actionValues.get(action).valueOf(getPlayerID());
+        } else {
+            throw new IllegalArgumentException("Unknown action: " + action);
+        }
+    }
+
     @Override
     public void finalizePlayer(AbstractGameState state) {
         getParameters().getRolloutStrategy().onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
