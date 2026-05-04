@@ -483,8 +483,9 @@ public class Game {
             // Resolve action and game rules, time it
             s = System.nanoTime();
             if (overrideAction != null) {
+                currentPlayer.overrideAction(action, overrideAction);
                 action = overrideAction;
-                System.out.println("Overriding action with " + overrideAction);
+               // System.out.println("Overriding action with " + overrideAction);
                 overrideAction = null;
             }
             // we copy the action before using it...so that the action returned by oneAction() does not have a state link

@@ -90,7 +90,13 @@ public abstract class AbstractPlayer {
      * @param model
      */
     public void setForwardModel(AbstractForwardModel model) {
-        this.forwardModel = model;
+        // For consistency we only include Decorators specified with this player
+        // This complements the logic in getForwardModel
+        if (model instanceof DecoratedForwardModel decoratedModel) {
+            this.forwardModel = decoratedModel.wrappedFM;
+        } else {
+            this.forwardModel = model;
+        }
     }
     /**
      * Retrieves the forward model for current game being played.
@@ -144,6 +150,14 @@ public abstract class AbstractPlayer {
      */
     public abstract AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions);
 
+    /**
+     * overrideAction is called in the main Game loop if the action chosen by the agent (via _getAction)
+     * is overridden for any reason (usually because an adviser intervenes)
+     * This enables the agent to update its internal state (if any)
+     */
+    public void overrideAction(AbstractAction originalAction, AbstractAction override) {
+        // do nothing...purely for overriding in sub-classes
+    }
     /* Methods that can be implemented in subclass */
 
     /**

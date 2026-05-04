@@ -302,16 +302,20 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
         if (root.children.size() > 3 * actions.size() && !(root instanceof MCGSNode) && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
-        lastAction = new Pair<>(gameState.getCurrentPlayer(), root.bestAction());
+        lastAction = Pair.of(gameState.getCurrentPlayer(), root.bestAction());
         return lastAction.b.copy();
     }
 
-    public double getValue(AbstractAction action) {
-        if (root.actionValues.containsKey(action)) {
-            return root.actionValues.get(action).valueOf(getPlayerID());
-        } else {
-            throw new IllegalArgumentException("Unknown action: " + action);
+    @Override
+    public void overrideAction(AbstractAction originalAction, AbstractAction override) {
+        if (!lastAction.b.equals(originalAction)) {
+            throw new IllegalArgumentException("Original action does not match the last action taken" + lastAction.b + " vs " + originalAction);
         }
+        lastAction = Pair.of(lastAction.a, override.copy());
+    }
+
+    public double getValue(AbstractAction action) {
+        return root.getValue(action);
     }
 
     @Override

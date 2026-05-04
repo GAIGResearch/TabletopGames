@@ -78,7 +78,7 @@ public class GameAdviserTest {
     @Test
     public void testSetOutputDirectory() {
         AbstractPlayer adviserPlayer = new RandomPlayer();
-        IAdviceFilter filter = new UnderdogAdviser();
+        IAdviceFilter filter = new UnderdogAdviser((state, p) -> 0, 0.5, 0.5); // Dummy filter that doesn't actually advise
         GameAdviser adviser = new GameAdviser(adviserPlayer, filter, "test.txt");
         
         adviser.setOutputDirectory("testDir1", "testDir2");

@@ -6,12 +6,14 @@ import core.actions.AbstractAction;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import org.jetbrains.annotations.NotNull;
+import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import utilities.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class GameAdviser implements IGameListener {
 
@@ -35,6 +37,9 @@ public class GameAdviser implements IGameListener {
      */
     public GameAdviser(@NotNull AbstractPlayer player, @NotNull IAdviceFilter filter) {
         this(player, filter, null);
+    }
+    public GameAdviser(@NotNull MCTSParams params, @NotNull IAdviceFilter filter, String fileName) {
+        this(new MCTSPlayer(params), filter, fileName);
     }
 
     public GameAdviser(@NotNull AbstractPlayer player, @NotNull IAdviceFilter filter, String fileName) {
@@ -61,10 +66,17 @@ public class GameAdviser implements IGameListener {
         int actingPlayerID = event.state.getCurrentPlayer();
         AbstractPlayer actingPlayer = game.getPlayers().get(actingPlayerID);
         if (event.type == Event.GameEvent.ACTION_CHOSEN && filter.payAttention(event.state, event.action, actingPlayer)) {
-            AbstractAction action = player.getAction(event.state, event.actions);
-            if (filter.provideAdvice(event.state, event.action, actingPlayer, action, this)) {
-                game.setOverrideAction(action);
-                logIntervention(event, action, actingPlayer);
+            player.setPlayerID(actingPlayer.getPlayerID());
+            player.setForwardModel(actingPlayer.getForwardModel());
+            List<AbstractAction> adviserActions = player.getForwardModel().computeAvailableActions(event.state);
+            if (adviserActions.size() > 1 && adviserActions.contains(event.action)) {
+                // only advise if we have more than one option
+                // and if the action they plan on taking is one we recognise
+                AbstractAction action = player.getAction(event.state, event.actions);
+                if (filter.provideAdvice(event.state, event.action, actingPlayer, action, this)) {
+                    game.setOverrideAction(action);
+                    logIntervention(event, action, actingPlayer);
+                }
             }
         }
     }

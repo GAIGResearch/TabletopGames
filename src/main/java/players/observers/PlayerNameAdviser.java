@@ -3,12 +3,10 @@ package players.observers;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import players.mcts.MCTSPlayer;
 
-public class PlayerNameAdviser implements IAdviceFilter {
+public class PlayerNameAdviser extends AbstractMCTSAdviser {
 
     public final String playerName;
-    protected double adviceThreshold;
 
     /**
      * Will advise a player that matches on playerName, if we think our recommendation
@@ -18,8 +16,8 @@ public class PlayerNameAdviser implements IAdviceFilter {
      * @param adviceThreshold threshold for advice to be given (value of proposed action over their action)
      */
     public PlayerNameAdviser(String playerName, double adviceThreshold) {
+        super(adviceThreshold);
         this.playerName = playerName;
-        this.adviceThreshold = adviceThreshold;
     }
 
     @Override
@@ -27,15 +25,4 @@ public class PlayerNameAdviser implements IAdviceFilter {
         return advisee.toString().equals(playerName);
     }
 
-    @Override
-    public boolean provideAdvice(AbstractGameState state, AbstractAction proposedAction, AbstractPlayer advisee,
-                                 AbstractAction advice, GameAdviser adviser) {
-        if (adviser.player instanceof MCTSPlayer mctsPlayer) {
-            double valueOfProposedAction = mctsPlayer.getValue(proposedAction);
-            double valueOfOurAction = mctsPlayer.getValue(advice);
-            return valueOfOurAction - valueOfProposedAction > adviceThreshold;
-        } else {
-            throw new AssertionError("PlayerNameAdviser only supports MCTS players");
-        }
-    }
 }
