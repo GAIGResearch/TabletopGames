@@ -48,6 +48,7 @@ public class LoadDice extends AbstractAction {
             // reset pdf
             state.setDicePdf(die, originalPDF);
         }
+        state.incrementCheatCount(state.getCurrentPlayer());
 
         // then check for cheating detection
         if (rnd.nextDouble() < detectionChance) {

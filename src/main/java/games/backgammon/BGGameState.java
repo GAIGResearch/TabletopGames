@@ -48,6 +48,8 @@ public class BGGameState extends AbstractGameState {
 
     protected List<Token> movedThisTurn;
 
+    protected int[] loadedDiceUsages;
+
     public BGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
@@ -191,6 +193,14 @@ public class BGGameState extends AbstractGameState {
         dice[dieIndex] = new Dice(newPDF);
     }
 
+    public int getCheatCount(int playerId) {
+        return loadedDiceUsages[playerId];
+    }
+
+    public void incrementCheatCount(int playerId) {
+        loadedDiceUsages[playerId]++;
+    }
+
     public void useDiceValue(int dieValue) {
         for (int i = 0; i < availableDiceValues.length; i++) {
             if (!diceUsed[i] && availableDiceValues[i] == dieValue) {
@@ -273,6 +283,7 @@ public class BGGameState extends AbstractGameState {
         }
         copy.playerTrackMapping = playerTrackMapping; // this is immutable, so we can just copy the reference
         copy.movedThisTurn = new ArrayList<>(movedThisTurn);
+        copy.loadedDiceUsages = Arrays.copyOf(loadedDiceUsages, loadedDiceUsages.length);
         return copy;
     }
 

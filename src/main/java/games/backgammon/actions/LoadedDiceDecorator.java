@@ -21,14 +21,21 @@ public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
     final List<double[]> pdfs;
     final boolean permanentChange;
     double detectionChance;
+    final boolean incrementalDetectionChance;
     final boolean randomiseDetectionChance;
     // currently we only load the first die (the second/third will not be changed)
 
     public LoadedDiceDecorator(int sides, double[] probabilities, boolean permanentChange, double chance) {
+        this(sides, probabilities, permanentChange, false, chance);
+    }
+
+
+    public LoadedDiceDecorator(int sides, double[] probabilities, boolean permanentChange, boolean incremental, double chance) {
         pdfs = new ArrayList<>(probabilities.length / sides);
         this.randomiseDetectionChance = chance < 0.0;
         this.permanentChange = permanentChange;
         this.detectionChance = chance;
+        this.incrementalDetectionChance = incremental;
         int nDice = probabilities.length / sides;
         for (int i = 0; i < nDice; i++) {
             double[] pdf = new double[sides];
@@ -45,6 +52,7 @@ public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
         int sides = json.get("sides") != null ? ((Long) json.get("sides")).intValue() : 6; // default to 6 sides if not specified
         List<Double> probabilities = (List<Double>) json.get("probabilities");
         detectionChance = json.get("detectionChance") != null ? (Double) json.get("detectionChance") : 0.0;
+        incrementalDetectionChance = json.get("incrementalDetectionChance") != null ? (Boolean) json.get("incrementalDetectionChance") : false;
         randomiseDetectionChance = detectionChance < 0.0;
         MAX_DETECTION_CHANCE = json.get("maxDetectionChance") != null ? (Double) json.get("maxDetectionChance") : MAX_DETECTION_CHANCE;
         permanentChange = json.get("isPermanent") != null ? (Boolean) json.get("isPermanent") : false; // default to false if not specified
@@ -83,6 +91,7 @@ public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
         }
         json.put("probabilities", probabilities);
         json.put("isPermanent", permanentChange);
+        json.put("incrementalDetectionChance", incrementalDetectionChance);
         json.put("detectionChance", randomiseDetectionChance ? -1.0 : detectionChance);
         if (MAX_DETECTION_CHANCE != 0.10)
             json.put("maxDetectionChance", MAX_DETECTION_CHANCE);
@@ -119,14 +128,18 @@ public class LoadedDiceDecorator implements IPlayerDecorator, IToJSON {
         if (state.getGamePhase() == BGGamePhase.RollDice) {
             List<AbstractAction> newPossibleActions = new ArrayList<>();
             BGGameState bgs = (BGGameState) state;
+            // chance of detection - the cheatCount tells us how many times the player has already loaded the dice
+            double localDetectionChance = incrementalDetectionChance ?
+                    detectionChance * (bgs.getCheatCount(state.getCurrentPlayer()) + 1) :
+                    detectionChance;
             double[] currentPDF = bgs.getDicePdf(0);
             for (double[] pdf : pdfs) {
                 if (pdfsAreRoughlyEqual(currentPDF, pdf))
                     continue; // skip the current pdf, as this is already in use
                 if (permanentChange) {
-                    newPossibleActions.add(LoadDice.getPermanentShift(0, pdf, detectionChance));
+                    newPossibleActions.add(LoadDice.getPermanentShift(0, pdf, localDetectionChance));
                 } else {
-                    newPossibleActions.add(LoadDice.getOneOffShift(0, pdf, detectionChance));
+                    newPossibleActions.add(LoadDice.getOneOffShift(0, pdf, localDetectionChance));
                 }
             }
             List<AbstractAction> allActions = new ArrayList<>(possibleActions);

@@ -25,7 +25,7 @@ public class AutomatedFeatureRangeCalculations {
     @Test
     public void testSimpleBucketing() {
         // details 0, 0, 0, 1, 1, 2, 2, 2, 3, 10, 12
-        asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/SimpleBucketData.txt");
+        asf.processData("tmp.txt", 100, true, "src/test/java/evaluation/features/SimpleBucketData.txt");
         // now check correct buckets
         assertEquals(3, asf.getBuckets(estateIndex));
         assertEquals(4, asf.names().length);
@@ -40,7 +40,7 @@ public class AutomatedFeatureRangeCalculations {
     @Test
     public void testComplexBucketingI() {
         // details 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 10, 12, 20
-        asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/ComplexBucketData_1.txt");
+        asf.processData("tmp.txt", 100, true, "src/test/java/evaluation/features/ComplexBucketData_1.txt");
         assertEquals(3, asf.getBuckets(estateIndex));
         assertEquals(4, asf.names().length);
         assertEquals(Pair.of(Double.NEGATIVE_INFINITY, 1.0), asf.getColumnDetails().get(1).range());
@@ -51,7 +51,7 @@ public class AutomatedFeatureRangeCalculations {
     @Test
     public void testComplexBucketingII() {
         // in which the break occurs after the large number of identical values
-        asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/ComplexBucketData_2.txt");
+        asf.processData("tmp.txt", 100, true, "src/test/java/evaluation/features/ComplexBucketData_2.txt");
         assertEquals(3, asf.getBuckets(estateIndex));
         assertEquals(4, asf.names().length);
         assertEquals(Pair.of(Double.NEGATIVE_INFINITY, 1.0), asf.getColumnDetails().get(1).range());
@@ -62,7 +62,7 @@ public class AutomatedFeatureRangeCalculations {
     @Test
     public void testComplexBucketingIII() {
         // in which the break occurs before the large number of identical values
-        asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/ComplexBucketData_3.txt");
+        asf.processData("tmp.txt", 100, true, "src/test/java/evaluation/features/ComplexBucketData_3.txt");
         assertEquals(3, asf.getBuckets(estateIndex));
         assertEquals(4, asf.names().length);
         assertEquals(Pair.of(Double.NEGATIVE_INFINITY, 6.0), asf.getColumnDetails().get(1).range());
@@ -73,7 +73,7 @@ public class AutomatedFeatureRangeCalculations {
     @Test
     public void testComplexBucketingIV() {
         // in which we have a large number of items at one extreme
-        asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/ComplexBucketData_4.txt");
+        asf.processData("tmp.txt", 100, true, "src/test/java/evaluation/features/ComplexBucketData_4.txt");
         assertEquals(2, asf.getBuckets(estateIndex));
         assertEquals(3, asf.names().length);
         assertEquals(Pair.of(Double.NEGATIVE_INFINITY, 6.0), asf.getColumnDetails().get(1).range());
@@ -84,7 +84,7 @@ public class AutomatedFeatureRangeCalculations {
     public void testComplexBucketingV() {
         // in which we have a large number of items at one extreme
         asf.setBuckets(estateIndex, 7);
-        asf.processData("tmp.txt", 100, "src/test/java/evaluation/features/ComplexBucketData_4.txt");
+        asf.processData("tmp.txt", 100, true, "src/test/java/evaluation/features/ComplexBucketData_4.txt");
         assertEquals(3, asf.getBuckets(estateIndex));
         assertEquals(4, asf.names().length);
         assertEquals(Pair.of(Double.NEGATIVE_INFINITY, 5.0), asf.getColumnDetails().get(1).range());
