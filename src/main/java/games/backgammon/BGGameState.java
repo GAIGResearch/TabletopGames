@@ -361,18 +361,4 @@ public class BGGameState extends AbstractGameState implements IToJSON {
         return BGStateJSON.toJSON(this);
     }
 
-    protected void setAbstractFields(int round, int turn, int tick, int gameID) {
-        this.roundCounter = round;
-        this.turnCounter = turn;
-        try {
-            java.lang.reflect.Field f = core.AbstractGameState.class.getDeclaredField("tick");
-            f.setAccessible(true);
-            f.set(this, tick);
-            java.lang.reflect.Field f2 = core.AbstractGameState.class.getDeclaredField("gameID");
-            f2.setAccessible(true);
-            f2.set(this, gameID);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

@@ -11,9 +11,12 @@ import core.interfaces.IGameEvent;
 import core.interfaces.IGamePhase;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
 import utilities.Pair;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -21,6 +24,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static core.CoreConstants.GameResult.*;
+import static evaluation.optimisation.TunableParameters.loadFromJSON;
 
 /**
  * Contains all game state information.
@@ -35,7 +39,7 @@ import static core.CoreConstants.GameResult.*;
 public abstract class AbstractGameState {
 
     // Parameters, forward model and turn order for the game
-    protected final AbstractParameters gameParameters;
+    protected AbstractParameters gameParameters;
     // Game being played
     protected final GameType gameType = _getGameType();
     private Area allComponents;
@@ -712,6 +716,63 @@ public abstract class AbstractGameState {
                 Objects.hash(firstPlayer),
                 Arrays.hashCode(playerResults)
         };
+    }
+
+    public JSONObject abstractGameStateToJSON() {
+        if (!actionsInProgress.isEmpty())
+            throw new IllegalStateException("Cannot yet serialize game state with ongoing actions");
+        JSONObject json = new JSONObject();
+        json.put("gameStatus", gameStatus.name());
+        if (gamePhase instanceof Enum) {
+            json.put("gamePhase", ((Enum<?>) gamePhase).name());
+        } else if (gamePhase != null) {
+            json.put("gamePhase", gamePhase.toString());
+        }
+        json.put("turnOwner", turnOwner);
+        json.put("turnCounter", turnCounter);
+        json.put("roundCounter", roundCounter);
+        json.put("gameTick", tick);
+        json.put("firstPlayer", firstPlayer);
+        json.put("gameID", gameID);
+        json.put("nPlayers", nPlayers);
+        if (gameParameters instanceof TunableParameters tunableParameters) {
+            json.put("gameParams", tunableParameters.instanceToJSON(true, new HashMap<>()));
+        }
+
+        JSONArray playerResultsJson = new JSONArray();
+        for (CoreConstants.GameResult res : playerResults) {
+            playerResultsJson.add(res.name());
+        }
+        json.put("playerResults", playerResultsJson);
+        return json;
+    }
+
+    public void loadAbstractGameStateFromJSON(JSONObject json) {
+        this.gameStatus = CoreConstants.GameResult.valueOf((String) json.get("gameStatus"));
+        this.turnOwner = ((Number) json.get("turnOwner")).intValue();
+        this.turnCounter = ((Number) json.get("turnCounter")).intValue();
+        this.roundCounter = ((Number) json.get("roundCounter")).intValue();
+        this.tick = ((Number) json.get("gameTick")).intValue();
+        this.firstPlayer = ((Number) json.get("firstPlayer")).intValue();
+        this.gameID = json.containsKey("gameID") ? ((Number) json.get("gameID")).intValue() : -1;
+        this.nPlayers = ((Number) json.get("nPlayers")).intValue();
+        if (json.containsKey("gameParams")) {  // We only support serialization of tunable parameters (otherwise we just pick up the defaults)
+            this.gameParameters = loadFromJSON((TunableParameters<?>) getGameParameters(), (JSONObject) json.get("gameParams"));
+        }
+
+        JSONArray playerResultsJson = (JSONArray) json.get("playerResults");
+        for (int i = 0; i < playerResultsJson.size(); i++) {
+            this.playerResults[i] = CoreConstants.GameResult.valueOf((String) playerResultsJson.get(i));
+        }
+
+        String phaseStr = (String) json.get("gamePhase");
+        if (phaseStr != null) {
+            try {
+                this.gamePhase = CoreConstants.DefaultGamePhase.valueOf(phaseStr);
+            } catch (Exception e) {
+                // Ignore, maybe subclass will handle it
+            }
+        }
     }
 
     public boolean isGameOver() {

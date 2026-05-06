@@ -8,50 +8,29 @@ import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import utilities.JSONUtils;
 import java.util.*;
 
 public class BGStateJSON {
 
-    public static BGGameState fromJSON(JSONObject json) {
-        BGGameState retValue = new BGGameState(
-                TunableParameters.loadFromJSON(new BGParameters(), (JSONObject) json.get("gameParams")),
-                ((Number) json.get("nPlayers")).intValue());
-        loadFromJSON(retValue, json);
-        return retValue;
-    }
-
     public static void loadFromJSON(BGGameState state, JSONObject json) {
         try {
-            state.setGameStatus(CoreConstants.GameResult.valueOf((String) json.get("gameStatus")));
-            String phaseStr = (String) json.get("gamePhase");
+            JSONObject abstractGS = (JSONObject) json.get("abstractGameState");
+            state.loadAbstractGameStateFromJSON(abstractGS);
+            String phaseStr = (String) abstractGS.get("gamePhase");
             try {
                 state.setGamePhase(BGGamePhase.valueOf(phaseStr));
             } catch (Exception e) {
-                state.setGamePhase(CoreConstants.DefaultGamePhase.valueOf(phaseStr));
+                // If this fails, then it was either DefaultGamePhase (already handled) or something else
             }
-            state.setFirstPlayer(((Number) json.get("firstPlayer")).intValue());
-            state.setTurnOwner(((Number) json.get("turnOwner")).intValue());
-            state.setAbstractFields(
-                    ((Number) json.get("roundCounter")).intValue(),
-                    ((Number) json.get("turnCounter")).intValue(),
-                    ((Number) json.get("gameTick")).intValue(),
-                    json.containsKey("gameID") ? ((Number) json.get("gameID")).intValue() : -1
-            );
         } catch (Exception e) {
             throw e;
         }
 
-        JSONArray playerResults = (JSONArray) json.get("playerResults");
-        for (int i = 0; i < playerResults.size(); i++) {
-            String resStr = (String) playerResults.get(i);
-            CoreConstants.GameResult res = CoreConstants.GameResult.valueOf(resStr);
-            state.setPlayerResult(res, i);
-        }
-
-        state.piecesBorneOff = intArrayFromJSON((JSONArray) json.get("piecesBorneOff"));
-        state.blots = intArrayFromJSON((JSONArray) json.get("blots"));
-        state.diceUsed = booleanArrayFromJSON((JSONArray) json.get("diceUsed"));
-        state.availableDiceValues = intArrayFromJSON((JSONArray) json.get("availableDiceValues"));
+        state.piecesBorneOff = JSONUtils.intArrayFromJSON((JSONArray) json.get("piecesBorneOff"));
+        state.blots = JSONUtils.intArrayFromJSON((JSONArray) json.get("blots"));
+        state.diceUsed = JSONUtils.booleanArrayFromJSON((JSONArray) json.get("diceUsed"));
+        state.availableDiceValues = JSONUtils.intArrayFromJSON((JSONArray) json.get("availableDiceValues"));
 
         JSONArray diceArray = (JSONArray) json.get("dice");
         state.dice = new Dice[diceArray.size()];
@@ -98,37 +77,19 @@ public class BGStateJSON {
             }
         }
 
-        state.playerTrackMapping = intMatrixFromJSON((JSONArray) json.get("playerTrackMapping"));
+        state.playerTrackMapping = JSONUtils.intMatrixFromJSON((JSONArray) json.get("playerTrackMapping"));
     }
 
     public static JSONObject toJSON(BGGameState state) {
         JSONObject json = new JSONObject();
         json.put("gameParams", ((TunableParameters)state.getGameParameters()).instanceToJSON(false, new HashMap<>()));
-        json.put("nPlayers", state.getNPlayers());
 
-        json.put("gameStatus", state.getGameStatus().name());
-        if (state.getGamePhase() instanceof Enum) {
-            json.put("gamePhase", ((Enum) state.getGamePhase()).name());
-        } else {
-            json.put("gamePhase", state.getGamePhase().toString());
-        }
-        json.put("turnOwner", state.getTurnOwner());
-        json.put("turnCounter", state.getTurnCounter());
-        json.put("roundCounter", state.getRoundCounter());
-        json.put("gameTick", state.getGameTick());
-        json.put("firstPlayer", state.getFirstPlayer());
-        json.put("gameID", state.getGameID());
+        json.put("abstractGameState", state.abstractGameStateToJSON());
 
-        JSONArray playerResults = new JSONArray();
-        for (CoreConstants.GameResult res : state.getPlayerResults()) {
-            playerResults.add(res.name());
-        }
-        json.put("playerResults", playerResults);
-
-        json.put("piecesBorneOff", intArrayToJSON(state.piecesBorneOff));
-        json.put("blots", intArrayToJSON(state.blots));
-        json.put("diceUsed", booleanArrayToJSON(state.diceUsed));
-        json.put("availableDiceValues", intArrayToJSON(state.availableDiceValues));
+        json.put("piecesBorneOff", JSONUtils.intArrayToJSON(state.piecesBorneOff));
+        json.put("blots", JSONUtils.intArrayToJSON(state.blots));
+        json.put("diceUsed", JSONUtils.booleanArrayToJSON(state.diceUsed));
+        json.put("availableDiceValues", JSONUtils.intArrayToJSON(state.availableDiceValues));
 
         JSONArray dice = new JSONArray();
         for (Dice d : state.dice) {
@@ -166,7 +127,7 @@ public class BGStateJSON {
             movedThisTurn.add(t.getComponentID());
         }
         json.put("movedThisTurn", movedThisTurn);
-        json.put("playerTrackMapping", intMatrixToJSON(state.playerTrackMapping));
+        json.put("playerTrackMapping", JSONUtils.intMatrixToJSON(state.playerTrackMapping));
 
         return json;
     }
@@ -179,50 +140,5 @@ public class BGStateJSON {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private static JSONArray intArrayToJSON(int[] array) {
-        JSONArray res = new JSONArray();
-        if (array != null) {
-            for (int i : array) res.add(i);
-        }
-        return res;
-    }
-
-    private static int[] intArrayFromJSON(JSONArray array) {
-        if (array == null) return null;
-        int[] res = new int[array.size()];
-        for (int i = 0; i < array.size(); i++) res[i] = ((Number) array.get(i)).intValue();
-        return res;
-    }
-
-    private static JSONArray booleanArrayToJSON(boolean[] array) {
-        JSONArray res = new JSONArray();
-        if (array != null) {
-            for (boolean b : array) res.add(b);
-        }
-        return res;
-    }
-
-    private static boolean[] booleanArrayFromJSON(JSONArray array) {
-        if (array == null) return null;
-        boolean[] res = new boolean[array.size()];
-        for (int i = 0; i < array.size(); i++) res[i] = (boolean) array.get(i);
-        return res;
-    }
-
-    private static JSONArray intMatrixToJSON(int[][] matrix) {
-        JSONArray res = new JSONArray();
-        if (matrix != null) {
-            for (int[] row : matrix) res.add(intArrayToJSON(row));
-        }
-        return res;
-    }
-
-    private static int[][] intMatrixFromJSON(JSONArray array) {
-        if (array == null) return null;
-        int[][] res = new int[array.size()][];
-        for (int i = 0; i < array.size(); i++) res[i] = intArrayFromJSON((JSONArray) array.get(i));
-        return res;
     }
 }
