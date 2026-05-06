@@ -3,11 +3,14 @@ package games.backgammon;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
+import core.interfaces.IToJSON;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
+import org.json.simple.JSONObject;
 
 import java.util.*;
 
-public class BGGameState extends AbstractGameState {
+public class BGGameState extends AbstractGameState implements IToJSON {
 
 //    Backgammon involves moving 15 checkers around a board, aiming to be the first to "bear off" (remove) all your pieces before your opponent. Players move their pieces based on dice rolls, and a key strategy involves hitting opponent's pieces (blots) to send them to the bar, forcing them to re-enter the game.
 //    Here's a more detailed breakdown of the rules:
@@ -52,6 +55,13 @@ public class BGGameState extends AbstractGameState {
         super(gameParameters, nPlayers);
     }
 
+    public BGGameState(JSONObject jsonObject) {
+        this(TunableParameters.loadFromJSON(new BGParameters(), (JSONObject) jsonObject.get("gameParams")),
+                ((Number) jsonObject.get("nPlayers")).intValue());
+        reset();
+        BGStateJSON.loadFromJSON(this, jsonObject);
+    }
+
     /**
      * @return the enum value corresponding to this game, declared in {@link GameType}.
      */
@@ -69,9 +79,10 @@ public class BGGameState extends AbstractGameState {
     @Override
     protected List<Component> _getAllComponents() {
         List<Component> components = new ArrayList<>();
-        for (int playerId = 0; playerId < getNPlayers(); playerId++) {
-            components.addAll(counters.get(playerId));
+        for (List<Token> counter : counters) {
+            components.addAll(counter);
         }
+        components.addAll(Arrays.asList(dice));
         return components;
     }
 
@@ -345,4 +356,23 @@ public class BGGameState extends AbstractGameState {
                 super.hashCode();
     }
 
+    @Override
+    public JSONObject toJSON() {
+        return BGStateJSON.toJSON(this);
+    }
+
+    protected void setAbstractFields(int round, int turn, int tick, int gameID) {
+        this.roundCounter = round;
+        this.turnCounter = turn;
+        try {
+            java.lang.reflect.Field f = core.AbstractGameState.class.getDeclaredField("tick");
+            f.setAccessible(true);
+            f.set(this, tick);
+            java.lang.reflect.Field f2 = core.AbstractGameState.class.getDeclaredField("gameID");
+            f2.setAccessible(true);
+            f2.set(this, gameID);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

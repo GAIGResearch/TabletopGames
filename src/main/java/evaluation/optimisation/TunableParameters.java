@@ -60,7 +60,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
      * Instantiate parameters from a JSONObject
      */
     @SuppressWarnings("unchecked")
-    public static void loadFromJSON(TunableParameters<?> params, JSONObject rawData) {
+    public static TunableParameters<?> loadFromJSON(TunableParameters<?> params, JSONObject rawData) {
         List<String> allParams = params.getParameterNames();
 
         // Static parameter, load from json and exclude from tuning
@@ -93,6 +93,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
             }
         }
+        return params;
     }
 
     private Class<?> getParameterType(String pName) {

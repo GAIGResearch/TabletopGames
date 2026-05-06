@@ -2,8 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.interfaces.IExtendedSequence;
-import core.interfaces.IPrintable;
+import core.interfaces.*;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
@@ -29,8 +28,7 @@ import players.rmhc.RMHCPlayer;
 import players.simple.FirstActionPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
-import utilities.Pair;
-import utilities.Utils;
+import utilities.*;
 
 import javax.swing.Timer;
 import javax.swing.*;
@@ -487,6 +485,10 @@ public class Game {
                 action = overrideAction;
                // System.out.println("Overriding action with " + overrideAction);
                 overrideAction = null;
+            }
+            if (action.saveGame() && gameState instanceof IToJSON serialisableGameState) {
+                String filename = String.format("%s_G%d_P%d_Tick%d.json", gameType, gameState.getGameID(), activePlayer, gameState.getGameTick());
+                JSONUtils.writeJSON(serialisableGameState.toJSON(), filename);
             }
             // we copy the action before using it...so that the action returned by oneAction() does not have a state link
             forwardModel.next(gameState, action.copy());
