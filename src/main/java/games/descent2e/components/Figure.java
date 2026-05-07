@@ -370,11 +370,11 @@ public class Figure extends Token {
     }
 
     public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
-        if (!ignoreKeys.contains("id")) {
-            this.componentName = (String) figure.get("id");
+        if (figure.containsKey("name") && !ignoreKeys.contains("name")) {
+            this.componentName = (String) figure.get("name");
         }
-        if (!ignoreKeys.contains("type")) {
-            this.tokenType = (String) ((JSONArray) figure.get("type")).get(1);
+        if (figure.containsKey("tokenType") && !ignoreKeys.contains("tokenType")) {
+            this.tokenType = (String) figure.get("tokenType");
         }
         // TODO: custom load of figure properties
         parseComponent(this, figure, ignoreKeys);

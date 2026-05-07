@@ -2,8 +2,8 @@
   {
     "monster-sources": "https://descent2e.fandom.com/wiki/Monster",
 
-    "id": "Goblin Archer",
-    "type": ["String", "Monster"],
+    "name": "Goblin Archer",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [2, 3, 4]],
     "traits": ["String[]", ["Building", "Cave"]],
     "size": ["String", "1x1"],
@@ -53,8 +53,8 @@
   },
 
   {
-    "id": "Barghest",
-    "type": ["String", "Monster"],
+    "name": "Barghest",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [1, 2, 3]],
     "traits": ["String[]", ["Wilderness", "Dark"]],
     "size": ["String", "1x2"],
@@ -108,8 +108,8 @@
   },
 
   {
-    "id": "Zombie",
-    "type": ["String", "Monster"],
+    "name": "Zombie",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [2, 3, 4]],
     "traits": ["String[]", ["Cursed", "Building"]],
     "size": ["String", "1x1"],
@@ -161,8 +161,8 @@
   },
 
   {
-    "id": "Cave Spider",
-    "type": ["String", "Monster"],
+    "name": "Cave Spider",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [2, 3, 4]],
     "traits": ["String[]", ["Wilderness", "Cave"]],
     "size": ["String", "1x1"],
@@ -212,8 +212,8 @@
   },
 
   {
-    "id": "Flesh Moulder",
-    "type": ["String", "Monster"],
+    "name": "Flesh Moulder",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [1, 2, 3]],
     "traits": ["String[]", ["Cursed", "Civilised"]],
     "size": ["String", "1x1"],
@@ -265,8 +265,8 @@
   },
 
   {
-    "id": "Ettin",
-    "type": ["String", "Monster"],
+    "name": "Ettin",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [1, 0, 1]],
     "traits": ["String[]", ["Mountain", "Cave"]],
     "size": ["String", "2x2"],
@@ -318,8 +318,8 @@
   },
 
   {
-    "id": "Elemental",
-    "type": ["String", "Monster"],
+    "name": "Elemental",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [1, 0, 1]],
     "traits": ["String[]", ["Cold", "Hot"]],
     "size": ["String", "2x2"],
@@ -369,8 +369,8 @@
   },
 
   {
-    "id": "Merriod",
-    "type": ["String", "Monster"],
+    "name": "Merriod",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [1, 0, 1]],
     "traits": ["String[]", ["Wilderness", "Water"]],
     "size": ["String", "2x2"],
@@ -420,8 +420,8 @@
   },
 
   {
-    "id": "Shadow Dragon",
-    "type": ["String", "Monster"],
+    "name": "Shadow Dragon",
+    "tokenType": "Monster",
     "setup": ["Integer[]", [1, 0, 1]],
     "traits": ["String[]", ["Dark", "Cave"]],
     "size": ["String", "2x3"],

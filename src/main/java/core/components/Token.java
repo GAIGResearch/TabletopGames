@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import core.CoreConstants;
+import core.interfaces.IToJSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -12,7 +13,7 @@ import org.json.simple.parser.ParseException;
 
 import java.util.List;
 
-public class Token extends Component {
+public class Token extends Component implements IToJSON {
     protected String tokenType;
 
     public Token(String name){
@@ -80,8 +81,18 @@ public class Token extends Component {
      * @param token - JSON to parse into Token object.
      */
     protected void loadToken(JSONObject token) {
-        this.tokenType = (String) ( (JSONArray) token.get("type")).get(1);
-        this.componentName = (String) token.get("id");
+        if (token.containsKey("tokenType")) {
+            this.tokenType = (String) token.get("tokenType");
+        }
+
+        if (token.containsKey("name")) {
+            this.componentName = (String) token.get("name");
+        }
+
+        if (token.containsKey("ownerId")) {
+            this.ownerId = ((Number) token.get("ownerId")).intValue();
+        }
+
         parseComponent(this, token);
     }
 
@@ -93,5 +104,26 @@ public class Token extends Component {
     @Override
     public String toString() {
         return tokenType;
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject tJSON = new JSONObject();
+        tJSON.put("name", componentName);
+        tJSON.put("ownerId", ownerId);
+        tJSON.put("id", componentID);
+        tJSON.put("tokenType", tokenType);
+        return tJSON;
+    }
+
+    public static Token loadFromJSON(JSONObject tJSON) {
+        Token t;
+        if (tJSON.containsKey("id") && tJSON.get("id") instanceof Number) {
+            t = new Token("", ((Number) tJSON.get("id")).intValue());
+        } else {
+            t = new Token("");
+        }
+        t.loadToken(tJSON);
+        return t;
     }
 }

@@ -309,19 +309,19 @@ public class DescentGameData extends AbstractGameData {
             for (Object o : data) {
                 JSONObject obj = (JSONObject) o;
 
-                String key = (String) obj.get("id");
+                String key = (String) obj.get("name");
                 Monster superT = new Monster();
                 HashSet<String> ignoreKeys = new HashSet<String>(){{
                     add("act1");
                     add("act2");
-                    add("id");
+                    add("name");
                 }};
 
                 superT.loadFigure(obj, ignoreKeys);
 
                 ignoreKeys.clear();
-                ignoreKeys.add("type");
-                ignoreKeys.add("id");
+                ignoreKeys.add("tokenType");
+                ignoreKeys.add("name");
 
                 HashMap<String, Monster> monsterDef = new HashMap<>();
                 Monster act1m = new Monster();

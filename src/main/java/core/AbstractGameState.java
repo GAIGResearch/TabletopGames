@@ -38,39 +38,72 @@ import static evaluation.optimisation.TunableParameters.loadFromJSON;
  */
 public abstract class AbstractGameState {
 
-    // Parameters, forward model and turn order for the game
-    protected AbstractParameters gameParameters;
+
+    /**
+     * The following fields are serializable into JSON with abstractGameStateToJSON.
+     * They are then populated on reconstruction from JSON with loadAbstractGameStateFromJSON.
+     *
+     * GameParameters are only fully supported in serialization/deserialization if they extend TunableParameters
+     * (which is the only case in which they can be easily changed from their default values)
+     */
     // Game being played
-    protected final GameType gameType = _getGameType();
-    private Area allComponents;
+    protected final GameType gameType = _getGameType(); // not re-loaded, but serialized as read-only
 
     // Game tick, number of iterations of game loop
     private int tick = 0;
-
-    // Migrated from TurnOrder...may move later
     protected int roundCounter, turnCounter, turnOwner, firstPlayer;
     protected int nPlayers;
     protected int nTeams;
-    protected List<IGameListener> listeners = new ArrayList<>();
-
-    // Timers for all players
-    protected ElapsedCpuChessTimer[] playerTimer;
-
-    // A record of all actions taken to reach this game state
-    // The history is stored as a list of pairs, where the first element is the player who took the action
-    // this is in chronological order
-    private List<Pair<Integer, AbstractAction>> history = new ArrayList<>();
-    private List<String> historyText = new ArrayList<>();
+    private int gameID;
 
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
     protected CoreConstants.GameResult gameStatus;
     protected CoreConstants.GameResult[] playerResults;
+
+    // Parameters, forward model and turn order for the game
+    protected AbstractParameters gameParameters;
+
+    /**
+     * The fields below are NOT serialized / re-loaded
+     *
+     * allComponents is built from _getAllComponents() when the state is initialised
+     * history/historyText are omitted to save space, and they are intended to provide an audit trail for debugging, and no functionality should ever be based on them
+     *
+     * gamePhase needs to be serialized/reloaded, but that has to be done currently in the child implementation
+     *                  as we have no means of knowing the class to instantiate
+     *
+     * actionsInProgress could be serialized, but that requires the game implementation to support this for all ExtendedSequence implementations
+     *                  for the moment TAGG will throw an error if serialization is attempted with any active actions on the stack
+     *
+     *  coreGameParameters deals with competition disqualification and non-standard action spaces. If could be serialized straightforwardly if needed
+     *                  but for the moment any reload will just pick up the defaults
+     *
+     *  gameListeners and playerTimers are also not considered part of the 'real' game state, much like CoreParameters. If these are
+     *                  important then they will need to be set up post reload
+     *
+     *  random number generators are excluded deliberately. Any future need to rerun a game multiple times with the same seed is not currently supported (but would not be difficult)
+     */
     // Current game phase
     protected IGamePhase gamePhase;
+
+    private Area allComponents;
+    protected List<IGameListener> listeners = new ArrayList<>();
+
+    // A record of all actions taken to reach this game state
+    // The history is stored as a list of pairs, where the first element is the player who took the action
+    // this is in chronological order
+    // DO NOT implement game functionality that relies on history or historyText. If there is important state that the game depends on,
+    // then implement it as a separate field. These history fields are intended for auditing/debugging and should not be used for game logic.
+    private List<Pair<Integer, AbstractAction>> history = new ArrayList<>();
+    private List<String> historyText = new ArrayList<>();
+
     // Stack for extended actions
     Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
-    private int gameID;
+
+    // Timers for all players
+    protected ElapsedCpuChessTimer[] playerTimer;
+
     // rnd is used for all random number generation in the game - for events within the game
     protected Random rnd;
     // redeterminisationRnd is used for redeterminisation only - this is to ensure that the main game is not affected
@@ -718,10 +751,16 @@ public abstract class AbstractGameState {
         };
     }
 
+    /**
+     * This converts all fields within AbstractGameState to a JSON object.
+     * An extension of AbstractGameState that implements IToJSON (and hence is serializable), calls this
+     * method to create one JSON moiety in the serialized game state.
+     */
     public JSONObject abstractGameStateToJSON() {
-        if (!actionsInProgress.isEmpty())
+        if (isActionInProgress())
             throw new IllegalStateException("Cannot yet serialize game state with ongoing actions");
         JSONObject json = new JSONObject();
+        json.put("gameType", gameType.name());  // for info
         json.put("gameStatus", gameStatus.name());
         if (gamePhase instanceof Enum) {
             json.put("gamePhase", ((Enum<?>) gamePhase).name());
@@ -735,6 +774,7 @@ public abstract class AbstractGameState {
         json.put("firstPlayer", firstPlayer);
         json.put("gameID", gameID);
         json.put("nPlayers", nPlayers);
+        json.put("nTeams", nTeams);
         if (gameParameters instanceof TunableParameters tunableParameters) {
             json.put("gameParams", tunableParameters.instanceToJSON(true, new HashMap<>()));
         }
@@ -747,7 +787,12 @@ public abstract class AbstractGameState {
         return json;
     }
 
+    /**
+     * This is the obverse of abstractGameStateToJSON. It takes a JSON object created by that method
+     * and uses it to populate the fields of this AbstractGameState instance.
+     */
     public void loadAbstractGameStateFromJSON(JSONObject json) {
+
         this.gameStatus = CoreConstants.GameResult.valueOf((String) json.get("gameStatus"));
         this.turnOwner = ((Number) json.get("turnOwner")).intValue();
         this.turnCounter = ((Number) json.get("turnCounter")).intValue();
@@ -756,6 +801,8 @@ public abstract class AbstractGameState {
         this.firstPlayer = ((Number) json.get("firstPlayer")).intValue();
         this.gameID = json.containsKey("gameID") ? ((Number) json.get("gameID")).intValue() : -1;
         this.nPlayers = ((Number) json.get("nPlayers")).intValue();
+        this.nTeams = ((Number) json.get("nTeams")).intValue();
+
         if (json.containsKey("gameParams")) {  // We only support serialization of tunable parameters (otherwise we just pick up the defaults)
             this.gameParameters = loadFromJSON((TunableParameters<?>) getGameParameters(), (JSONObject) json.get("gameParams"));
         }
@@ -770,7 +817,7 @@ public abstract class AbstractGameState {
             try {
                 this.gamePhase = CoreConstants.DefaultGamePhase.valueOf(phaseStr);
             } catch (Exception e) {
-                // Ignore, maybe subclass will handle it
+                // Ignore, subclass is expected to handle this
             }
         }
     }

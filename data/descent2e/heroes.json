@@ -1,7 +1,7 @@
 [
   {
-    "id": "Widow Tarha",
-    "type": ["String", "Hero"],
+    "name": "Widow Tarha",
+    "tokenType": "Hero",
     "archetype": ["String", "Mage"],
     "MovePoints": ["Integer", 4],
     "Health": ["Integer", 10],
@@ -17,8 +17,8 @@
     "quote": ["String", "\"I have nothing left to lose. Yet, there is so much more power for me to gain.\""]
   },
   {
-    "id": "Leoric of the Book",
-    "type": ["String", "Hero"],
+    "name": "Leoric of the Book",
+    "tokenType": "Hero",
     "archetype": ["String", "Mage"],
     "MovePoints": ["Integer", 4],
     "Health": ["Integer", 8],
@@ -34,8 +34,8 @@
     "quote": ["String", "\"If my years of study have taught me anything, it is that I am worthy of the knowledge I possess.\""]
   },
   {
-    "id": "Avric Albright",
-    "type": ["String", "Hero"],
+    "name": "Avric Albright",
+    "tokenType": "Hero",
     "archetype": ["String", "Healer"],
     "MovePoints": ["Integer", 4],
     "Health": ["Integer", 12],
@@ -51,8 +51,8 @@
     "quote": ["String", "\"I pledge myself to those in need. I will be their shield, their light in the darkness.\""]
   },
   {
-    "id": "Ashrian",
-    "type": ["String", "Hero"],
+    "name": "Ashrian",
+    "tokenType": "Hero",
     "archetype": ["String", "Healer"],
     "MovePoints": ["Integer", 5],
     "Health": ["Integer", 10],
@@ -68,8 +68,8 @@
     "quote": ["String", "\"I no more understand why I can hear the spirits speak than I understand why you cannot.\""]
   },
   {
-    "id": "Syndrael",
-    "type": ["String", "Hero"],
+    "name": "Syndrael",
+    "tokenType": "Hero",
     "archetype": ["String", "Warrior"],
     "MovePoints": ["Integer", 4],
     "Health": ["Integer", 12],
@@ -85,8 +85,8 @@
     "quote": ["String", "\"You swear undying loyalty, yet you are mortal. What can you know of commitment?\""]
   },
   {
-    "id": "Grisban the Thirsty",
-    "type": ["String", "Hero"],
+    "name": "Grisban the Thirsty",
+    "tokenType": "Hero",
     "archetype": ["String", "Warrior"],
     "MovePoints": ["Integer", 3],
     "Health": ["Integer", 14],
@@ -102,8 +102,8 @@
     "quote": ["String", "\"All this killing is thirsty work. Drink with me!\""]
   },
   {
-    "id": "Tomble Burrowell",
-    "type": ["String", "Hero"],
+    "name": "Tomble Burrowell",
+    "tokenType": "Hero",
     "archetype": ["String", "Scout"],
     "MovePoints": ["Integer", 4],
     "Health": ["Integer", 8],
@@ -119,8 +119,8 @@
     "quote": ["String", "\"Don't think of this as you being robbed. Instead, think of it as you donating to a worthy cause.\""]
   },
   {
-    "id": "Jain Fairwood",
-    "type": ["String", "Hero"],
+    "name": "Jain Fairwood",
+    "tokenType": "Hero",
     "archetype": ["String", "Scout"],
     "MovePoints": ["Integer", 5],
     "Health": ["Integer", 8],
