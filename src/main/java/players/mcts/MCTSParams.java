@@ -44,9 +44,9 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.Strategies oppModelType = MCTSEnums.Strategies.DEFAULT;  // Default is to use the same as rolloutType
     public String rolloutClass, oppModelClass = "";
     public AbstractPlayer rolloutPolicy;
-    public ITunableParameters rolloutPolicyParams;
+    public ITunableParameters<? extends AbstractPlayer> rolloutPolicyParams;
     public AbstractPlayer opponentModel;
-    public ITunableParameters opponentModelParams;
+    public ITunableParameters<? extends AbstractPlayer> opponentModelParams;
     public double exploreEpsilon = 0.1;
     public int omaVisits = 30;
     public boolean normaliseRewards = true;  // This will automatically normalise rewards to be in the range [0,1]
@@ -77,6 +77,8 @@ public class MCTSParams extends PlayerParameters {
     public Class<?> instantiationClass;
     public int numDeterminizations = 1;
     public MCTSEnums.PerfectInformationPolicy perfectInformationPolicy = AverageValue;
+    double DDAGameThreshold = 1_000_000.0; // If our projected result is higher than this, then we play badly
+    double DDAMoveThreshold = 0.0; // When playing badly, we will take actions up to this amount less than the best action
 
     public MCTSParams() {
         addTunableParameter("K", 1.0, Arrays.asList(0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0));
@@ -128,6 +130,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("instantiationClass", "players.mcts.MCTSPlayer");
         addTunableParameter("perfectInformationPolicy", AverageValue, Arrays.asList(MCTSEnums.PerfectInformationPolicy.values()));
         addTunableParameter("numDeterminizations", 1, Arrays.asList(1, 10, 30, 100, 300, 1000));
+        addTunableParameter("DDAGameThreshold", 1_000_000.0);
+        addTunableParameter("DDAMoveThreshold", 0.0);
     }
 
     @Override
@@ -178,7 +182,7 @@ public class MCTSParams extends PlayerParameters {
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
         MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");
-        rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
+        rolloutPolicyParams = (TunableParameters<AbstractPlayer>) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
         // we then null those elements of params which are constructed (lazily) from the above
         firstPlayUrgency = (double) getParameterValue("FPU");
@@ -214,6 +218,8 @@ public class MCTSParams extends PlayerParameters {
         if (numDeterminizations > 1) {
             budget = budget / numDeterminizations;
         }
+        DDAGameThreshold = (double) getParameterValue("DDAGameThreshold");
+        DDAMoveThreshold = (double) getParameterValue("DDAMoveThreshold");
     }
 
     @Override
@@ -227,12 +233,12 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer getOpponentModel() {
         if (opponentModel == null) {
             if (oppModelType == PARAMS)
-                opponentModel = (AbstractPlayer) opponentModelParams.instantiate();
+                opponentModel = opponentModelParams.instantiate();
             else if (oppModelType == MCTSEnums.Strategies.DEFAULT)
                 opponentModel = getRolloutStrategy();
             else
                 opponentModel = constructStrategy(oppModelType, oppModelClass);
-            opponentModel.getParameters().actionSpace = actionSpace;  // TODO makes sense?
+            opponentModel.getParameters().actionSpace = actionSpace;
         }
         return opponentModel;
     }
@@ -247,11 +253,11 @@ public class MCTSParams extends PlayerParameters {
                 if (rolloutPolicyParams == null) {
                     throw new AssertionError("Rollout policy parameters have not been set");
                 }
-                rolloutPolicy = (AbstractPlayer) rolloutPolicyParams.instantiate();
+                rolloutPolicy = rolloutPolicyParams.instantiate();
             } else {
                 rolloutPolicy = constructStrategy(rolloutType, rolloutClass);
             }
-            rolloutPolicy.getParameters().actionSpace = actionSpace;  // TODO makes sense?
+            rolloutPolicy.getParameters().actionSpace = actionSpace;
         }
         return rolloutPolicy;
     }

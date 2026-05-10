@@ -8,6 +8,7 @@ import utilities.*;
 
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -1166,13 +1167,6 @@ public class SingleTreeNode {
         double bestValue = -Double.MAX_VALUE;
         AbstractAction bestAction = null;
 
-        MCTSEnums.SelectionPolicy policy = params.selectionPolicy;
-        // check to see if all nodes have the same number of visits
-        // if they do, then we use average score instead
-        if (params.selectionPolicy == ROBUST &&
-                Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
-            policy = SIMPLE;
-        }
         if (params.treePolicy == EXP3) {
             // EXP3 uses the tree policy (without exploration)
             bestAction = treePolicyAction(false);
@@ -1193,6 +1187,7 @@ public class SingleTreeNode {
                 // we only consider the ones that are valid in the caller (in MCGS case it is possible that we have a loop round to the root)
                 availableActions = actionsToConsider(forwardModel.computeAvailableActions(state, params.actionSpace));
             }
+            List<Pair<AbstractAction, Double>> tempValues = new ArrayList<>();
             for (AbstractAction action : availableActions) {
                 if (!actionValues.containsKey(action)) {
                     throw new AssertionError("Hashcode / equals contract issue for " + action);
@@ -1201,10 +1196,23 @@ public class SingleTreeNode {
                 // Apply small noise to break ties randomly
                 childValue = noise(childValue, params.noiseEpsilon, rnd.nextDouble());
 
+                tempValues.add(Pair.of(action, childValue));
                 // Save best value
                 if (childValue > bestValue) {
                     bestValue = childValue;
                     bestAction = action;
+                }
+            }
+            // DDA
+            if (params.DDAGameThreshold < bestValue) {
+                // we are in DDA territory. We deliberately take a sub-optimal action if we can
+                tempValues.sort(Comparator.comparing(p -> -p.b));
+                for (Pair<AbstractAction, Double> pair : tempValues) {
+                    if (pair.b > bestValue - params.DDAMoveThreshold ) {
+                        bestAction = pair.a;
+                    } else {
+                        break;  // now in the really poor moves
+                    }
                 }
             }
         }
