@@ -3,6 +3,7 @@ package evaluation.listeners;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
 
@@ -20,6 +21,11 @@ public class StateFeatureListener extends FeatureListener {
 
     public StateFeatureListener(IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly) {
         super(frequency, currentPlayerOnly);
+        this.phiFn = phi;
+    }
+
+    public StateFeatureListener(IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly, IStateHeuristic heuristic) {
+        super(frequency, currentPlayerOnly, heuristic);
         this.phiFn = phi;
     }
 

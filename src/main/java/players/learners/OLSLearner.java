@@ -3,6 +3,8 @@ package players.learners;
 
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
+import org.apache.spark.HeartbeatReceiver;
 import org.apache.spark.ml.feature.RFormula;
 import org.apache.spark.ml.regression.GeneralizedLinearRegression;
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
@@ -22,6 +24,10 @@ public class OLSLearner extends ApacheLearner {
     }
     public OLSLearner(double gamma, double regParam, Target target) {
         this(gamma, regParam, target, null, null);
+    }
+    public OLSLearner(double gamma, double regParam, IStateHeuristic stateHeuristic) {
+        super(gamma, Target.FINAL_HEURISTIC, null, null, stateHeuristic);
+        this.regParam = regParam;
     }
 
     public OLSLearner(Target target, IStateFeatureVector stateFeatureVector) {
@@ -86,6 +92,7 @@ public class OLSLearner extends ApacheLearner {
                         case ORDINAL, ORD_MEAN, ORD_SCALE, ORD_MEAN_SCALE -> new OrdinalPosition();
                         case SCORE -> new PureScoreHeuristic();
                         case SCORE_DELTA -> new LeaderHeuristic();
+                        case HEURISTIC, FINAL_HEURISTIC -> heuristic.orElseThrow(() -> new IllegalStateException("If target is FINAL_HEURISTIC, then a heuristic must be provided"));
                         default -> new WinOnlyHeuristic();
                     });
             retValue.setModel(lrModel);

@@ -31,8 +31,8 @@ public class LoseLongGameHeuristicTest {
         double weightForGameLength = 0.5;
         double lengthComponent = sigmoid((double) (gameTick - minGameLength) / (sigmoidScale * minGameLength)) * weightForGameLength;
         double lossDiff = player1Score - player0Score;
-        int targetLossDiff = 5;
-        double scoreComponent = sigmoid((targetLossDiff - lossDiff) / (sigmoidScale * targetLossDiff));
+        int maxScore = 15;
+        double scoreComponent = sigmoid( - lossDiff / (sigmoidScale * maxScore));
         scoreComponent = (1.0 - Math.abs(scoreComponent - 0.5) * 2) * (1 - weightForGameLength);
         double winPenalty = 0.5;
         double winComponent = isWin ? winPenalty : 0;
@@ -43,7 +43,7 @@ public class LoseLongGameHeuristicTest {
     @Test
     public void gameInProgress_MinLengthGame_ExactDiff() {
         // We have reached the min length (so 0.5 for the length) and are exactly at the target loss diff (so 1.0 for the score).
-        AbstractGameState gs = setupMockState(minGameLength, 5.0, 10.0, CoreConstants.GameResult.GAME_ONGOING, CoreConstants.GameResult.GAME_ONGOING);
+        AbstractGameState gs = setupMockState(minGameLength, 10.0, 10.0, CoreConstants.GameResult.GAME_ONGOING, CoreConstants.GameResult.GAME_ONGOING);
         double expected = 0.75;
         System.out.println("Expected score for min length and exact diff: " + expected);
         assertEquals(expected, heuristic.evaluateState(gs, playerId), 0.0001);

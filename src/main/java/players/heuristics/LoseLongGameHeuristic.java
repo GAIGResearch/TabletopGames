@@ -28,14 +28,14 @@ public class LoseLongGameHeuristic extends TunableParameters<LoseLongGameHeurist
 
     double weightForGameLength = 0.5;
     int minGameLength = 50;
-    int targetLossDiff = 5;
+    int maxScore = 15;
     double winPenalty = 0.5;  // how much to penalise winning (between 0 and 1)
     double sigmoidScale = 0.2;  // how steep the sigmoid functions are (between 0 and 1)
 
     public LoseLongGameHeuristic() {
         addTunableParameter("weightForGameLength", 0.5);
         addTunableParameter("minGameLength", 50);
-        addTunableParameter("targetLossDiff", 5);
+        addTunableParameter("maxScore", 15);
         addTunableParameter("winPenalty", 0.5);
         addTunableParameter("sigmoidScale", 0.2);
     }
@@ -58,8 +58,8 @@ public class LoseLongGameHeuristic extends TunableParameters<LoseLongGameHeurist
             }
         }
         double lossDiff = bestOpponentScore - score;
-        double scoreComponent = sigmoid((targetLossDiff - lossDiff) / (sigmoidScale * targetLossDiff));
-        // at this stage, 0.5 means we are at the target loss diff, which needs to be 1.0, declining in either direction
+        double scoreComponent = sigmoid(( - lossDiff) / (sigmoidScale * maxScore));
+        // at this stage, 0.5 means we have just lost which needs to be 1.0, declining in either direction
         // so we scale
         scoreComponent = (1.0 - Math.abs(scoreComponent - 0.5) * 2) * (1 - weightForGameLength);
 
@@ -73,14 +73,14 @@ public class LoseLongGameHeuristic extends TunableParameters<LoseLongGameHeurist
 
     @Override
     public LoseLongGameHeuristic instantiate() {
-        return this._copy();
+        return this;
     }
 
     @Override
     public void _reset() {
         weightForGameLength = (double) getParameterValue("weightForGameLength");
         minGameLength = (int) getParameterValue("minGameLength");
-        targetLossDiff = (int) getParameterValue("targetLossDiff");
+        maxScore = (int) getParameterValue("maxScore");
         winPenalty = (double) getParameterValue("winPenalty");
         sigmoidScale = (double) getParameterValue("sigmoidScale");
     }
@@ -99,7 +99,7 @@ public class LoseLongGameHeuristic extends TunableParameters<LoseLongGameHeurist
     public String toString() {
         return "LoseLongGameHeuristic with weightForGameLength " + weightForGameLength +
                 ", minGameLength " + minGameLength +
-                ", targetLossDiff " + targetLossDiff +
+                ", maxScore " + maxScore +
                 ", winPenalty " + winPenalty +
                 ", sigmoidScale " + sigmoidScale;
     }
