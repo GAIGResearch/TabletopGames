@@ -2,6 +2,7 @@ package evaluation.listeners;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
@@ -27,10 +28,15 @@ public abstract class FeatureListener implements IGameListener {
     protected double sampleRate = 1.0; // what proportion of events to record
     protected Random rnd = new Random();
     protected boolean recordEndGameState = true;
+    protected IStateHeuristic heuristic;
 
     protected FeatureListener(Event.GameEvent frequency, boolean currentPlayerOnly) {
         this.currentPlayerOnly = currentPlayerOnly;
         this.frequency = frequency;
+    }
+    protected FeatureListener(Event.GameEvent frequency, boolean currentPlayerOnly, IStateHeuristic heuristic) {
+        this(frequency, currentPlayerOnly);
+        this.heuristic = heuristic;
     }
 
     public FeatureListener setLogger(IStatisticLogger logger) {
@@ -44,6 +50,11 @@ public abstract class FeatureListener implements IGameListener {
     public FeatureListener setSampleRate(double rate) {
         if (rate <= 0 || rate > 1.0) throw new IllegalArgumentException("Sample rate must be in the range (0,1]");
         sampleRate = rate;
+        return this;
+    }
+
+    public FeatureListener setStateHeuristic(IStateHeuristic heuristic) {
+        this.heuristic = heuristic;
         return this;
     }
 
@@ -124,6 +135,13 @@ public abstract class FeatureListener implements IGameListener {
             data.put("ActualWin", winLoss[record.player]);
             if (!data.containsKey("Win")) {
                 data.put("Win", winLoss[record.player]);
+            }
+            double heuristicScore = heuristic == null ?
+                    state.getHeuristicScore(record.player) :
+                    heuristic.evaluateState(state, record.player);
+            data.put("Heuristic", heuristicScore);
+            if (!data.containsKey("FinalHeuristic")) {
+                data.put("FinalHeuristic", heuristicScore);
             }
             data.put("ActualOrdinal", ordinal[record.player]);
             if (!data.containsKey("Ordinal")) {

@@ -3,6 +3,7 @@ package players.learners;
 import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -41,6 +42,9 @@ public abstract class ApacheLearner extends AbstractLearner {
     }
     public ApacheLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
         super(gamma, target, stateFeatureVector, actionFeatureVector);
+    }
+    public ApacheLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector, IStateHeuristic heuristic) {
+        super(gamma, target, stateFeatureVector, actionFeatureVector, heuristic);
     }
 
 

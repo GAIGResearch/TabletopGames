@@ -1,7 +1,9 @@
 package players.learners;
 
 import core.interfaces.IActionFeatureVector;
+import core.interfaces.IStateFeatureJSON;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
 import org.apache.spark.ml.feature.RFormula;
 import org.apache.spark.ml.regression.GeneralizedLinearRegression;
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
@@ -44,6 +46,11 @@ public class LogisticLearner extends ApacheLearner {
         this.regParam = regParam;
     }
 
+    public LogisticLearner(double gamma, double regParam, IStateHeuristic heuristic) {
+        super(gamma, Target.FINAL_HEURISTIC, null, null, heuristic);
+        this.regParam = regParam;
+    }
+
     public LogisticLearner(double gamma, double regParam, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
         super(gamma, target, stateFeatureVector, actionFeatureVector);
         this.regParam = regParam;
@@ -77,7 +84,7 @@ public class LogisticLearner extends ApacheLearner {
             System.out.println(lrModel.coefficients());
 
         if (this.actionFeatureVector == null) {
-            LogisticStateHeuristic retValue = new LogisticStateHeuristic(stateFeatureVector, coefficients, new WinOnlyHeuristic());
+            LogisticStateHeuristic retValue = new LogisticStateHeuristic(stateFeatureVector, coefficients, heuristic.orElse(new WinOnlyHeuristic()));
             retValue.setModel(lrModel);
             return retValue;
         } else {

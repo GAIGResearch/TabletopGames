@@ -3,6 +3,7 @@ package players.learners;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -22,6 +23,7 @@ public abstract class AbstractLearner implements ILearner {
     Target targetType;
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
+    Optional<IStateHeuristic> heuristic = Optional.empty();
 
     public enum Target {
         WIN("Win", false),  // 0 or 1 for loss/win
@@ -33,6 +35,8 @@ public abstract class AbstractLearner implements ILearner {
         ORD_MEAN("Ordinal", true),  // as ORDINAL, but discounted to middle of the range based on rounds to final result
         ORD_SCALE("Ordinal", false), // as ORDINAL, but scaled to 0 to 1 (for Logistic regression targeting)
         ORD_MEAN_SCALE("Ordinal", true), // as ORD_MEAN, but scaled to 0 to 1 ( for Logistic regression targeting)
+        HEURISTIC("Heuristic", false), // targets a heuristic value (the heuristic needs to be supplied, with game.getHeuristicScore() being the default)
+        FINAL_HEURISTIC("FinalHeuristic", false), // targets the heuristic value at the end of the game (the heuristic needs to be supplied, with game.getHeuristicScore() being the default)
         ACTION_CHOSEN("CHOSEN", false), // targets the probability of the action taken
         ACTION_VISITS("VISIT_PROPORTION", false),
         ACTION_ADV("ADVANTAGE", false), // targets the advantage of the action taken
@@ -59,16 +63,22 @@ public abstract class AbstractLearner implements ILearner {
     }
 
     public AbstractLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector) {
-        this.gamma = gamma;
-        this.targetType = target;
-        this.stateFeatureVector = stateFeatureVector;
+        this(gamma, target, stateFeatureVector, null, null);
     }
 
     public AbstractLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        this(gamma, target, stateFeatureVector, actionFeatureVector, null);
+    }
+
+    public AbstractLearner(double gamma, Target target,
+                           IStateFeatureVector stateFeatureVector,
+                           IActionFeatureVector actionFeatureVector,
+                           IStateHeuristic stateHeuristic) {
         this.gamma = gamma;
         this.targetType = target;
         this.stateFeatureVector = stateFeatureVector;
         this.actionFeatureVector = actionFeatureVector;
+        this.heuristic = stateHeuristic == null ? Optional.empty() : Optional.of(stateHeuristic);
     }
 
     public AbstractLearner setStateFeatureVector(IStateFeatureVector stateFeatureVector) {
@@ -81,12 +91,21 @@ public abstract class AbstractLearner implements ILearner {
         return this;
     }
 
+    public AbstractLearner setHeuristic(IStateHeuristic heuristic) {
+        this.heuristic = Optional.of(heuristic);
+        return this;
+    }
+
     public IActionFeatureVector getActionFeatureVector() {
         return actionFeatureVector;
     }
 
     public IStateFeatureVector getStateFeatureVector() {
         return stateFeatureVector;
+    }
+
+    public IStateHeuristic getHeuristic() {
+        return heuristic.orElse(null);
     }
 
     public AbstractLearner setGamma(double gamma) {
@@ -113,7 +132,8 @@ public abstract class AbstractLearner implements ILearner {
         String[] specialColumns = {"GameID", "Player", "Turn", "Round", "Tick", "CurrentScore", "Win", "Ordinal",
                 "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks",
                 "ActualWin", "ActualOrdinal", "ActualScore", "ActualScoreAdv",
-                "CHOSEN", "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE", "VISIT_PROPORTION"};
+                "CHOSEN", "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE", "VISIT_PROPORTION",
+                "Heuristic", "FinalHeuristic"};
         Map<String, Integer> indexForSpecialColumns = new HashMap<>();
 
         // then set descriptions to the rest of the data

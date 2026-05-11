@@ -64,16 +64,12 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) visits);
                 records.put("Action", e.action.getString(e.state));
                 if (actionValueEstimates.containsKey(e.action)) {
+                    // Action Taken ad Best Action may not be the same, either due to ROBUST selection, or because of DDA
                     records.put("ActionValue", actionValueEstimates.get(e.action).valueOf(e.playerID));
+                    records.put("BestAction", sortedActions.get(0).getString(e.state));
+                    records.put("BestActionValue", actionValueEstimates.get(sortedActions.get(0)).valueOf(e.playerID));
                     AbstractAction secondAction = sortedActions.get(1); // we know there are at least 2 actions
                     records.put("SecondAction", secondAction.getString(e.state));
-                    if (actionValueEstimates.get(secondAction).valueOf(e.playerID) > 0.00001 + actionValueEstimates.get(e.action).valueOf(e.playerID)) {
-                        System.out.println("Warning: second action has higher value than chosen action" +
-                                String.format(" (%.4f to %.4f)",
-                                        actionValueEstimates.get(secondAction).valueOf(e.playerID),
-                                        actionValueEstimates.get(e.action).valueOf(e.playerID)));
-                        throw new AssertionError("as above");
-                    }
                     records.put("SecondActionValue", actionValueEstimates.get(secondAction).valueOf(e.playerID));
                     // this may just be the same as the best action
                     AbstractAction worstAction = sortedActions.getLast();
@@ -126,6 +122,8 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("maxVisitProportion", Double.class);
             cols.put("Action", String.class);
             cols.put("ActionValue", Double.class);
+            cols.put("BestAction", String.class);
+            cols.put("BestActionValue", Double.class);
             cols.put("SecondAction", String.class);
             cols.put("SecondActionValue", Double.class);
             cols.put("WorstAction", String.class);
