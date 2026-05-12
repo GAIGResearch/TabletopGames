@@ -524,9 +524,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         // for equality we just check parameter names and current values
         return _equals(o)
                 && that.parameterNames.equals(parameterNames)
-          //      && that.possibleValues.equals(possibleValues)
                 && that.currentValues.equals(currentValues);
-          //      && that.defaultValues.equals(defaultValues);
     }
 
     public boolean allParametersAndValuesEqual(TunableParameters other) {

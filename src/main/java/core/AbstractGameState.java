@@ -775,6 +775,9 @@ public abstract class AbstractGameState {
         json.put("gameID", gameID);
         json.put("nPlayers", nPlayers);
         json.put("nTeams", nTeams);
+        if (gameParameters instanceof TunableParameters tunableParameters) {
+            json.put("gameParams", tunableParameters.instanceToJSON(true, new HashMap<>()));
+        }
 
         JSONArray playerResultsJson = new JSONArray();
         for (CoreConstants.GameResult res : playerResults) {

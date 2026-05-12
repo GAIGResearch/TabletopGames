@@ -257,6 +257,11 @@ public class Game {
         resetStats();
     }
 
+    public void reset(AbstractGameState gameState) {
+        this.gameState = gameState;
+        resetStats();
+    }
+
     /**
      * All timers and game tick set to 0.
      */

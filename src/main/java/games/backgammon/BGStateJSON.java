@@ -1,5 +1,6 @@
 package games.backgammon;
 
+import core.AbstractParameters;
 import core.components.Dice;
 import core.components.Token;
 import evaluation.optimisation.TunableParameters;
@@ -61,7 +62,7 @@ public class BGStateJSON {
 
         // this includes parameters and game phase
         json.put("abstractGameState", state.abstractGameStateToJSON());
-        json.put("gameParams", ((BGParameters) state.getGameParameters()).instanceToJSON(true, new HashMap<>()));
+    //    json.put("gameParams", ((TunableParameters<?>) state.getGameParameters()).instanceToJSON(true, new HashMap<>()));
 
         json.put("piecesBorneOff", JSONUtils.intArrayToJSON(state.piecesBorneOff));
         json.put("blots", JSONUtils.intArrayToJSON(state.blots));

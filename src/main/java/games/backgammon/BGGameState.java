@@ -6,6 +6,7 @@ import core.components.*;
 import core.interfaces.IToJSON;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
+import games.XIIScripta.XIIParameters;
 import org.json.simple.JSONObject;
 
 import java.util.*;
@@ -56,9 +57,11 @@ public class BGGameState extends AbstractGameState implements IToJSON {
     }
 
     public BGGameState(JSONObject jsonObject) {
-        this(TunableParameters.loadFromJSON(new BGParameters(), (JSONObject) jsonObject.get("gameParams")),
-                ((Number) (((JSONObject)jsonObject.get("abstractGameState")).get("nPlayers"))).intValue());
+        this(TunableParameters.loadFromJSON(new XIIParameters(), (JSONObject) ((JSONObject) jsonObject.get("abstractGameState")).get("gameParams")),
+                ((Number) (((JSONObject) jsonObject.get("abstractGameState")).get("nPlayers"))).intValue());
         reset();
+        BGForwardModel fm = new BGForwardModel();
+        fm.setup(this);
         BGStateJSON.loadFromJSON(this, jsonObject);
     }
 

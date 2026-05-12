@@ -2,6 +2,8 @@ package games.backgammon;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import games.GameType;
+import games.XIIScripta.XIIParameters;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 import utilities.JSONUtils;
@@ -53,8 +55,8 @@ public class JSONTest {
 
     @Test
     public void testJSONLoadFromFile() throws Exception {
-        BGParameters params = new BGParameters();
-        BGGameState state = new BGGameState(params, 2);
+        BGParameters params = new XIIParameters();
+        BGGameState state = (BGGameState) GameType.XIIScripta.createGameState(params, 2);
         BGForwardModel fm = new BGForwardModel();
         fm.setup(state);
         state.rollDice();
