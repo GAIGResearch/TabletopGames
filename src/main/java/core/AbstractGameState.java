@@ -752,7 +752,7 @@ public abstract class AbstractGameState {
     }
 
     /**
-     * This converts all fields within AbstractGameState to a JSON object.
+     * This converts all fields within AbstractGameState to a JSON object (excpet for GameParameters, which need to be done in the caller).
      * An extension of AbstractGameState that implements IToJSON (and hence is serializable), calls this
      * method to create one JSON moiety in the serialized game state.
      */
@@ -775,9 +775,6 @@ public abstract class AbstractGameState {
         json.put("gameID", gameID);
         json.put("nPlayers", nPlayers);
         json.put("nTeams", nTeams);
-        if (gameParameters instanceof TunableParameters tunableParameters) {
-            json.put("gameParams", tunableParameters.instanceToJSON(true, new HashMap<>()));
-        }
 
         JSONArray playerResultsJson = new JSONArray();
         for (CoreConstants.GameResult res : playerResults) {

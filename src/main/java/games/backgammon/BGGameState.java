@@ -57,7 +57,7 @@ public class BGGameState extends AbstractGameState implements IToJSON {
 
     public BGGameState(JSONObject jsonObject) {
         this(TunableParameters.loadFromJSON(new BGParameters(), (JSONObject) jsonObject.get("gameParams")),
-                ((Number) jsonObject.get("nPlayers")).intValue());
+                ((Number) (((JSONObject)jsonObject.get("abstractGameState")).get("nPlayers"))).intValue());
         reset();
         BGStateJSON.loadFromJSON(this, jsonObject);
     }

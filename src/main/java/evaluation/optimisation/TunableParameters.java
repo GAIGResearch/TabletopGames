@@ -521,11 +521,12 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         if (this == o) return true;
         if (!(o instanceof TunableParameters that)) return false;
         // getRandomSeed() == that.getRandomSeed() && removed, so that equals (and hashcode) covers parameters only
+        // for equality we just check parameter names and current values
         return _equals(o)
                 && that.parameterNames.equals(parameterNames)
-                && that.possibleValues.equals(possibleValues)
-                && that.currentValues.equals(currentValues)
-                && that.defaultValues.equals(defaultValues);
+          //      && that.possibleValues.equals(possibleValues)
+                && that.currentValues.equals(currentValues);
+          //      && that.defaultValues.equals(defaultValues);
     }
 
     public boolean allParametersAndValuesEqual(TunableParameters other) {

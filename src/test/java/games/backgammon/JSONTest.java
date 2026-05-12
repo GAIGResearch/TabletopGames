@@ -4,6 +4,11 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import org.json.simple.JSONObject;
 import org.junit.Test;
+import utilities.JSONUtils;
+
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
 import static org.junit.Assert.*;
 
 public class JSONTest {
@@ -44,5 +49,31 @@ public class JSONTest {
         assertEquals(state.getTurnOwner(), newState.getTurnOwner());
         assertEquals(state.getGameStatus(), newState.getGameStatus());
         assertEquals(state.getGameTick(), newState.getGameTick());
+    }
+
+    @Test
+    public void testJSONLoadFromFile() throws Exception {
+        BGParameters params = new BGParameters();
+        BGGameState state = new BGGameState(params, 2);
+        BGForwardModel fm = new BGForwardModel();
+        fm.setup(state);
+        state.rollDice();
+
+        // Use reflection to call setGameID()
+        java.lang.reflect.Method setGameIDMethod = AbstractGameState.class.getDeclaredMethod("setGameID", int.class);
+        setGameIDMethod.setAccessible(true);
+        setGameIDMethod.invoke(state, 1234);
+
+        state.setFirstPlayer(1);
+        state.setTurnOwner(0);
+        state.setGameStatus(CoreConstants.GameResult.GAME_ONGOING);
+
+        JSONObject json = state.toJSON();
+        JSONUtils.writeJSON(json, "testFile.json");
+
+        BGGameState loadedState = JSONUtils.loadClassFromJSON(json);
+
+        assertEquals(state, loadedState);
+        (new File("testFile.json")).delete();
     }
 }

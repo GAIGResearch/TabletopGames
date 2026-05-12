@@ -2,6 +2,7 @@ package games.backgammon;
 
 import core.components.Dice;
 import core.components.Token;
+import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -56,9 +57,11 @@ public class BGStateJSON {
 
     public static JSONObject toJSON(BGGameState state) {
         JSONObject json = new JSONObject();
+        json.put("class", "games.backgammon.BGGameState");
 
         // this includes parameters and game phase
         json.put("abstractGameState", state.abstractGameStateToJSON());
+        json.put("gameParams", ((BGParameters) state.getGameParameters()).instanceToJSON(true, new HashMap<>()));
 
         json.put("piecesBorneOff", JSONUtils.intArrayToJSON(state.piecesBorneOff));
         json.put("blots", JSONUtils.intArrayToJSON(state.blots));

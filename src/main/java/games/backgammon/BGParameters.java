@@ -81,8 +81,8 @@ public class BGParameters extends TunableParameters<BGParameters> {
 
     @Override
     protected boolean _equals(Object o) {
-        return o instanceof BGParameters && super.equals(o)
-                && ((customDie == null && ((BGParameters) o).customDie == null)
+        return o instanceof BGParameters &&
+                ((customDie == null && ((BGParameters) o).customDie == null)
                 || (customDie != null && customDie.equals(((BGParameters) o).customDie)));
     }
 
