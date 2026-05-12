@@ -772,7 +772,6 @@ public abstract class AbstractGameState {
         json.put("roundCounter", roundCounter);
         json.put("gameTick", tick);
         json.put("firstPlayer", firstPlayer);
-        json.put("gameID", gameID);
         json.put("nPlayers", nPlayers);
         json.put("nTeams", nTeams);
         if (gameParameters instanceof TunableParameters tunableParameters) {
@@ -799,7 +798,6 @@ public abstract class AbstractGameState {
         this.roundCounter = ((Number) json.get("roundCounter")).intValue();
         this.tick = ((Number) json.get("gameTick")).intValue();
         this.firstPlayer = ((Number) json.get("firstPlayer")).intValue();
-        this.gameID = json.containsKey("gameID") ? ((Number) json.get("gameID")).intValue() : -1;
         this.nPlayers = ((Number) json.get("nPlayers")).intValue();
         this.nTeams = ((Number) json.get("nTeams")).intValue();
 

@@ -22,12 +22,7 @@ public class JSONTest {
         BGForwardModel fm = new BGForwardModel();
         fm.setup(state);
         state.rollDice();
-        
-        // Use reflection to call setGameID()
-        java.lang.reflect.Method setGameIDMethod = AbstractGameState.class.getDeclaredMethod("setGameID", int.class);
-        setGameIDMethod.setAccessible(true);
-        setGameIDMethod.invoke(state, 1234);
-        
+
         state.setFirstPlayer(1);
         state.setTurnOwner(0);
         state.setGameStatus(CoreConstants.GameResult.GAME_ONGOING);
@@ -37,7 +32,6 @@ public class JSONTest {
         // Check if abstractGameState key exists
         assertTrue(json.containsKey("abstractGameState"));
         JSONObject abstractGS = (JSONObject) json.get("abstractGameState");
-        assertEquals(1234L, ((Number) abstractGS.get("gameID")).longValue());
         assertEquals(1L, ((Number) abstractGS.get("firstPlayer")).longValue());
         assertEquals(0L, ((Number) abstractGS.get("turnOwner")).longValue());
         

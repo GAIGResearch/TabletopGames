@@ -252,8 +252,6 @@ public class Game {
                 // Allow player to initialize
                 player.initializePlayer(observation);
             }
-        int gameID = idFountain.incrementAndGet();
-        gameState.setGameID(gameID);
         resetStats();
     }
 
@@ -276,6 +274,8 @@ public class Game {
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
         lastPlayer = -1;
+        int gameID = idFountain.incrementAndGet();
+        gameState.setGameID(gameID);
     }
 
     /**
