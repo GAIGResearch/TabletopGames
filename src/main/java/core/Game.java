@@ -33,6 +33,7 @@ import utilities.*;
 import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -486,8 +487,11 @@ public class Game {
                // System.out.println("Overriding action with " + overrideAction);
                 overrideAction = null;
             }
+            // if requested, save a copy of the full undeterminized game state (we do this in the Game loop to avoid passing the real state to agents)
             if (action.saveGame() && gameState instanceof IToJSON serialisableGameState) {
-                String filename = String.format("%s_G%d_P%d_Tick%d.json", gameType, gameState.getGameID(), activePlayer, gameState.getGameTick());
+                String directory = String.format("SavedStates%s%s%sG%d", File.separator, gameType.name(), File.separator, gameState.getGameID());
+                Utils.createDirectory(directory);
+                String filename = String.format("%sP%d_Tick%d.json", directory + File.separator, activePlayer, gameState.getGameTick());
                 JSONUtils.writeJSON(serialisableGameState.toJSON(), filename);
             }
             // we copy the action before using it...so that the action returned by oneAction() does not have a state link

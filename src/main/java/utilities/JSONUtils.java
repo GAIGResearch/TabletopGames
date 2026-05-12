@@ -439,28 +439,10 @@ public class JSONUtils {
             if (value instanceof JSONObject subJSON) {
                 sb.append(prettyPrint(subJSON, tabDepth + 1));
             } else if (value instanceof JSONArray array) {
-                sb.append("[\n");
-                tabDepth++;
-                for (int index = 0; index < array.size(); index++) {
-                    Object v = array.get(index);
-                    sb.append("\t".repeat(Math.max(0, tabDepth)));
-                    if (v instanceof JSONObject subJSON) {
-                        sb.append(prettyPrint(subJSON, tabDepth + 1));
-                    } else if (v instanceof String) {
-                        sb.append("\"").append(v).append("\"");
-                    } else if (v instanceof Long || v instanceof Integer || v instanceof Boolean) {
-                        sb.append(v);
-                    } else if (v instanceof Number n) {
-                        sb.append(String.format("%.3g", n.doubleValue()));
-                    }
-                    if (index < array.size() - 1)
-                        sb.append(",").append("\n");
-                }
-                sb.append("\t".repeat(Math.max(0, tabDepth - 1))).append("]");
-                tabDepth--;
+                sb.append(prettyPrintArray(array, tabDepth + 1));
             } else if (value instanceof IToJSON toJSON) {
                 JSONObject subJSON = toJSON.toJSON();
-                sb.append(prettyPrint(subJSON, tabDepth + 1));
+                sb.append("\n").append(prettyPrint(subJSON, tabDepth + 1));
             } else if (value instanceof String) {
                 sb.append("\"").append(value).append("\"");
             } else if (value instanceof Long || value instanceof Integer ||
@@ -480,6 +462,38 @@ public class JSONUtils {
         }
         sb.append("\t".repeat(Math.max(0, tabDepth - 1)));
         sb.append("}");
+        return sb.toString();
+    }
+
+    // Caller is responsible for adding linefeed/tabs before the start of the array
+    private static String prettyPrintArray(JSONArray array, int tabDepth) {
+        StringBuilder sb = new StringBuilder("[ ");
+        boolean allOnOneLine = true;
+        for (int index = 0; index < array.size(); index++) {
+            Object v = array.get(index);
+            //    sb.append("\t".repeat(Math.max(0, tabDepth)));
+            if (v instanceof JSONObject subJSON) {
+                sb.append("\n").repeat("\t", Math.max(0, tabDepth));
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
+                allOnOneLine = false;
+            } else if (v instanceof JSONArray vArray) {
+                sb.append("\n").repeat("\t", Math.max(0, tabDepth));
+                sb.append(prettyPrintArray(vArray, tabDepth + 1));
+                allOnOneLine = false;
+            } else if (v instanceof String) {
+                sb.append("\"").append(v).append("\"");
+            } else if (v instanceof Long || v instanceof Integer || v instanceof Boolean) {
+                sb.append(v);
+            } else if (v instanceof Number n) {
+                sb.append(String.format("%.3g", n.doubleValue()));
+            }
+            if (index < array.size() - 1)
+                sb.append(", ");
+        }
+        if (allOnOneLine)
+            sb.append(" ]");
+        else
+            sb.append("\n").repeat("\t", Math.max(0, tabDepth - 1)).append(" ]");
         return sb.toString();
     }
 

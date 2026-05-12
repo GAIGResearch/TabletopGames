@@ -81,4 +81,8 @@ public abstract class AbstractAction implements IPrintable {
     public boolean saveGame() {
         return saveGameBeforeAction;
     }
+
+    public void setSaveGame(boolean saveGame) {
+        this.saveGameBeforeAction = saveGame;
+    }
 }

@@ -1210,6 +1210,7 @@ public class SingleTreeNode {
                 for (Pair<AbstractAction, Double> pair : tempValues) {
                     if (pair.b > bestValue - params.DDAMoveThreshold ) {
                         bestAction = pair.a;
+                        bestAction.setSaveGame(true);
                     } else {
                         break;  // now in the really poor moves
                     }

@@ -73,6 +73,7 @@ public class GameAdviser implements IGameListener {
                 // only advise if we have more than one option
                 // and if the action they plan on taking is one we recognise
                 AbstractAction action = player.getAction(event.state, event.actions);
+                action.setSaveGame(true);
                 if (filter.provideAdvice(event.state, event.action, actingPlayer, action, this)) {
                     game.setOverrideAction(action);
                     logIntervention(event, action, actingPlayer);
