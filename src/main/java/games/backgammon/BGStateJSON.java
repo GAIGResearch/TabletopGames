@@ -2,8 +2,6 @@ package games.backgammon;
 
 import core.components.Dice;
 import core.components.Token;
-import core.components.Component;
-import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
