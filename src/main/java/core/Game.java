@@ -354,7 +354,7 @@ public class Game {
 
 
 
-    public final SimultaneousAction SimultaneousAction() {
+    private SimultaneousAction simultaneousAction() {
         List<Integer> activePlayers = gameState.getCurrentSimultaneousPlayers();
         Map<Integer, AbstractAction> playerActions = new HashMap<>();
 
@@ -388,7 +388,7 @@ public class Game {
 
 
 
-
+/*
     public final AbstractAction oneAction() {
 
         // we pause before each action is taken if running with a delay (e.g. for video recording with random players)
@@ -411,7 +411,7 @@ public class Game {
 
         // This handles the simultaneous actions keeping the single player logic the same
         if (gameState.getCurrentSimultaneousPlayers().size() > 1) {
-            return SimultaneousAction();
+            return simultaneousAction();
         }
 
         // Get player observation, and time how long it takes

@@ -8,6 +8,7 @@ import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("unchecked")
 public class SGGameState extends AbstractGameState {
@@ -36,6 +37,19 @@ public class SGGameState extends AbstractGameState {
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
+
+/// /////////////////////////////////////////////////////////////////////////
+
+
+    @Override
+    public List<Integer> getCurrentSimultaneousPlayers() {
+        return IntStream.range(0, getNPlayers())
+                .boxed()
+                .toList();
+    }
+
+
+/// /////////////////////////////////////////////////////////////////////////
 
     @Override
     protected GameType _getGameType() {

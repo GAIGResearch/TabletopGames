@@ -3,6 +3,7 @@ package core;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
+import core.actions.SimultaneousAction;
 import core.interfaces.IPlayerDecorator;
 import utilities.ActionTreeNode;
 import utilities.ElapsedCpuChessTimer;
@@ -23,7 +24,7 @@ public abstract class AbstractForwardModel {
     }
 
     /**
-     * Combines both super class and sub class setup methods. Called from the game loop.
+     * Combines both super class and subclass setup methods. Called from the game loop.
      *
      * @param firstState - initial state.
      */
@@ -129,7 +130,10 @@ public abstract class AbstractForwardModel {
      *
      * @param currentState - current game state, to be modified by the action.
      * @param action       - action requested to be played by a player.
-     */
+     *
+     *
+
+
     public final void next(AbstractGameState currentState, AbstractAction action) {
         if (action != null) {
             int player = currentState.getCurrentPlayer();
@@ -143,6 +147,45 @@ public abstract class AbstractForwardModel {
         }
         currentState.advanceGameTick();
     }
+    */
+
+
+
+    public final void next(AbstractGameState currentState, AbstractAction action) {
+        if (action != null) {
+
+            if (action instanceof SimultaneousAction sa) {
+
+                for (Map.Entry<Integer, AbstractAction> entry : sa.getPlayerActions().entrySet()) {
+                    currentState.recordAction(entry.getValue(), entry.getKey());
+                }
+
+            } else {
+
+                int player = currentState.getCurrentPlayer();
+                currentState.recordAction(action, player);
+
+            }
+
+            _next(currentState, action);
+
+        } else {
+
+            if (currentState.coreGameParameters.verbose) {
+                System.out.println("Invalid action.");
+            }
+
+            illegalActionPlayed(currentState, action);
+        }
+
+        currentState.advanceGameTick();
+    }
+
+
+
+
+
+
 
     /**
      * Computes the available actions and updates the game state accordingly.
