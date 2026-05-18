@@ -234,7 +234,11 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
             }
         }
         if (!foundPointInHistory) {
-            throw new AssertionError("Unable to find matching action in history : " + lastExpected);
+            String message = String.format("Agent: %s, P%d unable to find matching action in history : %s%n%t%t%b:%s%d%n%s", this, rootPlayer, lastExpected,
+                    params.reuseTree, params.opponentTreePolicy, params.maxTreeDepth,
+                    history.reversed().stream().limit(20).map(p -> String.format("%d:%s", p.a, p.b)).collect(Collectors.joining("\n\t\t")));
+            System.out.println(message);
+            throw new AssertionError(message);
         }
         if (debug)
             System.out.println("\tBacktracking complete : " + (newRoot == null ? "no matching node found" : "node found"));
