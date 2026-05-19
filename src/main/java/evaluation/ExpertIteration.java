@@ -25,8 +25,11 @@ import players.mcts.MCTSExpertIterationListener;
 import players.mcts.MCTSPlayer;
 import utilities.Pair;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -47,9 +50,11 @@ public class ExpertIteration {
     IActionFeatureVector actionFeatureVector;
     FeatureListener stateListener, actionListener;
     int nPlayers, matchups, iterations, iter, bicMultiplier, bicTimer, expertTime, maxRecords;
-    double sampleRate;
+    double stateSampleRate, actionSampleRate;
+    double baselineStateSampleRate, baselineActionSampleRate;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
+    int[] stateRowsPerIteration, actionRowsPerIteration;
     boolean useRounds, useStateInAction;
     String prefix = "EI";
     AbstractPlayer bestAgent = null;
@@ -67,6 +72,8 @@ public class ExpertIteration {
     int[] actionSearchSettings;
     ITPSearchSpace<?> valueSearchSpace = null;
     ITPSearchSpace<?> actionSearchSpace = null;
+    ActionTarget actionTarget;
+    ValueTarget valueTarget;
 
     public enum ValueTarget {Base, MCTS, Rollout, None}
 
@@ -89,14 +96,20 @@ public class ExpertIteration {
         gameToPlay = GameType.valueOf((String) config.get(RunArg.game));
         bicMultiplier = (int) config.get(RunArg.bicMultiplier);
         bicTimer = (int) config.get(RunArg.bicTimer);
-        sampleRate = (double) config.get(RunArg.sampleRate);
+        baselineActionSampleRate = (double) config.get(RunArg.sampleRate);
+        baselineStateSampleRate = (double) config.get(RunArg.sampleRate);
+        stateSampleRate = baselineStateSampleRate;
+        actionSampleRate = baselineActionSampleRate;
         expertTime = (int) config.get(RunArg.expertTime);
         maxRecords = (int) config.get(RunArg.maxRecords);
 
         params = AbstractParameters.createFromFile(gameToPlay, (String) config.get(RunArg.gameParams));
 
-        actionDataFilesByIteration = new String[iterations];
-        stateDataFilesByIteration = new String[iterations];
+        int totalExpertIterations = (int) config.get(RunArg.expertIterations);
+        actionRowsPerIteration = new int[totalExpertIterations];
+        stateRowsPerIteration = new int[totalExpertIterations];
+        stateDataFilesByIteration = new String[totalExpertIterations];
+        actionDataFilesByIteration = new String[totalExpertIterations];
 
         if (!config.get(RunArg.stateLearner).equals("")) {
             String featureDefinition = (String) config.get(RunArg.stateFeatures);
@@ -120,6 +133,11 @@ public class ExpertIteration {
         } else if (actionLearnerFile == null && stateLearnerFile == null) {
             throw new IllegalArgumentException("Must specify at least one learner");
         }
+
+        actionTarget = (ActionTarget) config.get(RunArg.actionTarget);
+        valueTarget = (ValueTarget) config.get(RunArg.valueTarget);
+        if (valueTarget == ValueTarget.None) stateLearnerFile = null;
+        if (actionTarget == ActionTarget.None) actionLearnerFile = null;
     }
 
     public static void main(String[] args) {
@@ -204,15 +222,17 @@ public class ExpertIteration {
                 runningTournamentResults.registerAgent(newPlayer);
             }
 
-            // the above code has loaded all agents....we now cut this down to just the ones that were in the
+            // the above code has loaded all agents...we now cut this down to just the ones that were in the
             // running at the point from which we are reloading
+            List<AbstractPlayer> toRemove =  new ArrayList<>();
             for (AbstractPlayer agent : agents) {
                 if (runningTournamentResults.getPlayerResults(agent.toString()).isEmpty()) {
                     // has already been removed
                     runningTournamentResults.filterPlayer(agent.toString());
-                    agents.remove(agent);
+                    toRemove.add(agent);
                 }
             }
+            agents.removeAll(toRemove);
             // then work out who the current best agent is
             WinRateAnalysis winRateAnalysis = new WinRateAnalysis();
             String bestAgentName = winRateAnalysis.getRanking(runningTournamentResults).firstEntry().getKey();
@@ -254,7 +274,36 @@ public class ExpertIteration {
                         learnTime.a, learnTime.b,
                         tuneTime.a, tuneTime.b
                 );
+
+                // record the amount of data gathered for this iteration
+                int totalStateRecords = getTotalDataSize("state");
+                TrainingMode trainingMode = (TrainingMode) config.get(RunArg.expertTrainingMode);
+                stateRowsPerIteration[iter] = switch (trainingMode) {
+                    case Batch -> totalStateRecords;  // we just have the current set of data
+                    case Exponential -> totalStateRecords - Arrays.stream(stateRowsPerIteration).sum(); // data is gathered incrementally
+                    default -> throw new IllegalArgumentException("Unknown training mode: " + trainingMode);
+                };
+
+                int totalActionRecords = getTotalDataSize("action");
+                actionRowsPerIteration[iter] = switch(trainingMode) {
+                    case Batch -> totalActionRecords;
+                    case Exponential -> totalActionRecords - Arrays.stream(actionRowsPerIteration).sum();
+                    default -> throw new IllegalArgumentException("Unknown training mode: " + trainingMode);
+                };
+
+                // we can now adjust some parameters based on empirical data (data gathered per iteration, and time taken)
+                // generally speaking we want each iteration to generate about 10-15% of the total data
+                // we therefore calculate sample rates for each of value and actions to achieve this
+                stateSampleRate = Math.min(0.05, baselineStateSampleRate * maxRecords / 8.0 / (double) stateRowsPerIteration[iter]);
+                // we do not want to sample more than about 5% of state to avoid over-correlation between samples (not such an issue for actions)
+                actionSampleRate = Math.min(1.0, baselineActionSampleRate * maxRecords / 8.0 / (double) actionRowsPerIteration[iter]);
+                System.out.printf("State records gathered: %d, Action records gathered: %d%n", stateRowsPerIteration[iter], actionRowsPerIteration[iter]);
+                System.out.printf("State sample rate: %.3f, Action sample rate: %.3f\n", stateSampleRate, actionSampleRate);
+
+                //TODO: We also don't want the learning process to take up more than about 1/3rd of the total time. So we adjust
+                // the limit on maxRecords if needed
                 iter++;
+
             }
         } while (!finished);
 
@@ -265,40 +314,21 @@ public class ExpertIteration {
         // where X is a unique identifier for the agent (e.g. its rank in the final tournament)
         // and YY is the alpha rank of the agent in the final tournament.
 
-        ParetoAnalysis paretoAnalysis = new ParetoAnalysis();
-        Map<String, Pair<Double, Double>> paretoRankings = paretoAnalysis.getRanking(runningTournamentResults);
-
-        List<String> firstParetoFront = paretoRankings.entrySet().stream()
-                .filter(e -> e.getValue().a == 1.0)
-                .map(Map.Entry::getKey)
-                .toList();
-
-        AlphaRankAnalysis alphaRankAnalysis = new AlphaRankAnalysis(false);
-        Map<String, Pair<Double, Double>> alphaRankings = alphaRankAnalysis.getRanking(runningTournamentResults);
-        agents.sort(comparingDouble(a -> -alphaRankings.get(a.toString()).a)); // then sort by alpha rank00
-        for (int i = 0; i < agents.size(); i++) {
-            if (firstParetoFront.contains(agents.get(i).toString())) {
-                // only save those agents on the Pareto Front
-                AbstractPlayer agent = agents.get(i);
-                String newFileName = String.format("FinalAgent_R%02d_A%2d.json", i + 1, Math.round(alphaRankings.get(agent.toString()).a * 100.0));
-                String originalFileName;
-                if (agents.get(i).toString().equals(originalOpponentName))
-                    originalFileName = player;
-                else {
-                    // format is XXX_03.json"
-                    int originalIteration = Integer.parseInt(agent.toString().split("_")[1].replaceAll("\\D+", ""));
-                    originalFileName = String.format("%sNTBEA_%02d.json", config.get(RunArg.valueSS).equals("") ? "Action" : "Value", originalIteration);
-                }
-                try {
-                    // we now copy the file for the agent
-                    File oldFile = new File(dataDir + File.separator + originalFileName);
-                    File newFile = new File(dataDir + File.separator + "FinalAgents" + File.separator + newFileName);
-                    FileUtils.copyFile(oldFile, newFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        List<File> agentFiles = new ArrayList<>();
+        for (AbstractPlayer agent : agents) {
+            String originalFileName;
+            if (agent.toString().equals(originalOpponentName))
+                originalFileName = player;
+            else {
+                // format is XXX_03.json"
+                int originalIteration = Integer.parseInt(agent.toString().split("_")[1].replaceAll("\\D+", ""));
+                originalFileName = dataDir + File.separator + String.format("%sNTBEA_%02d.json", config.get(RunArg.valueSS).equals("") ? "Action" : "Value", originalIteration);
             }
+            agentFiles.add(new File(originalFileName));
         }
+
+        AgentArchiver archiver = new AgentArchiver();
+        archiver.archive(runningTournamentResults, agents, agentFiles, dataDir);
     }
 
 
@@ -431,36 +461,14 @@ public class ExpertIteration {
             }
             if (toRemove > 0) {
                 // we now see if there are clusters of agents, and remove the worst agent from the largest cluster
-                List<String> poorClusterPerformers = new ArrayList<>();
+                final List<String> poorClusterPerformers = new ArrayList<>();
                 double[] thresholds = new double[]{0.02, 0.05, 0.1, 0.2};
                 for (double threshold : thresholds) {
-                    Map<String, List<String>> clusters = alphaRankAnalysis.calculateClusters(runningTournamentResults, threshold);
-                    Map<String, List<String>> clustersWithMoreThanOneMember = clusters.keySet().stream()
-                            .filter(cName -> clusters.get(cName).size() > 1)
-                            .collect(Collectors.toMap(c -> c, clusters::get));
-                    if (clustersWithMoreThanOneMember.isEmpty()) {
-                        System.out.printf("No clusters with a threshold of %.2f%n", threshold);
-                        continue; // try next largest thresholds
+                    List<String> identified = alphaRankAnalysis.identifyCloseDuplicates(runningTournamentResults, alphaRankings, threshold);
+                    if (!identified.isEmpty()) {
+                        poorClusterPerformers.addAll(identified);
+                        break;  // we stop once we've found the narrowest clusters
                     }
-
-                    System.out.printf("%d clusters found at threshold of %2f (%s)%n\t",
-                            clustersWithMoreThanOneMember.size(), threshold,
-                            clustersWithMoreThanOneMember.values().stream().map(List::toString).collect(Collectors.joining(", ")));
-                    System.out.println();
-                    // Now we find the poorest performer in each cluster
-                    for (String clusterName : clustersWithMoreThanOneMember.keySet()) {
-                        String poorestPerformer = "";
-                        double performance = Double.POSITIVE_INFINITY;
-                        for (String agent : clustersWithMoreThanOneMember.get(clusterName)) {
-                            double p = alphaRankings.get(agent).a;
-                            if (p < performance) {
-                                performance = p;
-                                poorestPerformer = agent;
-                            }
-                        }
-                        poorClusterPerformers.add(poorestPerformer);
-                    }
-                    break;  // we stop once we've found the narrowest clusters
                 }
                 agents.removeIf(a -> poorClusterPerformers.contains(a.toString()));
                 for (String removed : poorClusterPerformers) {
@@ -481,12 +489,30 @@ public class ExpertIteration {
         return false;
     }
 
+    private int getTotalDataSize(String fileType) {
+        // for all stateLearner files, open them and check their length in rows. Return the total
+        String[] files = switch (fileType) {
+            case "state" -> stateDataFilesByIteration;
+            case "action" -> actionDataFilesByIteration;
+            default -> throw new IllegalArgumentException("Invalid file type: " + fileType);
+        };
+        int totalDataSize = 0;
+        for (String fileName : files) {
+            if (fileName == null || fileName.isEmpty()) continue;
+            try (BufferedReader reader = Files.newBufferedReader(Path.of(fileName))) {
+                while (reader.readLine() != null) {
+                    totalDataSize++;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return totalDataSize;
+    }
+
     private RoundRobinTournament runTournament(List<AbstractPlayer> localAgents, Map<RunArg, Object> runGamesConfig) {
 
-        ActionTarget actionTarget = (ActionTarget) config.get(RunArg.actionTarget);
-        ValueTarget valueTarget = (ValueTarget) config.get(RunArg.valueTarget);
-        if (valueTarget == ValueTarget.None) stateLearnerFile = null;
-        if (actionTarget == ActionTarget.None) actionLearnerFile = null;
+
         boolean allDataAsOne = config.get(RunArg.expertTrainingMode) == TrainingMode.Exponential;
         RoundRobinTournament tournament = new RoundRobinTournament(localAgents, gameToPlay, nPlayers, params, runGamesConfig);
         tournament.setTournamentResults(runningTournamentResults);
@@ -520,7 +546,7 @@ public class ExpertIteration {
             stateDataFilesByIteration[allDataAsOne ? 0 : iter] = dataDir + File.separator + fileName;
             if (stateListener != null) {
                 stateListener = stateListener
-                        .setSampleRate(sampleRate)
+                        .setSampleRate(stateSampleRate)
                         .setLogger(new FileStatsLogger(fileName, "\t", allDataAsOne));
                 stateListener.setOutputDirectory(dataDir);
                 tournament.addListener(stateListener);
@@ -542,6 +568,10 @@ public class ExpertIteration {
                     oracle.setBudget((int) config.get(RunArg.budget) * expertTime);
                     oracle.getParameters().setParameterValue("reuseTree", false); // we only look at occasional actions
                     //       oracle.getParameters().setParameterValue("maxTreeDepth", 1000);
+                    // then in this case we have to shackle the action and state sample rates
+                    double commonRate = Math.min(actionSampleRate, stateSampleRate);
+                    actionSampleRate = commonRate;
+                    stateSampleRate = commonRate;
                     if (((double) oracle.getParameters().getParameterValue("FPU")) < 1000.0)
                         oracle.getParameters().setParameterValue("FPU", 1000.0);
                     if (((double) oracle.getParameters().getParameterValue("K")) < 1.0)
@@ -556,7 +586,7 @@ public class ExpertIteration {
             String fileName = String.format("Action_%s_%02d.txt", prefix, allDataAsOne ? 0 : iter);
             actionListener = actionListener
                     .setLogger(new FileStatsLogger(fileName, "\t", allDataAsOne))
-                    .setSampleRate(sampleRate);
+                    .setSampleRate(actionSampleRate);
             actionListener.setOutputDirectory(dataDir);
 
             tournament.addListener(actionListener);

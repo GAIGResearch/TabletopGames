@@ -53,7 +53,7 @@ public class DecisionTreeLearner extends ApacheLearner {
     public Object learnFromApacheData() {
 
         RFormula formula = new RFormula()
-                .setFormula("target ~ " + String.join(" + ", descriptions))
+                .setFormula("target ~ " + String.join(" + ", sparkDescriptions))
                 .setFeaturesCol("features")
                 .setLabelCol("target");
 
@@ -75,7 +75,7 @@ public class DecisionTreeLearner extends ApacheLearner {
         drModel = dr.fit(training);
 
         if (debug)
-            System.out.println(DecisionTreeActionHeuristic.prettifyDecisionTreeDescription(drModel, descriptions));
+            System.out.println(DecisionTreeActionHeuristic.prettifyDecisionTreeDescription(drModel, sparkDescriptions));
 
         if (this.actionFeatureVector == null) {
             return new DecisionTreeStateHeuristic(stateFeatureVector, drModel, switch (targetType) {

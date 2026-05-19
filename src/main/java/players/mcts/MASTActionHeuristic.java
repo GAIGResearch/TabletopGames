@@ -35,9 +35,15 @@ public class MASTActionHeuristic extends TunableParameters<MASTActionHeuristic> 
         actionKey = (IActionKey) getParameterValue("actionKey");
         defaultValue = (double) getParameterValue("defaultValue");
     }
-    
+
+    @Override
     public void setMASTStats(List<Map<Object, Pair<Integer, Double>>> MASTStatistics) {
         this.MASTStatistics = MASTStatistics;
+    }
+
+    @Override
+    public List<Map<Object, Pair<Integer, Double>>> getMASTStats() {
+        return MASTStatistics;
     }
 
     @Override

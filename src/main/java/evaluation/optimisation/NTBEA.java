@@ -8,6 +8,7 @@ import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import evaluation.optimisation.ntbea.functions.FunctionEvaluator;
 import evaluation.optimisation.ntbea.functions.NTBEAFunction;
+import evaluation.tournaments.AgentArchiver;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import evaluation.optimisation.ntbea.*;
@@ -241,6 +242,17 @@ public class NTBEA {
                 bestResult = params.evalMethod.equals("Ordinal") ?
                         new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
                         new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
+
+                if (params.repeats > 1) {
+                    List<File> agentFiles = new ArrayList<>();
+                    for (int i = 0; i < params.repeats; i++) {
+                        agentFiles.add(new File(params.destDir + File.separator + "Recommended_" + i + ".json"));
+                    }
+                    if (players.size() == agentFiles.size()) {
+                        AgentArchiver archiver = new AgentArchiver();
+                        archiver.archive(tournament.getTournamentResults(), players, agentFiles, params.destDir);
+                    }
+                }
 
                 // We then want to check the win rate against the elite agent (if one was provided)
                 // we only regard an agent as better if it beats the elite agent with about 80% confidence (adjusted for multiple comparisons)

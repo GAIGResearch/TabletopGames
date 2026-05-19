@@ -1,0 +1,7 @@
+{
+	"startOffBoard" : true,
+	"blotRuleActive" : true,
+	"onePieceLimitOffSacredLine" : false,
+	"mustMoveFromSacredLine" : false,
+	"bearOffFromSacredLine" : false
+}

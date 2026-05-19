@@ -1,3 +1,7 @@
 {
-	"kiddsVariant" : true
+	"startOffBoard" : true,
+	"blotRuleActive" : true,
+	"onePieceLimitOffSacredLine" : false,
+	"mustMoveFromSacredLine" : true,
+	"bearOffFromSacredLine" : false
 }

@@ -73,13 +73,13 @@ public abstract class FeatureListener implements IGameListener {
             if (rnd.nextDouble() > sampleRate) {
                 return;
             }
-            processState(event.state, event.action);
+            processState(event.state, event.action, event.actions, event.playerID);
         }
 
         if (event.type == Event.GameEvent.GAME_OVER) {
             // first we record a final state for each player
             if (recordEndGameState)
-                processState(event.state, null);
+                processState(event.state, null, Collections.emptyList(), event.playerID);
 
             // now we can update the result
             writeDataWithStandardHeaders(event.state);
@@ -175,19 +175,21 @@ public abstract class FeatureListener implements IGameListener {
     public void preProcessing(AbstractGameState state, AbstractAction action) {
         // for extension in sub-classes
     }
-    public void processState(AbstractGameState state, AbstractAction action) {
+    public void processState(AbstractGameState state, AbstractAction action, List<AbstractAction> allActions, int currentPlayer) {
         // we record one state for each player after each relevant event occurs
         // we first determine if the data is double[] or Object[]
         preProcessing(state, action);
+        boolean endOfGame = state.isGameOver();
+        if (endOfGame)
+            currentPlayer = state.getCurrentPlayer(); // instead of -1
         boolean isDouble = true;
-        int currentPlayer = state.getCurrentPlayer();
         double[] doubleData = new double[0];
         try {
             doubleData = extractDoubleVector(action, state, currentPlayer);
         } catch (UnsupportedOperationException e) {
             isDouble = false;
         }
-        if (currentPlayerOnly && state.isNotTerminalForPlayer(currentPlayer)) {
+        if (currentPlayerOnly && (endOfGame || state.isNotTerminalForPlayer(currentPlayer))) {
             if (isDouble) {
                 currentData.add(LocalDataWrapper.factory(currentPlayer, doubleData, names(), state, new HashMap<>()));
             } else {
@@ -196,7 +198,7 @@ public abstract class FeatureListener implements IGameListener {
             }
         } else {
             for (int p = 0; p < state.getNPlayers(); p++) {
-                if (state.isNotTerminalForPlayer(p)) {
+                if (endOfGame || state.isNotTerminalForPlayer(p)) {
                     if (isDouble) {
                         double[] phi = p == currentPlayer ? doubleData : extractDoubleVector(action, state, p);
                         currentData.add(LocalDataWrapper.factory(p, phi, names(), state, new HashMap<>()));

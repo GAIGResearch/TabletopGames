@@ -10,6 +10,8 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import players.heuristics.*;
 
+import java.util.Arrays;
+
 public class OLSLearner extends ApacheLearner {
 
     double[] coefficients;
@@ -44,9 +46,8 @@ public class OLSLearner extends ApacheLearner {
 
     @Override
     Object learnFromApacheData() {
-
         RFormula formula = new RFormula()
-                .setFormula("target ~ " + String.join(" + ", descriptions))
+                .setFormula("target ~ " + String.join(" + ", sparkDescriptions))
                 .setFeaturesCol("features")
                 .setLabelCol("target");
 

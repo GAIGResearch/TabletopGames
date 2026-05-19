@@ -153,6 +153,9 @@ public abstract class AbstractPlayer {
      * @param gameState observation of the initial game state
      */
     public void initializePlayer(AbstractGameState gameState) {
+        for (IPlayerDecorator decorator : decorators) {
+            decorator.initialiseBeforeGame();
+        }
     }
 
     /**
@@ -162,6 +165,9 @@ public abstract class AbstractPlayer {
      * @param gameState observation of the final game state
      */
     public void finalizePlayer(AbstractGameState gameState) {
+        for (IPlayerDecorator decorator : decorators) {
+            decorator.finaliseAfterGame();
+        }
     }
 
     /**

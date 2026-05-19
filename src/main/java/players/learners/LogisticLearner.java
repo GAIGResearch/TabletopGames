@@ -53,7 +53,7 @@ public class LogisticLearner extends ApacheLearner {
     public Object learnFromApacheData() {
 
         RFormula formula = new RFormula()
-                .setFormula("target ~ " + String.join(" + ", descriptions))
+                .setFormula("target ~ " + String.join(" + ", sparkDescriptions))
                 .setFeaturesCol("features")
                 .setLabelCol("target");
 

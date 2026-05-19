@@ -50,6 +50,7 @@ public class ActionValueHeuristic extends AbstractPlayer implements ToDoubleBiFu
     @Override
     public void initializePlayer(AbstractGameState state) {
         initialiseFromFile();
+        super.initializePlayer(state);
     }
 
     @Override

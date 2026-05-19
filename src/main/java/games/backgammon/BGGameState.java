@@ -48,6 +48,8 @@ public class BGGameState extends AbstractGameState {
 
     protected List<Token> movedThisTurn;
 
+    protected int[] loadedDiceUsages;
+
     public BGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
@@ -139,14 +141,12 @@ public class BGGameState extends AbstractGameState {
 
 
     // generally used after the other player was detected cheating
-    public void moveAllPiecesToEnd(int i) {
-        for (int p = 0; p < getNPlayers(); p++) {
-            for (int point = 0; point < counters.size(); point++) {
-                List<Token> tokens = new ArrayList<>(counters.get(point));
-                for (Token t : tokens) {
-                    if (t.getOwnerId() == p) {
-                        movePiece(p, point, -1);
-                    }
+    public void moveAllPiecesToEnd(int p) {
+        for (int point = 0; point < counters.size(); point++) {
+            List<Token> tokens = new ArrayList<>(counters.get(point));
+            for (Token t : tokens) {
+                if (t.getOwnerId() == p) {
+                    movePiece(p, point, -1);
                 }
             }
         }
@@ -191,6 +191,14 @@ public class BGGameState extends AbstractGameState {
         if (dice[dieIndex].nSides != newPDF.length)
             throw new IllegalArgumentException("New PDF has wrong number of sides. Expecting " + dice[dieIndex].nSides + " but got " + newPDF.length);
         dice[dieIndex] = new Dice(newPDF);
+    }
+
+    public int getCheatCount(int playerId) {
+        return loadedDiceUsages[playerId];
+    }
+
+    public void incrementCheatCount(int playerId) {
+        loadedDiceUsages[playerId]++;
     }
 
     public void useDiceValue(int dieValue) {
@@ -275,6 +283,7 @@ public class BGGameState extends AbstractGameState {
         }
         copy.playerTrackMapping = playerTrackMapping; // this is immutable, so we can just copy the reference
         copy.movedThisTurn = new ArrayList<>(movedThisTurn);
+        copy.loadedDiceUsages = Arrays.copyOf(loadedDiceUsages, loadedDiceUsages.length);
         return copy;
     }
 
