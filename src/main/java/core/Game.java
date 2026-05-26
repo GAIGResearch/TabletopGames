@@ -348,46 +348,6 @@ public class Game {
 
 
 
-
-
-
-
-
-
-    private SimultaneousAction simultaneousAction() {
-        List<Integer> activePlayers = gameState.getCurrentSimultaneousPlayers();
-        Map<Integer, AbstractAction> playerActions = new HashMap<>();
-
-        for (int activePlayer : activePlayers) {
-            AbstractAction action = makeDecisionForPlayer(activePlayer);
-            playerActions.put(activePlayer, action);
-        }
-
-        SimultaneousAction wrappedAction = new SimultaneousAction(playerActions);
-        forwardModel.next(gameState, wrappedAction);
-        return wrappedAction;
-    }
-
-
-    private AbstractAction makeDecisionForPlayer(int activePlayer){
-        AbstractPlayer currPlayer = players.get(activePlayer);
-        AbstractGameState observation = gameState.copy(activePlayer);
-
-        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currPlayer.getParameters().actionSpace);
-
-        if (observedActions.size() == 1 && !currPlayer.considerSingletonActions){
-            currPlayer.registerUpdatedObservation(observation);
-            return observedActions.getFirst();
-        }
-
-        return currPlayer.getAction(observation, observedActions);
-    }
-
-
-
-
-
-
 /*
     public final AbstractAction oneAction() {
 
