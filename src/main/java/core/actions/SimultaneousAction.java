@@ -34,12 +34,15 @@ public class SimultaneousAction extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        return false;
+        if (this == obj) return true;
+        if (!(obj instanceof SimultaneousAction)) return false;
+        SimultaneousAction other = (SimultaneousAction) obj;
+        return playerActions.equals(other.playerActions);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return playerActions.hashCode();
     }
 
     @Override

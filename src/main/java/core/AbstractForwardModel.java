@@ -75,10 +75,21 @@ public abstract class AbstractForwardModel {
      *
      * @return - List of AbstractAction objects.
      */
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int activePlayer){
+        return _computeAvailableActions(gameState);
+    }
+
+
+
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
+
 
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         return _computeAvailableActions(gameState);
+    }
+
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace, int activePlayer) {
+        return _computeAvailableActions(gameState, activePlayer);
     }
 
     protected abstract void endPlayerTurn(AbstractGameState state);
@@ -209,6 +220,22 @@ public abstract class AbstractForwardModel {
         }
         return retValue;
     }
+
+
+    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace, int activePlayer) {
+        // If there is an action in progress (see IExtendedSequence), then delegate to that
+        List<AbstractAction> retValue;
+        if (gameState.isActionInProgress()) {
+            retValue = gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace, activePlayer);
+        } else if (actionSpace != null && !actionSpace.isDefault()) {
+            retValue = _computeAvailableActions(gameState, actionSpace, activePlayer);
+        } else {
+            retValue = _computeAvailableActions(gameState, activePlayer);
+        }
+        return retValue;
+    }
+
+
 
     /**
      * Performs any end of game computations, as needed.

@@ -43,7 +43,14 @@ public class SGGameState extends AbstractGameState {
 
     @Override
     public List<Integer> getCurrentSimultaneousPlayers() {
+        if (isActionInProgress()) {
+            return Collections.singletonList(getCurrentPlayer());
+        }
+        if (playerHands == null) {
+            return Collections.singletonList(getCurrentPlayer());
+        }
         return IntStream.range(0, getNPlayers())
+                .filter(p -> playerHands.get(p).getSize() > 0)
                 .boxed()
                 .toList();
     }
@@ -139,7 +146,7 @@ public class SGGameState extends AbstractGameState {
             }
 
             // We don't know what other players have chosen for this round, hide card choices
-            turnOwner = playerId;
+            copy.turnOwner = playerId;
             for (int i = 0; i < getNPlayers(); i++) {
                 copy.cardChoices.add(new ArrayList<>());
                 if (i == playerId) {

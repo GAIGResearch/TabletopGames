@@ -25,7 +25,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((SGGameState) gs).addCardChoice(this, gs.getCurrentPlayer());
+        ((SGGameState) gs).addCardChoice(this, this.playerId);
         if (useChopsticks) {
             gs.setActionInProgress(this);
         }

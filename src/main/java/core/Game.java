@@ -15,6 +15,7 @@ import gui.GamePanel;
 import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -520,12 +521,12 @@ public class Game {
             // copy state for this player
             double s = System.nanoTime();
             AbstractGameState observation = gameState.copy(activePlayer);
+            observation.setTurnOwner(activePlayer);
             copyTime += (System.nanoTime() - s);
 
             // compute available actions
             s = System.nanoTime();
-            List<AbstractAction> observedActions = forwardModel.computeAvailableActions(
-                    observation, currentPlayer.getParameters().actionSpace);
+            List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace, activePlayer);
             actionComputeTime += (System.nanoTime() - s);
 
             if (observedActions.isEmpty()) {
@@ -574,7 +575,8 @@ public class Game {
                     System.out.printf("About to get action for player %d%n", activePlayer);
                 action = currentPlayer.getAction(observation, observedActions);
                 if (actionValidation && !observedActions.contains(action))
-                    throw new AssertionError("Action played that was not in the list of available actions: " + action);
+                    throw new AssertionError("Action played that was not in the list of available actions: " + action
+                            + "\nAvailable actions: " + observedActions);
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
                 agentTime += (System.nanoTime() - s);
@@ -834,7 +836,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "SeaSaltPaper");
+        String gameType = Utils.getArg(args, "game", "SushiGo");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -843,7 +845,7 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-//        players.add(new MCTSPlayer());
+        players.add(new MCTSPlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new RandomPlayer());
