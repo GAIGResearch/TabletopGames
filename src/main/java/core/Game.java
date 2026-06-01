@@ -55,7 +55,6 @@ public class Game {
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
     private boolean pause, stop;
     private boolean debug = false;
-    private boolean actionValidation = true;
     // Video recording
     private Rectangle areaBounds;
     private boolean recordingVideo = false;
@@ -385,7 +384,9 @@ public class Game {
 
         // Get actions for the player
         s = System.nanoTime();
-        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
+        List<AbstractAction> observedActions = currentPlayer.getForwardModel() == null ?
+                forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace) :
+                currentPlayer.getForwardModel().computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
         if (observedActions.isEmpty()) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
             IExtendedSequence topOfStack = null;
@@ -440,7 +441,7 @@ public class Game {
                 if (debug)
                     System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
-                if (actionValidation && !observedActions.contains(action)) {
+                if (!observedActions.contains(action)) {
                     throw new AssertionError("Action played that was not in the list of available actions: " + action);
                 }
 
@@ -803,10 +804,6 @@ public class Game {
 
     public void setStopped(boolean stopped) {
         this.stop = stopped;
-    }
-
-    public void setActionValidation(boolean actionValidation) {
-        this.actionValidation = actionValidation;
     }
 
     public CoreParameters getCoreParameters() {

@@ -116,7 +116,7 @@ public class SingleTreeNode {
         this.forwardModel = root.forwardModel;
         this.rnd = root.rnd;
 
-        if (params.information != Closed_Loop && (params.maintainMasterState || depth == 0)) {
+        if (params.information != Closed_Loop && (params.maintainMasterState || parent == null)) {
             // if we're using open loop, then we need to make sure the reference state is never changed
             // however this is only used at the root - and we can switch the copy off for other nodes for performance
             // these master copies *are* required if we want to do something funky with the final tree, and gather

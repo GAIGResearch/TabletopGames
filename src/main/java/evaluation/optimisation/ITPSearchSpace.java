@@ -223,10 +223,17 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
             settings[i] = index;
         }
 
+
         // Then we check all the parameters in the JSON file are valid for the ITunableParameters
         // If any have values that are not the same as the searchspace values (or do not
         // match the default value for that parameter), then we throw an error
         // This is recursive as needed over any nested ITunableParameters in the JSON
+        JSONObject oldJSON = new JSONObject();
+        if (itp instanceof TunableParameters<T> tp) {
+            oldJSON = tp.getRawJSON();
+            tp.setRawJSON(json);
+            // first we set the rawJSON on TunabpleParameters to pick up defaults correctly
+        }
         for (Object key : json.keySet()) {
             String keyName = (String) key;
             if (keyName.equals("class") || keyName.equals("args") || keyName.equals("budget") || searchDimensions.contains(keyName)) {
@@ -242,6 +249,9 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
             if (!JSONUtils.areValuesEqual(value, defaultValue)) {
                 throw new AssertionError("Value " + value + " for parameter " + keyName + " does not match default value " + defaultValue);
             }
+        }
+        if (itp instanceof TunableParameters<?> tp) {
+            tp.setRawJSON(oldJSON);  // possibly redundant; but cleaner
         }
         return settings;
     }

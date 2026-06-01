@@ -79,6 +79,7 @@ public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
         newData = new HashMap<>();
         newData.put("", new HashMap<>());
         valueHeuristic = new ActionValueHeuristic(getValues(), valueHeuristic.RND_WEIGHT, bucketingFunction, defaultValue);
+        super.initializePlayer(state);
     }
 
     @Override

@@ -237,6 +237,10 @@ public class MCTSParams extends PlayerParameters {
         return opponentModel;
     }
 
+    public void setOpponentModel(AbstractPlayer opponentModel) {
+        this.opponentModel = opponentModel;
+    }
+
     public AbstractPlayer getRolloutStrategy() {
         if (rolloutPolicy == null) {
             if (rolloutType == PARAMS) {
@@ -250,6 +254,11 @@ public class MCTSParams extends PlayerParameters {
             rolloutPolicy.getParameters().actionSpace = actionSpace;  // TODO makes sense?
         }
         return rolloutPolicy;
+    }
+
+    // this is primarily intended for testing
+    public void setRolloutPolicy(AbstractPlayer rolloutPolicy) {
+        this.rolloutPolicy = rolloutPolicy;
     }
 
     private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {

@@ -24,4 +24,9 @@ public class MASTPlayer extends BoltzmannActionPlayer implements IMASTUser {
     public void setMASTStats(List<Map<Object, Pair<Integer, Double>>> MASTStats) {
         ((IMASTUser) this.actionHeuristic).setMASTStats(MASTStats);
     }
+
+    public List<Map<Object, Pair<Integer, Double>>> getMASTStats() {
+        return ((IMASTUser) this.actionHeuristic).getMASTStats();
+    }
+
 }

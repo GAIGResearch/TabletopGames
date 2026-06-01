@@ -1,0 +1,76 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "progressiveWideningExponent" : 0.100,
+  "rolloutTermination" : "END_TURN",
+  "rolloutLength" : 3,
+  "actionHeuristic" : {
+    "coefficients" : {
+      "Wild" : 0.158,
+      "BIAS" : 0.405,
+      "PlaySkip" : 0.123,
+      "SameNumberInHand" : 0.00626,
+      "PlayWild" : -0.0361,
+      "SameColorInHand:cardsInDeck:SameNumberInHand" : 0.00156,
+      "cardsInDeck:SameNumberInHand" : -0.00868,
+      "diffNumbersNumber" : -0.113,
+      "PlayNumber" : -0.221,
+      "diffNumbersNumber:SameColorInHand" : 0.0416,
+      "cardsInHand:PlayWild" : -0.157,
+      "cardsInDeck" : 0.00395,
+      "diffColorsNumber" : 0.0418,
+      "Number" : 0.120,
+      "cardsInHand" : -0.123,
+      "Skip" : -0.150,
+      "SameColorInHand" : -0.470,
+      "diffColorsNumber:PlaySkip" : 0.369,
+      "cardsInDeck:PlayWild" : -0.0226
+    },
+    "actionFeatures" : {
+      "features" : [
+      ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.uno.metrics.UnoStateFeatures"
+      },
+      "class" : "evaluation.features.AutomatedFeatures",
+      "underlyingAction" : {
+        "class" : "games.uno.metrics.UnoActionFeatures"
+      }
+    },
+    "class" : "players.heuristics.LogisticActionHeuristic"
+  },
+  "opponentTreePolicy" : "SelfOnly",
+  "heuristic" : {
+    "features" : {
+      "features" : [
+      ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.uno.metrics.UnoStateFeatures"
+      },
+      "class" : "evaluation.features.AutomatedFeatures"
+    },
+    "coefficients" : {
+      "minOpponentCards" : 1.14,
+      "Number" : -1.98,
+      "Draw" : 4.96,
+      "BIAS" : -0.515,
+      "leaderMargin" : -100
+    },
+    "class" : "players.heuristics.LinearStateHeuristic",
+    "defaultHeuristic" : {
+      "class" : "players.heuristics.LeaderHeuristic"
+    }
+  },
+  "FPU" : 100,
+  "K" : 0.0100,
+  "progressiveWideningConstant" : 2.00,
+  "treePolicy" : "Uniform",
+  "reuseTree" : true,
+  "backupPolicy" : "MaxMC",
+  "rolloutType" : "RANDOM",
+  "maxBackupThreshold" : 3,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

@@ -9,6 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 import utilities.Pair;
+import utilities.Triple;
 import utilities.Utils;
 
 import java.util.*;
@@ -179,9 +180,11 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         if (interactionIndices.size() != numberOfInteractions) {
             throw new AssertionError("Invalid interaction indices for interaction: " + first + ", " + second);
         }
+
+        String featureName = featureNames.get(first) + ":" + featureNames.get(second);
         addFeature(
                 new AutomatedFeatures.ColumnDetails(
-                        featureNames.get(first) + ":" + featureNames.get(second),
+                        featureName,
                         featureType.INTERACTION, null, null, -1, Double.class,
                         interactionIndices
                 )
@@ -422,7 +425,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return columnDetails;
     }
 
-    public List<List<Object>> processData(String outputFile, int maxRecords, String... inputFiles) {
+    public List<List<Object>> processData(String outputFile, int maxRecords, boolean initialProcessing, String... inputFiles) {
         // inputFiles contain the raw data.
         // There can be two types of columns:
         // 1. Columns that refer to existing featureNames. These are detected by matching the names.
@@ -442,7 +445,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         //          if this already exists in the data, we do not add it again
 
         List<ColumnDetails> newColumnDetails = new ArrayList<>(); // will be populated with new columns
-        Map<Integer, Integer> underlyingIndexToDataIndex = new HashMap<>();
         List<ColumnDetails> startingFeatures = getColumnDetails();
 
         // load files...the columns should correspond to the underlying vector
@@ -471,6 +473,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 break; // Stop processing if we reached the maximum number of records
             }
         }
+
         List<List<?>> newDataColumns = new ArrayList<>(); // set up to take the new data (especially where we can just copy this from the old)
 
         // Loop over all underlyingNames/Types to determine if the current features match with the data
@@ -487,7 +490,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             }
 
             int columnIndex = headers.indexOf(columnName);
-            underlyingIndexToDataIndex.put(i, columnIndex);
 
             if (columnType.equals(Boolean.class)) {
                 // Boolean column: Just add raw column directly (no bucketing is relevant here)
@@ -523,7 +525,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     List<ColumnDetails> original = startingFeatures.stream()
                             .filter(r -> r.type == featureType.RANGE && r.underlyingIndex == finalI)
                             .toList();
-                    if (original.size() == 1 + getBuckets(i)) {
+                    if (original.size() == getBuckets(i)) {
                         for (ColumnDetails columnDetail : original) {
                             newColumnDetails.add(columnDetail);
                             // we need to find the range field in the data
@@ -541,6 +543,10 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                         newColumnDetails.add(missingColumn.a);
                         newDataColumns.add(missingColumn.b);
                         if (debug) System.out.println("Adding Range column " + columnName);
+                    }
+                    // If the algorithm was unable to bucket neatly, then ensure buckets is in line
+                    if (missingColumns.size() != buckets[i]) {
+                        buckets[i] = missingColumns.size();
                     }
                 }
             } else if (columnType.isEnum()) {
@@ -651,7 +657,26 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             }
         }
 
-
+        if (initialProcessing) {
+            // Now check for any column which has no variance (all values are the same).
+            // These can be removed
+            List<Integer> removedIndices = new ArrayList<>();
+            for (int i = 0; i < newColumnDetails.size(); i++) {
+                if (newColumnDetails.get(i).type == featureType.TARGET)
+                    continue;  // except for columns not used in the learning process
+                Object reference = newDataColumns.get(i).getFirst();
+                if (newDataColumns.get(i).stream().allMatch(v -> v.equals(reference))) {
+                    System.out.println("Removing column with no variance: " + newColumnDetails.get(i).name);
+                    removedIndices.add(i);
+                }
+            }
+            // we need to remove backwards (otherwise the indices will shift as we remove)
+            for (int removedIndex : removedIndices.reversed()) {
+                removedFeatureNames.add(newColumnDetails.get(removedIndex).name);  // to avoid it being resurrected on later iterations
+                newColumnDetails.remove(removedIndex);
+                newDataColumns.remove(removedIndex);
+            }
+        }
         // The logic so far has constructed a RAW column for each underlying feature
         // Then a RANGE column per bucket for that underlying feature
         // And similarly a number of ENUM column per underlying feature that is an enum
@@ -667,7 +692,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     // we still need to write this column, so we switch it to TARGET
                     // (iff it is used to derive another constructed feature)
                     boolean rawDataIsUsed = false;
-                    for (int f = 0;  f < featureNames.size(); f++) {
+                    for (int f = 0; f < featureNames.size(); f++) {
                         if (featureTypes.get(f) != featureType.RAW) {
                             if (featureIndices.get(f) == column.underlyingIndex) {
                                 // RANGE and ENUM features
@@ -699,11 +724,9 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     newDataColumns.remove(i);
                 }
             }
-
         }
 
-
-        // We now have all the column, to write to file we need to convert this into a set of rows
+        // We now have all the columns, to write to file we need to convert this into a set of rows
         List<List<Object>> newDataRows = new ArrayList<>();
         for (List<?> columnData : newDataColumns) {
             for (int j = 0; j < columnData.size(); j++) {
@@ -822,8 +845,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     }
 
 
-    private <T extends Number> List<Pair<Number, Number>> calculateFeatureRanges(List<T> numericValues,
-                                                                                 int buckets, List<Number> exclusions) {
+    private <T extends Number> List<Pair<Number, Number>> calculateFeatureRanges(List<T> numericValues, int buckets) {
         List<Pair<Number, Number>> featureRanges = new ArrayList<>();
         for (int b = 0; b < buckets; b++) {
             Number lowerBound = b == 0 ? Double.NEGATIVE_INFINITY :
@@ -833,23 +855,25 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             featureRanges.add(new Pair<>(lowerBound, upperBound));
         }
         // now we detect any ranges with the same start and end bounds
-        List<Number> newExclusions = featureRanges.stream()
-                .filter(pair -> pair.a.equals(pair.b))
-                .map(pair -> pair.a)
-                .toList();
+        // this indicates that we have a single value that goes in its own bucket
+        // this might be several buckets
+        Set<Number> newExclusions = featureRanges.stream()
+                .filter(r -> r.a.equals(r.b))
+                .map(r -> r.a)
+                .collect(Collectors.toSet());
+
+        // we then need to take this into account (otherwise, we're done)
         if (!newExclusions.isEmpty()) {
-            List<T> filteredValues = numericValues.stream()
-                    .filter(value -> !newExclusions.contains(value))
-                    .toList();
-            List<Number> allExclusions = new ArrayList<>(exclusions);
-            allExclusions.addAll(newExclusions);
-            featureRanges = filteredValues.isEmpty()
-                    ? new ArrayList<>()
-                    : calculateFeatureRanges(filteredValues, buckets - newExclusions.size(), allExclusions);
+            // new algorithm
+
+            // we remove the ranges which start on one of the excluded values
+            // (this includes the empty ranges)
+            featureRanges.removeIf(r -> newExclusions.contains(r.a));
 
             // we now create one Range for each of the excluded values
             for (Number exclusion : newExclusions) {
-                // we then need to find the value in the data that bracket the exclusion (defaulting to +/- infinity)
+                // we then need to find the upper value in the data that brackets the exclusion (defaulting to +infinity)
+                // this becomes the upper bound of the range
                 Number nextHighestValue = Double.POSITIVE_INFINITY;
                 for (T value : numericValues) {  // this relies on the fact that the values are sorted
                     if (value.doubleValue() > exclusion.doubleValue()) {
@@ -857,60 +881,76 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                         break;
                     }
                 }
-
-                // we check if the exclusion is already in the ranges
-                List<Pair<Number, Number>> toRemove = new ArrayList<>();
-                List<Pair<Number, Number>> toAdd = new ArrayList<>();
-                for (Pair<Number, Number> range : featureRanges) {
-                    if (range.a.doubleValue() < exclusion.doubleValue() && range.b.doubleValue() > exclusion.doubleValue()) {
-                        // we need to remove this range, and split it into two
-                        toRemove.add(range);
-                        toAdd.add(Pair.of(range.a, exclusion));
-                        toAdd.add(Pair.of(nextHighestValue, range.b));
-                    }
-                }
-                // remove the ranges that we split
-                featureRanges.removeAll(toRemove);
-                featureRanges.addAll(toAdd);
-                // then add the exclusion as a range
                 featureRanges.add(new Pair<>(exclusion, nextHighestValue));
             }
 
             // and sort the features to be in ascending order
-            featureRanges.sort(Comparator.comparingDouble(pair -> pair.a.doubleValue() + pair.b.doubleValue() * 0.0001));
+            featureRanges.sort(Comparator.comparingDouble(pair -> pair.a.doubleValue()));
 
+            // we now have fewer buckets than we are allowed. So the next step is to create new buckets to fill in the gaps between the
+            // excluded values
+            double currentPoint = featureRanges.getFirst().a.doubleValue();
+            if (currentPoint != Double.NEGATIVE_INFINITY) {
+                throw new AssertionError("First feature range should not start with negative infinity");
+            }
+            List<Pair<Number, Number>> featuresToAdd = new ArrayList<>();
+            for (Pair<Number, Number> range : featureRanges) {
+                if (currentPoint != range.a.doubleValue()) {
+                    // we are missing a bit of the number line
+                    featuresToAdd.add(new Pair<>(currentPoint, range.a));
+                }
+                // move to the end of this feature range
+                currentPoint = range.b.doubleValue();
+            }
+            featureRanges.addAll(featuresToAdd);
 
-            // then go up the feature ranges to check that they enclose the real line, and that the end point of one is
-            // the start point of the next
-            List<Integer> toRemove = new ArrayList<>();
-            for (int i = 0; i < featureRanges.size() - 1; i++) {
-                Pair<Number, Number> range1 = featureRanges.get(i);
-                Pair<Number, Number> range2 = featureRanges.get(i + 1);
-                //             System.out.println("Checking ranges: " + range1 + " and " + range2);
-                // if two ranges start at the same point, then we remove the first one (the one with the earlier end point)
-                if (range1.a.equals(range2.a)) {
-                    toRemove.add(i);
-                    //               System.out.println("Removing range: " + range1 + " because it is equal to: " + range2);
-                    continue;
+            if (currentPoint != Double.POSITIVE_INFINITY) {
+                // add final feature range
+                featureRanges.add(new Pair<>(currentPoint, Double.POSITIVE_INFINITY));
+            }
+            // and sort the features to be in ascending order
+            featureRanges.sort(Comparator.comparingDouble(pair -> pair.a.doubleValue()));
+
+            // now check how many we have
+            int numberOfFeatures = featureRanges.size();
+            if (numberOfFeatures > buckets) {
+                // So we need to merge some to get within our limit
+                // first we track the number in each bucket
+                List<Integer> bucketSizes = new ArrayList<>();
+                for (Pair<Number, Number> range : featureRanges) {
+                    Integer numberInRange = Math.toIntExact(numericValues.stream()
+                            .filter(n -> n.doubleValue() >= range.a.doubleValue() && n.doubleValue() < range.b.doubleValue()).count());
+                    bucketSizes.add(numberInRange);
                 }
-                if (range1.b.doubleValue() != range2.a.doubleValue()) {
-                    range1.b = range2.a;
+
+                while (featureRanges.size() > buckets) {
+                    // find the smallest bucket and merge it into its smallest neighbour
+                    int indexOfSmallest = bucketSizes.indexOf(Collections.min(bucketSizes));
+                    int indexOfSmallestNeighbour;
+                    if (indexOfSmallest == bucketSizes.size() - 1)
+                        indexOfSmallestNeighbour = indexOfSmallest - 1;
+                    else if (indexOfSmallest == 0)
+                        indexOfSmallestNeighbour = indexOfSmallest + 1;
+                    else {
+                        indexOfSmallestNeighbour = indexOfSmallest + 1;
+                        if (bucketSizes.get(indexOfSmallest - 1) < bucketSizes.get(indexOfSmallestNeighbour))
+                            indexOfSmallestNeighbour = indexOfSmallest - 1;
+                    }
+                    // merge the two feature ranges (expand range of smallestNeighbour)
+                    Number start = indexOfSmallestNeighbour > indexOfSmallest ? featureRanges.get(indexOfSmallest).a : featureRanges.get(indexOfSmallestNeighbour).a;
+                    Number end = indexOfSmallestNeighbour > indexOfSmallest ? featureRanges.get(indexOfSmallestNeighbour).b : featureRanges.get(indexOfSmallest).b;
+                    featureRanges.set(indexOfSmallestNeighbour, new Pair<>(start, end));
+                    bucketSizes.set(indexOfSmallestNeighbour, bucketSizes.get(indexOfSmallestNeighbour) + bucketSizes.get(indexOfSmallest));
+                    featureRanges.remove(indexOfSmallest);
+                    bucketSizes.remove(indexOfSmallest);
                 }
             }
-            // remove the ranges that we split (this has to be by index, as some ranges may be duplicated, and we don't want to remove both)
-            for (int i = toRemove.size() - 1; i >= 0; i--) {
-                featureRanges.remove((int) toRemove.get(i));
-            }
-            // if the first range has an end point that is equal to the lowest value in the data, then we remove it
-            // and amend the next range to start at minus infinity
-            if (featureRanges.get(0).b.doubleValue() <= numericValues.get(0).doubleValue()) {
-                featureRanges.remove(0);
-                featureRanges.get(0).a = Double.NEGATIVE_INFINITY;
-            }
+
         }
 
         return featureRanges;
     }
+
 
     private List<Pair<Number, Number>> calculateFeatureRanges(List<String> columnData, int buckets, Class<?> clazz) {
         List<Double> doubleValues;
@@ -918,11 +958,11 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         if (clazz == Double.class) {
             doubleValues = validateDoubleColumnData(columnData);
             Collections.sort(doubleValues);
-            return calculateFeatureRanges(doubleValues, buckets, Collections.emptyList());
+            return calculateFeatureRanges(doubleValues, buckets);
         } else if (clazz == Integer.class) {
             integerValues = validateIntColumnData(columnData);
             Collections.sort(integerValues);
-            return calculateFeatureRanges(integerValues, buckets, Collections.emptyList());
+            return calculateFeatureRanges(integerValues, buckets);
         } else {
             throw new IllegalArgumentException("Unsupported class type: " + clazz);
         }
@@ -947,7 +987,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
                 booleanValues.add(Boolean.parseBoolean(value));
             } else {
-                Double number = Double.parseDouble(value);
+                double number = Double.parseDouble(value);
                 if (number == 0.0) {
                     booleanValues.add(false);
                 } else if (number == 1.0) {

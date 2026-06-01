@@ -98,4 +98,9 @@ public class BoltzmannActionPlayer extends AbstractPlayer implements IMASTUser {
             ((IMASTUser) actionHeuristic).setMASTStats(MASTStats);
         }
     }
+
+    @Override
+    public List<Map<Object, Pair<Integer, Double>>> getMASTStats() {
+        return ((IMASTUser) actionHeuristic).getMASTStats();
+    }
 }

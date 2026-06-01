@@ -1,7 +1,11 @@
 package players.mcts;
 
+import core.AbstractPlayer;
+import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
+import games.loveletter.LoveLetterForwardModel;
+import games.loveletter.LoveLetterGameState;
 import org.junit.Before;
 import org.junit.Test;
 import utilities.Pair;
@@ -140,4 +144,5 @@ public class MASTRolloutMixture {
         assertEquals(0.207, rolloutPlayer.probabilityOf(new LMRAction("Middle"), game, baseActions), 0.001);
         assertEquals(0.207, rolloutPlayer.probabilityOf(new LMRAction("Right"), game, baseActions), 0.001);
     }
+
 }

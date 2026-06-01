@@ -66,4 +66,9 @@ public class MASTPlusActionHeuristic extends TunableParameters<MASTPlusActionHeu
     public void setMASTStats(List<Map<Object, Pair<Integer, Double>>> MASTStats) {
         baseHeuristic.setMASTStats(MASTStats);
     }
+
+    @Override
+    public List<Map<Object, Pair<Integer, Double>>> getMASTStats() {
+        return baseHeuristic.getMASTStats();
+    }
 }

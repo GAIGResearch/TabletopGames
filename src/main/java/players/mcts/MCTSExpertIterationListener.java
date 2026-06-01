@@ -37,12 +37,11 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
     }
 
     @Override
-    public void processState(AbstractGameState state, AbstractAction action) {
+    public void processState(AbstractGameState state, AbstractAction action, List<AbstractAction> availableActions, int player) {
         // we override this from FeatureListener, because we want to record the feature vector for each action
         // we record this once, and cache the results for all actions
 
         if (action == null) return; // we do not record data for the GAME_OVER event
-        List<AbstractAction> availableActions = game.getForwardModel().computeAvailableActions(state);
         if (availableActions.size() == 1) {
             // only one action available, so no decision to take
             return;
@@ -51,7 +50,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
         oracle.setForwardModel(game.getForwardModel());
         oracle.getAction(state, availableActions);
         // recordData will call the super.processState() method, which will then record the feature vectors
-        recordData(oracle.root);
+        recordData(oracle.root, availableActions);
     }
 
     @Override
@@ -90,7 +89,7 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             stateRecorder.writeDataWithStandardHeaders(state);
     }
 
-    public void recordData(SingleTreeNode root) {
+    public void recordData(SingleTreeNode root, List<AbstractAction> actionsFromState) {
 
         if (root instanceof MultiTreeNode) {
             // access the root for the acting player instead
@@ -114,7 +113,6 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             // we record its depth, value, visits, and the full feature list
             int player = node.getActor();
             double stateValue = node.nodeValue(player);
-            List<AbstractAction> actionsFromState = game.getForwardModel().computeAvailableActions(node.state);
             actionValues = new HashMap<>();
             actionValues.put("CHOSEN", new HashMap<>());
             actionValues.put("VISIT_PROPORTION", new HashMap<>());
@@ -159,11 +157,11 @@ public class MCTSExpertIterationListener extends ActionFeatureListener {
             if (actionsFromState.size() > 1) {
                 // the super class will then pull in the feature vectors for state and all actions
                 // and populate the main currentData map (then held until the end of the game so it can be updated with final scores)
-                super.processState(node.state, bestAction);
+                super.processState(node.state, bestAction, actionsFromState, player);
 
                 // then we also record the state
                 if (stateRecorder != null) {
-                    stateRecorder.processState(node.state, bestAction);
+                    stateRecorder.processState(node.state, bestAction, actionsFromState, player);
                     // and then add in the final score and win/loss information based on the state value estimate
                     // we only have the values for the heuristic being used within MCTS search (WinOnly/Score/Leader etc.)
                     // it is the responsibility of the user to ensure they know what has been used

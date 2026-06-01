@@ -97,6 +97,7 @@ public class BGForwardModel extends StandardForwardModel {
 
         gameState.setGamePhase(RollDice);
         gameState.blots = new int[2];
+        gameState.loadedDiceUsages = new int[2];
     }
 
     private void tokensAt(BGGameState state, int space, BGParameters params) {
