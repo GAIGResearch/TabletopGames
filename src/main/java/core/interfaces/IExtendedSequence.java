@@ -116,4 +116,9 @@ public interface IExtendedSequence {
      * @return a copy of the Object
      */
     IExtendedSequence copy();
+
+    default List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace, int activePlayer) {
+        return _computeAvailableActions(gameState, actionSpace);
+    }
+
 }

@@ -1,0 +1,34 @@
+Game: SushiGo, Players: 4, Mode: RANDOM, TotalGames: 100, GamesPerMatchup: 100
+Basic MCTS got 89.00 points. Basic MCTS won 89.0% of the 100 games of the tournament. Basic MCTS won 89.0% of the 100 games it played during the tournament.
+Basic MCTS got a mean score of 39.61.
+Basic MCTS won 89.0% of the 100 games against RandomPlayer.
+Basic MCTS won 89.0% of the 100 games against RMHC.
+Basic MCTS won NaN% of the 0 games against SuperOSLA.
+
+RandomPlayer got 5.00 points. RandomPlayer won 5.0% of the 100 games of the tournament. RandomPlayer won 5.0% of the 100 games it played during the tournament.
+RandomPlayer got a mean score of 25.30.
+RandomPlayer won 5.0% of the 100 games against Basic MCTS.
+RandomPlayer won 5.0% of the 100 games against RMHC.
+RandomPlayer won NaN% of the 0 games against SuperOSLA.
+
+RMHC got 3.00 points. RMHC won 3.0% of the 100 games of the tournament. RMHC won 3.0% of the 100 games it played during the tournament.
+RMHC got a mean score of 24.98.
+RMHC won 3.0% of the 100 games against Basic MCTS.
+RMHC won 3.0% of the 100 games against RandomPlayer.
+RMHC won NaN% of the 0 games against SuperOSLA.
+
+SuperOSLA got 0.00 points. SuperOSLA won 0.0% of the 100 games of the tournament. SuperOSLA won NaN% of the 0 games it played during the tournament.
+SuperOSLA got a mean score of NaN.
+SuperOSLA won NaN% of the 0 games against Basic MCTS.
+SuperOSLA won NaN% of the 0 games against RandomPlayer.
+SuperOSLA won NaN% of the 0 games against RMHC.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+Basic MCTS: Win rate 0.89 +/- 0.031	Mean Ordinal 1.14 +/- 0.04
+RandomPlayer: Win rate 0.05 +/- 0.022	Mean Ordinal 2.91 +/- 0.09
+RMHC: Win rate 0.03 +/- 0.017	Mean Ordinal 2.98 +/- 0.09
+OSLA: Win rate 0.03 +/- 0.017	Mean Ordinal 2.95 +/- 0.08
+
+
+---- Alpha Rank ----  
+
