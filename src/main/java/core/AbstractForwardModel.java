@@ -74,14 +74,11 @@ public abstract class AbstractForwardModel {
      *
      * @return - List of AbstractAction objects.
      */
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int activePlayer){
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int activePlayer) {
         return _computeAvailableActions(gameState);
     }
 
-
-
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
-
 
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         return _computeAvailableActions(gameState);
@@ -140,27 +137,7 @@ public abstract class AbstractForwardModel {
      *
      * @param currentState - current game state, to be modified by the action.
      * @param action       - action requested to be played by a player.
-     *
-     *
-
-
-    public final void next(AbstractGameState currentState, AbstractAction action) {
-        if (action != null) {
-            int player = currentState.getCurrentPlayer();
-            currentState.recordAction(action, player);
-            _next(currentState, action);
-        } else {
-            if (currentState.coreGameParameters.verbose) {
-                System.out.println("Invalid action.");
-            }
-            illegalActionPlayed(currentState, action);
-        }
-        currentState.advanceGameTick();
-    }
-    */
-
-
-
+     */
     public final void next(AbstractGameState currentState, AbstractAction action) {
         if (action != null) {
 
@@ -208,16 +185,7 @@ public abstract class AbstractForwardModel {
     }
 
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
-        // If there is an action in progress (see IExtendedSequence), then delegate to that
-        List<AbstractAction> retValue;
-        if (gameState.isActionInProgress()) {
-            retValue = gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace);
-        } else if (actionSpace != null && !actionSpace.isDefault()) {
-            retValue = _computeAvailableActions(gameState, actionSpace);
-        } else {
-            retValue = _computeAvailableActions(gameState);
-        }
-        return retValue;
+        return computeAvailableActions(gameState, actionSpace, gameState.getCurrentPlayer());
     }
 
 

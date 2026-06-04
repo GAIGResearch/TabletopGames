@@ -55,6 +55,7 @@ public class Game {
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
     private boolean pause, stop;
     private boolean debug = false;
+    private boolean actionValidation = true;
     // Video recording
     private Rectangle areaBounds;
     private boolean recordingVideo = false;
@@ -345,158 +346,6 @@ public class Game {
         return this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
     }
 
-
-
-
-/*
-    public final AbstractAction oneAction() {
-
-        // we pause before each action is taken if running with a delay (e.g. for video recording with random players)
-        if (turnPause > 0)
-            synchronized (this) {
-                try {
-                    wait(turnPause);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        // This is the next player to be asked for a decision
-        int activePlayer = gameState.getCurrentPlayer();
-        if (!gameState.isNotTerminalForPlayer(activePlayer))
-            throw new AssertionError("Player " + activePlayer + " is not allowed to move");
-        AbstractPlayer currentPlayer = players.get(activePlayer);
-        if (debug) System.out.printf("Starting oneAction for player %s%n", activePlayer);
-
-
-        // This handles the simultaneous actions keeping the single player logic the same
-        if (gameState.getCurrentSimultaneousPlayers().size() > 1) {
-            return simultaneousAction();
-        }
-
-        // Get player observation, and time how long it takes
-        double s = System.nanoTime();
-        // copying the gamestate also copies the game parameters and resets the random seed (so agents cannot use this
-        // to reconstruct the starting hands etc.)
-        AbstractGameState observation = gameState.copy(activePlayer);
-        copyTime = (System.nanoTime() - s);
-        //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
-
-        // Get actions for the player
-        s = System.nanoTime();
-        List<AbstractAction> observedActions = currentPlayer.getForwardModel() == null ?
-                forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace) :
-                currentPlayer.getForwardModel().computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
-        if (observedActions.isEmpty()) {
-            Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
-            IExtendedSequence topOfStack = null;
-            AbstractAction lastAction = null;
-            if (!actionsInProgress.isEmpty()) {
-                topOfStack = actionsInProgress.peek();
-            }
-            if (gameState.getHistory().size() > 1) {
-                lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1).b;
-            }
-            if (debug) {
-                System.out.println("---\nActions in progress:");
-                for (IExtendedSequence action : actionsInProgress) {
-                    System.out.println(action);
-                }
-                System.out.println("---\nRecent History:");
-                List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
-                for (int i = Math.max(0, history.size() - 10); i < history.size(); i++) {
-                    System.out.println(history.get(i));
-                }
-            }
-            throw new AssertionError("No actions available for player " + activePlayer
-                    + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
-                    + ". Actions in progress: " + actionsInProgress.size()
-                    + (topOfStack != null ? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + (topOfStack instanceof AbstractAction ? ((AbstractAction) topOfStack).getString(gameState) : topOfStack) + ")" : ""));
-
-        }
-        actionComputeTime = (System.nanoTime() - s);
-        actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
-
-        if (gameState.coreGameParameters.verbose) {
-            System.out.println("Round: " + gameState.getRoundCounter());
-        }
-
-        if (observation instanceof IPrintable && gameState.coreGameParameters.verbose) {
-            ((IPrintable) observation).printToConsole();
-        }
-
-        // Start the timer for this decision
-        gameState.playerTimer[activePlayer].resume();
-
-        // Either ask player which action to use or, in case no actions are available, report the updated observation
-        AbstractAction action = null;
-        if (!observedActions.isEmpty()) {
-            if (observedActions.size() == 1 && !currentPlayer.considerSingletonActions) {
-                // Can only do 1 action, so do it.
-                action = observedActions.getFirst();
-                currentPlayer.registerUpdatedObservation(observation);
-            } else {
-                // Get action from player, and time it
-                s = System.nanoTime();
-                if (debug)
-                    System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
-                action = currentPlayer.getAction(observation, observedActions);
-                if (!observedActions.contains(action)) {
-                    throw new AssertionError("Action played that was not in the list of available actions: " + action);
-                }
-
-                if (debug)
-                    System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
-
-                agentTime = (System.nanoTime() - s);
-                nDecisions++;
-            }
-            if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
-                System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
-                action = null;
-            }
-            // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
-            AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, observedActions, activePlayer)));
-
-        } else {
-            currentPlayer.registerUpdatedObservation(observation);
-        }
-
-        // End the timer for this decision
-        gameState.playerTimer[activePlayer].pause();
-        gameState.playerTimer[activePlayer].incrementAction();
-
-        if (gameState.coreGameParameters.verbose && !(action == null)) {
-            System.out.println(action);
-        }
-        if (action == null)
-            throw new AssertionError("We have a NULL action in the Game loop");
-
-        // Check player timeout
-        if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-            action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
-        } else {
-            // Resolve action and game rules, time it
-            s = System.nanoTime();
-            // we copy the action before using it..so that the action returned by oneAction() does not have a state link
-            forwardModel.next(gameState, action.copy());
-            nextTime = (System.nanoTime() - s);
-        }
-
-        lastPlayer = activePlayer;
-
-        // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
-        // (such as the next player)
-        AbstractAction finalAction1 = action;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction1.copy(), observedActions, activePlayer)));
-
-        if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
-        return action;
-    }
-    */
-
-
     public final AbstractAction oneAction() {
 
         // pause once before any decisions
@@ -611,9 +460,8 @@ public class Game {
             actionsChosen.put(activePlayer, action);
         }
 
-        // compose final action — single player keeps original action, multiple wraps into SimultaneousAction
         AbstractAction finalAction = actionsChosen.size() == 1
-                ? actionsChosen.values().iterator().next()
+                ? actionsChosen.get(activePlayers.get(0))
                 : new SimultaneousAction(actionsChosen);
 
         // apply once
@@ -804,6 +652,10 @@ public class Game {
 
     public void setStopped(boolean stopped) {
         this.stop = stopped;
+    }
+
+    public void setActionValidation(boolean actionValidation) {
+        this.actionValidation = actionValidation;
     }
 
     public CoreParameters getCoreParameters() {
