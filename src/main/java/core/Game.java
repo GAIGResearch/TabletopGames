@@ -388,7 +388,7 @@ public class Game {
                     topOfStack = actionsInProgress.peek();
                 }
                 if (gameState.getHistory().size() > 1) {
-                    lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1).b;
+                    lastAction = gameState.getHistory().getLast().b;
                 }
                 if (debug) {
                     System.out.println("---\nActions in progress:");

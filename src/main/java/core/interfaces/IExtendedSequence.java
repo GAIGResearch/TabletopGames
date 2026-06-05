@@ -46,6 +46,8 @@ import java.util.List;
  */
 public interface IExtendedSequence {
 
+
+    // TODO: What if IExtendedSequence is a Simultaneous Action!
     /**
      * Forward Model delegates to this from computeAvailableActions() if this Extended Sequence is currently active.
      *
