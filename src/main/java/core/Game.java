@@ -359,8 +359,8 @@ public class Game {
 
         if (debug) System.out.printf("Starting oneAction for players %s%n", activePlayers);
 
-        Map<Integer, AbstractAction> actionsChosen = new LinkedHashMap<>();
-        List<AbstractAction> lastObservedActions = new ArrayList<>();
+        Map<Integer, AbstractAction> actionsChosen = new HashMap<>();
+        Map<Integer, List<AbstractAction>> availableActions = new HashMap<>();
 
         for (int activePlayer : activePlayers) {
             if (!gameState.isNotTerminalForPlayer(activePlayer))
@@ -377,6 +377,7 @@ public class Game {
             // compute available actions
             s = System.nanoTime();
             List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace, activePlayer);
+            availableActions.put(activePlayer, observedActions);
             actionComputeTime += (System.nanoTime() - s);
 
             if (observedActions.isEmpty()) {
@@ -404,7 +405,6 @@ public class Game {
             }
 
             actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
-            lastObservedActions = observedActions;
 
             if (gameState.coreGameParameters.verbose)
                 System.out.println("Round: " + gameState.getRoundCounter());
@@ -415,7 +415,7 @@ public class Game {
             // start timer for this player
             gameState.playerTimer[activePlayer].resume();
 
-            AbstractAction action = null;
+            AbstractAction action;
             if (observedActions.size() == 1 && !currentPlayer.considerSingletonActions) {
                 action = observedActions.getFirst();
                 currentPlayer.registerUpdatedObservation(observation);
@@ -461,7 +461,7 @@ public class Game {
         }
 
         AbstractAction finalAction = actionsChosen.size() == 1
-                ? actionsChosen.get(activePlayers.get(0))
+                ? actionsChosen.get(activePlayers.getFirst())
                 : new SimultaneousAction(actionsChosen);
 
         // apply once
@@ -469,12 +469,13 @@ public class Game {
         forwardModel.next(gameState, finalAction.copy());
         nextTime = (System.nanoTime() - s);
 
-        lastPlayer = activePlayers.get(activePlayers.size() - 1);
+        lastPlayer = activePlayers.getLast();
 
-        // fire ACTION_TAKEN once after applying
-        List<AbstractAction> finalObservedActions = lastObservedActions;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction.copy(), finalObservedActions, lastPlayer)));
-
+        // fire ACTION_TAKEN after applying, once per action
+        for (int player : activePlayers) {
+            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN,
+                    gameState, actionsChosen.get(player).copy(), availableActions.get(player), player)));
+        }
         if (debug) System.out.printf("Finishing oneAction for players %s%n", activePlayers);
         return finalAction;
     }
