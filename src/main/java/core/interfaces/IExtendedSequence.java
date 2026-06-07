@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,8 +47,23 @@ import java.util.List;
  */
 public interface IExtendedSequence {
 
+    /**
+     * AbstractGameState delegates to this from getCurrentPlayer() if this Extended Sequence is currently active.
+     *
+     * @param state The current game state
+     * @return The player Id whose move it is
+     */
+    int getCurrentPlayer(AbstractGameState state);
 
-    // TODO: What if IExtendedSequence is a Simultaneous Action!
+    /**
+     * If the IExtendedSequence represents a simultaneous action, then it is necessary to override
+     * the getCurrentSimultaneousPlayers method
+     * @return
+     */
+    default List<Integer> getCurrentSimultaneousPlayers(AbstractGameState state) {
+        return Collections.singletonList(getCurrentPlayer(state));
+    }
+
     /**
      * Forward Model delegates to this from computeAvailableActions() if this Extended Sequence is currently active.
      *
@@ -55,20 +71,30 @@ public interface IExtendedSequence {
      * @return the list of possible actions for the currentPlayer
      */
     List<AbstractAction> _computeAvailableActions(AbstractGameState state);
-    default List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
+    /**
+     * If the IExtendedSequence represents a simultaneous action, then it is necessary instead to implement
+     * _computeAvailableActions for a specific player
+     * @param state
+     * @param activePlayer
+     * @return
+     */
+    default List<AbstractAction> _computeAvailableActions(AbstractGameState state, int activePlayer) {
         return _computeAvailableActions(state);
-    }
-    default List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace, int activePlayer) {
-        return _computeAvailableActions(gameState, actionSpace);
     }
 
     /**
-     * TurnOrder delegates to this from getCurrentPlayer() if this Extended Sequence is currently active.
-     *
-     * @param state The current game state
-     * @return The player Id whose move it is
+     * Override this method if (and only if) you are implementing multiple action spaces for a game
      */
-    int getCurrentPlayer(AbstractGameState state);
+    default List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
+        return _computeAvailableActions(state);
+    }
+
+    /**
+     * Override this method if (and only if) you are implementing multiple action spaces for a game AND we have simultaneous moves
+     */
+    default List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace, int activePlayer) {
+        return _computeAvailableActions(gameState, actionSpace);
+    }
 
     /**
      * This is called by ForwardModel whenever an action has just been taken. It enables the IExtendedSequence

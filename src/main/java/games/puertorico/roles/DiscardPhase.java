@@ -24,10 +24,10 @@ public class DiscardPhase extends PuertoRicoRole<DiscardPhase> {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        return _computeAvailableActions(gs, currentPlayer);
+        return actionHelper(gs, currentPlayer);
     }
 
-    private List<AbstractAction> _computeAvailableActions(AbstractGameState gs, int player) {
+    private List<AbstractAction> actionHelper(AbstractGameState gs, int player) {
         PuertoRicoGameState state = (PuertoRicoGameState) gs;
         int warehouseSlotsAvailable = 0;
         if (state.hasActiveBuilding(player, SMALL_WAREHOUSE)) warehouseSlotsAvailable++;

@@ -133,28 +133,18 @@ public abstract class AbstractGameState {
      */
     public int getTeam(int player) { return player;}
 
-
-
-
-
     public int getCurrentPlayer() {
         return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }
 
     /**
-     * This new method retrns a list of the players in a game state that is simltaenois
-     *
-     *
+     * This method returns a list of the players in a game state that has simultaneous moves
      */
-
     public List<Integer> getCurrentSimultaneousPlayers(){
-        return Collections.singletonList(getCurrentPlayer());
+        return isActionInProgress() ?
+                actionsInProgress.peek().getCurrentSimultaneousPlayers(this) :
+                Collections.singletonList(getCurrentPlayer());
     }
-
-
-
-
-
 
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final Set<Integer> getWinners() {
@@ -181,10 +171,6 @@ public abstract class AbstractGameState {
         return gameType;
     }
 
-
-    protected void setHistoryAt(int index, Pair<Integer, AbstractAction> action) {
-        history.set(index, action);
-    }
     /**
      * @return All actions that have been executed on this state since reset()/initialisation
      */
