@@ -179,10 +179,10 @@ public abstract class AbstractForwardModel {
         List<AbstractAction> retValue;
         if (gameState.isActionInProgress()) {
             // we call appropriate method depending on the actionSpace and move simultaneity
-            if (actionSpace == null || actionSpace.isDefault()) {
+            if (actionSpace != null && !actionSpace.isDefault()) {
                 retValue = gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace, activePlayer);
             } else {
-                retValue = _computeAvailableActions(gameState, activePlayer);
+                retValue = gameState.getActionsInProgress().peek()._computeAvailableActions(gameState, activePlayer);
             }
         } else if (actionSpace != null && !actionSpace.isDefault()) {
             retValue = _computeAvailableActions(gameState, actionSpace, activePlayer);

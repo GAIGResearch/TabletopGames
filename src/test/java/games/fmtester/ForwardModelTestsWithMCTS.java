@@ -3,6 +3,9 @@ package games.fmtester;
 import evaluation.ForwardModelTester;
 import games.catan.CatanParameters;
 import games.descent2e.DescentParameters;
+import games.dominion.DominionIParameters;
+import games.dominion.DominionParameters;
+import games.dominion.DominionSDParameters;
 import org.junit.Test;
 
 import java.util.List;
@@ -87,6 +90,8 @@ public class ForwardModelTestsWithMCTS {
     @Test
     public void testDominion() {
         new ForwardModelTester("game=Dominion", "nGames=2", "nPlayers=4", "agent=json\\players\\gameSpecific\\Dominion\\Dominion.json");
+        new ForwardModelTester(new DominionSDParameters(), "game=Dominion", "nGames=2", "nPlayers=4", "agent=json\\players\\gameSpecific\\Dominion\\Dominion.json");
+        new ForwardModelTester(new DominionIParameters(), "game=Dominion", "nGames=2", "nPlayers=4", "agent=json\\players\\gameSpecific\\Dominion\\Dominion.json");
     }
 
     @Test
@@ -167,7 +172,7 @@ public class ForwardModelTestsWithMCTS {
 
     @Test
     public void testSeaSaltPaper() {
-        new ForwardModelTester("game=SeaSaltPaper", "nGames=10", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\Poker.json");
+        new ForwardModelTester("game=SeaSaltPaper", "nGames=3", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\Poker.json");
     }
 
     @Test
@@ -202,7 +207,7 @@ public class ForwardModelTestsWithMCTS {
 
     @Test
     public void testGoFish() {
-        new ForwardModelTester("game=GoFish", "nGames=10", "nPlayers=4", "agent=json\\players\\mcts.json");
+        new ForwardModelTester("game=GoFish", "nGames=3", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 
 }

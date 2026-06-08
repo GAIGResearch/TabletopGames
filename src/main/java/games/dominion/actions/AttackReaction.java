@@ -72,8 +72,7 @@ public class AttackReaction implements IExtendedSequence {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof AttackReaction) {
-            AttackReaction ar = (AttackReaction) other;
+        if (other instanceof AttackReaction ar) {
             return ar.defender == defender && ar.attacker == attacker && ar.cardsToPlay.equals(cardsToPlay);
         }
         return false;

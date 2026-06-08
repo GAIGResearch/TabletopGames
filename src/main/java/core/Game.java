@@ -371,7 +371,6 @@ public class Game {
             // copy state for this player
             double s = System.nanoTime();
             AbstractGameState observation = gameState.copy(activePlayer);
-            observation.setTurnOwner(activePlayer);
             copyTime += (System.nanoTime() - s);
 
             // compute available actions
