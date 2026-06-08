@@ -341,6 +341,9 @@ public abstract class AbstractGameState {
             s.playerTimer[i] = playerTimer[i].copy();
         }
 
+        if (playerId != -1 && coreGameParameters.partialObservable) {
+            s.redeterminise(playerId);
+        }
         // Update the list of components for ID matching in actions.
         s.addAllComponents();
         return s;
@@ -356,6 +359,13 @@ public abstract class AbstractGameState {
         historyText.add("Player " + player + " : " + action.getString(this));
     }
 
+    /**
+     * Override with logic to redeterminise the game state from the perspective of the specified player
+     * @param playerId
+     */
+    public void redeterminise(int playerId) {
+        // do nothing as the default
+    }
 
     // helper function to avoid time-consuming string manipulations if the message is not actually
     // going to be logged anywhere

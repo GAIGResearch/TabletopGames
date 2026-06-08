@@ -38,7 +38,7 @@ public class SGGameState extends AbstractGameState {
         super(gameParameters, nPlayers);
     }
 
-/// /////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////
 
 
     @Override
@@ -56,7 +56,7 @@ public class SGGameState extends AbstractGameState {
     }
 
 
-/// /////////////////////////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////////////////////////////
 
     @Override
     protected GameType _getGameType() {
@@ -113,51 +113,50 @@ public class SGGameState extends AbstractGameState {
         copy.discardPile = discardPile.copy();
         copy.cardChoices = new ArrayList<>();
 
-        if (playerId == -1) {
-            for (int i = 0; i < getNPlayers(); i++) {
-                List<ChooseCard> copiedItems = new ArrayList<>();
-                for (ChooseCard cc : cardChoices.get(i)) {
-                    copiedItems.add(cc.copy());
-                }
-                copy.cardChoices.add(copiedItems);
+        for (int i = 0; i < getNPlayers(); i++) {
+            List<ChooseCard> copiedItems = new ArrayList<>();
+            for (ChooseCard cc : cardChoices.get(i)) {
+                copiedItems.add(cc.copy());
             }
-        } else {
-            // Now we need to redeterminise
-            // We need to shuffle the hands of other players with the draw deck and then redraw
+            copy.cardChoices.add(copiedItems);
+        }
+        return copy;
+    }
 
-            // Add player hands unseen back to the draw pile
-            for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (!isHandKnown(playerId, p)) {
-                    copy.drawPile.add(playerHands.get(p));
-                }
+    @Override
+    public void redeterminise(int playerId) {
+        // We need to shuffle the hands of other players with the draw deck and then redraw
+
+        // Add player hands unseen back to the draw pile
+        for (int p = 0; p < playerHands.size(); p++) {
+            if (!isHandKnown(playerId, p)) {
+                drawPile.add(playerHands.get(p));
             }
-            copy.drawPile.shuffle(redeterminisationRnd);
+        }
+        drawPile.shuffle(redeterminisationRnd);
 
-            // Now we draw into the unknown player hands
-            for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (!isHandKnown(playerId, p)) {
-                    Deck<SGCard> hand = copy.playerHands.get(p);
-                    int handSize = hand.getSize();
-                    hand.clear();
-                    for (int i = 0; i < handSize; i++) {
-                        hand.add(copy.drawPile.draw());
-                    }
-                }
-            }
-
-            // We don't know what other players have chosen for this round, hide card choices
-            copy.turnOwner = playerId;
-            for (int i = 0; i < getNPlayers(); i++) {
-                copy.cardChoices.add(new ArrayList<>());
-                if (i == playerId) {
-                    for (ChooseCard cc : cardChoices.get(i)) {
-                        copy.cardChoices.get(i).add(cc.copy());
-                    }
+        // Now we draw into the unknown player hands
+        for (int p = 0; p < playerHands.size(); p++) {
+            if (!isHandKnown(playerId, p)) {
+                Deck<SGCard> hand = playerHands.get(p);
+                int handSize = hand.getSize();
+                hand.clear();
+                for (int i = 0; i < handSize; i++) {
+                    hand.add(drawPile.draw());
                 }
             }
         }
 
-        return copy;
+        // We don't know what other players have chosen for this round, hide card choices
+        setTurnOwner(playerId);
+        for (int i = 0; i < getNPlayers(); i++) {
+            cardChoices.add(new ArrayList<>());
+            if (i == playerId) {
+                for (ChooseCard cc : cardChoices.get(i)) {
+                    cardChoices.get(i).add(cc.copy());
+                }
+            }
+        }
     }
 
     /**
@@ -206,9 +205,9 @@ public class SGGameState extends AbstractGameState {
     }
 
     @Override
-    /**
-     * Tie break is the number of puddings
-     */
+/**
+ * Tie break is the number of puddings
+ */
     public double getTiebreak(int playerId, int tier) {
         // Tie-break is number of puddings
         return playedCardTypes[playerId].get(SGCard.SGCardType.Pudding).getValue();
