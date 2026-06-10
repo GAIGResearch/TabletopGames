@@ -1,0 +1,59 @@
+{
+  "id": "PCG 1039",
+  "act": 2,
+  "starting-xp": 2,
+  "starting-gold": 50,
+  "traits": [
+    "Building",
+    "Cursed",
+    "Wilderness"
+  ],
+  "monsters": [
+    [
+      "Lady Eliza Farrow:lieutenant",
+      "2A"
+    ],
+    [
+      "Zombie:group",
+      "7A"
+    ],
+    [
+      "Goblin Archer:group",
+      "6A"
+    ],
+    [
+      "Open:group",
+      "5A"
+    ]
+  ],
+  "tokens": [],
+  "rules": [],
+  "game-over": [
+    {
+      "id": "CountGameOver",
+      "count": {
+        "type": "NFiguresAlive",
+        "figureNameContains": "Hero"
+      },
+      "target": 0,
+      "comparison-type": "Equal",
+      "result-heroes": "LOSE_GAME",
+      "result-overlord": "WIN_GAME"
+    },
+    {
+      "id": "CountGameOver",
+      "count": {
+        "type": "NFiguresAlive",
+        "figureNameContains": "Monster"
+      },
+      "target": 0,
+      "comparison-type": "Equal",
+      "result-heroes": "WIN_GAME",
+      "result-overlord": "LOSE_GAME"
+    }
+  ],
+  "boards": [
+    "board1"
+  ],
+  "starting-tile": "14A"
+}

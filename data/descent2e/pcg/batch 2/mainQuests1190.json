@@ -1,0 +1,63 @@
+{
+  "id": "PCG 1190",
+  "act": 1,
+  "starting-xp": 7,
+  "starting-gold": 175,
+  "traits": [
+    "Building",
+    "Civilized",
+    "Cursed"
+  ],
+  "monsters": [
+    [
+      "Sir Alric Farrow:lieutenant",
+      "3B"
+    ],
+    [
+      "Lord Merick Farrow:lieutenant",
+      "5B"
+    ],
+    [
+      "Flesh Moulder:group",
+      "14B"
+    ],
+    [
+      "Open:group",
+      "10B"
+    ],
+    [
+      "Open:group",
+      "11B"
+    ]
+  ],
+  "tokens": [],
+  "rules": [],
+  "game-over": [
+    {
+      "id": "CountGameOver",
+      "count": {
+        "type": "NFiguresAlive",
+        "figureNameContains": "Hero"
+      },
+      "target": 0,
+      "comparison-type": "Equal",
+      "result-heroes": "LOSE_GAME",
+      "result-overlord": "WIN_GAME"
+    },
+    {
+      "id": "CountGameOver",
+      "count": {
+        "type": "NFiguresAlive",
+        "figureNameContains": "Monster"
+      },
+      "target": 0,
+      "comparison-type": "Equal",
+      "result-heroes": "WIN_GAME",
+      "result-overlord": "LOSE_GAME"
+    }
+  ],
+  "boards": [
+    "PCG-1190"
+  ],
+  "starting-tile": "exit1B"
+}

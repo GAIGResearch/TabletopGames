@@ -334,7 +334,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     // If an interrupt action has caused a target substitution, call it here
                     checkSubstitute(state);
 
-                    if (defender instanceof Hero) getWeaponBonuses(state, defendingFigure, true, false);
+                    if (defender instanceof Hero) getWeaponBonuses(state, defender.getComponentID(), true, false);
                     // if (defender instanceof Monster && ((Monster) defender).isLieutenant()) getWeaponBonuses(state, defendingFigure, false, false);
 
                     defenceRoll(state);

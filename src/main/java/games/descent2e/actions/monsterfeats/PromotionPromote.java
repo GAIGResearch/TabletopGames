@@ -55,7 +55,7 @@ public class PromotionPromote extends DescentAction {
 
         Monster newMaster = (Monster) minion;
         newMaster.removeAll();
-        minion.setComponentName(monsterName + " master " + (masterCounter + 1));
+        //minion.setComponentName(monsterName + " master " + (masterCounter + 1));
 
         int act = dgs.getCurrentQuest().getAct();
 

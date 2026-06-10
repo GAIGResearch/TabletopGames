@@ -1,0 +1,22 @@
+{
+    "ID": 1190,
+    "Status": "Good",
+    "Connectedness score": 1,
+    "Size score": 166,
+    "Tile score": 12,
+    "Consistency score": 1.0,
+    "Free score": 0,
+    "Geometry score": true,
+    "Group score": 5,
+    "Spawn score": 12.88888888888889,
+    "Monster repeats score": true,
+    "Health score": 75.33333333333333,
+    "Average Health score": 5.844827586206896,
+    "Spawning score": true,
+    "Complexity score": 1,
+    "Bonuses score": 1,
+    "Act score": 1,
+    "XP score": 7,
+    "Gold score": 175,
+    "Fitness score": 9.995372545334963
+}

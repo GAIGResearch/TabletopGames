@@ -1,0 +1,295 @@
+[
+    {
+        "type": "graph",
+        "verticesKey": "name",
+        "neighboursKey": "neighbours",
+        "maxNeighbours": -1,
+        "id": "PCG-1190",
+        "nodes": [
+            {
+                "name": [
+                    "String",
+                    "entrance1B"
+                ],
+                "orientation": [
+                    "Integer",
+                    1
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "10B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "3B"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "11B",
+                        "4B",
+                        "27B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "S-0",
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "4B"
+                ],
+                "orientation": [
+                    "Integer",
+                    1
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "3B",
+                        "endcap1B-1"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "N-0",
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "14B"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "27B",
+                        "8B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "27B"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "3B",
+                        "14B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "endcap1B-1"
+                ],
+                "orientation": [
+                    "Integer",
+                    3
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "4B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "5B"
+                ],
+                "orientation": [
+                    "Integer",
+                    2
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "10B",
+                        "exit1B",
+                        "11B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "N-0",
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "exit1B"
+                ],
+                "orientation": [
+                    "Integer",
+                    2
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "5B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "S-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "8B"
+                ],
+                "orientation": [
+                    "Integer",
+                    3
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "14B",
+                        "endcap1B-2"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "S-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "10B"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "entrance1B",
+                        "5B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "endcap1B-2"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "8B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "N-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "11B"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "3B",
+                        "5B"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "E-0",
+                        "W-0"
+                    ]
+                ]
+            }
+        ]
+    }
+]

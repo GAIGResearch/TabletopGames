@@ -1,0 +1,295 @@
+[
+    {
+        "type": "graph",
+        "verticesKey": "name",
+        "neighboursKey": "neighbours",
+        "maxNeighbours": -1,
+        "id": "PCG-1039",
+        "nodes": [
+            {
+                "name": [
+                    "String",
+                    "exit1A"
+                ],
+                "orientation": [
+                    "Integer",
+                    1
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "12A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "27A"
+                ],
+                "orientation": [
+                    "Integer",
+                    2
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "7A",
+                        "5A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "28A"
+                ],
+                "orientation": [
+                    "Integer",
+                    3
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "endcap1A",
+                        "extender1A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "7A"
+                ],
+                "orientation": [
+                    "Integer",
+                    3
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "27A",
+                        "14A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "E-0",
+                        "W-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "12A"
+                ],
+                "orientation": [
+                    "Integer",
+                    1
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "exit1A",
+                        "6A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "W-0",
+                        "N-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "6A"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "12A",
+                        "5A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "S-0",
+                        "N-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "5A"
+                ],
+                "orientation": [
+                    "Integer",
+                    1
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "6A",
+                        "27A",
+                        "2A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "S-0",
+                        "W-0",
+                        "N-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "endcap1A"
+                ],
+                "orientation": [
+                    "Integer",
+                    1
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "28A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "E-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "entrance1A"
+                ],
+                "orientation": [
+                    "Integer",
+                    2
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "2A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "S-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "14A"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "7A",
+                        "extender1A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "E-0",
+                        "W-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "extender1A"
+                ],
+                "orientation": [
+                    "Integer",
+                    1
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "14A",
+                        "28A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "E-0",
+                        "W-0"
+                    ]
+                ]
+            },
+            {
+                "name": [
+                    "String",
+                    "2A"
+                ],
+                "orientation": [
+                    "Integer",
+                    0
+                ],
+                "neighbours": [
+                    "String[]",
+                    [
+                        "entrance1A",
+                        "5A"
+                    ]
+                ],
+                "connections": [
+                    "String[]",
+                    [
+                        "N-0",
+                        "S-0"
+                    ]
+                ]
+            }
+        ]
+    }
+]

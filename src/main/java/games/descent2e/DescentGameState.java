@@ -264,6 +264,28 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 retValue += 10.0 * getPlayerResults()[playerId].value;
                 break;
             default:
+                double maxHeroesHealth = 0.0;
+                double currentHeroesHealth = 0.0;
+                for (Hero h : getHeroes()){
+                    maxHeroesHealth += h.getAttributeMax(Figure.Attribute.Health);
+                    currentHeroesHealth += h.getAttributeValue(Figure.Attribute.Health);
+                }
+                double maxMonsterHealth = 0.0;
+                double currentMonsterHealth = 0.0;
+                for (Monster m : getAllOriginalMonsters()) {
+                    maxMonsterHealth += m.getAttributeMax(Figure.Attribute.Health);
+                }
+                for (Monster m : getAllMonsters()) {
+                    currentMonsterHealth += m.getAttributeValue(Figure.Attribute.Health);
+                }
+
+                double heroesHealth = isOverlord * (10.0 * currentHeroesHealth / maxHeroesHealth);
+                double monstersHealth = isOverlord * (10.0 * currentMonsterHealth / maxMonsterHealth);
+                retValue = heroesHealth - monstersHealth;
+                if (monstersHealth == 0.0)
+                    retValue += 10.0 * isOverlord;
+                if (heroesHealth == 0.0)
+                    retValue -= 10.0 * isOverlord;
                 break;
         }
 
