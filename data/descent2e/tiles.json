@@ -2,6 +2,8 @@
   {
     "id": "1A",
     "size": [10, 8],
+    "space": 48,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "open", "open", "null", "null", "null", "null"],
@@ -17,6 +19,8 @@
   {
     "id": "1B",
     "size": [10, 8],
+    "space": 44,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "open", "open", "null", "null", "null", "null"],
@@ -32,6 +36,8 @@
   {
     "id": "2A",
     "size": [8, 8],
+    "space": 36,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -47,6 +53,8 @@
   {
     "id": "2B",
     "size": [8, 8],
+    "space": 36,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -62,6 +70,8 @@
   {
     "id": "3A",
     "size": [8, 6],
+    "space": 24,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -75,6 +85,8 @@
   {
     "id": "3B",
     "size": [8, 6],
+    "space": 24,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -88,6 +100,8 @@
   {
     "id": "4A",
     "size": [8, 8],
+    "space": 30,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -103,11 +117,13 @@
   {
     "id": "4B",
     "size": [8, 8],
+    "space": 36,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
-      ["null", "pit", "pit", "pit", "pit", "plain", "pit", "null"],
       ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "pit", "pit", "pit", "pit", "plain", "pit", "null"],
       ["open", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
       ["open", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
       ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
@@ -118,6 +134,8 @@
   {
     "id": "5A",
     "size": [8, 6],
+    "space": 24,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -131,6 +149,8 @@
   {
     "id": "5B",
     "size": [8, 6],
+    "space": 24,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -144,6 +164,8 @@
   {
     "id": "6A",
     "size": [6, 8],
+    "space": 24,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -159,6 +181,8 @@
   {
     "id": "6B",
     "size": [6, 8],
+    "space": 24,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -174,6 +198,8 @@
   {
     "id": "7A",
     "size": [8, 6],
+    "space": 20,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "open", "open", "null", "null"],
@@ -187,6 +213,8 @@
   {
     "id": "7B",
     "size": [8, 6],
+    "space": 24,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null", "null", "null"],
@@ -200,6 +228,8 @@
   {
     "id": "8A",
     "size": [6, 6],
+    "space": 16,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -213,6 +243,8 @@
   {
     "id": "8B",
     "size": [6, 6],
+    "space": 16,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -226,6 +258,8 @@
   {
     "id": "9A",
     "size": [6, 6],
+    "space": 16,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -239,6 +273,8 @@
   {
     "id": "9B",
     "size": [6, 6],
+    "space": 16,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -252,7 +288,8 @@
   {
     "id": "10A",
     "size": [6, 6],
-    "img": "",
+    "space": 16,
+    "nodes": 2,
     "class": "String",
     "grid":
     [
@@ -267,6 +304,8 @@
   {
     "id": "10B",
     "size": [6, 6],
+    "space": 16,
+    "nodes": 2,
     "class": "String",
     "grid" :
     [
@@ -281,6 +320,8 @@
   {
     "id": "11A",
     "size": [6, 6],
+    "space": 16,
+    "nodes": 2,
     "class": "String",
     "grid":
       [
@@ -295,6 +336,8 @@
   {
     "id": "11B",
     "size": [6, 6],
+    "space": 16,
+    "nodes": 2,
     "class": "String",
     "grid" :
       [
@@ -309,6 +352,8 @@
   {
     "id": "12A",
     "size": [7, 7],
+    "space": 19,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null"],
@@ -323,6 +368,8 @@
   {
     "id": "12B",
     "size": [7, 7],
+    "space": 19,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null"],
@@ -337,6 +384,8 @@
   {
     "id": "13A",
     "size": [8, 8],
+    "space": 26,
+    "nodes": 2,
     "class": "String",
     "grid":
     [
@@ -353,6 +402,8 @@
   {
     "id": "13B",
     "size": [8, 8],
+    "space": 26,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -368,6 +419,8 @@
   {
     "id": "14A",
     "size": [6, 6],
+    "space": 14,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -381,6 +434,8 @@
   {
     "id": "14B",
     "size": [6, 6],
+    "space": 14,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -394,6 +449,8 @@
   {
     "id": "15A",
     "size": [7, 6],
+    "space": 14,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null"],
@@ -407,6 +464,8 @@
   {
     "id": "15B",
     "size": [7, 6],
+    "space": 14,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null", "null"],
@@ -420,6 +479,8 @@
   {
     "id": "16A",
     "size": [6, 6],
+    "space": 12,
+    "nodes": 4,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -433,6 +494,8 @@
   {
     "id": "16B",
     "size": [6, 6],
+    "space": 12,
+    "nodes": 4,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -446,6 +509,8 @@
   {
     "id": "17A",
     "size": [6, 6],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null"],
@@ -459,6 +524,8 @@
   {
     "id": "17B",
     "size": [6, 6],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "open", "open", "null", "null", "null"],
@@ -472,6 +539,8 @@
   {
     "id": "18A",
     "size": [6, 6],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null"],
@@ -485,6 +554,8 @@
   {
     "id": "18B",
     "size": [6, 6],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "open", "open", "null", "null", "null"],
@@ -498,6 +569,8 @@
   {
     "id": "19A",
     "size": [5, 8],
+    "space": 18,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null"],
@@ -513,6 +586,8 @@
   {
     "id": "19B",
     "size": [5, 8],
+    "space": 18,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "open", "open", "null", "null"],
@@ -528,6 +603,8 @@
   {
     "id": "20A",
     "size": [5, 10],
+    "space": 20,
+    "nodes": 2,
     "class": "String",
     "grid" :
       [
@@ -546,6 +623,8 @@
   {
     "id": "20B",
     "size": [5, 10],
+    "space": 20,
+    "nodes": 2,
     "class": "String",
     "grid":
       [
@@ -564,6 +643,8 @@
   {
     "id": "21A",
     "size": [8, 5],
+    "space": 18,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -576,6 +657,8 @@
   {
     "id": "21B",
     "size": [8, 5],
+    "space": 18,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -588,6 +671,8 @@
   {
     "id": "22A",
     "size": [8, 4],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -599,6 +684,8 @@
   {
     "id": "22B",
     "size": [8, 4],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -610,6 +697,8 @@
   {
     "id": "23A",
     "size": [8, 4],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -621,6 +710,8 @@
   {
     "id": "23B",
     "size": [8, 4],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -632,6 +723,8 @@
   {
     "id": "24A",
     "size": [8, 4],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -643,6 +736,8 @@
   {
     "id": "24B",
     "size": [8, 4],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -654,6 +749,8 @@
   {
     "id": "25A",
     "size": [4, 8],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "open", "open", "null"],
@@ -669,6 +766,8 @@
   {
     "id": "25B",
     "size": [4, 8],
+    "space": 12,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "open", "open", "null"],
@@ -684,6 +783,8 @@
   {
     "id": "26A",
     "size": [6, 5],
+    "space": 10,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -696,6 +797,8 @@
   {
     "id": "26B",
     "size": [6, 5],
+    "space": 10,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -708,6 +811,8 @@
   {
     "id": "27A",
     "size": [4, 6],
+    "space": 8,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null"],
@@ -721,6 +826,8 @@
   {
     "id": "27B",
     "size": [4, 6],
+    "space": 8,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null"],
@@ -734,7 +841,8 @@
   {
     "id": "28A",
     "size": [6, 4],
-    "img": "",
+    "space": 8,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null"],
@@ -746,6 +854,8 @@
   {
     "id": "28B",
     "size": [6, 4],
+    "space": 8,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "open", "open", "null", "null", "null"],
@@ -757,6 +867,8 @@
   {
     "id": "29A",
     "size": [6, 4],
+    "space": 8,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -768,6 +880,8 @@
   {
     "id": "29B",
     "size": [6, 4],
+    "space": 8,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -779,6 +893,8 @@
   {
     "id": "30A",
     "size": [6, 4],
+    "space": 8,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -790,6 +906,8 @@
   {
     "id": "30B",
     "size": [6, 4],
+    "space": 8,
+    "nodes": 2,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -801,6 +919,8 @@
   {
     "id": "extender1A",
     "size": [4, 3],
+    "space": 2,
+    "nodes": 2,
     "class": "String",
     "grid":
     [
@@ -812,6 +932,8 @@
   {
     "id": "extender1B",
     "size": [4, 3],
+    "space": 2,
+    "nodes": 2,
     "class": "String",
     "grid":
     [
@@ -823,6 +945,8 @@
   {
     "id": "endcap1A",
     "size": [4, 3],
+    "space": 2,
+    "nodes": 1,
     "class": "String",
     "grid":
     [
@@ -834,6 +958,8 @@
   {
     "id": "endcap1B",
     "size": [4, 3],
+    "space": 2,
+    "nodes": 1,
     "class": "String",
     "grid":
     [
@@ -845,6 +971,8 @@
   {
     "id": "entrance1A",
     "size": [4, 4],
+    "space": 4,
+    "nodes": 1,
     "class": "String",
     "grid":
     [
@@ -857,6 +985,8 @@
   {
     "id": "entrance1B",
     "size": [4, 4],
+    "space": 4,
+    "nodes": 1,
     "class": "String",
     "grid":
     [
@@ -869,6 +999,8 @@
   {
     "id": "exit1A",
     "size": [4, 4],
+    "space": 4,
+    "nodes": 1,
     "class": "String",
     "grid":
     [
@@ -881,6 +1013,8 @@
   {
     "id": "exit1B",
     "size": [4, 4],
+    "space": 4,
+    "nodes": 1,
     "class": "String",
     "grid":
     [
@@ -893,6 +1027,8 @@
   {
     "id": "transition",
     "size": [4, 4],
+    "space": 4,
+    "nodes": 2,
     "class": "String",
     "grid":
     [

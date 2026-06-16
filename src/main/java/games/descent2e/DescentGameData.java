@@ -564,4 +564,20 @@ public class DescentGameData extends AbstractGameData {
         }
         return copy;
     }
+
+    public List<GridBoard> getTiles() {
+        return tiles;
+    }
+    public List<GraphBoard> getBoardConfigurations() {
+        return boardConfigurations;
+    }
+    public List<Quest> getQuests() {
+        return quests;
+    }
+    public HashMap<String, HashMap<String, Monster>> getMonsters() {
+        return monsters;
+    }
+    public HashMap<String, HashMap<String, Monster>> getLieutenants() {
+        return lieutenants;
+    }
 }
