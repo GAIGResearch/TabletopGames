@@ -2,6 +2,7 @@ package core.components;
 
 import core.CoreConstants;
 import core.interfaces.IComponentContainer;
+import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
 import org.json.simple.JSONArray;
@@ -356,6 +357,12 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
 
         if (board.get("img") != null) {
             properties.put(imgHash, new PropertyString((String) board.get("img")));
+        }
+        if (board.get("nodes") != null) {
+            properties.put(100, new PropertyInt("Nodes", ((Long) board.get("nodes")).intValue()));
+        }
+        if (board.get("space") != null) {
+            properties.put(900, new PropertyInt("Size", ((Long) board.get("space")).intValue()));
         }
 
         this.grid = new BoardNode[height][width];
