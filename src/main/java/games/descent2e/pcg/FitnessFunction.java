@@ -1,5 +1,6 @@
 package games.descent2e.pcg;
 
+import com.google.apps.card.v1.Grid;
 import core.components.BoardNode;
 import core.components.Component;
 import core.components.GraphBoard;
@@ -126,15 +127,16 @@ public class FitnessFunction {
         int size = 0;
         List<String> nodes = new ArrayList<>();
         for (BoardNode node : board.getBoardNodes()) {
-            nodes.add(node.getComponentName());
+            nodes.add(node.getComponentName().split("-")[0]);
         }
         int checked = 0;
-        for (GridBoard tile : GenerateBoards.tiles) {
-            if (nodes.contains(tile.getComponentName())) {
-                checked++;
-                size += Integer.parseInt(tile.getProperty(900).toString());
-                if (checked >= nodes.size())
+        for (String node : nodes) {
+            for (GridBoard tile : GenerateBoards.tiles) {
+                if (tile.getComponentName().contains(node)) {
+                    checked++;
+                    size += Integer.parseInt(tile.getProperty(900).toString());
                     break;
+                }
             }
         }
         return size;
@@ -231,7 +233,7 @@ public class FitnessFunction {
                     monsterHealth += (act == 1) ? (float) 132 / 9 : (float) 194 / 9;
                 }
             }
-            if (name[1].contains("lieutenant")) {
+            else if (name[1].contains("lieutenant")) {
                 totalMonsters++;
                 monsterHealth += GenerateBoards.lieutenants.get(name[0]).get(act + "-4").getAttributeValue(Figure.Attribute.Health);
             }
@@ -251,14 +253,18 @@ public class FitnessFunction {
         return monsterHealth;
     }
 
-    static List<Float> fitness(Quest quest, GraphBoard board) {
+    static List<Float> getFitness(Quest quest, GraphBoard board) {
         List<Float> scores = new ArrayList<>();
 
         // Connectedness
         float connected = connectedness(board);
 
+        // Map Size
+        float size = getBoardSize(board);
+
         // Geometry
-        float geometry = 1f;
+        Pair<int[][], Integer> result = createBoard(quest, board);
+        float geometry = size == (float) result.b ? 1f : 0f;
 
         // Monster Group Repeats
         // Inverse Boolean = Score 1 if no repeats, 0 if repeats found
@@ -270,9 +276,6 @@ public class FitnessFunction {
 
         // Map Consistency
         float consistency = consistency(board);
-
-        // Map Size
-        float size = getBoardSize(board);
 
         // Monster Groups
         float groups = quest.getMonsters().size();
@@ -303,7 +306,7 @@ public class FitnessFunction {
         return scores;
     }
 
-    static void createBoard(Quest q, GraphBoard b) {
+    static Pair<int[][], Integer> createBoard(Quest q, GraphBoard b) {
 
         // 3. Put together the master grid board
         // Find maximum board width and height, if all were put together side by side
@@ -372,8 +375,9 @@ public class FitnessFunction {
                 }
             }
 
-            System.out.println("Pootis");
+            return new Pair<>(trimTileRef, sizeCounter);
         }
+        return null;
     }
 
     private static void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,

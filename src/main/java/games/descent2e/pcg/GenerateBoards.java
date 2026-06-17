@@ -38,19 +38,20 @@ public class GenerateBoards {
         lieutenants = data.getLieutenants();
         Quest quest = originalQuests.get(0);
         Quest quest2 = originalQuests.get(1);
-        FitnessFunction.createBoard(quest, Objects.requireNonNull(getBoardByName(quest.getBoards().get(0))));
-        List<Float> fitness = FitnessFunction.fitness(quest, Objects.requireNonNull(getBoardByName(quest.getBoards().get(0))));
         // FitnessFunction.getBoardSize(Objects.requireNonNull(getBoardByName(quest.getBoards().get(0))));
-        Pair<Quest, GraphBoard> offspring = createOffspring(quest, quest2);
-        List<String[]> monsters = quest.getMonsters();
-        monsters = mutateMonsters(monsters);
-        mutateAct(quest);
-        mutateXP(quest);
-        mutateTraits(quest);
+        Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(quest, quest2);
+
+        if (offspring.b)
+            feasible.add(offspring.a);
+        else
+            infeasible.add(offspring.a);
+
         System.out.println("Pootis!");
     }
 
     static GridBoard getTileByName(String name) {
+        if (name.contains("-"))
+            name = name.split("-")[0];
         for (GridBoard tile : tiles) {
             if (tile.getComponentName().equals(name))
                 return tile;
@@ -62,7 +63,7 @@ public class GenerateBoards {
         return Random.randInt(100);
     }
 
-    static Pair<Quest, GraphBoard> createOffspring(Quest parent1, Quest parent2) {
+    static Pair<Pair<Quest, GraphBoard>, Boolean> createOffspring(Quest parent1, Quest parent2) {
         Quest newQuest;
         GraphBoard newBoard;
         Quest otherParent;
@@ -153,13 +154,52 @@ public class GenerateBoards {
             forceMutate = (finalMonsters.size() < ControlVariables.GROUP_MIN) || (finalMonsters.size() > ControlVariables.GROUP_MAX);
         }
 
-
-
         newQuest.setMonsters(finalMonsters);
+
+        mutateAct(newQuest);
+        mutateXP(newQuest);
+        mutateTraits(newQuest);
+
+        List<Float> scores = FitnessFunction.getFitness(newQuest, newBoard);
+
+        boolean feasible = checkFeasible(scores);
 
         System.out.println("Pootis");
 
-        return new Pair<Quest, GraphBoard>(newQuest, newBoard);
+        Pair<Quest, GraphBoard> offspring = new Pair<>(newQuest, newBoard);
+
+        return new Pair<>(offspring, feasible);
+    }
+
+    static boolean checkFeasible(List<Float> scores) {
+
+        // Connectedness Check
+        if (scores.get(0) < 1f)
+            return false;
+
+        // Geometry Check
+        if (scores.get(1) < 1f)
+            return false;
+
+        // No Repeating Monsters Check
+        if (scores.get(2) < 1f)
+            return false;
+
+        // Consistency Check
+        if (scores.get(4) < 1f)
+            return false;
+
+        // Board Size Check
+        float size = scores.get(5);
+        if (size > ControlVariables.SIZE_MAX || size < ControlVariables.SIZE_MIN)
+            return false;
+
+        // Monster Group Check
+        float groups = scores.get(6);
+        if (groups > ControlVariables.GROUP_MAX || groups < ControlVariables.GROUP_MIN)
+            return false;
+
+        return true;
     }
 
     static String getRandomMonster(List<String> oldMonsters) {

@@ -100,7 +100,7 @@
   {
     "id": "4A",
     "size": [8, 8],
-    "space": 30,
+    "space": 36,
     "nodes": 2,
     "class": "String",
     "grid": [
@@ -110,7 +110,7 @@
       ["open", "plain", "plain", "block", "plain", "plain", "plain", "null"],
       ["open", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
       ["null", "plain", "plain", "plain", "plain", "plain", "block", "null"],
-      ["null", "plain", "plain", "plain", "plain", "block", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "block", "block", "null"],
       ["null", "null", "null", "null", "null", "null", "null", "null"]
     ]
   },
