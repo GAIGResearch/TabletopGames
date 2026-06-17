@@ -6,14 +6,12 @@ import core.components.GraphBoard;
 import core.components.GridBoard;
 import games.descent2e.DescentGameData;
 import games.descent2e.DescentGameState;
+import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
 import org.apache.hadoop.yarn.state.Graph;
 import utilities.Pair;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class GenerateBoards {
 
@@ -24,8 +22,8 @@ public class GenerateBoards {
 
     public static List<GridBoard> tiles = new ArrayList<>();
 
-    public static List<String> monsters = new ArrayList<>();
-    public static List<String> lieutenants = new ArrayList<>();
+    public static HashMap<String, HashMap<String, Monster>> monsters;
+    public static HashMap<String, HashMap<String, Monster>> lieutenants;
 
     public static List<Pair<Quest, GraphBoard>> feasible = new ArrayList<>();
     public static List<Pair<Quest, GraphBoard>> infeasible = new ArrayList<>();
@@ -36,10 +34,13 @@ public class GenerateBoards {
         originalBoards = data.getBoardConfigurations();
         originalQuests = data.getQuests();
         tiles = data.getTiles();
-        monsters.addAll(data.getMonsters().keySet());
-        lieutenants.addAll(data.getLieutenants().keySet());
+        monsters = data.getMonsters();
+        lieutenants = data.getLieutenants();
         Quest quest = originalQuests.get(0);
         Quest quest2 = originalQuests.get(1);
+        FitnessFunction.createBoard(quest, Objects.requireNonNull(getBoardByName(quest.getBoards().get(0))));
+        List<Float> fitness = FitnessFunction.fitness(quest, Objects.requireNonNull(getBoardByName(quest.getBoards().get(0))));
+        // FitnessFunction.getBoardSize(Objects.requireNonNull(getBoardByName(quest.getBoards().get(0))));
         Pair<Quest, GraphBoard> offspring = createOffspring(quest, quest2);
         List<String[]> monsters = quest.getMonsters();
         monsters = mutateMonsters(monsters);
@@ -47,6 +48,14 @@ public class GenerateBoards {
         mutateXP(quest);
         mutateTraits(quest);
         System.out.println("Pootis!");
+    }
+
+    static GridBoard getTileByName(String name) {
+        for (GridBoard tile : tiles) {
+            if (tile.getComponentName().equals(name))
+                return tile;
+        }
+        return null;
     }
 
     static int mutate() {
@@ -83,7 +92,30 @@ public class GenerateBoards {
 
         // -- BOARD MUTATIONS ---
 
+        List<BoardNode> newNodes = newBoard.getComponents();
+        List<BoardNode> oldNodes = otherBoard.getComponents();
+        List<String> tiles = new ArrayList<>();
+        for (BoardNode node : newNodes) {
+            tiles.add(node.getComponentName());
+        }
+        // 10% crossover chance
+        for (BoardNode node : oldNodes) {
+            if (Random.randInt(10) < 1) {
+                // Make sure we don't add duplicate Monsters
+                if (!tiles.contains(node.getComponentName()) || node.getComponentName().contains("extender") ||
+                        node.getComponentName().contains("endcap") || node.getComponentName().contains("transition"))
+                    newNodes.add(node);
+            }
+        }
 
+        List<BoardNode> finalNodes = new ArrayList<>(newNodes);
+        for (BoardNode node : newNodes) {
+            if (Random.randInt(10) < 1) {
+                finalNodes.remove(node);
+            }
+        }
+
+        newBoard.setBoardNodes(finalNodes);
 
         // --- MONSTER MUTATIONS ---
 
@@ -121,11 +153,11 @@ public class GenerateBoards {
             forceMutate = (finalMonsters.size() < ControlVariables.GROUP_MIN) || (finalMonsters.size() > ControlVariables.GROUP_MAX);
         }
 
+
+
         newQuest.setMonsters(finalMonsters);
 
         System.out.println("Pootis");
-
-
 
         return new Pair<Quest, GraphBoard>(newQuest, newBoard);
     }
@@ -144,15 +176,15 @@ public class GenerateBoards {
             return "Open:group";
 
         if (type >= (100 - ControlVariables.LIEUTENANT)) {
-            toAdd.addAll(lieutenants);
+            toAdd.addAll(lieutenants.keySet());
             monType = ":lieutenant";
-            other.addAll(monsters);
+            other.addAll(monsters.keySet());
             otherType = ":group";
         }
         else {
-            toAdd.addAll(monsters);
+            toAdd.addAll(monsters.keySet());
             monType = ":group";
-            other.addAll(lieutenants);
+            other.addAll(lieutenants.keySet());
             otherType = ":lieutenant";
         }
 
