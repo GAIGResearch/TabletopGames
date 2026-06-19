@@ -172,10 +172,10 @@ public class FitnessFunction {
             else {
                 int orientation = ((PropertyInt) node.getProperty("orientation")).value;
                 String[] cons = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                BoardNode[] neighbours = node.getNeighbours().keySet().toArray(new BoardNode[0]);
+                String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
                 for (int i = 0; i < neighbours.length; i++) {
                     connections++;
-                    String neighbour = neighbours[i].getComponentName();
+                    String neighbour = neighbours[i];
                     String connect = cons[i];
                     switch (orientation) {
                         case 0:
