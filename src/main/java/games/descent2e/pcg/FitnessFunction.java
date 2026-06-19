@@ -303,6 +303,9 @@ public class FitnessFunction {
         float fitness = fitness(scores);
         scores.add(fitness);
 
+        boolean feasible = GenerateBoards.checkFeasible(scores);
+        System.out.println(feasible);
+
         return scores;
     }
 
@@ -408,14 +411,14 @@ public class FitnessFunction {
 
                     // Set
                     board[i][j] = tileGrid[i - y][j - x].copy();
-                    board[i][j].setProperty(new PropertyInt("connections", tileToAdd.getComponentID()));
+                    board[i][j].setProperty(new PropertyInt("connections", (tileToAdd.getComponentID()+1)));
 
                     // Don't keep references for edge tiles
                     if (board[i][j] == null || board[i][j].getComponentName().equals("edge")
                             || board[i][j].getComponentName().equals("open")) continue;
 
                     // Set references
-                    tileReferences[i][j] = tile.getComponentID();
+                    tileReferences[i][j] = (tile.getComponentID()+1);
                     }
             }
 

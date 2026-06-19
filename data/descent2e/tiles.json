@@ -19,7 +19,7 @@
   {
     "id": "1B",
     "size": [10, 8],
-    "space": 44,
+    "space": 48,
     "nodes": 3,
     "class": "String",
     "grid": [
@@ -198,7 +198,7 @@
   {
     "id": "7A",
     "size": [8, 6],
-    "space": 20,
+    "space": 24,
     "nodes": 2,
     "class": "String",
     "grid": [

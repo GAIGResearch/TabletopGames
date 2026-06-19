@@ -38,6 +38,13 @@ public class GenerateBoards {
         lieutenants = data.getLieutenants();
         Quest quest = originalQuests.get(0);
         Quest quest2 = originalQuests.get(1);
+
+        for (Quest q : originalQuests) {
+            System.out.println(q.getBoards());
+            List<Float> fitness = FitnessFunction.getFitness(q, Objects.requireNonNull(getBoardByName(q.getBoards().get(0))));
+            System.out.println(fitness.get(fitness.size()-1));
+        }
+
         // FitnessFunction.getBoardSize(Objects.requireNonNull(getBoardByName(quest.getBoards().get(0))));
         Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(quest, quest2);
 
@@ -174,30 +181,41 @@ public class GenerateBoards {
     static boolean checkFeasible(List<Float> scores) {
 
         // Connectedness Check
-        if (scores.get(0) < 1f)
+        if (scores.get(0) < 1f) {
+            System.out.println("Connectedness Failure");
             return false;
+        }
 
         // Geometry Check
-        if (scores.get(1) < 1f)
+        if (scores.get(1) < 1f) {
+            System.out.println("Geometry Failure");
             return false;
+        }
 
         // No Repeating Monsters Check
-        if (scores.get(2) < 1f)
+        if (scores.get(2) < 1f) {
+            System.out.println("Repeating Groups Failure");
             return false;
+        }
 
         // Consistency Check
-        if (scores.get(4) < 1f)
+        if (scores.get(4) < 1f) {
+            System.out.println("Consistency Failure");
             return false;
+        }
 
         // Board Size Check
         float size = scores.get(5);
-        if (size > ControlVariables.SIZE_MAX || size < ControlVariables.SIZE_MIN)
+        if (size > ControlVariables.SIZE_MAX || size < ControlVariables.SIZE_MIN) {
+            System.out.println("Size Failure");
             return false;
-
+        }
         // Monster Group Check
         float groups = scores.get(6);
-        if (groups > ControlVariables.GROUP_MAX || groups < ControlVariables.GROUP_MIN)
+        if (groups > ControlVariables.GROUP_MAX || groups < ControlVariables.GROUP_MIN) {
+            System.out.println("Group Count Failure");
             return false;
+        }
 
         return true;
     }

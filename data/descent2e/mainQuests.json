@@ -1264,9 +1264,9 @@
     "starting-gold": 200,
     "traits": ["Building", "Cursed", "Wilderness"],
     "monsters": [
-      ["Baron Zachareth:lieutenant", "8A"],
+      ["Belthir:lieutenant", "8A"],
       ["Baron Zachareth:lieutenant", "4A"],
-      ["Baron Zachareth:lieutenant", "5A"],
+      ["Splig:lieutenant", "5A"],
       ["Zombie:group", "8A"],
       ["Elemental:group", "3A"],
       ["Open:group", "2A"],
@@ -1347,7 +1347,7 @@
       }
     ],
     "boards": [
-      "blood-and-betrayal-2A"
+      "blood-and-betrayal-2a"
     ],
     "starting-tile" : "23B"
   },
