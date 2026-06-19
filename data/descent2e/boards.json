@@ -1615,7 +1615,7 @@
       },
       {
         "name": ["String", "extender1B-1"],
-        "orientation": ["Integer", 1],
+        "orientation": ["Integer", 0],
         "neighbours": ["String[]", ["16B", "12B"]],
         "connections": ["String[]", ["N-0", "S-0"]]
       },
@@ -1627,7 +1627,7 @@
       },
       {
         "name": ["String", "extender1B-2"],
-        "orientation": ["Integer", 0],
+        "orientation": ["Integer", 1],
         "neighbours": ["String[]", ["12B", "23B"]],
         "connections": ["String[]", ["W-0", "E-0"]]
       },
@@ -1640,13 +1640,19 @@
       {
         "name": ["String", "28B"],
         "orientation": ["Integer", 2],
-        "neighbours": ["String[]", ["23B", "3B"]],
+        "neighbours": ["String[]", ["23B", "extender1B-3"]],
+        "connections": ["String[]", ["S-0", "N-0"]]
+      },
+      {
+        "name": ["String", "extender1B-3"],
+        "orientation": ["Integer", 0],
+        "neighbours": ["String[]", ["28B", "3B"]],
         "connections": ["String[]", ["S-0", "N-0"]]
       },
       {
         "name": ["String", "3B"],
         "orientation": ["Integer", 0],
-        "neighbours": ["String[]", ["16B", "28B", "24B"]],
+        "neighbours": ["String[]", ["16B", "extender1B-3", "24B"]],
         "connections": ["String[]", ["W-0", "S-0", "E-0"]]
       },
       {
