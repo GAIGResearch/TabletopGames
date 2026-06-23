@@ -339,7 +339,6 @@ public class FitnessFunction {
         int[][] tileReferences = new int[height][width];  // Reference to component ID of tile placed at that position
         HashMap<BoardNode, BoardNode> drawn = new HashMap<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
 
-        // TODO iterate all that are not already drawn, to make sure disconnected tiles are also placed.
         // StartX / Y Will need to be adjusted to not draw on top of existing things
 
         // Find first tile, as board node in the board configuration graph board

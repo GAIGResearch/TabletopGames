@@ -15,13 +15,6 @@ public class ControlVariables {
     public static final int SIZE_MIN = 100;
     public static final int SIZE_MAX = 300;
 
-    // How many boards we generate using purely the starting Quests
-    public static final int FIRSTLOOP = 400;
-
-    // How many boards we generate using the feasible/infeasible pools
-    public static final int GENERATIONLOOP = 200;
-    public static final int OFFSPRING = 10;
-
     // Likelihood for Monster Mutation
     public static final int MONSTER_MUTATE = 10;
     public static final int LIEUTENANT = 25;
