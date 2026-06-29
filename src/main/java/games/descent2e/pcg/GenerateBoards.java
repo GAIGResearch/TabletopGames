@@ -4,11 +4,11 @@ import com.google.crypto.tink.subtle.Random;
 import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.components.GridBoard;
+import core.properties.PropertyInt;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameData;
-import games.descent2e.DescentGameState;
 import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
-import org.apache.hadoop.yarn.state.Graph;
 import utilities.Pair;
 
 import java.util.*;
@@ -56,6 +56,7 @@ public class GenerateBoards {
             System.out.println(q.getBoards());
             List<Float> fitness = FitnessFunction.getFitness(q, Objects.requireNonNull(getBoardByName(q.getBoards().get(0))));
             System.out.println(fitness.get(fitness.size()-1));
+            //feasibleFitness.add(fitness);
         }
 
         int originalSize = originalQuests.size();
@@ -152,7 +153,7 @@ public class GenerateBoards {
         else if (p4.b > results.get(2).b)
             results.add(2, p4);
         else
-            results.add(p3);
+            results.add(p4);
 
         Quest first = feasible.get(results.get(0).a).a;
         Quest second = feasible.get(results.get(1).a).a;
@@ -308,7 +309,7 @@ public class GenerateBoards {
         // 10% crossover chance
         for (BoardNode node : oldNodes) {
             if (Random.randInt(10) < 1) {
-                // Make sure we don't add duplicate Monsters
+                // Make sure we don't add duplicate Tiles
                 if (!tiles.contains(node.getComponentName()) || node.getComponentName().contains("extender") ||
                         node.getComponentName().contains("endcap") || node.getComponentName().contains("transition"))
                     newNodes.add(node);
