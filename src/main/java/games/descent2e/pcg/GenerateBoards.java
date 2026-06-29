@@ -279,12 +279,12 @@ public class GenerateBoards {
         // Deciding which Parent is the Base Quest
         int choice = Random.randInt(2);
         if (choice == 0) {
-            newQuest = parent1;
-            otherParent = parent2;
+            newQuest = parent1.copy();
+            otherParent = parent2.copy();
         }
         else {
-            newQuest = parent2;
-            otherParent = parent1;
+            newQuest = parent2.copy();
+            otherParent = parent1.copy();
         }
 
         // Now, decide which Parent is the Base Board
