@@ -316,11 +316,20 @@ public class GenerateBoards {
             }
         }
 
-        // 10 % deletion chance
+        // 10% deletion chance
         List<BoardNode> finalNodes = new ArrayList<>(newNodes);
         for (BoardNode node : newNodes) {
             if (Random.randInt(10) < 1) {
                 finalNodes.remove(node);
+                for (BoardNode n : finalNodes) {
+                    String[] neighbours = ((PropertyStringArray) n.getProperty("neighbours")).getValues();
+                    for (int i = 0; i < neighbours.length; i++) {
+                        if (neighbours[i].equals(node.getComponentName())) {
+                            neighbours[i] = "FREE";
+                            break;
+                        }
+                    }
+                }
             }
         }
 
