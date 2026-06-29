@@ -316,10 +316,29 @@ public class GenerateBoards {
             }
         }
 
+        // 10 % deletion chance
         List<BoardNode> finalNodes = new ArrayList<>(newNodes);
         for (BoardNode node : newNodes) {
             if (Random.randInt(10) < 1) {
                 finalNodes.remove(node);
+            }
+        }
+
+        // 10% rotation chance
+        for (BoardNode node : finalNodes) {
+            if (Random.randInt(10) < 1) {
+                List<String> positions = List.of("N-0", "E-0", "S-0", "W-0");
+
+                int rotation = Random.randInt(positions.size() - 1) + 1;
+                int oldRotate = ((PropertyInt) node.getProperty("orientation")).value;
+                node.setProperty(new PropertyInt("orientation", (oldRotate + rotation) % 4));
+                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                for (int i = 0; i < connections.length; i++) {
+                    if (positions.contains(connections[i])) {
+                        int index = positions.indexOf(connections[i]);
+                        connections[i] = positions.get((index + rotation) % 4);
+                    }
+                }
             }
         }
 
