@@ -43,8 +43,8 @@ public class GenerateBoards {
 
     public static List<Pair<Quest, GraphBoard>> feasible = new ArrayList<>();
     public static List<Pair<Quest, GraphBoard>> infeasible = new ArrayList<>();
-    public static List<List<Float>> feasibleFitness = new ArrayList<>();
-    public static List<List<Float>> infeasibleFitness = new ArrayList<>();
+    public static List<HashMap<String, Float>> feasibleFitness = new ArrayList<>();
+    public static List<HashMap<String, Float>> infeasibleFitness = new ArrayList<>();
     public static List<Boolean> feasibleList = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -59,8 +59,8 @@ public class GenerateBoards {
 
         for (Quest q : originalQuests) {
             System.out.println(q.getBoards());
-            List<Float> fitness = FitnessFunction.getFitness(q, Objects.requireNonNull(getBoardByName(q.getBoards().get(0))));
-            System.out.println(fitness.get(fitness.size()-1));
+            HashMap<String, Float> scores = FitnessFunction.getFitness(q, Objects.requireNonNull(getBoardByName(q.getBoards().get(0))));
+            System.out.println(scores.get("Fitness"));
             //feasibleFitness.add(fitness);
         }
 
@@ -119,10 +119,10 @@ public class GenerateBoards {
             allDifferent = w != x && w != y && w != z && x != y && x != z && y != z;
         }
 
-        List<Float> one = feasibleFitness.get(w);
-        List<Float> two = feasibleFitness.get(x);
-        List<Float> three = feasibleFitness.get(y);
-        List<Float> four = feasibleFitness.get(z);
+        HashMap<String, Float> one = feasibleFitness.get(w);
+        HashMap<String, Float> two = feasibleFitness.get(x);
+        HashMap<String, Float> three = feasibleFitness.get(y);
+        HashMap<String, Float> four = feasibleFitness.get(z);
 
         int size = one.size();
 
@@ -130,19 +130,19 @@ public class GenerateBoards {
         float mean = 0;
         float variance = 0.2f;
         double noise = r.nextGaussian() * Math.sqrt(variance) + mean;
-        double scoreOne = one.get(size - 1) + noise;
+        double scoreOne = one.get("Fitness") + noise;
         Pair<Integer, Double> p1 = new Pair<>(w, scoreOne);
 
         noise = r.nextGaussian() * Math.sqrt(variance) + mean;
-        double scoreTwo = two.get(size - 1) + noise;
+        double scoreTwo = two.get("Fitness") + noise;
         Pair<Integer, Double> p2 = new Pair<>(x, scoreTwo);
 
         noise = r.nextGaussian() * Math.sqrt(variance) + mean;
-        double scoreThree = three.get(size - 1) + noise;
+        double scoreThree = three.get("Fitness") + noise;
         Pair<Integer, Double> p3 = new Pair<>(y, scoreThree);
 
         noise = r.nextGaussian() * Math.sqrt(variance) + mean;
-        double scoreFour = four.get(size - 1) + noise;
+        double scoreFour = four.get("Fitness") + noise;
         Pair<Integer, Double> p4 = new Pair<>(z, scoreFour);
 
         List<Pair<Integer, Double>> results = new ArrayList<>();
@@ -235,27 +235,27 @@ public class GenerateBoards {
     }
 
     private static double getCalc(int i, float decay, float sigma) {
-        List<Float> score = infeasibleFitness.get(i);
+        HashMap<String, Float> score = infeasibleFitness.get(i);
         // Connectedness
-        double connect = Math.pow(decay, 1 - score.get(0));
+        double connect = Math.pow(decay, 1 - score.get("Connectedness"));
 
-        double geometry = score.get(1);
+        double geometry = score.get("Geometry");
 
-        double repeats = score.get(2);
+        double repeats = score.get("Repeats");
 
-        double spawning = score.get(3);
+        double spawning = score.get("Spawning");
 
-        double consistency = Math.pow(decay, 1 - score.get(4));
+        double consistency = Math.pow(decay, 1 - score.get("Consistency"));
 
-        double size = Math.exp(-(Math.pow(score.get(5) - IDEAL_SIZE, 2)) / Math.pow(2 * sigma, 2));
+        double size = Math.exp(-(Math.pow(score.get("Size") - IDEAL_SIZE, 2)) / Math.pow(2 * sigma, 2));
 
-        double groups = Math.exp(-(Math.pow(score.get(6) - IDEAL_GROUP, 2)) / Math.pow(2 * sigma, 2));
+        double groups = Math.exp(-(Math.pow(score.get("Groups") - IDEAL_GROUP, 2)) / Math.pow(2 * sigma, 2));
 
-        double health = Math.exp(-(Math.pow(score.get(7) - IDEAL_HEALTH, 2)) / Math.pow(2 * sigma, 2));
+        double health = Math.exp(-(Math.pow(score.get("Health") - IDEAL_HEALTH, 2)) / Math.pow(2 * sigma, 2));
 
-        double complexity = Math.pow(decay, 1 - score.get(8));
+        double complexity = Math.pow(decay, 1 - score.get("Complexity"));
 
-        double rules = Math.pow(decay, 1 - score.get(9));
+        double rules = Math.pow(decay, 1 - score.get("Rules"));
 
         return Math.sqrt(connect + geometry + repeats + spawning + consistency + size + groups + health + complexity + rules);
     }
@@ -460,9 +460,9 @@ public class GenerateBoards {
         boards.add(newBoardName);
 
 
-        List<Float> scores = FitnessFunction.getFitness(newQuest, newBoard);
+        HashMap<String, Float> scores = FitnessFunction.getFitness(newQuest, newBoard);
 
-        boolean feasible = checkFeasible(scores);
+        boolean feasible = scores.get("Feasible") > 0f;
 
         if (feasible)
             feasibleFitness.add(scores);
@@ -475,40 +475,40 @@ public class GenerateBoards {
         return new Pair<>(offspring, feasible);
     }
 
-    static boolean checkFeasible(List<Float> scores) {
+    static boolean checkFeasible(HashMap<String, Float> scores) {
 
         // Connectedness Check
-        if (scores.get(0) < 1f) {
+        if (scores.get("Connectedness") < 1f) {
             System.out.println("Connectedness Failure");
             return false;
         }
 
         // Geometry Check
-        if (scores.get(1) < 1f) {
+        if (scores.get("Geometry") < 1f) {
             System.out.println("Geometry Failure");
             return false;
         }
 
         // No Repeating Monsters Check
-        if (scores.get(2) < 1f) {
+        if (scores.get("Spawning") < 1f) {
             System.out.println("Repeating Groups Failure");
             return false;
         }
 
         // Consistency Check
-        if (scores.get(4) < 1f) {
+        if (scores.get("Consistency") < 1f) {
             System.out.println("Consistency Failure");
             return false;
         }
 
         // Board Size Check
-        float size = scores.get(5);
+        float size = scores.get("Size");
         if (size > ControlVariables.SIZE_MAX || size < ControlVariables.SIZE_MIN) {
             System.out.println("Size Failure");
             return false;
         }
         // Monster Group Check
-        float groups = scores.get(6);
+        float groups = scores.get("Groups");
         if (groups > ControlVariables.GROUP_MAX || groups < ControlVariables.GROUP_MIN) {
             System.out.println("Group Count Failure");
             return false;

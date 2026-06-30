@@ -47,21 +47,21 @@ public class FitnessFunction {
     public static final int IDEAL_COMPLEXITY = 1;
     public static final int IDEAL_RULES = 1;
 
-    public static float fitness(List<Float> scores) {
+    public static float fitness(HashMap<String, Float> scores) {
         float fitness = 0f;
 
-        fitness += W_CONNECTED * (1 / scores.get(0));
-        fitness += W_GEOMETRY * scores.get(1);
-        fitness += W_REPEATS * scores.get(2);
-        fitness += W_SPAWNING * scores.get(3);
-        fitness += W_CONSISTENCY * scores.get(4);
+        fitness += W_CONNECTED * (1 / scores.get("Connectedness"));
+        fitness += W_GEOMETRY * scores.get("Geometry");
+        fitness += W_REPEATS * scores.get("Repeats");
+        fitness += W_SPAWNING * scores.get("Spawning");
+        fitness += W_CONSISTENCY * scores.get("Consistency");
 
-        fitness += W_SIZE * (1f - (Math.abs(IDEAL_SIZE - scores.get(5)) / IDEAL_SIZE));
-        fitness += W_GROUP * (1f - (Math.abs(IDEAL_GROUP - scores.get(6)) / IDEAL_GROUP));
-        fitness += W_HEALTH * (1f - (Math.abs(IDEAL_HEALTH - scores.get(7)) / IDEAL_HEALTH));
+        fitness += W_SIZE * (1f - (Math.abs(IDEAL_SIZE - scores.get("Size")) / IDEAL_SIZE));
+        fitness += W_GROUP * (1f - (Math.abs(IDEAL_GROUP - scores.get("Groups")) / IDEAL_GROUP));
+        fitness += W_HEALTH * (1f - (Math.abs(IDEAL_HEALTH - scores.get("Health")) / IDEAL_HEALTH));
 
-        fitness += W_COMPLEXITY * (1f - (Math.abs(IDEAL_COMPLEXITY - scores.get(8)) / IDEAL_COMPLEXITY));
-        fitness += W_RULES * (1f - (Math.abs(IDEAL_RULES - scores.get(9)) / IDEAL_RULES));
+        fitness += W_COMPLEXITY * (1f - (Math.abs(IDEAL_COMPLEXITY - scores.get("Complexity")) / IDEAL_COMPLEXITY));
+        fitness += W_RULES * (1f - (Math.abs(IDEAL_RULES - scores.get("Rules")) / IDEAL_RULES));
 
         return fitness;
     }
@@ -224,9 +224,8 @@ public class FitnessFunction {
             String tile = node.getComponentName();
             boolean checkTransition = tile.contains("transition");
             if (!checkTransition) {
-                for (BoardNode n : node.getNeighbours().keySet()) {
+                for (String neighbour : ((PropertyStringArray) node.getProperty("Neighbours")).getValues()) {
                     connections++;
-                    String neighbour = n.getComponentName();
                     if ((tile.contains("A") && tile.contains("B")) || (tile.contains("B") && neighbour.contains("A")))
                         errors++;
                 }
@@ -315,8 +314,8 @@ public class FitnessFunction {
         return monsterHealth;
     }
 
-    static List<Float> getFitness(Quest quest, GraphBoard board) {
-        List<Float> scores = new ArrayList<>();
+    static HashMap<String, Float> getFitness(Quest quest, GraphBoard board) {
+        HashMap<String, Float> scores = new HashMap<>();
 
         // Connectedness
         float connected = connectedness(board);
@@ -326,7 +325,9 @@ public class FitnessFunction {
 
         // Geometry
         Pair<int[][], Integer> result = createBoard(quest, board);
-        float geometry = size == (float) result.b ? 1f : 0f;
+        float geometry = 0f;
+        if (result != null)
+            geometry = size == (float) result.b ? 1f : 0f;
 
         // Monster Group Repeats
         // Inverse Boolean = Score 1 if no repeats, 0 if repeats found
@@ -351,21 +352,23 @@ public class FitnessFunction {
         // Map Rules
         float rules = 1f;
 
-        scores.add(connected);
-        scores.add(geometry);
-        scores.add(repeats);
-        scores.add(spawning);
-        scores.add(consistency);
-        scores.add(size);
-        scores.add(groups);
-        scores.add(health);
-        scores.add(complexity);
-        scores.add(rules);
+        scores.put("Connectedness", connected);
+        scores.put("Geometry", geometry);
+        scores.put("Repeats", repeats);
+        scores.put("Spawning", spawning);
+        scores.put("Consistency", consistency);
+        scores.put("Size", size);
+        scores.put("Groups", groups);
+        scores.put("Health", health);
+        scores.put("Complexity", complexity);
+        scores.put("Rules", rules);
 
         float fitness = fitness(scores);
-        scores.add(fitness);
+        scores.put("Fitness", fitness);
 
         boolean feasible = GenerateBoards.checkFeasible(scores);
+        float f = feasible ? 1f : 0f;
+        scores.put("Feasible", f);
         System.out.println(feasible);
 
         return scores;
