@@ -405,6 +405,14 @@ public class GenerateBoards {
         mutateXP(newQuest);
         mutateTraits(newQuest);
 
+        String newBoardName = "pcg-" + nowServing;
+        newBoard.setComponentName(newBoardName);
+        newQuest.setName("PCG-" + nowServing);
+        List<String> boards = newQuest.getBoards();
+        boards.clear();
+        boards.add(newBoardName);
+
+
         List<Float> scores = FitnessFunction.getFitness(newQuest, newBoard);
 
         boolean feasible = checkFeasible(scores);
