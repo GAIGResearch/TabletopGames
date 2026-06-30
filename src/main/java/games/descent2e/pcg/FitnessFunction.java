@@ -45,11 +45,6 @@ public class FitnessFunction {
     public static final int IDEAL_COMPLEXITY = 1;
     public static final int IDEAL_RULES = 1;
 
-    public static List<String> illegalHeroSpawns = Arrays.asList("null", "endcap", "extender");
-    public static List<String> illegalMonsterSpawns = Arrays.asList("null", "endcap", "entrance", "exit", "extender", "transition");
-    public static List<String> illegalBarghestSpawns = Arrays.asList("27A", "27B", "28A", "28B", "29A", "29B", "30A", "30B");
-    public static List<String> illegalDragonSpawns = Arrays.asList("16A", "16B", "17A", "17B", "18A", "18B");
-
     public static float fitness(List<Float> scores) {
         float fitness = 0f;
 

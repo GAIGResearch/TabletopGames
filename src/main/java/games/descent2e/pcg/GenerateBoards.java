@@ -397,6 +397,8 @@ public class GenerateBoards {
             forceMutate = (finalMonsters.size() < ControlVariables.GROUP_MIN) || (finalMonsters.size() > ControlVariables.GROUP_MAX);
         }
 
+        mutatePositions(finalNodes, newQuest, finalMonsters);
+
         newQuest.setMonsters(finalMonsters);
 
         mutateAct(newQuest);
@@ -551,6 +553,105 @@ public class GenerateBoards {
         }
 
         return newMonsters;
+    }
+
+    static void mutatePositions(List<BoardNode> nodes, Quest quest, List<String[]> monsters) {
+        List<String> tiles = new ArrayList<>();
+        List<String> taken = new ArrayList<>();
+        for (BoardNode node : nodes) {
+            tiles.add(node.getComponentName());
+        }
+        Collections.shuffle(tiles);
+        String heroStart = quest.getStartingTile();
+
+        // First, check if the Heroes' original starting tile still exists or not
+        // Then, roll Mutation chance (10%)
+        boolean forceHeroMutate = !tiles.contains(heroStart) || ControlVariables.illegalHeroSpawns.contains(heroStart);
+        if (!forceHeroMutate)
+            forceHeroMutate = Random.randInt(10) < 1;
+
+        if (forceHeroMutate) {
+            heroStart = "null";
+            for (String tile : tiles) {
+                if (taken.contains(tile)) continue;
+                boolean legal = true;
+                for (String illegal : ControlVariables.illegalHeroSpawns) {
+                    if (tile.contains(illegal)) {
+                        legal = false;
+                        break;
+                    }
+                }
+                if (legal) {
+                    heroStart = tile;
+                    break;
+                }
+            }
+        }
+
+        // Save the new Heroes start
+        taken.add(heroStart);
+        quest.setStartingTile(heroStart);
+
+        // Now repeat for every Monster
+        for (String[] monster : monsters) {
+            String name = monster[0];
+            String monsterPosition = monster[1];
+            boolean forceMonsterMutate = !tiles.contains(monsterPosition) || taken.contains(monsterPosition);
+            // Non-Lieutenant Monsters have additional restrictions
+
+            boolean lieutenant = true;
+            boolean barghest = false;
+            boolean dragon = false;
+            if (!name.contains("lieutenant")) {
+                lieutenant = false;
+                forceMonsterMutate = forceMonsterMutate || ControlVariables.illegalMonsterSpawns.contains(monsterPosition.split("-")[0]);
+                if (name.contains("Barghest")) {
+                    forceMonsterMutate = forceMonsterMutate || ControlVariables.illegalBarghestSpawns.contains(monsterPosition.split("-")[0]);
+                    barghest = true;
+                }
+                if (name.contains("Dragon")) {
+                    forceMonsterMutate = forceMonsterMutate || ControlVariables.illegalBarghestSpawns.contains(monsterPosition.split("-")[0]) || ControlVariables.illegalDragonSpawns.contains(monsterPosition.split("-")[0]);
+                    barghest = true;
+                    dragon = true;
+                }
+            }
+            // Otherwise, mutation chance
+            if (!forceMonsterMutate)
+                forceMonsterMutate = Random.randInt(10) < 1;
+
+            if (forceMonsterMutate) {
+                monsterPosition = "null";
+                List<String> illegals = new ArrayList<>(ControlVariables.illegalMonsterSpawns);
+                if (barghest)
+                    illegals.addAll(ControlVariables.illegalBarghestSpawns);
+                if (dragon)
+                    illegals.addAll(ControlVariables.illegalDragonSpawns);
+
+                for (String tile : tiles) {
+                    if (taken.contains(tile)) continue;
+
+                    if (lieutenant) {
+                        monsterPosition = tile;
+                        break;
+                    }
+
+                    boolean legal = true;
+                    for (String illegal : illegals) {
+                        if (tile.contains(illegal)) {
+                            legal = false;
+                            break;
+                        }
+                    }
+                    if (legal) {
+                        monsterPosition = tile;
+                        break;
+                    }
+                }
+            }
+            taken.add(monsterPosition);
+            monster[1] = monsterPosition;
+        }
+
     }
 
     static void mutateAct(Quest quest) {

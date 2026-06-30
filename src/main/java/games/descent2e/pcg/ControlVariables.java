@@ -1,11 +1,17 @@
 package games.descent2e.pcg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ControlVariables {
 
     public static final List<String> TRAITS = List.of("Building", "Cave", "Civilized", "Cold", "Cursed", "Dark", "Hot", "Mountain", "Water", "Wilderness");
+
+    public static List<String> illegalHeroSpawns = Arrays.asList("null", "endcap", "extender");
+    public static List<String> illegalMonsterSpawns = Arrays.asList("null", "endcap", "entrance", "exit", "extender", "transition");
+    public static List<String> illegalBarghestSpawns = Arrays.asList("27A", "27B", "28A", "28B", "29A", "29B", "30A", "30B");
+    public static List<String> illegalDragonSpawns = Arrays.asList("16A", "16B", "17A", "17B", "18A", "18B");
 
     public static final int CROSSOVER = 10;
     public static final int TILE_REMOVE = 10;
