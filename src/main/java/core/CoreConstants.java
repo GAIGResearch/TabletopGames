@@ -23,6 +23,9 @@ public class CoreConstants {
     public final static int playerHandHash = Hash.GetInstance().hash("playerHand");
     public final static int playersHash = Hash.GetInstance().hash("players");
     public final static int imgHash = Hash.GetInstance().hash("img");
+    public final static int spaceHash = Hash.GetInstance().hash("space");
+    public final static int nodeHash = Hash.GetInstance().hash("nodes");
+
     public final static int backgroundImgHash = Hash.GetInstance().hash("backgroundImg");
 
 

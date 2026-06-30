@@ -13,6 +13,8 @@ import utilities.Pair;
 
 import java.util.*;
 
+import static core.CoreConstants.nodeHash;
+import static games.descent2e.pcg.ControlVariables.*;
 import static games.descent2e.pcg.FitnessFunction.*;
 
 public class GenerateBoards {
@@ -393,8 +395,7 @@ public class GenerateBoards {
 
                 if (freeNodes) break;
 
-                // 100 = Node Hash
-                int expected = ((PropertyInt) Objects.requireNonNull(getTileByName(node.getComponentName())).getProperty(100)).value;
+                int expected = ((PropertyInt) Objects.requireNonNull(getTileByName(node.getComponentName())).getProperty(nodeHash)).value;
 
                 if (expected != neighbours.length || expected != connections.length) {
                     freeNodes = true;
@@ -441,13 +442,15 @@ public class GenerateBoards {
             forceMutate = (finalMonsters.size() < ControlVariables.GROUP_MIN) || (finalMonsters.size() > ControlVariables.GROUP_MAX);
         }
 
+        mutateAct(newQuest);
+        mutateXP(newQuest);
+        mutateTraits(newQuest);
+
         mutatePositions(finalNodes, newQuest, finalMonsters);
 
         newQuest.setMonsters(finalMonsters);
 
-        mutateAct(newQuest);
-        mutateXP(newQuest);
-        mutateTraits(newQuest);
+
 
         String newBoardName = "pcg-" + nowServing;
         newBoard.setComponentName(newBoardName);
@@ -649,22 +652,51 @@ public class GenerateBoards {
             String name = monster[0];
             String monsterPosition = monster[1];
             boolean forceMonsterMutate = !tiles.contains(monsterPosition) || taken.contains(monsterPosition);
-            // Non-Lieutenant Monsters have additional restrictions
 
+            // Non-Lieutenant Monsters have additional restrictions
+            List<String> traits = quest.getMonsterTraits();
             boolean lieutenant = true;
-            boolean barghest = false;
-            boolean dragon = false;
+            boolean barghestOpen = traits.contains("Dark") || traits.contains("Wilderness") || traits.contains("All");
+            boolean dragonOpen = traits.contains("Dark") || traits.contains("Cave") || traits.contains("All");
+            boolean dragon = name.contains("Open") && !name.contains("OpenSmall") && dragonOpen;
+            boolean barghest = name.contains("Open") && barghestOpen;
+
             if (!name.contains("lieutenant")) {
                 lieutenant = false;
-                forceMonsterMutate = forceMonsterMutate || ControlVariables.illegalMonsterSpawns.contains(monsterPosition.split("-")[0]);
-                if (name.contains("Barghest")) {
-                    forceMonsterMutate = forceMonsterMutate || ControlVariables.illegalBarghestSpawns.contains(monsterPosition.split("-")[0]);
-                    barghest = true;
+                if (!forceMonsterMutate) {
+                    for (String tile : illegalMonsterSpawns)
+                        if (monsterPosition.contains(tile)) {
+                            forceMonsterMutate = true;
+                            break;
+                        }
                 }
-                if (name.contains("Dragon")) {
-                    forceMonsterMutate = forceMonsterMutate || ControlVariables.illegalBarghestSpawns.contains(monsterPosition.split("-")[0]) || ControlVariables.illegalDragonSpawns.contains(monsterPosition.split("-")[0]);
+                if (name.contains("Barghest") || barghest) {
+                    barghest = true;
+                    if (!forceMonsterMutate) {
+                        for (String tile : illegalBarghestSpawns)
+                            if (monsterPosition.contains(tile)) {
+                                forceMonsterMutate = true;
+                                break;
+                            }
+                    }
+                }
+                if (name.contains("Dragon") || dragon) {
                     barghest = true;
                     dragon = true;
+                    if (!forceMonsterMutate) {
+                        for (String tile : illegalBarghestSpawns)
+                            if (monsterPosition.contains(tile)) {
+                                forceMonsterMutate = true;
+                                break;
+                            }
+                    }
+                    if (!forceMonsterMutate) {
+                        for (String tile : illegalDragonSpawns)
+                            if (monsterPosition.contains(tile)) {
+                                forceMonsterMutate = true;
+                                break;
+                            }
+                    }
                 }
             }
             // Otherwise, mutation chance
@@ -677,7 +709,7 @@ public class GenerateBoards {
                 if (barghest)
                     illegals.addAll(ControlVariables.illegalBarghestSpawns);
                 if (dragon)
-                    illegals.addAll(ControlVariables.illegalDragonSpawns);
+                    illegals.addAll(illegalDragonSpawns);
 
                 for (String tile : tiles) {
                     if (taken.contains(tile)) continue;
@@ -703,7 +735,6 @@ public class GenerateBoards {
             taken.add(monsterPosition);
             monster[1] = monsterPosition;
         }
-
     }
 
     static void mutateAct(Quest quest) {

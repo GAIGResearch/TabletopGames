@@ -23,8 +23,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-import static core.CoreConstants.neighbourHash;
-import static core.CoreConstants.orientationHash;
+import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.connectionHash;
 import static games.descent2e.pcg.ControlVariables.*;
 import static games.descent2e.pcg.GenerateBoards.getTileByName;
@@ -106,9 +105,8 @@ public class FitnessFunction {
         occupied.add(heroTile);
         GridBoard node = getTileByName(heroTile);
         assert node != null;
-        // Spaces Hash = 900
         // Subtract 4 from the available space, one for each Hero
-        occupiedSize.add(new Pair<>(heroTile, ((PropertyInt) node.getProperty(900)).value - 4));
+        occupiedSize.add(new Pair<>(heroTile, ((PropertyInt) node.getProperty(spaceHash)).value - 4));
 
         List<String> traits = quest.getMonsterTraits();
         boolean barghestOpen = traits.contains("Dark") || traits.contains("Wilderness") || traits.contains("All");
@@ -180,7 +178,7 @@ public class FitnessFunction {
                 occupied.add(monsterTile);
                 node = getTileByName(monsterTile);
                 assert node != null;
-                occupiedSize.add(new Pair<>(monsterTile, ((PropertyInt) node.getProperty(900)).value));
+                occupiedSize.add(new Pair<>(monsterTile, ((PropertyInt) node.getProperty(spaceHash)).value));
             }
 
         }
@@ -198,7 +196,7 @@ public class FitnessFunction {
             for (GridBoard tile : GenerateBoards.tiles) {
                 if (tile.getComponentName().contains(node)) {
                     checked++;
-                    size += Integer.parseInt(tile.getProperty(900).toString());
+                    size += Integer.parseInt(tile.getProperty(spaceHash).toString());
                     break;
                 }
             }
