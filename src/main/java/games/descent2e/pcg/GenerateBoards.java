@@ -79,17 +79,25 @@ public class GenerateBoards {
         for (int i = 0; i < GENERATIONLOOP; i++) {
             System.out.println(FIRSTLOOP + (i * OFFSPRING));
             int choice = Random.randInt(10);
+
+            // Failsafe - force Infeasible Parents
+            // if, for whatever reason, we got this far and failed to spawn enough Feasible parents
+            if (feasible.size() < 4)
+                choice = 0;
+
             // 30% to pick parents from the Infeasible pool
-
             Pair<Quest, Quest> parents;
+            String isFeasible = "feasible";
 
-            if (choice < CHOOSE_INFEASIBLE)
+            if (choice < CHOOSE_INFEASIBLE) {
                 parents = infeasibleParents();
+                isFeasible = "infeasible";
+            }
             else
                 parents = feasibleParents();
 
             for (int j = 0; j < OFFSPRING; j++) {
-                generateOffspring(parents.a, parents.b);
+                generateOffspring(parents.a, parents.b, isFeasible);
             }
         }
         System.out.println("Complete!");
@@ -254,7 +262,19 @@ public class GenerateBoards {
         nowServing++;
         System.out.println("Generating Offspring " + nowServing);
 
-        Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(one, two);
+        Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(one, two, "null");
+
+        if (offspring.b)
+            feasible.add(offspring.a);
+        else
+            infeasible.add(offspring.a);
+    }
+
+    static void generateOffspring(Quest one, Quest two, String isFeasible) {
+        nowServing++;
+        System.out.println("Generating Offspring " + nowServing);
+
+        Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(one, two, isFeasible);
 
         if (offspring.b)
             feasible.add(offspring.a);
@@ -276,7 +296,7 @@ public class GenerateBoards {
         return Random.randInt(100);
     }
 
-    static Pair<Pair<Quest, GraphBoard>, Boolean> createOffspring(Quest parent1, Quest parent2) {
+    static Pair<Pair<Quest, GraphBoard>, Boolean> createOffspring(Quest parent1, Quest parent2, String type) {
         Quest newQuest;
         GraphBoard newBoard;
         Quest otherParent;
@@ -296,12 +316,36 @@ public class GenerateBoards {
         // Now, decide which Parent is the Base Board
         choice = Random.randInt(2);
         if (choice == 0) {
-            newBoard = Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0))).copy();
-            otherBoard = Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0))).copy();
+            otherBoard = switch (type) {
+                case "feasible" -> {
+                    newBoard = Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0), true)).copy();
+                    yield Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0), true)).copy();
+                }
+                case "infeasible" -> {
+                    newBoard = Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0), false)).copy();
+                    yield Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0), false)).copy();
+                }
+                default -> {
+                    newBoard = Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0))).copy();
+                    yield Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0))).copy();
+                }
+            };
         }
         else {
-            newBoard = Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0))).copy();
-            otherBoard = Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0))).copy();
+            otherBoard = switch (type) {
+                case "feasible" -> {
+                    newBoard = Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0), true)).copy();
+                    yield Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0), true)).copy();
+                }
+                case "infeasible" -> {
+                    newBoard = Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0), false)).copy();
+                    yield Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0), false)).copy();
+                }
+                default -> {
+                    newBoard = Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0))).copy();
+                    yield Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0))).copy();
+                }
+            };
         }
 
         // -- BOARD MUTATIONS ---
@@ -332,7 +376,7 @@ public class GenerateBoards {
                 String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
 
                 for (String neighbour : neighbours) {
-                    if (neighbour.equals("FREE")) {
+                    if (neighbour.equals("null")) {
                         freeNodes = true;
                         break;
                     }
@@ -753,10 +797,28 @@ public class GenerateBoards {
         quest.setMonsterTraits(oldTraits);
     }
 
-    static GraphBoard getBoardByName (String name) {
+    static GraphBoard getBoardByName(String name) {
         for (GraphBoard board : originalBoards) {
             if (board.getComponentName().equals(name))
                     return board;
+        }
+        return null;
+    }
+
+    static GraphBoard getBoardByName(String name, boolean isFeasible) {
+        if (isFeasible) {
+            for (Pair<Quest, GraphBoard> quest : feasible) {
+                GraphBoard board = quest.b;
+                if (board.getComponentName().equals(name))
+                    return board;
+            }
+        }
+        else {
+            for (Pair<Quest, GraphBoard> quest : infeasible) {
+                GraphBoard board = quest.b;
+                if (board.getComponentName().equals(name))
+                    return board;
+            }
         }
         return null;
     }
@@ -835,7 +897,7 @@ public class GenerateBoards {
                     String[] neighbours = ((PropertyStringArray) n.getProperty("neighbours")).getValues();
                     for (int i = 0; i < neighbours.length; i++) {
                         if (neighbours[i].equals(node.getComponentName())) {
-                            neighbours[i] = "FREE";
+                            neighbours[i] = "null";
                             break;
                         }
                     }
@@ -875,7 +937,7 @@ public class GenerateBoards {
         // First, cleanse the board of any possible connections
         for (BoardNode node : nodes) {
             String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
-            Arrays.fill(neighbours, "FREE");
+            Arrays.fill(neighbours, "null");
 
             Map<String, List<Pair<BoardNode, String>>> connections = new HashMap<>();
 
@@ -886,20 +948,17 @@ public class GenerateBoards {
         // Then, go through all possible connections for each node
         for (BoardNode n1 : nodes) {
             for (BoardNode n2 : nodes) {
-                if (n1.getComponentName().equals(n2.getComponentName()))
+                if (n1.equals(n2))
                     continue;
 
                 for (String connection : ((PropertyStringArray) n1.getProperty("connections")).getValues()) {
                     String opposite = pairings.get(connection);
 
                     String[] n2Connects = ((PropertyStringArray) n2.getProperty("connections")).getValues();
-
-                    for (String n2Connect : n2Connects) {
-                        if (n2Connect.equals(opposite)) {
-                            Map<String, List<Pair<BoardNode, String>>> link = possible.get(n1.getComponentName());
-                            List<Pair<BoardNode, String>> list = link.get(connection);
-                            list.add(new Pair<>(n2, opposite));
-                        }
+                    if (Arrays.asList(n2Connects).contains(opposite)) {
+                        Map<String, List<Pair<BoardNode, String>>> link = possible.get(n1.getComponentName());
+                        List<Pair<BoardNode, String>> list = link.get(connection);
+                        list.add(new Pair<>(n2, opposite));
                     }
 
                 }
