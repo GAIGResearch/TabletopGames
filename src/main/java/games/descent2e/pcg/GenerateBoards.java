@@ -17,6 +17,9 @@ import static games.descent2e.pcg.FitnessFunction.*;
 
 public class GenerateBoards {
 
+    static int nowServing = 0;
+
+    public static final List<String> positions = List.of("N-0", "E-0", "S-0", "W-0");
     // How many boards we generate using purely the starting Quests
     public static final int FIRSTLOOP = 400;
 
@@ -248,6 +251,9 @@ public class GenerateBoards {
     }
 
     static void generateOffspring(Quest one, Quest two) {
+        nowServing++;
+        System.out.println("Generating Offspring " + nowServing);
+
         Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(one, two);
 
         if (offspring.b)
@@ -299,58 +305,59 @@ public class GenerateBoards {
         }
 
         // -- BOARD MUTATIONS ---
+        List<BoardNode> finalNodes = new ArrayList<>();
+        boolean freeNodes = true;
 
         List<BoardNode> newNodes = newBoard.getComponents();
         List<BoardNode> oldNodes = otherBoard.getComponents();
-        List<String> tiles = new ArrayList<>();
-        for (BoardNode node : newNodes) {
-            tiles.add(node.getComponentName());
-        }
-        // 10% crossover chance
-        for (BoardNode node : oldNodes) {
-            if (Random.randInt(10) < 1) {
-                // Make sure we don't add duplicate Tiles
-                if (!tiles.contains(node.getComponentName()) || node.getComponentName().contains("extender") ||
-                        node.getComponentName().contains("endcap") || node.getComponentName().contains("transition"))
-                    newNodes.add(node);
-            }
-        }
 
-        // 10% deletion chance
-        List<BoardNode> finalNodes = new ArrayList<>(newNodes);
-        for (BoardNode node : newNodes) {
-            if (Random.randInt(10) < 1) {
-                finalNodes.remove(node);
-                for (BoardNode n : finalNodes) {
-                    String[] neighbours = ((PropertyStringArray) n.getProperty("neighbours")).getValues();
-                    for (int i = 0; i < neighbours.length; i++) {
-                        if (neighbours[i].equals(node.getComponentName())) {
-                            neighbours[i] = "FREE";
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        int attempt = 0;
+        while (freeNodes) {
+            attempt++;
+            freeNodes = false;
 
-        // 10% rotation chance
-        for (BoardNode node : finalNodes) {
-            if (Random.randInt(10) < 1) {
-                List<String> positions = List.of("N-0", "E-0", "S-0", "W-0");
+            finalNodes.clear();
+            for (BoardNode node : newNodes)
+                finalNodes.add(node.copy());
 
-                int rotation = Random.randInt(positions.size() - 1) + 1;
-                int oldRotate = ((PropertyInt) node.getProperty("orientation")).value;
-                node.setProperty(new PropertyInt("orientation", (oldRotate + rotation) % 4));
+            // Construct Board Assembly with all the new tiles
+            crossoverMutate(oldNodes, finalNodes);
+            deletionMutate(finalNodes);
+            rotateMutate(finalNodes);
+
+            assembleBoard(finalNodes);
+
+            for (BoardNode node : finalNodes) {
+                String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
                 String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                for (int i = 0; i < connections.length; i++) {
-                    if (positions.contains(connections[i])) {
-                        int index = positions.indexOf(connections[i]);
-                        connections[i] = positions.get((index + rotation) % 4);
+
+                for (String neighbour : neighbours) {
+                    if (neighbour.equals("FREE")) {
+                        freeNodes = true;
+                        break;
                     }
+                }
+
+                if (freeNodes) break;
+
+                for (String connection : connections) {
+                    if (!positions.contains(connection)) {
+                        freeNodes = true;
+                        break;
+                    }
+                }
+
+                if (freeNodes) break;
+
+                // 100 = Node Hash
+                int expected = ((PropertyInt) Objects.requireNonNull(getTileByName(node.getComponentName())).getProperty(100)).value;
+
+                if (expected != neighbours.length || expected != connections.length) {
+                    freeNodes = true;
+                    break;
                 }
             }
         }
-
         newBoard.setBoardNodes(finalNodes);
 
         // --- MONSTER MUTATIONS ---
@@ -643,5 +650,225 @@ public class GenerateBoards {
                     return board;
         }
         return null;
+    }
+
+    static void crossoverMutate(List<BoardNode> crossoverNodes, List<BoardNode> baseNodes) {
+
+        List<String> tiles = new ArrayList<>();
+
+        int transition = 0;
+        int endcap = 0;
+        int extender = 0;
+        for (BoardNode node : baseNodes) {
+            String name = node.getComponentName();
+
+            if (name.contains("transition")) {
+                transition++;
+                name = name.split("-")[0] + "-" + transition;
+                node.setComponentName(name);
+            }
+            else if (name.contains("endcap")) {
+                endcap++;
+                name = name.split("-")[0] + "-" + endcap;
+                node.setComponentName(name);
+            }
+            else if (name.contains("extender")) {
+                extender++;
+                name = name.split("-")[0] + "-" + extender;
+                node.setComponentName(name);
+            }
+
+            tiles.add(node.getComponentName());
+        }
+
+        // 10% crossover chance
+        for (BoardNode node : crossoverNodes) {
+            if (Random.randInt(10) < 1) {
+                String name = node.getComponentName();
+
+                if (name.contains("transition")) {
+                    if (transition < 2) {
+                        transition++;
+                        name = name.split("-")[0] + "-" + transition;
+                    }
+                }
+                else if (name.contains("endcap")) {
+                    if (endcap < 5) {
+                        endcap++;
+                        name = name.split("-")[0] + "-" + endcap;
+                    }
+                }
+                else if (name.contains("extender")) {
+                    if (extender < 9) {
+                        extender++;
+                        name = name.split("-")[0] + "-" + extender;
+                    }
+                }
+
+                // Make sure we don't add duplicate Tiles
+                if (!tiles.contains(name)) {
+                    tiles.add(name);
+                    BoardNode newNode = node.copy();
+                    newNode.setComponentName(name);
+                    baseNodes.add(newNode);
+                }
+            }
+        }
+    }
+
+    static void deletionMutate(List<BoardNode> newNodes) {
+        // 10% deletion chance
+        List<BoardNode> finalNodes = new ArrayList<>(newNodes);
+        for (BoardNode node : newNodes) {
+            if (Random.randInt(10) < 1) {
+                finalNodes.remove(node);
+                for (BoardNode n : finalNodes) {
+                    String[] neighbours = ((PropertyStringArray) n.getProperty("neighbours")).getValues();
+                    for (int i = 0; i < neighbours.length; i++) {
+                        if (neighbours[i].equals(node.getComponentName())) {
+                            neighbours[i] = "FREE";
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    static void rotateMutate (List<BoardNode> nodes) {
+        // 10% rotation chance
+        for (BoardNode node : nodes) {
+            if (Random.randInt(10) < 1) {
+                int rotation = Random.randInt(positions.size() - 1) + 1;
+                int oldRotate = ((PropertyInt) node.getProperty("orientation")).value;
+                node.setProperty(new PropertyInt("orientation", (oldRotate + rotation) % 4));
+                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                for (int i = 0; i < connections.length; i++) {
+                    if (positions.contains(connections[i])) {
+                        int index = positions.indexOf(connections[i]);
+                        connections[i] = positions.get((index + rotation) % 4);
+                    }
+                }
+            }
+        }
+    }
+
+    static void assembleBoard(List<BoardNode> nodes) {
+        // Randomly assemble the new board
+        Map<String, String> pairings = new HashMap<>();
+        pairings.put("N-0", "S-0");
+        pairings.put("S-0", "N-0");
+        pairings.put("E-0", "W-0");
+        pairings.put("W-0", "E-0");
+
+        Map<String, Map<String, List<Pair<BoardNode, String>>>> possible = new HashMap<>();
+
+        // First, cleanse the board of any possible connections
+        for (BoardNode node : nodes) {
+            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
+            Arrays.fill(neighbours, "FREE");
+
+            Map<String, List<Pair<BoardNode, String>>> connections = new HashMap<>();
+
+            for (String c : ((PropertyStringArray) node.getProperty("connections")).getValues())
+                connections.put(c, new ArrayList<>());
+            possible.put(node.getComponentName(), connections);
+        }
+        // Then, go through all possible connections for each node
+        for (BoardNode n1 : nodes) {
+            for (BoardNode n2 : nodes) {
+                if (n1.getComponentName().equals(n2.getComponentName()))
+                    continue;
+
+                for (String connection : ((PropertyStringArray) n1.getProperty("connections")).getValues()) {
+                    String opposite = pairings.get(connection);
+
+                    String[] n2Connects = ((PropertyStringArray) n2.getProperty("connections")).getValues();
+
+                    for (String n2Connect : n2Connects) {
+                        if (n2Connect.equals(opposite)) {
+                            Map<String, List<Pair<BoardNode, String>>> link = possible.get(n1.getComponentName());
+                            List<Pair<BoardNode, String>> list = link.get(connection);
+                            list.add(new Pair<>(n2, opposite));
+                        }
+                    }
+
+                }
+
+            }
+        }
+
+        // And get all the unique combinations
+        List<String[]> unique = new ArrayList<>();
+        Set<String> checked = new HashSet<>();
+        for (String tile : possible.keySet()) {
+            for (String connection : possible.get(tile).keySet()) {
+                String one = tile + ":" + connection;
+                for (Pair<BoardNode, String> piece : possible.get(tile).get(connection)) {
+                    String two = piece.a.getComponentName() + ":" + piece.b;
+
+                    List<String> pair = Arrays.asList(one, two);
+                    Collections.sort(pair);
+                    String key = pair.get(0) + "," + pair.get(1);
+                    if (checked.add(key)) {
+                        unique.add(new String[]{pair.get(0), pair.get(1)});
+                    }
+                }
+            }
+        }
+
+        Collections.shuffle(unique);
+
+        Set<String> usedConnects = new HashSet<>();
+        Set<String> usedPairs = new HashSet<>();
+        List<String[]> finalSet = new ArrayList<>();
+
+        for (String[] pair : unique) {
+            String a = pair[0];
+            String tileA = a.split(":")[0];
+            String b = pair[1];
+            String tileB = b.split(":")[0];
+
+            List<String> newPair = Arrays.asList(tileA, tileB);
+            Collections.sort(newPair);
+            String key = newPair.get(0) + "," + newPair.get(1);
+
+            if (!usedConnects.contains(a) && !usedConnects.contains(b) && !usedPairs.contains(key)) {
+                finalSet.add(pair);
+                usedConnects.add(a);
+                usedConnects.add(b);
+                usedPairs.add(key);
+
+            }
+        }
+
+        // Lastly, update all the tiles with the new connections
+        for (String[] pair : finalSet) {
+            String[] first = pair[0].split(":");
+            String[] second = pair[1].split(":");
+
+            for (BoardNode node : nodes) {
+                if (node.getComponentName().equals(first[0])) {
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    for (int i = 0; i < connections.length; i++) {
+                        if (connections[i].equals(first[1])) {
+                            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
+                            neighbours[i] = second[0];
+                            break;
+                        }
+                    }
+                }
+                if (node.getComponentName().equals(second[0])) {
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    for (int i = 0; i < connections.length; i++) {
+                        if (connections[i].equals(second[1])) {
+                            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
+                            neighbours[i] = first[0];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
