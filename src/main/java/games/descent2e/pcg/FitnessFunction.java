@@ -7,6 +7,7 @@ import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.properties.PropertyInt;
 import core.properties.PropertyIntArray;
+import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
@@ -25,6 +26,8 @@ import java.util.List;
 import static core.CoreConstants.neighbourHash;
 import static core.CoreConstants.orientationHash;
 import static games.descent2e.DescentConstants.connectionHash;
+import static games.descent2e.pcg.ControlVariables.*;
+import static games.descent2e.pcg.GenerateBoards.getTileByName;
 import static utilities.Utils.getNeighbourhood;
 
 public class FitnessFunction {
@@ -93,27 +96,93 @@ public class FitnessFunction {
 
     static boolean legalSpawns(Quest quest) {
         String heroTile = quest.getStartingTile();
-        if (illegalHeroSpawns.contains(heroTile)) return false;
+        for (String tile : illegalHeroSpawns)
+            if (heroTile.contains(tile))
+                return false;
 
         List<String> occupied = new ArrayList<>();
+        List<Pair<String, Integer>> occupiedSize = new ArrayList<>();
+
         occupied.add(heroTile);
+        GridBoard node = getTileByName(heroTile);
+        assert node != null;
+        // Spaces Hash = 900
+        // Subtract 4 from the available space, one for each Hero
+        occupiedSize.add(new Pair<>(heroTile, ((PropertyInt) node.getProperty(900)).value - 4));
+
+        List<String> traits = quest.getMonsterTraits();
+        boolean barghestOpen = traits.contains("Dark") || traits.contains("Wilderness") || traits.contains("All");
+        boolean dragonOpen = traits.contains("Dark") || traits.contains("Cave") || traits.contains("All");
+
 
         for (String[] monster : quest.getMonsters())
         {
             String monsterTile = monster[1];
-            if (occupied.contains(monsterTile)) return false;
-            occupied.add(monsterTile);
-            // Lieutenants can be placed anywhere that Heroes can
             String monsterName = monster[0];
-            if (monsterName.contains("lieutenant")) continue;
-            if (illegalMonsterSpawns.contains(monsterTile)) return false;
-            if (monsterName.contains("Barghest")) {
-                if (illegalBarghestSpawns.contains(monsterTile)) return false;
+
+            // Lieutenants can be placed anywhere that Heroes can
+            boolean dragon = monsterName.contains("Open") && !monsterName.contains("OpenSmall") && dragonOpen;
+            boolean barghest = monsterName.contains("Open") && barghestOpen;
+
+            if (!monsterName.contains("lieutenant")) {
+                for (String tile : illegalMonsterSpawns)
+                    if (monsterTile.contains(tile))
+                        return false;
+                if (monsterName.contains("Barghest") || barghest) {
+                    for (String tile : illegalBarghestSpawns)
+                        if (monsterTile.contains(tile))
+                            return false;
+                }
+                if (monsterName.contains("Dragon") || dragon) {
+                    for (String tile : illegalBarghestSpawns)
+                        if (monsterTile.contains(tile))
+                            return false;
+                    for (String tile : illegalDragonSpawns)
+                        if (monsterTile.contains(tile))
+                            return false;
+                }
             }
-            if (monsterName.contains("Dragon")) {
-                if (illegalBarghestSpawns.contains(monsterTile)) return false;
-                if (illegalDragonSpawns.contains(monsterTile)) return false;
+
+            if (occupied.contains(monsterTile)) {
+                int i = 0;
+                for (int j = 0; j < occupiedSize.size(); j++) {
+                    if (occupiedSize.get(j).a.equals(monsterTile)) {
+                        i = j;
+                        break;
+                    }
+                }
+                Pair<String, Integer> set = occupiedSize.get(i);
+                if (monsterName.contains("lieutenant")) {
+                    set.b -= 1;
+                }
+                else {
+                    Monster mon;
+                    if (dragon)
+                        mon = GenerateBoards.monsters.get("Shadow Dragon").get("super");
+                    else if (barghest)
+                        mon = GenerateBoards.monsters.get("Barghest").get("super");
+                    else if (monsterName.contains("OpenSmall"))
+                        mon = GenerateBoards.monsters.get("Goblin Archer").get("super");
+                    else if (monsterName.contains("Open"))
+                        mon = GenerateBoards.monsters.get("Ettin").get("super");
+                    else
+                        mon = GenerateBoards.monsters.get(monsterName.split(":")[0]).get("super");
+                    int count = ((PropertyIntArray) mon.getProperty("setup")).getValues()[2] + 1;
+                    String[] size = ((PropertyString) mon.getProperty("size")).value.split("x");
+                    int space = Integer.parseInt(size[0]) * Integer.parseInt(size[1]) * count;
+                    set.b -= space;
+                }
+                if (set.b < 0)
+                    return false;
+                occupiedSize.set(i, set);
             }
+            else {
+                occupied.add(monsterTile);
+                node = getTileByName(monsterTile);
+                assert node != null;
+                occupiedSize.add(new Pair<>(monsterTile, ((PropertyInt) node.getProperty(900)).value));
+            }
+
         }
         return true;
     }
@@ -312,7 +381,7 @@ public class FitnessFunction {
         int height = 0;
         for (BoardNode bn : b.getBoardNodes()) {
             // Find width of this tile, according to orientation
-            GridBoard tile = GenerateBoards.getTileByName(bn.getComponentName());
+            GridBoard tile = getTileByName(bn.getComponentName());
             if (tile != null) {
                 int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
                 if (orientation % 2 == 0) {
@@ -348,7 +417,7 @@ public class FitnessFunction {
         // System.out.println("First tile:" + firstTile.getComponentName());
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
-            GridBoard tile = GenerateBoards.getTileByName(firstTile.getComponentName());
+            GridBoard tile = getTileByName(firstTile.getComponentName());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
             Component[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
@@ -386,7 +455,7 @@ public class FitnessFunction {
                                  String sideWithOpening) {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
-            GridBoard tile = GenerateBoards.getTileByName(tileToAdd.getComponentName());
+            GridBoard tile = getTileByName(tileToAdd.getComponentName());
             BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
             if (tileGrid == null) {
                 tileGrid = originalTileGrid;
@@ -451,7 +520,7 @@ public class FitnessFunction {
                 if (connectionToNeighbour != null) {
                     connectionToNeighbour.b.add(x, y);
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
-                    GridBoard tileN = GenerateBoards.getTileByName(neighbour.getComponentName());
+                    GridBoard tileN = getTileByName(neighbour.getComponentName());
                     if (tileN != null) {
                         BoardNode[][] tileGridN = tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
 
