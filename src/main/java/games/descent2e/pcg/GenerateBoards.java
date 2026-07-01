@@ -47,6 +47,9 @@ public class GenerateBoards {
     public static List<HashMap<String, Float>> infeasibleFitness = new ArrayList<>();
     public static List<Boolean> feasibleList = new ArrayList<>();
 
+    // MAP-Elites
+    public static HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_SizeVsGroups = new HashMap<>(); // Board Size vs Group Count
+
     public static void main(String[] args) {
 
         DescentGameData data = new DescentGameData();
@@ -103,6 +106,10 @@ public class GenerateBoards {
             }
         }
         System.out.println("Complete!");
+        for (Pair<Float, Float> key : map_SizeVsGroups.keySet()) {
+            Pair<Integer, Float> result = map_SizeVsGroups.get(key);
+            System.out.println("Size: " + key.a + "; Groups: " + key.b + "; Board ID: " + result.a + "; Fitness: " + result.b);
+        }
     }
 
     static Pair<Quest, Quest> feasibleParents() {
@@ -469,6 +476,16 @@ public class GenerateBoards {
         else
             infeasibleFitness.add(scores);
         feasibleList.add(feasible);
+
+        Pair<Float, Float> mapKey = new Pair<>(scores.get("Size"), scores.get("Groups"));
+        Pair<Integer, Float> mapResult = new Pair<>(nowServing, scores.get("Fitness"));
+        if (map_SizeVsGroups.containsKey(mapKey)) {
+            Pair<Integer, Float> oldResult = map_SizeVsGroups.get(mapKey);
+            if (oldResult.b < mapResult.b)
+                map_SizeVsGroups.put(mapKey, mapResult);
+        }
+        else
+            map_SizeVsGroups.put(mapKey, mapResult);
 
         Pair<Quest, GraphBoard> offspring = new Pair<>(newQuest, newBoard);
 
