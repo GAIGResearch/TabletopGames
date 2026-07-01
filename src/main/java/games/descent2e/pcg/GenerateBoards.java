@@ -1,5 +1,8 @@
 package games.descent2e.pcg;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.crypto.tink.subtle.Random;
 import core.components.BoardNode;
 import core.components.GraphBoard;
@@ -9,8 +12,15 @@ import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameData;
 import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
+import org.apache.hadoop.shaded.com.nimbusds.jose.shaded.json.JSONObject;
+import org.apache.hadoop.shaded.com.nimbusds.jose.shaded.json.JSONStyle;
 import utilities.Pair;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 import static core.CoreConstants.nodeHash;
@@ -50,7 +60,7 @@ public class GenerateBoards {
     // MAP-Elites
     public static HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_SizeVsGroups = new HashMap<>(); // Board Size vs Group Count
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         DescentGameData data = new DescentGameData();
         data.load(path);
@@ -106,9 +116,26 @@ public class GenerateBoards {
             }
         }
         System.out.println("Complete!");
+
+        exportMAPElitesToJSON();
+    }
+
+    static void exportMAPElitesToJSON() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Path mapEliteOutput = Paths.get("data/descent2e/pcg/mapelites_size&groups.json");
+
+        int max = map_SizeVsGroups.size();
         for (Pair<Float, Float> key : map_SizeVsGroups.keySet()) {
+            counter++;
             Pair<Integer, Float> result = map_SizeVsGroups.get(key);
-            System.out.println("Size: " + key.a + "; Groups: " + key.b + "; Board ID: " + result.a + "; Fitness: " + result.b);
+            String output = "{\"";
+            output += "size\":\"" + key.a + "\"";
+            output += ",\"groups\":\"" + key.b + "\"";
+            output += ",\"id\":\"" + result.a + "\"";
+            output += ",\"fitness\":\"" + result.b + "\"}";
+            Object o = mapper.readValue(output, Object.class);
+            String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+            if (counter < max)
         }
     }
 
