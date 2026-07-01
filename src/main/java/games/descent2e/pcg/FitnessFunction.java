@@ -224,9 +224,9 @@ public class FitnessFunction {
             String tile = node.getComponentName();
             boolean checkTransition = tile.contains("transition");
             if (!checkTransition) {
-                for (String neighbour : ((PropertyStringArray) node.getProperty("Neighbours")).getValues()) {
+                for (String neighbour : ((PropertyStringArray) node.getProperty("neighbours")).getValues()) {
                     connections++;
-                    if ((tile.contains("A") && tile.contains("B")) || (tile.contains("B") && neighbour.contains("A")))
+                    if ((tile.contains("A") && neighbour.contains("B")) || (tile.contains("B") && neighbour.contains("A")))
                         errors++;
                 }
             }
