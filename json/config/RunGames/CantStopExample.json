@@ -1,9 +1,9 @@
 {
-  "game" : "CantStop",
+  "game" : "SushiGo",
   "nPlayers" : 3,
   "playerDirectory" : "CantStop_Agents/3P",
   "mode" : "random",
-  "matchups" : 1000,
+  "matchups" : 100,
   "verbose" : false,
   "listener" : "GameResultsListener.json",
   "destDir" : "SkillGrid_CantStop_3P",

@@ -102,18 +102,21 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
             currentStep = Step.DONE;
         }
         else if (currentStep == Step.DISCARD) {
-            Discard d = (Discard) action;
-            int discardCount = 0;
-            for (int i = 0; i < drawnCardsId.length; i++) {
-                if (drawnCardsId[i] == d.discardCardId) {
-                    drawnCardsId[i] = -1;
+            if (action instanceof Discard d) {
+                int discardCount = 0;
+                for (int i = 0; i < drawnCardsId.length; i++) {
+                    if (drawnCardsId[i] == d.discardCardId) {
+                        drawnCardsId[i] = -1;
+                    }
+                    if (drawnCardsId[i] == -1) {
+                        discardCount += 1;
+                    }
                 }
-                if (drawnCardsId[i] == -1) {
-                    discardCount += 1;
+                if (discardCount == howManyDiscard || discardCount == drawnCardsId.length) {
+                    currentStep = Step.DONE;
                 }
-            }
-            if (discardCount == howManyDiscard || discardCount == drawnCardsId.length) {
-                currentStep = Step.DONE;
+            } else {
+                throw new AssertionError("Invalid action not of Type Discard: " + action);
             }
         }
     }
