@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.ITreeActionSpace;
@@ -14,7 +13,6 @@ import utilities.ActionTreeNode;
 import utilities.Pair;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static games.sushigo.cards.SGCard.SGCardType.*;
 
@@ -81,124 +79,6 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
         }
         gs.drawPile.shuffle(gs.getRnd());
     }
-
-
-    /*
-
-    @Override
-    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.isActionInProgress())
-            return; // we only want to trigger this processing if an extended action sequence (i.e. Chopsticks) has been terminated
-
-        SGGameState gs = (SGGameState) currentState;
-
-        // Check if all players made their choice
-        int nextPlayer = gs.getCurrentPlayer();
-        do {
-            nextPlayer = (nextPlayer + 1) % gs.getNPlayers();
-        } while (nextPlayer != gs.getCurrentPlayer() && !gs.cardChoices.get(nextPlayer).isEmpty());
-
-        if (nextPlayer == gs.getCurrentPlayer()) {
-            // They did! Reveal all cards at once. Process card reveal rules.
-            revealCards(gs);
-
-            // Check if the round is over
-            if (isRoundOver(gs)) {
-                // It is! Process end of round rules.
-                endRound(gs);
-                _endRound(gs);
-
-                // Clear card choices from this turn, ready for the next simultaneous choice.
-                gs.clearCardChoices();
-
-                // Check if the game is over
-                if (gs.getRoundCounter() >= ((SGParameters)gs.getGameParameters()).nRounds) {
-                    // It is! Process end of game rules.
-                    for (SGCard.SGCardType type: values()) {
-                        type.onGameEnd(gs);
-                    }
-                    // Decide winner
-                    endGame(gs);
-                    return;
-                }
-
-                _startRound(gs);
-                return;
-            } else {
-                // Round is not over, keep going. Rotate hands for next player turns.
-                rotatePlayerHands(gs);
-
-                // Clear card choices from this turn, ready for the next simultaneous choice.
-                gs.clearCardChoices();
-            }
-        }
-
-        // End player turn
-        if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            endPlayerTurn(gs, nextPlayer);
-        }
-    }
-
-
-
-    */
-/*
-    @Override
-    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.isActionInProgress())
-            return;
-
-        SGGameState gs = (SGGameState) currentState;
-
-        // Only proceed when all players have made their choice
-        boolean allChosen = gs.cardChoices.stream().allMatch(choices -> !choices.isEmpty());
-        if (!allChosen) return;
-
-        System.out.println("_afterAction fired, allChosen=" + allChosen +
-                " roundOver=" + isRoundOver(gs) +
-                " currentPlayer=" + gs.getCurrentPlayer() +
-                " cardChoices=" + gs.cardChoices.stream().map(List::size).collect(Collectors.toList()) +
-                " handSizes=" + gs.getPlayerHands().stream().map(d -> d.getSize()).collect(Collectors.toList()));
-
-
-        System.out.println("Before reveal - handSizes: " +
-                gs.getPlayerHands().stream().map(d -> d.getSize()).collect(Collectors.toList()) +
-                " cardChoices: " + gs.cardChoices.stream().map(List::size).collect(Collectors.toList()));
-
-
-
-        // All players have chosen, reveal cards
-        revealCards(gs);
-
-        // Check if the round is over
-        if (isRoundOver(gs)) {
-            endRound(gs);
-            _endRound(gs);
-            gs.clearCardChoices();
-
-            if (gs.getRoundCounter() >= ((SGParameters) gs.getGameParameters()).nRounds) {
-                for (SGCard.SGCardType type : values()) {
-                    type.onGameEnd(gs);
-                }
-                endGame(gs);
-                return;
-            }
-
-            _startRound(gs);
-            return;
-        } else {
-            rotatePlayerHands(gs);
-            gs.clearCardChoices();
-        }
-
-        if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            endPlayerTurn(gs, gs.getCurrentPlayer());
-        }
-    }
-
-    */
-
-
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
@@ -311,9 +191,17 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
     void revealCards(SGGameState gs) {
         for (int i = 0; i < gs.getNPlayers(); i++) {
             Deck<SGCard> hand = gs.getPlayerHands().get(i);
-            for (ChooseCard cc: gs.cardChoices.get(i)) {
-                SGCard cardToReveal = hand.get(cc.cardIdx);
+            boolean usedChopsticks = false;
 
+            // both picks index into the original hand so grab the cards first then remove them.
+            // if you remove one first the index for the second card ends up wrong.
+            List<SGCard> cardsToReveal = new ArrayList<>();
+            for (ChooseCard cc : gs.cardChoices.get(i)) {
+                cardsToReveal.add(hand.get(cc.cardIdx));
+                if (cc.useChopsticks) usedChopsticks = true;
+            }
+
+            for (SGCard cardToReveal : cardsToReveal) {
                 hand.remove(cardToReveal);
                 gs.playedCards.get(i).add(cardToReveal);
                 gs.playedCardTypes[i].get(cardToReveal.type).increment(cardToReveal.count);
@@ -321,18 +209,19 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
                 //Add points to player
                 cardToReveal.type.onReveal(gs, i);
+            }
 
-                if (cc.useChopsticks) {
-                    removeUsedChopsticks(gs, i);
-                }
+            // put the chopstick back only after both cards are gone
+            if (usedChopsticks) {
+                removeUsedChopsticks(gs, i);
             }
         }
-//       int expectedPlayerCards = gs.getPlayerHands().get(0).getSize();
-//       for (int i = 1; i < gs.getNPlayers(); i++) {
-//           if (gs.getPlayerHands().get(i).getSize() != expectedPlayerCards) {
-//               throw new AssertionError("Player " + i + " has " + gs.getPlayerHands().get(i).getSize() + " cards, expected " + expectedPlayerCards);
-//           }
-//       }
+        int expectedPlayerCards = gs.getPlayerHands().get(0).getSize();
+        for (int i = 1; i < gs.getNPlayers(); i++) {
+            if (gs.getPlayerHands().get(i).getSize() != expectedPlayerCards) {
+                throw new AssertionError("Player " + i + " has " + gs.getPlayerHands().get(i).getSize() + " cards, expected " + expectedPlayerCards);
+            }
+        }
     }
 
     /**
@@ -389,8 +278,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
         int currentPlayer = sggs.getCurrentPlayer();
         Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(currentPlayer);
         if (currentPlayerHand.getSize() == 0) {
-            actions.add(new DoNothing());
-            return actions;
+            throw new AssertionError("Player " + currentPlayer + " has no cards in hand before the round is over");
         }
         for (int i = 0; i < currentPlayerHand.getSize(); i++) {
             // All players can do is choose a card in hand to play.
@@ -410,8 +298,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
         Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(activePlayer);
         if (currentPlayerHand.getSize() == 0) {
-            actions.add(new DoNothing());
-            return actions;
+            throw new AssertionError("Player " + activePlayer + " has no cards in hand before the round is over");
         }
         for (int i = 0; i < currentPlayerHand.getSize(); i++) {
             actions.add(new ChooseCard(activePlayer, i, false));

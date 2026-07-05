@@ -37,10 +37,6 @@ public class SGGameState extends AbstractGameState {
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
-
-/// /////////////////////////////////////////////////////////////////////////
-
-
     @Override
     public List<Integer> getCurrentSimultaneousPlayers() {
         if (isActionInProgress()) {
@@ -50,13 +46,9 @@ public class SGGameState extends AbstractGameState {
             return Collections.singletonList(getCurrentPlayer());
         }
         return IntStream.range(0, getNPlayers())
-                .filter(p -> playerHands.get(p).getSize() > 0)
                 .boxed()
                 .toList();
     }
-
-
-/// /////////////////////////////////////////////////////////////////////////
 
     @Override
     protected GameType _getGameType() {

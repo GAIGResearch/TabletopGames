@@ -43,3 +43,9 @@ src/pytag/env/
 metrics/out/*
 treeRecorder*
 .vscode/*
+
+# game run output
+outputdir/
+
+# private experiment config, not for the main codebase
+json/experiments/Lab3_Connect4.json
