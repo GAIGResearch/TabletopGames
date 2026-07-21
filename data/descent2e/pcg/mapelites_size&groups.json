@@ -1,2977 +1,3151 @@
 [
 {
-  "size" : "208.0",
-  "groups" : "9.0",
-  "id" : "485",
-  "fitness" : "5.8686857"
+  "Size" : 184,
+  "Groups" : 2,
+  "ID" : 625,
+  "Fitness" : 7.727193,
+  "Feasible" : false
 },
 {
-  "size" : "306.0",
-  "groups" : "3.0",
-  "id" : "412",
-  "fitness" : "7.557806"
+  "Size" : 149,
+  "Groups" : 3,
+  "ID" : 83,
+  "Fitness" : 7.8030076,
+  "Feasible" : false
 },
 {
-  "size" : "184.0",
-  "groups" : "2.0",
-  "id" : "274",
-  "fitness" : "6.6863055"
+  "Size" : 123,
+  "Groups" : 2,
+  "ID" : 354,
+  "Fitness" : 7.1650333,
+  "Feasible" : false
 },
 {
-  "size" : "182.0",
-  "groups" : "3.0",
-  "id" : "364",
-  "fitness" : "7.3965344"
+  "Size" : 182,
+  "Groups" : 3,
+  "ID" : 1820,
+  "Fitness" : 7.81515,
+  "Feasible" : false
 },
 {
-  "size" : "123.0",
-  "groups" : "2.0",
-  "id" : "1553",
-  "fitness" : "7.5042133"
+  "Size" : 180,
+  "Groups" : 4,
+  "ID" : 613,
+  "Fitness" : 7.9458447,
+  "Feasible" : false
 },
 {
-  "size" : "147.0",
-  "groups" : "4.0",
-  "id" : "897",
-  "fitness" : "6.6918497"
+  "Size" : 122,
+  "Groups" : 3,
+  "ID" : 2447,
+  "Fitness" : 7.753995,
+  "Feasible" : false
 },
 {
-  "size" : "180.0",
-  "groups" : "4.0",
-  "id" : "28",
-  "fitness" : "8.596657"
+  "Size" : 178,
+  "Groups" : 6,
+  "ID" : 166,
+  "Fitness" : 8.489872,
+  "Feasible" : false
 },
 {
-  "size" : "122.0",
-  "groups" : "3.0",
-  "id" : "311",
-  "fitness" : "7.654045"
+  "Size" : 210,
+  "Groups" : 7,
+  "ID" : 292,
+  "Fitness" : 7.6192265,
+  "Feasible" : false
 },
 {
-  "size" : "178.0",
-  "groups" : "6.0",
-  "id" : "140",
-  "fitness" : "8.060177"
+  "Size" : 292,
+  "Groups" : 10,
+  "ID" : 323,
+  "Fitness" : 6.3657613,
+  "Feasible" : false
 },
 {
-  "size" : "210.0",
-  "groups" : "7.0",
-  "id" : "261",
-  "fitness" : "7.170807"
+  "Size" : 120,
+  "Groups" : 6,
+  "ID" : 764,
+  "Fitness" : 7.933625,
+  "Feasible" : false
 },
 {
-  "size" : "242.0",
-  "groups" : "8.0",
-  "id" : "414",
-  "fitness" : "7.040347"
+  "Size" : 119,
+  "Groups" : 9,
+  "ID" : 60,
+  "Fitness" : 6.0759563,
+  "Feasible" : false
 },
 {
-  "size" : "121.0",
-  "groups" : "4.0",
-  "id" : "1320",
-  "fitness" : "6.52154"
+  "Size" : 152,
+  "Groups" : 2,
+  "ID" : 1891,
+  "Fitness" : 7.5719233,
+  "Feasible" : false
 },
 {
-  "size" : "146.0",
-  "groups" : "5.0",
-  "id" : "1753",
-  "fitness" : "6.9017057"
+  "Size" : 150,
+  "Groups" : 3,
+  "ID" : 2295,
+  "Fitness" : 9.474686,
+  "Feasible" : true
 },
 {
-  "size" : "120.0",
-  "groups" : "6.0",
-  "id" : "1854",
-  "fitness" : "9.244815"
+  "Size" : 147,
+  "Groups" : 5,
+  "ID" : 193,
+  "Fitness" : 7.8422976,
+  "Feasible" : false
 },
 {
-  "size" : "176.0",
-  "groups" : "9.0",
-  "id" : "163",
-  "fitness" : "7.493742"
+  "Size" : 106,
+  "Groups" : 3,
+  "ID" : 276,
+  "Fitness" : 9.234873,
+  "Feasible" : true
 },
 {
-  "size" : "251.0",
-  "groups" : "2.0",
-  "id" : "355",
-  "fitness" : "6.9598346"
+  "Size" : 212,
+  "Groups" : 6,
+  "ID" : 115,
+  "Fitness" : 6.874612,
+  "Feasible" : false
 },
 {
-  "size" : "152.0",
-  "groups" : "2.0",
-  "id" : "200",
-  "fitness" : "7.135619"
+  "Size" : 148,
+  "Groups" : 4,
+  "ID" : 1957,
+  "Fitness" : 9.653105,
+  "Feasible" : true
 },
 {
-  "size" : "245.0",
-  "groups" : "6.0",
-  "id" : "257",
-  "fitness" : "7.8497753"
+  "Size" : 180,
+  "Groups" : 5,
+  "ID" : 1376,
+  "Fitness" : 8.137644,
+  "Feasible" : false
 },
 {
-  "size" : "107.0",
-  "groups" : "2.0",
-  "id" : "235",
-  "fitness" : "8.538448"
+  "Size" : 210,
+  "Groups" : 8,
+  "ID" : 385,
+  "Fitness" : 8.054192,
+  "Feasible" : false
 },
 {
-  "size" : "150.0",
-  "groups" : "3.0",
-  "id" : "198",
-  "fitness" : "7.876113"
+  "Size" : 178,
+  "Groups" : 7,
+  "ID" : 436,
+  "Fitness" : 6.8020425,
+  "Feasible" : false
 },
 {
-  "size" : "179.0",
-  "groups" : "6.0",
-  "id" : "319",
-  "fitness" : "7.8711705"
+  "Size" : 176,
+  "Groups" : 10,
+  "ID" : 253,
+  "Fitness" : 6.8900843,
+  "Feasible" : false
 },
 {
-  "size" : "147.0",
-  "groups" : "5.0",
-  "id" : "539",
-  "fitness" : "7.9580345"
+  "Size" : 182,
+  "Groups" : 2,
+  "ID" : 2198,
+  "Fitness" : 7.6115165,
+  "Feasible" : false
 },
 {
-  "size" : "148.0",
-  "groups" : "4.0",
-  "id" : "69",
-  "fitness" : "9.336628"
+  "Size" : 122,
+  "Groups" : 2,
+  "ID" : 2443,
+  "Fitness" : 7.503468,
+  "Feasible" : false
 },
 {
-  "size" : "106.0",
-  "groups" : "3.0",
-  "id" : "347",
-  "fitness" : "7.63935"
+  "Size" : 180,
+  "Groups" : 3,
+  "ID" : 1310,
+  "Fitness" : 8.664646,
+  "Feasible" : false
 },
 {
-  "size" : "210.0",
-  "groups" : "8.0",
-  "id" : "369",
-  "fitness" : "7.4553404"
+  "Size" : 209,
+  "Groups" : 6,
+  "ID" : 394,
+  "Fitness" : 9.013897,
+  "Feasible" : false
 },
 {
-  "size" : "121.0",
-  "groups" : "5.0",
-  "id" : "579",
-  "fitness" : "6.847471"
+  "Size" : 178,
+  "Groups" : 4,
+  "ID" : 642,
+  "Fitness" : 8.580343,
+  "Feasible" : false
 },
 {
-  "size" : "147.0",
-  "groups" : "3.0",
-  "id" : "346",
-  "fitness" : "7.6371136"
+  "Size" : 242,
+  "Groups" : 6,
+  "ID" : 57,
+  "Fitness" : 7.2075415,
+  "Feasible" : false
 },
 {
-  "size" : "122.0",
-  "groups" : "2.0",
-  "id" : "178",
-  "fitness" : "7.4474964"
+  "Size" : 143,
+  "Groups" : 6,
+  "ID" : 100,
+  "Fitness" : 9.436598,
+  "Feasible" : false
 },
 {
-  "size" : "180.0",
-  "groups" : "3.0",
-  "id" : "919",
-  "fitness" : "7.727825"
+  "Size" : 176,
+  "Groups" : 6,
+  "ID" : 66,
+  "Fitness" : 8.48828,
+  "Feasible" : false
 },
 {
-  "size" : "290.0",
-  "groups" : "8.0",
-  "id" : "211",
-  "fitness" : "6.721606"
+  "Size" : 144,
+  "Groups" : 5,
+  "ID" : 143,
+  "Fitness" : 8.371137,
+  "Feasible" : false
 },
 {
-  "size" : "241.0",
-  "groups" : "7.0",
-  "id" : "493",
-  "fitness" : "7.8393435"
+  "Size" : 120,
+  "Groups" : 4,
+  "ID" : 337,
+  "Fitness" : 7.8128023,
+  "Feasible" : false
 },
 {
-  "size" : "145.0",
-  "groups" : "4.0",
-  "id" : "1306",
-  "fitness" : "7.564651"
+  "Size" : 208,
+  "Groups" : 7,
+  "ID" : 438,
+  "Fitness" : 6.9372177,
+  "Feasible" : false
 },
 {
-  "size" : "121.0",
-  "groups" : "3.0",
-  "id" : "2025",
-  "fitness" : "7.4084954"
+  "Size" : 118,
+  "Groups" : 8,
+  "ID" : 358,
+  "Fitness" : 7.787545,
+  "Feasible" : false
 },
 {
-  "size" : "176.0",
-  "groups" : "6.0",
-  "id" : "102",
-  "fitness" : "8.072225"
+  "Size" : 118,
+  "Groups" : 9,
+  "ID" : 310,
+  "Fitness" : 6.069932,
+  "Feasible" : false
 },
 {
-  "size" : "208.0",
-  "groups" : "7.0",
-  "id" : "184",
-  "fitness" : "7.2101336"
+  "Size" : 150,
+  "Groups" : 2,
+  "ID" : 1505,
+  "Fitness" : 9.240263,
+  "Feasible" : true
 },
 {
-  "size" : "144.0",
-  "groups" : "5.0",
-  "id" : "344",
-  "fitness" : "8.242129"
+  "Size" : 214,
+  "Groups" : 3,
+  "ID" : 2097,
+  "Fitness" : 7.100769,
+  "Feasible" : false
 },
 {
-  "size" : "120.0",
-  "groups" : "4.0",
-  "id" : "561",
-  "fitness" : "7.837569"
+  "Size" : 243,
+  "Groups" : 6,
+  "ID" : 442,
+  "Fitness" : 7.2252417,
+  "Feasible" : false
 },
 {
-  "size" : "142.0",
-  "groups" : "7.0",
-  "id" : "68",
-  "fitness" : "9.410164"
+  "Size" : 212,
+  "Groups" : 4,
+  "ID" : 141,
+  "Fitness" : 7.299184,
+  "Feasible" : false
 },
 {
-  "size" : "119.0",
-  "groups" : "6.0",
-  "id" : "873",
-  "fitness" : "7.761805"
+  "Size" : 148,
+  "Groups" : 3,
+  "ID" : 1958,
+  "Fitness" : 9.462637,
+  "Feasible" : true
 },
 {
-  "size" : "118.0",
-  "groups" : "8.0",
-  "id" : "44",
-  "fitness" : "6.144417"
+  "Size" : 106,
+  "Groups" : 2,
+  "ID" : 2404,
+  "Fitness" : 9.018997,
+  "Feasible" : true
 },
 {
-  "size" : "304.0",
-  "groups" : "3.0",
-  "id" : "249",
-  "fitness" : "6.7718983"
+  "Size" : 210,
+  "Groups" : 6,
+  "ID" : 222,
+  "Fitness" : 7.6810694,
+  "Feasible" : false
 },
 {
-  "size" : "181.0",
-  "groups" : "3.0",
-  "id" : "1754",
-  "fitness" : "8.386156"
+  "Size" : 178,
+  "Groups" : 5,
+  "ID" : 519,
+  "Fitness" : 7.7690153,
+  "Feasible" : false
 },
 {
-  "size" : "150.0",
-  "groups" : "2.0",
-  "id" : "1038",
-  "fitness" : "7.375158"
+  "Size" : 208,
+  "Groups" : 8,
+  "ID" : 107,
+  "Fitness" : 7.010912,
+  "Feasible" : false
 },
 {
-  "size" : "179.0",
-  "groups" : "4.0",
-  "id" : "821",
-  "fitness" : "6.6738615"
+  "Size" : 176,
+  "Groups" : 7,
+  "ID" : 206,
+  "Fitness" : 7.870963,
+  "Feasible" : false
 },
 {
-  "size" : "106.0",
-  "groups" : "2.0",
-  "id" : "4",
-  "fitness" : "7.1116695"
+  "Size" : 120,
+  "Groups" : 5,
+  "ID" : 2008,
+  "Fitness" : 9.635212,
+  "Feasible" : true
 },
 {
-  "size" : "148.0",
-  "groups" : "3.0",
-  "id" : "362",
-  "fitness" : "8.474249"
+  "Size" : 144,
+  "Groups" : 6,
+  "ID" : 1486,
+  "Fitness" : 7.971663,
+  "Feasible" : false
 },
 {
-  "size" : "241.0",
-  "groups" : "8.0",
-  "id" : "287",
-  "fitness" : "7.1082687"
+  "Size" : 142,
+  "Groups" : 8,
+  "ID" : 346,
+  "Fitness" : 6.611037,
+  "Feasible" : false
 },
 {
-  "size" : "178.0",
-  "groups" : "5.0",
-  "id" : "264",
-  "fitness" : "8.211222"
+  "Size" : 309,
+  "Groups" : 2,
+  "ID" : 325,
+  "Fitness" : 7.0349345,
+  "Feasible" : false
 },
 {
-  "size" : "146.0",
-  "groups" : "4.0",
-  "id" : "1305",
-  "fitness" : "7.3523645"
+  "Size" : 171,
+  "Groups" : 9,
+  "ID" : 405,
+  "Fitness" : 7.441929,
+  "Feasible" : false
 },
 {
-  "size" : "143.0",
-  "groups" : "7.0",
-  "id" : "73",
-  "fitness" : "6.7274866"
+  "Size" : 180,
+  "Groups" : 2,
+  "ID" : 583,
+  "Fitness" : 7.0841775,
+  "Feasible" : false
 },
 {
-  "size" : "176.0",
-  "groups" : "7.0",
-  "id" : "397",
-  "fitness" : "7.783533"
+  "Size" : 145,
+  "Groups" : 3,
+  "ID" : 52,
+  "Fitness" : 7.3466134,
+  "Feasible" : false
 },
 {
-  "size" : "144.0",
-  "groups" : "6.0",
-  "id" : "1088",
-  "fitness" : "7.765911"
+  "Size" : 290,
+  "Groups" : 6,
+  "ID" : 126,
+  "Fitness" : 7.118537,
+  "Feasible" : false
 },
 {
-  "size" : "119.0",
-  "groups" : "7.0",
-  "id" : "880",
-  "fitness" : "6.421608"
+  "Size" : 241,
+  "Groups" : 5,
+  "ID" : 296,
+  "Fitness" : 7.457871,
+  "Feasible" : false
 },
 {
-  "size" : "147.0",
-  "groups" : "2.0",
-  "id" : "321",
-  "fitness" : "7.6309853"
+  "Size" : 178,
+  "Groups" : 3,
+  "ID" : 2176,
+  "Fitness" : 7.8506336,
+  "Feasible" : false
 },
 {
-  "size" : "241.0",
-  "groups" : "5.0",
-  "id" : "58",
-  "fitness" : "7.237"
+  "Size" : 176,
+  "Groups" : 4,
+  "ID" : 41,
+  "Fitness" : 8.409972,
+  "Feasible" : false
 },
 {
-  "size" : "121.0",
-  "groups" : "2.0",
-  "id" : "571",
-  "fitness" : "7.322804"
+  "Size" : 120,
+  "Groups" : 3,
+  "ID" : 40,
+  "Fitness" : 7.6305947,
+  "Feasible" : false
 },
 {
-  "size" : "178.0",
-  "groups" : "3.0",
-  "id" : "715",
-  "fitness" : "7.8731737"
+  "Size" : 174,
+  "Groups" : 6,
+  "ID" : 109,
+  "Fitness" : 8.610341,
+  "Feasible" : false
 },
 {
-  "size" : "143.0",
-  "groups" : "4.0",
-  "id" : "365",
-  "fitness" : "7.6295447"
+  "Size" : 238,
+  "Groups" : 8,
+  "ID" : 234,
+  "Fitness" : 5.8974447,
+  "Feasible" : false
 },
 {
-  "size" : "120.0",
-  "groups" : "3.0",
-  "id" : "1",
-  "fitness" : "7.467277"
+  "Size" : 142,
+  "Groups" : 5,
+  "ID" : 2010,
+  "Fitness" : 8.101075,
+  "Feasible" : false
 },
 {
-  "size" : "176.0",
-  "groups" : "4.0",
-  "id" : "60",
-  "fitness" : "8.4493685"
+  "Size" : 140,
+  "Groups" : 7,
+  "ID" : 138,
+  "Fitness" : 8.195112,
+  "Feasible" : false
 },
 {
-  "size" : "119.0",
-  "groups" : "4.0",
-  "id" : "450",
-  "fitness" : "9.234769"
+  "Size" : 172,
+  "Groups" : 8,
+  "ID" : 465,
+  "Fitness" : 7.5489464,
+  "Feasible" : false
 },
 {
-  "size" : "142.0",
-  "groups" : "5.0",
-  "id" : "460",
-  "fitness" : "8.000614"
+  "Size" : 118,
+  "Groups" : 6,
+  "ID" : 1488,
+  "Fitness" : 7.928224,
+  "Feasible" : false
 },
 {
-  "size" : "174.0",
-  "groups" : "6.0",
-  "id" : "1536",
-  "fitness" : "7.5460176"
+  "Size" : 117,
+  "Groups" : 8,
+  "ID" : 49,
+  "Fitness" : 6.4916406,
+  "Feasible" : false
 },
 {
-  "size" : "118.0",
-  "groups" : "6.0",
-  "id" : "567",
-  "fitness" : "8.198093"
+  "Size" : 245,
+  "Groups" : 3,
+  "ID" : 208,
+  "Fitness" : 7.106161,
+  "Feasible" : false
 },
 {
-  "size" : "172.0",
-  "groups" : "8.0",
-  "id" : "658",
-  "fitness" : "6.4184556"
+  "Size" : 214,
+  "Groups" : 2,
+  "ID" : 618,
+  "Fitness" : 7.129094,
+  "Feasible" : false
 },
 {
-  "size" : "117.0",
-  "groups" : "8.0",
-  "id" : "240",
-  "fitness" : "6.35457"
+  "Size" : 148,
+  "Groups" : 2,
+  "ID" : 2126,
+  "Fitness" : 7.772009,
+  "Feasible" : false
 },
 {
-  "size" : "245.0",
-  "groups" : "3.0",
-  "id" : "31",
-  "fitness" : "7.320875"
+  "Size" : 212,
+  "Groups" : 3,
+  "ID" : 2308,
+  "Fitness" : 6.456634,
+  "Feasible" : false
 },
 {
-  "size" : "358.0",
-  "groups" : "6.0",
-  "id" : "45",
-  "fitness" : "6.8856106"
+  "Size" : 241,
+  "Groups" : 6,
+  "ID" : 34,
+  "Fitness" : 6.8236594,
+  "Feasible" : false
 },
 {
-  "size" : "148.0",
-  "groups" : "2.0",
-  "id" : "443",
-  "fitness" : "8.668756"
+  "Size" : 146,
+  "Groups" : 3,
+  "ID" : 231,
+  "Fitness" : 8.947935,
+  "Feasible" : false
 },
 {
-  "size" : "212.0",
-  "groups" : "3.0",
-  "id" : "465",
-  "fitness" : "7.4025025"
+  "Size" : 210,
+  "Groups" : 4,
+  "ID" : 923,
+  "Fitness" : 6.817278,
+  "Feasible" : false
 },
 {
-  "size" : "241.0",
-  "groups" : "6.0",
-  "id" : "93",
-  "fitness" : "6.849975"
+  "Size" : 239,
+  "Groups" : 8,
+  "ID" : 467,
+  "Fitness" : 7.330708,
+  "Feasible" : false
 },
 {
-  "size" : "146.0",
-  "groups" : "3.0",
-  "id" : "432",
-  "fitness" : "7.5743804"
+  "Size" : 144,
+  "Groups" : 4,
+  "ID" : 2271,
+  "Fitness" : 8.129008,
+  "Feasible" : false
 },
 {
-  "size" : "286.0",
-  "groups" : "10.0",
-  "id" : "286",
-  "fitness" : "6.4098487"
+  "Size" : 176,
+  "Groups" : 5,
+  "ID" : 256,
+  "Fitness" : 8.758305,
+  "Feasible" : false
 },
 {
-  "size" : "144.0",
-  "groups" : "4.0",
-  "id" : "54",
-  "fitness" : "7.880994"
+  "Size" : 208,
+  "Groups" : 6,
+  "ID" : 470,
+  "Fitness" : 7.383018,
+  "Feasible" : false
 },
 {
-  "size" : "176.0",
-  "groups" : "5.0",
-  "id" : "191",
-  "fitness" : "8.191082"
+  "Size" : 142,
+  "Groups" : 6,
+  "ID" : 2005,
+  "Fitness" : 8.525843,
+  "Feasible" : true
 },
 {
-  "size" : "240.0",
-  "groups" : "7.0",
-  "id" : "181",
-  "fitness" : "7.1498933"
+  "Size" : 178,
+  "Groups" : 2,
+  "ID" : 529,
+  "Fitness" : 7.3727655,
+  "Feasible" : false
 },
 {
-  "size" : "141.0",
-  "groups" : "7.0",
-  "id" : "2326",
-  "fitness" : "9.187666"
+  "Size" : 288,
+  "Groups" : 5,
+  "ID" : 368,
+  "Fitness" : 7.5546284,
+  "Feasible" : false
 },
 {
-  "size" : "174.0",
-  "groups" : "7.0",
-  "id" : "358",
-  "fitness" : "9.419428"
+  "Size" : 240,
+  "Groups" : 4,
+  "ID" : 380,
+  "Fitness" : 8.120972,
+  "Feasible" : false
 },
 {
-  "size" : "119.0",
-  "groups" : "5.0",
-  "id" : "533",
-  "fitness" : "7.9361467"
+  "Size" : 176,
+  "Groups" : 3,
+  "ID" : 1410,
+  "Fitness" : 8.680046,
+  "Feasible" : false
 },
 {
-  "size" : "142.0",
-  "groups" : "6.0",
-  "id" : "1832",
-  "fitness" : "7.8773446"
+  "Size" : 120,
+  "Groups" : 2,
+  "ID" : 1733,
+  "Fitness" : 7.547376,
+  "Feasible" : false
 },
 {
-  "size" : "118.0",
-  "groups" : "7.0",
-  "id" : "132",
-  "fitness" : "6.7845635"
+  "Size" : 141,
+  "Groups" : 4,
+  "ID" : 96,
+  "Fitness" : 7.5495725,
+  "Feasible" : false
 },
 {
-  "size" : "136.0",
-  "groups" : "9.0",
-  "id" : "206",
-  "fitness" : "5.863672"
+  "Size" : 174,
+  "Groups" : 4,
+  "ID" : 512,
+  "Fitness" : 9.286861,
+  "Feasible" : false
 },
 {
-  "size" : "178.0",
-  "groups" : "2.0",
-  "id" : "2488",
-  "fitness" : "7.3215904"
+  "Size" : 119,
+  "Groups" : 3,
+  "ID" : 290,
+  "Fitness" : 7.5619287,
+  "Feasible" : false
 },
 {
-  "size" : "143.0",
-  "groups" : "3.0",
-  "id" : "1796",
-  "fitness" : "7.7122855"
+  "Size" : 206,
+  "Groups" : 5,
+  "ID" : 431,
+  "Fitness" : 7.584554,
+  "Feasible" : false
 },
 {
-  "size" : "176.0",
-  "groups" : "3.0",
-  "id" : "2485",
-  "fitness" : "8.70723"
+  "Size" : 204,
+  "Groups" : 7,
+  "ID" : 43,
+  "Fitness" : 7.828985,
+  "Feasible" : false
 },
 {
-  "size" : "141.0",
-  "groups" : "4.0",
-  "id" : "830",
-  "fitness" : "9.323975"
+  "Size" : 118,
+  "Groups" : 4,
+  "ID" : 773,
+  "Fitness" : 9.498199,
+  "Feasible" : true
 },
 {
-  "size" : "206.0",
-  "groups" : "5.0",
-  "id" : "12",
-  "fitness" : "8.0151615"
+  "Size" : 172,
+  "Groups" : 6,
+  "ID" : 188,
+  "Fitness" : 7.85935,
+  "Feasible" : false
 },
 {
-  "size" : "174.0",
-  "groups" : "4.0",
-  "id" : "524",
-  "fitness" : "9.659012"
+  "Size" : 236,
+  "Groups" : 8,
+  "ID" : 226,
+  "Fitness" : 7.023708,
+  "Feasible" : false
 },
 {
-  "size" : "119.0",
-  "groups" : "3.0",
-  "id" : "573",
-  "fitness" : "7.7338657"
+  "Size" : 140,
+  "Groups" : 5,
+  "ID" : 1273,
+  "Fitness" : 9.7192,
+  "Feasible" : false
 },
 {
-  "size" : "172.0",
-  "groups" : "6.0",
-  "id" : "84",
-  "fitness" : "8.553776"
+  "Size" : 117,
+  "Groups" : 6,
+  "ID" : 142,
+  "Fitness" : 7.670618,
+  "Feasible" : false
 },
 {
-  "size" : "280.0",
-  "groups" : "10.0",
-  "id" : "329",
-  "fitness" : "7.140709"
+  "Size" : 138,
+  "Groups" : 7,
+  "ID" : 221,
+  "Fitness" : 8.389227,
+  "Feasible" : false
 },
 {
-  "size" : "118.0",
-  "groups" : "4.0",
-  "id" : "592",
-  "fitness" : "8.000711"
+  "Size" : 170,
+  "Groups" : 8,
+  "ID" : 487,
+  "Fitness" : 7.872244,
+  "Feasible" : false
 },
 {
-  "size" : "204.0",
-  "groups" : "7.0",
-  "id" : "909",
-  "fitness" : "7.922395"
+  "Size" : 282,
+  "Groups" : 9,
+  "ID" : 478,
+  "Fitness" : 6.5207586,
+  "Feasible" : false
 },
 {
-  "size" : "140.0",
-  "groups" : "5.0",
-  "id" : "1304",
-  "fitness" : "8.216312"
+  "Size" : 137,
+  "Groups" : 9,
+  "ID" : 288,
+  "Fitness" : 6.318363,
+  "Feasible" : false
 },
 {
-  "size" : "117.0",
-  "groups" : "6.0",
-  "id" : "745",
-  "fitness" : "9.421913"
+  "Size" : 243,
+  "Groups" : 3,
+  "ID" : 374,
+  "Fitness" : 7.3215013,
+  "Feasible" : false
 },
 {
-  "size" : "136.0",
-  "groups" : "10.0",
-  "id" : "172",
-  "fitness" : "6.1078267"
+  "Size" : 146,
+  "Groups" : 2,
+  "ID" : 6,
+  "Fitness" : 6.7035875,
+  "Feasible" : false
 },
 {
-  "size" : "243.0",
-  "groups" : "3.0",
-  "id" : "66",
-  "fitness" : "7.129181"
+  "Size" : 210,
+  "Groups" : 3,
+  "ID" : 291,
+  "Fitness" : 7.5143266,
+  "Feasible" : false
 },
 {
-  "size" : "179.0",
-  "groups" : "2.0",
-  "id" : "2487",
-  "fitness" : "7.0025225"
+  "Size" : 208,
+  "Groups" : 4,
+  "ID" : 279,
+  "Fitness" : 7.7430234,
+  "Feasible" : false
 },
 {
-  "size" : "177.0",
-  "groups" : "3.0",
-  "id" : "1036",
-  "fitness" : "7.4293084"
+  "Size" : 144,
+  "Groups" : 3,
+  "ID" : 1732,
+  "Fitness" : 7.8645844,
+  "Feasible" : false
 },
 {
-  "size" : "175.0",
-  "groups" : "4.0",
-  "id" : "1251",
-  "fitness" : "8.290632"
+  "Size" : 173,
+  "Groups" : 6,
+  "ID" : 27,
+  "Fitness" : 7.847421,
+  "Feasible" : false
 },
 {
-  "size" : "208.0",
-  "groups" : "4.0",
-  "id" : "394",
-  "fitness" : "7.2411323"
+  "Size" : 282,
+  "Groups" : 10,
+  "ID" : 32,
+  "Fitness" : 6.956621,
+  "Feasible" : false
 },
 {
-  "size" : "144.0",
-  "groups" : "3.0",
-  "id" : "1074",
-  "fitness" : "9.177551"
+  "Size" : 205,
+  "Groups" : 7,
+  "ID" : 84,
+  "Fitness" : 7.3800387,
+  "Feasible" : false
 },
 {
-  "size" : "141.0",
-  "groups" : "5.0",
-  "id" : "227",
-  "fitness" : "8.174452"
+  "Size" : 141,
+  "Groups" : 5,
+  "ID" : 392,
+  "Fitness" : 9.466555,
+  "Feasible" : false
 },
 {
-  "size" : "142.0",
-  "groups" : "4.0",
-  "id" : "2026",
-  "fitness" : "7.8296013"
+  "Size" : 238,
+  "Groups" : 7,
+  "ID" : 93,
+  "Fitness" : 7.321924,
+  "Feasible" : false
 },
 {
-  "size" : "174.0",
-  "groups" : "5.0",
-  "id" : "699",
-  "fitness" : "8.445222"
+  "Size" : 174,
+  "Groups" : 5,
+  "ID" : 906,
+  "Fitness" : 9.142486,
+  "Feasible" : false
 },
 {
-  "size" : "172.0",
-  "groups" : "7.0",
-  "id" : "158",
-  "fitness" : "9.058154"
+  "Size" : 142,
+  "Groups" : 4,
+  "ID" : 1715,
+  "Fitness" : 9.557935,
+  "Feasible" : false
 },
 {
-  "size" : "118.0",
-  "groups" : "5.0",
-  "id" : "232",
-  "fitness" : "8.16102"
+  "Size" : 118,
+  "Groups" : 5,
+  "ID" : 1084,
+  "Fitness" : 9.64647,
+  "Feasible" : true
 },
 {
-  "size" : "140.0",
-  "groups" : "6.0",
-  "id" : "750",
-  "fitness" : "7.656776"
+  "Size" : 140,
+  "Groups" : 6,
+  "ID" : 1531,
+  "Fitness" : 7.810754,
+  "Feasible" : false
 },
 {
-  "size" : "204.0",
-  "groups" : "8.0",
-  "id" : "782",
-  "fitness" : "7.244113"
+  "Size" : 176,
+  "Groups" : 2,
+  "ID" : 2307,
+  "Fitness" : 7.549114,
+  "Feasible" : false
 },
 {
-  "size" : "117.0",
-  "groups" : "7.0",
-  "id" : "547",
-  "fitness" : "8.027206"
+  "Size" : 237,
+  "Groups" : 5,
+  "ID" : 475,
+  "Fitness" : 7.5880985,
+  "Feasible" : false
 },
 {
-  "size" : "138.0",
-  "groups" : "8.0",
-  "id" : "961",
-  "fitness" : "6.4540606"
+  "Size" : 119,
+  "Groups" : 2,
+  "ID" : 42,
+  "Fitness" : 6.493571,
+  "Feasible" : false
 },
 {
-  "size" : "293.0",
-  "groups" : "4.0",
-  "id" : "299",
-  "fitness" : "8.888197"
+  "Size" : 174,
+  "Groups" : 3,
+  "ID" : 560,
+  "Fitness" : 9.0108,
+  "Feasible" : false
 },
 {
-  "size" : "143.0",
-  "groups" : "2.0",
-  "id" : "1316",
-  "fitness" : "6.515593"
+  "Size" : 139,
+  "Groups" : 4,
+  "ID" : 410,
+  "Fitness" : 7.906429,
+  "Feasible" : false
 },
 {
-  "size" : "282.0",
-  "groups" : "6.0",
-  "id" : "340",
-  "fitness" : "7.113366"
+  "Size" : 172,
+  "Groups" : 4,
+  "ID" : 388,
+  "Fitness" : 8.482363,
+  "Feasible" : false
 },
 {
-  "size" : "141.0",
-  "groups" : "3.0",
-  "id" : "1537",
-  "fitness" : "7.9415097"
+  "Size" : 118,
+  "Groups" : 3,
+  "ID" : 1075,
+  "Fitness" : 9.179372,
+  "Feasible" : true
 },
 {
-  "size" : "205.0",
-  "groups" : "4.0",
-  "id" : "1799",
-  "fitness" : "6.4419985"
+  "Size" : 204,
+  "Groups" : 5,
+  "ID" : 671,
+  "Fitness" : 7.847785,
+  "Feasible" : false
 },
 {
-  "size" : "174.0",
-  "groups" : "3.0",
-  "id" : "696",
-  "fitness" : "8.202042"
+  "Size" : 138,
+  "Groups" : 5,
+  "ID" : 195,
+  "Fitness" : 7.6942487,
+  "Feasible" : false
 },
 {
-  "size" : "235.0",
-  "groups" : "7.0",
-  "id" : "341",
-  "fitness" : "7.1917467"
+  "Size" : 117,
+  "Groups" : 4,
+  "ID" : 218,
+  "Fitness" : 7.921094,
+  "Feasible" : false
 },
 {
-  "size" : "139.0",
-  "groups" : "4.0",
-  "id" : "534",
-  "fitness" : "7.507457"
+  "Size" : 234,
+  "Groups" : 8,
+  "ID" : 319,
+  "Fitness" : 7.5422316,
+  "Feasible" : false
 },
 {
-  "size" : "171.0",
-  "groups" : "5.0",
-  "id" : "2359",
-  "fitness" : "7.6055617"
+  "Size" : 170,
+  "Groups" : 6,
+  "ID" : 1597,
+  "Fitness" : 6.88062,
+  "Feasible" : false
 },
 {
-  "size" : "118.0",
-  "groups" : "3.0",
-  "id" : "229",
-  "fitness" : "9.224705"
+  "Size" : 136,
+  "Groups" : 7,
+  "ID" : 15,
+  "Fitness" : 6.561377,
+  "Feasible" : false
 },
 {
-  "size" : "172.0",
-  "groups" : "4.0",
-  "id" : "608",
-  "fitness" : "7.595979"
+  "Size" : 241,
+  "Groups" : 3,
+  "ID" : 68,
+  "Fitness" : 7.272854,
+  "Feasible" : false
 },
 {
-  "size" : "137.0",
-  "groups" : "6.0",
-  "id" : "43",
-  "fitness" : "8.55416"
+  "Size" : 210,
+  "Groups" : 2,
+  "ID" : 61,
+  "Fitness" : 7.2026052,
+  "Feasible" : false
 },
 {
-  "size" : "169.0",
-  "groups" : "7.0",
-  "id" : "541",
-  "fitness" : "7.3434725"
+  "Size" : 208,
+  "Groups" : 3,
+  "ID" : 1325,
+  "Fitness" : 7.2761645,
+  "Feasible" : false
 },
 {
-  "size" : "117.0",
-  "groups" : "4.0",
-  "id" : "1172",
-  "fitness" : "9.50334"
+  "Size" : 142,
+  "Groups" : 3,
+  "ID" : 964,
+  "Fitness" : 9.180064,
+  "Feasible" : true
 },
 {
-  "size" : "138.0",
-  "groups" : "5.0",
-  "id" : "296",
-  "fitness" : "8.124418"
+  "Size" : 238,
+  "Groups" : 5,
+  "ID" : 185,
+  "Fitness" : 7.179023,
+  "Feasible" : false
 },
 {
-  "size" : "170.0",
-  "groups" : "6.0",
-  "id" : "978",
-  "fitness" : "8.066172"
+  "Size" : 206,
+  "Groups" : 4,
+  "ID" : 2160,
+  "Fitness" : 7.8640895,
+  "Feasible" : false
 },
 {
-  "size" : "135.0",
-  "groups" : "8.0",
-  "id" : "875",
-  "fitness" : "6.280202"
+  "Size" : 172,
+  "Groups" : 5,
+  "ID" : 156,
+  "Fitness" : 7.730695,
+  "Feasible" : false
 },
 {
-  "size" : "168.0",
-  "groups" : "8.0",
-  "id" : "677",
-  "fitness" : "8.199696"
+  "Size" : 140,
+  "Groups" : 4,
+  "ID" : 1711,
+  "Fitness" : 9.564808,
+  "Feasible" : false
 },
 {
-  "size" : "136.0",
-  "groups" : "7.0",
-  "id" : "271",
-  "fitness" : "8.181828"
+  "Size" : 204,
+  "Groups" : 6,
+  "ID" : 216,
+  "Fitness" : 8.329451,
+  "Feasible" : false
 },
 {
-  "size" : "241.0",
-  "groups" : "3.0",
-  "id" : "431",
-  "fitness" : "6.7679887"
+  "Size" : 238,
+  "Groups" : 3,
+  "ID" : 191,
+  "Fitness" : 7.211556,
+  "Feasible" : false
 },
 {
-  "size" : "144.0",
-  "groups" : "2.0",
-  "id" : "894",
-  "fitness" : "7.4014993"
+  "Size" : 174,
+  "Groups" : 2,
+  "ID" : 266,
+  "Fitness" : 8.74195,
+  "Feasible" : false
 },
 {
-  "size" : "173.0",
-  "groups" : "4.0",
-  "id" : "1540",
-  "fitness" : "7.598977"
+  "Size" : 118,
+  "Groups" : 2,
+  "ID" : 1367,
+  "Fitness" : 9.090067,
+  "Feasible" : true
 },
 {
-  "size" : "238.0",
-  "groups" : "5.0",
-  "id" : "420",
-  "fitness" : "7.5798035"
+  "Size" : 172,
+  "Groups" : 3,
+  "ID" : 1039,
+  "Fitness" : 7.7435336,
+  "Feasible" : false
 },
 {
-  "size" : "172.0",
-  "groups" : "5.0",
-  "id" : "267",
-  "fitness" : "8.667522"
+  "Size" : 170,
+  "Groups" : 4,
+  "ID" : 70,
+  "Fitness" : 7.731201,
+  "Feasible" : false
 },
 {
-  "size" : "204.0",
-  "groups" : "6.0",
-  "id" : "674",
-  "fitness" : "7.4552445"
+  "Size" : 234,
+  "Groups" : 6,
+  "ID" : 127,
+  "Fitness" : 7.374209,
+  "Feasible" : false
 },
 {
-  "size" : "140.0",
-  "groups" : "4.0",
-  "id" : "749",
-  "fitness" : "7.819581"
+  "Size" : 117,
+  "Groups" : 3,
+  "ID" : 257,
+  "Fitness" : 7.6356225,
+  "Feasible" : false
 },
 {
-  "size" : "138.0",
-  "groups" : "6.0",
-  "id" : "127",
-  "fitness" : "7.525626"
+  "Size" : 202,
+  "Groups" : 5,
+  "ID" : 1782,
+  "Fitness" : 7.0166216,
+  "Feasible" : false
 },
 {
-  "size" : "117.0",
-  "groups" : "5.0",
-  "id" : "557",
-  "fitness" : "9.684042"
+  "Size" : 168,
+  "Groups" : 6,
+  "ID" : 204,
+  "Fitness" : 8.00111,
+  "Feasible" : false
 },
 {
-  "size" : "202.0",
-  "groups" : "8.0",
-  "id" : "497",
-  "fitness" : "7.7963567"
+  "Size" : 136,
+  "Groups" : 5,
+  "ID" : 212,
+  "Fitness" : 8.252224,
+  "Feasible" : false
 },
 {
-  "size" : "170.0",
-  "groups" : "7.0",
-  "id" : "908",
-  "fitness" : "6.800375"
+  "Size" : 116,
+  "Groups" : 4,
+  "ID" : 2069,
+  "Fitness" : 7.639367,
+  "Feasible" : false
 },
 {
-  "size" : "136.0",
-  "groups" : "8.0",
-  "id" : "793",
-  "fitness" : "6.441863"
+  "Size" : 166,
+  "Groups" : 8,
+  "ID" : 389,
+  "Fitness" : 7.3042693,
+  "Feasible" : false
 },
 {
-  "size" : "198.0",
-  "groups" : "9.0",
-  "id" : "24",
-  "fitness" : "6.1237364"
+  "Size" : 232,
+  "Groups" : 9,
+  "ID" : 110,
+  "Fitness" : 6.594224,
+  "Feasible" : false
 },
 {
-  "size" : "132.0",
-  "groups" : "9.0",
-  "id" : "495",
-  "fitness" : "7.654269"
+  "Size" : 133,
+  "Groups" : 9,
+  "ID" : 26,
+  "Fitness" : 6.2060304,
+  "Feasible" : false
 },
 {
-  "size" : "290.0",
-  "groups" : "2.0",
-  "id" : "301",
-  "fitness" : "7.3607893"
+  "Size" : 241,
+  "Groups" : 2,
+  "ID" : 485,
+  "Fitness" : 6.2792797,
+  "Feasible" : false
 },
 {
-  "size" : "141.0",
-  "groups" : "2.0",
-  "id" : "430",
-  "fitness" : "7.6008964"
+  "Size" : 206,
+  "Groups" : 3,
+  "ID" : 199,
+  "Fitness" : 7.450299,
+  "Feasible" : false
 },
 {
-  "size" : "174.0",
-  "groups" : "2.0",
-  "id" : "40",
-  "fitness" : "9.279767"
+  "Size" : 142,
+  "Groups" : 2,
+  "ID" : 1568,
+  "Fitness" : 9.105898,
+  "Feasible" : true
 },
 {
-  "size" : "139.0",
-  "groups" : "3.0",
-  "id" : "595",
-  "fitness" : "7.409527"
+  "Size" : 235,
+  "Groups" : 6,
+  "ID" : 376,
+  "Fitness" : 7.4988527,
+  "Feasible" : false
 },
 {
-  "size" : "278.0",
-  "groups" : "6.0",
-  "id" : "324",
-  "fitness" : "6.8074055"
+  "Size" : 204,
+  "Groups" : 4,
+  "ID" : 133,
+  "Fitness" : 8.4726715,
+  "Feasible" : false
 },
 {
-  "size" : "236.0",
-  "groups" : "4.0",
-  "id" : "50",
-  "fitness" : "7.4593616"
+  "Size" : 140,
+  "Groups" : 3,
+  "ID" : 464,
+  "Fitness" : 8.768835,
+  "Feasible" : false
 },
 {
-  "size" : "118.0",
-  "groups" : "2.0",
-  "id" : "56",
-  "fitness" : "8.6349125"
+  "Size" : 137,
+  "Groups" : 5,
+  "ID" : 39,
+  "Fitness" : 8.028968,
+  "Feasible" : false
 },
 {
-  "size" : "172.0",
-  "groups" : "3.0",
-  "id" : "823",
-  "fitness" : "7.726268"
+  "Size" : 170,
+  "Groups" : 5,
+  "ID" : 167,
+  "Fitness" : 8.390633,
+  "Feasible" : false
 },
 {
-  "size" : "274.0",
-  "groups" : "8.0",
-  "id" : "259",
-  "fitness" : "7.217897"
+  "Size" : 138,
+  "Groups" : 4,
+  "ID" : 400,
+  "Fitness" : 8.351093,
+  "Feasible" : false
 },
 {
-  "size" : "137.0",
-  "groups" : "4.0",
-  "id" : "639",
-  "fitness" : "7.940195"
+  "Size" : 202,
+  "Groups" : 6,
+  "ID" : 366,
+  "Fitness" : 7.4647455,
+  "Feasible" : false
 },
 {
-  "size" : "234.0",
-  "groups" : "6.0",
-  "id" : "107",
-  "fitness" : "7.7298026"
+  "Size" : 136,
+  "Groups" : 6,
+  "ID" : 196,
+  "Fitness" : 7.928237,
+  "Feasible" : false
 },
 {
-  "size" : "117.0",
-  "groups" : "3.0",
-  "id" : "1401",
-  "fitness" : "9.304308"
+  "Size" : 268,
+  "Groups" : 9,
+  "ID" : 299,
+  "Fitness" : 6.8907633,
+  "Feasible" : false
 },
 {
-  "size" : "202.0",
-  "groups" : "5.0",
-  "id" : "719",
-  "fitness" : "7.9358506"
+  "Size" : 286,
+  "Groups" : 2,
+  "ID" : 229,
+  "Fitness" : 6.937212,
+  "Feasible" : false
 },
 {
-  "size" : "170.0",
-  "groups" : "4.0",
-  "id" : "901",
-  "fitness" : "7.6548777"
+  "Size" : 203,
+  "Groups" : 3,
+  "ID" : 271,
+  "Fitness" : 8.359498,
+  "Feasible" : false
 },
 {
-  "size" : "135.0",
-  "groups" : "6.0",
-  "id" : "754",
-  "fitness" : "6.4892607"
+  "Size" : 170,
+  "Groups" : 3,
+  "ID" : 1473,
+  "Fitness" : 8.147787,
+  "Feasible" : false
 },
 {
-  "size" : "232.0",
-  "groups" : "8.0",
-  "id" : "91",
-  "fitness" : "7.170258"
+  "Size" : 135,
+  "Groups" : 4,
+  "ID" : 399,
+  "Fitness" : 8.100992,
+  "Feasible" : false
 },
 {
-  "size" : "272.0",
-  "groups" : "10.0",
-  "id" : "236",
-  "fitness" : "6.5663686"
+  "Size" : 168,
+  "Groups" : 4,
+  "ID" : 1541,
+  "Fitness" : 8.2472315,
+  "Feasible" : false
 },
 {
-  "size" : "136.0",
-  "groups" : "5.0",
-  "id" : "794",
-  "fitness" : "9.681961"
+  "Size" : 197,
+  "Groups" : 8,
+  "ID" : 451,
+  "Fitness" : 7.825729,
+  "Feasible" : false
 },
 {
-  "size" : "168.0",
-  "groups" : "6.0",
-  "id" : "464",
-  "fitness" : "8.64451"
+  "Size" : 230,
+  "Groups" : 8,
+  "ID" : 440,
+  "Fitness" : 7.9315844,
+  "Feasible" : false
 },
 {
-  "size" : "166.0",
-  "groups" : "8.0",
-  "id" : "1106",
-  "fitness" : "6.4261265"
+  "Size" : 166,
+  "Groups" : 6,
+  "ID" : 159,
+  "Fitness" : 8.132673,
+  "Feasible" : false
 },
 {
-  "size" : "134.0",
-  "groups" : "7.0",
-  "id" : "2354",
-  "fitness" : "7.3180356"
+  "Size" : 134,
+  "Groups" : 5,
+  "ID" : 1540,
+  "Fitness" : 8.096861,
+  "Feasible" : false
 },
 {
-  "size" : "281.0",
-  "groups" : "5.0",
-  "id" : "438",
-  "fitness" : "6.838986"
+  "Size" : 164,
+  "Groups" : 9,
+  "ID" : 480,
+  "Fitness" : 7.325856,
+  "Feasible" : false
 },
 {
-  "size" : "199.0",
-  "groups" : "9.0",
-  "id" : "6",
-  "fitness" : "7.374142"
+  "Size" : 171,
+  "Groups" : 3,
+  "ID" : 227,
+  "Fitness" : 7.6282043,
+  "Feasible" : false
 },
 {
-  "size" : "241.0",
-  "groups" : "2.0",
-  "id" : "103",
-  "fitness" : "6.904747"
+  "Size" : 204,
+  "Groups" : 3,
+  "ID" : 343,
+  "Fitness" : 9.349709,
+  "Feasible" : false
 },
 {
-  "size" : "173.0",
-  "groups" : "3.0",
-  "id" : "171",
-  "fitness" : "7.237124"
+  "Size" : 140,
+  "Groups" : 2,
+  "ID" : 2247,
+  "Fitness" : 7.679,
+  "Feasible" : false
 },
 {
-  "size" : "142.0",
-  "groups" : "2.0",
-  "id" : "279",
-  "fitness" : "8.1353035"
+  "Size" : 169,
+  "Groups" : 4,
+  "ID" : 441,
+  "Fitness" : 8.066147,
+  "Feasible" : false
 },
 {
-  "size" : "171.0",
-  "groups" : "4.0",
-  "id" : "1477",
-  "fitness" : "7.4739475"
+  "Size" : 234,
+  "Groups" : 5,
+  "ID" : 215,
+  "Fitness" : 8.2862,
+  "Feasible" : false
 },
 {
-  "size" : "140.0",
-  "groups" : "3.0",
-  "id" : "134",
-  "fitness" : "7.925763"
+  "Size" : 138,
+  "Groups" : 3,
+  "ID" : 1447,
+  "Fitness" : 8.231734,
+  "Feasible" : false
 },
 {
-  "size" : "204.0",
-  "groups" : "4.0",
-  "id" : "915",
-  "fitness" : "7.544755"
+  "Size" : 202,
+  "Groups" : 4,
+  "ID" : 1894,
+  "Fitness" : 7.7581,
+  "Feasible" : false
 },
 {
-  "size" : "201.0",
-  "groups" : "7.0",
-  "id" : "5",
-  "fitness" : "7.9151864"
+  "Size" : 135,
+  "Groups" : 5,
+  "ID" : 124,
+  "Fitness" : 8.43717,
+  "Feasible" : false
 },
 {
-  "size" : "138.0",
-  "groups" : "4.0",
-  "id" : "105",
-  "fitness" : "8.067018"
+  "Size" : 136,
+  "Groups" : 4,
+  "ID" : 123,
+  "Fitness" : 8.110579,
+  "Feasible" : false
 },
 {
-  "size" : "202.0",
-  "groups" : "6.0",
-  "id" : "419",
-  "fitness" : "8.358285"
+  "Size" : 232,
+  "Groups" : 7,
+  "ID" : 284,
+  "Fitness" : 8.776873,
+  "Feasible" : false
 },
 {
-  "size" : "135.0",
-  "groups" : "7.0",
-  "id" : "490",
-  "fitness" : "7.6694846"
+  "Size" : 272,
+  "Groups" : 8,
+  "ID" : 125,
+  "Fitness" : 7.6602664,
+  "Feasible" : false
 },
 {
-  "size" : "136.0",
-  "groups" : "6.0",
-  "id" : "326",
-  "fitness" : "9.367799"
+  "Size" : 168,
+  "Groups" : 5,
+  "ID" : 270,
+  "Fitness" : 8.691618,
+  "Feasible" : false
 },
 {
-  "size" : "168.0",
-  "groups" : "7.0",
-  "id" : "673",
-  "fitness" : "7.917496"
+  "Size" : 166,
+  "Groups" : 7,
+  "ID" : 137,
+  "Fitness" : 6.6763363,
+  "Feasible" : false
 },
 {
-  "size" : "134.0",
-  "groups" : "8.0",
-  "id" : "26",
-  "fitness" : "6.1634045"
+  "Size" : 134,
+  "Groups" : 6,
+  "ID" : 633,
+  "Fitness" : 8.043197,
+  "Feasible" : false
 },
 {
-  "size" : "166.0",
-  "groups" : "10.0",
-  "id" : "390",
-  "fitness" : "5.8700147"
+  "Size" : 132,
+  "Groups" : 8,
+  "ID" : 22,
+  "Fitness" : 7.619239,
+  "Feasible" : false
 },
 {
-  "size" : "229.0",
-  "groups" : "9.0",
-  "id" : "64",
-  "fitness" : "6.612904"
+  "Size" : 227,
+  "Groups" : 9,
+  "ID" : 180,
+  "Fitness" : 6.826344,
+  "Feasible" : false
 },
 {
-  "size" : "139.0",
-  "groups" : "2.0",
-  "id" : "410",
-  "fitness" : "7.9311047"
+  "Size" : 274,
+  "Groups" : 4,
+  "ID" : 5,
+  "Fitness" : 7.447916,
+  "Feasible" : false
 },
 {
-  "size" : "137.0",
-  "groups" : "3.0",
-  "id" : "177",
-  "fitness" : "7.4169593"
+  "Size" : 137,
+  "Groups" : 2,
+  "ID" : 81,
+  "Fitness" : 7.67898,
+  "Feasible" : false
 },
 {
-  "size" : "117.0",
-  "groups" : "2.0",
-  "id" : "2207",
-  "fitness" : "9.083021"
+  "Size" : 170,
+  "Groups" : 2,
+  "ID" : 1848,
+  "Fitness" : 8.157684,
+  "Feasible" : false
 },
 {
-  "size" : "135.0",
-  "groups" : "4.0",
-  "id" : "391",
-  "fitness" : "8.102441"
+  "Size" : 135,
+  "Groups" : 3,
+  "ID" : 64,
+  "Fitness" : 8.408161,
+  "Feasible" : false
 },
 {
-  "size" : "167.0",
-  "groups" : "5.0",
-  "id" : "2355",
-  "fitness" : "8.006296"
+  "Size" : 168,
+  "Groups" : 3,
+  "ID" : 1801,
+  "Fitness" : 9.123374,
+  "Feasible" : true
 },
 {
-  "size" : "168.0",
-  "groups" : "4.0",
-  "id" : "356",
-  "fitness" : "9.618729"
+  "Size" : 266,
+  "Groups" : 8,
+  "ID" : 202,
+  "Fitness" : 7.7604384,
+  "Feasible" : false
 },
 {
-  "size" : "133.0",
-  "groups" : "6.0",
-  "id" : "1483",
-  "fitness" : "7.810911"
+  "Size" : 133,
+  "Groups" : 4,
+  "ID" : 372,
+  "Fitness" : 8.085159,
+  "Feasible" : false
 },
 {
-  "size" : "230.0",
-  "groups" : "8.0",
-  "id" : "224",
-  "fitness" : "7.834859"
+  "Size" : 197,
+  "Groups" : 6,
+  "ID" : 429,
+  "Fitness" : 7.342848,
+  "Feasible" : false
 },
 {
-  "size" : "268.0",
-  "groups" : "10.0",
-  "id" : "241",
-  "fitness" : "6.6792016"
+  "Size" : 166,
+  "Groups" : 4,
+  "ID" : 2342,
+  "Fitness" : 9.364876,
+  "Feasible" : false
 },
 {
-  "size" : "134.0",
-  "groups" : "5.0",
-  "id" : "422",
-  "fitness" : "7.7866783"
+  "Size" : 198,
+  "Groups" : 5,
+  "ID" : 694,
+  "Fitness" : 7.109654,
+  "Feasible" : false
 },
 {
-  "size" : "166.0",
-  "groups" : "6.0",
-  "id" : "2014",
-  "fitness" : "9.511757"
+  "Size" : 164,
+  "Groups" : 6,
+  "ID" : 89,
+  "Fitness" : 7.7808723,
+  "Feasible" : false
 },
 {
-  "size" : "198.0",
-  "groups" : "7.0",
-  "id" : "1058",
-  "fitness" : "7.6723895"
+  "Size" : 132,
+  "Groups" : 5,
+  "ID" : 1539,
+  "Fitness" : 9.790779,
+  "Feasible" : true
 },
 {
-  "size" : "131.0",
-  "groups" : "8.0",
-  "id" : "649",
-  "fitness" : "6.403107"
+  "Size" : 279,
+  "Groups" : 3,
+  "ID" : 326,
+  "Fitness" : 6.487538,
+  "Feasible" : false
 },
 {
-  "size" : "270.0",
-  "groups" : "9.0",
-  "id" : "110",
-  "fitness" : "6.6254396"
+  "Size" : 266,
+  "Groups" : 9,
+  "ID" : 9,
+  "Fitness" : 6.781009,
+  "Feasible" : false
 },
 {
-  "size" : "230.0",
-  "groups" : "9.0",
-  "id" : "368",
-  "fitness" : "7.521004"
+  "Size" : 228,
+  "Groups" : 9,
+  "ID" : 157,
+  "Fitness" : 7.1275454,
+  "Feasible" : false
 },
 {
-  "size" : "171.0",
-  "groups" : "3.0",
-  "id" : "36",
-  "fitness" : "8.05227"
+  "Size" : 129,
+  "Groups" : 9,
+  "ID" : 422,
+  "Fitness" : 5.638047,
+  "Feasible" : false
 },
 {
-  "size" : "204.0",
-  "groups" : "3.0",
-  "id" : "315",
-  "fitness" : "8.349709"
+  "Size" : 171,
+  "Groups" : 2,
+  "ID" : 461,
+  "Fitness" : 7.4691644,
+  "Feasible" : false
 },
 {
-  "size" : "202.0",
-  "groups" : "4.0",
-  "id" : "976",
-  "fitness" : "7.447198"
+  "Size" : 169,
+  "Groups" : 3,
+  "ID" : 355,
+  "Fitness" : 8.0773,
+  "Feasible" : false
 },
 {
-  "size" : "167.0",
-  "groups" : "6.0",
-  "id" : "210",
-  "fitness" : "7.9565773"
+  "Size" : 138,
+  "Groups" : 2,
+  "ID" : 1768,
+  "Fitness" : 7.65581,
+  "Feasible" : false
 },
 {
-  "size" : "135.0",
-  "groups" : "5.0",
-  "id" : "429",
-  "fitness" : "8.029533"
+  "Size" : 167,
+  "Groups" : 4,
+  "ID" : 333,
+  "Fitness" : 7.467523,
+  "Feasible" : false
 },
 {
-  "size" : "231.0",
-  "groups" : "8.0",
-  "id" : "491",
-  "fitness" : "7.5380383"
+  "Size" : 136,
+  "Groups" : 3,
+  "ID" : 419,
+  "Fitness" : 9.206663,
+  "Feasible" : true
 },
 {
-  "size" : "136.0",
-  "groups" : "4.0",
-  "id" : "1077",
-  "fitness" : "8.063419"
+  "Size" : 200,
+  "Groups" : 4,
+  "ID" : 31,
+  "Fitness" : 7.844359,
+  "Feasible" : false
 },
 {
-  "size" : "232.0",
-  "groups" : "7.0",
-  "id" : "230",
-  "fitness" : "8.754944"
+  "Size" : 232,
+  "Groups" : 5,
+  "ID" : 459,
+  "Fitness" : 7.792302,
+  "Feasible" : false
 },
 {
-  "size" : "168.0",
-  "groups" : "5.0",
-  "id" : "809",
-  "fitness" : "9.682"
+  "Size" : 266,
+  "Groups" : 10,
+  "ID" : 474,
+  "Fitness" : 7.189054,
+  "Feasible" : false
 },
 {
-  "size" : "133.0",
-  "groups" : "7.0",
-  "id" : "1490",
-  "fitness" : "7.480659"
+  "Size" : 229,
+  "Groups" : 8,
+  "ID" : 160,
+  "Fitness" : 8.716707,
+  "Feasible" : false
 },
 {
-  "size" : "166.0",
-  "groups" : "7.0",
-  "id" : "441",
-  "fitness" : "9.2106"
+  "Size" : 268,
+  "Groups" : 8,
+  "ID" : 145,
+  "Fitness" : 7.0104523,
+  "Feasible" : false
 },
 {
-  "size" : "134.0",
-  "groups" : "6.0",
-  "id" : "407",
-  "fitness" : "7.4065824"
+  "Size" : 198,
+  "Groups" : 6,
+  "ID" : 211,
+  "Fitness" : 7.8693905,
+  "Feasible" : false
 },
 {
-  "size" : "114.0",
-  "groups" : "7.0",
-  "id" : "1858",
-  "fitness" : "6.3424683"
+  "Size" : 166,
+  "Groups" : 5,
+  "ID" : 1723,
+  "Fitness" : 7.9700937,
+  "Feasible" : false
 },
 {
-  "size" : "137.0",
-  "groups" : "2.0",
-  "id" : "320",
-  "fitness" : "7.2556205"
+  "Size" : 134,
+  "Groups" : 4,
+  "ID" : 1249,
+  "Fitness" : 8.036137,
+  "Feasible" : false
 },
 {
-  "size" : "170.0",
-  "groups" : "2.0",
-  "id" : "179",
-  "fitness" : "7.500973"
+  "Size" : 164,
+  "Groups" : 7,
+  "ID" : 77,
+  "Fitness" : 7.7937813,
+  "Feasible" : false
 },
 {
-  "size" : "234.0",
-  "groups" : "3.0",
-  "id" : "436",
-  "fitness" : "7.290651"
+  "Size" : 228,
+  "Groups" : 10,
+  "ID" : 177,
+  "Fitness" : 7.27083,
+  "Feasible" : false
 },
 {
-  "size" : "135.0",
-  "groups" : "3.0",
-  "id" : "262",
-  "fitness" : "9.408626"
+  "Size" : 196,
+  "Groups" : 8,
+  "ID" : 351,
+  "Fitness" : 6.831524,
+  "Feasible" : false
 },
 {
-  "size" : "272.0",
-  "groups" : "5.0",
-  "id" : "328",
-  "fitness" : "7.816983"
+  "Size" : 132,
+  "Groups" : 6,
+  "ID" : 841,
+  "Fitness" : 8.085264,
+  "Feasible" : false
 },
 {
-  "size" : "168.0",
-  "groups" : "3.0",
-  "id" : "918",
-  "fitness" : "9.260738"
+  "Size" : 191,
+  "Groups" : 10,
+  "ID" : 456,
+  "Fitness" : 6.3766365,
+  "Feasible" : false
 },
 {
-  "size" : "266.0",
-  "groups" : "8.0",
-  "id" : "467",
-  "fitness" : "7.0920267"
+  "Size" : 160,
+  "Groups" : 7,
+  "ID" : 128,
+  "Fitness" : 7.198716,
+  "Feasible" : false
 },
 {
-  "size" : "133.0",
-  "groups" : "4.0",
-  "id" : "1310",
-  "fitness" : "8.993977"
+  "Size" : 128,
+  "Groups" : 6,
+  "ID" : 539,
+  "Fitness" : 7.88262,
+  "Feasible" : false
 },
 {
-  "size" : "165.0",
-  "groups" : "5.0",
-  "id" : "2321",
-  "fitness" : "7.8431582"
+  "Size" : 269,
+  "Groups" : 4,
+  "ID" : 148,
+  "Fitness" : 7.468149,
+  "Feasible" : false
 },
 {
-  "size" : "166.0",
-  "groups" : "4.0",
-  "id" : "1577",
-  "fitness" : "9.55451"
+  "Size" : 232,
+  "Groups" : 3,
+  "ID" : 207,
+  "Fitness" : 6.988182,
+  "Feasible" : false
 },
 {
-  "size" : "230.0",
-  "groups" : "6.0",
-  "id" : "371",
-  "fitness" : "8.1896105"
+  "Size" : 168,
+  "Groups" : 2,
+  "ID" : 1136,
+  "Fitness" : 7.43284,
+  "Feasible" : false
 },
 {
-  "size" : "198.0",
-  "groups" : "5.0",
-  "id" : "427",
-  "fitness" : "7.8885"
+  "Size" : 133,
+  "Groups" : 3,
+  "ID" : 38,
+  "Fitness" : 7.2275743,
+  "Feasible" : false
 },
 {
-  "size" : "164.0",
-  "groups" : "6.0",
-  "id" : "10",
-  "fitness" : "8.7757845"
+  "Size" : 266,
+  "Groups" : 6,
+  "ID" : 289,
+  "Fitness" : 7.575714,
+  "Feasible" : false
 },
 {
-  "size" : "132.0",
-  "groups" : "5.0",
-  "id" : "166",
-  "fitness" : "8.178878"
+  "Size" : 229,
+  "Groups" : 5,
+  "ID" : 415,
+  "Fitness" : 7.8199644,
+  "Feasible" : false
 },
 {
-  "size" : "114.0",
-  "groups" : "4.0",
-  "id" : "1092",
-  "fitness" : "8.219246"
+  "Size" : 230,
+  "Groups" : 4,
+  "ID" : 382,
+  "Fitness" : 8.209476,
+  "Feasible" : false
 },
 {
-  "size" : "194.0",
-  "groups" : "10.0",
-  "id" : "96",
-  "fitness" : "6.595508"
+  "Size" : 268,
+  "Groups" : 5,
+  "ID" : 255,
+  "Fitness" : 7.6118803,
+  "Feasible" : false
 },
 {
-  "size" : "162.0",
-  "groups" : "8.0",
-  "id" : "2461",
-  "fitness" : "7.1518364"
+  "Size" : 166,
+  "Groups" : 3,
+  "ID" : 2189,
+  "Fitness" : 9.299002,
+  "Feasible" : false
 },
 {
-  "size" : "279.0",
-  "groups" : "3.0",
-  "id" : "239",
-  "fitness" : "6.84505"
+  "Size" : 227,
+  "Groups" : 7,
+  "ID" : 56,
+  "Fitness" : 7.368569,
+  "Feasible" : false
 },
 {
-  "size" : "266.0",
-  "groups" : "9.0",
-  "id" : "469",
-  "fitness" : "7.3847237"
+  "Size" : 195,
+  "Groups" : 6,
+  "ID" : 449,
+  "Fitness" : 8.363884,
+  "Feasible" : false
 },
 {
-  "size" : "265.0",
-  "groups" : "10.0",
-  "id" : "452",
-  "fitness" : "6.1345468"
+  "Size" : 164,
+  "Groups" : 4,
+  "ID" : 416,
+  "Fitness" : 8.329761,
+  "Feasible" : false
 },
 {
-  "size" : "202.0",
-  "groups" : "3.0",
-  "id" : "605",
-  "fitness" : "6.144696"
+  "Size" : 114,
+  "Groups" : 3,
+  "ID" : 250,
+  "Fitness" : 7.3353395,
+  "Feasible" : false
 },
 {
-  "size" : "167.0",
-  "groups" : "4.0",
-  "id" : "2",
-  "fitness" : "7.6192503"
+  "Size" : 228,
+  "Groups" : 6,
+  "ID" : 363,
+  "Fitness" : 6.3680754,
+  "Feasible" : false
 },
 {
-  "size" : "200.0",
-  "groups" : "4.0",
-  "id" : "244",
-  "fitness" : "7.5632796"
+  "Size" : 196,
+  "Groups" : 5,
+  "ID" : 499,
+  "Fitness" : 8.677412,
+  "Feasible" : false
 },
 {
-  "size" : "136.0",
-  "groups" : "3.0",
-  "id" : "1793",
-  "fitness" : "7.7308125"
+  "Size" : 225,
+  "Groups" : 10,
+  "ID" : 401,
+  "Fitness" : 6.7301598,
+  "Feasible" : false
 },
 {
-  "size" : "266.0",
-  "groups" : "10.0",
-  "id" : "333",
-  "fitness" : "7.219986"
+  "Size" : 162,
+  "Groups" : 6,
+  "ID" : 273,
+  "Fitness" : 8.662157,
+  "Feasible" : false
 },
 {
-  "size" : "133.0",
-  "groups" : "5.0",
-  "id" : "2274",
-  "fitness" : "9.174108"
+  "Size" : 130,
+  "Groups" : 5,
+  "ID" : 1600,
+  "Fitness" : 6.886448,
+  "Feasible" : false
 },
 {
-  "size" : "268.0",
-  "groups" : "8.0",
-  "id" : "392",
-  "fitness" : "7.55539"
+  "Size" : 160,
+  "Groups" : 8,
+  "ID" : 249,
+  "Fitness" : 8.311888,
+  "Feasible" : false
 },
 {
-  "size" : "166.0",
-  "groups" : "5.0",
-  "id" : "1611",
-  "fitness" : "9.7886505"
+  "Size" : 270,
+  "Groups" : 5,
+  "ID" : 476,
+  "Fitness" : 8.23587,
+  "Feasible" : false
 },
 {
-  "size" : "230.0",
-  "groups" : "7.0",
-  "id" : "204",
-  "fitness" : "7.3718843"
+  "Size" : 136,
+  "Groups" : 2,
+  "ID" : 118,
+  "Fitness" : 8.095299,
+  "Feasible" : false
 },
 {
-  "size" : "134.0",
-  "groups" : "4.0",
-  "id" : "208",
-  "fitness" : "7.83792"
+  "Size" : 200,
+  "Groups" : 3,
+  "ID" : 130,
+  "Fitness" : 7.3894916,
+  "Feasible" : false
 },
 {
-  "size" : "131.0",
-  "groups" : "7.0",
-  "id" : "546",
-  "fitness" : "6.3893223"
+  "Size" : 229,
+  "Groups" : 6,
+  "ID" : 44,
+  "Fitness" : 8.0477915,
+  "Feasible" : false
 },
 {
-  "size" : "114.0",
-  "groups" : "5.0",
-  "id" : "237",
-  "fitness" : "7.797442"
+  "Size" : 266,
+  "Groups" : 7,
+  "ID" : 179,
+  "Fitness" : 7.71447,
+  "Feasible" : false
 },
 {
-  "size" : "164.0",
-  "groups" : "7.0",
-  "id" : "376",
-  "fitness" : "9.327734"
+  "Size" : 230,
+  "Groups" : 5,
+  "ID" : 483,
+  "Fitness" : 7.8780913,
+  "Feasible" : false
 },
 {
-  "size" : "132.0",
-  "groups" : "6.0",
-  "id" : "1487",
-  "fitness" : "8.216925"
+  "Size" : 134,
+  "Groups" : 3,
+  "ID" : 1072,
+  "Fitness" : 7.5869074,
+  "Feasible" : false
 },
 {
-  "size" : "128.0",
-  "groups" : "6.0",
-  "id" : "325",
-  "fitness" : "7.499225"
+  "Size" : 198,
+  "Groups" : 4,
+  "ID" : 384,
+  "Fitness" : 7.205519,
+  "Feasible" : false
 },
 {
-  "size" : "160.0",
-  "groups" : "7.0",
-  "id" : "216",
-  "fitness" : "7.8267045"
+  "Size" : 227,
+  "Groups" : 8,
+  "ID" : 111,
+  "Fitness" : 6.8816648,
+  "Feasible" : false
 },
 {
-  "size" : "261.0",
-  "groups" : "8.0",
-  "id" : "281",
-  "fitness" : "6.6924853"
+  "Size" : 164,
+  "Groups" : 5,
+  "ID" : 62,
+  "Fitness" : 8.691618,
+  "Feasible" : false
 },
 {
-  "size" : "270.0",
-  "groups" : "4.0",
-  "id" : "468",
-  "fitness" : "8.057653"
+  "Size" : 132,
+  "Groups" : 4,
+  "ID" : 86,
+  "Fitness" : 9.336483,
+  "Feasible" : false
 },
 {
-  "size" : "135.0",
-  "groups" : "2.0",
-  "id" : "1752",
-  "fitness" : "6.9167953"
+  "Size" : 264,
+  "Groups" : 8,
+  "ID" : 260,
+  "Fitness" : 6.6011987,
+  "Feasible" : false
 },
 {
-  "size" : "168.0",
-  "groups" : "2.0",
-  "id" : "836",
-  "fitness" : "8.167833"
+  "Size" : 228,
+  "Groups" : 7,
+  "ID" : 424,
+  "Fitness" : 7.162375,
+  "Feasible" : false
 },
 {
-  "size" : "266.0",
-  "groups" : "6.0",
-  "id" : "55",
-  "fitness" : "8.194349"
+  "Size" : 162,
+  "Groups" : 7,
+  "ID" : 458,
+  "Fitness" : 7.850367,
+  "Feasible" : false
 },
 {
-  "size" : "229.0",
-  "groups" : "5.0",
-  "id" : "221",
-  "fitness" : "7.975435"
+  "Size" : 160,
+  "Groups" : 5,
+  "ID" : 12,
+  "Fitness" : 9.847552,
+  "Feasible" : false
 },
 {
-  "size" : "133.0",
-  "groups" : "3.0",
-  "id" : "1800",
-  "fitness" : "9.036255"
+  "Size" : 128,
+  "Groups" : 4,
+  "ID" : 689,
+  "Fitness" : 8.030128,
+  "Feasible" : false
 },
 {
-  "size" : "230.0",
-  "groups" : "4.0",
-  "id" : "377",
-  "fitness" : "8.1037245"
+  "Size" : 190,
+  "Groups" : 8,
+  "ID" : 169,
+  "Fitness" : 7.212414,
+  "Feasible" : false
 },
 {
-  "size" : "166.0",
-  "groups" : "3.0",
-  "id" : "1935",
-  "fitness" : "9.154644"
+  "Size" : 156,
+  "Groups" : 10,
+  "ID" : 261,
+  "Fitness" : 6.193846,
+  "Feasible" : false
 },
 {
-  "size" : "227.0",
-  "groups" : "7.0",
-  "id" : "243",
-  "fitness" : "7.940307"
+  "Size" : 126,
+  "Groups" : 8,
+  "ID" : 492,
+  "Fitness" : 6.9566107,
+  "Feasible" : false
 },
 {
-  "size" : "131.0",
-  "groups" : "4.0",
-  "id" : "591",
-  "fitness" : "7.9679127"
+  "Size" : 259,
+  "Groups" : 7,
+  "ID" : 37,
+  "Fitness" : 7.6067767,
+  "Feasible" : false
 },
 {
-  "size" : "228.0",
-  "groups" : "6.0",
-  "id" : "65",
-  "fitness" : "7.8676357"
+  "Size" : 270,
+  "Groups" : 3,
+  "ID" : 496,
+  "Fitness" : 8.830884,
+  "Feasible" : false
 },
 {
-  "size" : "196.0",
-  "groups" : "5.0",
-  "id" : "115",
-  "fitness" : "8.368323"
+  "Size" : 266,
+  "Groups" : 4,
+  "ID" : 381,
+  "Fitness" : 8.105251,
+  "Feasible" : false
 },
 {
-  "size" : "164.0",
-  "groups" : "4.0",
-  "id" : "196",
-  "fitness" : "7.5393844"
+  "Size" : 166,
+  "Groups" : 2,
+  "ID" : 1561,
+  "Fitness" : 9.336649,
+  "Feasible" : false
 },
 {
-  "size" : "162.0",
-  "groups" : "6.0",
-  "id" : "383",
-  "fitness" : "8.249439"
+  "Size" : 230,
+  "Groups" : 3,
+  "ID" : 517,
+  "Fitness" : 6.7703257,
+  "Feasible" : false
 },
 {
-  "size" : "128.0",
-  "groups" : "7.0",
-  "id" : "314",
-  "fitness" : "6.706349"
+  "Size" : 164,
+  "Groups" : 3,
+  "ID" : 262,
+  "Fitness" : 9.273308,
+  "Feasible" : false
 },
 {
-  "size" : "269.0",
-  "groups" : "5.0",
-  "id" : "442",
-  "fitness" : "7.534145"
+  "Size" : 162,
+  "Groups" : 4,
+  "ID" : 21,
+  "Fitness" : 8.125372,
+  "Feasible" : false
 },
 {
-  "size" : "267.0",
-  "groups" : "6.0",
-  "id" : "307",
-  "fitness" : "6.9095373"
+  "Size" : 194,
+  "Groups" : 5,
+  "ID" : 987,
+  "Fitness" : 6.8395762,
+  "Feasible" : false
 },
 {
-  "size" : "136.0",
-  "groups" : "2.0",
-  "id" : "195",
-  "fitness" : "8.713146"
+  "Size" : 191,
+  "Groups" : 8,
+  "ID" : 314,
+  "Fitness" : 7.7274895,
+  "Feasible" : false
 },
 {
-  "size" : "266.0",
-  "groups" : "7.0",
-  "id" : "454",
-  "fitness" : "7.1899934"
+  "Size" : 160,
+  "Groups" : 6,
+  "ID" : 225,
+  "Fitness" : 8.517641,
+  "Feasible" : false
 },
 {
-  "size" : "165.0",
-  "groups" : "4.0",
-  "id" : "956",
-  "fitness" : "8.124402"
+  "Size" : 112,
+  "Groups" : 4,
+  "ID" : 732,
+  "Fitness" : 7.6651034,
+  "Feasible" : false
 },
 {
-  "size" : "268.0",
-  "groups" : "6.0",
-  "id" : "46",
-  "fitness" : "7.7734923"
+  "Size" : 128,
+  "Groups" : 5,
+  "ID" : 937,
+  "Fitness" : 7.9617624,
+  "Feasible" : false
 },
 {
-  "size" : "230.0",
-  "groups" : "5.0",
-  "id" : "155",
-  "fitness" : "7.9725924"
+  "Size" : 259,
+  "Groups" : 8,
+  "ID" : 136,
+  "Fitness" : 6.71418,
+  "Feasible" : false
 },
 {
-  "size" : "134.0",
-  "groups" : "3.0",
-  "id" : "183",
-  "fitness" : "7.7805896"
+  "Size" : 272,
+  "Groups" : 3,
+  "ID" : 481,
+  "Fitness" : 8.821029,
+  "Feasible" : false
 },
 {
-  "size" : "198.0",
-  "groups" : "4.0",
-  "id" : "691",
-  "fitness" : "8.366568"
+  "Size" : 200,
+  "Groups" : 2,
+  "ID" : 647,
+  "Fitness" : 6.287269,
+  "Feasible" : false
 },
 {
-  "size" : "227.0",
-  "groups" : "8.0",
-  "id" : "205",
-  "fitness" : "6.640432"
+  "Size" : 198,
+  "Groups" : 3,
+  "ID" : 521,
+  "Fitness" : 7.3782997,
+  "Feasible" : false
 },
 {
-  "size" : "131.0",
-  "groups" : "5.0",
-  "id" : "531",
-  "fitness" : "7.742466"
+  "Size" : 134,
+  "Groups" : 2,
+  "ID" : 1528,
+  "Fitness" : 7.5187645,
+  "Feasible" : false
 },
 {
-  "size" : "132.0",
-  "groups" : "4.0",
-  "id" : "186",
-  "fitness" : "9.586483"
+  "Size" : 227,
+  "Groups" : 6,
+  "ID" : 210,
+  "Fitness" : 8.04307,
+  "Feasible" : false
 },
 {
-  "size" : "130.0",
-  "groups" : "6.0",
-  "id" : "265",
-  "fitness" : "7.532284"
+  "Size" : 132,
+  "Groups" : 3,
+  "ID" : 1736,
+  "Fitness" : 7.8662515,
+  "Feasible" : false
 },
 {
-  "size" : "162.0",
-  "groups" : "7.0",
-  "id" : "474",
-  "fitness" : "7.871616"
+  "Size" : 196,
+  "Groups" : 4,
+  "ID" : 2213,
+  "Fitness" : 8.089986,
+  "Feasible" : false
 },
 {
-  "size" : "191.0",
-  "groups" : "7.0",
-  "id" : "402",
-  "fitness" : "8.268599"
+  "Size" : 130,
+  "Groups" : 4,
+  "ID" : 17,
+  "Fitness" : 7.869379,
+  "Feasible" : false
 },
 {
-  "size" : "160.0",
-  "groups" : "5.0",
-  "id" : "83",
-  "fitness" : "8.733565"
+  "Size" : 162,
+  "Groups" : 5,
+  "ID" : 977,
+  "Fitness" : 7.2698684,
+  "Feasible" : false
 },
 {
-  "size" : "224.0",
-  "groups" : "7.0",
-  "id" : "291",
-  "fitness" : "7.1693068"
+  "Size" : 194,
+  "Groups" : 6,
+  "ID" : 1373,
+  "Fitness" : 6.5582747,
+  "Feasible" : false
 },
 {
-  "size" : "189.0",
-  "groups" : "10.0",
-  "id" : "353",
-  "fitness" : "6.7172627"
+  "Size" : 255,
+  "Groups" : 7,
+  "ID" : 172,
+  "Fitness" : 7.5574965,
+  "Feasible" : false
 },
 {
-  "size" : "158.0",
-  "groups" : "7.0",
-  "id" : "2465",
-  "fitness" : "8.092377"
+  "Size" : 192,
+  "Groups" : 4,
+  "ID" : 1401,
+  "Fitness" : 7.6674423,
+  "Feasible" : false
 },
 {
-  "size" : "126.0",
-  "groups" : "8.0",
-  "id" : "348",
-  "fitness" : "5.399105"
+  "Size" : 128,
+  "Groups" : 3,
+  "ID" : 724,
+  "Fitness" : 7.8366227,
+  "Feasible" : false
 },
 {
-  "size" : "270.0",
-  "groups" : "3.0",
-  "id" : "323",
-  "fitness" : "7.327118"
+  "Size" : 189,
+  "Groups" : 7,
+  "ID" : 149,
+  "Fitness" : 9.160708,
+  "Feasible" : false
 },
 {
-  "size" : "266.0",
-  "groups" : "4.0",
-  "id" : "317",
-  "fitness" : "7.165492"
+  "Size" : 190,
+  "Groups" : 6,
+  "ID" : 75,
+  "Fitness" : 8.129694,
+  "Feasible" : false
 },
 {
-  "size" : "133.0",
-  "groups" : "2.0",
-  "id" : "593",
-  "fitness" : "7.2041297"
+  "Size" : 222,
+  "Groups" : 7,
+  "ID" : 265,
+  "Fitness" : 7.038862,
+  "Feasible" : false
 },
 {
-  "size" : "166.0",
-  "groups" : "2.0",
-  "id" : "606",
-  "fitness" : "7.6690245"
+  "Size" : 158,
+  "Groups" : 5,
+  "ID" : 1864,
+  "Fitness" : 7.2607307,
+  "Feasible" : false
 },
 {
-  "size" : "230.0",
-  "groups" : "3.0",
-  "id" : "238",
-  "fitness" : "6.715619"
+  "Size" : 156,
+  "Groups" : 7,
+  "ID" : 933,
+  "Fitness" : 6.5605564,
+  "Feasible" : false
 },
 {
-  "size" : "227.0",
-  "groups" : "5.0",
-  "id" : "18",
-  "fitness" : "7.8953686"
+  "Size" : 126,
+  "Groups" : 6,
+  "ID" : 1482,
+  "Fitness" : 8.030746,
+  "Feasible" : false
 },
 {
-  "size" : "131.0",
-  "groups" : "3.0",
-  "id" : "635",
-  "fitness" : "7.486581"
+  "Size" : 154,
+  "Groups" : 10,
+  "ID" : 387,
+  "Fitness" : 7.719175,
+  "Feasible" : false
 },
 {
-  "size" : "164.0",
-  "groups" : "3.0",
-  "id" : "336",
-  "fitness" : "8.379846"
+  "Size" : 257,
+  "Groups" : 6,
+  "ID" : 205,
+  "Fitness" : 6.9243402,
+  "Feasible" : false
 },
 {
-  "size" : "258.0",
-  "groups" : "8.0",
-  "id" : "49",
-  "fitness" : "7.3990645"
+  "Size" : 270,
+  "Groups" : 2,
+  "ID" : 80,
+  "Fitness" : 8.342863,
+  "Feasible" : false
 },
 {
-  "size" : "193.0",
-  "groups" : "6.0",
-  "id" : "481",
-  "fitness" : "8.462648"
+  "Size" : 266,
+  "Groups" : 3,
+  "ID" : 63,
+  "Fitness" : 7.0759854,
+  "Feasible" : false
 },
 {
-  "size" : "129.0",
-  "groups" : "4.0",
-  "id" : "1191",
-  "fitness" : "7.6257176"
+  "Size" : 230,
+  "Groups" : 2,
+  "ID" : 362,
+  "Fitness" : 7.2199855,
+  "Feasible" : false
 },
 {
-  "size" : "162.0",
-  "groups" : "4.0",
-  "id" : "2430",
-  "fitness" : "7.6859384"
+  "Size" : 164,
+  "Groups" : 2,
+  "ID" : 1303,
+  "Fitness" : 7.456818,
+  "Feasible" : false
 },
 {
-  "size" : "224.0",
-  "groups" : "8.0",
-  "id" : "142",
-  "fitness" : "7.456754"
+  "Size" : 225,
+  "Groups" : 5,
+  "ID" : 55,
+  "Fitness" : 8.259451,
+  "Feasible" : false
 },
 {
-  "size" : "160.0",
-  "groups" : "6.0",
-  "id" : "488",
-  "fitness" : "8.0062065"
+  "Size" : 226,
+  "Groups" : 4,
+  "ID" : 1412,
+  "Fitness" : 6.895957,
+  "Feasible" : false
 },
 {
-  "size" : "265.0",
-  "groups" : "5.0",
-  "id" : "121",
-  "fitness" : "6.8102674"
+  "Size" : 162,
+  "Groups" : 3,
+  "ID" : 1892,
+  "Fitness" : 7.465269,
+  "Feasible" : false
 },
 {
-  "size" : "191.0",
-  "groups" : "9.0",
-  "id" : "148",
-  "fitness" : "6.708486"
+  "Size" : 192,
+  "Groups" : 5,
+  "ID" : 20,
+  "Fitness" : 8.714212,
+  "Feasible" : false
 },
 {
-  "size" : "158.0",
-  "groups" : "9.0",
-  "id" : "411",
-  "fitness" : "5.7553406"
+  "Size" : 160,
+  "Groups" : 4,
+  "ID" : 683,
+  "Fitness" : 8.243367,
+  "Feasible" : false
 },
 {
-  "size" : "231.0",
-  "groups" : "3.0",
-  "id" : "334",
-  "fitness" : "7.0621862"
+  "Size" : 189,
+  "Groups" : 8,
+  "ID" : 129,
+  "Fitness" : 7.873922,
+  "Feasible" : false
 },
 {
-  "size" : "266.0",
-  "groups" : "5.0",
-  "id" : "90",
-  "fitness" : "7.7788916"
+  "Size" : 158,
+  "Groups" : 6,
+  "ID" : 1776,
+  "Fitness" : 6.789815,
+  "Feasible" : false
 },
 {
-  "size" : "134.0",
-  "groups" : "2.0",
-  "id" : "343",
-  "fitness" : "7.095853"
+  "Size" : 188,
+  "Groups" : 10,
+  "ID" : 411,
+  "Fitness" : 6.489353,
+  "Feasible" : false
 },
 {
-  "size" : "195.0",
-  "groups" : "5.0",
-  "id" : "187",
-  "fitness" : "9.560996"
+  "Size" : 126,
+  "Groups" : 7,
+  "ID" : 1425,
+  "Fitness" : 6.847255,
+  "Feasible" : false
 },
 {
-  "size" : "227.0",
-  "groups" : "6.0",
-  "id" : "466",
-  "fitness" : "7.629263"
+  "Size" : 259,
+  "Groups" : 6,
+  "ID" : 445,
+  "Fitness" : 7.005476,
+  "Feasible" : false
 },
 {
-  "size" : "163.0",
-  "groups" : "4.0",
-  "id" : "1303",
-  "fitness" : "7.5510945"
+  "Size" : 227,
+  "Groups" : 4,
+  "ID" : 334,
+  "Fitness" : 8.232769,
+  "Feasible" : false
 },
 {
-  "size" : "196.0",
-  "groups" : "4.0",
-  "id" : "16",
-  "fitness" : "8.575209"
+  "Size" : 132,
+  "Groups" : 2,
+  "ID" : 1361,
+  "Fitness" : 7.8383594,
+  "Feasible" : false
 },
 {
-  "size" : "132.0",
-  "groups" : "3.0",
-  "id" : "529",
-  "fitness" : "7.635463"
+  "Size" : 225,
+  "Groups" : 6,
+  "ID" : 178,
+  "Fitness" : 7.7116284,
+  "Feasible" : false
 },
 {
-  "size" : "260.0",
-  "groups" : "8.0",
-  "id" : "406",
-  "fitness" : "7.361453"
+  "Size" : 130,
+  "Groups" : 3,
+  "ID" : 2450,
+  "Fitness" : 7.802188,
+  "Feasible" : false
 },
 {
-  "size" : "130.0",
-  "groups" : "4.0",
-  "id" : "1097",
-  "fitness" : "7.7211757"
+  "Size" : 194,
+  "Groups" : 4,
+  "ID" : 513,
+  "Fitness" : 7.6627226,
+  "Feasible" : false
 },
 {
-  "size" : "128.0",
-  "groups" : "3.0",
-  "id" : "822",
-  "fitness" : "6.5892496"
+  "Size" : 223,
+  "Groups" : 4,
+  "ID" : 139,
+  "Fitness" : 7.257834,
+  "Feasible" : false
 },
 {
-  "size" : "189.0",
-  "groups" : "7.0",
-  "id" : "156",
-  "fitness" : "8.143091"
+  "Size" : 192,
+  "Groups" : 3,
+  "ID" : 1416,
+  "Fitness" : 7.4685097,
+  "Feasible" : false
 },
 {
-  "size" : "157.0",
-  "groups" : "6.0",
-  "id" : "650",
-  "fitness" : "7.572073"
+  "Size" : 128,
+  "Groups" : 2,
+  "ID" : 2215,
+  "Fitness" : 7.3123198,
+  "Feasible" : false
 },
 {
-  "size" : "254.0",
-  "groups" : "8.0",
-  "id" : "185",
-  "fitness" : "6.949912"
+  "Size" : 157,
+  "Groups" : 4,
+  "ID" : 277,
+  "Fitness" : 7.6606927,
+  "Feasible" : false
 },
 {
-  "size" : "127.0",
-  "groups" : "4.0",
-  "id" : "1554",
-  "fitness" : "6.80978"
+  "Size" : 222,
+  "Groups" : 5,
+  "ID" : 88,
+  "Fitness" : 8.023112,
+  "Feasible" : false
 },
 {
-  "size" : "156.0",
-  "groups" : "7.0",
-  "id" : "145",
-  "fitness" : "6.8327966"
+  "Size" : 127,
+  "Groups" : 3,
+  "ID" : 181,
+  "Fitness" : 7.5038114,
+  "Feasible" : false
 },
 {
-  "size" : "188.0",
-  "groups" : "8.0",
-  "id" : "130",
-  "fitness" : "8.048686"
+  "Size" : 190,
+  "Groups" : 4,
+  "ID" : 514,
+  "Fitness" : 9.083691,
+  "Feasible" : false
 },
 {
-  "size" : "261.0",
-  "groups" : "4.0",
-  "id" : "160",
-  "fitness" : "8.024569"
+  "Size" : 188,
+  "Groups" : 6,
+  "ID" : 238,
+  "Fitness" : 8.596064,
+  "Feasible" : false
 },
 {
-  "size" : "254.0",
-  "groups" : "9.0",
-  "id" : "48",
-  "fitness" : "6.67294"
+  "Size" : 126,
+  "Groups" : 4,
+  "ID" : 1177,
+  "Fitness" : 8.007192,
+  "Feasible" : false
 },
 {
-  "size" : "270.0",
-  "groups" : "2.0",
-  "id" : "3",
-  "fitness" : "7.411215"
+  "Size" : 156,
+  "Groups" : 5,
+  "ID" : 1385,
+  "Fitness" : 9.393667,
+  "Feasible" : false
 },
 {
-  "size" : "230.0",
-  "groups" : "2.0",
-  "id" : "453",
-  "fitness" : "6.97686"
+  "Size" : 124,
+  "Groups" : 8,
+  "ID" : 194,
+  "Fitness" : 6.259464,
+  "Feasible" : false
 },
 {
-  "size" : "131.0",
-  "groups" : "2.0",
-  "id" : "1560",
-  "fitness" : "8.975195"
+  "Size" : 195,
+  "Groups" : 2,
+  "ID" : 402,
+  "Fitness" : 8.048416,
+  "Feasible" : false
 },
 {
-  "size" : "195.0",
-  "groups" : "3.0",
-  "id" : "289",
-  "fitness" : "7.657691"
+  "Size" : 262,
+  "Groups" : 3,
+  "ID" : 1819,
+  "Fitness" : 7.26537,
+  "Feasible" : false
 },
 {
-  "size" : "164.0",
-  "groups" : "2.0",
-  "id" : "32",
-  "fitness" : "7.788951"
+  "Size" : 258,
+  "Groups" : 4,
+  "ID" : 798,
+  "Fitness" : 7.035361,
+  "Feasible" : false
 },
 {
-  "size" : "225.0",
-  "groups" : "5.0",
-  "id" : "100",
-  "fitness" : "8.420179"
+  "Size" : 162,
+  "Groups" : 2,
+  "ID" : 370,
+  "Fitness" : 7.6213055,
+  "Feasible" : false
 },
 {
-  "size" : "129.0",
-  "groups" : "3.0",
-  "id" : "1200",
-  "fitness" : "7.501676"
+  "Size" : 160,
+  "Groups" : 3,
+  "ID" : 821,
+  "Fitness" : 8.690558,
+  "Feasible" : false
 },
 {
-  "size" : "159.0",
-  "groups" : "5.0",
-  "id" : "2351",
-  "fitness" : "7.6596622"
+  "Size" : 158,
+  "Groups" : 4,
+  "ID" : 1291,
+  "Fitness" : 7.980731,
+  "Feasible" : false
 },
 {
-  "size" : "160.0",
-  "groups" : "4.0",
-  "id" : "483",
-  "fitness" : "8.255157"
+  "Size" : 254,
+  "Groups" : 7,
+  "ID" : 228,
+  "Fitness" : 7.2601304,
+  "Feasible" : false
 },
 {
-  "size" : "158.0",
-  "groups" : "6.0",
-  "id" : "285",
-  "fitness" : "8.052296"
+  "Size" : 190,
+  "Groups" : 5,
+  "ID" : 1015,
+  "Fitness" : 7.9434614,
+  "Feasible" : false
 },
 {
-  "size" : "254.0",
-  "groups" : "10.0",
-  "id" : "213",
-  "fitness" : "6.8294587"
+  "Size" : 110,
+  "Groups" : 4,
+  "ID" : 396,
+  "Fitness" : 7.6185827,
+  "Feasible" : false
 },
 {
-  "size" : "190.0",
-  "groups" : "7.0",
-  "id" : "258",
-  "fitness" : "7.447425"
+  "Size" : 188,
+  "Groups" : 7,
+  "ID" : 306,
+  "Fitness" : 8.28094,
+  "Feasible" : false
 },
 {
-  "size" : "127.0",
-  "groups" : "5.0",
-  "id" : "2324",
-  "fitness" : "7.7944427"
+  "Size" : 126,
+  "Groups" : 5,
+  "ID" : 434,
+  "Fitness" : 8.15554,
+  "Feasible" : false
 },
 {
-  "size" : "126.0",
-  "groups" : "7.0",
-  "id" : "1485",
-  "fitness" : "7.530417"
+  "Size" : 156,
+  "Groups" : 6,
+  "ID" : 1535,
+  "Fitness" : 8.15714,
+  "Feasible" : false
 },
 {
-  "size" : "259.0",
-  "groups" : "6.0",
-  "id" : "500",
-  "fitness" : "7.486002"
+  "Size" : 154,
+  "Groups" : 9,
+  "ID" : 258,
+  "Fitness" : 7.120133,
+  "Feasible" : false
 },
 {
-  "size" : "189.0",
-  "groups" : "9.0",
-  "id" : "222",
-  "fitness" : "7.1170855"
+  "Size" : 227,
+  "Groups" : 3,
+  "ID" : 308,
+  "Fitness" : 7.461154,
+  "Feasible" : false
 },
 {
-  "size" : "231.0",
-  "groups" : "2.0",
-  "id" : "255",
-  "fitness" : "6.851778"
+  "Size" : 225,
+  "Groups" : 4,
+  "ID" : 19,
+  "Fitness" : 7.847645,
+  "Feasible" : false
 },
 {
-  "size" : "198.0",
-  "groups" : "2.0",
-  "id" : "2490",
-  "fitness" : "7.121398"
+  "Size" : 194,
+  "Groups" : 3,
+  "ID" : 1011,
+  "Fitness" : 7.445251,
+  "Feasible" : false
 },
 {
-  "size" : "227.0",
-  "groups" : "4.0",
-  "id" : "234",
-  "fitness" : "8.232212"
+  "Size" : 130,
+  "Groups" : 2,
+  "ID" : 338,
+  "Fitness" : 8.532417,
+  "Feasible" : false
 },
 {
-  "size" : "132.0",
-  "groups" : "2.0",
-  "id" : "214",
-  "fitness" : "7.1906295"
+  "Size" : 159,
+  "Groups" : 2,
+  "ID" : 248,
+  "Fitness" : 7.961374,
+  "Feasible" : false
 },
 {
-  "size" : "225.0",
-  "groups" : "6.0",
-  "id" : "30",
-  "fitness" : "7.9822083"
+  "Size" : 192,
+  "Groups" : 2,
+  "ID" : 582,
+  "Fitness" : 6.8830094,
+  "Feasible" : false
 },
 {
-  "size" : "258.0",
-  "groups" : "7.0",
-  "id" : "389",
-  "fitness" : "7.013763"
+  "Size" : 254,
+  "Groups" : 4,
+  "ID" : 105,
+  "Fitness" : 8.007223,
+  "Feasible" : false
 },
 {
-  "size" : "130.0",
-  "groups" : "3.0",
-  "id" : "501",
-  "fitness" : "7.623415"
+  "Size" : 190,
+  "Groups" : 3,
+  "ID" : 2302,
+  "Fitness" : 8.433623,
+  "Feasible" : true
 },
 {
-  "size" : "194.0",
-  "groups" : "4.0",
-  "id" : "906",
-  "fitness" : "8.182919"
+  "Size" : 251,
+  "Groups" : 7,
+  "ID" : 263,
+  "Fitness" : 7.700715,
+  "Feasible" : false
 },
 {
-  "size" : "157.0",
-  "groups" : "4.0",
-  "id" : "109",
-  "fitness" : "8.142097"
+  "Size" : 126,
+  "Groups" : 3,
+  "ID" : 684,
+  "Fitness" : 7.8527193,
+  "Feasible" : false
 },
 {
-  "size" : "189.0",
-  "groups" : "5.0",
-  "id" : "138",
-  "fitness" : "8.468601"
+  "Size" : 188,
+  "Groups" : 4,
+  "ID" : 1328,
+  "Fitness" : 9.016009,
+  "Feasible" : false
 },
 {
-  "size" : "127.0",
-  "groups" : "3.0",
-  "id" : "536",
-  "fitness" : "7.702059"
+  "Size" : 249,
+  "Groups" : 10,
+  "ID" : 320,
+  "Fitness" : 6.3515105,
+  "Feasible" : false
 },
 {
-  "size" : "190.0",
-  "groups" : "4.0",
-  "id" : "786",
-  "fitness" : "7.560453"
+  "Size" : 154,
+  "Groups" : 5,
+  "ID" : 1226,
+  "Fitness" : 8.39711,
+  "Feasible" : false
 },
 {
-  "size" : "188.0",
-  "groups" : "6.0",
-  "id" : "154",
-  "fitness" : "7.999935"
+  "Size" : 125,
+  "Groups" : 4,
+  "ID" : 383,
+  "Fitness" : 7.960674,
+  "Feasible" : false
 },
 {
-  "size" : "220.0",
-  "groups" : "7.0",
-  "id" : "789",
-  "fitness" : "7.4396462"
+  "Size" : 152,
+  "Groups" : 7,
+  "ID" : 53,
+  "Fitness" : 7.800407,
+  "Feasible" : false
 },
 {
-  "size" : "156.0",
-  "groups" : "5.0",
-  "id" : "1473",
-  "fitness" : "9.423428"
+  "Size" : 124,
+  "Groups" : 6,
+  "ID" : 1042,
+  "Fitness" : 9.517006,
+  "Feasible" : true
 },
 {
-  "size" : "126.0",
-  "groups" : "4.0",
-  "id" : "597",
-  "fitness" : "7.612762"
+  "Size" : 108,
+  "Groups" : 5,
+  "ID" : 303,
+  "Fitness" : 7.916882,
+  "Feasible" : false
 },
 {
-  "size" : "154.0",
-  "groups" : "7.0",
-  "id" : "78",
-  "fitness" : "7.6664047"
+  "Size" : 150,
+  "Groups" : 10,
+  "ID" : 16,
+  "Fitness" : 6.0254974,
+  "Feasible" : false
 },
 {
-  "size" : "186.0",
-  "groups" : "8.0",
-  "id" : "651",
-  "fitness" : "7.234395"
+  "Size" : 107,
+  "Groups" : 7,
+  "ID" : 174,
+  "Fitness" : 6.4877043,
+  "Feasible" : false
 },
 {
-  "size" : "152.0",
-  "groups" : "10.0",
-  "id" : "260",
-  "fitness" : "6.0908237"
+  "Size" : 106,
+  "Groups" : 10,
+  "ID" : 407,
+  "Fitness" : 5.835614,
+  "Feasible" : false
 },
 {
-  "size" : "108.0",
-  "groups" : "7.0",
-  "id" : "379",
-  "fitness" : "6.5418367"
+  "Size" : 160,
+  "Groups" : 2,
+  "ID" : 1875,
+  "Fitness" : 9.020725,
+  "Feasible" : true
 },
 {
-  "size" : "266.0",
-  "groups" : "2.0",
-  "id" : "139",
-  "fitness" : "7.491959"
+  "Size" : 189,
+  "Groups" : 4,
+  "ID" : 477,
+  "Fitness" : 8.114359,
+  "Feasible" : false
 },
 {
-  "size" : "193.0",
-  "groups" : "3.0",
-  "id" : "2421",
-  "fitness" : "8.771921"
+  "Size" : 158,
+  "Groups" : 3,
+  "ID" : 1734,
+  "Fitness" : 7.8562117,
+  "Feasible" : false
 },
 {
-  "size" : "129.0",
-  "groups" : "2.0",
-  "id" : "2483",
-  "fitness" : "6.865422"
+  "Size" : 222,
+  "Groups" : 4,
+  "ID" : 466,
+  "Fitness" : 8.0793,
+  "Feasible" : false
 },
 {
-  "size" : "160.0",
-  "groups" : "3.0",
-  "id" : "233",
-  "fitness" : "7.524427"
+  "Size" : 110,
+  "Groups" : 3,
+  "ID" : 101,
+  "Fitness" : 7.745041,
+  "Feasible" : false
 },
 {
-  "size" : "224.0",
-  "groups" : "4.0",
-  "id" : "457",
-  "fitness" : "7.1702986"
+  "Size" : 156,
+  "Groups" : 4,
+  "ID" : 859,
+  "Fitness" : 8.148947,
+  "Feasible" : false
 },
 {
-  "size" : "157.0",
-  "groups" : "5.0",
-  "id" : "223",
-  "fitness" : "7.9182034"
+  "Size" : 218,
+  "Groups" : 8,
+  "ID" : 69,
+  "Fitness" : 6.1742663,
+  "Feasible" : false
 },
 {
-  "size" : "253.0",
-  "groups" : "8.0",
-  "id" : "372",
-  "fitness" : "6.7770834"
+  "Size" : 154,
+  "Groups" : 6,
+  "ID" : 854,
+  "Fitness" : 9.523374,
+  "Feasible" : true
 },
 {
-  "size" : "158.0",
-  "groups" : "4.0",
-  "id" : "384",
-  "fitness" : "8.093065"
+  "Size" : 108,
+  "Groups" : 6,
+  "ID" : 2352,
+  "Fitness" : 5.766248,
+  "Feasible" : false
 },
 {
-  "size" : "190.0",
-  "groups" : "5.0",
-  "id" : "1055",
-  "fitness" : "8.297716"
+  "Size" : 123,
+  "Groups" : 10,
+  "ID" : 114,
+  "Fitness" : 7.470528,
+  "Feasible" : false
 },
 {
-  "size" : "187.0",
-  "groups" : "8.0",
-  "id" : "309",
-  "fitness" : "7.9486656"
+  "Size" : 107,
+  "Groups" : 8,
+  "ID" : 224,
+  "Fitness" : 6.433226,
+  "Feasible" : false
 },
 {
-  "size" : "126.0",
-  "groups" : "5.0",
-  "id" : "203",
-  "fitness" : "8.145957"
+  "Size" : 152,
+  "Groups" : 9,
+  "ID" : 413,
+  "Fitness" : 7.2743917,
+  "Feasible" : false
 },
 {
-  "size" : "154.0",
-  "groups" : "8.0",
-  "id" : "108",
-  "fitness" : "6.3290753"
+  "Size" : 107,
+  "Groups" : 9,
+  "ID" : 373,
+  "Fitness" : 5.837001,
+  "Feasible" : false
 },
 {
-  "size" : "229.0",
-  "groups" : "2.0",
-  "id" : "126",
-  "fitness" : "7.5879407"
+  "Size" : 225,
+  "Groups" : 3,
+  "ID" : 50,
+  "Fitness" : 8.021086,
+  "Feasible" : false
 },
 {
-  "size" : "227.0",
-  "groups" : "3.0",
-  "id" : "7",
-  "fitness" : "7.6371"
+  "Size" : 194,
+  "Groups" : 2,
+  "ID" : 914,
+  "Fitness" : 6.9786816,
+  "Feasible" : false
 },
 {
-  "size" : "322.0",
-  "groups" : "6.0",
-  "id" : "350",
-  "fitness" : "7.0035186"
+  "Size" : 157,
+  "Groups" : 2,
+  "ID" : 25,
+  "Fitness" : 8.641148,
+  "Feasible" : false
 },
 {
-  "size" : "161.0",
-  "groups" : "3.0",
-  "id" : "382",
-  "fitness" : "7.9440403"
+  "Size" : 190,
+  "Groups" : 2,
+  "ID" : 644,
+  "Fitness" : 7.177254,
+  "Feasible" : false
 },
 {
-  "size" : "194.0",
-  "groups" : "3.0",
-  "id" : "444",
-  "fitness" : "7.6212173"
+  "Size" : 188,
+  "Groups" : 3,
+  "ID" : 646,
+  "Fitness" : 7.820582,
+  "Feasible" : false
 },
 {
-  "size" : "318.0",
-  "groups" : "4.0",
-  "id" : "440",
-  "fitness" : "6.9423604"
+  "Size" : 126,
+  "Groups" : 2,
+  "ID" : 1278,
+  "Fitness" : 7.4537683,
+  "Feasible" : false
 },
 {
-  "size" : "157.0",
-  "groups" : "3.0",
-  "id" : "129",
-  "fitness" : "8.945252"
+  "Size" : 185,
+  "Groups" : 5,
+  "ID" : 65,
+  "Fitness" : 7.8823123,
+  "Feasible" : false
 },
 {
-  "size" : "253.0",
-  "groups" : "5.0",
-  "id" : "342",
-  "fitness" : "7.4156103"
+  "Size" : 186,
+  "Groups" : 4,
+  "ID" : 825,
+  "Fitness" : 9.024955,
+  "Feasible" : false
 },
 {
-  "size" : "127.0",
-  "groups" : "2.0",
-  "id" : "1559",
-  "fitness" : "8.552362"
+  "Size" : 250,
+  "Groups" : 6,
+  "ID" : 350,
+  "Fitness" : 7.167451,
+  "Feasible" : false
 },
 {
-  "size" : "126.0",
-  "groups" : "3.0",
-  "id" : "74",
-  "fitness" : "8.955919"
+  "Size" : 184,
+  "Groups" : 6,
+  "ID" : 408,
+  "Fitness" : 8.530609,
+  "Feasible" : false
 },
 {
-  "size" : "188.0",
-  "groups" : "4.0",
-  "id" : "504",
-  "fitness" : "7.7374487"
+  "Size" : 124,
+  "Groups" : 4,
+  "ID" : 1065,
+  "Fitness" : 9.537823,
+  "Feasible" : true
 },
 {
-  "size" : "185.0",
-  "groups" : "7.0",
-  "id" : "219",
-  "fitness" : "6.9653115"
+  "Size" : 152,
+  "Groups" : 5,
+  "ID" : 979,
+  "Fitness" : 7.9748354,
+  "Feasible" : false
 },
 {
-  "size" : "153.0",
-  "groups" : "6.0",
-  "id" : "1484",
-  "fitness" : "7.98232"
+  "Size" : 150,
+  "Groups" : 7,
+  "ID" : 220,
+  "Fitness" : 7.2673225,
+  "Feasible" : false
 },
 {
-  "size" : "154.0",
-  "groups" : "5.0",
-  "id" : "131",
-  "fitness" : "8.211222"
+  "Size" : 122,
+  "Groups" : 8,
+  "ID" : 428,
+  "Fitness" : 6.18685,
+  "Feasible" : false
 },
 {
-  "size" : "186.0",
-  "groups" : "6.0",
-  "id" : "135",
-  "fitness" : "7.95467"
+  "Size" : 248,
+  "Groups" : 9,
+  "ID" : 24,
+  "Fitness" : 5.926327,
+  "Feasible" : false
 },
 {
-  "size" : "125.0",
-  "groups" : "4.0",
-  "id" : "1197",
-  "fitness" : "7.898814"
+  "Size" : 255,
+  "Groups" : 3,
+  "ID" : 317,
+  "Fitness" : 7.775975,
+  "Feasible" : false
 },
 {
-  "size" : "250.0",
-  "groups" : "8.0",
-  "id" : "425",
-  "fitness" : "6.861407"
+  "Size" : 224,
+  "Groups" : 2,
+  "ID" : 268,
+  "Fitness" : 7.281045,
+  "Feasible" : false
 },
 {
-  "size" : "124.0",
-  "groups" : "6.0",
-  "id" : "75",
-  "fitness" : "9.372287"
+  "Size" : 158,
+  "Groups" : 2,
+  "ID" : 2199,
+  "Fitness" : 7.659709,
+  "Feasible" : false
 },
 {
-  "size" : "184.0",
-  "groups" : "8.0",
-  "id" : "713",
-  "fitness" : "7.284618"
+  "Size" : 222,
+  "Groups" : 3,
+  "ID" : 328,
+  "Fitness" : 7.370609,
+  "Feasible" : false
 },
 {
-  "size" : "152.0",
-  "groups" : "7.0",
-  "id" : "517",
-  "fitness" : "7.709026"
+  "Size" : 156,
+  "Groups" : 3,
+  "ID" : 508,
+  "Fitness" : 7.8632083,
+  "Feasible" : false
 },
 {
-  "size" : "108.0",
-  "groups" : "5.0",
-  "id" : "1857",
-  "fitness" : "7.9178944"
+  "Size" : 153,
+  "Groups" : 5,
+  "ID" : 147,
+  "Fitness" : 8.278086,
+  "Feasible" : false
 },
 {
-  "size" : "184.0",
-  "groups" : "9.0",
-  "id" : "15",
-  "fitness" : "7.4302955"
+  "Size" : 109,
+  "Groups" : 3,
+  "ID" : 112,
+  "Fitness" : 7.368355,
+  "Feasible" : false
 },
 {
-  "size" : "193.0",
-  "groups" : "2.0",
-  "id" : "576",
-  "fitness" : "7.036093"
+  "Size" : 154,
+  "Groups" : 4,
+  "ID" : 2095,
+  "Fitness" : 8.4940605,
+  "Feasible" : false
 },
 {
-  "size" : "191.0",
-  "groups" : "3.0",
-  "id" : "318",
-  "fitness" : "8.4317875"
+  "Size" : 186,
+  "Groups" : 5,
+  "ID" : 973,
+  "Fitness" : 7.173483,
+  "Feasible" : false
 },
 {
-  "size" : "160.0",
-  "groups" : "2.0",
-  "id" : "1089",
-  "fitness" : "7.4564686"
+  "Size" : 151,
+  "Groups" : 7,
+  "ID" : 223,
+  "Fitness" : 7.780668,
+  "Feasible" : false
 },
 {
-  "size" : "253.0",
-  "groups" : "6.0",
-  "id" : "193",
-  "fitness" : "7.10015"
+  "Size" : 108,
+  "Groups" : 4,
+  "ID" : 433,
+  "Fitness" : 7.8304844,
+  "Feasible" : false
 },
 {
-  "size" : "189.0",
-  "groups" : "4.0",
-  "id" : "2275",
-  "fitness" : "7.1296244"
+  "Size" : 152,
+  "Groups" : 6,
+  "ID" : 36,
+  "Fitness" : 7.850944,
+  "Feasible" : false
 },
 {
-  "size" : "155.0",
-  "groups" : "5.0",
-  "id" : "1072",
-  "fitness" : "7.9605775"
+  "Size" : 124,
+  "Groups" : 5,
+  "ID" : 1259,
+  "Fitness" : 9.727732,
+  "Feasible" : true
 },
 {
-  "size" : "188.0",
-  "groups" : "5.0",
-  "id" : "434",
-  "fitness" : "8.163365"
+  "Size" : 216,
+  "Groups" : 8,
+  "ID" : 243,
+  "Fitness" : 7.9350204,
+  "Feasible" : false
 },
 {
-  "size" : "109.0",
-  "groups" : "4.0",
-  "id" : "313",
-  "fitness" : "7.687086"
+  "Size" : 123,
+  "Groups" : 7,
+  "ID" : 134,
+  "Fitness" : 9.197523,
+  "Feasible" : false
 },
 {
-  "size" : "186.0",
-  "groups" : "7.0",
-  "id" : "902",
-  "fitness" : "9.212647"
+  "Size" : 308,
+  "Groups" : 9,
+  "ID" : 267,
+  "Fitness" : 6.434809,
+  "Feasible" : false
 },
 {
-  "size" : "125.0",
-  "groups" : "5.0",
-  "id" : "1534",
-  "fitness" : "7.5442963"
+  "Size" : 188,
+  "Groups" : 2,
+  "ID" : 1785,
+  "Fitness" : 7.3793163,
+  "Feasible" : false
 },
 {
-  "size" : "154.0",
-  "groups" : "6.0",
-  "id" : "2427",
-  "fitness" : "7.6877294"
+  "Size" : 153,
+  "Groups" : 3,
+  "ID" : 283,
+  "Fitness" : 7.6662154,
+  "Feasible" : false
 },
 {
-  "size" : "184.0",
-  "groups" : "10.0",
-  "id" : "52",
-  "fitness" : "7.6801157"
+  "Size" : 125,
+  "Groups" : 2,
+  "ID" : 305,
+  "Fitness" : 8.976128,
+  "Feasible" : false
 },
 {
-  "size" : "124.0",
-  "groups" : "7.0",
-  "id" : "759",
-  "fitness" : "8.156817"
+  "Size" : 186,
+  "Groups" : 3,
+  "ID" : 1058,
+  "Fitness" : 7.6591964,
+  "Feasible" : false
 },
 {
-  "size" : "152.0",
-  "groups" : "8.0",
-  "id" : "209",
-  "fitness" : "6.332701"
+  "Size" : 184,
+  "Groups" : 4,
+  "ID" : 1023,
+  "Fitness" : 8.08564,
+  "Feasible" : false
 },
 {
-  "size" : "190.0",
-  "groups" : "2.0",
-  "id" : "525",
-  "fitness" : "7.502707"
+  "Size" : 124,
+  "Groups" : 3,
+  "ID" : 2032,
+  "Fitness" : 9.304924,
+  "Feasible" : true
 },
 {
-  "size" : "155.0",
-  "groups" : "3.0",
-  "id" : "955",
-  "fitness" : "6.618567"
+  "Size" : 123,
+  "Groups" : 4,
+  "ID" : 103,
+  "Fitness" : 8.382445,
+  "Feasible" : false
 },
 {
-  "size" : "126.0",
-  "groups" : "2.0",
-  "id" : "218",
-  "fitness" : "7.358259"
+  "Size" : 214,
+  "Groups" : 7,
+  "ID" : 232,
+  "Fitness" : 7.5730405,
+  "Feasible" : false
 },
 {
-  "size" : "188.0",
-  "groups" : "3.0",
-  "id" : "503",
-  "fitness" : "8.207752"
+  "Size" : 150,
+  "Groups" : 5,
+  "ID" : 2438,
+  "Fitness" : 8.614866,
+  "Feasible" : true
 },
 {
-  "size" : "125.0",
-  "groups" : "3.0",
-  "id" : "97",
-  "fitness" : "8.71661"
+  "Size" : 182,
+  "Groups" : 6,
+  "ID" : 1953,
+  "Fitness" : 7.1061277,
+  "Feasible" : false
 },
 {
-  "size" : "186.0",
-  "groups" : "4.0",
-  "id" : "717",
-  "fitness" : "9.157976"
+  "Size" : 148,
+  "Groups" : 7,
+  "ID" : 8,
+  "Fitness" : 8.2969265,
+  "Feasible" : false
 },
 {
-  "size" : "151.0",
-  "groups" : "6.0",
-  "id" : "2358",
-  "fitness" : "7.6369386"
+  "Size" : 106,
+  "Groups" : 5,
+  "ID" : 1632,
+  "Fitness" : 9.603656,
+  "Feasible" : true
 },
 {
-  "size" : "216.0",
-  "groups" : "7.0",
-  "id" : "585",
-  "fitness" : "7.318548"
+  "Size" : 122,
+  "Groups" : 6,
+  "ID" : 1639,
+  "Fitness" : 6.829672,
+  "Feasible" : false
 },
 {
-  "size" : "152.0",
-  "groups" : "5.0",
-  "id" : "151",
-  "fitness" : "8.018706"
+  "Size" : 156,
+  "Groups" : 2,
+  "ID" : 163,
+  "Fitness" : 7.6129766,
+  "Feasible" : false
 },
 {
-  "size" : "124.0",
-  "groups" : "4.0",
-  "id" : "642",
-  "fitness" : "9.5373535"
+  "Size" : 220,
+  "Groups" : 3,
+  "ID" : 1302,
+  "Fitness" : 7.4921846,
+  "Feasible" : false
 },
 {
-  "size" : "184.0",
-  "groups" : "6.0",
-  "id" : "655",
-  "fitness" : "7.9213524"
+  "Size" : 154,
+  "Groups" : 3,
+  "ID" : 47,
+  "Fitness" : 9.138966,
+  "Feasible" : true
 },
 {
-  "size" : "107.0",
-  "groups" : "5.0",
-  "id" : "70",
-  "fitness" : "8.364008"
+  "Size" : 109,
+  "Groups" : 2,
+  "ID" : 117,
+  "Fitness" : 7.0918546,
+  "Feasible" : false
 },
 {
-  "size" : "150.0",
-  "groups" : "7.0",
-  "id" : "461",
-  "fitness" : "9.247389"
+  "Size" : 152,
+  "Groups" : 4,
+  "ID" : 28,
+  "Fitness" : 8.146439,
+  "Feasible" : false
 },
 {
-  "size" : "123.0",
-  "groups" : "6.0",
-  "id" : "298",
-  "fitness" : "9.46113"
+  "Size" : 184,
+  "Groups" : 5,
+  "ID" : 252,
+  "Fitness" : 6.732911,
+  "Feasible" : false
 },
 {
-  "size" : "182.0",
-  "groups" : "8.0",
-  "id" : "679",
-  "fitness" : "7.2992306"
+  "Size" : 108,
+  "Groups" : 3,
+  "ID" : 2446,
+  "Fitness" : 7.5768437,
+  "Feasible" : false
 },
 {
-  "size" : "122.0",
-  "groups" : "8.0",
-  "id" : "202",
-  "fitness" : "5.7174797"
+  "Size" : 123,
+  "Groups" : 5,
+  "ID" : 95,
+  "Fitness" : 6.623637,
+  "Feasible" : false
 },
 {
-  "size" : "248.0",
-  "groups" : "9.0",
-  "id" : "19",
-  "fitness" : "6.799842"
+  "Size" : 214,
+  "Groups" : 8,
+  "ID" : 455,
+  "Fitness" : 7.4943814,
+  "Feasible" : false
 },
 {
-  "size" : "191.0",
-  "groups" : "2.0",
-  "id" : "277",
-  "fitness" : "7.657663"
+  "Size" : 150,
+  "Groups" : 6,
+  "ID" : 2437,
+  "Fitness" : 6.789852,
+  "Feasible" : false
 },
 {
-  "size" : "222.0",
-  "groups" : "3.0",
-  "id" : "386",
-  "fitness" : "8.0861"
+  "Size" : 148,
+  "Groups" : 8,
+  "ID" : 315,
+  "Fitness" : 7.779679,
+  "Feasible" : false
 },
 {
-  "size" : "110.0",
-  "groups" : "2.0",
-  "id" : "1096",
-  "fitness" : "7.2209163"
+  "Size" : 106,
+  "Groups" : 6,
+  "ID" : 1422,
+  "Fitness" : 7.937646,
+  "Feasible" : false
 },
 {
-  "size" : "306.0",
-  "groups" : "10.0",
-  "id" : "192",
-  "fitness" : "6.0674577"
+  "Size" : 148,
+  "Groups" : 9,
+  "ID" : 500,
+  "Fitness" : 6.673732,
+  "Feasible" : false
 },
 {
-  "size" : "186.0",
-  "groups" : "5.0",
-  "id" : "877",
-  "fitness" : "7.878739"
+  "Size" : 186,
+  "Groups" : 2,
+  "ID" : 1988,
+  "Fitness" : 7.46435,
+  "Feasible" : false
 },
 {
-  "size" : "152.0",
-  "groups" : "6.0",
-  "id" : "799",
-  "fitness" : "7.910455"
+  "Size" : 247,
+  "Groups" : 5,
+  "ID" : 448,
+  "Fitness" : 7.744439,
+  "Feasible" : false
 },
 {
-  "size" : "124.0",
-  "groups" : "5.0",
-  "id" : "825",
-  "fitness" : "8.040026"
+  "Size" : 124,
+  "Groups" : 2,
+  "ID" : 2402,
+  "Fitness" : 9.12743,
+  "Feasible" : true
 },
 {
-  "size" : "184.0",
-  "groups" : "7.0",
-  "id" : "929",
-  "fitness" : "6.645644"
+  "Size" : 184,
+  "Groups" : 3,
+  "ID" : 2151,
+  "Fitness" : 7.761548,
+  "Feasible" : false
 },
 {
-  "size" : "123.0",
-  "groups" : "7.0",
-  "id" : "435",
-  "fitness" : "6.642491"
+  "Size" : 248,
+  "Groups" : 4,
+  "ID" : 491,
+  "Fitness" : 7.532611,
+  "Feasible" : false
 },
 {
-  "size" : "150.0",
-  "groups" : "8.0",
-  "id" : "969",
-  "fitness" : "6.592081"
+  "Size" : 149,
+  "Groups" : 4,
+  "ID" : 13,
+  "Fitness" : 7.7029686,
+  "Feasible" : false
 },
 {
-  "size" : "106.0",
-  "groups" : "8.0",
-  "id" : "396",
-  "fitness" : "6.455985"
+  "Size" : 245,
+  "Groups" : 7,
+  "ID" : 356,
+  "Fitness" : 6.3010387,
+  "Feasible" : false
 },
 {
-  "size" : "150.0",
-  "groups" : "9.0",
-  "id" : "85",
-  "fitness" : "6.9393597"
+  "Size" : 123,
+  "Groups" : 3,
+  "ID" : 295,
+  "Fitness" : 8.194946,
+  "Feasible" : false
 },
 {
-  "size" : "106.0",
-  "groups" : "9.0",
-  "id" : "373",
-  "fitness" : "7.6471343"
+  "Size" : 246,
+  "Groups" : 6,
+  "ID" : 393,
+  "Fitness" : 7.2318964,
+  "Feasible" : false
 },
 {
-  "size" : "155.0",
-  "groups" : "2.0",
-  "id" : "1199",
-  "fitness" : "8.021162"
+  "Size" : 182,
+  "Groups" : 4,
+  "ID" : 2218,
+  "Fitness" : 7.744347,
+  "Feasible" : false
 },
 {
-  "size" : "188.0",
-  "groups" : "2.0",
-  "id" : "528",
-  "fitness" : "7.791539"
+  "Size" : 211,
+  "Groups" : 8,
+  "ID" : 152,
+  "Fitness" : 6.8791494,
+  "Feasible" : false
 },
 {
-  "size" : "153.0",
-  "groups" : "3.0",
-  "id" : "2484",
-  "fitness" : "7.331363"
+  "Size" : 122,
+  "Groups" : 4,
+  "ID" : 427,
+  "Fitness" : 7.83353,
+  "Feasible" : false
 },
 {
-  "size" : "125.0",
-  "groups" : "2.0",
-  "id" : "268",
-  "fitness" : "7.3332872"
+  "Size" : 148,
+  "Groups" : 5,
+  "ID" : 774,
+  "Fitness" : 9.811185,
+  "Feasible" : false
 },
 {
-  "size" : "250.0",
-  "groups" : "4.0",
-  "id" : "498",
-  "fitness" : "7.2201834"
+  "Size" : 244,
+  "Groups" : 8,
+  "ID" : 453,
+  "Fitness" : 7.0657835,
+  "Feasible" : false
 },
 {
-  "size" : "151.0",
-  "groups" : "4.0",
-  "id" : "537",
-  "fitness" : "7.7345076"
+  "Size" : 244,
+  "Groups" : 9,
+  "ID" : 269,
+  "Fitness" : 6.8411174,
+  "Feasible" : false
 },
 {
-  "size" : "184.0",
-  "groups" : "4.0",
-  "id" : "712",
-  "fitness" : "8.007969"
+  "Size" : 154,
+  "Groups" : 2,
+  "ID" : 672,
+  "Fitness" : 9.193111,
+  "Feasible" : true
 },
 {
-  "size" : "124.0",
-  "groups" : "3.0",
-  "id" : "1471",
-  "fitness" : "7.5058775"
+  "Size" : 247,
+  "Groups" : 6,
+  "ID" : 217,
+  "Fitness" : 7.486894,
+  "Feasible" : false
 },
 {
-  "size" : "149.0",
-  "groups" : "6.0",
-  "id" : "421",
-  "fitness" : "8.006969"
+  "Size" : 152,
+  "Groups" : 3,
+  "ID" : 1743,
+  "Fitness" : 8.009346,
+  "Feasible" : false
 },
 {
-  "size" : "246.0",
-  "groups" : "8.0",
-  "id" : "303",
-  "fitness" : "5.777832"
+  "Size" : 108,
+  "Groups" : 2,
+  "ID" : 2358,
+  "Fitness" : 7.3643785,
+  "Feasible" : false
 },
 {
-  "size" : "150.0",
-  "groups" : "5.0",
-  "id" : "2466",
-  "fitness" : "8.155219"
+  "Size" : 149,
+  "Groups" : 5,
+  "ID" : 367,
+  "Fitness" : 8.709883,
+  "Feasible" : false
 },
 {
-  "size" : "123.0",
-  "groups" : "4.0",
-  "id" : "594",
-  "fitness" : "7.6419425"
+  "Size" : 150,
+  "Groups" : 4,
+  "ID" : 690,
+  "Fitness" : 8.683126,
+  "Feasible" : false
 },
 {
-  "size" : "182.0",
-  "groups" : "6.0",
-  "id" : "912",
-  "fitness" : "8.115219"
+  "Size" : 246,
+  "Groups" : 7,
+  "ID" : 281,
+  "Fitness" : 7.4942303,
+  "Feasible" : false
 },
 {
-  "size" : "148.0",
-  "groups" : "7.0",
-  "id" : "86",
-  "fitness" : "8.398063"
+  "Size" : 182,
+  "Groups" : 5,
+  "ID" : 528,
+  "Fitness" : 7.543859,
+  "Feasible" : false
 },
 {
-  "size" : "122.0",
-  "groups" : "6.0",
-  "id" : "92",
-  "fitness" : "7.818974"
+  "Size" : 122,
+  "Groups" : 5,
+  "ID" : 54,
+  "Fitness" : 7.7549567,
+  "Feasible" : false
 },
 {
-  "size" : "106.0",
-  "groups" : "5.0",
-  "id" : "143",
-  "fitness" : "8.001238"
+  "Size" : 106,
+  "Groups" : 4,
+  "ID" : 896,
+  "Fitness" : 8.371069,
+  "Feasible" : false
 },
 {
-  "size" : "180.0",
-  "groups" : "8.0",
-  "id" : "714",
-  "fitness" : "6.3940725"
+  "Size" : 180,
+  "Groups" : 7,
+  "ID" : 420,
+  "Fitness" : 7.6007357,
+  "Feasible" : false
 },
 {
-  "size" : "319.0",
-  "groups" : "2.0",
-  "id" : "76",
-  "fitness" : "5.849436"
-},
-{
-  "size" : "246.0",
-  "groups" : "9.0",
-  "id" : "378",
-  "fitness" : "6.953658"
-},
-{
-  "size" : "156.0",
-  "groups" : "2.0",
-  "id" : "409",
-  "fitness" : "7.311716"
-},
-{
-  "size" : "220.0",
-  "groups" : "3.0",
-  "id" : "489",
-  "fitness" : "8.09116"
-},
-{
-  "size" : "185.0",
-  "groups" : "4.0",
-  "id" : "895",
-  "fitness" : "6.5202146"
-},
-{
-  "size" : "154.0",
-  "groups" : "3.0",
-  "id" : "375",
-  "fitness" : "7.8872237"
-},
-{
-  "size" : "109.0",
-  "groups" : "2.0",
-  "id" : "37",
-  "fitness" : "7.196511"
-},
-{
-  "size" : "218.0",
-  "groups" : "4.0",
-  "id" : "787",
-  "fitness" : "7.946286"
-},
-{
-  "size" : "151.0",
-  "groups" : "5.0",
-  "id" : "165",
-  "fitness" : "8.70051"
-},
-{
-  "size" : "184.0",
-  "groups" : "5.0",
-  "id" : "910",
-  "fitness" : "8.318426"
-},
-{
-  "size" : "108.0",
-  "groups" : "3.0",
-  "id" : "513",
-  "fitness" : "7.0441294"
-},
-{
-  "size" : "152.0",
-  "groups" : "4.0",
-  "id" : "572",
-  "fitness" : "8.038151"
-},
-{
-  "size" : "216.0",
-  "groups" : "6.0",
-  "id" : "904",
-  "fitness" : "7.5175424"
-},
-{
-  "size" : "150.0",
-  "groups" : "6.0",
-  "id" : "1054",
-  "fitness" : "9.425537"
-},
-{
-  "size" : "182.0",
-  "groups" : "7.0",
-  "id" : "980",
-  "fitness" : "8.110869"
-},
-{
-  "size" : "123.0",
-  "groups" : "5.0",
-  "id" : "1751",
-  "fitness" : "6.8266435"
-},
-{
-  "size" : "106.0",
-  "groups" : "6.0",
-  "id" : "437",
-  "fitness" : "6.6854663"
-},
-{
-  "size" : "180.0",
-  "groups" : "10.0",
-  "id" : "473",
-  "fitness" : "5.460557"
-},
-{
-  "size" : "122.0",
-  "groups" : "7.0",
-  "id" : "512",
-  "fitness" : "6.528303"
-},
-{
-  "size" : "153.0",
-  "groups" : "2.0",
-  "id" : "692",
-  "fitness" : "7.1211114"
-},
-{
-  "size" : "302.0",
-  "groups" : "6.0",
-  "id" : "144",
-  "fitness" : "7.4501743"
-},
-{
-  "size" : "124.0",
-  "groups" : "2.0",
-  "id" : "22",
-  "fitness" : "7.2146535"
-},
-{
-  "size" : "245.0",
-  "groups" : "7.0",
-  "id" : "119",
-  "fitness" : "7.094305"
-},
-{
-  "size" : "182.0",
-  "groups" : "4.0",
-  "id" : "51",
-  "fitness" : "7.6158724"
-},
-{
-  "size" : "123.0",
-  "groups" : "3.0",
-  "id" : "388",
-  "fitness" : "9.146381"
-},
-{
-  "size" : "148.0",
-  "groups" : "5.0",
-  "id" : "101",
-  "fitness" : "8.608789"
-},
-{
-  "size" : "180.0",
-  "groups" : "6.0",
-  "id" : "283",
-  "fitness" : "8.654049"
-},
-{
-  "size" : "212.0",
-  "groups" : "7.0",
-  "id" : "226",
-  "fitness" : "7.1469746"
-},
-{
-  "size" : "122.0",
-  "groups" : "4.0",
-  "id" : "634",
-  "fitness" : "7.745133"
-},
-{
-  "size" : "121.0",
-  "groups" : "6.0",
-  "id" : "1482",
-  "fitness" : "7.521222"
-},
-{
-  "size" : "251.0",
-  "groups" : "3.0",
-  "id" : "47",
-  "fitness" : "6.863355"
-},
-{
-  "size" : "306.0",
-  "groups" : "5.0",
-  "id" : "242",
-  "fitness" : "7.581605"
-},
-{
-  "size" : "154.0",
-  "groups" : "2.0",
-  "id" : "507",
-  "fitness" : "7.7643595"
-},
-{
-  "size" : "152.0",
-  "groups" : "3.0",
-  "id" : "81",
-  "fitness" : "9.113266"
-},
-{
-  "size" : "216.0",
-  "groups" : "4.0",
-  "id" : "370",
-  "fitness" : "8.400382"
-},
-{
-  "size" : "149.0",
-  "groups" : "5.0",
-  "id" : "698",
-  "fitness" : "9.605291"
-},
-{
-  "size" : "182.0",
-  "groups" : "5.0",
-  "id" : "784",
-  "fitness" : "9.457694"
-},
-{
-  "size" : "107.0",
-  "groups" : "3.0",
-  "id" : "312",
-  "fitness" : "7.670688"
-},
-{
-  "size" : "150.0",
-  "groups" : "4.0",
-  "id" : "1860",
-  "fitness" : "9.681816"
-},
-{
-  "size" : "147.0",
-  "groups" : "7.0",
-  "id" : "349",
-  "fitness" : "7.8812003"
-},
-{
-  "size" : "106.0",
-  "groups" : "4.0",
-  "id" : "445",
-  "fitness" : "8.8618145"
-},
-{
-  "size" : "122.0",
-  "groups" : "5.0",
-  "id" : "300",
-  "fitness" : "8.054066"
-},
-{
-  "size" : "148.0",
-  "groups" : "6.0",
-  "id" : "486",
-  "fitness" : "7.9401813"
-},
-{
-  "size" : "212.0",
-  "groups" : "8.0",
-  "id" : "470",
-  "fitness" : "6.153103"
-},
-{
-  "size" : "180.0",
-  "groups" : "7.0",
-  "id" : "675",
-  "fitness" : "7.5972767"
-},
-{
-  "size" : "121.0",
-  "groups" : "7.0",
-  "id" : "2330",
-  "fitness" : "7.2486944"
-},
-{
-  "size" : "212.0",
-  "groups" : "9.0",
-  "id" : "149",
-  "fitness" : "7.151476"
+  "Size" : 148,
+  "Groups" : 6,
+  "ID" : 1506,
+  "Fitness" : 8.593153,
+  "Feasible" : true
 }]

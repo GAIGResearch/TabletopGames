@@ -327,10 +327,12 @@ public class GenerateBoards {
             counter++;
             Pair<Integer, Float> result = map_SizeVsGroups.get(key);
             String output = "{\"";
-            output += "size\":\"" + key.a + "\"";
-            output += ",\"groups\":\"" + key.b + "\"";
-            output += ",\"id\":\"" + result.a + "\"";
-            output += ",\"fitness\":\"" + result.b + "\"}";
+            output += "Size\":" + key.a.intValue();
+            output += ",\"Groups\":" + key.b.intValue();
+            output += ",\"ID\":" + result.a;
+            output += ",\"Fitness\":" + result.b;
+            output += ",\"Feasible\":" + feasibleList.get(result.a - 1);
+            output += "}";
             Object o = mapper.readValue(output, Object.class);
             String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
             if (counter < max)
