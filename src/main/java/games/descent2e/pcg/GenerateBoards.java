@@ -115,20 +115,23 @@ public class GenerateBoards {
                 generateOffspring(parents.a, parents.b, isFeasible);
             }
         }
-        System.out.println("Complete!");
 
         exportPCGToJSON(true);
         exportPCGToJSON(false);
         exportMAPElitesToJSON();
+
+        System.out.println("Complete!");
     }
 
     static void exportPCGToJSON(boolean isFeasible) throws IOException {
 
         String destination = "feasible.json";
         List<Pair<Quest, GraphBoard>> set = feasible;
+        List<HashMap<String, Float>> fitness = feasibleFitness;
         if (!isFeasible) {
             destination = "infeasible.json";
             set = infeasible;
+            fitness = infeasibleFitness;
         }
 
         ObjectMapper mapper = new ObjectMapper();
@@ -137,7 +140,7 @@ public class GenerateBoards {
         Path questOutput = Paths.get("data/descent2e/pcg/pcgquests_" + destination);
         Files.write(questOutput,"[\n".getBytes());
         Path fitnessOutput = Paths.get("data/descent2e/pcg/pcgscores_" + destination);
-        Files.write(questOutput,"[\n".getBytes());
+        Files.write(fitnessOutput,"[\n".getBytes());
         int counter = 0;
         int max = set.size();
         for (Pair<Quest, GraphBoard> pair : set) {
@@ -202,9 +205,6 @@ public class GenerateBoards {
 
             outputQ.append("}");
 
-            Object q = mapper.readValue(outputQ.toString(), Object.class);
-            String prettyQ = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(q);
-
             // --- BOARD ---
 
             StringBuilder outputB = new StringBuilder("{");
@@ -252,8 +252,15 @@ public class GenerateBoards {
             }
 
 
+
+
+            // -- FINAL OUTPUTS ---
+
+            Object q = mapper.readValue(outputQ.toString(), Object.class);
+            String prettyQ = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(q);
             Object b = mapper.readValue(outputB.toString(), Object.class);
             String prettyB = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(b);
+
 
             if (counter < max) {
                 prettyQ += ",";
@@ -262,10 +269,50 @@ public class GenerateBoards {
             else {
                 prettyQ  += "\n]";
                 prettyB += "\n]";
-                }
-
+            }
             Files.writeString(questOutput,prettyQ + System.lineSeparator(),StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             Files.writeString(boardOutput,prettyB + System.lineSeparator(),StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        }
+
+        // --- SCORES ---
+
+        counter = 0;
+        max = fitness.size();
+        for (HashMap<String, Float> f : fitness) {
+            counter++;
+            StringBuilder outputS = new StringBuilder("{");
+
+            outputS.append("\"ID\": ").append(f.get("ID").intValue());
+            outputS.append(",\"Feasible\": ").append(isFeasible);
+            outputS.append(",\"Fitness\": ").append(f.get("Fitness"));
+            outputS.append(",\"Connectedness\": ").append(f.get("Connectedness").intValue());
+            outputS.append(",\"Free Edges\": ").append(f.get("Free Edges").intValue());
+            outputS.append(",\"Size\": ").append(f.get("Size").intValue());
+            outputS.append(",\"Tile Count\": ").append(f.get("Tile Count").intValue());
+            outputS.append(",\"Consistency\": ").append(f.get("Consistency"));
+            outputS.append(",\"Geometry\": ").append(f.get("Geometry") > 0.0f);
+            outputS.append(",\"Groups\": ").append(f.get("Groups").intValue());
+            outputS.append(",\"Monster Count\": ").append(f.get("Monster Count"));
+            outputS.append(",\"No Repeats\": ").append(f.get("Repeats") > 0.0f);
+            outputS.append(",\"Total Health\": ").append(f.get("Total Health"));
+            outputS.append(",\"Average Health\": ").append(f.get("Health"));
+            outputS.append(",\"Legal Spawning\": ").append(f.get("Spawning") > 0.0f);
+            outputS.append(",\"Complexity\": ").append(f.get("Complexity"));
+            outputS.append(",\"Rules\": ").append(f.get("Rules"));
+            outputS.append(",\"Act\": ").append(f.get("Act").intValue());
+            outputS.append(",\"XP\": ").append(f.get("XP").intValue());
+            outputS.append(",\"Gold\": ").append(f.get("Gold").intValue());
+            outputS.append("}");
+
+            Object s = mapper.readValue(outputS.toString(), Object.class);
+            String prettyS = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(s);
+
+            if (counter < max)
+                prettyS += ",";
+            else
+                prettyS += "\n]";
+
+            Files.writeString(fitnessOutput,prettyS + System.lineSeparator(),StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         }
     }
 
