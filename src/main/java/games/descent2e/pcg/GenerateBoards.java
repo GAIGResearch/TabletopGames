@@ -33,11 +33,11 @@ public class GenerateBoards {
 
     public static final List<String> positions = List.of("N-0", "E-0", "S-0", "W-0");
     // How many boards we generate using purely the starting Quests
-    public static final int FIRSTLOOP = 4;
+    public static final int FIRSTLOOP = 500;
 
     // How many boards we generate using the feasible/infeasible pools
-    public static final int GENERATIONLOOP = 0;
-    public static final int OFFSPRING = 1;
+    public static final int GENERATIONLOOP = 200;
+    public static final int OFFSPRING = 10;
 
     public static final int CHOOSE_INFEASIBLE = 3;
 
