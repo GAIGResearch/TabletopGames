@@ -33,11 +33,11 @@ public class GenerateBoards {
 
     public static final List<String> positions = List.of("N-0", "E-0", "S-0", "W-0");
     // How many boards we generate using purely the starting Quests
-    public static final int FIRSTLOOP = 400;
+    public static final int FIRSTLOOP = 4;
 
     // How many boards we generate using the feasible/infeasible pools
-    public static final int GENERATIONLOOP = 200;
-    public static final int OFFSPRING = 10;
+    public static final int GENERATIONLOOP = 0;
+    public static final int OFFSPRING = 1;
 
     public static final int CHOOSE_INFEASIBLE = 3;
 
@@ -117,13 +117,164 @@ public class GenerateBoards {
         }
         System.out.println("Complete!");
 
+        exportPCGToJSON(true);
+        exportPCGToJSON(false);
         exportMAPElitesToJSON();
+    }
+
+    static void exportPCGToJSON(boolean isFeasible) throws IOException {
+
+        String destination = "feasible.json";
+        List<Pair<Quest, GraphBoard>> set = feasible;
+        if (!isFeasible) {
+            destination = "infeasible.json";
+            set = infeasible;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        Path boardOutput = Paths.get("data/descent2e/pcg/pcgboards_" + destination);
+        Files.write(boardOutput,"[\n".getBytes());
+        Path questOutput = Paths.get("data/descent2e/pcg/pcgquests_" + destination);
+        Files.write(questOutput,"[\n".getBytes());
+        Path fitnessOutput = Paths.get("data/descent2e/pcg/pcgscores_" + destination);
+        Files.write(questOutput,"[\n".getBytes());
+        int counter = 0;
+        int max = set.size();
+        for (Pair<Quest, GraphBoard> pair : set) {
+            counter++;
+            Quest quest = pair.a;
+            GraphBoard board = pair.b;
+
+            StringBuilder outputQ = new StringBuilder("{\"");
+
+            outputQ.append("id\":\"").append(quest.getName()).append("\"");
+            outputQ.append(",\"act\":\"").append(quest.getAct()).append("\"");
+            outputQ.append(",\"starting-gold\":\"").append(quest.getGold()).append("\"");
+            outputQ.append(",\"starting-xp\":\"").append(quest.getStartingXP()).append("\"");
+            outputQ.append(",\"traits\": [\"").append(String.join("\", \"", quest.getMonsterTraits())).append("\"]");
+            outputQ.append(",\"monsters\": [");
+            int monsterMax = quest.getMonsters().size();
+            int monsterCounter = 0;
+            for (String[] monster : quest.getMonsters()) {
+                monsterCounter++;
+                outputQ.append("[\"").append(monster[0]).append("\", \"").append(monster[1]).append("\"]");
+                if (monsterCounter < monsterMax)
+                    outputQ.append(",");
+                else
+                    outputQ.append("]");
+            }
+
+            outputQ.append(",\"tokens\": []");
+            outputQ.append(",\"rules\": []");
+            outputQ.append(",\"game-over\": [{" +
+                    "\"id\": \"CountGameOver\"," +
+                        "\"count\": {" +
+                        "\"type\": \"NFiguresAlive\"," +
+                        "\"figureNameContains\": \"Hero\"}," +
+                    "\"target\": 0," +
+                    "\"comparison-type\": \"Equal\"," +
+                    "\"result-heroes\": \"LOSE_GAME\"," +
+                    "\"result-overlord\": \"WIN_GAME\"" +
+                    "},{" +
+                    "\"id\": \"CountGameOver\"," +
+                        "\"count\": {" +
+                        "\"type\": \"NFiguresAlive\"," +
+                        "\"figureNameContains\": \"Monster\"}," +
+                    "\"target\": 0," +
+                    "\"comparison-type\": \"Equal\"," +
+                    "\"result-heroes\": \"WIN_GAME\"," +
+                    "\"result-overlord\": \"LOSE_GAME\"" +
+                    "}]");
+
+            outputQ.append(",\"common-rewards\": [{" +
+                    "\"rewardType\": \"Attribute\"," +
+                    "\"attribute\": \"XP\"," +
+                    "\"value\": 1.0" +
+                    "}]");
+            outputQ.append(",\"overlord-rewards\": [{" +
+                    "\"rewardType\": \"Attribute\"," +
+                    "\"attribute\": \"XP\"," +
+                    "\"value\": 1.0," +
+                    "\"mustWinToReceive\": true" +
+                    "}]");
+            outputQ.append(",\"boards\": [ \"").append(board.getComponentName()).append("\"]");
+            outputQ.append(",\"starting-tile\": \"").append(quest.getStartingTile()).append("\"");
+
+            outputQ.append("}");
+
+            Object q = mapper.readValue(outputQ.toString(), Object.class);
+            String prettyQ = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(q);
+
+            // --- BOARD ---
+
+            StringBuilder outputB = new StringBuilder("{");
+
+            outputB.append("\"type\": \"graph\",");
+            outputB.append("\"verticesKey\": \"name\",");
+            outputB.append("\"neighboursKey\": \"neighbours\",");
+            outputB.append("\"maxNeighbours\": -1,");
+            outputB.append("\"id\": \"").append(board.getComponentName()).append("\",");
+            outputB.append("\"nodes\": [");
+            int nodeCount = 0;
+            for (BoardNode node : board.getBoardNodes()) {
+                nodeCount++;
+
+                String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
+                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+
+                outputB.append("{ \"name\": [\"String\", \"").append(node.getComponentName()).append("\"],");
+                outputB.append("\"orientation\": [\"Integer\", ").append(node.getProperty("orientation")).append("],");
+                outputB.append("\"neighbours\": [\"String[]\", [");
+
+                int neighbourCount = 0;
+                for (String neighbour : neighbours) {
+                    neighbourCount++;
+                    outputB.append("\"").append(neighbour).append("\"");
+                    if (neighbourCount < neighbours.length)
+                        outputB.append(", ");
+                    else
+                        outputB.append("]],");
+                }
+                outputB.append("\"connections\": [\"String[]\", [");
+                neighbourCount = 0;
+                for (String connect : connections) {
+                    neighbourCount++;
+                    outputB.append("\"").append(connect).append("\"");
+                    if (neighbourCount < connections.length)
+                        outputB.append(", ");
+                    else
+                        outputB.append("]]}");
+                }
+                if (nodeCount < board.getBoardNodes().size())
+                    outputB.append(",");
+                else
+                    outputB.append("]}");
+            }
+
+
+            Object b = mapper.readValue(outputB.toString(), Object.class);
+            String prettyB = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(b);
+
+            if (counter < max) {
+                prettyQ += ",";
+                prettyB += ",";
+            }
+            else {
+                prettyQ  += "\n]";
+                prettyB += "\n]";
+                }
+
+            Files.writeString(questOutput,prettyQ + System.lineSeparator(),StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            Files.writeString(boardOutput,prettyB + System.lineSeparator(),StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        }
     }
 
     static void exportMAPElitesToJSON() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Path mapEliteOutput = Paths.get("data/descent2e/pcg/mapelites_size&groups.json");
+        Files.write(mapEliteOutput,"[\n".getBytes());
 
+        int counter = 0;
         int max = map_SizeVsGroups.size();
         for (Pair<Float, Float> key : map_SizeVsGroups.keySet()) {
             counter++;
@@ -136,6 +287,10 @@ public class GenerateBoards {
             Object o = mapper.readValue(output, Object.class);
             String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
             if (counter < max)
+                pretty += ",";
+            else
+                pretty  += "]";
+            Files.writeString(mapEliteOutput,pretty + System.lineSeparator(),StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         }
     }
 
@@ -394,6 +549,7 @@ public class GenerateBoards {
         int attempt = 0;
         while (freeNodes) {
             attempt++;
+            System.out.println("Attempt: " + attempt);
             freeNodes = false;
 
             finalNodes.clear();
@@ -413,7 +569,7 @@ public class GenerateBoards {
 
                 for (String neighbour : neighbours) {
                     if (neighbour.equals("null")) {
-                        freeNodes = true;
+                        //freeNodes = true;
                         break;
                     }
                 }
@@ -422,7 +578,7 @@ public class GenerateBoards {
 
                 for (String connection : connections) {
                     if (!positions.contains(connection)) {
-                        freeNodes = true;
+                        //freeNodes = true;
                         break;
                     }
                 }
@@ -432,7 +588,7 @@ public class GenerateBoards {
                 int expected = ((PropertyInt) Objects.requireNonNull(getTileByName(node.getComponentName())).getProperty(nodeHash)).value;
 
                 if (expected != neighbours.length || expected != connections.length) {
-                    freeNodes = true;
+                    //freeNodes = true;
                     break;
                 }
             }
