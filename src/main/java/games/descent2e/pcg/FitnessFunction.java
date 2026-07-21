@@ -26,7 +26,7 @@ import java.util.List;
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.connectionHash;
 import static games.descent2e.pcg.ControlVariables.*;
-import static games.descent2e.pcg.GenerateBoards.getTileByName;
+import static games.descent2e.pcg.GenerateBoards.*;
 import static utilities.Utils.getNeighbourhood;
 
 public class FitnessFunction {
@@ -82,6 +82,24 @@ public class FitnessFunction {
             }
         }
         return islands;
+    }
+
+    public static int freeEdges(GraphBoard board) {
+        int freeEdges = 0;
+
+        BoardNode[] nodes = board.getBoardNodeMap().values().toArray(new BoardNode[0]);
+        for (BoardNode node : nodes) {
+            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
+            for (String n : neighbours) {
+                if (n.equals("null"))
+                    freeEdges++;
+            }
+            int expected = ((PropertyInt) Objects.requireNonNull(getTileByName(node.getComponentName())).getProperty(nodeHash)).value;
+            if (neighbours.length != expected)
+                freeEdges += Math.max(expected - neighbours.length, 0);
+        }
+
+        return freeEdges;
     }
 
     static void addNeighbours(BoardNode n, List<String> tiles) {
@@ -270,7 +288,7 @@ public class FitnessFunction {
         return (float) (connections - errors) / connections;
     }
 
-    static float getMonsterHealth(Quest quest) {
+    static Pair<Float, Float> getMonsterHealth(Quest quest) {
         float monsterHealth = 0f;
         float totalMonsters = 0f;
 
@@ -308,10 +326,7 @@ public class FitnessFunction {
             }
         }
 
-
-        if (totalMonsters > 0)
-            monsterHealth = monsterHealth / totalMonsters;
-        return monsterHealth;
+        return new Pair<>(monsterHealth, totalMonsters);
     }
 
     static HashMap<String, Float> getFitness(Quest quest, GraphBoard board) {
@@ -320,8 +335,12 @@ public class FitnessFunction {
         // Connectedness
         float connected = connectedness(board);
 
+        float freeEdge = freeEdges(board);
+
         // Map Size
         float size = getBoardSize(board);
+
+        float tiles = (float) board.getBoardNodes().size();
 
         // Geometry
         Pair<int[][], Integer> result = createBoard(quest, board);
@@ -344,7 +363,11 @@ public class FitnessFunction {
         float groups = quest.getMonsters().size();
 
         // Monster Health
-        float health = getMonsterHealth(quest);
+        Pair<Float, Float> health = getMonsterHealth(quest);
+
+        float averageHealth = health.a;
+        if (health.b > 0)
+            averageHealth = health.a / health.b;
 
         // Map Complexity
         float complexity = 1f;
@@ -352,16 +375,24 @@ public class FitnessFunction {
         // Map Rules
         float rules = 1f;
 
+        scores.put("ID", (float) nowServing);
         scores.put("Connectedness", connected);
+        scores.put("Free Edges", freeEdge);
         scores.put("Geometry", geometry);
         scores.put("Repeats", repeats);
         scores.put("Spawning", spawning);
         scores.put("Consistency", consistency);
         scores.put("Size", size);
+        scores.put("Tile Count", tiles);
         scores.put("Groups", groups);
-        scores.put("Health", health);
+        scores.put("Monster Count", health.b);
+        scores.put("Health", averageHealth);
+        scores.put("Total Health", health.a);
         scores.put("Complexity", complexity);
         scores.put("Rules", rules);
+        scores.put("Act", (float) quest.getAct());
+        scores.put("XP", (float) quest.getStartingXP());
+        scores.put("Gold", (float) quest.getGold());
 
         float fitness = fitness(scores);
         scores.put("Fitness", fitness);
