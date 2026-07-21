@@ -1,3151 +1,3319 @@
 [
 {
+  "Size" : 306,
+  "Groups" : 3,
+  "ID" : 475,
+  "Fitness" : 7.118327,
+  "Feasible" : false
+},
+{
   "Size" : 184,
   "Groups" : 2,
-  "ID" : 625,
-  "Fitness" : 7.727193,
+  "ID" : 1308,
+  "Fitness" : 7.2179465,
   "Feasible" : false
 },
 {
   "Size" : 149,
   "Groups" : 3,
-  "ID" : 83,
-  "Fitness" : 7.8030076,
-  "Feasible" : false
-},
-{
-  "Size" : 123,
-  "Groups" : 2,
-  "ID" : 354,
-  "Fitness" : 7.1650333,
+  "ID" : 2365,
+  "Fitness" : 9.129351,
   "Feasible" : false
 },
 {
   "Size" : 182,
   "Groups" : 3,
-  "ID" : 1820,
-  "Fitness" : 7.81515,
+  "ID" : 324,
+  "Fitness" : 7.819338,
   "Feasible" : false
 },
 {
-  "Size" : 180,
+  "Size" : 123,
+  "Groups" : 2,
+  "ID" : 2364,
+  "Fitness" : 7.227907,
+  "Feasible" : false
+},
+{
+  "Size" : 243,
+  "Groups" : 7,
+  "ID" : 28,
+  "Fitness" : 6.777499,
+  "Feasible" : false
+},
+{
+  "Size" : 147,
   "Groups" : 4,
-  "ID" : 613,
-  "Fitness" : 7.9458447,
+  "ID" : 1526,
+  "Fitness" : 7.792508,
   "Feasible" : false
 },
 {
   "Size" : 122,
   "Groups" : 3,
-  "ID" : 2447,
-  "Fitness" : 7.753995,
+  "ID" : 451,
+  "Fitness" : 7.062659,
   "Feasible" : false
 },
 {
-  "Size" : 178,
-  "Groups" : 6,
-  "ID" : 166,
-  "Fitness" : 8.489872,
+  "Size" : 180,
+  "Groups" : 4,
+  "ID" : 2043,
+  "Fitness" : 7.8045545,
   "Feasible" : false
 },
 {
   "Size" : 210,
   "Groups" : 7,
-  "ID" : 292,
-  "Fitness" : 7.6192265,
+  "ID" : 26,
+  "Fitness" : 7.688231,
   "Feasible" : false
 },
 {
   "Size" : 292,
   "Groups" : 10,
-  "ID" : 323,
-  "Fitness" : 6.3657613,
+  "ID" : 196,
+  "Fitness" : 6.9950514,
   "Feasible" : false
 },
 {
-  "Size" : 120,
+  "Size" : 178,
   "Groups" : 6,
-  "ID" : 764,
-  "Fitness" : 7.933625,
+  "ID" : 429,
+  "Fitness" : 7.946163,
   "Feasible" : false
 },
 {
-  "Size" : 119,
-  "Groups" : 9,
-  "ID" : 60,
-  "Fitness" : 6.0759563,
+  "Size" : 121,
+  "Groups" : 4,
+  "ID" : 1847,
+  "Fitness" : 6.5158596,
+  "Feasible" : false
+},
+{
+  "Size" : 176,
+  "Groups" : 8,
+  "ID" : 194,
+  "Fitness" : 7.5264626,
+  "Feasible" : false
+},
+{
+  "Size" : 249,
+  "Groups" : 3,
+  "ID" : 468,
+  "Fitness" : 7.1890764,
+  "Feasible" : false
+},
+{
+  "Size" : 302,
+  "Groups" : 5,
+  "ID" : 421,
+  "Fitness" : 7.257129,
   "Feasible" : false
 },
 {
   "Size" : 152,
   "Groups" : 2,
-  "ID" : 1891,
-  "Fitness" : 7.5719233,
+  "ID" : 561,
+  "Fitness" : 9.223928,
+  "Feasible" : true
+},
+{
+  "Size" : 214,
+  "Groups" : 4,
+  "ID" : 212,
+  "Fitness" : 8.069945,
   "Feasible" : false
 },
 {
   "Size" : 150,
   "Groups" : 3,
-  "ID" : 2295,
-  "Fitness" : 9.474686,
+  "ID" : 278,
+  "Fitness" : 7.9663343,
+  "Feasible" : false
+},
+{
+  "Size" : 246,
+  "Groups" : 5,
+  "ID" : 305,
+  "Fitness" : 7.8241305,
+  "Feasible" : false
+},
+{
+  "Size" : 107,
+  "Groups" : 2,
+  "ID" : 1490,
+  "Fitness" : 9.025021,
   "Feasible" : true
 },
 {
   "Size" : 147,
   "Groups" : 5,
-  "ID" : 193,
-  "Fitness" : 7.8422976,
-  "Feasible" : false
-},
-{
-  "Size" : 106,
-  "Groups" : 3,
-  "ID" : 276,
-  "Fitness" : 9.234873,
-  "Feasible" : true
-},
-{
-  "Size" : 212,
-  "Groups" : 6,
-  "ID" : 115,
-  "Fitness" : 6.874612,
+  "ID" : 624,
+  "Fitness" : 8.344689,
   "Feasible" : false
 },
 {
   "Size" : 148,
   "Groups" : 4,
-  "ID" : 1957,
-  "Fitness" : 9.653105,
-  "Feasible" : true
-},
-{
-  "Size" : 180,
-  "Groups" : 5,
-  "ID" : 1376,
-  "Fitness" : 8.137644,
+  "ID" : 733,
+  "Fitness" : 9.227974,
   "Feasible" : false
 },
 {
-  "Size" : 210,
-  "Groups" : 8,
-  "ID" : 385,
-  "Fitness" : 8.054192,
+  "Size" : 212,
+  "Groups" : 6,
+  "ID" : 172,
+  "Fitness" : 7.7794266,
+  "Feasible" : false
+},
+{
+  "Size" : 106,
+  "Groups" : 3,
+  "ID" : 1106,
+  "Fitness" : 9.161011,
+  "Feasible" : true
+},
+{
+  "Size" : 244,
+  "Groups" : 7,
+  "ID" : 352,
+  "Fitness" : 7.7927585,
   "Feasible" : false
 },
 {
   "Size" : 178,
   "Groups" : 7,
-  "ID" : 436,
-  "Fitness" : 6.8020425,
+  "ID" : 112,
+  "Fitness" : 7.8513203,
+  "Feasible" : false
+},
+{
+  "Size" : 210,
+  "Groups" : 8,
+  "ID" : 326,
+  "Fitness" : 7.6193566,
+  "Feasible" : false
+},
+{
+  "Size" : 121,
+  "Groups" : 5,
+  "ID" : 768,
+  "Fitness" : 9.427357,
+  "Feasible" : false
+},
+{
+  "Size" : 144,
+  "Groups" : 8,
+  "ID" : 234,
+  "Fitness" : 6.5878706,
   "Feasible" : false
 },
 {
   "Size" : 176,
   "Groups" : 10,
-  "ID" : 253,
-  "Fitness" : 6.8900843,
+  "ID" : 491,
+  "Fitness" : 6.8371406,
   "Feasible" : false
 },
 {
-  "Size" : 182,
-  "Groups" : 2,
-  "ID" : 2198,
-  "Fitness" : 7.6115165,
+  "Size" : 243,
+  "Groups" : 5,
+  "ID" : 87,
+  "Fitness" : 7.2727947,
+  "Feasible" : false
+},
+{
+  "Size" : 147,
+  "Groups" : 3,
+  "ID" : 599,
+  "Fitness" : 7.9637437,
+  "Feasible" : false
+},
+{
+  "Size" : 294,
+  "Groups" : 6,
+  "ID" : 275,
+  "Fitness" : 8.686349,
   "Feasible" : false
 },
 {
   "Size" : 122,
   "Groups" : 2,
-  "ID" : 2443,
-  "Fitness" : 7.503468,
+  "ID" : 445,
+  "Fitness" : 7.2026052,
   "Feasible" : false
 },
 {
-  "Size" : 180,
-  "Groups" : 3,
-  "ID" : 1310,
-  "Fitness" : 8.664646,
+  "Size" : 241,
+  "Groups" : 7,
+  "ID" : 116,
+  "Fitness" : 6.8540993,
   "Feasible" : false
 },
 {
-  "Size" : 209,
-  "Groups" : 6,
-  "ID" : 394,
-  "Fitness" : 9.013897,
+  "Size" : 210,
+  "Groups" : 5,
+  "ID" : 203,
+  "Fitness" : 8.687697,
   "Feasible" : false
 },
 {
   "Size" : 178,
   "Groups" : 4,
-  "ID" : 642,
-  "Fitness" : 8.580343,
+  "ID" : 381,
+  "Fitness" : 7.5103936,
   "Feasible" : false
 },
 {
-  "Size" : 242,
-  "Groups" : 6,
-  "ID" : 57,
-  "Fitness" : 7.2075415,
+  "Size" : 121,
+  "Groups" : 3,
+  "ID" : 626,
+  "Fitness" : 8.896835,
   "Feasible" : false
 },
 {
   "Size" : 143,
   "Groups" : 6,
-  "ID" : 100,
-  "Fitness" : 9.436598,
+  "ID" : 762,
+  "Fitness" : 7.7834606,
   "Feasible" : false
 },
 {
   "Size" : 176,
   "Groups" : 6,
-  "ID" : 66,
-  "Fitness" : 8.48828,
-  "Feasible" : false
-},
-{
-  "Size" : 144,
-  "Groups" : 5,
-  "ID" : 143,
-  "Fitness" : 8.371137,
-  "Feasible" : false
-},
-{
-  "Size" : 120,
-  "Groups" : 4,
-  "ID" : 337,
-  "Fitness" : 7.8128023,
+  "ID" : 92,
+  "Fitness" : 8.135588,
   "Feasible" : false
 },
 {
   "Size" : 208,
   "Groups" : 7,
-  "ID" : 438,
-  "Fitness" : 6.9372177,
+  "ID" : 322,
+  "Fitness" : 7.2844753,
   "Feasible" : false
 },
 {
-  "Size" : 118,
+  "Size" : 240,
   "Groups" : 8,
-  "ID" : 358,
-  "Fitness" : 7.787545,
+  "ID" : 427,
+  "Fitness" : 6.9848332,
   "Feasible" : false
 },
 {
-  "Size" : 118,
-  "Groups" : 9,
-  "ID" : 310,
-  "Fitness" : 6.069932,
+  "Size" : 142,
+  "Groups" : 7,
+  "ID" : 331,
+  "Fitness" : 6.4582357,
   "Feasible" : false
 },
 {
   "Size" : 150,
   "Groups" : 2,
-  "ID" : 1505,
-  "Fitness" : 9.240263,
-  "Feasible" : true
-},
-{
-  "Size" : 214,
-  "Groups" : 3,
-  "ID" : 2097,
-  "Fitness" : 7.100769,
+  "ID" : 504,
+  "Fitness" : 7.3620954,
   "Feasible" : false
 },
 {
   "Size" : 243,
   "Groups" : 6,
-  "ID" : 442,
-  "Fitness" : 7.2252417,
+  "ID" : 417,
+  "Fitness" : 7.1797194,
+  "Feasible" : false
+},
+{
+  "Size" : 179,
+  "Groups" : 4,
+  "ID" : 499,
+  "Fitness" : 9.512989,
+  "Feasible" : false
+},
+{
+  "Size" : 106,
+  "Groups" : 2,
+  "ID" : 359,
+  "Fitness" : 8.60622,
+  "Feasible" : true
+},
+{
+  "Size" : 148,
+  "Groups" : 3,
+  "ID" : 1444,
+  "Fitness" : 7.7471066,
   "Feasible" : false
 },
 {
   "Size" : 212,
   "Groups" : 4,
-  "ID" : 141,
-  "Fitness" : 7.299184,
+  "ID" : 1310,
+  "Fitness" : 6.975309,
   "Feasible" : false
-},
-{
-  "Size" : 148,
-  "Groups" : 3,
-  "ID" : 1958,
-  "Fitness" : 9.462637,
-  "Feasible" : true
-},
-{
-  "Size" : 106,
-  "Groups" : 2,
-  "ID" : 2404,
-  "Fitness" : 9.018997,
-  "Feasible" : true
 },
 {
   "Size" : 210,
   "Groups" : 6,
-  "ID" : 222,
-  "Fitness" : 7.6810694,
+  "ID" : 37,
+  "Fitness" : 7.150509,
   "Feasible" : false
 },
 {
-  "Size" : 178,
-  "Groups" : 5,
-  "ID" : 519,
-  "Fitness" : 7.7690153,
+  "Size" : 146,
+  "Groups" : 4,
+  "ID" : 1849,
+  "Fitness" : 6.3449693,
   "Feasible" : false
 },
 {
   "Size" : 208,
   "Groups" : 8,
-  "ID" : 107,
-  "Fitness" : 7.010912,
+  "ID" : 403,
+  "Fitness" : 7.2103696,
   "Feasible" : false
 },
 {
   "Size" : 176,
   "Groups" : 7,
-  "ID" : 206,
-  "Fitness" : 7.870963,
+  "ID" : 267,
+  "Fitness" : 8.405483,
   "Feasible" : false
-},
-{
-  "Size" : 120,
-  "Groups" : 5,
-  "ID" : 2008,
-  "Fitness" : 9.635212,
-  "Feasible" : true
 },
 {
   "Size" : 144,
   "Groups" : 6,
-  "ID" : 1486,
-  "Fitness" : 7.971663,
-  "Feasible" : false
-},
-{
-  "Size" : 142,
-  "Groups" : 8,
-  "ID" : 346,
-  "Fitness" : 6.611037,
-  "Feasible" : false
-},
-{
-  "Size" : 309,
-  "Groups" : 2,
-  "ID" : 325,
-  "Fitness" : 7.0349345,
+  "ID" : 313,
+  "Fitness" : 7.8140097,
   "Feasible" : false
 },
 {
   "Size" : 171,
   "Groups" : 9,
-  "ID" : 405,
-  "Fitness" : 7.441929,
+  "ID" : 321,
+  "Fitness" : 7.3672943,
   "Feasible" : false
 },
 {
-  "Size" : 180,
-  "Groups" : 2,
-  "ID" : 583,
-  "Fitness" : 7.0841775,
+  "Size" : 241,
+  "Groups" : 5,
+  "ID" : 432,
+  "Fitness" : 7.9017105,
   "Feasible" : false
 },
 {
   "Size" : 145,
   "Groups" : 3,
-  "ID" : 52,
-  "Fitness" : 7.3466134,
+  "ID" : 1497,
+  "Fitness" : 7.3850293,
   "Feasible" : false
 },
 {
-  "Size" : 290,
-  "Groups" : 6,
-  "ID" : 126,
-  "Fitness" : 7.118537,
-  "Feasible" : false
-},
-{
-  "Size" : 241,
-  "Groups" : 5,
-  "ID" : 296,
-  "Fitness" : 7.457871,
-  "Feasible" : false
-},
-{
-  "Size" : 178,
-  "Groups" : 3,
-  "ID" : 2176,
-  "Fitness" : 7.8506336,
-  "Feasible" : false
-},
-{
-  "Size" : 176,
+  "Size" : 242,
   "Groups" : 4,
-  "ID" : 41,
-  "Fitness" : 8.409972,
+  "ID" : 233,
+  "Fitness" : 7.41469,
+  "Feasible" : false
+},
+{
+  "Size" : 121,
+  "Groups" : 2,
+  "ID" : 2362,
+  "Fitness" : 6.644867,
+  "Feasible" : false
+},
+{
+  "Size" : 143,
+  "Groups" : 4,
+  "ID" : 1619,
+  "Fitness" : 8.081064,
+  "Feasible" : false
+},
+{
+  "Size" : 175,
+  "Groups" : 5,
+  "ID" : 1802,
+  "Fitness" : 8.222047,
   "Feasible" : false
 },
 {
   "Size" : 120,
   "Groups" : 3,
-  "ID" : 40,
-  "Fitness" : 7.6305947,
+  "ID" : 88,
+  "Fitness" : 7.1312165,
+  "Feasible" : false
+},
+{
+  "Size" : 208,
+  "Groups" : 5,
+  "ID" : 253,
+  "Fitness" : 7.8514676,
+  "Feasible" : false
+},
+{
+  "Size" : 176,
+  "Groups" : 4,
+  "ID" : 244,
+  "Fitness" : 8.510512,
   "Feasible" : false
 },
 {
   "Size" : 174,
   "Groups" : 6,
-  "ID" : 109,
-  "Fitness" : 8.610341,
+  "ID" : 56,
+  "Fitness" : 7.7639685,
   "Feasible" : false
 },
 {
-  "Size" : 238,
-  "Groups" : 8,
-  "ID" : 234,
-  "Fitness" : 5.8974447,
-  "Feasible" : false
-},
-{
-  "Size" : 142,
-  "Groups" : 5,
-  "ID" : 2010,
-  "Fitness" : 8.101075,
-  "Feasible" : false
-},
-{
-  "Size" : 140,
-  "Groups" : 7,
-  "ID" : 138,
-  "Fitness" : 8.195112,
+  "Size" : 119,
+  "Groups" : 4,
+  "ID" : 1616,
+  "Fitness" : 7.999173,
   "Feasible" : false
 },
 {
   "Size" : 172,
   "Groups" : 8,
-  "ID" : 465,
-  "Fitness" : 7.5489464,
+  "ID" : 86,
+  "Fitness" : 7.745884,
+  "Feasible" : false
+},
+{
+  "Size" : 140,
+  "Groups" : 7,
+  "ID" : 286,
+  "Fitness" : 7.7449,
   "Feasible" : false
 },
 {
   "Size" : 118,
   "Groups" : 6,
-  "ID" : 1488,
-  "Fitness" : 7.928224,
+  "ID" : 410,
+  "Fitness" : 8.03771,
   "Feasible" : false
 },
 {
-  "Size" : 117,
-  "Groups" : 8,
-  "ID" : 49,
-  "Fitness" : 6.4916406,
-  "Feasible" : false
-},
-{
-  "Size" : 245,
-  "Groups" : 3,
-  "ID" : 208,
-  "Fitness" : 7.106161,
-  "Feasible" : false
-},
-{
-  "Size" : 214,
-  "Groups" : 2,
-  "ID" : 618,
-  "Fitness" : 7.129094,
+  "Size" : 243,
+  "Groups" : 4,
+  "ID" : 270,
+  "Fitness" : 8.776648,
   "Feasible" : false
 },
 {
   "Size" : 148,
   "Groups" : 2,
-  "ID" : 2126,
-  "Fitness" : 7.772009,
-  "Feasible" : false
-},
-{
-  "Size" : 212,
-  "Groups" : 3,
-  "ID" : 2308,
-  "Fitness" : 6.456634,
+  "ID" : 2191,
+  "Fitness" : 8.8930645,
   "Feasible" : false
 },
 {
   "Size" : 241,
   "Groups" : 6,
-  "ID" : 34,
-  "Fitness" : 6.8236594,
-  "Feasible" : false
-},
-{
-  "Size" : 146,
-  "Groups" : 3,
-  "ID" : 231,
-  "Fitness" : 8.947935,
+  "ID" : 27,
+  "Fitness" : 7.8181076,
   "Feasible" : false
 },
 {
   "Size" : 210,
   "Groups" : 4,
-  "ID" : 923,
-  "Fitness" : 6.817278,
+  "ID" : 125,
+  "Fitness" : 7.7384086,
+  "Feasible" : false
+},
+{
+  "Size" : 143,
+  "Groups" : 5,
+  "ID" : 198,
+  "Fitness" : 8.548349,
   "Feasible" : false
 },
 {
   "Size" : 239,
   "Groups" : 8,
-  "ID" : 467,
-  "Fitness" : 7.330708,
-  "Feasible" : false
-},
-{
-  "Size" : 144,
-  "Groups" : 4,
-  "ID" : 2271,
-  "Fitness" : 8.129008,
-  "Feasible" : false
-},
-{
-  "Size" : 176,
-  "Groups" : 5,
-  "ID" : 256,
-  "Fitness" : 8.758305,
+  "ID" : 227,
+  "Fitness" : 7.158924,
   "Feasible" : false
 },
 {
   "Size" : 208,
   "Groups" : 6,
-  "ID" : 470,
-  "Fitness" : 7.383018,
-  "Feasible" : false
-},
-{
-  "Size" : 142,
-  "Groups" : 6,
-  "ID" : 2005,
-  "Fitness" : 8.525843,
-  "Feasible" : true
-},
-{
-  "Size" : 178,
-  "Groups" : 2,
-  "ID" : 529,
-  "Fitness" : 7.3727655,
-  "Feasible" : false
-},
-{
-  "Size" : 288,
-  "Groups" : 5,
-  "ID" : 368,
-  "Fitness" : 7.5546284,
-  "Feasible" : false
-},
-{
-  "Size" : 240,
-  "Groups" : 4,
-  "ID" : 380,
-  "Fitness" : 8.120972,
+  "ID" : 89,
+  "Fitness" : 7.367906,
   "Feasible" : false
 },
 {
   "Size" : 176,
+  "Groups" : 5,
+  "ID" : 414,
+  "Fitness" : 8.872477,
+  "Feasible" : false
+},
+{
+  "Size" : 119,
+  "Groups" : 5,
+  "ID" : 1096,
+  "Fitness" : 6.7616696,
+  "Feasible" : false
+},
+{
+  "Size" : 139,
+  "Groups" : 10,
+  "ID" : 163,
+  "Fitness" : 7.3774085,
+  "Feasible" : false
+},
+{
+  "Size" : 281,
+  "Groups" : 8,
+  "ID" : 124,
+  "Fitness" : 6.560805,
+  "Feasible" : false
+},
+{
+  "Size" : 178,
+  "Groups" : 2,
+  "ID" : 201,
+  "Fitness" : 7.486502,
+  "Feasible" : false
+},
+{
+  "Size" : 242,
   "Groups" : 3,
-  "ID" : 1410,
-  "Fitness" : 8.680046,
+  "ID" : 444,
+  "Fitness" : 7.393491,
+  "Feasible" : false
+},
+{
+  "Size" : 143,
+  "Groups" : 3,
+  "ID" : 1635,
+  "Fitness" : 7.815669,
   "Feasible" : false
 },
 {
   "Size" : 120,
   "Groups" : 2,
-  "ID" : 1733,
-  "Fitness" : 7.547376,
+  "ID" : 143,
+  "Fitness" : 6.994014,
   "Feasible" : false
 },
 {
-  "Size" : 141,
-  "Groups" : 4,
-  "ID" : 96,
-  "Fitness" : 7.5495725,
+  "Size" : 176,
+  "Groups" : 3,
+  "ID" : 1267,
+  "Fitness" : 7.8806067,
   "Feasible" : false
 },
 {
-  "Size" : 174,
-  "Groups" : 4,
-  "ID" : 512,
-  "Fitness" : 9.286861,
+  "Size" : 205,
+  "Groups" : 6,
+  "ID" : 126,
+  "Fitness" : 8.212429,
+  "Feasible" : false
+},
+{
+  "Size" : 282,
+  "Groups" : 8,
+  "ID" : 328,
+  "Fitness" : 6.922236,
   "Feasible" : false
 },
 {
   "Size" : 119,
   "Groups" : 3,
-  "ID" : 290,
-  "Fitness" : 7.5619287,
+  "ID" : 293,
+  "Fitness" : 7.742977,
   "Feasible" : false
 },
 {
-  "Size" : 206,
-  "Groups" : 5,
-  "ID" : 431,
-  "Fitness" : 7.584554,
-  "Feasible" : false
-},
-{
-  "Size" : 204,
-  "Groups" : 7,
-  "ID" : 43,
-  "Fitness" : 7.828985,
-  "Feasible" : false
-},
-{
-  "Size" : 118,
+  "Size" : 174,
   "Groups" : 4,
-  "ID" : 773,
-  "Fitness" : 9.498199,
-  "Feasible" : true
+  "ID" : 428,
+  "Fitness" : 7.955276,
+  "Feasible" : false
+},
+{
+  "Size" : 171,
+  "Groups" : 7,
+  "ID" : 117,
+  "Fitness" : 7.3714066,
+  "Feasible" : false
 },
 {
   "Size" : 172,
   "Groups" : 6,
-  "ID" : 188,
-  "Fitness" : 7.85935,
-  "Feasible" : false
-},
-{
-  "Size" : 236,
-  "Groups" : 8,
-  "ID" : 226,
-  "Fitness" : 7.023708,
+  "ID" : 568,
+  "Fitness" : 7.957729,
   "Feasible" : false
 },
 {
   "Size" : 140,
   "Groups" : 5,
-  "ID" : 1273,
-  "Fitness" : 9.7192,
+  "ID" : 802,
+  "Fitness" : 7.730801,
   "Feasible" : false
 },
 {
-  "Size" : 117,
-  "Groups" : 6,
-  "ID" : 142,
-  "Fitness" : 7.670618,
-  "Feasible" : false
-},
-{
-  "Size" : 138,
-  "Groups" : 7,
-  "ID" : 221,
-  "Fitness" : 8.389227,
+  "Size" : 137,
+  "Groups" : 8,
+  "ID" : 953,
+  "Fitness" : 6.05816,
   "Feasible" : false
 },
 {
   "Size" : 170,
   "Groups" : 8,
-  "ID" : 487,
-  "Fitness" : 7.872244,
+  "ID" : 186,
+  "Fitness" : 7.7605677,
   "Feasible" : false
 },
 {
-  "Size" : 282,
-  "Groups" : 9,
-  "ID" : 478,
-  "Fitness" : 6.5207586,
+  "Size" : 117,
+  "Groups" : 6,
+  "ID" : 1028,
+  "Fitness" : 6.9914517,
   "Feasible" : false
 },
 {
-  "Size" : 137,
-  "Groups" : 9,
-  "ID" : 288,
-  "Fitness" : 6.318363,
-  "Feasible" : false
-},
-{
-  "Size" : 243,
-  "Groups" : 3,
-  "ID" : 374,
-  "Fitness" : 7.3215013,
-  "Feasible" : false
-},
-{
-  "Size" : 146,
+  "Size" : 179,
   "Groups" : 2,
-  "ID" : 6,
-  "Fitness" : 6.7035875,
+  "ID" : 1309,
+  "Fitness" : 7.484734,
   "Feasible" : false
 },
 {
-  "Size" : 210,
+  "Size" : 177,
   "Groups" : 3,
-  "ID" : 291,
-  "Fitness" : 7.5143266,
+  "ID" : 46,
+  "Fitness" : 8.459085,
+  "Feasible" : false
+},
+{
+  "Size" : 241,
+  "Groups" : 4,
+  "ID" : 226,
+  "Fitness" : 7.9546447,
+  "Feasible" : false
+},
+{
+  "Size" : 286,
+  "Groups" : 7,
+  "ID" : 38,
+  "Fitness" : 6.5682106,
+  "Feasible" : false
+},
+{
+  "Size" : 239,
+  "Groups" : 6,
+  "ID" : 214,
+  "Fitness" : 8.091442,
   "Feasible" : false
 },
 {
   "Size" : 208,
   "Groups" : 4,
-  "ID" : 279,
-  "Fitness" : 7.7430234,
-  "Feasible" : false
-},
-{
-  "Size" : 144,
-  "Groups" : 3,
-  "ID" : 1732,
-  "Fitness" : 7.8645844,
-  "Feasible" : false
-},
-{
-  "Size" : 173,
-  "Groups" : 6,
-  "ID" : 27,
-  "Fitness" : 7.847421,
+  "ID" : 255,
+  "Fitness" : 8.48726,
   "Feasible" : false
 },
 {
   "Size" : 282,
   "Groups" : 10,
-  "ID" : 32,
-  "Fitness" : 6.956621,
-  "Feasible" : false
-},
-{
-  "Size" : 205,
-  "Groups" : 7,
-  "ID" : 84,
-  "Fitness" : 7.3800387,
+  "ID" : 41,
+  "Fitness" : 6.690684,
   "Feasible" : false
 },
 {
   "Size" : 141,
   "Groups" : 5,
-  "ID" : 392,
-  "Fitness" : 9.466555,
+  "ID" : 246,
+  "Fitness" : 8.060122,
+  "Feasible" : false
+},
+{
+  "Size" : 206,
+  "Groups" : 6,
+  "ID" : 44,
+  "Fitness" : 7.9334598,
   "Feasible" : false
 },
 {
   "Size" : 238,
   "Groups" : 7,
-  "ID" : 93,
-  "Fitness" : 7.321924,
+  "ID" : 218,
+  "Fitness" : 7.864123,
   "Feasible" : false
 },
 {
   "Size" : 174,
   "Groups" : 5,
-  "ID" : 906,
-  "Fitness" : 9.142486,
+  "ID" : 497,
+  "Fitness" : 8.744844,
   "Feasible" : false
 },
 {
   "Size" : 142,
   "Groups" : 4,
-  "ID" : 1715,
-  "Fitness" : 9.557935,
+  "ID" : 1738,
+  "Fitness" : 7.64176,
+  "Feasible" : false
+},
+{
+  "Size" : 172,
+  "Groups" : 7,
+  "ID" : 97,
+  "Fitness" : 7.8206544,
+  "Feasible" : false
+},
+{
+  "Size" : 140,
+  "Groups" : 6,
+  "ID" : 744,
+  "Fitness" : 7.8381658,
   "Feasible" : false
 },
 {
   "Size" : 118,
   "Groups" : 5,
-  "ID" : 1084,
-  "Fitness" : 9.64647,
-  "Feasible" : true
-},
-{
-  "Size" : 140,
-  "Groups" : 6,
-  "ID" : 1531,
-  "Fitness" : 7.810754,
+  "ID" : 2285,
+  "Fitness" : 6.7837753,
   "Feasible" : false
 },
 {
-  "Size" : 176,
-  "Groups" : 2,
-  "ID" : 2307,
-  "Fitness" : 7.549114,
+  "Size" : 117,
+  "Groups" : 7,
+  "ID" : 1491,
+  "Fitness" : 8.177018,
   "Feasible" : false
 },
 {
-  "Size" : 237,
-  "Groups" : 5,
-  "ID" : 475,
-  "Fitness" : 7.5880985,
+  "Size" : 138,
+  "Groups" : 8,
+  "ID" : 565,
+  "Fitness" : 6.6067595,
   "Feasible" : false
 },
 {
-  "Size" : 119,
-  "Groups" : 2,
-  "ID" : 42,
-  "Fitness" : 6.493571,
+  "Size" : 141,
+  "Groups" : 3,
+  "ID" : 102,
+  "Fitness" : 9.12443,
+  "Feasible" : false
+},
+{
+  "Size" : 205,
+  "Groups" : 4,
+  "ID" : 422,
+  "Fitness" : 7.5209923,
   "Feasible" : false
 },
 {
   "Size" : 174,
   "Groups" : 3,
-  "ID" : 560,
-  "Fitness" : 9.0108,
+  "ID" : 1686,
+  "Fitness" : 7.441173,
   "Feasible" : false
 },
 {
-  "Size" : 139,
-  "Groups" : 4,
-  "ID" : 410,
-  "Fitness" : 7.906429,
-  "Feasible" : false
-},
-{
-  "Size" : 172,
-  "Groups" : 4,
-  "ID" : 388,
-  "Fitness" : 8.482363,
+  "Size" : 171,
+  "Groups" : 5,
+  "ID" : 1807,
+  "Fitness" : 7.278896,
   "Feasible" : false
 },
 {
   "Size" : 118,
   "Groups" : 3,
-  "ID" : 1075,
-  "Fitness" : 9.179372,
+  "ID" : 376,
+  "Fitness" : 8.065271,
   "Feasible" : true
+},
+{
+  "Size" : 172,
+  "Groups" : 4,
+  "ID" : 1483,
+  "Fitness" : 7.83267,
+  "Feasible" : false
 },
 {
   "Size" : 204,
   "Groups" : 5,
-  "ID" : 671,
-  "Fitness" : 7.847785,
+  "ID" : 356,
+  "Fitness" : 8.667588,
   "Feasible" : false
 },
 {
-  "Size" : 138,
-  "Groups" : 5,
-  "ID" : 195,
-  "Fitness" : 7.6942487,
+  "Size" : 137,
+  "Groups" : 6,
+  "ID" : 1979,
+  "Fitness" : 6.475589,
+  "Feasible" : false
+},
+{
+  "Size" : 202,
+  "Groups" : 7,
+  "ID" : 442,
+  "Fitness" : 7.1880946,
   "Feasible" : false
 },
 {
   "Size" : 117,
   "Groups" : 4,
-  "ID" : 218,
-  "Fitness" : 7.921094,
-  "Feasible" : false
+  "ID" : 1162,
+  "Fitness" : 9.176481,
+  "Feasible" : true
 },
 {
-  "Size" : 234,
+  "Size" : 135,
   "Groups" : 8,
-  "ID" : 319,
-  "Fitness" : 7.5422316,
+  "ID" : 120,
+  "Fitness" : 7.682249,
   "Feasible" : false
 },
 {
-  "Size" : 170,
+  "Size" : 116,
   "Groups" : 6,
-  "ID" : 1597,
-  "Fitness" : 6.88062,
+  "ID" : 40,
+  "Fitness" : 6.308156,
+  "Feasible" : false
+},
+{
+  "Size" : 200,
+  "Groups" : 10,
+  "ID" : 477,
+  "Fitness" : 6.439086,
   "Feasible" : false
 },
 {
   "Size" : 136,
   "Groups" : 7,
-  "ID" : 15,
-  "Fitness" : 6.561377,
+  "ID" : 506,
+  "Fitness" : 8.211887,
   "Feasible" : false
 },
 {
   "Size" : 241,
   "Groups" : 3,
-  "ID" : 68,
-  "Fitness" : 7.272854,
+  "ID" : 361,
+  "Fitness" : 7.0040784,
   "Feasible" : false
 },
 {
-  "Size" : 210,
-  "Groups" : 2,
-  "ID" : 61,
-  "Fitness" : 7.2026052,
-  "Feasible" : false
-},
-{
-  "Size" : 208,
+  "Size" : 175,
   "Groups" : 3,
-  "ID" : 1325,
-  "Fitness" : 7.2761645,
+  "ID" : 155,
+  "Fitness" : 7.6799097,
+  "Feasible" : false
+},
+{
+  "Size" : 239,
+  "Groups" : 4,
+  "ID" : 165,
+  "Fitness" : 7.427964,
+  "Feasible" : false
+},
+{
+  "Size" : 144,
+  "Groups" : 2,
+  "ID" : 395,
+  "Fitness" : 8.777052,
+  "Feasible" : false
+},
+{
+  "Size" : 173,
+  "Groups" : 4,
+  "ID" : 992,
+  "Fitness" : 8.109543,
   "Feasible" : false
 },
 {
   "Size" : 142,
   "Groups" : 3,
-  "ID" : 964,
-  "Fitness" : 9.180064,
-  "Feasible" : true
-},
-{
-  "Size" : 238,
-  "Groups" : 5,
-  "ID" : 185,
-  "Fitness" : 7.179023,
+  "ID" : 2193,
+  "Fitness" : 9.159601,
   "Feasible" : false
 },
 {
   "Size" : 206,
   "Groups" : 4,
-  "ID" : 2160,
-  "Fitness" : 7.8640895,
+  "ID" : 493,
+  "Fitness" : 8.36796,
+  "Feasible" : false
+},
+{
+  "Size" : 139,
+  "Groups" : 5,
+  "ID" : 274,
+  "Fitness" : 8.290108,
+  "Feasible" : false
+},
+{
+  "Size" : 203,
+  "Groups" : 7,
+  "ID" : 437,
+  "Fitness" : 7.512141,
+  "Feasible" : false
+},
+{
+  "Size" : 171,
+  "Groups" : 6,
+  "ID" : 2370,
+  "Fitness" : 7.8029585,
   "Feasible" : false
 },
 {
   "Size" : 172,
   "Groups" : 5,
-  "ID" : 156,
-  "Fitness" : 7.730695,
+  "ID" : 245,
+  "Fitness" : 8.262354,
   "Feasible" : false
 },
 {
   "Size" : 140,
   "Groups" : 4,
-  "ID" : 1711,
-  "Fitness" : 9.564808,
+  "ID" : 750,
+  "Fitness" : 7.9277234,
   "Feasible" : false
 },
 {
-  "Size" : 204,
+  "Size" : 169,
+  "Groups" : 8,
+  "ID" : 260,
+  "Fitness" : 7.7045107,
+  "Feasible" : false
+},
+{
+  "Size" : 137,
+  "Groups" : 7,
+  "ID" : 2361,
+  "Fitness" : 6.2916903,
+  "Feasible" : false
+},
+{
+  "Size" : 138,
   "Groups" : 6,
-  "ID" : 216,
-  "Fitness" : 8.329451,
+  "ID" : 408,
+  "Fitness" : 8.068928,
   "Feasible" : false
 },
 {
-  "Size" : 238,
-  "Groups" : 3,
-  "ID" : 191,
-  "Fitness" : 7.211556,
+  "Size" : 117,
+  "Groups" : 5,
+  "ID" : 1164,
+  "Fitness" : 7.943757,
+  "Feasible" : false
+},
+{
+  "Size" : 277,
+  "Groups" : 6,
+  "ID" : 101,
+  "Fitness" : 7.7033873,
+  "Feasible" : false
+},
+{
+  "Size" : 165,
+  "Groups" : 9,
+  "ID" : 10,
+  "Fitness" : 6.892538,
+  "Feasible" : false
+},
+{
+  "Size" : 141,
+  "Groups" : 2,
+  "ID" : 1614,
+  "Fitness" : 9.203076,
   "Feasible" : false
 },
 {
   "Size" : 174,
   "Groups" : 2,
-  "ID" : 266,
-  "Fitness" : 8.74195,
+  "ID" : 357,
+  "Fitness" : 7.5151634,
   "Feasible" : false
 },
 {
-  "Size" : 118,
-  "Groups" : 2,
-  "ID" : 1367,
-  "Fitness" : 9.090067,
-  "Feasible" : true
-},
-{
-  "Size" : 172,
+  "Size" : 238,
   "Groups" : 3,
-  "ID" : 1039,
-  "Fitness" : 7.7435336,
+  "ID" : 385,
+  "Fitness" : 7.481989,
   "Feasible" : false
 },
 {
-  "Size" : 170,
-  "Groups" : 4,
-  "ID" : 70,
-  "Fitness" : 7.731201,
-  "Feasible" : false
-},
-{
-  "Size" : 234,
+  "Size" : 278,
   "Groups" : 6,
-  "ID" : 127,
-  "Fitness" : 7.374209,
+  "ID" : 136,
+  "Fitness" : 7.920964,
+  "Feasible" : false
+},
+{
+  "Size" : 139,
+  "Groups" : 3,
+  "ID" : 2274,
+  "Fitness" : 7.7622814,
+  "Feasible" : false
+},
+{
+  "Size" : 280,
+  "Groups" : 5,
+  "ID" : 407,
+  "Fitness" : 7.3602877,
+  "Feasible" : false
+},
+{
+  "Size" : 137,
+  "Groups" : 4,
+  "ID" : 1638,
+  "Fitness" : 7.5833697,
+  "Feasible" : false
+},
+{
+  "Size" : 274,
+  "Groups" : 8,
+  "ID" : 271,
+  "Fitness" : 6.6821637,
+  "Feasible" : false
+},
+{
+  "Size" : 169,
+  "Groups" : 5,
+  "ID" : 682,
+  "Fitness" : 8.0349865,
   "Feasible" : false
 },
 {
   "Size" : 117,
   "Groups" : 3,
-  "ID" : 257,
-  "Fitness" : 7.6356225,
+  "ID" : 20,
+  "Fitness" : 9.302289,
+  "Feasible" : true
+},
+{
+  "Size" : 170,
+  "Groups" : 4,
+  "ID" : 884,
+  "Fitness" : 7.9827557,
   "Feasible" : false
 },
 {
-  "Size" : 202,
-  "Groups" : 5,
-  "ID" : 1782,
-  "Fitness" : 7.0166216,
-  "Feasible" : false
-},
-{
-  "Size" : 168,
+  "Size" : 135,
   "Groups" : 6,
-  "ID" : 204,
-  "Fitness" : 8.00111,
+  "ID" : 61,
+  "Fitness" : 8.354416,
+  "Feasible" : false
+},
+{
+  "Size" : 232,
+  "Groups" : 8,
+  "ID" : 306,
+  "Fitness" : 7.162714,
+  "Feasible" : false
+},
+{
+  "Size" : 200,
+  "Groups" : 7,
+  "ID" : 71,
+  "Fitness" : 7.3211,
   "Feasible" : false
 },
 {
   "Size" : 136,
   "Groups" : 5,
-  "ID" : 212,
-  "Fitness" : 8.252224,
+  "ID" : 138,
+  "Fitness" : 7.002223,
   "Feasible" : false
 },
 {
-  "Size" : 116,
-  "Groups" : 4,
-  "ID" : 2069,
-  "Fitness" : 7.639367,
+  "Size" : 168,
+  "Groups" : 6,
+  "ID" : 162,
+  "Fitness" : 7.93806,
+  "Feasible" : false
+},
+{
+  "Size" : 133,
+  "Groups" : 8,
+  "ID" : 888,
+  "Fitness" : 6.2703657,
+  "Feasible" : false
+},
+{
+  "Size" : 134,
+  "Groups" : 7,
+  "ID" : 742,
+  "Fitness" : 6.6668553,
   "Feasible" : false
 },
 {
   "Size" : 166,
   "Groups" : 8,
-  "ID" : 389,
-  "Fitness" : 7.3042693,
-  "Feasible" : false
-},
-{
-  "Size" : 232,
-  "Groups" : 9,
-  "ID" : 110,
-  "Fitness" : 6.594224,
+  "ID" : 907,
+  "Fitness" : 7.540991,
   "Feasible" : false
 },
 {
   "Size" : 133,
   "Groups" : 9,
-  "ID" : 26,
-  "Fitness" : 6.2060304,
+  "ID" : 36,
+  "Fitness" : 7.031953,
   "Feasible" : false
 },
 {
-  "Size" : 241,
-  "Groups" : 2,
-  "ID" : 485,
-  "Fitness" : 6.2792797,
+  "Size" : 237,
+  "Groups" : 4,
+  "ID" : 15,
+  "Fitness" : 7.818312,
   "Feasible" : false
 },
 {
-  "Size" : 206,
+  "Size" : 173,
   "Groups" : 3,
-  "ID" : 199,
-  "Fitness" : 7.450299,
+  "ID" : 280,
+  "Fitness" : 7.431307,
   "Feasible" : false
 },
 {
   "Size" : 142,
   "Groups" : 2,
-  "ID" : 1568,
-  "Fitness" : 9.105898,
-  "Feasible" : true
+  "ID" : 2057,
+  "Fitness" : 6.461825,
+  "Feasible" : false
 },
 {
-  "Size" : 235,
-  "Groups" : 6,
-  "ID" : 376,
-  "Fitness" : 7.4988527,
+  "Size" : 171,
+  "Groups" : 4,
+  "ID" : 1720,
+  "Fitness" : 7.7466745,
   "Feasible" : false
 },
 {
   "Size" : 204,
   "Groups" : 4,
-  "ID" : 133,
-  "Fitness" : 8.4726715,
+  "ID" : 171,
+  "Fitness" : 8.501861,
   "Feasible" : false
 },
 {
-  "Size" : 140,
-  "Groups" : 3,
-  "ID" : 464,
-  "Fitness" : 8.768835,
-  "Feasible" : false
-},
-{
-  "Size" : 137,
-  "Groups" : 5,
-  "ID" : 39,
-  "Fitness" : 8.028968,
-  "Feasible" : false
-},
-{
-  "Size" : 170,
-  "Groups" : 5,
-  "ID" : 167,
-  "Fitness" : 8.390633,
-  "Feasible" : false
-},
-{
-  "Size" : 138,
-  "Groups" : 4,
-  "ID" : 400,
-  "Fitness" : 8.351093,
+  "Size" : 234,
+  "Groups" : 7,
+  "ID" : 9,
+  "Fitness" : 7.2089534,
   "Feasible" : false
 },
 {
   "Size" : 202,
   "Groups" : 6,
-  "ID" : 366,
-  "Fitness" : 7.4647455,
+  "ID" : 160,
+  "Fitness" : 7.228289,
+  "Feasible" : false
+},
+{
+  "Size" : 138,
+  "Groups" : 4,
+  "ID" : 347,
+  "Fitness" : 7.929916,
+  "Feasible" : false
+},
+{
+  "Size" : 170,
+  "Groups" : 5,
+  "ID" : 987,
+  "Fitness" : 7.7744036,
+  "Feasible" : false
+},
+{
+  "Size" : 135,
+  "Groups" : 7,
+  "ID" : 81,
+  "Fitness" : 7.7827334,
   "Feasible" : false
 },
 {
   "Size" : 136,
   "Groups" : 6,
-  "ID" : 196,
-  "Fitness" : 7.928237,
+  "ID" : 505,
+  "Fitness" : 7.7981434,
   "Feasible" : false
 },
 {
-  "Size" : 268,
-  "Groups" : 9,
-  "ID" : 299,
-  "Fitness" : 6.8907633,
+  "Size" : 115,
+  "Groups" : 7,
+  "ID" : 952,
+  "Fitness" : 6.4149694,
   "Feasible" : false
 },
 {
-  "Size" : 286,
+  "Size" : 172,
   "Groups" : 2,
-  "ID" : 229,
-  "Fitness" : 6.937212,
+  "ID" : 30,
+  "Fitness" : 7.181521,
   "Feasible" : false
 },
 {
-  "Size" : 203,
+  "Size" : 137,
   "Groups" : 3,
-  "ID" : 271,
-  "Fitness" : 8.359498,
+  "ID" : 1269,
+  "Fitness" : 7.446819,
   "Feasible" : false
+},
+{
+  "Size" : 117,
+  "Groups" : 2,
+  "ID" : 235,
+  "Fitness" : 9.1012,
+  "Feasible" : true
 },
 {
   "Size" : 170,
   "Groups" : 3,
-  "ID" : 1473,
-  "Fitness" : 8.147787,
+  "ID" : 1524,
+  "Fitness" : 7.594926,
   "Feasible" : false
 },
 {
   "Size" : 135,
   "Groups" : 4,
-  "ID" : 399,
-  "Fitness" : 8.100992,
+  "ID" : 54,
+  "Fitness" : 7.974064,
+  "Feasible" : false
+},
+{
+  "Size" : 167,
+  "Groups" : 5,
+  "ID" : 2311,
+  "Fitness" : 9.449699,
+  "Feasible" : false
+},
+{
+  "Size" : 232,
+  "Groups" : 6,
+  "ID" : 290,
+  "Fitness" : 7.709324,
   "Feasible" : false
 },
 {
   "Size" : 168,
   "Groups" : 4,
-  "ID" : 1541,
-  "Fitness" : 8.2472315,
-  "Feasible" : false
-},
-{
-  "Size" : 197,
-  "Groups" : 8,
-  "ID" : 451,
-  "Fitness" : 7.825729,
+  "ID" : 416,
+  "Fitness" : 8.630511,
   "Feasible" : false
 },
 {
   "Size" : 230,
   "Groups" : 8,
-  "ID" : 440,
-  "Fitness" : 7.9315844,
+  "ID" : 113,
+  "Fitness" : 8.002571,
   "Feasible" : false
 },
 {
   "Size" : 166,
   "Groups" : 6,
-  "ID" : 159,
-  "Fitness" : 8.132673,
+  "ID" : 149,
+  "Fitness" : 8.65452,
   "Feasible" : false
 },
 {
   "Size" : 134,
   "Groups" : 5,
-  "ID" : 1540,
-  "Fitness" : 8.096861,
+  "ID" : 466,
+  "Fitness" : 7.7203393,
+  "Feasible" : false
+},
+{
+  "Size" : 198,
+  "Groups" : 7,
+  "ID" : 909,
+  "Fitness" : 6.990712,
+  "Feasible" : false
+},
+{
+  "Size" : 115,
+  "Groups" : 4,
+  "ID" : 1021,
+  "Fitness" : 7.931439,
+  "Feasible" : false
+},
+{
+  "Size" : 132,
+  "Groups" : 7,
+  "ID" : 448,
+  "Fitness" : 7.763041,
   "Feasible" : false
 },
 {
   "Size" : 164,
+  "Groups" : 8,
+  "ID" : 983,
+  "Fitness" : 6.493267,
+  "Feasible" : false
+},
+{
+  "Size" : 270,
   "Groups" : 9,
-  "ID" : 480,
-  "Fitness" : 7.325856,
+  "ID" : 323,
+  "Fitness" : 6.901034,
+  "Feasible" : false
+},
+{
+  "Size" : 173,
+  "Groups" : 2,
+  "ID" : 955,
+  "Fitness" : 7.361263,
   "Feasible" : false
 },
 {
   "Size" : 171,
   "Groups" : 3,
-  "ID" : 227,
-  "Fitness" : 7.6282043,
-  "Feasible" : false
-},
-{
-  "Size" : 204,
-  "Groups" : 3,
-  "ID" : 343,
-  "Fitness" : 9.349709,
+  "ID" : 904,
+  "Fitness" : 7.6934786,
   "Feasible" : false
 },
 {
   "Size" : 140,
   "Groups" : 2,
-  "ID" : 2247,
-  "Fitness" : 7.679,
+  "ID" : 18,
+  "Fitness" : 6.898214,
+  "Feasible" : false
+},
+{
+  "Size" : 233,
+  "Groups" : 6,
+  "ID" : 249,
+  "Fitness" : 6.9877057,
   "Feasible" : false
 },
 {
   "Size" : 169,
   "Groups" : 4,
-  "ID" : 441,
-  "Fitness" : 8.066147,
-  "Feasible" : false
-},
-{
-  "Size" : 234,
-  "Groups" : 5,
-  "ID" : 215,
-  "Fitness" : 8.2862,
+  "ID" : 2058,
+  "Fitness" : 6.8079042,
   "Feasible" : false
 },
 {
   "Size" : 138,
   "Groups" : 3,
-  "ID" : 1447,
-  "Fitness" : 8.231734,
-  "Feasible" : false
-},
-{
-  "Size" : 202,
-  "Groups" : 4,
-  "ID" : 1894,
-  "Fitness" : 7.7581,
-  "Feasible" : false
-},
-{
-  "Size" : 135,
-  "Groups" : 5,
-  "ID" : 124,
-  "Fitness" : 8.43717,
-  "Feasible" : false
-},
-{
-  "Size" : 136,
-  "Groups" : 4,
-  "ID" : 123,
-  "Fitness" : 8.110579,
+  "ID" : 256,
+  "Fitness" : 7.4507523,
   "Feasible" : false
 },
 {
   "Size" : 232,
   "Groups" : 7,
-  "ID" : 284,
-  "Fitness" : 8.776873,
-  "Feasible" : false
-},
-{
-  "Size" : 272,
-  "Groups" : 8,
-  "ID" : 125,
-  "Fitness" : 7.6602664,
+  "ID" : 239,
+  "Fitness" : 7.2766643,
   "Feasible" : false
 },
 {
   "Size" : 168,
   "Groups" : 5,
-  "ID" : 270,
-  "Fitness" : 8.691618,
+  "ID" : 340,
+  "Fitness" : 8.69296,
   "Feasible" : false
 },
 {
-  "Size" : 166,
+  "Size" : 136,
+  "Groups" : 4,
+  "ID" : 435,
+  "Fitness" : 8.28549,
+  "Feasible" : false
+},
+{
+  "Size" : 133,
   "Groups" : 7,
-  "ID" : 137,
-  "Fitness" : 6.6763363,
+  "ID" : 981,
+  "Fitness" : 6.4956255,
   "Feasible" : false
 },
 {
   "Size" : 134,
   "Groups" : 6,
-  "ID" : 633,
-  "Fitness" : 8.043197,
+  "ID" : 106,
+  "Fitness" : 6.9398255,
   "Feasible" : false
 },
 {
   "Size" : 132,
   "Groups" : 8,
-  "ID" : 22,
-  "Fitness" : 7.619239,
+  "ID" : 72,
+  "Fitness" : 6.357909,
   "Feasible" : false
 },
 {
-  "Size" : 227,
-  "Groups" : 9,
-  "ID" : 180,
-  "Fitness" : 6.826344,
+  "Size" : 269,
+  "Groups" : 6,
+  "ID" : 419,
+  "Fitness" : 7.208699,
   "Feasible" : false
 },
 {
-  "Size" : 274,
-  "Groups" : 4,
-  "ID" : 5,
-  "Fitness" : 7.447916,
+  "Size" : 265,
+  "Groups" : 8,
+  "ID" : 193,
+  "Fitness" : 6.452676,
   "Feasible" : false
 },
 {
   "Size" : 137,
   "Groups" : 2,
-  "ID" : 81,
-  "Fitness" : 7.67898,
-  "Feasible" : false
-},
-{
-  "Size" : 170,
-  "Groups" : 2,
-  "ID" : 1848,
-  "Fitness" : 8.157684,
+  "ID" : 997,
+  "Fitness" : 7.528303,
   "Feasible" : false
 },
 {
   "Size" : 135,
   "Groups" : 3,
-  "ID" : 64,
-  "Fitness" : 8.408161,
+  "ID" : 65,
+  "Fitness" : 8.357395,
+  "Feasible" : false
+},
+{
+  "Size" : 270,
+  "Groups" : 6,
+  "ID" : 398,
+  "Fitness" : 7.1569796,
+  "Feasible" : false
+},
+{
+  "Size" : 231,
+  "Groups" : 5,
+  "ID" : 336,
+  "Fitness" : 7.7572236,
   "Feasible" : false
 },
 {
   "Size" : 168,
   "Groups" : 3,
-  "ID" : 1801,
-  "Fitness" : 9.123374,
-  "Feasible" : true
+  "ID" : 527,
+  "Fitness" : 9.3368,
+  "Feasible" : false
 },
 {
   "Size" : 266,
   "Groups" : 8,
-  "ID" : 202,
-  "Fitness" : 7.7604384,
+  "ID" : 471,
+  "Fitness" : 7.0759506,
   "Feasible" : false
 },
 {
   "Size" : 133,
   "Groups" : 4,
-  "ID" : 372,
-  "Fitness" : 8.085159,
-  "Feasible" : false
-},
-{
-  "Size" : 197,
-  "Groups" : 6,
-  "ID" : 429,
-  "Fitness" : 7.342848,
+  "ID" : 1089,
+  "Fitness" : 7.750807,
   "Feasible" : false
 },
 {
   "Size" : 166,
   "Groups" : 4,
-  "ID" : 2342,
-  "Fitness" : 9.364876,
+  "ID" : 73,
+  "Fitness" : 8.255932,
+  "Feasible" : false
+},
+{
+  "Size" : 230,
+  "Groups" : 6,
+  "ID" : 334,
+  "Fitness" : 8.36339,
+  "Feasible" : false
+},
+{
+  "Size" : 115,
+  "Groups" : 3,
+  "ID" : 598,
+  "Fitness" : 7.790241,
   "Feasible" : false
 },
 {
   "Size" : 198,
   "Groups" : 5,
-  "ID" : 694,
-  "Fitness" : 7.109654,
+  "ID" : 2317,
+  "Fitness" : 7.510294,
   "Feasible" : false
 },
 {
-  "Size" : 164,
+  "Size" : 131,
   "Groups" : 6,
-  "ID" : 89,
-  "Fitness" : 7.7808723,
+  "ID" : 822,
+  "Fitness" : 9.040014,
   "Feasible" : false
 },
 {
   "Size" : 132,
   "Groups" : 5,
-  "ID" : 1539,
-  "Fitness" : 9.790779,
-  "Feasible" : true
-},
-{
-  "Size" : 279,
-  "Groups" : 3,
-  "ID" : 326,
-  "Fitness" : 6.487538,
+  "ID" : 25,
+  "Fitness" : 8.337997,
   "Feasible" : false
 },
 {
-  "Size" : 266,
-  "Groups" : 9,
-  "ID" : 9,
-  "Fitness" : 6.781009,
+  "Size" : 164,
+  "Groups" : 6,
+  "ID" : 1207,
+  "Fitness" : 9.520905,
   "Feasible" : false
 },
 {
-  "Size" : 228,
-  "Groups" : 9,
-  "ID" : 157,
-  "Fitness" : 7.1275454,
-  "Feasible" : false
-},
-{
-  "Size" : 129,
-  "Groups" : 9,
-  "ID" : 422,
-  "Fitness" : 5.638047,
+  "Size" : 275,
+  "Groups" : 4,
+  "ID" : 404,
+  "Fitness" : 7.098171,
   "Feasible" : false
 },
 {
   "Size" : 171,
   "Groups" : 2,
-  "ID" : 461,
-  "Fitness" : 7.4691644,
+  "ID" : 1685,
+  "Fitness" : 7.0890603,
   "Feasible" : false
 },
 {
   "Size" : 169,
   "Groups" : 3,
-  "ID" : 355,
-  "Fitness" : 8.0773,
+  "ID" : 1901,
+  "Fitness" : 6.448413,
+  "Feasible" : false
+},
+{
+  "Size" : 202,
+  "Groups" : 3,
+  "ID" : 809,
+  "Fitness" : 6.8415036,
   "Feasible" : false
 },
 {
   "Size" : 138,
   "Groups" : 2,
-  "ID" : 1768,
-  "Fitness" : 7.65581,
+  "ID" : 1229,
+  "Fitness" : 7.582824,
+  "Feasible" : false
+},
+{
+  "Size" : 270,
+  "Groups" : 7,
+  "ID" : 200,
+  "Fitness" : 7.1210566,
+  "Feasible" : false
+},
+{
+  "Size" : 231,
+  "Groups" : 6,
+  "ID" : 345,
+  "Fitness" : 7.5265784,
   "Feasible" : false
 },
 {
   "Size" : 167,
   "Groups" : 4,
-  "ID" : 333,
-  "Fitness" : 7.467523,
+  "ID" : 2051,
+  "Fitness" : 6.951584,
+  "Feasible" : false
+},
+{
+  "Size" : 232,
+  "Groups" : 5,
+  "ID" : 51,
+  "Fitness" : 7.883972,
   "Feasible" : false
 },
 {
   "Size" : 136,
   "Groups" : 3,
-  "ID" : 419,
-  "Fitness" : 9.206663,
-  "Feasible" : true
+  "ID" : 508,
+  "Fitness" : 7.7246947,
+  "Feasible" : false
 },
 {
   "Size" : 200,
   "Groups" : 4,
-  "ID" : 31,
-  "Fitness" : 7.844359,
+  "ID" : 1307,
+  "Fitness" : 7.3364162,
   "Feasible" : false
 },
 {
-  "Size" : 232,
+  "Size" : 133,
   "Groups" : 5,
-  "ID" : 459,
-  "Fitness" : 7.792302,
+  "ID" : 104,
+  "Fitness" : 9.786997,
   "Feasible" : false
 },
 {
   "Size" : 266,
   "Groups" : 10,
-  "ID" : 474,
-  "Fitness" : 7.189054,
-  "Feasible" : false
-},
-{
-  "Size" : 229,
-  "Groups" : 8,
-  "ID" : 160,
-  "Fitness" : 8.716707,
-  "Feasible" : false
-},
-{
-  "Size" : 268,
-  "Groups" : 8,
-  "ID" : 145,
-  "Fitness" : 7.0104523,
-  "Feasible" : false
-},
-{
-  "Size" : 198,
-  "Groups" : 6,
-  "ID" : 211,
-  "Fitness" : 7.8693905,
-  "Feasible" : false
-},
-{
-  "Size" : 166,
-  "Groups" : 5,
-  "ID" : 1723,
-  "Fitness" : 7.9700937,
+  "ID" : 459,
+  "Fitness" : 6.6516776,
   "Feasible" : false
 },
 {
   "Size" : 134,
   "Groups" : 4,
-  "ID" : 1249,
-  "Fitness" : 8.036137,
+  "ID" : 115,
+  "Fitness" : 7.802711,
+  "Feasible" : false
+},
+{
+  "Size" : 230,
+  "Groups" : 7,
+  "ID" : 498,
+  "Fitness" : 7.5198183,
+  "Feasible" : false
+},
+{
+  "Size" : 166,
+  "Groups" : 5,
+  "ID" : 247,
+  "Fitness" : 8.545748,
   "Feasible" : false
 },
 {
   "Size" : 164,
   "Groups" : 7,
-  "ID" : 77,
-  "Fitness" : 7.7937813,
-  "Feasible" : false
-},
-{
-  "Size" : 228,
-  "Groups" : 10,
-  "ID" : 177,
-  "Fitness" : 7.27083,
-  "Feasible" : false
-},
-{
-  "Size" : 196,
-  "Groups" : 8,
-  "ID" : 351,
-  "Fitness" : 6.831524,
+  "ID" : 284,
+  "Fitness" : 8.487057,
   "Feasible" : false
 },
 {
   "Size" : 132,
   "Groups" : 6,
-  "ID" : 841,
-  "Fitness" : 8.085264,
-  "Feasible" : false
-},
-{
-  "Size" : 191,
-  "Groups" : 10,
-  "ID" : 456,
-  "Fitness" : 6.3766365,
+  "ID" : 224,
+  "Fitness" : 7.366061,
   "Feasible" : false
 },
 {
   "Size" : 160,
   "Groups" : 7,
-  "ID" : 128,
-  "Fitness" : 7.198716,
+  "ID" : 423,
+  "Fitness" : 7.865382,
   "Feasible" : false
 },
 {
-  "Size" : 128,
+  "Size" : 265,
   "Groups" : 6,
-  "ID" : 539,
-  "Fitness" : 7.88262,
+  "ID" : 241,
+  "Fitness" : 8.803522,
   "Feasible" : false
 },
 {
-  "Size" : 269,
-  "Groups" : 4,
-  "ID" : 148,
-  "Fitness" : 7.468149,
+  "Size" : 344,
+  "Groups" : 2,
+  "ID" : 4,
+  "Fitness" : 7.117455,
+  "Feasible" : false
+},
+{
+  "Size" : 135,
+  "Groups" : 2,
+  "ID" : 2042,
+  "Fitness" : 7.4122124,
   "Feasible" : false
 },
 {
   "Size" : 232,
   "Groups" : 3,
-  "ID" : 207,
-  "Fitness" : 6.988182,
+  "ID" : 430,
+  "Fitness" : 7.6445184,
   "Feasible" : false
 },
 {
   "Size" : 168,
   "Groups" : 2,
-  "ID" : 1136,
-  "Fitness" : 7.43284,
+  "ID" : 649,
+  "Fitness" : 7.4724207,
+  "Feasible" : false
+},
+{
+  "Size" : 266,
+  "Groups" : 6,
+  "ID" : 22,
+  "Fitness" : 8.069605,
+  "Feasible" : false
+},
+{
+  "Size" : 229,
+  "Groups" : 5,
+  "ID" : 420,
+  "Fitness" : 7.8057666,
   "Feasible" : false
 },
 {
   "Size" : 133,
   "Groups" : 3,
-  "ID" : 38,
-  "Fitness" : 7.2275743,
-  "Feasible" : false
-},
-{
-  "Size" : 266,
-  "Groups" : 6,
-  "ID" : 289,
-  "Fitness" : 7.575714,
-  "Feasible" : false
-},
-{
-  "Size" : 229,
-  "Groups" : 5,
-  "ID" : 415,
-  "Fitness" : 7.8199644,
-  "Feasible" : false
-},
-{
-  "Size" : 230,
-  "Groups" : 4,
-  "ID" : 382,
-  "Fitness" : 8.209476,
-  "Feasible" : false
-},
-{
-  "Size" : 268,
-  "Groups" : 5,
-  "ID" : 255,
-  "Fitness" : 7.6118803,
+  "ID" : 543,
+  "Fitness" : 9.077314,
   "Feasible" : false
 },
 {
   "Size" : 166,
   "Groups" : 3,
-  "ID" : 2189,
-  "Fitness" : 9.299002,
+  "ID" : 176,
+  "Fitness" : 7.7524395,
+  "Feasible" : false
+},
+{
+  "Size" : 230,
+  "Groups" : 4,
+  "ID" : 311,
+  "Fitness" : 7.750254,
+  "Feasible" : false
+},
+{
+  "Size" : 115,
+  "Groups" : 2,
+  "ID" : 2368,
+  "Fitness" : 8.650673,
   "Feasible" : false
 },
 {
   "Size" : 227,
   "Groups" : 7,
-  "ID" : 56,
-  "Fitness" : 7.368569,
+  "ID" : 413,
+  "Fitness" : 7.815307,
   "Feasible" : false
 },
 {
-  "Size" : 195,
-  "Groups" : 6,
-  "ID" : 449,
-  "Fitness" : 8.363884,
+  "Size" : 131,
+  "Groups" : 4,
+  "ID" : 1264,
+  "Fitness" : 8.97316,
   "Feasible" : false
 },
 {
   "Size" : 164,
   "Groups" : 4,
-  "ID" : 416,
-  "Fitness" : 8.329761,
+  "ID" : 645,
+  "Fitness" : 9.529818,
   "Feasible" : false
 },
 {
-  "Size" : 114,
-  "Groups" : 3,
-  "ID" : 250,
-  "Fitness" : 7.3353395,
-  "Feasible" : false
-},
-{
-  "Size" : 228,
+  "Size" : 129,
   "Groups" : 6,
-  "ID" : 363,
-  "Fitness" : 6.3680754,
+  "ID" : 1175,
+  "Fitness" : 6.7216372,
   "Feasible" : false
 },
 {
-  "Size" : 196,
-  "Groups" : 5,
-  "ID" : 499,
-  "Fitness" : 8.677412,
-  "Feasible" : false
-},
-{
-  "Size" : 225,
-  "Groups" : 10,
-  "ID" : 401,
-  "Fitness" : 6.7301598,
-  "Feasible" : false
-},
-{
-  "Size" : 162,
-  "Groups" : 6,
-  "ID" : 273,
-  "Fitness" : 8.662157,
-  "Feasible" : false
-},
-{
-  "Size" : 130,
-  "Groups" : 5,
-  "ID" : 1600,
-  "Fitness" : 6.886448,
-  "Feasible" : false
-},
-{
-  "Size" : 160,
-  "Groups" : 8,
-  "ID" : 249,
-  "Fitness" : 8.311888,
+  "Size" : 128,
+  "Groups" : 7,
+  "ID" : 507,
+  "Fitness" : 6.6307106,
   "Feasible" : false
 },
 {
   "Size" : 270,
   "Groups" : 5,
-  "ID" : 476,
-  "Fitness" : 8.23587,
+  "ID" : 450,
+  "Fitness" : 8.152576,
   "Feasible" : false
 },
 {
   "Size" : 136,
   "Groups" : 2,
-  "ID" : 118,
-  "Fitness" : 8.095299,
+  "ID" : 436,
+  "Fitness" : 8.1275425,
   "Feasible" : false
 },
 {
   "Size" : 200,
   "Groups" : 3,
-  "ID" : 130,
-  "Fitness" : 7.3894916,
+  "ID" : 307,
+  "Fitness" : 7.2344694,
   "Feasible" : false
 },
 {
-  "Size" : 229,
-  "Groups" : 6,
-  "ID" : 44,
-  "Fitness" : 8.0477915,
-  "Feasible" : false
-},
-{
-  "Size" : 266,
-  "Groups" : 7,
-  "ID" : 179,
-  "Fitness" : 7.71447,
-  "Feasible" : false
-},
-{
-  "Size" : 230,
-  "Groups" : 5,
-  "ID" : 483,
-  "Fitness" : 7.8780913,
-  "Feasible" : false
-},
-{
-  "Size" : 134,
-  "Groups" : 3,
-  "ID" : 1072,
-  "Fitness" : 7.5869074,
+  "Size" : 165,
+  "Groups" : 4,
+  "ID" : 472,
+  "Fitness" : 8.577942,
   "Feasible" : false
 },
 {
   "Size" : 198,
   "Groups" : 4,
-  "ID" : 384,
-  "Fitness" : 7.205519,
+  "ID" : 82,
+  "Fitness" : 7.8808346,
+  "Feasible" : false
+},
+{
+  "Size" : 230,
+  "Groups" : 5,
+  "ID" : 487,
+  "Fitness" : 8.392557,
   "Feasible" : false
 },
 {
   "Size" : 227,
   "Groups" : 8,
-  "ID" : 111,
-  "Fitness" : 6.8816648,
+  "ID" : 57,
+  "Fitness" : 7.788437,
+  "Feasible" : false
+},
+{
+  "Size" : 163,
+  "Groups" : 6,
+  "ID" : 461,
+  "Fitness" : 7.93064,
+  "Feasible" : false
+},
+{
+  "Size" : 131,
+  "Groups" : 5,
+  "ID" : 1145,
+  "Fitness" : 7.2862806,
   "Feasible" : false
 },
 {
   "Size" : 164,
   "Groups" : 5,
-  "ID" : 62,
-  "Fitness" : 8.691618,
+  "ID" : 1252,
+  "Fitness" : 9.832758,
+  "Feasible" : false
+},
+{
+  "Size" : 196,
+  "Groups" : 6,
+  "ID" : 383,
+  "Fitness" : 8.503526,
   "Feasible" : false
 },
 {
   "Size" : 132,
   "Groups" : 4,
-  "ID" : 86,
-  "Fitness" : 9.336483,
-  "Feasible" : false
-},
-{
-  "Size" : 264,
-  "Groups" : 8,
-  "ID" : 260,
-  "Fitness" : 6.6011987,
-  "Feasible" : false
-},
-{
-  "Size" : 228,
-  "Groups" : 7,
-  "ID" : 424,
-  "Fitness" : 7.162375,
+  "ID" : 335,
+  "Fitness" : 8.525957,
   "Feasible" : false
 },
 {
   "Size" : 162,
   "Groups" : 7,
-  "ID" : 458,
-  "Fitness" : 7.850367,
+  "ID" : 8,
+  "Fitness" : 7.546132,
+  "Feasible" : false
+},
+{
+  "Size" : 130,
+  "Groups" : 6,
+  "ID" : 350,
+  "Fitness" : 6.783376,
+  "Feasible" : false
+},
+{
+  "Size" : 113,
+  "Groups" : 5,
+  "ID" : 1977,
+  "Fitness" : 6.4147587,
+  "Feasible" : false
+},
+{
+  "Size" : 223,
+  "Groups" : 8,
+  "ID" : 378,
+  "Fitness" : 8.669048,
+  "Feasible" : false
+},
+{
+  "Size" : 192,
+  "Groups" : 6,
+  "ID" : 229,
+  "Fitness" : 7.659434,
   "Feasible" : false
 },
 {
   "Size" : 160,
   "Groups" : 5,
-  "ID" : 12,
-  "Fitness" : 9.847552,
+  "ID" : 522,
+  "Fitness" : 9.526539,
   "Feasible" : false
 },
 {
   "Size" : 128,
   "Groups" : 4,
-  "ID" : 689,
-  "Fitness" : 8.030128,
+  "ID" : 681,
+  "Fitness" : 7.780983,
   "Feasible" : false
 },
 {
-  "Size" : 190,
-  "Groups" : 8,
-  "ID" : 169,
-  "Fitness" : 7.212414,
+  "Size" : 111,
+  "Groups" : 5,
+  "ID" : 1263,
+  "Fitness" : 7.6729436,
   "Feasible" : false
 },
 {
-  "Size" : 156,
-  "Groups" : 10,
-  "ID" : 261,
-  "Fitness" : 6.193846,
-  "Feasible" : false
-},
-{
-  "Size" : 126,
-  "Groups" : 8,
-  "ID" : 492,
-  "Fitness" : 6.9566107,
-  "Feasible" : false
-},
-{
-  "Size" : 259,
-  "Groups" : 7,
-  "ID" : 37,
-  "Fitness" : 7.6067767,
+  "Size" : 261,
+  "Groups" : 6,
+  "ID" : 202,
+  "Fitness" : 7.0357327,
   "Feasible" : false
 },
 {
   "Size" : 270,
   "Groups" : 3,
-  "ID" : 496,
-  "Fitness" : 8.830884,
+  "ID" : 185,
+  "Fitness" : 7.830884,
+  "Feasible" : false
+},
+{
+  "Size" : 232,
+  "Groups" : 2,
+  "ID" : 366,
+  "Fitness" : 6.961992,
+  "Feasible" : false
+},
+{
+  "Size" : 133,
+  "Groups" : 2,
+  "ID" : 174,
+  "Fitness" : 8.972767,
   "Feasible" : false
 },
 {
   "Size" : 266,
   "Groups" : 4,
-  "ID" : 381,
-  "Fitness" : 8.105251,
-  "Feasible" : false
-},
-{
-  "Size" : 166,
-  "Groups" : 2,
-  "ID" : 1561,
-  "Fitness" : 9.336649,
+  "ID" : 365,
+  "Fitness" : 8.915492,
   "Feasible" : false
 },
 {
   "Size" : 230,
   "Groups" : 3,
-  "ID" : 517,
-  "Fitness" : 6.7703257,
+  "ID" : 298,
+  "Fitness" : 8.014345,
+  "Feasible" : false
+},
+{
+  "Size" : 227,
+  "Groups" : 5,
+  "ID" : 128,
+  "Fitness" : 8.391706,
+  "Feasible" : false
+},
+{
+  "Size" : 131,
+  "Groups" : 3,
+  "ID" : 2044,
+  "Fitness" : 7.5612803,
   "Feasible" : false
 },
 {
   "Size" : 164,
   "Groups" : 3,
-  "ID" : 262,
-  "Fitness" : 9.273308,
+  "ID" : 812,
+  "Fitness" : 9.137839,
   "Feasible" : false
 },
 {
-  "Size" : 162,
+  "Size" : 114,
+  "Groups" : 2,
+  "ID" : 205,
+  "Fitness" : 6.882085,
+  "Feasible" : false
+},
+{
+  "Size" : 129,
   "Groups" : 4,
-  "ID" : 21,
-  "Fitness" : 8.125372,
+  "ID" : 2275,
+  "Fitness" : 8.01601,
   "Feasible" : false
 },
 {
   "Size" : 194,
   "Groups" : 5,
-  "ID" : 987,
-  "Fitness" : 6.8395762,
+  "ID" : 139,
+  "Fitness" : 7.890729,
   "Feasible" : false
 },
 {
-  "Size" : 191,
+  "Size" : 162,
+  "Groups" : 4,
+  "ID" : 178,
+  "Fitness" : 8.040013,
+  "Feasible" : false
+},
+{
+  "Size" : 159,
+  "Groups" : 7,
+  "ID" : 259,
+  "Fitness" : 7.8631916,
+  "Feasible" : false
+},
+{
+  "Size" : 224,
   "Groups" : 8,
-  "ID" : 314,
-  "Fitness" : 7.7274895,
+  "ID" : 173,
+  "Fitness" : 6.871812,
+  "Feasible" : false
+},
+{
+  "Size" : 128,
+  "Groups" : 5,
+  "ID" : 622,
+  "Fitness" : 7.9948797,
   "Feasible" : false
 },
 {
   "Size" : 160,
   "Groups" : 6,
-  "ID" : 225,
-  "Fitness" : 8.517641,
+  "ID" : 424,
+  "Fitness" : 8.526016,
   "Feasible" : false
 },
 {
   "Size" : 112,
   "Groups" : 4,
-  "ID" : 732,
-  "Fitness" : 7.6651034,
+  "ID" : 1099,
+  "Fitness" : 7.3802395,
   "Feasible" : false
 },
 {
-  "Size" : 128,
+  "Size" : 127,
+  "Groups" : 7,
+  "ID" : 889,
+  "Fitness" : 7.2712874,
+  "Feasible" : false
+},
+{
+  "Size" : 265,
   "Groups" : 5,
-  "ID" : 937,
-  "Fitness" : 7.9617624,
+  "ID" : 80,
+  "Fitness" : 8.702785,
+  "Feasible" : false
+},
+{
+  "Size" : 267,
+  "Groups" : 4,
+  "ID" : 402,
+  "Fitness" : 6.5666027,
+  "Feasible" : false
+},
+{
+  "Size" : 261,
+  "Groups" : 7,
+  "ID" : 127,
+  "Fitness" : 7.513448,
   "Feasible" : false
 },
 {
   "Size" : 259,
   "Groups" : 8,
-  "ID" : 136,
-  "Fitness" : 6.71418,
-  "Feasible" : false
-},
-{
-  "Size" : 272,
-  "Groups" : 3,
-  "ID" : 481,
-  "Fitness" : 8.821029,
+  "ID" : 354,
+  "Fitness" : 6.7449784,
   "Feasible" : false
 },
 {
   "Size" : 200,
   "Groups" : 2,
-  "ID" : 647,
-  "Fitness" : 6.287269,
+  "ID" : 1303,
+  "Fitness" : 7.441561,
   "Feasible" : false
 },
 {
-  "Size" : 198,
-  "Groups" : 3,
-  "ID" : 521,
-  "Fitness" : 7.3782997,
-  "Feasible" : false
-},
-{
-  "Size" : 134,
-  "Groups" : 2,
-  "ID" : 1528,
-  "Fitness" : 7.5187645,
+  "Size" : 163,
+  "Groups" : 4,
+  "ID" : 1023,
+  "Fitness" : 8.220596,
   "Feasible" : false
 },
 {
   "Size" : 227,
   "Groups" : 6,
-  "ID" : 210,
-  "Fitness" : 8.04307,
+  "ID" : 480,
+  "Fitness" : 7.791863,
   "Feasible" : false
 },
 {
   "Size" : 132,
   "Groups" : 3,
-  "ID" : 1736,
-  "Fitness" : 7.8662515,
+  "ID" : 122,
+  "Fitness" : 8.928751,
   "Feasible" : false
 },
 {
-  "Size" : 196,
-  "Groups" : 4,
-  "ID" : 2213,
-  "Fitness" : 8.089986,
+  "Size" : 129,
+  "Groups" : 5,
+  "ID" : 338,
+  "Fitness" : 7.8339677,
   "Feasible" : false
 },
 {
-  "Size" : 130,
-  "Groups" : 4,
-  "ID" : 17,
-  "Fitness" : 7.869379,
+  "Size" : 193,
+  "Groups" : 7,
+  "ID" : 390,
+  "Fitness" : 7.754809,
   "Feasible" : false
 },
 {
   "Size" : 162,
   "Groups" : 5,
-  "ID" : 977,
-  "Fitness" : 7.2698684,
+  "ID" : 168,
+  "Fitness" : 8.245613,
   "Feasible" : false
 },
 {
-  "Size" : 194,
+  "Size" : 130,
+  "Groups" : 4,
+  "ID" : 1317,
+  "Fitness" : 9.25661,
+  "Feasible" : false
+},
+{
+  "Size" : 159,
+  "Groups" : 4,
+  "ID" : 821,
+  "Fitness" : 8.86083,
+  "Feasible" : false
+},
+{
+  "Size" : 223,
   "Groups" : 6,
-  "ID" : 1373,
-  "Fitness" : 6.5582747,
-  "Feasible" : false
-},
-{
-  "Size" : 255,
-  "Groups" : 7,
-  "ID" : 172,
-  "Fitness" : 7.5574965,
+  "ID" : 2366,
+  "Fitness" : 7.287829,
   "Feasible" : false
 },
 {
   "Size" : 192,
   "Groups" : 4,
-  "ID" : 1401,
-  "Fitness" : 7.6674423,
+  "ID" : 53,
+  "Fitness" : 7.506256,
   "Feasible" : false
 },
 {
   "Size" : 128,
   "Groups" : 3,
-  "ID" : 724,
-  "Fitness" : 7.8366227,
+  "ID" : 1489,
+  "Fitness" : 7.6385436,
   "Feasible" : false
 },
 {
   "Size" : 189,
   "Groups" : 7,
-  "ID" : 149,
-  "Fitness" : 9.160708,
-  "Feasible" : false
-},
-{
-  "Size" : 190,
-  "Groups" : 6,
-  "ID" : 75,
-  "Fitness" : 8.129694,
-  "Feasible" : false
-},
-{
-  "Size" : 222,
-  "Groups" : 7,
-  "ID" : 265,
-  "Fitness" : 7.038862,
-  "Feasible" : false
-},
-{
-  "Size" : 158,
-  "Groups" : 5,
-  "ID" : 1864,
-  "Fitness" : 7.2607307,
-  "Feasible" : false
-},
-{
-  "Size" : 156,
-  "Groups" : 7,
-  "ID" : 933,
-  "Fitness" : 6.5605564,
+  "ID" : 885,
+  "Fitness" : 7.4921174,
   "Feasible" : false
 },
 {
   "Size" : 126,
   "Groups" : 6,
-  "ID" : 1482,
-  "Fitness" : 8.030746,
+  "ID" : 19,
+  "Fitness" : 6.6408906,
   "Feasible" : false
 },
 {
-  "Size" : 154,
+  "Size" : 220,
   "Groups" : 10,
-  "ID" : 387,
-  "Fitness" : 7.719175,
+  "ID" : 272,
+  "Fitness" : 5.6230516,
   "Feasible" : false
 },
 {
-  "Size" : 257,
-  "Groups" : 6,
-  "ID" : 205,
-  "Fitness" : 6.9243402,
+  "Size" : 109,
+  "Groups" : 7,
+  "ID" : 959,
+  "Fitness" : 6.495492,
+  "Feasible" : false
+},
+{
+  "Size" : 254,
+  "Groups" : 9,
+  "ID" : 268,
+  "Fitness" : 6.4908733,
   "Feasible" : false
 },
 {
   "Size" : 270,
   "Groups" : 2,
-  "ID" : 80,
-  "Fitness" : 8.342863,
+  "ID" : 96,
+  "Fitness" : 7.127717,
   "Feasible" : false
 },
 {
-  "Size" : 266,
+  "Size" : 195,
   "Groups" : 3,
-  "ID" : 63,
-  "Fitness" : 7.0759854,
+  "ID" : 55,
+  "Fitness" : 7.264876,
   "Feasible" : false
 },
 {
-  "Size" : 230,
-  "Groups" : 2,
-  "ID" : 362,
-  "Fitness" : 7.2199855,
+  "Size" : 228,
+  "Groups" : 3,
+  "ID" : 330,
+  "Fitness" : 7.1211767,
   "Feasible" : false
 },
 {
   "Size" : 164,
   "Groups" : 2,
-  "ID" : 1303,
-  "Fitness" : 7.456818,
+  "ID" : 1898,
+  "Fitness" : 7.7232966,
   "Feasible" : false
 },
 {
   "Size" : 225,
   "Groups" : 5,
-  "ID" : 55,
-  "Fitness" : 8.259451,
+  "ID" : 339,
+  "Fitness" : 9.335424,
   "Feasible" : false
 },
 {
-  "Size" : 226,
-  "Groups" : 4,
-  "ID" : 1412,
-  "Fitness" : 6.895957,
+  "Size" : 258,
+  "Groups" : 6,
+  "ID" : 467,
+  "Fitness" : 7.559069,
+  "Feasible" : false
+},
+{
+  "Size" : 129,
+  "Groups" : 3,
+  "ID" : 476,
+  "Fitness" : 7.7287173,
   "Feasible" : false
 },
 {
   "Size" : 162,
   "Groups" : 3,
-  "ID" : 1892,
-  "Fitness" : 7.465269,
+  "ID" : 264,
+  "Fitness" : 7.612842,
   "Feasible" : false
 },
 {
-  "Size" : 192,
+  "Size" : 113,
+  "Groups" : 2,
+  "ID" : 901,
+  "Fitness" : 7.392258,
+  "Feasible" : false
+},
+{
+  "Size" : 191,
+  "Groups" : 6,
+  "ID" : 100,
+  "Fitness" : 7.9746966,
+  "Feasible" : false
+},
+{
+  "Size" : 159,
   "Groups" : 5,
-  "ID" : 20,
-  "Fitness" : 8.714212,
+  "ID" : 225,
+  "Fitness" : 8.2749815,
   "Feasible" : false
 },
 {
   "Size" : 160,
   "Groups" : 4,
-  "ID" : 683,
-  "Fitness" : 8.243367,
+  "ID" : 95,
+  "Fitness" : 9.153122,
   "Feasible" : false
 },
 {
-  "Size" : 189,
+  "Size" : 192,
+  "Groups" : 5,
+  "ID" : 524,
+  "Fitness" : 7.6751347,
+  "Feasible" : false
+},
+{
+  "Size" : 222,
   "Groups" : 8,
-  "ID" : 129,
-  "Fitness" : 7.873922,
+  "ID" : 309,
+  "Fitness" : 7.1028466,
   "Feasible" : false
 },
 {
   "Size" : 158,
   "Groups" : 6,
-  "ID" : 1776,
-  "Fitness" : 6.789815,
+  "ID" : 960,
+  "Fitness" : 7.844186,
   "Feasible" : false
 },
 {
-  "Size" : 188,
-  "Groups" : 10,
-  "ID" : 411,
-  "Fitness" : 6.489353,
+  "Size" : 127,
+  "Groups" : 5,
+  "ID" : 1904,
+  "Fitness" : 7.0138707,
   "Feasible" : false
 },
 {
-  "Size" : 126,
-  "Groups" : 7,
-  "ID" : 1425,
-  "Fitness" : 6.847255,
+  "Size" : 111,
+  "Groups" : 4,
+  "ID" : 1529,
+  "Fitness" : 7.721489,
+  "Feasible" : false
+},
+{
+  "Size" : 156,
+  "Groups" : 8,
+  "ID" : 1499,
+  "Fitness" : 6.571444,
   "Feasible" : false
 },
 {
   "Size" : 259,
   "Groups" : 6,
-  "ID" : 445,
-  "Fitness" : 7.005476,
+  "ID" : 150,
+  "Fitness" : 6.983343,
+  "Feasible" : false
+},
+{
+  "Size" : 229,
+  "Groups" : 3,
+  "ID" : 368,
+  "Fitness" : 7.217709,
   "Feasible" : false
 },
 {
   "Size" : 227,
   "Groups" : 4,
-  "ID" : 334,
-  "Fitness" : 8.232769,
+  "ID" : 315,
+  "Fitness" : 7.925565,
   "Feasible" : false
 },
 {
   "Size" : 132,
   "Groups" : 2,
-  "ID" : 1361,
-  "Fitness" : 7.8383594,
+  "ID" : 109,
+  "Fitness" : 7.447565,
   "Feasible" : false
 },
 {
-  "Size" : 225,
-  "Groups" : 6,
-  "ID" : 178,
-  "Fitness" : 7.7116284,
+  "Size" : 161,
+  "Groups" : 4,
+  "ID" : 1314,
+  "Fitness" : 7.728651,
   "Feasible" : false
 },
 {
   "Size" : 130,
   "Groups" : 3,
-  "ID" : 2450,
-  "Fitness" : 7.802188,
+  "ID" : 1100,
+  "Fitness" : 8.848392,
   "Feasible" : false
 },
 {
   "Size" : 194,
   "Groups" : 4,
-  "ID" : 513,
-  "Fitness" : 7.6627226,
+  "ID" : 515,
+  "Fitness" : 7.0887194,
   "Feasible" : false
 },
 {
   "Size" : 223,
   "Groups" : 4,
-  "ID" : 139,
-  "Fitness" : 7.257834,
+  "ID" : 170,
+  "Fitness" : 7.6268396,
   "Feasible" : false
 },
 {
-  "Size" : 192,
+  "Size" : 159,
   "Groups" : 3,
-  "ID" : 1416,
-  "Fitness" : 7.4685097,
+  "ID" : 254,
+  "Fitness" : 7.875751,
   "Feasible" : false
 },
 {
   "Size" : 128,
   "Groups" : 2,
-  "ID" : 2215,
-  "Fitness" : 7.3123198,
+  "ID" : 2197,
+  "Fitness" : 7.307733,
   "Feasible" : false
 },
 {
-  "Size" : 157,
-  "Groups" : 4,
-  "ID" : 277,
-  "Fitness" : 7.6606927,
-  "Feasible" : false
-},
-{
-  "Size" : 222,
+  "Size" : 189,
   "Groups" : 5,
-  "ID" : 88,
-  "Fitness" : 8.023112,
+  "ID" : 7,
+  "Fitness" : 8.294392,
   "Feasible" : false
 },
 {
   "Size" : 127,
   "Groups" : 3,
-  "ID" : 181,
-  "Fitness" : 7.5038114,
-  "Feasible" : false
-},
-{
-  "Size" : 190,
-  "Groups" : 4,
-  "ID" : 514,
-  "Fitness" : 9.083691,
-  "Feasible" : false
-},
-{
-  "Size" : 188,
-  "Groups" : 6,
-  "ID" : 238,
-  "Fitness" : 8.596064,
-  "Feasible" : false
-},
-{
-  "Size" : 126,
-  "Groups" : 4,
-  "ID" : 1177,
-  "Fitness" : 8.007192,
+  "ID" : 1664,
+  "Fitness" : 7.577091,
   "Feasible" : false
 },
 {
   "Size" : 156,
   "Groups" : 5,
-  "ID" : 1385,
-  "Fitness" : 9.393667,
+  "ID" : 489,
+  "Fitness" : 8.150483,
   "Feasible" : false
 },
 {
-  "Size" : 124,
-  "Groups" : 8,
-  "ID" : 194,
-  "Fitness" : 6.259464,
-  "Feasible" : false
-},
-{
-  "Size" : 195,
-  "Groups" : 2,
-  "ID" : 402,
-  "Fitness" : 8.048416,
-  "Feasible" : false
-},
-{
-  "Size" : 262,
-  "Groups" : 3,
-  "ID" : 1819,
-  "Fitness" : 7.26537,
-  "Feasible" : false
-},
-{
-  "Size" : 258,
+  "Size" : 126,
   "Groups" : 4,
-  "ID" : 798,
-  "Fitness" : 7.035361,
+  "ID" : 601,
+  "Fitness" : 7.853989,
+  "Feasible" : false
+},
+{
+  "Size" : 154,
+  "Groups" : 7,
+  "ID" : 295,
+  "Fitness" : 7.985612,
+  "Feasible" : false
+},
+{
+  "Size" : 109,
+  "Groups" : 5,
+  "ID" : 2287,
+  "Fitness" : 7.812925,
+  "Feasible" : false
+},
+{
+  "Size" : 125,
+  "Groups" : 6,
+  "ID" : 1313,
+  "Fitness" : 8.263989,
+  "Feasible" : false
+},
+{
+  "Size" : 108,
+  "Groups" : 7,
+  "ID" : 569,
+  "Fitness" : 6.456135,
+  "Feasible" : false
+},
+{
+  "Size" : 129,
+  "Groups" : 2,
+  "ID" : 1141,
+  "Fitness" : 7.47995,
   "Feasible" : false
 },
 {
   "Size" : 162,
   "Groups" : 2,
-  "ID" : 370,
-  "Fitness" : 7.6213055,
+  "ID" : 66,
+  "Fitness" : 8.975188,
   "Feasible" : false
 },
 {
-  "Size" : 160,
-  "Groups" : 3,
-  "ID" : 821,
-  "Fitness" : 8.690558,
+  "Size" : 189,
+  "Groups" : 6,
+  "ID" : 207,
+  "Fitness" : 8.149279,
   "Feasible" : false
 },
 {
   "Size" : 158,
   "Groups" : 4,
-  "ID" : 1291,
-  "Fitness" : 7.980731,
+  "ID" : 147,
+  "Fitness" : 8.204647,
   "Feasible" : false
 },
 {
-  "Size" : 254,
-  "Groups" : 7,
-  "ID" : 228,
-  "Fitness" : 7.2601304,
-  "Feasible" : false
-},
-{
-  "Size" : 190,
-  "Groups" : 5,
-  "ID" : 1015,
-  "Fitness" : 7.9434614,
-  "Feasible" : false
-},
-{
-  "Size" : 110,
-  "Groups" : 4,
-  "ID" : 396,
-  "Fitness" : 7.6185827,
-  "Feasible" : false
-},
-{
-  "Size" : 188,
-  "Groups" : 7,
-  "ID" : 306,
-  "Fitness" : 8.28094,
-  "Feasible" : false
-},
-{
-  "Size" : 126,
-  "Groups" : 5,
-  "ID" : 434,
-  "Fitness" : 8.15554,
+  "Size" : 111,
+  "Groups" : 3,
+  "ID" : 1737,
+  "Fitness" : 7.536134,
   "Feasible" : false
 },
 {
   "Size" : 156,
   "Groups" : 6,
-  "ID" : 1535,
-  "Fitness" : 8.15714,
+  "ID" : 281,
+  "Fitness" : 8.37035,
+  "Feasible" : false
+},
+{
+  "Size" : 126,
+  "Groups" : 5,
+  "ID" : 401,
+  "Fitness" : 7.0253158,
+  "Feasible" : false
+},
+{
+  "Size" : 110,
+  "Groups" : 4,
+  "ID" : 2289,
+  "Fitness" : 7.3456664,
+  "Feasible" : false
+},
+{
+  "Size" : 154,
+  "Groups" : 8,
+  "ID" : 23,
+  "Fitness" : 7.6502943,
+  "Feasible" : false
+},
+{
+  "Size" : 109,
+  "Groups" : 6,
+  "ID" : 2432,
+  "Fitness" : 7.7969217,
+  "Feasible" : false
+},
+{
+  "Size" : 323,
+  "Groups" : 5,
+  "ID" : 285,
+  "Fitness" : 7.616667,
   "Feasible" : false
 },
 {
   "Size" : 154,
   "Groups" : 9,
-  "ID" : 258,
-  "Fitness" : 7.120133,
+  "ID" : 14,
+  "Fitness" : 7.0755777,
   "Feasible" : false
 },
 {
-  "Size" : 227,
+  "Size" : 161,
   "Groups" : 3,
-  "ID" : 308,
-  "Fitness" : 7.461154,
+  "ID" : 257,
+  "Fitness" : 7.7142653,
   "Feasible" : false
 },
 {
   "Size" : 225,
   "Groups" : 4,
-  "ID" : 19,
-  "Fitness" : 7.847645,
+  "ID" : 344,
+  "Fitness" : 7.912362,
   "Feasible" : false
 },
 {
   "Size" : 194,
   "Groups" : 3,
-  "ID" : 1011,
-  "Fitness" : 7.445251,
-  "Feasible" : false
-},
-{
-  "Size" : 130,
-  "Groups" : 2,
-  "ID" : 338,
-  "Fitness" : 8.532417,
-  "Feasible" : false
-},
-{
-  "Size" : 159,
-  "Groups" : 2,
-  "ID" : 248,
-  "Fitness" : 7.961374,
+  "ID" : 1689,
+  "Fitness" : 7.3415604,
   "Feasible" : false
 },
 {
   "Size" : 192,
   "Groups" : 2,
-  "ID" : 582,
-  "Fitness" : 6.8830094,
+  "ID" : 52,
+  "Fitness" : 7.699928,
   "Feasible" : false
 },
 {
-  "Size" : 254,
+  "Size" : 157,
+  "Groups" : 3,
+  "ID" : 1146,
+  "Fitness" : 7.7259603,
+  "Feasible" : false
+},
+{
+  "Size" : 155,
   "Groups" : 4,
-  "ID" : 105,
-  "Fitness" : 8.007223,
-  "Feasible" : false
-},
-{
-  "Size" : 190,
-  "Groups" : 3,
-  "ID" : 2302,
-  "Fitness" : 8.433623,
-  "Feasible" : true
-},
-{
-  "Size" : 251,
-  "Groups" : 7,
-  "ID" : 263,
-  "Fitness" : 7.700715,
-  "Feasible" : false
-},
-{
-  "Size" : 126,
-  "Groups" : 3,
-  "ID" : 684,
-  "Fitness" : 7.8527193,
+  "ID" : 592,
+  "Fitness" : 9.722784,
   "Feasible" : false
 },
 {
   "Size" : 188,
   "Groups" : 4,
-  "ID" : 1328,
-  "Fitness" : 9.016009,
+  "ID" : 288,
+  "Fitness" : 9.198246,
   "Feasible" : false
 },
 {
-  "Size" : 249,
-  "Groups" : 10,
-  "ID" : 320,
-  "Fitness" : 6.3515105,
+  "Size" : 126,
+  "Groups" : 3,
+  "ID" : 739,
+  "Fitness" : 7.6927633,
   "Feasible" : false
 },
 {
   "Size" : 154,
   "Groups" : 5,
-  "ID" : 1226,
-  "Fitness" : 8.39711,
+  "ID" : 342,
+  "Fitness" : 8.29379,
   "Feasible" : false
 },
 {
   "Size" : 125,
   "Groups" : 4,
-  "ID" : 383,
-  "Fitness" : 7.960674,
+  "ID" : 2283,
+  "Fitness" : 8.259927,
+  "Feasible" : false
+},
+{
+  "Size" : 108,
+  "Groups" : 5,
+  "ID" : 299,
+  "Fitness" : 6.8335485,
   "Feasible" : false
 },
 {
   "Size" : 152,
   "Groups" : 7,
-  "ID" : 53,
-  "Fitness" : 7.800407,
+  "ID" : 302,
+  "Fitness" : 9.31719,
+  "Feasible" : true
+},
+{
+  "Size" : 216,
+  "Groups" : 10,
+  "ID" : 371,
+  "Fitness" : 5.5814543,
   "Feasible" : false
 },
 {
   "Size" : 124,
   "Groups" : 6,
-  "ID" : 1042,
-  "Fitness" : 9.517006,
-  "Feasible" : true
-},
-{
-  "Size" : 108,
-  "Groups" : 5,
-  "ID" : 303,
-  "Fitness" : 7.916882,
+  "ID" : 747,
+  "Fitness" : 7.9579887,
   "Feasible" : false
 },
 {
-  "Size" : 150,
-  "Groups" : 10,
-  "ID" : 16,
-  "Fitness" : 6.0254974,
+  "Size" : 123,
+  "Groups" : 8,
+  "ID" : 137,
+  "Fitness" : 6.5702133,
   "Feasible" : false
 },
 {
   "Size" : 107,
   "Groups" : 7,
-  "ID" : 174,
-  "Fitness" : 6.4877043,
+  "ID" : 195,
+  "Fitness" : 8.176673,
   "Feasible" : false
 },
 {
-  "Size" : 106,
-  "Groups" : 10,
-  "ID" : 407,
-  "Fitness" : 5.835614,
+  "Size" : 191,
+  "Groups" : 3,
+  "ID" : 98,
+  "Fitness" : 9.344831,
   "Feasible" : false
 },
 {
   "Size" : 160,
   "Groups" : 2,
-  "ID" : 1875,
-  "Fitness" : 9.020725,
-  "Feasible" : true
+  "ID" : 251,
+  "Fitness" : 7.4016438,
+  "Feasible" : false
 },
 {
-  "Size" : 189,
-  "Groups" : 4,
-  "ID" : 477,
-  "Fitness" : 8.114359,
+  "Size" : 253,
+  "Groups" : 6,
+  "ID" : 43,
+  "Fitness" : 7.174616,
   "Feasible" : false
 },
 {
   "Size" : 158,
   "Groups" : 3,
-  "ID" : 1734,
-  "Fitness" : 7.8562117,
+  "ID" : 223,
+  "Fitness" : 7.696193,
   "Feasible" : false
 },
 {
-  "Size" : 222,
-  "Groups" : 4,
-  "ID" : 466,
-  "Fitness" : 8.0793,
+  "Size" : 111,
+  "Groups" : 2,
+  "ID" : 2047,
+  "Fitness" : 5.540246,
+  "Feasible" : false
+},
+{
+  "Size" : 155,
+  "Groups" : 5,
+  "ID" : 341,
+  "Fitness" : 9.866681,
+  "Feasible" : false
+},
+{
+  "Size" : 188,
+  "Groups" : 5,
+  "ID" : 29,
+  "Fitness" : 8.791176,
   "Feasible" : false
 },
 {
   "Size" : 110,
   "Groups" : 3,
-  "ID" : 101,
-  "Fitness" : 7.745041,
+  "ID" : 546,
+  "Fitness" : 7.6887603,
+  "Feasible" : false
+},
+{
+  "Size" : 220,
+  "Groups" : 6,
+  "ID" : 84,
+  "Fitness" : 6.9812427,
   "Feasible" : false
 },
 {
   "Size" : 156,
   "Groups" : 4,
-  "ID" : 859,
-  "Fitness" : 8.148947,
-  "Feasible" : false
-},
-{
-  "Size" : 218,
-  "Groups" : 8,
-  "ID" : 69,
-  "Fitness" : 6.1742663,
+  "ID" : 1661,
+  "Fitness" : 8.030668,
   "Feasible" : false
 },
 {
   "Size" : 154,
   "Groups" : 6,
-  "ID" : 854,
-  "Fitness" : 9.523374,
-  "Feasible" : true
+  "ID" : 989,
+  "Fitness" : 7.5323367,
+  "Feasible" : false
+},
+{
+  "Size" : 109,
+  "Groups" : 4,
+  "ID" : 998,
+  "Fitness" : 7.8952947,
+  "Feasible" : false
+},
+{
+  "Size" : 152,
+  "Groups" : 8,
+  "ID" : 903,
+  "Fitness" : 8.196337,
+  "Feasible" : false
 },
 {
   "Size" : 108,
   "Groups" : 6,
-  "ID" : 2352,
-  "Fitness" : 5.766248,
+  "ID" : 460,
+  "Fitness" : 6.32943,
   "Feasible" : false
 },
 {
-  "Size" : 123,
+  "Size" : 184,
   "Groups" : 10,
-  "ID" : 114,
-  "Fitness" : 7.470528,
+  "ID" : 483,
+  "Fitness" : 4.836253,
   "Feasible" : false
 },
 {
   "Size" : 107,
   "Groups" : 8,
-  "ID" : 224,
-  "Fitness" : 6.433226,
+  "ID" : 906,
+  "Fitness" : 6.354142,
   "Feasible" : false
 },
 {
-  "Size" : 152,
-  "Groups" : 9,
-  "ID" : 413,
-  "Fitness" : 7.2743917,
-  "Feasible" : false
-},
-{
-  "Size" : 107,
-  "Groups" : 9,
-  "ID" : 373,
-  "Fitness" : 5.837001,
-  "Feasible" : false
-},
-{
-  "Size" : 225,
-  "Groups" : 3,
-  "ID" : 50,
-  "Fitness" : 8.021086,
+  "Size" : 161,
+  "Groups" : 2,
+  "ID" : 2199,
+  "Fitness" : 7.34687,
   "Feasible" : false
 },
 {
   "Size" : 194,
   "Groups" : 2,
-  "ID" : 914,
-  "Fitness" : 6.9786816,
+  "ID" : 563,
+  "Fitness" : 7.132324,
   "Feasible" : false
 },
 {
-  "Size" : 157,
+  "Size" : 223,
   "Groups" : 2,
-  "ID" : 25,
-  "Fitness" : 8.641148,
+  "ID" : 60,
+  "Fitness" : 7.9769716,
   "Feasible" : false
 },
 {
-  "Size" : 190,
-  "Groups" : 2,
-  "ID" : 644,
-  "Fitness" : 7.177254,
-  "Feasible" : false
-},
-{
-  "Size" : 188,
+  "Size" : 155,
   "Groups" : 3,
-  "ID" : 646,
-  "Fitness" : 7.820582,
+  "ID" : 610,
+  "Fitness" : 7.459845,
   "Feasible" : false
 },
 {
   "Size" : 126,
   "Groups" : 2,
-  "ID" : 1278,
-  "Fitness" : 7.4537683,
+  "ID" : 2198,
+  "Fitness" : 7.1095877,
   "Feasible" : false
 },
 {
-  "Size" : 185,
-  "Groups" : 5,
-  "ID" : 65,
-  "Fitness" : 7.8823123,
+  "Size" : 153,
+  "Groups" : 4,
+  "ID" : 1527,
+  "Fitness" : 7.726882,
   "Feasible" : false
 },
 {
   "Size" : 186,
   "Groups" : 4,
-  "ID" : 825,
-  "Fitness" : 9.024955,
+  "ID" : 248,
+  "Fitness" : 7.6640863,
   "Feasible" : false
 },
 {
-  "Size" : 250,
-  "Groups" : 6,
-  "ID" : 350,
-  "Fitness" : 7.167451,
-  "Feasible" : false
-},
-{
-  "Size" : 184,
-  "Groups" : 6,
-  "ID" : 408,
-  "Fitness" : 8.530609,
+  "Size" : 125,
+  "Groups" : 3,
+  "ID" : 545,
+  "Fitness" : 7.654122,
   "Feasible" : false
 },
 {
   "Size" : 124,
   "Groups" : 4,
-  "ID" : 1065,
-  "Fitness" : 9.537823,
+  "ID" : 2433,
+  "Fitness" : 9.465458,
   "Feasible" : true
 },
 {
   "Size" : 152,
   "Groups" : 5,
-  "ID" : 979,
-  "Fitness" : 7.9748354,
-  "Feasible" : false
+  "ID" : 956,
+  "Fitness" : 9.743269,
+  "Feasible" : true
 },
 {
   "Size" : 150,
   "Groups" : 7,
-  "ID" : 220,
-  "Fitness" : 7.2673225,
+  "ID" : 238,
+  "Fitness" : 7.4005055,
   "Feasible" : false
+},
+{
+  "Size" : 107,
+  "Groups" : 5,
+  "ID" : 1480,
+  "Fitness" : 9.636972,
+  "Feasible" : true
 },
 {
   "Size" : 122,
   "Groups" : 8,
-  "ID" : 428,
-  "Fitness" : 6.18685,
+  "ID" : 800,
+  "Fitness" : 6.3437076,
   "Feasible" : false
 },
 {
-  "Size" : 248,
+  "Size" : 106,
+  "Groups" : 7,
+  "ID" : 105,
+  "Fitness" : 7.48478,
+  "Feasible" : false
+},
+{
+  "Size" : 122,
   "Groups" : 9,
-  "ID" : 24,
-  "Fitness" : 5.926327,
+  "ID" : 349,
+  "Fitness" : 5.937026,
   "Feasible" : false
 },
 {
   "Size" : 255,
   "Groups" : 3,
-  "ID" : 317,
-  "Fitness" : 7.775975,
+  "ID" : 240,
+  "Fitness" : 6.757451,
   "Feasible" : false
 },
 {
-  "Size" : 224,
-  "Groups" : 2,
-  "ID" : 268,
-  "Fitness" : 7.281045,
+  "Size" : 251,
+  "Groups" : 6,
+  "ID" : 16,
+  "Fitness" : 8.863104,
   "Feasible" : false
 },
 {
-  "Size" : 158,
-  "Groups" : 2,
-  "ID" : 2199,
-  "Fitness" : 7.659709,
-  "Feasible" : false
-},
-{
-  "Size" : 222,
-  "Groups" : 3,
-  "ID" : 328,
-  "Fitness" : 7.370609,
+  "Size" : 220,
+  "Groups" : 4,
+  "ID" : 158,
+  "Fitness" : 7.7044444,
   "Feasible" : false
 },
 {
   "Size" : 156,
   "Groups" : 3,
-  "ID" : 508,
-  "Fitness" : 7.8632083,
+  "ID" : 384,
+  "Fitness" : 7.81768,
   "Feasible" : false
 },
 {
-  "Size" : 153,
-  "Groups" : 5,
-  "ID" : 147,
-  "Fitness" : 8.278086,
+  "Size" : 110,
+  "Groups" : 2,
+  "ID" : 2321,
+  "Fitness" : 7.090714,
   "Feasible" : false
 },
 {
-  "Size" : 109,
-  "Groups" : 3,
-  "ID" : 112,
-  "Fitness" : 7.368355,
+  "Size" : 217,
+  "Groups" : 7,
+  "ID" : 333,
+  "Fitness" : 7.778723,
+  "Feasible" : false
+},
+{
+  "Size" : 249,
+  "Groups" : 8,
+  "ID" : 434,
+  "Fitness" : 7.0500174,
   "Feasible" : false
 },
 {
   "Size" : 154,
   "Groups" : 4,
-  "ID" : 2095,
-  "Fitness" : 8.4940605,
+  "ID" : 99,
+  "Fitness" : 7.945613,
   "Feasible" : false
 },
 {
-  "Size" : 186,
-  "Groups" : 5,
-  "ID" : 973,
-  "Fitness" : 7.173483,
+  "Size" : 218,
+  "Groups" : 6,
+  "ID" : 123,
+  "Fitness" : 8.462793,
   "Feasible" : false
 },
 {
-  "Size" : 151,
-  "Groups" : 7,
-  "ID" : 223,
-  "Fitness" : 7.780668,
-  "Feasible" : false
-},
-{
-  "Size" : 108,
-  "Groups" : 4,
-  "ID" : 433,
-  "Fitness" : 7.8304844,
+  "Size" : 109,
+  "Groups" : 3,
+  "ID" : 1481,
+  "Fitness" : 7.6014953,
   "Feasible" : false
 },
 {
   "Size" : 152,
   "Groups" : 6,
-  "ID" : 36,
-  "Fitness" : 7.850944,
+  "ID" : 111,
+  "Fitness" : 8.119005,
   "Feasible" : false
 },
 {
   "Size" : 124,
   "Groups" : 5,
-  "ID" : 1259,
-  "Fitness" : 9.727732,
+  "ID" : 732,
+  "Fitness" : 9.605122,
   "Feasible" : true
 },
 {
-  "Size" : 216,
+  "Size" : 108,
+  "Groups" : 4,
+  "ID" : 1315,
+  "Fitness" : 7.515271,
+  "Feasible" : false
+},
+{
+  "Size" : 150,
   "Groups" : 8,
-  "ID" : 243,
-  "Fitness" : 7.9350204,
+  "ID" : 509,
+  "Fitness" : 7.559114,
   "Feasible" : false
 },
 {
-  "Size" : 123,
-  "Groups" : 7,
-  "ID" : 134,
-  "Fitness" : 9.197523,
+  "Size" : 107,
+  "Groups" : 6,
+  "ID" : 1041,
+  "Fitness" : 8.325609,
   "Feasible" : false
 },
 {
-  "Size" : 308,
-  "Groups" : 9,
-  "ID" : 267,
-  "Fitness" : 6.434809,
+  "Size" : 106,
+  "Groups" : 8,
+  "ID" : 795,
+  "Fitness" : 6.4192276,
   "Feasible" : false
 },
 {
-  "Size" : 188,
+  "Size" : 155,
   "Groups" : 2,
-  "ID" : 1785,
-  "Fitness" : 7.3793163,
+  "ID" : 2181,
+  "Fitness" : 7.0824485,
+  "Feasible" : false
+},
+{
+  "Size" : 252,
+  "Groups" : 3,
+  "ID" : 426,
+  "Fitness" : 6.6904964,
   "Feasible" : false
 },
 {
   "Size" : 153,
   "Groups" : 3,
-  "ID" : 283,
-  "Fitness" : 7.6662154,
+  "ID" : 221,
+  "Fitness" : 8.13294,
   "Feasible" : false
 },
 {
   "Size" : 125,
   "Groups" : 2,
-  "ID" : 305,
-  "Fitness" : 8.976128,
+  "ID" : 544,
+  "Fitness" : 8.882236,
   "Feasible" : false
 },
 {
-  "Size" : 186,
-  "Groups" : 3,
-  "ID" : 1058,
-  "Fitness" : 7.6591964,
-  "Feasible" : false
-},
-{
-  "Size" : 184,
+  "Size" : 151,
   "Groups" : 4,
-  "ID" : 1023,
-  "Fitness" : 8.08564,
+  "ID" : 215,
+  "Fitness" : 8.168682,
   "Feasible" : false
 },
 {
   "Size" : 124,
   "Groups" : 3,
-  "ID" : 2032,
-  "Fitness" : 9.304924,
+  "ID" : 1876,
+  "Fitness" : 9.239263,
   "Feasible" : true
 },
 {
-  "Size" : 123,
-  "Groups" : 4,
-  "ID" : 103,
-  "Fitness" : 8.382445,
+  "Size" : 248,
+  "Groups" : 6,
+  "ID" : 182,
+  "Fitness" : 7.6384897,
   "Feasible" : false
 },
 {
-  "Size" : 214,
-  "Groups" : 7,
-  "ID" : 232,
-  "Fitness" : 7.5730405,
+  "Size" : 184,
+  "Groups" : 4,
+  "ID" : 516,
+  "Fitness" : 7.3505297,
   "Feasible" : false
 },
 {
   "Size" : 150,
   "Groups" : 5,
-  "ID" : 2438,
-  "Fitness" : 8.614866,
-  "Feasible" : true
+  "ID" : 180,
+  "Fitness" : 8.355371,
+  "Feasible" : false
 },
 {
-  "Size" : 182,
+  "Size" : 123,
+  "Groups" : 4,
+  "ID" : 1739,
+  "Fitness" : 7.6245246,
+  "Feasible" : false
+},
+{
+  "Size" : 122,
   "Groups" : 6,
-  "ID" : 1953,
-  "Fitness" : 7.1061277,
+  "ID" : 3,
+  "Fitness" : 7.795278,
   "Feasible" : false
 },
 {
   "Size" : 148,
   "Groups" : 7,
-  "ID" : 8,
-  "Fitness" : 8.2969265,
-  "Feasible" : false
+  "ID" : 276,
+  "Fitness" : 9.251192,
+  "Feasible" : true
 },
 {
   "Size" : 106,
   "Groups" : 5,
-  "ID" : 1632,
-  "Fitness" : 9.603656,
+  "ID" : 242,
+  "Fitness" : 9.357846,
   "Feasible" : true
-},
-{
-  "Size" : 122,
-  "Groups" : 6,
-  "ID" : 1639,
-  "Fitness" : 6.829672,
-  "Feasible" : false
 },
 {
   "Size" : 156,
   "Groups" : 2,
-  "ID" : 163,
-  "Fitness" : 7.6129766,
-  "Feasible" : false
-},
-{
-  "Size" : 220,
-  "Groups" : 3,
-  "ID" : 1302,
-  "Fitness" : 7.4921846,
+  "ID" : 1718,
+  "Fitness" : 7.328642,
   "Feasible" : false
 },
 {
   "Size" : 154,
   "Groups" : 3,
-  "ID" : 47,
-  "Fitness" : 9.138966,
-  "Feasible" : true
+  "ID" : 59,
+  "Fitness" : 7.7429695,
+  "Feasible" : false
 },
 {
   "Size" : 109,
   "Groups" : 2,
-  "ID" : 117,
-  "Fitness" : 7.0918546,
+  "ID" : 470,
+  "Fitness" : 6.905911,
+  "Feasible" : false
+},
+{
+  "Size" : 218,
+  "Groups" : 4,
+  "ID" : 520,
+  "Fitness" : 7.6318426,
+  "Feasible" : false
+},
+{
+  "Size" : 216,
+  "Groups" : 6,
+  "ID" : 94,
+  "Fitness" : 7.690276,
   "Feasible" : false
 },
 {
   "Size" : 152,
   "Groups" : 4,
-  "ID" : 28,
-  "Fitness" : 8.146439,
+  "ID" : 986,
+  "Fitness" : 9.60181,
+  "Feasible" : true
+},
+{
+  "Size" : 248,
+  "Groups" : 7,
+  "ID" : 237,
+  "Fitness" : 7.255865,
   "Feasible" : false
 },
 {
-  "Size" : 184,
-  "Groups" : 5,
-  "ID" : 252,
-  "Fitness" : 6.732911,
-  "Feasible" : false
+  "Size" : 107,
+  "Groups" : 4,
+  "ID" : 656,
+  "Fitness" : 9.44397,
+  "Feasible" : true
 },
 {
-  "Size" : 108,
-  "Groups" : 3,
-  "ID" : 2446,
-  "Fitness" : 7.5768437,
-  "Feasible" : false
-},
-{
-  "Size" : 123,
-  "Groups" : 5,
-  "ID" : 95,
-  "Fitness" : 6.623637,
+  "Size" : 150,
+  "Groups" : 6,
+  "ID" : 69,
+  "Fitness" : 8.563646,
   "Feasible" : false
 },
 {
   "Size" : 214,
   "Groups" : 8,
-  "ID" : 455,
-  "Fitness" : 7.4943814,
+  "ID" : 358,
+  "Fitness" : 6.9452133,
   "Feasible" : false
 },
 {
-  "Size" : 150,
-  "Groups" : 6,
-  "ID" : 2437,
-  "Fitness" : 6.789852,
+  "Size" : 123,
+  "Groups" : 5,
+  "ID" : 808,
+  "Fitness" : 7.5937014,
   "Feasible" : false
 },
 {
   "Size" : 148,
   "Groups" : 8,
-  "ID" : 315,
-  "Fitness" : 7.779679,
+  "ID" : 161,
+  "Fitness" : 7.5195227,
   "Feasible" : false
 },
 {
   "Size" : 106,
   "Groups" : 6,
-  "ID" : 1422,
-  "Fitness" : 7.937646,
-  "Feasible" : false
-},
-{
-  "Size" : 148,
-  "Groups" : 9,
-  "ID" : 500,
-  "Fitness" : 6.673732,
+  "ID" : 797,
+  "Fitness" : 6.799094,
   "Feasible" : false
 },
 {
   "Size" : 186,
   "Groups" : 2,
-  "ID" : 1988,
-  "Fitness" : 7.46435,
-  "Feasible" : false
-},
-{
-  "Size" : 247,
-  "Groups" : 5,
-  "ID" : 448,
-  "Fitness" : 7.744439,
+  "ID" : 397,
+  "Fitness" : 7.1926517,
   "Feasible" : false
 },
 {
   "Size" : 124,
   "Groups" : 2,
-  "ID" : 2402,
-  "Fitness" : 9.12743,
+  "ID" : 609,
+  "Fitness" : 8.9984865,
   "Feasible" : true
 },
 {
-  "Size" : 184,
-  "Groups" : 3,
-  "ID" : 2151,
-  "Fitness" : 7.761548,
-  "Feasible" : false
-},
-{
-  "Size" : 248,
-  "Groups" : 4,
-  "ID" : 491,
-  "Fitness" : 7.532611,
-  "Feasible" : false
-},
-{
-  "Size" : 149,
-  "Groups" : 4,
-  "ID" : 13,
-  "Fitness" : 7.7029686,
-  "Feasible" : false
-},
-{
-  "Size" : 245,
-  "Groups" : 7,
-  "ID" : 356,
-  "Fitness" : 6.3010387,
+  "Size" : 246,
+  "Groups" : 6,
+  "ID" : 153,
+  "Fitness" : 7.456979,
   "Feasible" : false
 },
 {
   "Size" : 123,
   "Groups" : 3,
-  "ID" : 295,
-  "Fitness" : 8.194946,
-  "Feasible" : false
-},
-{
-  "Size" : 246,
-  "Groups" : 6,
-  "ID" : 393,
-  "Fitness" : 7.2318964,
+  "ID" : 319,
+  "Fitness" : 7.5953918,
   "Feasible" : false
 },
 {
   "Size" : 182,
   "Groups" : 4,
-  "ID" : 2218,
-  "Fitness" : 7.744347,
-  "Feasible" : false
-},
-{
-  "Size" : 211,
-  "Groups" : 8,
-  "ID" : 152,
-  "Fitness" : 6.8791494,
+  "ID" : 479,
+  "Fitness" : 8.144182,
   "Feasible" : false
 },
 {
   "Size" : 122,
   "Groups" : 4,
-  "ID" : 427,
-  "Fitness" : 7.83353,
+  "ID" : 230,
+  "Fitness" : 7.2148285,
   "Feasible" : false
 },
 {
-  "Size" : 148,
-  "Groups" : 5,
-  "ID" : 774,
-  "Fitness" : 9.811185,
-  "Feasible" : false
-},
-{
-  "Size" : 244,
-  "Groups" : 8,
-  "ID" : 453,
-  "Fitness" : 7.0657835,
-  "Feasible" : false
-},
-{
-  "Size" : 244,
-  "Groups" : 9,
-  "ID" : 269,
-  "Fitness" : 6.8411174,
-  "Feasible" : false
-},
-{
-  "Size" : 154,
-  "Groups" : 2,
-  "ID" : 672,
-  "Fitness" : 9.193111,
-  "Feasible" : true
-},
-{
-  "Size" : 247,
+  "Size" : 121,
   "Groups" : 6,
-  "ID" : 217,
-  "Fitness" : 7.486894,
+  "ID" : 1492,
+  "Fitness" : 6.605142,
   "Feasible" : false
 },
 {
-  "Size" : 152,
+  "Size" : 253,
+  "Groups" : 2,
+  "ID" : 464,
+  "Fitness" : 7.0487547,
+  "Feasible" : false
+},
+{
+  "Size" : 187,
+  "Groups" : 2,
+  "ID" : 151,
+  "Fitness" : 7.753937,
+  "Feasible" : false
+},
+{
+  "Size" : 218,
   "Groups" : 3,
-  "ID" : 1743,
-  "Fitness" : 8.009346,
+  "ID" : 418,
+  "Fitness" : 7.359704,
+  "Feasible" : false
+},
+{
+  "Size" : 183,
+  "Groups" : 4,
+  "ID" : 1670,
+  "Fitness" : 7.5004053,
   "Feasible" : false
 },
 {
   "Size" : 108,
   "Groups" : 2,
-  "ID" : 2358,
-  "Fitness" : 7.3643785,
+  "ID" : 277,
+  "Fitness" : 7.157051,
   "Feasible" : false
 },
 {
-  "Size" : 149,
-  "Groups" : 5,
-  "ID" : 367,
-  "Fitness" : 8.709883,
-  "Feasible" : false
+  "Size" : 152,
+  "Groups" : 3,
+  "ID" : 566,
+  "Fitness" : 9.126917,
+  "Feasible" : true
+},
+{
+  "Size" : 107,
+  "Groups" : 3,
+  "ID" : 597,
+  "Fitness" : 9.242048,
+  "Feasible" : true
 },
 {
   "Size" : 150,
   "Groups" : 4,
-  "ID" : 690,
-  "Fitness" : 8.683126,
+  "ID" : 177,
+  "Fitness" : 8.159546,
   "Feasible" : false
 },
 {
-  "Size" : 246,
-  "Groups" : 7,
-  "ID" : 281,
-  "Fitness" : 7.4942303,
-  "Feasible" : false
-},
-{
-  "Size" : 182,
-  "Groups" : 5,
-  "ID" : 528,
-  "Fitness" : 7.543859,
-  "Feasible" : false
-},
-{
-  "Size" : 122,
-  "Groups" : 5,
-  "ID" : 54,
-  "Fitness" : 7.7549567,
-  "Feasible" : false
-},
-{
-  "Size" : 106,
-  "Groups" : 4,
-  "ID" : 896,
-  "Fitness" : 8.371069,
-  "Feasible" : false
-},
-{
-  "Size" : 180,
-  "Groups" : 7,
-  "ID" : 420,
-  "Fitness" : 7.6007357,
+  "Size" : 214,
+  "Groups" : 6,
+  "ID" : 216,
+  "Fitness" : 8.343309,
   "Feasible" : false
 },
 {
   "Size" : 148,
   "Groups" : 6,
-  "ID" : 1506,
-  "Fitness" : 8.593153,
-  "Feasible" : true
+  "ID" : 204,
+  "Fitness" : 8.473423,
+  "Feasible" : false
+},
+{
+  "Size" : 106,
+  "Groups" : 4,
+  "ID" : 393,
+  "Fitness" : 7.929856,
+  "Feasible" : false
+},
+{
+  "Size" : 122,
+  "Groups" : 5,
+  "ID" : 103,
+  "Fitness" : 7.3255453,
+  "Feasible" : false
+},
+{
+  "Size" : 245,
+  "Groups" : 9,
+  "ID" : 222,
+  "Fitness" : 7.0128145,
+  "Feasible" : false
+},
+{
+  "Size" : 212,
+  "Groups" : 9,
+  "ID" : 209,
+  "Fitness" : 6.300418,
+  "Feasible" : false
 }]

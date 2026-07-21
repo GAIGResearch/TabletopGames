@@ -151,9 +151,9 @@ public class GenerateBoards {
             StringBuilder outputQ = new StringBuilder("{\"");
 
             outputQ.append("id\":\"").append(quest.getName()).append("\"");
-            outputQ.append(",\"act\":\"").append(quest.getAct()).append("\"");
-            outputQ.append(",\"starting-gold\":\"").append(quest.getGold()).append("\"");
-            outputQ.append(",\"starting-xp\":\"").append(quest.getStartingXP()).append("\"");
+            outputQ.append(",\"act\":").append(quest.getAct());
+            outputQ.append(",\"starting-gold\":").append(quest.getGold());
+            outputQ.append(",\"starting-xp\":").append(quest.getStartingXP());
             outputQ.append(",\"traits\": [\"").append(String.join("\", \"", quest.getMonsterTraits())).append("\"]");
             outputQ.append(",\"monsters\": [");
             int monsterMax = quest.getMonsters().size();
@@ -685,7 +685,7 @@ public class GenerateBoards {
         mutateXP(newQuest);
         mutateTraits(newQuest);
 
-        mutatePositions(finalNodes, newQuest, finalMonsters);
+        finalMonsters = mutatePositions(finalNodes, newQuest, finalMonsters);
 
         newQuest.setMonsters(finalMonsters);
 
@@ -865,7 +865,7 @@ public class GenerateBoards {
         return newMonsters;
     }
 
-    static void mutatePositions(List<BoardNode> nodes, Quest quest, List<String[]> monsters) {
+    static List<String[]> mutatePositions(List<BoardNode> nodes, Quest quest, List<String[]> monsters) {
         List<String> tiles = new ArrayList<>();
         List<String> taken = new ArrayList<>();
         for (BoardNode node : nodes) {
@@ -883,7 +883,6 @@ public class GenerateBoards {
         if (forceHeroMutate) {
             heroStart = "null";
             for (String tile : tiles) {
-                if (taken.contains(tile)) continue;
                 boolean legal = true;
                 for (String illegal : ControlVariables.illegalHeroSpawns) {
                     if (tile.contains(illegal)) {
@@ -960,6 +959,7 @@ public class GenerateBoards {
 
             if (forceMonsterMutate) {
                 monsterPosition = "null";
+                monster[1] = monsterPosition;
                 List<String> illegals = new ArrayList<>(ControlVariables.illegalMonsterSpawns);
                 if (barghest)
                     illegals.addAll(ControlVariables.illegalBarghestSpawns);
@@ -990,6 +990,9 @@ public class GenerateBoards {
             taken.add(monsterPosition);
             monster[1] = monsterPosition;
         }
+
+        return monsters;
+
     }
 
     static void mutateAct(Quest quest) {
