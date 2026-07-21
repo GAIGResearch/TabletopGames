@@ -683,6 +683,12 @@ public class GenerateBoards {
             return false;
         }
 
+        // Free Edge Failure
+        if (scores.get("Free Edges") > 0f) {
+            System.out.println("Free Edge Failure");
+            return false;
+        }
+
         // Geometry Check
         if (scores.get("Geometry") < 1f) {
             System.out.println("Geometry Failure");
