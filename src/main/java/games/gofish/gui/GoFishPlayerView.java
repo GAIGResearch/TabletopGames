@@ -25,7 +25,7 @@ public class GoFishPlayerView extends JComponent {
 
         // Player hand
         this.playerHandView = new GoFishDeckView(
-                humanIds.stream().toList().getFirst(),
+                humanIds.stream().findFirst().orElse(-1),
                 hand,
                 true,
                 null,
