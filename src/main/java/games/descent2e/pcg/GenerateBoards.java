@@ -1259,6 +1259,12 @@ public class GenerateBoards {
                         if (connections[i].equals(first[1])) {
                             String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
                             neighbours[i] = second[0];
+                            for (BoardNode n2 : nodes) {
+                                if (n2.getComponentName().equals(second[0])) {
+                                    node.addNeighbourWithCost(n2);
+                                    break;
+                                }
+                            }
                             break;
                         }
                     }
@@ -1269,6 +1275,12 @@ public class GenerateBoards {
                         if (connections[i].equals(second[1])) {
                             String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
                             neighbours[i] = first[0];
+                            for (BoardNode n2 : nodes) {
+                                if (n2.getComponentName().equals(first[0])) {
+                                    node.addNeighbourWithCost(n2);
+                                    break;
+                                }
+                            }
                             break;
                         }
                     }
