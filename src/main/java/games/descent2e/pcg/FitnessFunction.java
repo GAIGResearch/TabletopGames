@@ -111,11 +111,15 @@ public class FitnessFunction {
         }
     }
 
-    static boolean legalSpawns(Quest quest) {
+    static boolean legalSpawns(Quest quest, GraphBoard board) {
         String heroTile = quest.getStartingTile();
         for (String tile : illegalHeroSpawns)
             if (heroTile.contains(tile))
                 return false;
+
+        List<String> allNodes = new ArrayList<>();
+        for (BoardNode node : board.getBoardNodes())
+            allNodes.add(node.getComponentName());
 
         List<String> occupied = new ArrayList<>();
         List<Pair<String, Integer>> occupiedSize = new ArrayList<>();
@@ -135,6 +139,10 @@ public class FitnessFunction {
         {
             String monsterTile = monster[1];
             String monsterName = monster[0];
+
+            // Make sure the tile is actually valid in the first place
+            if (monsterTile.equals("null") || !allNodes.contains(monsterTile))
+                return false;
 
             // Lieutenants can be placed anywhere that Heroes can
             boolean dragon = monsterName.contains("Open") && !monsterName.contains("OpenSmall") && dragonOpen;
@@ -354,7 +362,7 @@ public class FitnessFunction {
 
         // Legal Spawning
         // Boolean = Score 1 if all legal, 0 if conflict
-        float spawning = legalSpawns(quest) ? 1f : 0f;
+        float spawning = legalSpawns(quest, board) ? 1f : 0f;
 
         // Map Consistency
         float consistency = consistency(board);
