@@ -71,6 +71,55 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
     boolean debugDrawGridReferences = false;
     boolean debugDrawTileReferences = false;
 
+    public DescentGridBoardView(GridBoard gridBoard,  Map<Integer, GridBoard> tiles, Map<String, Map<Vector2D, Vector2D>> gridReferences, int[][] tileReferences, String dataPath, int offset, int width, int height) {
+        super(gridBoard, width, height);
+        this.gameState = null;
+        this.offset = offset;
+        this.maxSize = new Dimension(width+offset*2, height+offset*2);
+        this.dataPath = dataPath;
+        notConnectedMap = new HashMap<>();
+        double w = gridBoard.getWidth() * defaultItemSize;
+        double h = gridBoard.getHeight() * defaultItemSize;
+        double minScale = 1.0;
+        if (width / w < minScale) minScale = width/w;
+        if (height / h < minScale) minScale = height/h;
+        scale = minScale;
+        updateScale(scale);
+
+        for (Integer key : tiles.keySet()) {
+            System.out.println(key);
+        }
+
+        tileImageTopLeftCorners = new HashMap<>();
+        for (String tile: gridReferences.keySet()) {
+            int minX = Integer.MAX_VALUE;
+            int minY = Integer.MAX_VALUE;
+            int maxX = 0;
+            int maxY = 0;
+            int compID = -1;
+            for (Vector2D space: gridReferences.get(tile).keySet()) {
+                //System.out.println(space.getX() + ", " + space.getY());
+                if (space.getX() < minX) minX = space.getX();
+                if (space.getY() < minY) minY = space.getY();
+                if (space.getX() > maxX) maxX = space.getX();
+                if (space.getY() > maxY) maxY = space.getY();
+                compID = tileReferences[space.getY()][space.getX()] - 1;
+            }
+            System.out.println(tile + ", " + compID);
+//            for (Integer key : tiles.get(compID).getProperties().keySet()) {
+//                System.out.println(key);
+//                System.out.println(tiles.get(compID).getProperty(key));
+//                System.out.println(tiles.get(compID).getProperty(key).getHashString());
+//            }
+            int orientation = ((PropertyInt) tiles.get(compID).getProperty(orientationHash)).value;
+            Image img = ImageIO.GetInstance().getImage(dataPath + "tiles/" + tile.split("-")[0] + ".png");
+            Image img2 = rotateImage((BufferedImage) img, new Pair<>(img.getWidth(null), img.getHeight(null)), orientation);
+
+            tileImageTopLeftCorners.put(new Vector2D(minX, minY), new Pair<>(img2, new Pair<>(maxX-minX+1, maxY-minY+1)));
+        }
+
+    }
+
     public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState, int offset, int width, int height) {
         super(gridBoard, width, height);
         this.gameState = gameState;
@@ -193,158 +242,158 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
             drawGridBoardWithGraphConnectivity(g, (GridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
         }
 
-        // Draw tokens
-        for (DToken dt : gameState.getTokens()) {
-            if (dt.getPosition() != null) {
-                String imgPath = dataPath + dt.getDescentTokenType().getImgPath(new Random(gameState.getGameParameters().getRandomSeed()));
-                Image img = ImageIO.GetInstance().getImage(imgPath);
-                g.drawImage(img, offset + panX + dt.getPosition().getX() * descentItemSize, offset + panY + dt.getPosition().getY() * descentItemSize, descentItemSize, descentItemSize, null);
+        if (gameState != null) {
 
-                // TODO ugly version
-            }
-        }
-        Stroke s = g.getStroke();
-
-        // Draw heroes
-        for (Hero f : gameState.getHeroes()) {
-            Vector2D loc = f.getPosition();
-            if (loc == null) continue;
-            DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString) f.getProperty("archetype")).value);
-
-            // Color
-            g.setColor(archetype.getColor());
-            g.fillOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
-
-            if (gameState.getActingFigure().equals(f)) {
-                g.setStroke(highlightStroke);
-                g.setColor(highlightColor);
-            } else {
-                g.setColor(Color.black);
-            }
-            g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
-            g.setStroke(s);
-
-            if (prettyVersion) {
-                // Image
-                int imgSize = descentItemSize * 2 / 3;
-                Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
-                g.drawImage(img, offset + panX + loc.getX() * descentItemSize + descentItemSize / 2 - imgSize / 2,
-                        offset + panY + loc.getY() * descentItemSize + descentItemSize / 2 - imgSize / 2, imgSize, imgSize, null);
-            }
-        }
-
-        // Draw monsters
-        for (List<Monster> monsterGroup : gameState.getMonsters()) {
-
-            // Only draws the monster group if there are monsters within it, to prevent out of index access attempts
-            if(!monsterGroup.isEmpty())
-            {
-                String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
-
-                for (Monster m : monsterGroup) {
-                    Vector2D loc = m.getPosition();
-                    if (loc == null) continue;
-                    loc = m.applyAnchorModifier();
-                    int orientation = m.getOrientation().ordinal();
-
-                    // Get the size of the monster, and scale according to item size
-                    Pair<Integer, Integer> size = m.getSize().copy();
-                    size.a *= descentItemSize;
-                    size.b *= descentItemSize;
+            // Draw tokens
+            for (DToken dt : gameState.getTokens()) {
+                if (dt.getPosition() != null) {
+                    String imgPath = dataPath + dt.getDescentTokenType().getImgPath(new Random(gameState.getGameParameters().getRandomSeed()));
+                    Image img = ImageIO.GetInstance().getImage(imgPath);
+                    g.drawImage(img, offset + panX + dt.getPosition().getX() * descentItemSize, offset + panY + dt.getPosition().getY() * descentItemSize, descentItemSize, descentItemSize, null);
 
                     // TODO ugly version
+                }
+            }
+            Stroke s = g.getStroke();
 
-                    String mPath = path;
+            // Draw heroes
+            for (Hero f : gameState.getHeroes()) {
+                Vector2D loc = f.getPosition();
+                if (loc == null) continue;
+                DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString) f.getProperty("archetype")).value);
 
-                    String imagePath = dataPath;
-                    if (!m.isLieutenant()) {
-                        if (((PropertyString) m.getProperty("instance")).value.equals("Master"))
-                            mPath = mPath.replace(".png", "-master.png");
-                    }
-                    imagePath += mPath;
-                    Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
-                    BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
-                    g.drawImage(imgToDraw, offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, null);
+                // Color
+                g.setColor(archetype.getColor());
+                g.fillOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
 
-                    if (gameState.getActingFigure().equals(m)) {
-                        g.setStroke(highlightStroke);
-                        g.setColor(highlightColor);
-                        // Check if facing Up/Down or Left/Right to draw correctly
-                        if (m.getOrientation().ordinal() % 2 == 0) {
-                            g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, size.a, size.b);
-                        }
-                        else {
-                            g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, size.b, size.a);
-                        }
-                    } else {
-                        g.setColor(Color.black);
-                    }
-                    g.setStroke(s);
-
-                    int health = m.getAttributeValue(Figure.Attribute.Health);
-                    int maxHealth = m.getAttributeMax(Figure.Attribute.Health);
-                    g.setColor(Color.red);
-                    g.fillRect(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, (int) (descentItemSize * health * 1.0 / maxHealth), 5);
+                if (gameState.getActingFigure().equals(f)) {
+                    g.setStroke(highlightStroke);
+                    g.setColor(highlightColor);
+                } else {
                     g.setColor(Color.black);
-                    g.drawRect(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, (int) (descentItemSize * health * 1.0 / maxHealth), 5);
+                }
+                g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+                g.setStroke(s);
+
+                if (prettyVersion) {
+                    // Image
+                    int imgSize = descentItemSize * 2 / 3;
+                    Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
+                    g.drawImage(img, offset + panX + loc.getX() * descentItemSize + descentItemSize / 2 - imgSize / 2,
+                            offset + panY + loc.getY() * descentItemSize + descentItemSize / 2 - imgSize / 2, imgSize, imgSize, null);
                 }
             }
-        }
 
-        // Draw action space highlights
-        for (Vector2D pos: actionHighlights) {
-            int xC = offset+panX + pos.getX() * descentItemSize;
-            int yC = offset+ panY + pos.getY() * descentItemSize;
-            g.setColor(highlightColor);
-            g.fillRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
-            g.setColor(Color.black);
-            g.drawRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
-        }
+            // Draw monsters
+            for (List<Monster> monsterGroup : gameState.getMonsters()) {
 
-        // Draw attack target
-        if (attackTarget != -1) {
+                // Only draws the monster group if there are monsters within it, to prevent out of index access attempts
+                if (!monsterGroup.isEmpty()) {
+                    String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
-            Figure target = (Figure) gameState.getComponentById(attackTarget);
+                    for (Monster m : monsterGroup) {
+                        Vector2D loc = m.getPosition();
+                        if (loc == null) continue;
+                        loc = m.applyAnchorModifier();
+                        int orientation = m.getOrientation().ordinal();
 
-            int xC = offset + panX + target.getPosition().getX() * descentItemSize;
-            int yC = offset + panY + target.getPosition().getY() * descentItemSize;
+                        // Get the size of the monster, and scale according to item size
+                        Pair<Integer, Integer> size = m.getSize().copy();
+                        size.a *= descentItemSize;
+                        size.b *= descentItemSize;
 
-            // Get the size of the monster, and scale according to item size
-            Pair<Integer, Integer> size = target.getSize().copy();
-            size.a *= descentItemSize;
-            size.b *= descentItemSize;
+                        // TODO ugly version
 
-            g.setColor(Color.red);
-            if (target instanceof Monster && ((Monster) target).getOrientation().ordinal() % 2 == 1) {
-                g.drawOval(xC, yC, size.b, size.a);
-            }
-            else {
-                g.drawOval(xC, yC, size.a, size.b);
-            }
-        }
+                        String mPath = path;
 
-        // Draw selected cell highlight
-        if (cellHighlight != null) {
-            int xC = offset + panX + cellHighlight.getX() * descentItemSize;
-            int yC = offset + panY + cellHighlight.getY() * descentItemSize;
-            g.setColor(highlightColor);
-            g.drawRect(xC, yC, descentItemSize, descentItemSize);
-        }
+                        String imagePath = dataPath;
+                        if (!m.isLieutenant()) {
+                            if (((PropertyString) m.getProperty("instance")).value.equals("Master"))
+                                mPath = mPath.replace(".png", "-master.png");
+                        }
+                        imagePath += mPath;
+                        Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
+                        BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
+                        g.drawImage(imgToDraw, offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, null);
 
-        // Debug draw cell coordinates
-        if (debugDrawCellCoordinates) {
-            g.setColor(foregroundColor);
-            Font f = g.getFont();
-            g.setFont(new Font(f.getName(), Font.PLAIN, (int)(12*scale)));
-            GridBoard gridBoard = (GridBoard) component;
-            for (int i = 0; i < gridBoard.getHeight(); i++) {
-                for (int j = 0; j < gridBoard.getWidth(); j++) {
-                    int xC = panX + j * descentItemSize;
-                    int yC = panY + i * descentItemSize;
-                    g.drawString("X:" + j + " Y:" + i, xC + defaultItemSize/5, yC + defaultItemSize);
+                        if (gameState.getActingFigure().equals(m)) {
+                            g.setStroke(highlightStroke);
+                            g.setColor(highlightColor);
+                            // Check if facing Up/Down or Left/Right to draw correctly
+                            if (m.getOrientation().ordinal() % 2 == 0) {
+                                g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, size.a, size.b);
+                            } else {
+                                g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, size.b, size.a);
+                            }
+                        } else {
+                            g.setColor(Color.black);
+                        }
+                        g.setStroke(s);
+
+                        int health = m.getAttributeValue(Figure.Attribute.Health);
+                        int maxHealth = m.getAttributeMax(Figure.Attribute.Health);
+                        g.setColor(Color.red);
+                        g.fillRect(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, (int) (descentItemSize * health * 1.0 / maxHealth), 5);
+                        g.setColor(Color.black);
+                        g.drawRect(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, (int) (descentItemSize * health * 1.0 / maxHealth), 5);
+                    }
                 }
             }
-            g.setFont(f);
+
+            // Draw action space highlights
+            for (Vector2D pos : actionHighlights) {
+                int xC = offset + panX + pos.getX() * descentItemSize;
+                int yC = offset + panY + pos.getY() * descentItemSize;
+                g.setColor(highlightColor);
+                g.fillRect(xC + descentItemSize / 4, yC + descentItemSize / 4, descentItemSize / 2, descentItemSize / 2);
+                g.setColor(Color.black);
+                g.drawRect(xC + descentItemSize / 4, yC + descentItemSize / 4, descentItemSize / 2, descentItemSize / 2);
+            }
+
+            // Draw attack target
+            if (attackTarget != -1) {
+
+                Figure target = (Figure) gameState.getComponentById(attackTarget);
+
+                int xC = offset + panX + target.getPosition().getX() * descentItemSize;
+                int yC = offset + panY + target.getPosition().getY() * descentItemSize;
+
+                // Get the size of the monster, and scale according to item size
+                Pair<Integer, Integer> size = target.getSize().copy();
+                size.a *= descentItemSize;
+                size.b *= descentItemSize;
+
+                g.setColor(Color.red);
+                if (target instanceof Monster && ((Monster) target).getOrientation().ordinal() % 2 == 1) {
+                    g.drawOval(xC, yC, size.b, size.a);
+                } else {
+                    g.drawOval(xC, yC, size.a, size.b);
+                }
+            }
+
+            // Draw selected cell highlight
+            if (cellHighlight != null) {
+                int xC = offset + panX + cellHighlight.getX() * descentItemSize;
+                int yC = offset + panY + cellHighlight.getY() * descentItemSize;
+                g.setColor(highlightColor);
+                g.drawRect(xC, yC, descentItemSize, descentItemSize);
+            }
+
+            // Debug draw cell coordinates
+            if (debugDrawCellCoordinates) {
+                g.setColor(foregroundColor);
+                Font f = g.getFont();
+                g.setFont(new Font(f.getName(), Font.PLAIN, (int) (12 * scale)));
+                GridBoard gridBoard = (GridBoard) component;
+                for (int i = 0; i < gridBoard.getHeight(); i++) {
+                    for (int j = 0; j < gridBoard.getWidth(); j++) {
+                        int xC = panX + j * descentItemSize;
+                        int yC = panY + i * descentItemSize;
+                        g.drawString("X:" + j + " Y:" + i, xC + defaultItemSize / 5, yC + defaultItemSize);
+                    }
+                }
+                g.setFont(f);
+            }
         }
     }
 

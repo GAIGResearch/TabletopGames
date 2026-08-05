@@ -7,6 +7,7 @@ import com.google.crypto.tink.subtle.Random;
 import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.components.GridBoard;
+import core.properties.Property;
 import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameData;
@@ -15,7 +16,9 @@ import games.descent2e.concepts.Quest;
 import org.apache.hadoop.shaded.com.nimbusds.jose.shaded.json.JSONObject;
 import org.apache.hadoop.shaded.com.nimbusds.jose.shaded.json.JSONStyle;
 import utilities.Pair;
+import utilities.Vector2D;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +33,7 @@ import static games.descent2e.pcg.FitnessFunction.*;
 public class GenerateBoards {
 
     static int nowServing = 0;
+    static boolean nowGenerating = false;
 
     public static final List<String> positions = List.of("N-0", "E-0", "S-0", "W-0");
     // How many boards we generate using purely the starting Quests
@@ -51,14 +55,20 @@ public class GenerateBoards {
     public static HashMap<String, HashMap<String, Monster>> monsters;
     public static HashMap<String, HashMap<String, Monster>> lieutenants;
 
+    public static HashMap<Integer, GridBoard> boards = new HashMap<>();
+    public static HashMap<Integer, Map<Integer, GridBoard>> boardTiles = new HashMap<>();
+    public static HashMap<Integer, int[][]> tileRefs = new HashMap<>();
+    public static HashMap<Integer, Map<String, Map<Vector2D, Vector2D>>> gridRefs = new HashMap<>();
+
     public static List<Pair<Quest, GraphBoard>> feasible = new ArrayList<>();
     public static List<Pair<Quest, GraphBoard>> infeasible = new ArrayList<>();
     public static List<HashMap<String, Float>> feasibleFitness = new ArrayList<>();
     public static List<HashMap<String, Float>> infeasibleFitness = new ArrayList<>();
     public static List<Boolean> feasibleList = new ArrayList<>();
 
-    // MAP-Elites
+    // MAP-Elites - Saved as <<Value, Value> , <Map ID, Fitness Score>>
     public static HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_SizeVsGroups = new HashMap<>(); // Board Size vs Group Count
+    public static HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_HealthVsGroups = new HashMap<>(); // Total Health vs Group Count
 
     public static void main(String[] args) throws IOException {
 
@@ -78,6 +88,8 @@ public class GenerateBoards {
         }
 
         int originalSize = originalQuests.size();
+
+        nowGenerating = true;
 
         for (int i = 0; i < FIRSTLOOP; i++) {
             int x = Random.randInt(originalSize);
@@ -116,11 +128,20 @@ public class GenerateBoards {
             }
         }
 
-        exportPCGToJSON(true);
-        exportPCGToJSON(false);
-        exportMAPElitesToJSON();
+        //exportPCGToJSON(true);
+        //exportPCGToJSON(false);
+        //exportMAPElitesToJSON(MapElites.Size, MapElites.Groups);
+        //exportMAPElitesToJSON(MapElites.Health, MapElites.Groups);
 
         System.out.println("Complete!");
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                MapElitesGUI main = new MapElitesGUI();
+                main.show();
+            }
+        });
     }
 
     static void exportPCGToJSON(boolean isFeasible) throws IOException {
@@ -316,19 +337,36 @@ public class GenerateBoards {
         }
     }
 
-    static void exportMAPElitesToJSON() throws IOException {
+    static void exportMAPElitesToJSON(MapElites first, MapElites second) throws IOException {
+
+        HashMap<Pair<Float, Float>, Pair<Integer, Float>> mapElite = new HashMap<>();
+
+        switch(first) {
+            case Size:
+                if (second.equals(MapElites.Groups))
+                    mapElite = map_SizeVsGroups;
+                break;
+            case Health:
+                if (second.equals(MapElites.Groups))
+                    mapElite = map_HealthVsGroups;
+                break;
+        }
+
+        if (mapElite.isEmpty()) return;
+
         ObjectMapper mapper = new ObjectMapper();
-        Path mapEliteOutput = Paths.get("data/descent2e/pcg/mapelites_size&groups.json");
+        String path = "data/descent2e/pcg/mapelites_" + first.name().toLowerCase() + "&" + second.name().toLowerCase() + ".json";
+        Path mapEliteOutput = Paths.get(path);
         Files.write(mapEliteOutput,"[\n".getBytes());
 
         int counter = 0;
-        int max = map_SizeVsGroups.size();
-        for (Pair<Float, Float> key : map_SizeVsGroups.keySet()) {
+        int max = mapElite.size();
+        for (Pair<Float, Float> key : mapElite.keySet()) {
             counter++;
-            Pair<Integer, Float> result = map_SizeVsGroups.get(key);
+            Pair<Integer, Float> result = mapElite.get(key);
             String output = "{\"";
-            output += "Size\":" + key.a.intValue();
-            output += ",\"Groups\":" + key.b.intValue();
+            output += first.name() + "\":" + key.a.intValue();
+            output += ",\"" + second.name() + "\":" + key.b.intValue();
             output += ",\"ID\":" + result.a;
             output += ",\"Fitness\":" + result.b;
             output += ",\"Feasible\":" + feasibleList.get(result.a - 1);
@@ -526,8 +564,15 @@ public class GenerateBoards {
         if (name.contains("-"))
             name = name.split("-")[0];
         for (GridBoard tile : tiles) {
-            if (tile.getComponentName().equals(name))
-                return tile;
+            if (tile.getComponentName().equals(name)) {
+                GridBoard copy = tile.copy();
+                copy.getProperties().clear();
+                for (int prop_key : tile.getProperties().keySet()) {
+                    Property newProp = tile.getProperties().get(prop_key).copy();
+                    copy.getProperties().put(prop_key, newProp);
+                }
+                return copy;
+            }
         }
         return null;
     }
@@ -703,12 +748,20 @@ public class GenerateBoards {
 
         boolean feasible = scores.get("Feasible") > 0f;
 
-        if (feasible)
+        if (feasible) {
             feasibleFitness.add(scores);
+            addToMAPElites(scores);
+        }
         else
             infeasibleFitness.add(scores);
         feasibleList.add(feasible);
 
+        Pair<Quest, GraphBoard> offspring = new Pair<>(newQuest, newBoard);
+
+        return new Pair<>(offspring, feasible);
+    }
+
+    static void addToMAPElites(HashMap<String, Float> scores) {
         Pair<Float, Float> mapKey = new Pair<>(scores.get("Size"), scores.get("Groups"));
         Pair<Integer, Float> mapResult = new Pair<>(nowServing, scores.get("Fitness"));
         if (map_SizeVsGroups.containsKey(mapKey)) {
@@ -719,9 +772,14 @@ public class GenerateBoards {
         else
             map_SizeVsGroups.put(mapKey, mapResult);
 
-        Pair<Quest, GraphBoard> offspring = new Pair<>(newQuest, newBoard);
-
-        return new Pair<>(offspring, feasible);
+        mapKey = new Pair<>((float) Math.floor(scores.get("Total Health")), scores.get("Groups"));
+        if (map_HealthVsGroups.containsKey(mapKey)) {
+            Pair<Integer, Float> oldResult = map_HealthVsGroups.get(mapKey);
+            if (oldResult.b < mapResult.b)
+                map_HealthVsGroups.put(mapKey, mapResult);
+        }
+        else
+            map_HealthVsGroups.put(mapKey, mapResult);
     }
 
     static boolean checkFeasible(HashMap<String, Float> scores) {
@@ -1107,6 +1165,24 @@ public class GenerateBoards {
                 GraphBoard board = quest.b;
                 if (board.getComponentName().equals(name))
                     return board;
+            }
+        }
+        return null;
+    }
+
+    static Pair<Quest, GraphBoard> getQuestByID(int id, boolean isFeasible) {
+        if (isFeasible) {
+            for (Pair<Quest, GraphBoard> quest : feasible) {
+                String name = quest.a.getName();
+                if (Integer.parseInt(name.split("-")[1]) == id)
+                    return quest;
+            }
+        }
+        else {
+            for (Pair<Quest, GraphBoard> quest : infeasible) {
+                String name = quest.a.getName();
+                if (Integer.parseInt(name.split("-")[1]) == id)
+                    return quest;
             }
         }
         return null;

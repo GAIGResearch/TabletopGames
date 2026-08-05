@@ -415,14 +415,24 @@ public class FitnessFunction {
 
     static Pair<int[][], Integer> createBoard(Quest q, GraphBoard b) {
 
-        // 3. Put together the master grid board
+        // Put together the master grid board
         // Find maximum board width and height, if all were put together side by side
+
+        Map<Integer, GridBoard> tiles = new HashMap<>(); // Reference the tiles used
+        Map<String, Map<Vector2D, Vector2D>> gridReferences = new HashMap<>(); // Reference to grid coordinates of tile placed at that position
+
         int width = 0;
         int height = 0;
         for (BoardNode bn : b.getBoardNodes()) {
             // Find width of this tile, according to orientation
-            GridBoard tile = getTileByName(bn.getComponentName());
+            String name = bn.getComponentName();
+            GridBoard tile = getTileByName(name);
             if (tile != null) {
+
+                tile.setProperty(bn.getProperty(orientationHash));
+                gridReferences.put(name, new HashMap<>());
+                tiles.put(tile.getComponentID(), tile);
+
                 int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
                 if (orientation % 2 == 0) {
                     width += tile.getWidth();
@@ -458,6 +468,8 @@ public class FitnessFunction {
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard tile = getTileByName(firstTile.getComponentName());
+            assert tile != null;
+            tile.setComponentName(firstTile.getComponentName());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
             Component[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
@@ -465,7 +477,7 @@ public class FitnessFunction {
             // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
             Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
             // Recursive call, will add all tiles in relation to their neighbours as per the board configuration
-            addTilesToBoard(null, firstTile, startX, startY, board, null, GenerateBoards.tiles, tileReferences, drawn, bounds, null);
+            addTilesToBoard(null, firstTile, startX, startY, board, null, GenerateBoards.tiles, tileReferences, gridReferences, drawn, bounds, null);
 
             BoardNode[][] trimBoard = new BoardNode[bounds.height][bounds.width];
             int[][] trimTileRef = new int[bounds.height][bounds.width];
@@ -481,6 +493,22 @@ public class FitnessFunction {
                 }
             }
 
+            GridBoard finalBoard = new GridBoard(trimBoard);
+            tileReferences = trimTileRef;
+            for (Map.Entry<String, Map<Vector2D, Vector2D>> e : gridReferences.entrySet()) {
+                for (Vector2D v : e.getValue().keySet()) {
+                    v.subtract(bounds.x, bounds.y);
+                }
+            }
+            if (nowGenerating) {
+                if (!boards.containsKey(nowServing)) {
+                    boards.put(nowServing, finalBoard);
+                    boardTiles.put(nowServing, tiles);
+                    tileRefs.put(nowServing, tileReferences);
+                    gridRefs.put(nowServing, gridReferences);
+                    }
+            }
+
             return new Pair<>(trimTileRef, sizeCounter);
         }
         return null;
@@ -489,13 +517,14 @@ public class FitnessFunction {
     private static void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
                                  List<GridBoard> tiles,
-                                 int[][] tileReferences,
+                                 int[][] tileReferences, Map<String, Map<Vector2D, Vector2D>> gridReferences,
                                  Map<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
                                  String sideWithOpening) {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = getTileByName(tileToAdd.getComponentName());
+            tile.setComponentName(tileToAdd.getComponentName());
             BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
             if (tileGrid == null) {
                 tileGrid = originalTileGrid;
@@ -522,6 +551,11 @@ public class FitnessFunction {
 
                     // Set references
                     tileReferences[i][j] = (tile.getComponentID()+1);
+                    for (String s : gridReferences.keySet()) {
+                        gridReferences.get(s).remove(new Vector2D(j, i));
+                    }
+                    //System.out.println(tile.getComponentName());
+                    gridReferences.get(tile.getComponentName()).put(new Vector2D(j, i), new Vector2D(j - x, i - y));
                     }
             }
 
@@ -632,7 +666,7 @@ public class FitnessFunction {
 
                             // Draw neighbour recursively
                             addTilesToBoard(tileToAdd, neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
-                                    tiles, tileReferences, drawn, bounds, side);
+                                    tiles, tileReferences, gridReferences, drawn, bounds, side);
                         }
                     }
                 }

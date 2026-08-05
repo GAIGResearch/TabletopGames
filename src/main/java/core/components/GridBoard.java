@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Objects;
 
-import static core.CoreConstants.imgHash;
+import static core.CoreConstants.*;
 import static utilities.Utils.getNeighbourhood;
 
 /**
@@ -359,10 +359,10 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
             properties.put(imgHash, new PropertyString((String) board.get("img")));
         }
         if (board.get("nodes") != null) {
-            properties.put(100, new PropertyInt("Nodes", ((Long) board.get("nodes")).intValue()));
+            properties.put(nodeHash, new PropertyInt("nodes", ((Long) board.get("nodes")).intValue()));
         }
         if (board.get("space") != null) {
-            properties.put(900, new PropertyInt("Size", ((Long) board.get("space")).intValue()));
+            properties.put(spaceHash, new PropertyInt("size", ((Long) board.get("space")).intValue()));
         }
 
         this.grid = new BoardNode[height][width];

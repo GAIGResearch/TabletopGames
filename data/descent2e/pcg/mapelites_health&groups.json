@@ -1,0 +1,778 @@
+[
+{
+  "Health" : 48,
+  "Groups" : 2,
+  "ID" : 699,
+  "Fitness" : 9.001036,
+  "Feasible" : true
+},
+{
+  "Health" : 64,
+  "Groups" : 3,
+  "ID" : 700,
+  "Fitness" : 9.235413,
+  "Feasible" : true
+},
+{
+  "Health" : 79,
+  "Groups" : 5,
+  "ID" : 710,
+  "Fitness" : 9.6445465,
+  "Feasible" : true
+},
+{
+  "Health" : 62,
+  "Groups" : 3,
+  "ID" : 784,
+  "Fitness" : 9.188721,
+  "Feasible" : true
+},
+{
+  "Health" : 46,
+  "Groups" : 2,
+  "ID" : 1972,
+  "Fitness" : 8.477821,
+  "Feasible" : true
+},
+{
+  "Health" : 91,
+  "Groups" : 6,
+  "ID" : 37,
+  "Fitness" : 9.526016,
+  "Feasible" : true
+},
+{
+  "Health" : 75,
+  "Groups" : 5,
+  "ID" : 2325,
+  "Fitness" : 9.527117,
+  "Feasible" : true
+},
+{
+  "Health" : 88,
+  "Groups" : 4,
+  "ID" : 1299,
+  "Fitness" : 9.449694,
+  "Feasible" : true
+},
+{
+  "Health" : 44,
+  "Groups" : 2,
+  "ID" : 1295,
+  "Fitness" : 8.795713,
+  "Feasible" : true
+},
+{
+  "Health" : 119,
+  "Groups" : 8,
+  "ID" : 247,
+  "Fitness" : 8.692287,
+  "Feasible" : true
+},
+{
+  "Health" : 87,
+  "Groups" : 6,
+  "ID" : 1685,
+  "Fitness" : 9.428823,
+  "Feasible" : true
+},
+{
+  "Health" : 71,
+  "Groups" : 5,
+  "ID" : 2261,
+  "Fitness" : 9.247464,
+  "Feasible" : true
+},
+{
+  "Health" : 58,
+  "Groups" : 3,
+  "ID" : 735,
+  "Fitness" : 9.009905,
+  "Feasible" : true
+},
+{
+  "Health" : 116,
+  "Groups" : 6,
+  "ID" : 1971,
+  "Fitness" : 8.798347,
+  "Feasible" : true
+},
+{
+  "Health" : 100,
+  "Groups" : 5,
+  "ID" : 2147,
+  "Fitness" : 8.225414,
+  "Feasible" : true
+},
+{
+  "Health" : 67,
+  "Groups" : 5,
+  "ID" : 1293,
+  "Fitness" : 9.522277,
+  "Feasible" : true
+},
+{
+  "Health" : 56,
+  "Groups" : 3,
+  "ID" : 692,
+  "Fitness" : 9.233128,
+  "Feasible" : true
+},
+{
+  "Health" : 80,
+  "Groups" : 4,
+  "ID" : 757,
+  "Fitness" : 9.357439,
+  "Feasible" : true
+},
+{
+  "Health" : 96,
+  "Groups" : 5,
+  "ID" : 958,
+  "Fitness" : 9.25597,
+  "Feasible" : true
+},
+{
+  "Health" : 38,
+  "Groups" : 2,
+  "ID" : 1348,
+  "Fitness" : 8.966013,
+  "Feasible" : true
+},
+{
+  "Health" : 54,
+  "Groups" : 3,
+  "ID" : 1432,
+  "Fitness" : 8.802903,
+  "Feasible" : true
+},
+{
+  "Health" : 92,
+  "Groups" : 5,
+  "ID" : 2370,
+  "Fitness" : 9.315493,
+  "Feasible" : true
+},
+{
+  "Health" : 36,
+  "Groups" : 2,
+  "ID" : 2425,
+  "Fitness" : 8.725778,
+  "Feasible" : true
+},
+{
+  "Health" : 52,
+  "Groups" : 3,
+  "ID" : 2054,
+  "Fitness" : 7.81684,
+  "Feasible" : true
+},
+{
+  "Health" : 72,
+  "Groups" : 4,
+  "ID" : 1400,
+  "Fitness" : 8.784792,
+  "Feasible" : true
+},
+{
+  "Health" : 34,
+  "Groups" : 2,
+  "ID" : 1015,
+  "Fitness" : 8.597031,
+  "Feasible" : true
+},
+{
+  "Health" : 65,
+  "Groups" : 3,
+  "ID" : 673,
+  "Fitness" : 8.860893,
+  "Feasible" : true
+},
+{
+  "Health" : 47,
+  "Groups" : 3,
+  "ID" : 221,
+  "Fitness" : 9.161378,
+  "Feasible" : true
+},
+{
+  "Health" : 91,
+  "Groups" : 4,
+  "ID" : 1277,
+  "Fitness" : 8.483225,
+  "Feasible" : true
+},
+{
+  "Health" : 61,
+  "Groups" : 4,
+  "ID" : 727,
+  "Fitness" : 9.487278,
+  "Feasible" : true
+},
+{
+  "Health" : 45,
+  "Groups" : 3,
+  "ID" : 1611,
+  "Fitness" : 9.176353,
+  "Feasible" : true
+},
+{
+  "Health" : 74,
+  "Groups" : 5,
+  "ID" : 1622,
+  "Fitness" : 9.466024,
+  "Feasible" : true
+},
+{
+  "Health" : 70,
+  "Groups" : 5,
+  "ID" : 1735,
+  "Fitness" : 9.4246,
+  "Feasible" : true
+},
+{
+  "Health" : 43,
+  "Groups" : 3,
+  "ID" : 2321,
+  "Fitness" : 9.294837,
+  "Feasible" : true
+},
+{
+  "Health" : 59,
+  "Groups" : 4,
+  "ID" : 1974,
+  "Fitness" : 9.376362,
+  "Feasible" : true
+},
+{
+  "Health" : 86,
+  "Groups" : 6,
+  "ID" : 2381,
+  "Fitness" : 9.390297,
+  "Feasible" : true
+},
+{
+  "Health" : 83,
+  "Groups" : 4,
+  "ID" : 1809,
+  "Fitness" : 9.082181,
+  "Feasible" : true
+},
+{
+  "Health" : 41,
+  "Groups" : 3,
+  "ID" : 195,
+  "Fitness" : 9.203118,
+  "Feasible" : true
+},
+{
+  "Health" : 57,
+  "Groups" : 4,
+  "ID" : 1356,
+  "Fitness" : 9.431934,
+  "Feasible" : true
+},
+{
+  "Health" : 79,
+  "Groups" : 4,
+  "ID" : 1090,
+  "Fitness" : 8.221518,
+  "Feasible" : true
+},
+{
+  "Health" : 39,
+  "Groups" : 3,
+  "ID" : 2154,
+  "Fitness" : 9.151997,
+  "Feasible" : true
+},
+{
+  "Health" : 55,
+  "Groups" : 4,
+  "ID" : 2500,
+  "Fitness" : 9.483637,
+  "Feasible" : true
+},
+{
+  "Health" : 76,
+  "Groups" : 3,
+  "ID" : 2463,
+  "Fitness" : 9.198757,
+  "Feasible" : true
+},
+{
+  "Health" : 75,
+  "Groups" : 4,
+  "ID" : 532,
+  "Fitness" : 9.212624,
+  "Feasible" : true
+},
+{
+  "Health" : 107,
+  "Groups" : 6,
+  "ID" : 1384,
+  "Fitness" : 7.788027,
+  "Feasible" : true
+},
+{
+  "Health" : 37,
+  "Groups" : 3,
+  "ID" : 536,
+  "Fitness" : 9.170769,
+  "Feasible" : true
+},
+{
+  "Health" : 61,
+  "Groups" : 5,
+  "ID" : 2251,
+  "Fitness" : 9.580814,
+  "Feasible" : true
+},
+{
+  "Health" : 72,
+  "Groups" : 3,
+  "ID" : 1877,
+  "Fitness" : 9.22278,
+  "Feasible" : true
+},
+{
+  "Health" : 51,
+  "Groups" : 4,
+  "ID" : 528,
+  "Fitness" : 9.2134075,
+  "Feasible" : true
+},
+{
+  "Health" : 35,
+  "Groups" : 3,
+  "ID" : 544,
+  "Fitness" : 9.052481,
+  "Feasible" : true
+},
+{
+  "Health" : 68,
+  "Groups" : 3,
+  "ID" : 1410,
+  "Fitness" : 9.068644,
+  "Feasible" : true
+},
+{
+  "Health" : 83,
+  "Groups" : 5,
+  "ID" : 354,
+  "Fitness" : 8.44876,
+  "Feasible" : true
+},
+{
+  "Health" : 67,
+  "Groups" : 4,
+  "ID" : 2259,
+  "Fitness" : 8.591091,
+  "Feasible" : true
+},
+{
+  "Health" : 49,
+  "Groups" : 4,
+  "ID" : 545,
+  "Fitness" : 9.442947,
+  "Feasible" : true
+},
+{
+  "Health" : 32,
+  "Groups" : 3,
+  "ID" : 2101,
+  "Fitness" : 8.299238,
+  "Feasible" : true
+},
+{
+  "Health" : 63,
+  "Groups" : 3,
+  "ID" : 994,
+  "Fitness" : 9.100673,
+  "Feasible" : true
+},
+{
+  "Health" : 110,
+  "Groups" : 5,
+  "ID" : 1125,
+  "Fitness" : 9.294442,
+  "Feasible" : true
+},
+{
+  "Health" : 47,
+  "Groups" : 2,
+  "ID" : 1341,
+  "Fitness" : 8.710564,
+  "Feasible" : true
+},
+{
+  "Health" : 93,
+  "Groups" : 6,
+  "ID" : 1591,
+  "Fitness" : 9.381291,
+  "Feasible" : true
+},
+{
+  "Health" : 46,
+  "Groups" : 4,
+  "ID" : 2070,
+  "Fitness" : 8.433901,
+  "Feasible" : true
+},
+{
+  "Health" : 45,
+  "Groups" : 2,
+  "ID" : 1046,
+  "Fitness" : 8.949795,
+  "Feasible" : true
+},
+{
+  "Health" : 106,
+  "Groups" : 5,
+  "ID" : 1275,
+  "Fitness" : 8.589275,
+  "Feasible" : true
+},
+{
+  "Health" : 73,
+  "Groups" : 5,
+  "ID" : 1658,
+  "Fitness" : 9.76883,
+  "Feasible" : true
+},
+{
+  "Health" : 22,
+  "Groups" : 2,
+  "ID" : 2105,
+  "Fitness" : 8.934268,
+  "Feasible" : true
+},
+{
+  "Health" : 59,
+  "Groups" : 3,
+  "ID" : 584,
+  "Fitness" : 9.218881,
+  "Feasible" : true
+},
+{
+  "Health" : 86,
+  "Groups" : 4,
+  "ID" : 696,
+  "Fitness" : 9.469156,
+  "Feasible" : true
+},
+{
+  "Health" : 69,
+  "Groups" : 5,
+  "ID" : 364,
+  "Fitness" : 9.700579,
+  "Feasible" : true
+},
+{
+  "Health" : 82,
+  "Groups" : 4,
+  "ID" : 856,
+  "Fitness" : 9.329056,
+  "Feasible" : true
+},
+{
+  "Health" : 57,
+  "Groups" : 3,
+  "ID" : 2391,
+  "Fitness" : 8.857852,
+  "Feasible" : true
+},
+{
+  "Health" : 55,
+  "Groups" : 3,
+  "ID" : 670,
+  "Fitness" : 9.021877,
+  "Feasible" : true
+},
+{
+  "Health" : 78,
+  "Groups" : 4,
+  "ID" : 999,
+  "Fitness" : 9.2119,
+  "Feasible" : true
+},
+{
+  "Health" : 39,
+  "Groups" : 2,
+  "ID" : 1438,
+  "Fitness" : 8.855492,
+  "Feasible" : true
+},
+{
+  "Health" : 74,
+  "Groups" : 4,
+  "ID" : 309,
+  "Fitness" : 9.222904,
+  "Feasible" : true
+},
+{
+  "Health" : 37,
+  "Groups" : 2,
+  "ID" : 1305,
+  "Fitness" : 8.869858,
+  "Feasible" : true
+},
+{
+  "Health" : 53,
+  "Groups" : 3,
+  "ID" : 1449,
+  "Fitness" : 7.988107,
+  "Feasible" : true
+},
+{
+  "Health" : 70,
+  "Groups" : 4,
+  "ID" : 1255,
+  "Fitness" : 9.002648,
+  "Feasible" : true
+},
+{
+  "Health" : 51,
+  "Groups" : 3,
+  "ID" : 2088,
+  "Fitness" : 8.507521,
+  "Feasible" : true
+},
+{
+  "Health" : 67,
+  "Groups" : 3,
+  "ID" : 585,
+  "Fitness" : 9.255491,
+  "Feasible" : true
+},
+{
+  "Health" : 49,
+  "Groups" : 3,
+  "ID" : 2439,
+  "Fitness" : 8.972449,
+  "Feasible" : true
+},
+{
+  "Health" : 33,
+  "Groups" : 2,
+  "ID" : 2442,
+  "Fitness" : 8.705975,
+  "Feasible" : true
+},
+{
+  "Health" : 32,
+  "Groups" : 2,
+  "ID" : 1240,
+  "Fitness" : 8.8230915,
+  "Feasible" : true
+},
+{
+  "Health" : 48,
+  "Groups" : 3,
+  "ID" : 2431,
+  "Fitness" : 9.035896,
+  "Feasible" : true
+},
+{
+  "Health" : 64,
+  "Groups" : 4,
+  "ID" : 2490,
+  "Fitness" : 9.195764,
+  "Feasible" : true
+},
+{
+  "Health" : 93,
+  "Groups" : 4,
+  "ID" : 829,
+  "Fitness" : 9.434446,
+  "Feasible" : true
+},
+{
+  "Health" : 31,
+  "Groups" : 2,
+  "ID" : 1601,
+  "Fitness" : 8.284815,
+  "Feasible" : true
+},
+{
+  "Health" : 62,
+  "Groups" : 4,
+  "ID" : 1402,
+  "Fitness" : 9.316376,
+  "Feasible" : true
+},
+{
+  "Health" : 76,
+  "Groups" : 5,
+  "ID" : 1600,
+  "Fitness" : 8.394506,
+  "Feasible" : true
+},
+{
+  "Health" : 46,
+  "Groups" : 3,
+  "ID" : 1786,
+  "Fitness" : 9.271994,
+  "Feasible" : true
+},
+{
+  "Health" : 121,
+  "Groups" : 6,
+  "ID" : 1236,
+  "Fitness" : 8.232445,
+  "Feasible" : true
+},
+{
+  "Health" : 60,
+  "Groups" : 4,
+  "ID" : 1326,
+  "Fitness" : 9.453752,
+  "Feasible" : true
+},
+{
+  "Health" : 44,
+  "Groups" : 3,
+  "ID" : 1398,
+  "Fitness" : 9.098188,
+  "Feasible" : true
+},
+{
+  "Health" : 72,
+  "Groups" : 5,
+  "ID" : 1979,
+  "Fitness" : 9.61145,
+  "Feasible" : true
+},
+{
+  "Health" : 85,
+  "Groups" : 4,
+  "ID" : 1775,
+  "Fitness" : 9.410616,
+  "Feasible" : true
+},
+{
+  "Health" : 42,
+  "Groups" : 3,
+  "ID" : 1918,
+  "Fitness" : 9.2303295,
+  "Feasible" : true
+},
+{
+  "Health" : 58,
+  "Groups" : 4,
+  "ID" : 1228,
+  "Fitness" : 9.401155,
+  "Feasible" : true
+},
+{
+  "Health" : 68,
+  "Groups" : 5,
+  "ID" : 1855,
+  "Fitness" : 9.650534,
+  "Feasible" : true
+},
+{
+  "Health" : 97,
+  "Groups" : 5,
+  "ID" : 704,
+  "Fitness" : 9.173975,
+  "Feasible" : true
+},
+{
+  "Health" : 81,
+  "Groups" : 4,
+  "ID" : 854,
+  "Fitness" : 9.295055,
+  "Feasible" : true
+},
+{
+  "Health" : 113,
+  "Groups" : 6,
+  "ID" : 2081,
+  "Fitness" : 9.00618,
+  "Feasible" : true
+},
+{
+  "Health" : 40,
+  "Groups" : 3,
+  "ID" : 2108,
+  "Fitness" : 9.362297,
+  "Feasible" : true
+},
+{
+  "Health" : 56,
+  "Groups" : 4,
+  "ID" : 1690,
+  "Fitness" : 9.336002,
+  "Feasible" : true
+},
+{
+  "Health" : 80,
+  "Groups" : 6,
+  "ID" : 1810,
+  "Fitness" : 8.431334,
+  "Feasible" : true
+},
+{
+  "Health" : 64,
+  "Groups" : 5,
+  "ID" : 2094,
+  "Fitness" : 8.552843,
+  "Feasible" : true
+},
+{
+  "Health" : 54,
+  "Groups" : 4,
+  "ID" : 2345,
+  "Fitness" : 9.470973,
+  "Feasible" : true
+},
+{
+  "Health" : 26,
+  "Groups" : 2,
+  "ID" : 678,
+  "Fitness" : 8.568647,
+  "Feasible" : true
+},
+{
+  "Health" : 36,
+  "Groups" : 3,
+  "ID" : 2009,
+  "Fitness" : 8.01842,
+  "Feasible" : true
+},
+{
+  "Health" : 52,
+  "Groups" : 4,
+  "ID" : 2206,
+  "Fitness" : 9.430639,
+  "Feasible" : true
+},
+{
+  "Health" : 85,
+  "Groups" : 5,
+  "ID" : 1838,
+  "Fitness" : 8.150056,
+  "Feasible" : true
+},
+{
+  "Health" : 25,
+  "Groups" : 2,
+  "ID" : 697,
+  "Fitness" : 8.802353,
+  "Feasible" : true
+},
+{
+  "Health" : 49,
+  "Groups" : 2,
+  "ID" : 1872,
+  "Fitness" : 8.653797,
+  "Feasible" : true
+},
+{
+  "Health" : 65,
+  "Groups" : 4,
+  "ID" : 777,
+  "Fitness" : 9.075376,
+  "Feasible" : true
+}]
