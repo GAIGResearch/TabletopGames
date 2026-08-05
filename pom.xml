@@ -231,6 +231,38 @@
                             </archive>
                             <finalName>TAG</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
+                            <!-- Without this, this execution replaces the project's main-artifact
+                                 reference with the fat TAG.jar, which the next execution's
+                                 useProjectArtifact would then pick up instead of the plain
+                                 classes-only jar, silently defeating its dependency filtering. -->
+                            <attach>false</attach>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Slim jar for PyTAG (github.com/martinballa/PyTAG): engine + games + players
+                             + GUI/replay, without the Spark/Hadoop ML-learner, tablesaw analytics, or
+                             LLM dependency trees. See src/assembly/pytag-jar.xml for what's excluded. -->
+                        <id>make-pytag-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/pytag-jar.xml</descriptor>
+                            </descriptors>
+                            <archive>
+                                <manifest>
+                                    <mainClass>core.TAG</mainClass>
+                                </manifest>
+                                <manifestEntries>
+                                    <Implementation-Title>TAG-pytag</Implementation-Title>
+                                    <Description>Slim TAG runtime jar for PyTAG (github.com/martinballa/PyTAG): engine, games, players and GUI/replay only, no Spark/Hadoop ML-learner, tablesaw analytics or LLM dependencies.</Description>
+                                </manifestEntries>
+                            </archive>
+                            <finalName>TAG-pytag</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <attach>false</attach>
                         </configuration>
                     </execution>
                 </executions>

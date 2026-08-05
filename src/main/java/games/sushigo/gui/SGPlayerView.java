@@ -33,7 +33,7 @@ public class SGPlayerView extends JComponent {
 //        this.width = playerAreaWidth + border*20;
 //        this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
-        int human = humanId.stream().toList().getFirst();
+        int human = humanId.stream().findFirst().orElse(-1);
         this.playerHandView = new SGDeckView(human, deck, true, dataPath, new Rectangle(border, border, playerAreaWidth-50, playerAreaHeight));
         this.playedCardsView = new SGDeckView(human, playDeck, true, dataPath, new Rectangle(border, border, playerAreaWidth-50, playerAreaHeight));
         this.pointsText = new JLabel(0 + " points");

@@ -1,0 +1,55 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+    <!--
+      Slimmed-down jar for PyTAG (github.com/martinballa/PyTAG): the core engine, all games,
+      the built-in players/agents, and the Swing GUI (incl. JSON-replay in gui.Frontend), but
+      none of the Spark/Hadoop-based heuristic learners, tablesaw analytics, or the LLM module.
+      Those pull in ~400MB of transitive deps (Spark, Hadoop, RocksDB, Scala, langchain4j,
+      google-cloud) that PyTAG never touches. Keep this include list in sync with pom.xml if a
+      dependency genuinely needed by core/games/players(non-heuristics/learners)/gui changes.
+    -->
+    <id>pytag</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <!-- No useTransitiveFiltering: each artifact below (direct or transitive) is matched
+                 individually against the resolved dependency graph, so the full closure needed by
+                 the 9 direct deps we keep is spelled out explicitly rather than inferred. -->
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
+            <unpack>true</unpack>
+            <scope>runtime</scope>
+            <includes>
+                <include>ai.tabletopgames:ModernBoardGame</include>
+                <include>com.googlecode.json-simple:json-simple</include>
+                <include>com.google.code.gson:gson</include>
+                <include>com.github.davidmoten:word-wrap</include>
+                <include>com.github.davidmoten:guava-mini</include>
+                <include>org.slf4j:slf4j-nop</include>
+                <include>org.slf4j:slf4j-api</include>
+                <include>org.knowm.xchart:xchart</include>
+                <include>de.erichseifert.vectorgraphics2d:VectorGraphics2D</include>
+                <include>de.rototor.pdfbox:graphics2d</include>
+                <include>org.apache.pdfbox:pdfbox</include>
+                <include>org.apache.pdfbox:fontbox</include>
+                <include>commons-logging:commons-logging</include>
+                <include>com.madgag:animated-gif-lib</include>
+                <include>org.swinglabs:swingx</include>
+                <include>com.jhlabs:filters</include>
+                <include>org.swinglabs:swing-worker</include>
+                <include>org.apache.commons:commons-lang3</include>
+                <include>com.github.javaparser:javaparser-core</include>
+                <include>commons-io:commons-io</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+    <containerDescriptorHandlers>
+        <containerDescriptorHandler>
+            <handlerName>metaInf-services</handlerName>
+        </containerDescriptorHandler>
+    </containerDescriptorHandlers>
+</assembly>

@@ -33,7 +33,7 @@ public class SSPPlayerView extends JPanel {
         this.height = playerAreaHeight*2 + borderBottom + border + borderBottom;
         this.playerId = playerId;
 
-        int humanId = human.stream().toList().getFirst();
+        int humanId = human.stream().findFirst().orElse(-1);
         this.playerHandView = new SSPDeckView(humanId, playerHand, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));  // todo only visible if player is human or always fully observable
         this.playerDiscardView = new SSPDeckView(humanId, playerDiscard, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
         this.pointsText = new JLabel(0 + " points");
