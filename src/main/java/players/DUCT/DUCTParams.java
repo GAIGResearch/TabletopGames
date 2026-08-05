@@ -14,6 +14,7 @@ public class DUCTParams extends PlayerParameters {
     public double firstPlayUrgency = 1_000_000.0; // score for an untried action so it gets picked first
     public boolean normaliseRewards = true;       // scale scores to [0,1] using min/max seen so far
     public boolean redeterminise = true;          // re-guess the hidden cards each iteration
+    public boolean decoupled = true;              // pick all simultaneous players jointly; off = one at a time (plain UCT)
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
 
     public DUCTParams() {
@@ -23,6 +24,7 @@ public class DUCTParams extends PlayerParameters {
         addTunableParameter("firstPlayUrgency", 1_000_000.0);
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("redeterminise", true, Arrays.asList(false, true));
+        addTunableParameter("decoupled", true, Arrays.asList(false, true));
         addTunableParameter("heuristic", IStateHeuristic.class, AbstractGameState::getHeuristicScore);
     }
 
@@ -35,6 +37,7 @@ public class DUCTParams extends PlayerParameters {
         firstPlayUrgency = (double) getParameterValue("firstPlayUrgency");
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
         redeterminise = (boolean) getParameterValue("redeterminise");
+        decoupled = (boolean) getParameterValue("decoupled");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
     }
 
@@ -51,7 +54,8 @@ public class DUCTParams extends PlayerParameters {
                 && maxTreeDepth == other.maxTreeDepth
                 && Double.compare(firstPlayUrgency, other.firstPlayUrgency) == 0
                 && normaliseRewards == other.normaliseRewards
-                && redeterminise == other.redeterminise;
+                && redeterminise == other.redeterminise
+                && decoupled == other.decoupled;
     }
 
     @Override

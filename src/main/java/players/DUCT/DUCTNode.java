@@ -3,6 +3,7 @@ package players.DUCT;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.SimultaneousAction;
 import players.mcts.ActionStats;
 
 import java.util.*;
@@ -12,33 +13,43 @@ import static utilities.Utils.normalise;
 
 /**
  * A node in the DUCT tree. Main field is playerActionStats wich holds stats per player per action,
- * so each player has its own UCB values. Thats what lets it handle simultaneous games.
+ * so each player has its own UCB values. At a simultaneous node every acting player picks its own
+ * action independantly from its own stats, the picks are combined into one joint action, and the
+ * child is stored under that joint action. Thats the decoupling that makes it DUCT and not plain UCT.
  *
- * We advance the game one player at a time (the current player), same as the normal random
- * rollouts do, so we dont have to build a joint action. Its open loop: one state copy per
- * iteration and the forward model changes it as we go down the tree.
+ * Its open loop: one state copy per iteration and the forward model changes it as we go down the tree.
+ *
+ * There is one awkward case: if the search STARTS in the middle of an extended action (chopsticks
+ * second card), the state we are handed has already had the other players hidden choices wiped by
+ * redeterminisation, so we cant safely rebuild a joint turn from it. In that case we fall back to
+ * advancing one player at a time (jointMode = false), which is fine because it is a single player
+ * decision anyway.
  */
 public class DUCTNode {
 
     // stats per player, per action. outer key = player, inner key = an action. filled in lazily.
     final Map<Integer, Map<AbstractAction, ActionStats>> playerActionStats = new HashMap<>();
 
-    // the current players avaliable actions for this iteration, refreshed each descent
+    // avaliable actions for each acting player this iteration, refreshed each descent
     Map<Integer, List<AbstractAction>> playerCurrentActions = new HashMap<>();
 
-    // children keyed by the action that leads to them
+    // children keyed by the joint action that leads to them
     final Map<AbstractAction, DUCTNode> children = new LinkedHashMap<>();
 
     final DUCTNode parent;   // null for the root
-    final DUCTNode root;     // trajectory / budget / reward bounds live on the root
+    final DUCTNode root;     // trajectory / budget / reward bounds / jointMode live on the root
     final int depth;         // root == 0
     int nVisits;
     boolean terminalNode;
-    final AbstractAction actionToReach;   // action taken from the parent to get here
+    final AbstractAction actionToReach;   // joint action taken from the parent to get here
 
     AbstractGameState state;          // master copy, root only
     AbstractGameState openLoopState;  // the state we are working on this iteration
-    int actingPlayer;                 // player to move at this node
+    List<Integer> actingPlayers;      // players choosing at this node
+
+    // true = build joint actions over all simultaneous players (proper DUCT).
+    // false = advance one current player at a time (used when the root starts mid extended sequence).
+    boolean jointMode;
 
     DUCTParams params;
     AbstractForwardModel forwardModel;
@@ -65,12 +76,14 @@ public class DUCTNode {
         this.depth = 0;
         this.actionToReach = null;
         this.nVisits = 0;
+        // if we start inside an extended sequence, dont try to rebuild joint turns (see class note)
+        this.jointMode = !state.isActionInProgress();
         this.state = state.copy();
         this.openLoopState = this.state;
         this.terminalNode = !state.isNotTerminal();
-        this.actingPlayer = state.getCurrentPlayer();
         this.currentNodeTrajectory = new ArrayList<>();
         this.currentActionTrajectory = new ArrayList<>();
+        this.actingPlayers = computeActingPlayers(state);
         initialisePlayerActionStats(state);
     }
 
@@ -85,73 +98,86 @@ public class DUCTNode {
         this.depth = parent.depth + 1;
         this.actionToReach = actionToReach;
         this.nVisits = 0;
+        this.jointMode = parent.root.jointMode;
         this.state = null;
         this.openLoopState = nextState;
         this.terminalNode = !nextState.isNotTerminal();
-        this.actingPlayer = nextState.getCurrentPlayer();
+        this.actingPlayers = computeActingPlayers(nextState);
         initialisePlayerActionStats(nextState);
     }
 
-    // make empty stats for every action the current player has here
+    // who chooses at this node. joint mode = all simultaneous players, otherwise just the current one.
+    private List<Integer> computeActingPlayers(AbstractGameState gs) {
+        // decoupled off (or mid-sequence) -> plain one-at-a-time UCT; on -> all simultaneous players
+        if (root.jointMode && params.decoupled) return gs.getCurrentSimultaneousPlayers();
+        return Collections.singletonList(gs.getCurrentPlayer());
+    }
+
+    // make empty stats for every action each acting player has here
     private void initialisePlayerActionStats(AbstractGameState gs) {
         if (terminalNode) return;
         int nPlayers = gs.getNPlayers();
-        Map<AbstractAction, ActionStats> statsMap =
-                playerActionStats.computeIfAbsent(actingPlayer, p -> new LinkedHashMap<>());
-        for (AbstractAction action : forwardModel.computeAvailableActions(gs, params.actionSpace, actingPlayer)) {
-            statsMap.putIfAbsent(action, new ActionStats(nPlayers));
+        for (int player : actingPlayers) {
+            Map<AbstractAction, ActionStats> statsMap =
+                    playerActionStats.computeIfAbsent(player, p -> new LinkedHashMap<>());
+            for (AbstractAction action : forwardModel.computeAvailableActions(gs, params.actionSpace, player)) {
+                statsMap.putIfAbsent(action, new ActionStats(nPlayers));
+            }
         }
     }
 
-    // sync the node to the current state: work out the current player + their actions, and add
-    // any new actions we havent seen before (can happen after redeterminising)
+    // sync the node to the current state: work out who acts + their actions, add any new actions
+    // we havent seen before (can happen after redeterminising)
     void updateForOpenLoopState(AbstractGameState gs) {
         this.openLoopState = gs;
-        this.actingPlayer = gs.getCurrentPlayer();
         this.terminalNode = !gs.isNotTerminal();
+        this.actingPlayers = computeActingPlayers(gs);
 
         playerCurrentActions = new HashMap<>();
         if (terminalNode) return;
 
         int nPlayers = gs.getNPlayers();
-        List<AbstractAction> actions =
-                forwardModel.computeAvailableActions(gs, params.actionSpace, actingPlayer);
-        playerCurrentActions.put(actingPlayer, actions);
+        for (int player : actingPlayers) {
+            List<AbstractAction> actions =
+                    forwardModel.computeAvailableActions(gs, params.actionSpace, player);
+            playerCurrentActions.put(player, actions);
 
-        Map<AbstractAction, ActionStats> statsMap =
-                playerActionStats.computeIfAbsent(actingPlayer, p -> new LinkedHashMap<>());
-        for (AbstractAction action : actions) {
-            statsMap.putIfAbsent(action, new ActionStats(nPlayers));
+            Map<AbstractAction, ActionStats> statsMap =
+                    playerActionStats.computeIfAbsent(player, p -> new LinkedHashMap<>());
+            for (AbstractAction action : actions) {
+                statsMap.putIfAbsent(action, new ActionStats(nPlayers));
+            }
         }
     }
 
-    // selection + expansion. keep letting the current player pick with UCB and advancing until we
-    // add a new child or hit a terminal / depth limit leaf.
+    // selection + expansion. at each node every acting player picks its own action by UCB, we join
+    // them and advance, until we add a new child or hit a terminal / depth limit leaf.
     DUCTNode treePolicy() {
         DUCTNode cur = this;
 
         while (!cur.terminalNode && cur.depth < params.maxTreeDepth) {
 
-            List<AbstractAction> available = cur.playerCurrentActions.get(cur.actingPlayer);
-            if (available == null || available.isEmpty()) break;
+            if (cur.actingPlayers.isEmpty() || cur.playerCurrentActions.isEmpty()) break;
 
-            int player = cur.actingPlayer;
-            AbstractAction chosen = cur.selectActionForPlayer(player, available);
+            Map<Integer, AbstractAction> choices = cur.selectJointAction();
+            if (choices.isEmpty()) break;
 
-            // save the node + choice before we advance, backUp reads this in reverse
+            AbstractAction jointAction = buildJointAction(choices, cur.actingPlayers);
+
+            // save the node + choices before we advance, backUp reads this in reverse
             root.currentNodeTrajectory.add(cur);
-            root.currentActionTrajectory.add(Collections.singletonMap(player, chosen));
+            root.currentActionTrajectory.add(choices);
 
             // next() changes openLoopState in place, copy the action so the key stays put
-            forwardModel.next(cur.openLoopState, chosen.copy());
+            forwardModel.next(cur.openLoopState, jointAction.copy());
             root.fmCallsCount++;
 
-            DUCTNode child = cur.children.get(chosen);
+            DUCTNode child = cur.children.get(jointAction);
 
             if (child == null) {
-                // new action here, make the child and roll out from it
-                child = new DUCTNode(cur, chosen.copy(), cur.openLoopState);
-                cur.children.put(chosen.copy(), child);
+                // new joint action here, make the child and roll out from it
+                child = new DUCTNode(cur, jointAction.copy(), cur.openLoopState);
+                cur.children.put(jointAction.copy(), child);
                 return child;
             }
 
@@ -160,6 +186,32 @@ public class DUCTNode {
         }
 
         return cur;
+    }
+
+    // each acting player independantly picks its own action via UCB
+    private Map<Integer, AbstractAction> selectJointAction() {
+        Map<Integer, AbstractAction> choices = new LinkedHashMap<>();
+        for (int player : actingPlayers) {
+            List<AbstractAction> available =
+                    playerCurrentActions.getOrDefault(player, Collections.emptyList());
+            if (available.isEmpty()) continue;
+            choices.put(player, selectActionForPlayer(player, available));
+        }
+        return choices;
+    }
+
+    // one acting player -> just its action. more than one -> wrap the picks in a SimultaneousAction.
+    private AbstractAction buildJointAction(Map<Integer, AbstractAction> choices,
+                                            List<Integer> acting) {
+        if (acting.size() == 1) {
+            return choices.get(acting.get(0));
+        }
+        Map<Integer, AbstractAction> ordered = new LinkedHashMap<>();
+        for (int player : acting) {
+            AbstractAction a = choices.get(player);
+            if (a != null) ordered.put(player, a);
+        }
+        return new SimultaneousAction(ordered);
     }
 
     // best UCB action for the player. shuffle first so ties get broken randomly (happens a lot
@@ -213,7 +265,7 @@ public class DUCTNode {
     }
 
     // random playout from this node until terminal or we hit the rollout length, one player at a
-    // time. gives back a score per player.
+    // time (the forward model sequences simultaneous players itself). gives back a score per player.
     double[] rollout() {
         AbstractGameState rolloutState = openLoopState;
         int steps = 0;
