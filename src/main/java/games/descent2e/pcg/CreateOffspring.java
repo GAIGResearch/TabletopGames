@@ -913,6 +913,7 @@ public class CreateOffspring {
                 extender++;
             }
             tiles.add(name);
+            retVal.add(node);
         }
 
         // 10% crossover chance
