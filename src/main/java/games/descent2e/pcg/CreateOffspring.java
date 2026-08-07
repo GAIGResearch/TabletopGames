@@ -53,6 +53,11 @@ public class CreateOffspring {
     public HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_SizeVsGroups = new HashMap<>(); // Board Size vs Group Count
     public HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_HealthVsGroups = new HashMap<>(); // Total Health vs Group Count
 
+    // Counters for tiles allowed multiple times
+    int transition = 0;
+    int endcap = 0;
+    int extender = 0;
+
     public CreateOffspring() {
     }
 
@@ -66,12 +71,12 @@ public class CreateOffspring {
     public void begin() {
         FitnessFunction fitfunc = new FitnessFunction();
 
-        for (Quest q : originalQuests) {
+        /*for (Quest q : originalQuests) {
             System.out.println(q.getBoards());
             HashMap<String, Float> scores = fitfunc.getFitness(this, q, Objects.requireNonNull(getBoardByName(q.getBoards().get(0))));
             System.out.println(scores.get("Fitness"));
             //feasibleFitness.add(fitness);
-        }
+        }*/
 
 
         int originalSize = originalQuests.size();
@@ -369,23 +374,38 @@ public class CreateOffspring {
         List<BoardNode> finalNodes = new ArrayList<>();
         boolean freeNodes = true;
 
+        transition = 0;
+        endcap = 0;
+        extender = 0;
+
         List<BoardNode> newNodes = newBoard.getComponents();
         List<BoardNode> oldNodes = otherBoard.getComponents();
 
         int attempt = 0;
         while (freeNodes) {
-            attempt++;
-            System.out.println("Attempt: " + attempt);
+            //attempt++;
+            //System.out.println("Attempt: " + attempt);
             freeNodes = false;
 
-            finalNodes.clear();
-            for (BoardNode node : newNodes)
-                finalNodes.add(node.copy());
-
             // Construct Board Assembly with all the new tiles
-            crossoverMutate(oldNodes, finalNodes);
-            deletionMutate(finalNodes);
-            rotateMutate(finalNodes);
+            List<BoardNode> crossover = crossoverMutate(oldNodes, newNodes);
+            List<BoardNode> deleted = deletionMutate(crossover);
+
+            List<BoardNode> cleanedUp = new ArrayList<>();
+            int counter = 1;
+            for (BoardNode node : deleted) {
+                String name = fixNodeName(node.getComponentName());
+                BoardNode newNode = new BoardNode(name);
+                for (int prop_key : node.getProperties().keySet()) {
+                    Property newProp = node.getProperties().get(prop_key).copy();
+                    newNode.setProperty(newProp);
+                }
+                cleanedUp.add(newNode);
+                //System.out.println(counter+ ": " + name + newNode.getComponentID());
+                counter++;
+            }
+
+            finalNodes = rotateMutate(cleanedUp);
 
             assembleBoard(finalNodes);
 
@@ -872,33 +892,27 @@ public class CreateOffspring {
         return null;
     }
 
-    void crossoverMutate(List<BoardNode> crossoverNodes, List<BoardNode> baseNodes) {
+    List<BoardNode> crossoverMutate(List<BoardNode> crossoverNodes, List<BoardNode> baseNodes) {
 
+        List<BoardNode> retVal = new ArrayList<>();
         List<String> tiles = new ArrayList<>();
 
-        int transition = 0;
-        int endcap = 0;
-        int extender = 0;
+        transition = 0;
+        endcap = 0;
+        extender = 0;
         for (BoardNode node : baseNodes) {
             String name = node.getComponentName();
 
             if (name.contains("transition")) {
                 transition++;
-                name = name.split("-")[0] + "-" + transition;
-                node.setComponentName(name);
             }
             else if (name.contains("endcap")) {
                 endcap++;
-                name = name.split("-")[0] + "-" + endcap;
-                node.setComponentName(name);
             }
             else if (name.contains("extender")) {
                 extender++;
-                name = name.split("-")[0] + "-" + extender;
-                node.setComponentName(name);
             }
-
-            tiles.add(node.getComponentName());
+            tiles.add(name);
         }
 
         // 10% crossover chance
@@ -907,42 +921,39 @@ public class CreateOffspring {
                 String name = node.getComponentName();
 
                 if (name.contains("transition")) {
-                    if (transition < 2) {
-                        transition++;
-                        name = name.split("-")[0] + "-" + transition;
-                    }
-                }
-                else if (name.contains("endcap")) {
-                    if (endcap < 5) {
-                        endcap++;
-                        name = name.split("-")[0] + "-" + endcap;
-                    }
-                }
-                else if (name.contains("extender")) {
-                    if (extender < 9) {
-                        extender++;
-                        name = name.split("-")[0] + "-" + extender;
-                    }
+                    if (transition >= 2) continue;
+                    transition++;
+                    tiles.add(name);
+                    retVal.add(node);
+                } else if (name.contains("endcap")) {
+                    if (endcap >= 5) continue;
+                    endcap++;
+                    tiles.add(name);
+                    retVal.add(node);
+                } else if (name.contains("extender")) {
+                    if (extender >= 9) continue;
+                    extender++;
+                    tiles.add(name);
+                    retVal.add(node);
                 }
 
                 // Make sure we don't add duplicate Tiles
                 if (!tiles.contains(name)) {
+                    retVal.add(node);
                     tiles.add(name);
-                    BoardNode newNode = node.copy();
-                    newNode.setComponentName(name);
-                    baseNodes.add(newNode);
                 }
             }
         }
+        return retVal;
     }
 
-    void deletionMutate(List<BoardNode> newNodes) {
+    List<BoardNode> deletionMutate(List<BoardNode> newNodes) {
         // 10% deletion chance
-        List<BoardNode> finalNodes = new ArrayList<>(newNodes);
+        List<BoardNode> retVal = new ArrayList<>(newNodes);
         for (BoardNode node : newNodes) {
             if (Random.randInt(10) < 1) {
-                finalNodes.remove(node);
-                for (BoardNode n : finalNodes) {
+                retVal.remove(node);
+                for (BoardNode n : retVal) {
                     String[] neighbours = ((PropertyStringArray) n.getProperty("neighbours")).getValues();
                     for (int i = 0; i < neighbours.length; i++) {
                         if (neighbours[i].equals(node.getComponentName())) {
@@ -953,11 +964,13 @@ public class CreateOffspring {
                 }
             }
         }
+        return retVal;
     }
 
-    void rotateMutate (List<BoardNode> nodes) {
+    List<BoardNode> rotateMutate (List<BoardNode> nodes) {
+        List<BoardNode> retVal = new ArrayList<>(nodes);
         // 10% rotation chance
-        for (BoardNode node : nodes) {
+        for (BoardNode node : retVal) {
             if (Random.randInt(10) < 1) {
                 int rotation = Random.randInt(positions.size() - 1) + 1;
                 int oldRotate = ((PropertyInt) node.getProperty("orientation")).value;
@@ -971,6 +984,7 @@ public class CreateOffspring {
                 }
             }
         }
+        return retVal;
     }
 
     void assembleBoard(List<BoardNode> nodes) {
@@ -1099,6 +1113,22 @@ public class CreateOffspring {
                 }
             }
         }
+    }
+
+    String fixNodeName (String name) {
+        if (name.contains("transition")) {
+            transition++;
+            return name.split("-")[0] + "-" + transition;
+        }
+        else if (name.contains("endcap")) {
+            endcap++;
+            return name.split("-")[0] + "-" + endcap;
+        }
+        else if (name.contains("extender")) {
+            extender++;
+            return name.split("-")[0] + "-" + extender;
+        }
+        return name;
     }
 
     void addToMAPElites(HashMap<String, Float> scores) {

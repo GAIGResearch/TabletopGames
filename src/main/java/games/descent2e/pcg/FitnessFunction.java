@@ -620,7 +620,6 @@ public class FitnessFunction {
                     for (String s : gridReferences.keySet()) {
                         gridReferences.get(s).remove(new Vector2D(j, i));
                     }
-                    //System.out.println(tile.getComponentName());
                     gridReferences.get(tile.getComponentName()).put(new Vector2D(j, i), new Vector2D(j - x, i - y));
                     }
             }
