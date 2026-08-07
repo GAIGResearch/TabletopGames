@@ -68,7 +68,7 @@ public class CreateOffspring {
         CHOOSE_INFEASIBLE = infeasible;
     }
 
-    public void begin() {
+    public void begin() throws IOException {
         FitnessFunction fitfunc = new FitnessFunction();
 
         /*for (Quest q : originalQuests) {
@@ -123,10 +123,10 @@ public class CreateOffspring {
             }
         }
 
-        //exportPCGToJSON(true);
-        //exportPCGToJSON(false);
-        //exportMAPElitesToJSON(MapElites.Size, MapElites.Groups);
-        //exportMAPElitesToJSON(MapElites.Health, MapElites.Groups);
+        exportPCGToJSON(true);
+        exportPCGToJSON(false);
+        exportMAPElitesToJSON(MapElites.Size, MapElites.Groups);
+        exportMAPElitesToJSON(MapElites.Health, MapElites.Groups);
 
         System.out.println("Complete!");
 
@@ -371,7 +371,11 @@ public class CreateOffspring {
         }
 
         // -- BOARD MUTATIONS ---
+
         List<BoardNode> finalNodes = new ArrayList<>();
+        List<BoardNode> crossover = new ArrayList<>();
+        List<BoardNode> deleted = new ArrayList<>();
+        List<BoardNode> cleanedUp = new ArrayList<>();
         boolean freeNodes = true;
 
         transition = 0;
@@ -388,10 +392,10 @@ public class CreateOffspring {
             freeNodes = false;
 
             // Construct Board Assembly with all the new tiles
-            List<BoardNode> crossover = crossoverMutate(oldNodes, newNodes);
-            List<BoardNode> deleted = deletionMutate(crossover);
+            crossover = crossoverMutate(oldNodes, newNodes);
+            deleted = deletionMutate(crossover);
 
-            List<BoardNode> cleanedUp = new ArrayList<>();
+            cleanedUp.clear();
             int counter = 1;
             for (BoardNode node : deleted) {
                 String name = fixNodeName(node.getComponentName());
@@ -406,6 +410,10 @@ public class CreateOffspring {
             }
 
             finalNodes = rotateMutate(cleanedUp);
+
+            /*for (BoardNode node : finalNodes) {
+                System.out.println(node.getComponentName() + "; " + node.getComponentID());
+            }*/
 
             assembleBoard(finalNodes);
 
@@ -900,20 +908,42 @@ public class CreateOffspring {
         transition = 0;
         endcap = 0;
         extender = 0;
+        int entrance = 0;
+        int exit = 0;
         for (BoardNode node : baseNodes) {
             String name = node.getComponentName();
 
+            // Make sure that certain tiles can only be placed a certain number of times
             if (name.contains("transition")) {
+                if (transition >= 2) continue;
                 transition++;
-            }
-            else if (name.contains("endcap")) {
+                tiles.add(name);
+                retVal.add(node);
+            } else if (name.contains("endcap")) {
+                if (endcap >= 5) continue;
                 endcap++;
-            }
-            else if (name.contains("extender")) {
+                tiles.add(name);
+                retVal.add(node);
+            } else if (name.contains("extender")) {
+                if (extender >= 9) continue;
                 extender++;
+                tiles.add(name);
+                retVal.add(node);
+            } else if (name.contains("entrance")) {
+                if (entrance > 0) continue;
+                entrance++;
+                tiles.add(name);
+                retVal.add(node);
+            } else if (name.contains("exit")) {
+                if (exit > 0) continue;
+                exit++;
+                tiles.add(name);
+                retVal.add(node);
             }
-            tiles.add(name);
-            retVal.add(node);
+            else if (!tiles.contains(name)) {
+                tiles.add(name);
+                retVal.add(node);
+            }
         }
 
         // 10% crossover chance
@@ -926,16 +956,31 @@ public class CreateOffspring {
                     transition++;
                     tiles.add(name);
                     retVal.add(node);
+                    continue;
                 } else if (name.contains("endcap")) {
                     if (endcap >= 5) continue;
                     endcap++;
                     tiles.add(name);
                     retVal.add(node);
+                    continue;
                 } else if (name.contains("extender")) {
                     if (extender >= 9) continue;
                     extender++;
                     tiles.add(name);
                     retVal.add(node);
+                    continue;
+                } else if (name.contains("entrance")) {
+                    if (entrance > 0) continue;
+                    entrance++;
+                    tiles.add(name);
+                    retVal.add(node);
+                    continue;
+                } else if (name.contains("exit")) {
+                    if (exit > 0) continue;
+                    exit++;
+                    tiles.add(name);
+                    retVal.add(node);
+                    continue;
                 }
 
                 // Make sure we don't add duplicate Tiles
@@ -945,6 +990,11 @@ public class CreateOffspring {
                 }
             }
         }
+        /*String result = "";
+        for (String tile : tiles) {
+            result += tile +"; ";
+        }
+        System.out.println(result);*/
         return retVal;
     }
 
@@ -1022,6 +1072,8 @@ public class CreateOffspring {
                     if (Arrays.asList(n2Connects).contains(opposite)) {
                         Map<String, List<Pair<BoardNode, String>>> link = possible.get(n1.getComponentName());
                         List<Pair<BoardNode, String>> list = link.get(connection);
+                        if (list == null)
+                            System.out.println("Why?");
                         list.add(new Pair<>(n2, opposite));
                     }
 

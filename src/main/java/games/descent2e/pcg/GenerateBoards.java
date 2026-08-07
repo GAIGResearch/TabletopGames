@@ -88,7 +88,11 @@ public class GenerateBoards {
                 public void actionPerformed(ActionEvent e) {
                     if(create.isEnabled()) {
                         CreateOffspring co = new CreateOffspring();
-                        co.begin();
+                        try {
+                            co.begin();
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         create.setEnabled(false);
                     }
                 }
