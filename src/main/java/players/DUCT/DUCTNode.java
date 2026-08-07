@@ -19,11 +19,10 @@ import static utilities.Utils.normalise;
  *
  * Its open loop: one state copy per iteration and the forward model changes it as we go down the tree.
  *
- * There is one awkward case: if the search STARTS in the middle of an extended action (chopsticks
- * second card), the state we are handed has already had the other players hidden choices wiped by
- * redeterminisation, so we cant safely rebuild a joint turn from it. In that case we fall back to
- * advancing one player at a time (jointMode = false), which is fine because it is a single player
- * decision anyway.
+ * Who acts at a node comes straight from the game state via getCurrentSimultaneousPlayers(). The
+ * game is the thing that knows whether one player or several are deciding in parallel, so we just
+ * ask it each time rather than guessing from the action stack. If it gives us one player we advance
+ * that single action, if it gives us several we build a joint action.
  */
 public class DUCTNode {
 
@@ -37,7 +36,7 @@ public class DUCTNode {
     final Map<AbstractAction, DUCTNode> children = new LinkedHashMap<>();
 
     final DUCTNode parent;   // null for the root
-    final DUCTNode root;     // trajectory / budget / reward bounds / jointMode live on the root
+    final DUCTNode root;     // trajectory / budget / reward bounds live on the root
     final int depth;         // root == 0
     int nVisits;
     boolean terminalNode;
@@ -45,11 +44,7 @@ public class DUCTNode {
 
     AbstractGameState state;          // master copy, root only
     AbstractGameState openLoopState;  // the state we are working on this iteration
-    List<Integer> actingPlayers;      // players choosing at this node
-
-    // true = build joint actions over all simultaneous players (proper DUCT).
-    // false = advance one current player at a time (used when the root starts mid extended sequence).
-    boolean jointMode;
+    List<Integer> actingPlayers;      // players choosing at this node, as reported by the game state
 
     DUCTParams params;
     AbstractForwardModel forwardModel;
@@ -76,8 +71,6 @@ public class DUCTNode {
         this.depth = 0;
         this.actionToReach = null;
         this.nVisits = 0;
-        // if we start inside an extended sequence, dont try to rebuild joint turns (see class note)
-        this.jointMode = !state.isActionInProgress();
         this.state = state.copy();
         this.openLoopState = this.state;
         this.terminalNode = !state.isNotTerminal();
@@ -98,7 +91,6 @@ public class DUCTNode {
         this.depth = parent.depth + 1;
         this.actionToReach = actionToReach;
         this.nVisits = 0;
-        this.jointMode = parent.root.jointMode;
         this.state = null;
         this.openLoopState = nextState;
         this.terminalNode = !nextState.isNotTerminal();
@@ -108,8 +100,9 @@ public class DUCTNode {
 
     // who chooses at this node. joint mode = all simultaneous players, otherwise just the current one.
     private List<Integer> computeActingPlayers(AbstractGameState gs) {
-        // decoupled off (or mid-sequence) -> plain one-at-a-time UCT; on -> all simultaneous players
-        if (root.jointMode && params.decoupled) return gs.getCurrentSimultaneousPlayers();
+        // ask the game who is deciding here. decoupled=false is the ablation switch that forces
+        // plain one-at-a-time UCT so we can measure what the decoupling is actually worth.
+        if (params.decoupled) return gs.getCurrentSimultaneousPlayers();
         return Collections.singletonList(gs.getCurrentPlayer());
     }
 

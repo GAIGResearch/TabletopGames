@@ -45,9 +45,18 @@ public class SGGameState extends AbstractGameState {
         if (playerHands == null) {
             return Collections.singletonList(getCurrentPlayer());
         }
-        return IntStream.range(0, getNPlayers())
+        // only report players who still have to choose this turn. a player who has already
+        // committed a card must not be asked again, or they end up playing two cards.
+        List<Integer> toDecide = IntStream.range(0, getNPlayers())
+                .filter(p -> cardChoices.get(p).isEmpty())
                 .boxed()
                 .toList();
+        if (toDecide.isEmpty()) {
+            // everyone has chosen, so the cards should already have been revealed and the
+            // choices cleared. if we get here the turn cycle is broken, so say so loudly.
+            throw new AssertionError("All players have chosen but the turn has not been resolved");
+        }
+        return toDecide;
     }
 
     @Override
