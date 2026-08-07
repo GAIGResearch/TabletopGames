@@ -14,7 +14,7 @@ public class MapElitesGUI {
     private final JFrame window;
     private JPanel panel;
 
-    public MapElitesGUI() {
+    public MapElitesGUI(CreateOffspring co) {
         window = new JFrame();
         window.setTitle("Descent Procedural Content Generation - MAP Elites");
         window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -26,14 +26,14 @@ public class MapElitesGUI {
         panel = new JPanel(new GridLayout(0, 1, 10, 10));
         panel.setBackground(Color.CYAN);
 
-        HashMap<Pair<Float, Float>, Pair<Integer, Float>> sizeGroups = GenerateBoards.map_SizeVsGroups;
+        HashMap<Pair<Float, Float>, Pair<Integer, Float>> sizeGroups = co.map_SizeVsGroups;
 
         if (!sizeGroups.isEmpty()) {
             String name = "Size Vs Groups";
             Button sizeVSgroups = createButton(name);
 
             ShowMAPElite elite = new ShowMAPElite(sizeGroups, name);
-            elite.prepare();
+            elite.prepare(co);
 
             sizeVSgroups.addActionListener(new ActionListener() {
                 @Override
@@ -46,14 +46,14 @@ public class MapElitesGUI {
             panel.add(sizeVSgroups);
         }
 
-        HashMap<Pair<Float, Float>, Pair<Integer, Float>> healthGroups = GenerateBoards.map_HealthVsGroups;
+        HashMap<Pair<Float, Float>, Pair<Integer, Float>> healthGroups = co.map_HealthVsGroups;
 
         if (!healthGroups.isEmpty()) {
             String name = "Health VS Groups";
             Button healthVSgroups = createButton(name);
 
             ShowMAPElite elite = new ShowMAPElite(healthGroups, name);
-            elite.prepare();
+            elite.prepare(co);
 
             healthVSgroups.addActionListener(new ActionListener() {
                 @Override

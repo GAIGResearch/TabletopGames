@@ -30,24 +30,42 @@ import static games.descent2e.pcg.GenerateBoards.*;
 import static utilities.Utils.getNeighbourhood;
 
 public class FitnessFunction {
-    public static final int W_CONNECTED = 1;
-    public static final int W_GEOMETRY = 1;
-    public static final int W_REPEATS = 1;
-    public static final int W_SPAWNING = 1;
-    public static final int W_CONSISTENCY = 1;
-    public static final int W_SIZE = 1;
-    public static final int W_GROUP = 1;
-    public static final int W_HEALTH = 1;
-    public static final int W_COMPLEXITY = 1;
-    public static final int W_RULES = 1;
+    public int W_CONNECTED = 1;
+    public int W_GEOMETRY = 1;
+    public int W_REPEATS = 1;
+    public int W_SPAWNING = 1;
+    public int W_CONSISTENCY = 1;
+    public int W_SIZE = 1;
+    public int W_GROUP = 1;
+    public int W_HEALTH = 1;
+    public int W_COMPLEXITY = 1;
+    public int W_RULES = 1;
 
-    public static final int IDEAL_SIZE = 166;
-    public static final int IDEAL_GROUP = 5;
-    public static final float IDEAL_HEALTH = 5.872f;
-    public static final int IDEAL_COMPLEXITY = 1;
-    public static final int IDEAL_RULES = 1;
+    public int IDEAL_SIZE = 166;
+    public int IDEAL_GROUP = 5;
+    public float IDEAL_HEALTH = 5.872f;
+    public int IDEAL_COMPLEXITY = 1;
+    public int IDEAL_RULES = 1;
 
-    public static float fitness(HashMap<String, Float> scores) {
+    public FitnessFunction() {
+        return;
+    }
+
+    public FitnessFunction(int size, int group, int health) {
+        IDEAL_SIZE = size;
+        IDEAL_GROUP = group;
+        IDEAL_HEALTH = health;
+    }
+
+    public FitnessFunction(int size, int group, int health, int complexity, int rules) {
+        IDEAL_SIZE = size;
+        IDEAL_GROUP = group;
+        IDEAL_HEALTH = health;
+        IDEAL_COMPLEXITY = complexity;
+        IDEAL_RULES = rules;
+    }
+
+    private float fitness(HashMap<String, Float> scores) {
         float fitness = 0f;
 
         fitness += W_CONNECTED * (1 / scores.get("Connectedness"));
@@ -66,7 +84,7 @@ public class FitnessFunction {
         return fitness;
     }
 
-    public static int connectedness(GraphBoard board) {
+    private int connectedness(GraphBoard board) {
         int islands = 0;
 
         BoardNode[] nodes = board.getBoardNodeMap().values().toArray(new BoardNode[0]);
@@ -84,7 +102,7 @@ public class FitnessFunction {
         return islands;
     }
 
-    public static int freeEdges(GraphBoard board) {
+    private int freeEdges(CreateOffspring co, GraphBoard board) {
         int freeEdges = 0;
 
         BoardNode[] nodes = board.getBoardNodeMap().values().toArray(new BoardNode[0]);
@@ -94,7 +112,7 @@ public class FitnessFunction {
                 if (n.equals("null"))
                     freeEdges++;
             }
-            int expected = ((PropertyInt) Objects.requireNonNull(getTileByName(node.getComponentName())).getProperty(nodeHash)).value;
+            int expected = ((PropertyInt) Objects.requireNonNull(co.getTileByName(node.getComponentName())).getProperty(nodeHash)).value;
             if (neighbours.length != expected)
                 freeEdges += Math.max(expected - neighbours.length, 0);
         }
@@ -102,7 +120,7 @@ public class FitnessFunction {
         return freeEdges;
     }
 
-    static void addNeighbours(BoardNode n, List<String> tiles) {
+    private void addNeighbours(BoardNode n, List<String> tiles) {
         if (tiles.contains(n.getComponentName())) return;
         tiles.add(n.getComponentName());
         for (BoardNode neighbour : n.getNeighbours().keySet()) {
@@ -111,7 +129,7 @@ public class FitnessFunction {
         }
     }
 
-    static boolean legalSpawns(Quest quest, GraphBoard board) {
+    private boolean legalSpawns(CreateOffspring co, Quest quest, GraphBoard board) {
         String heroTile = quest.getStartingTile();
         for (String tile : illegalHeroSpawns)
             if (heroTile.contains(tile))
@@ -125,7 +143,7 @@ public class FitnessFunction {
         List<Pair<String, Integer>> occupiedSize = new ArrayList<>();
 
         occupied.add(heroTile);
-        GridBoard node = getTileByName(heroTile);
+        GridBoard node = co.getTileByName(heroTile);
         assert node != null;
         // Subtract 4 from the available space, one for each Hero
         occupiedSize.add(new Pair<>(heroTile, ((PropertyInt) node.getProperty(spaceHash)).value - 4));
@@ -202,7 +220,7 @@ public class FitnessFunction {
             }
             else {
                 occupied.add(monsterTile);
-                node = getTileByName(monsterTile);
+                node = co.getTileByName(monsterTile);
                 assert node != null;
                 occupiedSize.add(new Pair<>(monsterTile, ((PropertyInt) node.getProperty(spaceHash)).value));
             }
@@ -211,7 +229,7 @@ public class FitnessFunction {
         return true;
     }
 
-    static int getBoardSize(GraphBoard board) {
+    private int getBoardSize(GraphBoard board) {
         int size = 0;
         List<String> nodes = new ArrayList<>();
         for (BoardNode node : board.getBoardNodes()) {
@@ -230,7 +248,7 @@ public class FitnessFunction {
         return size;
     }
 
-    static boolean noRepeats(Quest quest) {
+    private boolean noRepeats(Quest quest) {
         List<String> monsters = new ArrayList<>();
         for (String[] monster : quest.getMonsters()) {
             String name = monster[0].split(":")[0];
@@ -241,7 +259,7 @@ public class FitnessFunction {
         return false;
     }
 
-    static float consistency (GraphBoard board) {
+    private float consistency (GraphBoard board) {
         int errors = 0;
         int connections = 0;
 
@@ -296,7 +314,7 @@ public class FitnessFunction {
         return (float) (connections - errors) / connections;
     }
 
-    static Pair<Float, Float> getMonsterHealth(Quest quest) {
+    private Pair<Float, Float> getMonsterHealth(Quest quest) {
         float monsterHealth = 0f;
         float totalMonsters = 0f;
 
@@ -337,13 +355,13 @@ public class FitnessFunction {
         return new Pair<>(monsterHealth, totalMonsters);
     }
 
-    static HashMap<String, Float> getFitness(Quest quest, GraphBoard board) {
+    HashMap<String, Float> getFitness(CreateOffspring co, Quest quest, GraphBoard board) {
         HashMap<String, Float> scores = new HashMap<>();
 
         // Connectedness
         float connected = connectedness(board);
 
-        float freeEdge = freeEdges(board);
+        float freeEdge = freeEdges(co, board);
 
         // Map Size
         float size = getBoardSize(board);
@@ -351,7 +369,7 @@ public class FitnessFunction {
         float tiles = (float) board.getBoardNodes().size();
 
         // Geometry
-        Pair<int[][], Integer> result = createBoard(quest, board);
+        Pair<int[][], Integer> result = createBoard(co, quest, board);
         float geometry = 0f;
         if (result != null)
             geometry = size == (float) result.b ? 1f : 0f;
@@ -362,7 +380,7 @@ public class FitnessFunction {
 
         // Legal Spawning
         // Boolean = Score 1 if all legal, 0 if conflict
-        float spawning = legalSpawns(quest, board) ? 1f : 0f;
+        float spawning = legalSpawns(co, quest, board) ? 1f : 0f;
 
         // Map Consistency
         float consistency = consistency(board);
@@ -383,7 +401,7 @@ public class FitnessFunction {
         // Map Rules
         float rules = 1f;
 
-        scores.put("ID", (float) nowServing);
+        scores.put("ID", (float) co.nowServing);
         scores.put("Connectedness", connected);
         scores.put("Free Edges", freeEdge);
         scores.put("Geometry", geometry);
@@ -405,7 +423,7 @@ public class FitnessFunction {
         float fitness = fitness(scores);
         scores.put("Fitness", fitness);
 
-        boolean feasible = GenerateBoards.checkFeasible(scores);
+        boolean feasible = checkFeasible(scores);
         float f = feasible ? 1f : 0f;
         scores.put("Feasible", f);
         System.out.println(feasible);
@@ -413,7 +431,55 @@ public class FitnessFunction {
         return scores;
     }
 
-    static Pair<int[][], Integer> createBoard(Quest q, GraphBoard b) {
+    boolean checkFeasible(HashMap<String, Float> scores) {
+
+        // Connectedness Check
+        if (scores.get("Connectedness") < 1f) {
+            System.out.println("Connectedness Failure");
+            return false;
+        }
+
+        // Free Edge Failure
+        if (scores.get("Free Edges") > 0f) {
+            System.out.println("Free Edge Failure");
+            return false;
+        }
+
+        // Geometry Check
+        if (scores.get("Geometry") < 1f) {
+            System.out.println("Geometry Failure");
+            return false;
+        }
+
+        // No Repeating Monsters Check
+        if (scores.get("Spawning") < 1f) {
+            System.out.println("Repeating Groups Failure");
+            return false;
+        }
+
+        // Consistency Check
+        if (scores.get("Consistency") < 1f) {
+            System.out.println("Consistency Failure");
+            return false;
+        }
+
+        // Board Size Check
+        float size = scores.get("Size");
+        if (size > ControlVariables.SIZE_MAX || size < ControlVariables.SIZE_MIN) {
+            System.out.println("Size Failure");
+            return false;
+        }
+        // Monster Group Check
+        float groups = scores.get("Groups");
+        if (groups > ControlVariables.GROUP_MAX || groups < ControlVariables.GROUP_MIN) {
+            System.out.println("Group Count Failure");
+            return false;
+        }
+
+        return true;
+    }
+
+    private Pair<int[][], Integer> createBoard(CreateOffspring co, Quest q, GraphBoard b) {
 
         // Put together the master grid board
         // Find maximum board width and height, if all were put together side by side
@@ -426,7 +492,7 @@ public class FitnessFunction {
         for (BoardNode bn : b.getBoardNodes()) {
             // Find width of this tile, according to orientation
             String name = bn.getComponentName();
-            GridBoard tile = getTileByName(name);
+            GridBoard tile = co.getTileByName(name);
             if (tile != null) {
 
                 tile.setProperty(bn.getProperty(orientationHash));
@@ -467,7 +533,7 @@ public class FitnessFunction {
         // System.out.println("First tile:" + firstTile.getComponentName());
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
-            GridBoard tile = getTileByName(firstTile.getComponentName());
+            GridBoard tile = co.getTileByName(firstTile.getComponentName());
             assert tile != null;
             tile.setComponentName(firstTile.getComponentName());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
@@ -477,7 +543,7 @@ public class FitnessFunction {
             // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
             Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
             // Recursive call, will add all tiles in relation to their neighbours as per the board configuration
-            addTilesToBoard(null, firstTile, startX, startY, board, null, GenerateBoards.tiles, tileReferences, gridReferences, drawn, bounds, null);
+            addTilesToBoard(co, null, firstTile, startX, startY, board, null, GenerateBoards.tiles, tileReferences, gridReferences, drawn, bounds, null);
 
             BoardNode[][] trimBoard = new BoardNode[bounds.height][bounds.width];
             int[][] trimTileRef = new int[bounds.height][bounds.width];
@@ -500,12 +566,12 @@ public class FitnessFunction {
                     v.subtract(bounds.x, bounds.y);
                 }
             }
-            if (nowGenerating) {
-                if (!boards.containsKey(nowServing)) {
-                    boards.put(nowServing, finalBoard);
-                    boardTiles.put(nowServing, tiles);
-                    tileRefs.put(nowServing, tileReferences);
-                    gridRefs.put(nowServing, gridReferences);
+            if (co.nowGenerating) {
+                if (!co.boards.containsKey(co.nowServing)) {
+                    co.boards.put(co.nowServing, finalBoard);
+                    co.boardTiles.put(co.nowServing, tiles);
+                    co.tileRefs.put(co.nowServing, tileReferences);
+                    co.gridRefs.put(co.nowServing, gridReferences);
                     }
             }
 
@@ -514,7 +580,7 @@ public class FitnessFunction {
         return null;
     }
 
-    private static void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
+    private void addTilesToBoard(CreateOffspring co, BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
                                  List<GridBoard> tiles,
                                  int[][] tileReferences, Map<String, Map<Vector2D, Vector2D>> gridReferences,
@@ -523,7 +589,7 @@ public class FitnessFunction {
                                  String sideWithOpening) {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
-            GridBoard tile = getTileByName(tileToAdd.getComponentName());
+            GridBoard tile = co.getTileByName(tileToAdd.getComponentName());
             tile.setComponentName(tileToAdd.getComponentName());
             BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
             if (tileGrid == null) {
@@ -594,7 +660,7 @@ public class FitnessFunction {
                 if (connectionToNeighbour != null) {
                     connectionToNeighbour.b.add(x, y);
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
-                    GridBoard tileN = getTileByName(neighbour.getComponentName());
+                    GridBoard tileN = co.getTileByName(neighbour.getComponentName());
                     if (tileN != null) {
                         BoardNode[][] tileGridN = tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
 
@@ -665,7 +731,7 @@ public class FitnessFunction {
                                 bounds.height += deltaMaxY;
 
                             // Draw neighbour recursively
-                            addTilesToBoard(tileToAdd, neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
+                            addTilesToBoard(co, tileToAdd, neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
                                     tiles, tileReferences, gridReferences, drawn, bounds, side);
                         }
                     }
@@ -674,7 +740,7 @@ public class FitnessFunction {
         }
     }
 
-    private static Pair<String, Vector2D> findConnection(BoardNode from, BoardNode to, HashMap<String, ArrayList<Vector2D>> openings) {
+    private Pair<String, Vector2D> findConnection(BoardNode from, BoardNode to, HashMap<String, ArrayList<Vector2D>> openings) {
         String[] neighbours = ((PropertyStringArray) from.getProperty(neighbourHash)).getValues();
         String[] connections = ((PropertyStringArray) from.getProperty(connectionHash)).getValues();
 
@@ -695,7 +761,7 @@ public class FitnessFunction {
         return null;
     }
 
-    private static HashMap<String, ArrayList<Vector2D>> findOpenings(BoardNode[][] tileGrid) {
+    private HashMap<String, ArrayList<Vector2D>> findOpenings(BoardNode[][] tileGrid) {
         int height = tileGrid.length;
         int width = tileGrid[0].length;
 
@@ -788,7 +854,7 @@ public class FitnessFunction {
         return openings;
     }
 
-    private static void addConnectionsAtOpeningOnSide(BoardNode[][] board, BoardNode[][] originalTileGrid,
+    private void addConnectionsAtOpeningOnSide(BoardNode[][] board, BoardNode[][] originalTileGrid,
                                                int x, int y, int width, int height, String side) {
         if (side != null) {
             if (side.equalsIgnoreCase("n")) {
@@ -898,5 +964,4 @@ public class FitnessFunction {
             }
         }
     }
-
 }

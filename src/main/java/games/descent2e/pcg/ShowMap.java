@@ -26,7 +26,7 @@ public class ShowMap {
 
     private final String dataPath = "data/descent2e/img/";
 
-    public ShowMap(Quest quest, GraphBoard board, int id, float fit, ShowMAPElite parent) {
+    public ShowMap(CreateOffspring co, Quest quest, GraphBoard board, int id, float fit, ShowMAPElite parent) {
 
         this.parent = parent;
 
@@ -49,7 +49,7 @@ public class ShowMap {
         JPanel viewhold = new JPanel();
         viewhold.setBackground(Color.BLACK);
 
-        DescentGridBoardView view = new DescentGridBoardView(boards.get(id), boardTiles.get(id), gridRefs.get(id), tileRefs.get(id), dataPath, shadowSize, maxWidth/2 + 100, maxHeight/2 + 100);
+        DescentGridBoardView view = new DescentGridBoardView(co.boards.get(id), co.boardTiles.get(id), co.gridRefs.get(id), co.tileRefs.get(id), dataPath, shadowSize, maxWidth/2 + 100, maxHeight/2 + 100);
         view.setBackground(Color.BLACK);
         DropShadowBorder shadow = new DropShadowBorder(Color.black, shadowSize, 0.9f, 12, true, true, true, true);
         view.setBorder(shadow);

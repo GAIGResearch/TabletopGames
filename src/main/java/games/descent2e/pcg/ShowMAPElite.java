@@ -49,7 +49,7 @@ public class ShowMAPElite {
         window.setVisible(false);
     }
 
-    public void prepare() {
+    public void prepare(CreateOffspring co) {
         minMax(elite);
 
         JPanel grid = new JPanel(new GridLayout(xRange, 1, 0,0));
@@ -88,7 +88,7 @@ public class ShowMAPElite {
 
                 if (fit > 0f) {
 
-                    Pair<Quest, GraphBoard> quest = GenerateBoards.getQuestByID(myID, true);
+                    Pair<Quest, GraphBoard> quest = co.getQuestByID(myID, true);
                     if (quest != null) {
                         Quest q = quest.a;
                         GraphBoard b = quest.b;
@@ -106,7 +106,7 @@ public class ShowMAPElite {
                                 for (BoardNode node : b.getBoardNodes()) {
                                     System.out.println(node.getComponentName());
                                 }
-                                ShowMap map = new ShowMap(q, b, myID, fit, parent);
+                                ShowMap map = new ShowMap(co, q, b, myID, fit, parent);
                                 map.show();
                                 hide();
                             }
