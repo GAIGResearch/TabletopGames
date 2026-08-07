@@ -19,12 +19,16 @@ import utilities.Pair;
 import utilities.Vector2D;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.List;
 
 import static core.CoreConstants.nodeHash;
 import static games.descent2e.pcg.ControlVariables.*;
@@ -44,6 +48,9 @@ public class GenerateBoards {
     public static HashMap<String, HashMap<String, Monster>> monsters;
     public static HashMap<String, HashMap<String, Monster>> lieutenants;
 
+    static final JFrame mainWindow = new JFrame("Descent (Second Edition) Procedurally Generated Board Creator");
+    static JPanel mainPanel;
+
     public static void main(String[] args) throws IOException {
 
         DescentGameData data = new DescentGameData();
@@ -54,7 +61,48 @@ public class GenerateBoards {
         monsters = data.getMonsters();
         lieutenants = data.getLieutenants();
 
-        CreateOffspring co = new CreateOffspring();
-        co.begin();
+        mainWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        mainWindow.setSize(1200, 500);
+        mainWindow.setResizable(false);
+        mainWindow.setLocationRelativeTo(null);
+        mainWindow.setLayout(new GridLayout(0, 1,10, 10));
+
+        mainPanel = new JPanel(new GridLayout(0, 1, 10, 10));
+        mainPanel.setBackground(Color.CYAN);
+
+        mainWindow.add(mainPanel);
+
+        boolean testing = true;
+
+        if (testing) {
+            CreateOffspring co = new CreateOffspring();
+            co.begin();
+        }
+        else {
+            Button create = makeButton("Generate!");
+            mainPanel.add(create);
+            create.setEnabled(true);
+
+            create.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if(create.isEnabled()) {
+                        CreateOffspring co = new CreateOffspring();
+                        co.begin();
+                        create.setEnabled(false);
+                    }
+                }
+            });
+
+            mainWindow.setVisible(true);
+        }
+
+    }
+
+    public static Button makeButton(String label) {
+        Button button = new Button(label);
+        button.setFocusable(false);
+        button.setFont(new Font("Arial", Font.PLAIN, 10));
+        return button;
     }
 }
