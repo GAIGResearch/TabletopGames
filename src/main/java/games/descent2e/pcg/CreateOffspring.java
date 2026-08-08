@@ -5,9 +5,7 @@ import com.google.crypto.tink.subtle.Random;
 import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.components.GridBoard;
-import core.properties.Property;
-import core.properties.PropertyInt;
-import core.properties.PropertyStringArray;
+import core.properties.*;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -20,7 +18,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-import static core.CoreConstants.nodeHash;
+import static core.CoreConstants.*;
+import static games.descent2e.DescentConstants.connectionHash;
 import static games.descent2e.pcg.ControlVariables.*;
 import static games.descent2e.pcg.ControlVariables.illegalDragonSpawns;
 import static games.descent2e.pcg.GenerateBoards.*;
@@ -57,6 +56,11 @@ public class CreateOffspring {
     int transition = 0;
     int endcap = 0;
     int extender = 0;
+
+    // Limitations imposed by the physical board
+    final int transitionLimit = 2;
+    final int endcapLimit = 5;
+    final int extenderLimit = 9;
 
     public CreateOffspring() {
     }
@@ -376,6 +380,7 @@ public class CreateOffspring {
         List<BoardNode> crossover = new ArrayList<>();
         List<BoardNode> deleted = new ArrayList<>();
         List<BoardNode> cleanedUp = new ArrayList<>();
+        List<BoardNode> rotated = new ArrayList<>();
         boolean freeNodes = true;
 
         transition = 0;
@@ -400,20 +405,27 @@ public class CreateOffspring {
             for (BoardNode node : deleted) {
                 String name = fixNodeName(node.getComponentName());
                 BoardNode newNode = new BoardNode(name);
-                for (int prop_key : node.getProperties().keySet()) {
-                    Property newProp = node.getProperties().get(prop_key).copy();
-                    newNode.setProperty(newProp);
-                }
+                node.copyComponentTo(newNode);
+                newNode.setProperty(new PropertyString("name", name));
                 cleanedUp.add(newNode);
-                //System.out.println(counter+ ": " + name + newNode.getComponentID());
+                //System.out.println(counter+ ": " + name + "; " + newNode.getComponentID());
                 counter++;
             }
 
-            finalNodes = rotateMutate(cleanedUp);
+            rotated = rotateMutate(cleanedUp);
 
             /*for (BoardNode node : finalNodes) {
                 System.out.println(node.getComponentName() + "; " + node.getComponentID());
             }*/
+
+            finalNodes = addEndcaps(rotated);
+
+            // One final cleanup
+            for (BoardNode node : finalNodes) {
+                String name = fixNodeName(node.getComponentName());
+                node.setComponentName(name);
+                node.setProperty(new PropertyString("name", name));
+            }
 
             assembleBoard(finalNodes);
 
@@ -475,15 +487,15 @@ public class CreateOffspring {
         }
 
         // Force a mutation if the group sizes are now too big or too small
-        boolean forceMutate = (finalMonsters.size() < ControlVariables.GROUP_MIN) || (finalMonsters.size() > ControlVariables.GROUP_MAX);
+        boolean forceMutate = (finalMonsters.size() < GROUP_MIN) || (finalMonsters.size() > GROUP_MAX);
 
         if (!forceMutate)
-            if (mutate() < ControlVariables.MONSTER_MUTATE)
+            if (mutate() < MONSTER_MUTATE)
                 forceMutate = true;
 
         while (forceMutate) {
             finalMonsters = mutateMonsters(finalMonsters);
-            forceMutate = (finalMonsters.size() < ControlVariables.GROUP_MIN) || (finalMonsters.size() > ControlVariables.GROUP_MAX);
+            forceMutate = (finalMonsters.size() < GROUP_MIN) || (finalMonsters.size() > GROUP_MAX);
         }
 
         mutateAct(newQuest);
@@ -529,12 +541,12 @@ public class CreateOffspring {
         List<String> toAdd = new ArrayList<>();
         List<String> other = new ArrayList<>();
 
-        if (type < ControlVariables.SMALLOPENGROUP)
+        if (type < SMALLOPENGROUP)
             return "OpenSmall:group";
-        if (type < ControlVariables.OPENGROUP)
+        if (type < OPENGROUP)
             return "Open:group";
 
-        if (type >= (100 - ControlVariables.LIEUTENANT)) {
+        if (type >= (100 - LIEUTENANT)) {
             toAdd.addAll(lieutenants.keySet());
             monType = ":lieutenant";
             other.addAll(monsters.keySet());
@@ -573,17 +585,17 @@ public class CreateOffspring {
         int size = monsters.size();
 
         // Force a specific mutation if for whatever reason we're already over or under the limits
-        boolean add = size < ControlVariables.GROUP_MIN;
-        boolean remove = size > ControlVariables.GROUP_MAX;
+        boolean add = size < GROUP_MIN;
+        boolean remove = size > GROUP_MAX;
 
         if (!add)
-            if (size < ControlVariables.GROUP_MAX)
-                if (mutate < ControlVariables.ADD_GROUP)
+            if (size < GROUP_MAX)
+                if (mutate < ADD_GROUP)
                     add = true;
 
         if (!remove)
-            if (size > ControlVariables.GROUP_MIN)
-                if (mutate >= (100 - ControlVariables.REMOVE_GROUP))
+            if (size > GROUP_MIN)
+                if (mutate >= (100 - REMOVE_GROUP))
                     remove = true;
 
         // Add a new Monster to the groups
@@ -625,7 +637,7 @@ public class CreateOffspring {
 
         // First, check if the Heroes' original starting tile still exists or not
         // Then, roll Mutation chance (10%)
-        boolean forceHeroMutate = !tiles.contains(heroStart) || ControlVariables.illegalHeroSpawns.contains(heroStart);
+        boolean forceHeroMutate = !tiles.contains(heroStart) || illegalHeroSpawns.contains(heroStart);
         if (!forceHeroMutate)
             forceHeroMutate = Random.randInt(10) < 1;
 
@@ -633,7 +645,7 @@ public class CreateOffspring {
             heroStart = "null";
             for (String tile : tiles) {
                 boolean legal = true;
-                for (String illegal : ControlVariables.illegalHeroSpawns) {
+                for (String illegal : illegalHeroSpawns) {
                     if (tile.contains(illegal)) {
                         legal = false;
                         break;
@@ -709,9 +721,9 @@ public class CreateOffspring {
             if (forceMonsterMutate) {
                 monsterPosition = "null";
                 monster[1] = monsterPosition;
-                List<String> illegals = new ArrayList<>(ControlVariables.illegalMonsterSpawns);
+                List<String> illegals = new ArrayList<>(illegalMonsterSpawns);
                 if (barghest)
-                    illegals.addAll(ControlVariables.illegalBarghestSpawns);
+                    illegals.addAll(illegalBarghestSpawns);
                 if (dragon)
                     illegals.addAll(illegalDragonSpawns);
 
@@ -746,7 +758,7 @@ public class CreateOffspring {
 
     void mutateAct(Quest quest) {
         int mutate = mutate();
-        if (mutate < ControlVariables.ACT_MUTATE) {
+        if (mutate < ACT_MUTATE) {
             int newAct = (quest.getAct() % 2) + 1;
             if (newAct > 1) {
                 quest.setStartingXP(quest.getStartingXP() + 5);
@@ -762,7 +774,7 @@ public class CreateOffspring {
 
     void mutateXP(Quest quest) {
         int mutate = mutate();
-        if (mutate < ControlVariables.XP_MUTATE) {
+        if (mutate < XP_MUTATE) {
             int newXP = Random.randInt(5) + 5 * (quest.getAct() - 1);
             int newGold = newXP * 25;
             if (newXP > 1) {
@@ -778,35 +790,35 @@ public class CreateOffspring {
 
     void mutateTraits(Quest quest) {
         List<String> oldTraits = quest.getMonsterTraits();
-        boolean add = oldTraits.size() < ControlVariables.TRAITS_MIN;
-        boolean remove = oldTraits.size() > ControlVariables.TRAITS_MAX;
+        boolean add = oldTraits.size() < TRAITS_MIN;
+        boolean remove = oldTraits.size() > TRAITS_MAX;
         boolean replace = false;
 
         int mutate = mutate();
 
         if (!add)
-            if (oldTraits.size() < ControlVariables.TRAITS_MAX)
-                if (mutate < ControlVariables.ADD_TRAITS)
+            if (oldTraits.size() < TRAITS_MAX)
+                if (mutate < ADD_TRAITS)
                     add = true;
         if (!remove)
-            if (oldTraits.size() > ControlVariables.TRAITS_MIN)
-                if (mutate < (ControlVariables.ADD_TRAITS + ControlVariables.REMOVE_TRAITS))
+            if (oldTraits.size() > TRAITS_MIN)
+                if (mutate < (ADD_TRAITS + REMOVE_TRAITS))
                     remove = true;
-        if (mutate < (ControlVariables.ADD_TRAITS + ControlVariables.REMOVE_TRAITS + ControlVariables.REPLACE_TRAITS))
+        if (mutate < (ADD_TRAITS + REMOVE_TRAITS + REPLACE_TRAITS))
             replace = true;
 
         // Remove, in case of 'All' trait
-        if (oldTraits.size() < ControlVariables.TRAITS_MIN)
+        if (oldTraits.size() < TRAITS_MIN)
             oldTraits = new ArrayList<>();
 
         // Add
         if (add) {
-            List<String> traits = new ArrayList<>(ControlVariables.TRAITS);
+            List<String> traits = new ArrayList<>(TRAITS);
             Collections.shuffle(traits);
             for (String t : traits) {
                 if (!oldTraits.contains(t))
                     oldTraits.add(t);
-                if (oldTraits.size() >= ControlVariables.TRAITS_MIN)
+                if (oldTraits.size() >= TRAITS_MIN)
                     break;
             }
         }
@@ -817,7 +829,7 @@ public class CreateOffspring {
         // Replace
         else if (replace) {
             int r = Random.randInt(oldTraits.size());
-            List<String> traits = new ArrayList<>(ControlVariables.TRAITS);
+            List<String> traits = new ArrayList<>(TRAITS);
             Collections.shuffle(traits);
             for (String t : traits) {
                 if (!oldTraits.contains(t)) {
@@ -952,19 +964,19 @@ public class CreateOffspring {
                 String name = node.getComponentName();
 
                 if (name.contains("transition")) {
-                    if (transition >= 2) continue;
+                    if (transition >= transitionLimit) continue;
                     transition++;
                     tiles.add(name);
                     retVal.add(node);
                     continue;
                 } else if (name.contains("endcap")) {
-                    if (endcap >= 5) continue;
+                    if (endcap >= endcapLimit) continue;
                     endcap++;
                     tiles.add(name);
                     retVal.add(node);
                     continue;
                 } else if (name.contains("extender")) {
-                    if (extender >= 9) continue;
+                    if (extender >= extenderLimit) continue;
                     extender++;
                     tiles.add(name);
                     retVal.add(node);
@@ -1022,7 +1034,7 @@ public class CreateOffspring {
         List<BoardNode> retVal = new ArrayList<>(nodes);
         // 10% rotation chance
         for (BoardNode node : retVal) {
-            if (Random.randInt(10) < 1) {
+            if (Random.randInt(10) < 0) {
                 int rotation = Random.randInt(positions.size() - 1) + 1;
                 int oldRotate = ((PropertyInt) node.getProperty("orientation")).value;
                 node.setProperty(new PropertyInt("orientation", (oldRotate + rotation) % 4));
@@ -1035,6 +1047,327 @@ public class CreateOffspring {
                 }
             }
         }
+        return retVal;
+    }
+
+    List<BoardNode> addEndcaps(List<BoardNode> nodes) {
+        List<BoardNode> retVal = new ArrayList<>(nodes);
+
+        List<BoardNode> endcaps = new ArrayList<>();
+        List<BoardNode> nCaps = new ArrayList<>();
+        List<BoardNode> eCaps = new ArrayList<>();
+        List<BoardNode> sCaps = new ArrayList<>();
+        List<BoardNode> wCaps = new ArrayList<>();
+
+        int north = 0;
+        int east = 0;
+        int south = 0;
+        int west = 0;
+
+        int countA = 0;
+        int countB = 0;
+
+        boolean entrance = false;
+        boolean exit = false;
+        int endcap = 0;
+
+        for (BoardNode node : nodes) {
+            String name = node.getComponentName();
+
+            if (name.contains("A"))
+                countA++;
+            if (name.contains("B"))
+                countB++;
+
+            if (name.contains("endcap")) {
+                endcap++;
+                endcaps.add(node);
+            }
+            if (name.contains("entrance")) {
+                entrance = true;
+                endcaps.add(node);
+            }
+            if (name.contains("exit")) {
+                exit = true;
+                endcaps.add(node);
+            }
+
+            String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+            for (String c : connections) {
+                switch (c) {
+                    case "N-0" -> {
+                        north++;
+                        if (endcaps.contains(node))
+                            nCaps.add(node);
+                    }
+                    case "E-0" -> {
+                        east++;
+                        if (endcaps.contains(node))
+                            eCaps.add(node);
+                    }
+                    case "S-0" -> {
+                        south++;
+                        if (endcaps.contains(node))
+                            sCaps.add(node);
+                    }
+                    case "W-0" -> {
+                        west++;
+                        if (endcaps.contains(node))
+                            wCaps.add(node);
+                    }
+                }
+            }
+        }
+        boolean imbalanceNS = false;
+        boolean imbalanceEW = false;
+        if (north != south) {
+            //System.out.println("Imbalance of North and South - N:" + north + "; S:" + south);
+            imbalanceNS = true;
+        }
+        if (east != west) {
+            //System.out.println("Imbalance of East and West - E:" + east + "; W:" + west);
+            imbalanceEW = true;
+        }
+
+        // First, see if there's a way to fix both imbalances, by rotating any existing endcaps
+        while (imbalanceNS && imbalanceEW) {
+            boolean madeChange = false;
+            boolean canStop = true;
+            if (!(nCaps.isEmpty() && sCaps.isEmpty()))
+                canStop = false;
+            if (!(eCaps.isEmpty() && wCaps.isEmpty()))
+                canStop = false;
+            if (canStop)
+                break;
+
+            if (north > south && !nCaps.isEmpty()) {
+                BoardNode node = nCaps.remove(0);
+                north--;
+                madeChange = true;
+                if (east < west) {
+                    eCaps.add(node);
+                    east++;
+                    node.setProperty(new PropertyInt("orientation", 1));
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    connections[0] = "E-0";
+                }
+                else if (west < east) {
+                    wCaps.add(node);
+                    west++;
+                    node.setProperty(new PropertyInt("orientation", 3));
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    connections[0] = "W-0";
+                }
+            }
+            if (south > north && !sCaps.isEmpty()) {
+                BoardNode node = sCaps.remove(0);
+                south--;
+                madeChange = true;
+                if (east < west) {
+                    eCaps.add(node);
+                    east++;
+                    node.setProperty(new PropertyInt("orientation", 1));
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    connections[0] = "E-0";
+                }
+                else if (west < east) {
+                    wCaps.add(node);
+                    west++;
+                    node.setProperty(new PropertyInt("orientation", 3));
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    connections[0] = "W-0";
+                }
+            }
+            if (east > west && !eCaps.isEmpty()) {
+                BoardNode node = eCaps.remove(0);
+                east--;
+                madeChange = true;
+                if (north < south) {
+                    nCaps.add(node);
+                    north++;
+                    node.setProperty(new PropertyInt("orientation", 0));
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    connections[0] = "N-0";
+                }
+                else if (south < north) {
+                    sCaps.add(node);
+                    south++;
+                    node.setProperty(new PropertyInt("orientation", 2));
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    connections[0] = "S-0";
+                }
+            }
+            if (west > east && !wCaps.isEmpty()) {
+                BoardNode node = wCaps.remove(0);
+                west--;
+                madeChange = true;
+                if (north < south) {
+                    nCaps.add(node);
+                    north++;
+                    node.setProperty(new PropertyInt("orientation", 0));
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    connections[0] = "N-0";
+                }
+                else if (south < north) {
+                    sCaps.add(node);
+                    south++;
+                    node.setProperty(new PropertyInt("orientation", 2));
+                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                    connections[0] = "S-0";
+                }
+            }
+            if (north == south)
+                imbalanceNS = false;
+            if (east == west)
+                imbalanceEW = false;
+
+            // If, for whatever reason, we cycled through this and couldn't make a single change, abort
+            if (!madeChange)
+                break;
+        }
+
+        // If there's still an imbalance, go and add the tiles in afterwards
+        while (imbalanceNS) {
+            // As changing North to South is a difference of 2, we need to make sure we're not just flip-flopping the one tile around
+            if (north > south+1 && !nCaps.isEmpty()) {
+                BoardNode node = nCaps.remove(0);
+                north--;
+                sCaps.add(node);
+                south++;
+                node.setProperty(new PropertyInt("orientation", 2));
+                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                connections[0] = "S-0";
+                if (north == south) {
+                    imbalanceNS = false;
+                }
+                continue;
+            }
+            if (south > north+1 && !sCaps.isEmpty()) {
+                BoardNode node = sCaps.remove(0);
+                south--;
+                nCaps.add(node);
+                north++;
+                node.setProperty(new PropertyInt("orientation", 0));
+                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                connections[0] = "N-0";
+                if (north == south) {
+                    imbalanceNS = false;
+                }
+                continue;
+            }
+
+            BoardNode newNode = null;
+            if (!entrance) {
+                newNode = new BoardNode(countB > countA ? "entrance1B" : "entrance1A");
+                entrance = true;
+            }
+            else if (!exit) {
+                newNode = new BoardNode(countB > countA ? "exit1B" : "exit1A");
+                exit = true;
+            }
+            else if (endcap < endcapLimit) {
+                endcap++;
+                newNode = new BoardNode(countB > countA ? "endcap1B-" + endcap : "endcap1A-" + endcap);
+            }
+            if (newNode != null) {
+                newNode.setProperty(new PropertyString("name", newNode.getComponentName()));
+                newNode.setProperty(new PropertyStringArray("neighbours", neighbourHash, new String[]{"null"}));
+                if (north < south) {
+                    newNode.setProperty(new PropertyInt("orientation", 0));
+                    newNode.setProperty(new PropertyStringArray("connections", connectionHash, new String[]{"N-0"}));
+                    north++;
+                    nCaps.add(newNode);
+                }
+                else {
+                    newNode.setProperty(new PropertyInt("orientation", 2));
+                    newNode.setProperty(new PropertyStringArray("connections", connectionHash, new String[]{"S-0"}));
+                    south++;
+                    sCaps.add(newNode);
+                }
+                retVal.add(newNode);
+            }
+            // If there's nothing more to be done, give up
+            if (entrance && exit && endcap >= endcapLimit) {
+                break;
+            }
+            if (north == south)
+                imbalanceNS = false;
+        }
+
+        while (imbalanceEW) {
+            if (east > west+1 && !eCaps.isEmpty()) {
+                BoardNode node = eCaps.remove(0);
+                east--;
+                wCaps.add(node);
+                west++;
+                node.setProperty(new PropertyInt("orientation", 3));
+                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                connections[0] = "W-0";
+                if (east == west) {
+                    imbalanceEW = false;
+                }
+                continue;
+            }
+            if (west > east+1 && !wCaps.isEmpty()) {
+                BoardNode node = wCaps.remove(0);
+                west--;
+                eCaps.add(node);
+                east++;
+                node.setProperty(new PropertyInt("orientation", 1));
+                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                connections[0] = "E-0";
+                if (east == west) {
+                    imbalanceNS = false;
+                }
+                continue;
+            }
+
+            BoardNode newNode = null;
+            if (!entrance) {
+                newNode = new BoardNode(countB > countA ? "entrance1B" : "entrance1A");
+                entrance = true;
+            }
+            else if (!exit) {
+                newNode = new BoardNode(countB > countA ? "exit1B" : "exit1A");
+                exit = true;
+            }
+            else if (endcap < endcapLimit) {
+                endcap++;
+                newNode = new BoardNode(countB > countA ? "endcap1B-" + endcap : "endcap1A-" + endcap);
+            }
+            if (newNode != null) {
+                newNode.setProperty(new PropertyString("name", newNode.getComponentName()));
+                newNode.setProperty(new PropertyStringArray("neighbours", neighbourHash, new String[]{"null"}));
+                if (east < west) {
+                    newNode.setProperty(new PropertyInt("orientation", 1));
+                    newNode.setProperty(new PropertyStringArray("connections", connectionHash, new String[]{"E-0"}));
+                    east++;
+                    eCaps.add(newNode);
+                }
+                else {
+                    newNode.setProperty(new PropertyInt("orientation", 3));
+                    newNode.setProperty(new PropertyStringArray("connections", connectionHash, new String[]{"W-0"}));
+                    west++;
+                    wCaps.add(newNode);
+                }
+                retVal.add(newNode);
+            }
+            // If there's nothing more to be done, give up
+            if (entrance && exit && endcap >= endcapLimit) {
+                break;
+            }
+            if (east == west)
+                imbalanceEW = false;
+        }
+
+        if (north != south) {
+            System.out.println("Still an imbalance - North: " + north + "; South: " + south);
+        }
+        if (east != west) {
+            System.out.println("Still an imbalance - East: " + east + "; West: " + west);
+        }
+
+
         return retVal;
     }
 
@@ -1072,8 +1405,11 @@ public class CreateOffspring {
                     if (Arrays.asList(n2Connects).contains(opposite)) {
                         Map<String, List<Pair<BoardNode, String>>> link = possible.get(n1.getComponentName());
                         List<Pair<BoardNode, String>> list = link.get(connection);
-                        if (list == null)
-                            System.out.println("Why?");
+                        if (list == null) {
+                            System.out.println("n1: " + n1.getComponentName() + ": Real Name: " + n1.getProperty("name").toString());
+                            System.out.println("n2: " + n2.getComponentName() + ": Real Name: " + n2.getProperty("name").toString());
+                            System.out.println("Connection: " + connection);
+                        }
                         list.add(new Pair<>(n2, opposite));
                     }
 
