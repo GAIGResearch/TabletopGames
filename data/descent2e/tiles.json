@@ -71,7 +71,7 @@
     "id": "3A",
     "size": [8, 6],
     "space": 24,
-    "nodes": 2,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -86,7 +86,7 @@
     "id": "3B",
     "size": [8, 6],
     "space": 24,
-    "nodes": 2,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -698,7 +698,7 @@
     "id": "23A",
     "size": [8, 4],
     "space": 12,
-    "nodes": 2,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -711,7 +711,7 @@
     "id": "23B",
     "size": [8, 4],
     "space": 12,
-    "nodes": 2,
+    "nodes": 3,
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
