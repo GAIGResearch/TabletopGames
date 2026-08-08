@@ -383,25 +383,29 @@ public class CreateOffspring {
         List<BoardNode> rotated = new ArrayList<>();
         boolean freeNodes = true;
 
-        transition = 0;
-        endcap = 0;
-        extender = 0;
-
         List<BoardNode> newNodes = newBoard.getComponents();
         List<BoardNode> oldNodes = otherBoard.getComponents();
 
-        int attempt = 0;
+
         while (freeNodes) {
-            //attempt++;
-            //System.out.println("Attempt: " + attempt);
             freeNodes = false;
+
+            transition = 0;
+            endcap = 0;
+            extender = 0;
 
             // Construct Board Assembly with all the new tiles
             crossover = crossoverMutate(oldNodes, newNodes);
             deleted = deletionMutate(crossover);
 
             cleanedUp.clear();
-            int counter = 1;
+            //int counter = 1;
+
+            // Reset these back to 0 after crossover
+            transition = 0;
+            endcap = 0;
+            extender = 0;
+
             for (BoardNode node : deleted) {
                 String name = fixNodeName(node.getComponentName());
                 BoardNode newNode = new BoardNode(name);
@@ -409,26 +413,50 @@ public class CreateOffspring {
                 newNode.setProperty(new PropertyString("name", name));
                 cleanedUp.add(newNode);
                 //System.out.println(counter+ ": " + name + "; " + newNode.getComponentID());
-                counter++;
+                //counter++;
             }
 
             rotated = rotateMutate(cleanedUp);
 
-            /*for (BoardNode node : finalNodes) {
-                System.out.println(node.getComponentName() + "; " + node.getComponentID());
-            }*/
+            // Final validity check to ensure that we can actually assemble the board without any loose ends
+            // We force rotate, add and subtract any end cap pieces (and entrances / exits)
+            // so we have an equal number of connecting North and South pairs, and East and West pairs
+            Pair<List<BoardNode>, Boolean> lastCheck = addEndcaps(rotated);
 
-            finalNodes = addEndcaps(rotated);
+            finalNodes.clear();
+            finalNodes.addAll(lastCheck.a);
+            freeNodes = lastCheck.b;
 
-            // One final cleanup
-            transition = 0;
-            endcap = 0;
-            extender = 0;
-            for (BoardNode node : finalNodes) {
-                String name = fixNodeName(node.getComponentName());
-                node.setComponentName(name);
-                node.setProperty(new PropertyString("name", name));
+            if (freeNodes) {
+                System.out.println("Do it again!");
             }
+        }
+
+        // One final cleanup
+        transition = 0;
+        endcap = 0;
+        extender = 0;
+        for (BoardNode node : finalNodes) {
+            String name = fixNodeName(node.getComponentName());
+            node.setComponentName(name);
+            node.setProperty(new PropertyString("name", name));
+            //System.out.println(node.getComponentName() + "; " + node.getComponentID());
+        }
+
+        boolean boardReady = false;
+
+        // Now, assemble the board
+        // Keep assembling and reassembling until we have a connection that works
+
+        int attempt = 0;
+        while (!boardReady) {
+            // Give up after 10 attempts
+            if (attempt > 10)
+                break;
+            boardReady = true;
+
+            attempt++;
+            System.out.println("Attempt: " + attempt);
 
             assembleBoard(finalNodes);
 
@@ -438,30 +466,32 @@ public class CreateOffspring {
 
                 for (String neighbour : neighbours) {
                     if (neighbour.equals("null")) {
-                        //freeNodes = true;
+                        boardReady = false;
                         break;
                     }
                 }
 
-                if (freeNodes) break;
+                if (!boardReady) break;
 
                 for (String connection : connections) {
                     if (!positions.contains(connection)) {
-                        //freeNodes = true;
+                        boardReady = false;
                         break;
                     }
                 }
 
-                if (freeNodes) break;
+                if (!boardReady) break;
 
                 int expected = ((PropertyInt) Objects.requireNonNull(getTileByName(node.getComponentName())).getProperty(nodeHash)).value;
 
                 if (expected != neighbours.length || expected != connections.length) {
-                    //freeNodes = true;
+                    boardReady = false;
                     break;
                 }
             }
         }
+
+        newBoard.clearBoardNodes();
         newBoard.setBoardNodes(finalNodes);
 
         // --- MONSTER MUTATIONS ---
@@ -1107,7 +1137,8 @@ public class CreateOffspring {
         return retVal;
     }
 
-    List<BoardNode> addEndcaps(List<BoardNode> nodes) {
+    Pair<List<BoardNode>, Boolean> addEndcaps(List<BoardNode> nodes) {
+        boolean freeNodes = false;
         List<BoardNode> retVal = new ArrayList<>(nodes);
 
         // We include the Entrance and Exit as well as Endcaps
@@ -1455,13 +1486,15 @@ public class CreateOffspring {
         // If all else fails, we give up - we can't save this board with the current mutations
         if (north != south) {
             System.out.println("Still an imbalance - North: " + north + "; South: " + south);
+            freeNodes = true;
         }
         if (east != west) {
             System.out.println("Still an imbalance - East: " + east + "; West: " + west);
+            freeNodes = true;
         }
 
 
-        return retVal;
+        return new Pair<>(retVal, freeNodes);
     }
 
     void assembleBoard(List<BoardNode> nodes) {
@@ -1478,6 +1511,7 @@ public class CreateOffspring {
         for (BoardNode node : nodes) {
             String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
             Arrays.fill(neighbours, "null");
+            node.clearNeighbours();
 
             Map<String, List<Pair<BoardNode, String>>> connections = new HashMap<>();
 
