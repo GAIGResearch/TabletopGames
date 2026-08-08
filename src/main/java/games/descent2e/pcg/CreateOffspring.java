@@ -421,6 +421,9 @@ public class CreateOffspring {
             finalNodes = addEndcaps(rotated);
 
             // One final cleanup
+            transition = 0;
+            endcap = 0;
+            extender = 0;
             for (BoardNode node : finalNodes) {
                 String name = fixNodeName(node.getComponentName());
                 node.setComponentName(name);
@@ -1053,6 +1056,7 @@ public class CreateOffspring {
     List<BoardNode> addEndcaps(List<BoardNode> nodes) {
         List<BoardNode> retVal = new ArrayList<>(nodes);
 
+        // We include the Entrance and Exit as well as Endcaps
         List<BoardNode> endcaps = new ArrayList<>();
         List<BoardNode> nCaps = new ArrayList<>();
         List<BoardNode> eCaps = new ArrayList<>();
@@ -1226,7 +1230,7 @@ public class CreateOffspring {
                 break;
         }
 
-        // If there's still an imbalance, go and add the tiles in afterwards
+        // Then, if there's still an imbalance, go and add the tiles in afterwards
         while (imbalanceNS) {
             // As changing North to South is a difference of 2, we need to make sure we're not just flip-flopping the one tile around
             if (north > south+1 && !nCaps.isEmpty()) {
@@ -1284,6 +1288,7 @@ public class CreateOffspring {
                     south++;
                     sCaps.add(newNode);
                 }
+                endcaps.add(newNode);
                 retVal.add(newNode);
             }
             // If there's nothing more to be done, give up
@@ -1293,7 +1298,6 @@ public class CreateOffspring {
             if (north == south)
                 imbalanceNS = false;
         }
-
         while (imbalanceEW) {
             if (east > west+1 && !eCaps.isEmpty()) {
                 BoardNode node = eCaps.remove(0);
@@ -1350,6 +1354,7 @@ public class CreateOffspring {
                     west++;
                     wCaps.add(newNode);
                 }
+                endcaps.add(newNode);
                 retVal.add(newNode);
             }
             // If there's nothing more to be done, give up
@@ -1359,7 +1364,41 @@ public class CreateOffspring {
             if (east == west)
                 imbalanceEW = false;
         }
+        // If there's still an imbalance, go and remove whatever Endcaps we can as a last resort
+        if (imbalanceNS) {
+            while (north > south && !nCaps.isEmpty()) {
+                north--;
+                BoardNode node = nCaps.remove(0);
+                endcaps.remove(node);
+                retVal.remove(node);
+                System.out.println("Last Resort: Removing " + node.getComponentName());
+            }
+            while (south > north && !sCaps.isEmpty()) {
+                south--;
+                BoardNode node = sCaps.remove(0);
+                endcaps.remove(node);
+                retVal.remove(node);
+                System.out.println("Last Resort: Removing " + node.getComponentName());
+            }
+        }
+        if (imbalanceEW) {
+            while (east > west && !eCaps.isEmpty()) {
+                east--;
+                BoardNode node = eCaps.remove(0);
+                endcaps.remove(node);
+                retVal.remove(node);
+                System.out.println("Last Resort: Removing " + node.getComponentName());
+            }
+            while (west > east && !wCaps.isEmpty()) {
+                west--;
+                BoardNode node = wCaps.remove(0);
+                endcaps.remove(node);
+                retVal.remove(node);
+                System.out.println("Last Resort: Removing " + node.getComponentName());
+            }
+        }
 
+        // If all else fails, we give up - we can't save this board with the current mutations
         if (north != south) {
             System.out.println("Still an imbalance - North: " + north + "; South: " + south);
         }
