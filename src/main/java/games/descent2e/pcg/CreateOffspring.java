@@ -1035,21 +1035,75 @@ public class CreateOffspring {
 
     List<BoardNode> rotateMutate (List<BoardNode> nodes) {
         List<BoardNode> retVal = new ArrayList<>(nodes);
+        List<BoardNode> north = new ArrayList<>();
+        List<BoardNode> south = new ArrayList<>();
+        List<BoardNode> east = new ArrayList<>();
+        List<BoardNode> west = new ArrayList<>();
         // 10% rotation chance
         for (BoardNode node : retVal) {
-            if (Random.randInt(10) < 0) {
+            String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+            if (Random.randInt(10) < 1) {
                 int rotation = Random.randInt(positions.size() - 1) + 1;
                 int oldRotate = ((PropertyInt) node.getProperty("orientation")).value;
                 node.setProperty(new PropertyInt("orientation", (oldRotate + rotation) % 4));
-                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
                 for (int i = 0; i < connections.length; i++) {
                     if (positions.contains(connections[i])) {
                         int index = positions.indexOf(connections[i]);
                         connections[i] = positions.get((index + rotation) % 4);
+                        switch(connections[i]) {
+                            case "N-0" -> north.add(node);
+                            case "E-0" -> east.add(node);
+                            case "S-0" -> south.add(node);
+                            case "W-0" -> west.add(node);
+                        }
+                    }
+                }
+            }
+            else {
+                for (String connection : connections) {
+                    switch (connection) {
+                        case "N-0" -> north.add(node);
+                        case "E-0" -> east.add(node);
+                        case "S-0" -> south.add(node);
+                        case "W-0" -> west.add(node);
                     }
                 }
             }
         }
+
+        // Edge case, where we have one tile that now is the lone North/South or East/West provider
+        // If so, force a rotation
+        if (north.size() == 1 && south.size() == 1) {
+            BoardNode suspect = north.get(0);
+            if (south.contains(suspect)) {
+                //System.out.println("Edge case!");
+                int oldRotate = ((PropertyInt) suspect.getProperty("orientation")).value;
+                suspect.setProperty(new PropertyInt("orientation", (oldRotate + 1) % 4));
+                String[] connections = ((PropertyStringArray) suspect.getProperty("connections")).getValues();
+                for (int i = 0; i < connections.length; i++) {
+                    if (positions.contains(connections[i])) {
+                        int index = positions.indexOf(connections[i]);
+                        connections[i] = positions.get((index + 1) % 4);
+                    }
+                }
+            }
+        }
+        if (east.size() == 1 && west.size() == 1) {
+            BoardNode suspect = east.get(0);
+            if (west.contains(suspect)) {
+                //System.out.println("Edge case!");
+                int oldRotate = ((PropertyInt) suspect.getProperty("orientation")).value;
+                suspect.setProperty(new PropertyInt("orientation", (oldRotate + 1) % 4));
+                String[] connections = ((PropertyStringArray) suspect.getProperty("connections")).getValues();
+                for (int i = 0; i < connections.length; i++) {
+                    if (positions.contains(connections[i])) {
+                        int index = positions.indexOf(connections[i]);
+                        connections[i] = positions.get((index + 1) % 4);
+                    }
+                }
+            }
+        }
+
         return retVal;
     }
 
