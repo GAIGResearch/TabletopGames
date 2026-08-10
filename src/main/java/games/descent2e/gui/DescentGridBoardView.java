@@ -87,7 +87,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         updateScale(scale);
 
         for (Integer key : tiles.keySet()) {
-            System.out.println(key);
+            //System.out.println(key);
         }
 
         tileImageTopLeftCorners = new HashMap<>();
@@ -105,7 +105,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                 if (space.getY() > maxY) maxY = space.getY();
                 compID = tileReferences[space.getY()][space.getX()] - 1;
             }
-            System.out.println(tile + ", " + compID);
+            //System.out.println(tile + ", " + compID);
 //            for (Integer key : tiles.get(compID).getProperties().keySet()) {
 //                System.out.println(key);
 //                System.out.println(tiles.get(compID).getProperty(key));

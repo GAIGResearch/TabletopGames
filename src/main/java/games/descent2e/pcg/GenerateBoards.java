@@ -48,9 +48,6 @@ public class GenerateBoards {
     public static HashMap<String, HashMap<String, Monster>> monsters;
     public static HashMap<String, HashMap<String, Monster>> lieutenants;
 
-    static final JFrame mainWindow = new JFrame("Descent (Second Edition) Procedurally Generated Board Creator");
-    static JPanel mainPanel;
-
     public static void main(String[] args) throws IOException {
 
         DescentGameData data = new DescentGameData();
@@ -61,52 +58,14 @@ public class GenerateBoards {
         monsters = data.getMonsters();
         lieutenants = data.getLieutenants();
 
-        mainWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        mainWindow.setSize(1200, 500);
-        mainWindow.setResizable(false);
-        mainWindow.setLocationRelativeTo(null);
-        mainWindow.setLayout(new GridLayout(0, 1,10, 10));
-
-        mainPanel = new JPanel(new GridLayout(0, 1, 10, 10));
-        mainPanel.setBackground(Color.CYAN);
-
-        mainWindow.add(mainPanel);
-
-        boolean testing = true;
-
+        boolean testing = false;
         if (testing) {
             CreateOffspring co = new CreateOffspring();
             co.begin();
         }
         else {
-            Button create = makeButton("Generate!");
-            mainPanel.add(create);
-            create.setEnabled(true);
-
-            create.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if(create.isEnabled()) {
-                        CreateOffspring co = new CreateOffspring();
-                        try {
-                            co.begin();
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                        create.setEnabled(false);
-                    }
-                }
-            });
-
-            mainWindow.setVisible(true);
+            GenerateBoardsGUI gui = new GenerateBoardsGUI();
+            gui.load();
         }
-
-    }
-
-    public static Button makeButton(String label) {
-        Button button = new Button(label);
-        button.setFocusable(false);
-        button.setFont(new Font("Arial", Font.PLAIN, 10));
-        return button;
     }
 }

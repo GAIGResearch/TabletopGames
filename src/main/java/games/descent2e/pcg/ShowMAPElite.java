@@ -101,10 +101,10 @@ public class ShowMAPElite {
                                 System.out.println("ID: " + myID);
                                 System.out.println("Fitness: " + fit);
                                 for (String[] monster : q.getMonsters()) {
-                                    System.out.println(Arrays.toString(monster));
+                                    //System.out.println(Arrays.toString(monster));
                                 }
                                 for (BoardNode node : b.getBoardNodes()) {
-                                    System.out.println(node.getComponentName());
+                                    //System.out.println(node.getComponentName());
                                 }
                                 ShowMap map = new ShowMap(co, q, b, myID, fit, parent);
                                 map.show();
