@@ -35,7 +35,7 @@ public class CreateOffspring {
     // How many boards we generate using the feasible/infeasible pools
     private int GENERATIONLOOP = 200;
     private int OFFSPRING = 10;
-    private int CHOOSE_INFEASIBLE = 3;
+    private int CHOOSE_INFEASIBLE = 30;
 
     public HashMap<Integer, GridBoard> boards = new HashMap<>();
     public HashMap<Integer, Map<Integer, GridBoard>> boardTiles = new HashMap<>();
@@ -101,7 +101,7 @@ public class CreateOffspring {
 
         for (int i = 0; i < GENERATIONLOOP; i++) {
             System.out.println(FIRSTLOOP + (i * OFFSPRING));
-            int choice = Random.randInt(10);
+            int choice = Random.randInt(100);
 
             // Failsafe - force Infeasible Parents
             // if, for whatever reason, we got this far and failed to spawn enough Feasible parents
