@@ -36,9 +36,23 @@ public class GenerateBoardsGUI {
     int defaultOffspring = OFFSPRING;
     int defaultInfeasible = INFEASIBLE;
 
+    int sizeMin = 100;
+    int sizeMax = 300;
+
+    int groupMin = 2;
+    int groupMax = 10;
+
+    float healthMin = 2f;
+    float healthMax = 20f;
+
     int IDEAL_SIZE = 166;
     int IDEAL_GROUP = 5;
     float IDEAL_HEALTH = 5.872f;
+
+    int defaultSize = IDEAL_SIZE;
+    int defaultGroups = IDEAL_GROUP;
+    float defaultHealth = IDEAL_HEALTH;
+    boolean defaultIdeals = true;
 
     final JFrame mainWindow = new JFrame("Descent (Second Edition) Procedurally Generated Board Creator");
     JPanel mainPanel;
@@ -48,6 +62,9 @@ public class GenerateBoardsGUI {
     JSlider secondLoopSlide;
     JSlider offspringLoopSlide;
     JSlider infeasibleSlide;
+    JSlider sizeSlide;
+    JSlider groupsSlide;
+    JSlider healthSlide;
 
     public GenerateBoardsGUI() {
     }
@@ -183,6 +200,75 @@ public class GenerateBoardsGUI {
 
         mainPanel.add(generatorControls);
 
+        JPanel fitnessControls = new JPanel(new GridLayout(0, 1, 5, 5));
+
+        JPanel idealSizeContainer = new JPanel(new FlowLayout());
+        JLabel idealSizeLabel = new JLabel("Target Ideal Size:");
+
+        NumberField sizecount = new NumberField(IDEAL_SIZE, Category.idealSize, sizeMin, sizeMax);
+        sizecount.addPropertyChangeListener(sizecount);
+        sizecount.setColumns(3);
+        sizecount.setMargin(new Insets(5, 10, 5, 10));
+        sizecount.setMaximumSize(new Dimension(80, 50));
+
+        sizeSlide = new JSlider(JSlider.HORIZONTAL, sizeMin, sizeMax, IDEAL_SIZE);
+        sizeSlide.addChangeListener(new SliderListener(sizecount, Category.idealSize, sizeMin, sizeMax));
+        sizeSlide.setMajorTickSpacing(50);
+        sizeSlide.setMinorTickSpacing(10);
+        sizeSlide.setPaintTicks(true);
+        sizeSlide.setPaintLabels(true);
+        sizecount.setSlider(sizeSlide);
+
+        idealSizeContainer.add(idealSizeLabel);
+        idealSizeContainer.add(sizecount);
+        idealSizeContainer.add(sizeSlide);
+        fitnessControls.add(idealSizeContainer);
+
+        JPanel idealGroupContainer = new JPanel(new FlowLayout());
+        JLabel idealGroupLabel = new JLabel("Target Ideal Monster Groups:");
+
+        NumberField groupcount = new NumberField(IDEAL_GROUP, Category.idealGroups, groupMin, groupMax);
+        groupcount.addPropertyChangeListener(groupcount);
+        groupcount.setColumns(3);
+        groupcount.setMargin(new Insets(5, 10, 5, 10));
+        groupcount.setMaximumSize(new Dimension(80, 50));
+
+        groupsSlide = new JSlider(JSlider.HORIZONTAL, groupMin, groupMax, IDEAL_GROUP);
+        groupsSlide.addChangeListener(new SliderListener(groupcount, Category.idealGroups, groupMin, groupMax));
+        groupsSlide.setMajorTickSpacing(1);
+        groupsSlide.setPaintTicks(true);
+        groupsSlide.setPaintLabels(true);
+        groupcount.setSlider(groupsSlide);
+
+        idealGroupContainer.add(idealGroupLabel);
+        idealGroupContainer.add(groupcount);
+        idealGroupContainer.add(groupsSlide);
+        fitnessControls.add(idealGroupContainer);
+
+        JPanel idealHealthContainer = new JPanel(new FlowLayout());
+        JLabel idealHealthLabel = new JLabel("Target Ideal Average Monster Health:");
+
+        NumberField healthcount = new NumberField(IDEAL_HEALTH, Category.idealHealth, healthMin, healthMax);
+        healthcount.addPropertyChangeListener(healthcount);
+        healthcount.setColumns(5);
+        healthcount.setMargin(new Insets(5, 10, 5, 10));
+        healthcount.setMaximumSize(new Dimension(80, 50));
+
+        healthSlide = new JSlider(JSlider.HORIZONTAL, (int) healthMin, (int) healthMax, (int) IDEAL_HEALTH);
+        healthSlide.addChangeListener(new SliderListener(healthcount, Category.idealHealth, healthMin, healthMax));
+        healthSlide.setMajorTickSpacing(3);
+        healthSlide.setMinorTickSpacing(1);
+        healthSlide.setPaintTicks(true);
+        healthSlide.setPaintLabels(true);
+        healthcount.setSlider(healthSlide);
+
+        idealHealthContainer.add(idealHealthLabel);
+        idealHealthContainer.add(healthcount);
+        idealHealthContainer.add(healthSlide);
+        fitnessControls.add(idealHealthContainer);
+
+        mainPanel.add(fitnessControls);
+
         Button create = makeButton("Generate!");
         mainPanel.add(create);
         create.setEnabled(true);
@@ -193,6 +279,12 @@ public class GenerateBoardsGUI {
                 if(create.isEnabled()) {
                     System.out.println("Generating " + (FIRSTLOOP + (GENERATIONLOOP * OFFSPRING)) + " Boards, with " + INFEASIBLE +"% chance of Infeasible Pool Parents!");
                     CreateOffspring co = new CreateOffspring(FIRSTLOOP, GENERATIONLOOP, OFFSPRING, INFEASIBLE);
+
+                    if (defaultIdeals)
+                        co.setIdeals(defaultSize, defaultGroups, defaultHealth);
+                    else
+                        co.setIdeals(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH);
+
                     try {
                         co.begin();
                     } catch (IOException ex) {
@@ -233,13 +325,20 @@ public class GenerateBoardsGUI {
             this.max = max;
         }
 
+        public NumberField(float value, Category category, double min, double max) {
+            super(value);
+            this.category = category;
+            this.min = min;
+            this.max = max;
+        }
+
         public void setSlider(JSlider slider){
             this.slider = slider;
         }
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            int value = ((Number) this.getValue()).intValue();
-            final double result = Math.min(Math.max(value, min), max);
+            float value = ((Number) this.getValue()).floatValue();
+            float result = (float) Math.min(Math.max(value, min), max);
             switch (category) {
                 case firstLoop -> {
                     FIRSTLOOP = (int) Math.max(result, 4);
@@ -265,6 +364,24 @@ public class GenerateBoardsGUI {
                     if (slider != null)
                         slider.setValue(INFEASIBLE);
                 }
+                case idealSize -> {
+                    IDEAL_SIZE = (int) result;
+                    this.setValue(IDEAL_SIZE);
+                    if (slider != null)
+                        slider.setValue(IDEAL_SIZE);
+                }
+                case idealGroups -> {
+                    IDEAL_GROUP = (int) result;
+                    this.setValue(IDEAL_GROUP);
+                    if (slider != null)
+                        slider.setValue(IDEAL_GROUP);
+                }
+                case idealHealth -> {
+                    IDEAL_HEALTH = result;
+                    this.setValue(IDEAL_HEALTH);
+                    if (slider != null)
+                        slider.setValue((int) IDEAL_HEALTH);
+                }
             }
             totalGenerated.updateText();
         }
@@ -285,8 +402,8 @@ public class GenerateBoardsGUI {
         public void stateChanged(ChangeEvent e) {
             JSlider source = (JSlider)e.getSource();
             if (!source.getValueIsAdjusting()) {
-                double value = source.getValue();
-                double result = Math.max(min, Math.min(value, max));
+                float value = source.getValue();
+                float result = (float) Math.max(min, Math.min(value, max));
                 switch (category) {
                     case firstLoop -> {
                         FIRSTLOOP = (int) Math.max(result, 4);
@@ -307,6 +424,21 @@ public class GenerateBoardsGUI {
                         INFEASIBLE = (int) result;
                         text.setValue(INFEASIBLE);
                         source.setValue(INFEASIBLE);
+                    }
+                    case idealSize -> {
+                        IDEAL_SIZE = (int) result;
+                        text.setValue(IDEAL_SIZE);
+                        source.setValue(IDEAL_SIZE);
+                    }
+                    case idealGroups -> {
+                        IDEAL_GROUP = (int) result;
+                        text.setValue(IDEAL_GROUP);
+                        source.setValue(IDEAL_GROUP);
+                    }
+                    case idealHealth -> {
+                        IDEAL_HEALTH = result;
+                        text.setValue(IDEAL_HEALTH);
+                        source.setValue((int) IDEAL_HEALTH);
                     }
                 }
                 totalGenerated.updateText();

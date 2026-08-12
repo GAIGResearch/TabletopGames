@@ -47,17 +47,13 @@ public class FitnessFunction {
     public int IDEAL_COMPLEXITY = 1;
     public int IDEAL_RULES = 1;
 
-    public FitnessFunction() {
-        return;
-    }
-
-    public FitnessFunction(int size, int group, int health) {
+    public FitnessFunction(int size, int group, float health) {
         IDEAL_SIZE = size;
         IDEAL_GROUP = group;
         IDEAL_HEALTH = health;
     }
 
-    public FitnessFunction(int size, int group, int health, int complexity, int rules) {
+    public FitnessFunction(int size, int group, float health, int complexity, int rules) {
         IDEAL_SIZE = size;
         IDEAL_GROUP = group;
         IDEAL_HEALTH = health;

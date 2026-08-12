@@ -62,6 +62,10 @@ public class CreateOffspring {
     final int endcapLimit = 5;
     final int extenderLimit = 9;
 
+    int IDEAL_SIZE = 166;
+    int IDEAL_GROUP = 5;
+    float IDEAL_HEALTH = 5.872f;
+
     public CreateOffspring() {
     }
 
@@ -72,8 +76,14 @@ public class CreateOffspring {
         CHOOSE_INFEASIBLE = infeasible;
     }
 
+    public void setIdeals(int size, int groups, float health) {
+        IDEAL_SIZE = size;
+        IDEAL_GROUP = groups;
+        IDEAL_HEALTH = health;
+    }
+    
     public void begin() throws IOException {
-        FitnessFunction fitfunc = new FitnessFunction();
+        FitnessFunction fitfunc = new FitnessFunction(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH);
 
         /*for (Quest q : originalQuests) {
             System.out.println(q.getBoards());
