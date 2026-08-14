@@ -81,7 +81,7 @@ public class CreateOffspring {
         IDEAL_GROUP = groups;
         IDEAL_HEALTH = health;
     }
-    
+
     public void begin() throws IOException {
         FitnessFunction fitfunc = new FitnessFunction(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH);
 

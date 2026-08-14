@@ -1,6 +1,5 @@
 package games.descent2e.pcg;
 
-import com.google.apps.card.v1.Grid;
 import core.components.BoardNode;
 import core.components.Component;
 import core.components.GraphBoard;
@@ -9,13 +8,10 @@ import core.properties.PropertyInt;
 import core.properties.PropertyIntArray;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
-import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
-import org.apache.hadoop.yarn.state.Graph;
-import utilities.Hash;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -26,20 +22,26 @@ import java.util.List;
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.connectionHash;
 import static games.descent2e.pcg.ControlVariables.*;
-import static games.descent2e.pcg.GenerateBoards.*;
 import static utilities.Utils.getNeighbourhood;
 
 public class FitnessFunction {
-    public int W_CONNECTED = 1;
-    public int W_GEOMETRY = 1;
-    public int W_REPEATS = 1;
-    public int W_SPAWNING = 1;
-    public int W_CONSISTENCY = 1;
-    public int W_SIZE = 1;
-    public int W_GROUP = 1;
-    public int W_HEALTH = 1;
-    public int W_COMPLEXITY = 1;
-    public int W_RULES = 1;
+    // Default - requirements for feasible
+    public float W_CONNECTED = 1;
+    public float W_GEOMETRY = 1;
+    public float W_REPEATS = 1;
+    public float W_SPAWNING = 1;
+    public float W_CONSISTENCY = 1;
+
+    // What we're actually measuring for the user's requested board
+    public float W_SIZE = 1;
+    public float W_GROUP = 1;
+    public float W_HEALTH = 1;
+
+    public float W_TOTAL = 10;
+
+    // Not yet implemented/relevant
+    public float W_COMPLEXITY = 1;
+    public float W_RULES = 1;
 
     public int IDEAL_SIZE = 166;
     public int IDEAL_GROUP = 5;
@@ -61,7 +63,26 @@ public class FitnessFunction {
         IDEAL_RULES = rules;
     }
 
+    private void setWeights(int connected, int geometry, int repeats, int spawning, int consistency, int size, int group, int health) {
+        W_CONNECTED = connected;
+        W_GEOMETRY = geometry;
+        W_REPEATS = repeats;
+        W_SPAWNING = spawning;
+        W_CONSISTENCY = consistency;
+        W_SIZE = size;
+        W_GROUP = group;
+        W_HEALTH = health;
+        updateTotalWeights();
+    }
+
+    private void updateTotalWeights() {
+        W_TOTAL = W_CONNECTED + W_GEOMETRY + W_REPEATS + W_SPAWNING + W_CONSISTENCY
+                + W_SIZE + W_GROUP + W_HEALTH + W_COMPLEXITY + W_RULES;
+    }
+
     private float fitness(HashMap<String, Float> scores) {
+        updateTotalWeights();
+
         float fitness = 0f;
 
         fitness += W_CONNECTED * (1 / scores.get("Connectedness"));
@@ -76,6 +97,9 @@ public class FitnessFunction {
 
         fitness += W_COMPLEXITY * (1f - (Math.abs(IDEAL_COMPLEXITY - scores.get("Complexity")) / IDEAL_COMPLEXITY));
         fitness += W_RULES * (1f - (Math.abs(IDEAL_RULES - scores.get("Rules")) / IDEAL_RULES));
+
+        // Round it to out to 10
+        fitness = fitness * 10f / W_TOTAL;
 
         return fitness;
     }

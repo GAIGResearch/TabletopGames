@@ -18,7 +18,7 @@ public class GenerateBoardsGUI {
     int firstMax = 1000;
 
     int secondMin = 0;
-    int secondMax = 500;
+    int secondMax = 400;
 
     int offspringMin = 0;
     int offspringMax = 50;

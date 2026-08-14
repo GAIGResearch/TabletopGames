@@ -274,6 +274,10 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         }
     }
 
+    public void clearBoardNodes() {
+        boardNodes.clear();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof GraphBoard) {
