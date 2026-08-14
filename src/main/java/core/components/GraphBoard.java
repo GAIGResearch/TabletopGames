@@ -136,6 +136,10 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         this.boardNodes = boardNodes;
     }
 
+    public void clearBoardNodes() {
+        boardNodes.clear();
+    }
+
     public void addBoardNode(BoardNode bn) {
         this.boardNodes.put(bn.getComponentID(), bn);
     }
