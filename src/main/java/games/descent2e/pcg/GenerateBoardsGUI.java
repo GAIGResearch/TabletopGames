@@ -331,7 +331,19 @@ public class GenerateBoardsGUI {
         useDefaults.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                defaultIdeals = useDefaults.isSelected();
+                boolean result = !useDefaults.isSelected();
+                defaultIdeals = !result;
+                sizeSlide.setEnabled(result);
+                groupsSlide.setEnabled(result);
+                healthSlide.setEnabled(result);
+                heightSlide.setEnabled(result);
+                widthSlide.setEnabled(result);
+
+                sizecount.setEnabled(result);
+                groupcount.setEnabled(result);
+                healthcount.setEnabled(result);
+                heightcount.setEnabled(result);
+                widthcount.setEnabled(result);
             }
         });
         defaults.add(defaultLabel);

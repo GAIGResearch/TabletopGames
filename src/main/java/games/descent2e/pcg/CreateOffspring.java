@@ -65,6 +65,8 @@ public class CreateOffspring {
     int IDEAL_SIZE = 166;
     int IDEAL_GROUP = 5;
     float IDEAL_HEALTH = 5.872f;
+    int IDEAL_HEIGHT = 18; // 572 / 32
+    int IDEAL_WIDTH = 15; // 493 / 32
 
     public CreateOffspring() {
     }
@@ -76,14 +78,16 @@ public class CreateOffspring {
         CHOOSE_INFEASIBLE = infeasible;
     }
 
-    public void setIdeals(int size, int groups, float health) {
+    public void setIdeals(int size, int groups, float health, int height, int width) {
         IDEAL_SIZE = size;
         IDEAL_GROUP = groups;
         IDEAL_HEALTH = health;
+        IDEAL_HEIGHT = height;
+        IDEAL_WIDTH = width;
     }
 
     public void begin() throws IOException {
-        FitnessFunction fitfunc = new FitnessFunction(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH);
+        FitnessFunction fitfunc = new FitnessFunction(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH, IDEAL_HEIGHT, IDEAL_WIDTH);
 
         /*for (Quest q : originalQuests) {
             System.out.println(q.getBoards());
