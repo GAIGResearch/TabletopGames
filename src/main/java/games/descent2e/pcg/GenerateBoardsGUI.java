@@ -71,7 +71,7 @@ public class GenerateBoardsGUI {
 
     public void load() {
         mainWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        mainWindow.setSize(1200, 500);
+        mainWindow.setSize(1300, 700);
         mainWindow.setResizable(false);
         mainWindow.setLocationRelativeTo(null);
         mainWindow.setLayout(new GridLayout(0, 1,10, 10));
@@ -254,10 +254,10 @@ public class GenerateBoardsGUI {
         healthcount.setMargin(new Insets(5, 10, 5, 10));
         healthcount.setMaximumSize(new Dimension(80, 50));
 
-        healthSlide = new JSlider(JSlider.HORIZONTAL, (int) healthMin, (int) healthMax, (int) IDEAL_HEALTH);
-        healthSlide.addChangeListener(new SliderListener(healthcount, Category.idealHealth, healthMin, healthMax));
-        healthSlide.setMajorTickSpacing(3);
-        healthSlide.setMinorTickSpacing(1);
+        healthSlide = new JSlider(JSlider.HORIZONTAL, (int) healthMin * 1000, (int) healthMax * 1000, (int) IDEAL_HEALTH * 1000);
+        healthSlide.addChangeListener(new SliderListener(healthcount, Category.idealHealth, healthMin * 1000, healthMax * 1000));
+        healthSlide.setMajorTickSpacing(6000);
+        healthSlide.setMinorTickSpacing(1000);
         healthSlide.setPaintTicks(true);
         healthSlide.setPaintLabels(true);
         healthcount.setSlider(healthSlide);
@@ -267,10 +267,15 @@ public class GenerateBoardsGUI {
         idealHealthContainer.add(healthSlide);
         fitnessControls.add(idealHealthContainer);
 
+        TitledBorder fitnessSettings = new TitledBorder(blackline, "Ideal Fitness Variable Settings");
+        fitnessSettings.setTitleJustification(TitledBorder.CENTER);
+        fitnessControls.setBorder(fitnessSettings);
         mainPanel.add(fitnessControls);
 
-        Button create = makeButton("Generate!");
-        mainPanel.add(create);
+        JButton create = new JButton("Generate!");
+        JPanel buttonHolder = new JPanel(new FlowLayout());
+        buttonHolder.add(create);
+        mainPanel.add(buttonHolder);
         create.setEnabled(true);
 
         create.addActionListener(new ActionListener() {
@@ -380,7 +385,7 @@ public class GenerateBoardsGUI {
                     IDEAL_HEALTH = result;
                     this.setValue(IDEAL_HEALTH);
                     if (slider != null)
-                        slider.setValue((int) IDEAL_HEALTH);
+                        slider.setValue((int) (IDEAL_HEALTH * 1000));
                 }
             }
             totalGenerated.updateText();
@@ -436,9 +441,9 @@ public class GenerateBoardsGUI {
                         source.setValue(IDEAL_GROUP);
                     }
                     case idealHealth -> {
-                        IDEAL_HEALTH = result;
+                        IDEAL_HEALTH = result / 1000;
                         text.setValue(IDEAL_HEALTH);
-                        source.setValue((int) IDEAL_HEALTH);
+                        source.setValue((int) (IDEAL_HEALTH * 1000));
                     }
                 }
                 totalGenerated.updateText();
