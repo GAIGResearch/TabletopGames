@@ -45,13 +45,23 @@ public class GenerateBoardsGUI {
     float healthMin = 2f;
     float healthMax = 20f;
 
+    int heightMin = 6;
+    int heightMax = 30;
+
+    int widthMin = 6;
+    int widthMax = 30;
+
     int IDEAL_SIZE = 166;
     int IDEAL_GROUP = 5;
     float IDEAL_HEALTH = 5.872f;
+    int IDEAL_HEIGHT = 18; // 572 / 32
+    int IDEAL_WIDTH = 15; // 493 / 32
 
     int defaultSize = IDEAL_SIZE;
     int defaultGroups = IDEAL_GROUP;
     float defaultHealth = IDEAL_HEALTH;
+    int defaultHeight = IDEAL_HEIGHT;
+    int defaultWidth = IDEAL_WIDTH;
     boolean defaultIdeals = true;
 
     final JFrame mainWindow = new JFrame("Descent (Second Edition) Procedurally Generated Board Creator");
@@ -65,6 +75,8 @@ public class GenerateBoardsGUI {
     JSlider sizeSlide;
     JSlider groupsSlide;
     JSlider healthSlide;
+    JSlider heightSlide;
+    JSlider widthSlide;
 
     public GenerateBoardsGUI() {
     }
@@ -267,6 +279,65 @@ public class GenerateBoardsGUI {
         idealHealthContainer.add(healthSlide);
         fitnessControls.add(idealHealthContainer);
 
+        JPanel idealHeightContainer = new JPanel(new FlowLayout());
+        JLabel idealHeightLabel = new JLabel("Target Ideal Board Height:");
+
+        NumberField heightcount = new NumberField(IDEAL_HEIGHT, Category.idealHeight, heightMin, heightMax);
+        heightcount.addPropertyChangeListener(heightcount);
+        heightcount.setColumns(2);
+        heightcount.setMargin(new Insets(5, 10, 5, 10));
+        heightcount.setMaximumSize(new Dimension(80, 50));
+
+        heightSlide = new JSlider(JSlider.HORIZONTAL, heightMin, heightMax, IDEAL_HEIGHT);
+        heightSlide.addChangeListener(new SliderListener(heightcount, Category.idealHeight, heightMin, heightMax));
+        heightSlide.setMajorTickSpacing(6);
+        heightSlide.setMinorTickSpacing(1);
+        heightSlide.setPaintTicks(true);
+        heightSlide.setPaintLabels(true);
+        heightcount.setSlider(heightSlide);
+
+        idealHeightContainer.add(idealHeightLabel);
+        idealHeightContainer.add(heightcount);
+        idealHeightContainer.add(heightSlide);
+        fitnessControls.add(idealHeightContainer);
+
+        JPanel idealWidthContainer = new JPanel(new FlowLayout());
+        JLabel idealWidthLabel = new JLabel("Target Ideal Board Width:");
+
+        NumberField widthcount = new NumberField(IDEAL_WIDTH, Category.idealWidth, widthMin, widthMax);
+        widthcount.addPropertyChangeListener(widthcount);
+        widthcount.setColumns(2);
+        widthcount.setMargin(new Insets(5, 10, 5, 10));
+        widthcount.setMaximumSize(new Dimension(80, 50));
+
+        widthSlide = new JSlider(JSlider.HORIZONTAL, widthMin, widthMax, IDEAL_WIDTH);
+        widthSlide.addChangeListener(new SliderListener(widthcount, Category.idealWidth, widthMin, widthMax));
+        widthSlide.setMajorTickSpacing(6);
+        widthSlide.setMinorTickSpacing(1);
+        widthSlide.setPaintTicks(true);
+        widthSlide.setPaintLabels(true);
+        widthcount.setSlider(widthSlide);
+
+        idealWidthContainer.add(idealWidthLabel);
+        idealWidthContainer.add(widthcount);
+        idealWidthContainer.add(widthSlide);
+        fitnessControls.add(idealWidthContainer);
+
+        JPanel defaults = new JPanel(new FlowLayout());
+        JLabel defaultLabel = new JLabel("Use Default Ideal Variables?");
+        JCheckBox useDefaults = new JCheckBox();
+        useDefaults.setSelected(false);
+        defaultIdeals = false;
+        useDefaults.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                defaultIdeals = useDefaults.isSelected();
+            }
+        });
+        defaults.add(defaultLabel);
+        defaults.add(useDefaults);
+        fitnessControls.add(defaults);
+
         TitledBorder fitnessSettings = new TitledBorder(blackline, "Ideal Fitness Variable Settings");
         fitnessSettings.setTitleJustification(TitledBorder.CENTER);
         fitnessControls.setBorder(fitnessSettings);
@@ -286,9 +357,9 @@ public class GenerateBoardsGUI {
                     CreateOffspring co = new CreateOffspring(FIRSTLOOP, GENERATIONLOOP, OFFSPRING, INFEASIBLE);
 
                     if (defaultIdeals)
-                        co.setIdeals(defaultSize, defaultGroups, defaultHealth);
+                        co.setIdeals(defaultSize, defaultGroups, defaultHealth, defaultHeight, defaultWidth);
                     else
-                        co.setIdeals(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH);
+                        co.setIdeals(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH, IDEAL_HEIGHT, IDEAL_WIDTH);
 
                     try {
                         co.begin();
@@ -387,6 +458,18 @@ public class GenerateBoardsGUI {
                     if (slider != null)
                         slider.setValue((int) (IDEAL_HEALTH * 1000));
                 }
+                case idealHeight -> {
+                    IDEAL_HEIGHT = (int) result;
+                    this.setValue(IDEAL_HEIGHT);
+                    if (slider != null)
+                        slider.setValue(IDEAL_HEIGHT);
+                }
+                case idealWidth -> {
+                    IDEAL_WIDTH = (int) result;
+                    this.setValue(IDEAL_WIDTH);
+                    if (slider != null)
+                        slider.setValue(IDEAL_WIDTH);
+                }
             }
             totalGenerated.updateText();
         }
@@ -445,6 +528,16 @@ public class GenerateBoardsGUI {
                         text.setValue(IDEAL_HEALTH);
                         source.setValue((int) (IDEAL_HEALTH * 1000));
                     }
+                    case idealHeight -> {
+                        IDEAL_HEIGHT = (int) result;
+                        text.setValue(IDEAL_HEIGHT);
+                        source.setValue(IDEAL_HEIGHT);
+                    }
+                    case idealWidth -> {
+                        IDEAL_WIDTH = (int) result;
+                        text.setValue(IDEAL_WIDTH);
+                        source.setValue(IDEAL_WIDTH);
+                    }
                 }
                 totalGenerated.updateText();
             }
@@ -458,6 +551,8 @@ public class GenerateBoardsGUI {
         infeasible,
         idealHealth,
         idealSize,
-        idealGroups
+        idealGroups,
+        idealHeight,
+        idealWidth
     }
 }

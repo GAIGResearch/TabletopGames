@@ -36,6 +36,8 @@ public class FitnessFunction {
     public float W_SIZE = 1;
     public float W_GROUP = 1;
     public float W_HEALTH = 1;
+    public float W_HEIGHT = 0;
+    public float W_WIDTH = 0;
 
     public float W_TOTAL = 10;
 
@@ -46,24 +48,30 @@ public class FitnessFunction {
     public int IDEAL_SIZE = 166;
     public int IDEAL_GROUP = 5;
     public float IDEAL_HEALTH = 5.872f;
+    public int IDEAL_HEIGHT = 18;
+    public int IDEAL_WIDTH = 15;
     public int IDEAL_COMPLEXITY = 1;
     public int IDEAL_RULES = 1;
 
-    public FitnessFunction(int size, int group, float health) {
+    public FitnessFunction(int size, int group, float health, int height, int width) {
         IDEAL_SIZE = size;
         IDEAL_GROUP = group;
         IDEAL_HEALTH = health;
+        IDEAL_HEIGHT = height;
+        IDEAL_WIDTH  = width;
     }
 
-    public FitnessFunction(int size, int group, float health, int complexity, int rules) {
+    public FitnessFunction(int size, int group, float health, int height, int width, int complexity, int rules) {
         IDEAL_SIZE = size;
         IDEAL_GROUP = group;
         IDEAL_HEALTH = health;
+        IDEAL_HEIGHT = height;
+        IDEAL_WIDTH  = width;
         IDEAL_COMPLEXITY = complexity;
         IDEAL_RULES = rules;
     }
 
-    private void setWeights(int connected, int geometry, int repeats, int spawning, int consistency, int size, int group, int health) {
+    private void setWeights(int connected, int geometry, int repeats, int spawning, int consistency, int size, int group, int health, int height, int width) {
         W_CONNECTED = connected;
         W_GEOMETRY = geometry;
         W_REPEATS = repeats;
@@ -72,12 +80,14 @@ public class FitnessFunction {
         W_SIZE = size;
         W_GROUP = group;
         W_HEALTH = health;
+        W_HEIGHT = height;
+        W_WIDTH = width;
         updateTotalWeights();
     }
 
     private void updateTotalWeights() {
         W_TOTAL = W_CONNECTED + W_GEOMETRY + W_REPEATS + W_SPAWNING + W_CONSISTENCY
-                + W_SIZE + W_GROUP + W_HEALTH + W_COMPLEXITY + W_RULES;
+                + W_SIZE + W_GROUP + W_HEALTH + W_COMPLEXITY + W_RULES + W_HEALTH + W_WIDTH;
     }
 
     private float fitness(HashMap<String, Float> scores) {
@@ -94,6 +104,8 @@ public class FitnessFunction {
         fitness += W_SIZE * (1f - (Math.abs(IDEAL_SIZE - scores.get("Size")) / IDEAL_SIZE));
         fitness += W_GROUP * (1f - (Math.abs(IDEAL_GROUP - scores.get("Groups")) / IDEAL_GROUP));
         fitness += W_HEALTH * (1f - (Math.abs(IDEAL_HEALTH - scores.get("Health")) / IDEAL_HEALTH));
+        fitness += W_HEIGHT * (1f - (Math.abs(IDEAL_HEIGHT - scores.get("Height")) / IDEAL_HEIGHT));
+        fitness += W_WIDTH * (1f - (Math.abs(IDEAL_WIDTH - scores.get("Width")) / IDEAL_WIDTH));
 
         fitness += W_COMPLEXITY * (1f - (Math.abs(IDEAL_COMPLEXITY - scores.get("Complexity")) / IDEAL_COMPLEXITY));
         fitness += W_RULES * (1f - (Math.abs(IDEAL_RULES - scores.get("Rules")) / IDEAL_RULES));
@@ -391,9 +403,16 @@ public class FitnessFunction {
         // Geometry
         Pair<int[][], Integer> result = createBoard(co, quest, board);
         float geometry = 0f;
-        if (result != null)
+        float height = 0f;
+        float width = 0f;
+        if (result != null) {
             geometry = size == (float) result.b ? 1f : 0f;
 
+            // Subtract 2 from the array size of height/width, as there is a 1 tile buffer perimeter
+            // Remove the top/bottom and left/right buffer in our calculations
+            height = result.a.length - 2;
+            width = result.a[0].length - 2;
+        }
         // Monster Group Repeats
         // Inverse Boolean = Score 1 if no repeats, 0 if repeats found
         float repeats = noRepeats(quest) ? 0f : 1f;
@@ -429,6 +448,8 @@ public class FitnessFunction {
         scores.put("Spawning", spawning);
         scores.put("Consistency", consistency);
         scores.put("Size", size);
+        scores.put("Height", height);
+        scores.put("Width", width);
         scores.put("Tile Count", tiles);
         scores.put("Groups", groups);
         scores.put("Monster Count", health.b);
