@@ -39,11 +39,12 @@ public class FitnessFunction {
     public float W_HEIGHT = 0;
     public float W_WIDTH = 0;
 
-    public float W_TOTAL = 10;
-
     // Not yet implemented/relevant
-    public float W_COMPLEXITY = 1;
-    public float W_RULES = 1;
+    public float W_COMPLEXITY = 0;
+    public float W_RULES = 0;
+
+    public float W_TOTAL = W_CONNECTED + W_GEOMETRY + W_REPEATS + W_SPAWNING + W_CONSISTENCY +
+                            W_SIZE + W_GROUP + W_HEALTH + W_HEALTH + W_HEIGHT + W_WIDTH + W_COMPLEXITY + W_RULES;
 
     public int IDEAL_SIZE = 166;
     public int IDEAL_GROUP = 5;
@@ -71,7 +72,7 @@ public class FitnessFunction {
         IDEAL_RULES = rules;
     }
 
-    private void setWeights(int connected, int geometry, int repeats, int spawning, int consistency, int size, int group, int health, int height, int width) {
+    void setWeights(float connected, float geometry, float repeats, float spawning, float consistency, float size, float group, float health, float height, float width, float complexity, float rules) {
         W_CONNECTED = connected;
         W_GEOMETRY = geometry;
         W_REPEATS = repeats;
@@ -82,7 +83,13 @@ public class FitnessFunction {
         W_HEALTH = health;
         W_HEIGHT = height;
         W_WIDTH = width;
+        W_COMPLEXITY = complexity;
+        W_RULES = rules;
         updateTotalWeights();
+    }
+
+    void setWeights (float size, float group, float health, float height, float width){
+        setWeights(1,1,1,1,1, size, group, health, height, width, 0, 0);
     }
 
     private void updateTotalWeights() {

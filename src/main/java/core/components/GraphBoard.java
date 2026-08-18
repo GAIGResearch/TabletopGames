@@ -136,16 +136,16 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         this.boardNodes = boardNodes;
     }
 
-    public void clearBoardNodes() {
-        boardNodes.clear();
-    }
-
     public void addBoardNode(BoardNode bn) {
         this.boardNodes.put(bn.getComponentID(), bn);
     }
 
     public void removeBoardNode(BoardNode bn) {
         this.boardNodes.remove(bn.getComponentID());
+    }
+
+    public void clearBoardNodes() {
+        boardNodes.clear();
     }
 
     public void breakConnection(AbstractGameState gs, BoardNode bn1, BoardNode bn2) {
@@ -276,10 +276,6 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
                 }
             }
         }
-    }
-
-    public void clearBoardNodes() {
-        boardNodes.clear();
     }
 
     @Override

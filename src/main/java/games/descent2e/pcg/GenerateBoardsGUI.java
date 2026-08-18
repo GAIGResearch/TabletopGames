@@ -78,6 +78,21 @@ public class GenerateBoardsGUI {
     JSlider heightSlide;
     JSlider widthSlide;
 
+    int minWeight = 0;
+    int maxWeight = 1000;
+
+    float W_SIZE = 1f;
+    float W_GROUPS = 1f;
+    float W_HEALTH = 1f;
+    float W_HEIGHT = 0f;
+    float W_WIDTH = 0f;
+
+    JSlider weightSizeSlide;
+    JSlider weightGroupsSlide;
+    JSlider weightHealthSlide;
+    JSlider weightHeightSlide;
+    JSlider weightWidthSlide;
+
     public GenerateBoardsGUI() {
     }
 
@@ -324,8 +339,9 @@ public class GenerateBoardsGUI {
         fitnessControls.add(idealWidthContainer);
 
         JPanel defaults = new JPanel(new FlowLayout());
-        JLabel defaultLabel = new JLabel("Use Default Ideal Variables?");
+        JLabel defaultLabel = new JLabel("Use Default Ideal Variables");
         JCheckBox useDefaults = new JCheckBox();
+        JLabel defaultList = new JLabel("(" + defaultSize + " Spaces, " + defaultGroups + " Groups, " + defaultHealth + " Average Health, " + defaultHeight + "x" + defaultWidth + " Board Size)");
         useDefaults.setSelected(false);
         defaultIdeals = false;
         useDefaults.addActionListener(new ActionListener() {
@@ -348,6 +364,7 @@ public class GenerateBoardsGUI {
         });
         defaults.add(defaultLabel);
         defaults.add(useDefaults);
+        defaults.add(defaultList);
         fitnessControls.add(defaults);
 
         TitledBorder fitnessSettings = new TitledBorder(blackline, "Ideal Fitness Variable Settings");
@@ -355,9 +372,154 @@ public class GenerateBoardsGUI {
         fitnessControls.setBorder(fitnessSettings);
         mainPanel.add(fitnessControls);
 
+        JPanel weightControls = new JPanel(new GridLayout(0, 1, 5, 5));
+
+        JPanel weightSizeContainer = new JPanel(new FlowLayout());
+        JLabel weightSizeLabel = new JLabel("Ideal Size Weight:");
+        JLabel weightPercent = new JLabel("%");
+
+        NumberField weightsizecount = new NumberField((W_SIZE * 100), Category.weightSize, minWeight, maxWeight);
+        weightsizecount.addPropertyChangeListener(weightsizecount);
+        weightsizecount.setColumns(4);
+        weightsizecount.setMargin(new Insets(5, 10, 5, 10));
+        weightsizecount.setMaximumSize(new Dimension(80, 50));
+
+        weightSizeSlide = new JSlider(JSlider.HORIZONTAL, minWeight, maxWeight, (int) (W_SIZE * 100));
+        weightSizeSlide.addChangeListener(new SliderListener(weightsizecount, Category.weightSize, minWeight, maxWeight));
+        weightSizeSlide.setMajorTickSpacing(200);
+        weightSizeSlide.setMinorTickSpacing(50);
+        weightSizeSlide.setPaintTicks(true);
+        weightSizeSlide.setPaintLabels(true);
+        weightsizecount.setSlider(weightSizeSlide);
+
+        weightSizeContainer.add(weightSizeLabel);
+        weightSizeContainer.add(weightsizecount);
+        weightSizeContainer.add(weightPercent);
+        weightSizeContainer.add(weightSizeSlide);
+        weightControls.add(weightSizeContainer);
+
+        JPanel weightHealthContainer = new JPanel(new FlowLayout());
+        JLabel weightHealthLabel = new JLabel("Ideal Monster Health Weight:");
+        JLabel weightPercent2 = new JLabel("%");
+
+        NumberField weighthealthcount = new NumberField((W_HEALTH * 100), Category.weightHealth, minWeight, maxWeight);
+        weighthealthcount.addPropertyChangeListener(weighthealthcount);
+        weighthealthcount.setColumns(4);
+        weighthealthcount.setMargin(new Insets(5, 10, 5, 10));
+        weighthealthcount.setMaximumSize(new Dimension(80, 50));
+
+        weightHealthSlide = new JSlider(JSlider.HORIZONTAL, minWeight, maxWeight, (int) (W_HEALTH * 100));
+        weightHealthSlide.addChangeListener(new SliderListener(weighthealthcount, Category.weightHealth, minWeight, maxWeight));
+        weightHealthSlide.setMajorTickSpacing(200);
+        weightHealthSlide.setMinorTickSpacing(50);
+        weightHealthSlide.setPaintTicks(true);
+        weightHealthSlide.setPaintLabels(true);
+        weighthealthcount.setSlider(weightHealthSlide);
+
+        weightHealthContainer.add(weightHealthLabel);
+        weightHealthContainer.add(weighthealthcount);
+        weightHealthContainer.add(weightPercent2);
+        weightHealthContainer.add(weightHealthSlide);
+        weightControls.add(weightHealthContainer);
+
+        JPanel weightGroupsContainer = new JPanel(new FlowLayout());
+        JLabel weightGroupsLabel = new JLabel("Ideal Monster Groups Weight:");
+        JLabel weightPercent3 = new JLabel("%");
+
+        NumberField weightgroupcount = new NumberField((W_GROUPS * 100), Category.weightGroups, minWeight, maxWeight);
+        weightgroupcount.addPropertyChangeListener(weightgroupcount);
+        weightgroupcount.setColumns(4);
+        weightgroupcount.setMargin(new Insets(5, 10, 5, 10));
+        weightgroupcount.setMaximumSize(new Dimension(80, 50));
+
+        weightGroupsSlide = new JSlider(JSlider.HORIZONTAL, minWeight, maxWeight, (int) (W_GROUPS * 100));
+        weightGroupsSlide.addChangeListener(new SliderListener(weightgroupcount, Category.weightGroups, minWeight, maxWeight));
+        weightGroupsSlide.setMajorTickSpacing(200);
+        weightGroupsSlide.setMinorTickSpacing(50);
+        weightGroupsSlide.setPaintTicks(true);
+        weightGroupsSlide.setPaintLabels(true);
+        weightgroupcount.setSlider(weightGroupsSlide);
+
+        weightGroupsContainer.add(weightGroupsLabel);
+        weightGroupsContainer.add(weightgroupcount);
+        weightGroupsContainer.add(weightPercent3);
+        weightGroupsContainer.add(weightGroupsSlide);
+        weightControls.add(weightGroupsContainer);
+
+        JPanel weightHeightContainer = new JPanel(new FlowLayout());
+        JLabel weightHeightLabel = new JLabel("Ideal Board Height Weight:");
+        JLabel weightPercent4 = new JLabel("%");
+
+        NumberField weightheightcount = new NumberField((W_HEIGHT * 100), Category.weightHeight, minWeight, maxWeight);
+        weightheightcount.addPropertyChangeListener(weightheightcount);
+        weightheightcount.setColumns(4);
+        weightheightcount.setMargin(new Insets(5, 10, 5, 10));
+        weightheightcount.setMaximumSize(new Dimension(80, 50));
+
+        weightHeightSlide = new JSlider(JSlider.HORIZONTAL, minWeight, maxWeight, (int) (W_HEIGHT * 100));
+        weightHeightSlide.addChangeListener(new SliderListener(weightheightcount, Category.weightHeight, minWeight, maxWeight));
+        weightHeightSlide.setMajorTickSpacing(200);
+        weightHeightSlide.setMinorTickSpacing(50);
+        weightHeightSlide.setPaintTicks(true);
+        weightHeightSlide.setPaintLabels(true);
+        weightheightcount.setSlider(weightHeightSlide);
+
+        weightHeightContainer.add(weightHeightLabel);
+        weightHeightContainer.add(weightheightcount);
+        weightHeightContainer.add(weightPercent4);
+        weightHeightContainer.add(weightHeightSlide);
+        weightControls.add(weightHeightContainer);
+
+        JPanel weightWidthContainer = new JPanel(new FlowLayout());
+        JLabel weightWidthLabel = new JLabel("Ideal Board Height Weight:");
+        JLabel weightPercent5 = new JLabel("%");
+
+        NumberField weightwidthcount = new NumberField((W_HEIGHT * 100), Category.weightWidth, minWeight, maxWeight);
+        weightwidthcount.addPropertyChangeListener(weightwidthcount);
+        weightwidthcount.setColumns(4);
+        weightwidthcount.setMargin(new Insets(5, 10, 5, 10));
+        weightwidthcount.setMaximumSize(new Dimension(80, 50));
+
+        weightWidthSlide = new JSlider(JSlider.HORIZONTAL, minWeight, maxWeight, (int) (W_WIDTH * 100));
+        weightWidthSlide.addChangeListener(new SliderListener(weightwidthcount, Category.weightWidth, minWeight, maxWeight));
+        weightWidthSlide.setMajorTickSpacing(200);
+        weightWidthSlide.setMinorTickSpacing(50);
+        weightWidthSlide.setPaintTicks(true);
+        weightWidthSlide.setPaintLabels(true);
+        weightwidthcount.setSlider(weightWidthSlide);
+
+        weightWidthContainer.add(weightWidthLabel);
+        weightWidthContainer.add(weightwidthcount);
+        weightWidthContainer.add(weightPercent5);
+        weightWidthContainer.add(weightWidthSlide);
+        weightControls.add(weightWidthContainer);
+
+        JPanel resetWeightHolder = new JPanel(new FlowLayout());
+        JButton resetWeights = new JButton("Reset to Defaults");
+        resetWeights.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                weightSizeSlide.setValue(100);
+                weightGroupsSlide.setValue(100);
+                weightHeightSlide.setValue(100);
+                weightHeightSlide.setValue(0);
+                weightWidthSlide.setValue(0);
+            }
+        });
+        resetWeightHolder.add(resetWeights);
+        weightControls.add(resetWeightHolder);
+
+        TitledBorder weightSettings = new TitledBorder(blackline, "Fitness Function Weight Values");
+        weightSettings.setTitleJustification(TitledBorder.CENTER);
+        weightControls.setBorder(weightSettings);
+        mainPanel.add(weightControls);
+
         JButton create = new JButton("Generate!");
         JPanel buttonHolder = new JPanel(new FlowLayout());
         buttonHolder.add(create);
+        TitledBorder buttonSettings = new TitledBorder(blackline, "Board Generation");
+        buttonSettings.setTitleJustification(TitledBorder.CENTER);
+        buttonHolder.setBorder(buttonSettings);
         mainPanel.add(buttonHolder);
         create.setEnabled(true);
 
@@ -372,6 +534,7 @@ public class GenerateBoardsGUI {
                         co.setIdeals(defaultSize, defaultGroups, defaultHealth, defaultHeight, defaultWidth);
                     else
                         co.setIdeals(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH, IDEAL_HEIGHT, IDEAL_WIDTH);
+                    co.setWeights(W_SIZE, W_GROUPS, W_HEALTH, W_HEIGHT, W_WIDTH);
 
                     try {
                         co.begin();
@@ -482,6 +645,36 @@ public class GenerateBoardsGUI {
                     if (slider != null)
                         slider.setValue(IDEAL_WIDTH);
                 }
+                case weightHealth -> {
+                    W_HEALTH = result / 100;
+                    this.setValue(result);
+                    if (slider != null)
+                        slider.setValue((int) (W_HEALTH * 100));
+                }
+                case weightGroups -> {
+                    W_GROUPS = result / 100;
+                    this.setValue(result);
+                    if (slider != null)
+                        slider.setValue((int) (W_GROUPS * 100));
+                }
+                case weightSize -> {
+                    W_SIZE = result / 100;
+                    this.setValue(result);
+                    if (slider != null)
+                        slider.setValue((int) (W_SIZE * 100));
+                }
+                case weightHeight -> {
+                    W_HEIGHT = result / 100;
+                    this.setValue(result);
+                    if (slider != null)
+                        slider.setValue((int) (W_HEIGHT * 100));
+                }
+                case weightWidth -> {
+                    W_WIDTH = result / 100;
+                    this.setValue(result);
+                    if (slider != null)
+                        slider.setValue((int) (W_WIDTH * 100));
+                }
             }
             totalGenerated.updateText();
         }
@@ -550,6 +743,31 @@ public class GenerateBoardsGUI {
                         text.setValue(IDEAL_WIDTH);
                         source.setValue(IDEAL_WIDTH);
                     }
+                    case weightHealth -> {
+                        W_HEALTH = result / 100;
+                        text.setValue(result);
+                        source.setValue((int) (W_HEALTH * 100));
+                    }
+                    case weightSize -> {
+                        W_SIZE = result / 100;
+                        text.setValue(result);
+                        source.setValue((int) (W_SIZE * 100));
+                    }
+                    case weightGroups -> {
+                        W_GROUPS = result / 100;
+                        text.setValue(result);
+                        source.setValue((int) (W_GROUPS * 100));
+                    }
+                    case weightHeight -> {
+                        W_HEIGHT = result / 100;
+                        text.setValue(result);
+                        source.setValue((int) (W_HEIGHT * 100));
+                    }
+                    case weightWidth -> {
+                        W_WIDTH = result / 100;
+                        text.setValue(result);
+                        source.setValue((int) (W_WIDTH * 100));
+                    }
                 }
                 totalGenerated.updateText();
             }
@@ -565,6 +783,11 @@ public class GenerateBoardsGUI {
         idealSize,
         idealGroups,
         idealHeight,
-        idealWidth
+        idealWidth,
+        weightHealth,
+        weightSize,
+        weightGroups,
+        weightHeight,
+        weightWidth
     }
 }
