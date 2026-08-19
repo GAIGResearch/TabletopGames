@@ -90,8 +90,7 @@ public class BasicDUCTPlayer extends AbstractPlayer {
                     stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
                 }
                 case BUDGET_ITERATIONS -> stop = numIters >= params.budget;
-                case BUDGET_FM_CALLS -> stop = root.fmCallsCount >= params.budget
-                        || numIters >= params.budget;
+                case BUDGET_FM_CALLS -> stop = root.fmCallsCount >= params.budget;
                 default -> stop = numIters >= params.budget;
             }
         }

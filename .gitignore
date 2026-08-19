@@ -49,3 +49,7 @@ outputdir/
 
 # private experiment config, not for the main codebase
 json/experiments/Lab3_Connect4.json
+
+# local experiment scratch
+sgrun/
+cp.txt
