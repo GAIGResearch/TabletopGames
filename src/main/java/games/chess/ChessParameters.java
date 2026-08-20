@@ -16,11 +16,9 @@ public class ChessParameters extends TunableParameters {
     public int drawByRepetition = 3; // Number of times a position must be repeated for a draw by repetition to be declared, 0 for no limit
     public String dataPathString = "data/chess/"; // Path to the data folder for the game, used for loading images and other resources
 
-    
-
     public ChessParameters() {
         addTunableParameter("maxRounds", 100, Arrays.asList(50, 100, 200, 300)); //Note: current forward model checks for this before checkmate e.g. if the last move ends in checkmate, the game will end in a draw
-        addTunableParameter("drawByRepetition", 3, Arrays.asList(0, 1, 2, 3));
+        addTunableParameter("drawByRepetition", 0, Arrays.asList(0, 1, 2, 3));
         _reset();
     }
     
