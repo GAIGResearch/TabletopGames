@@ -2,6 +2,7 @@ package evaluation;
 
 import core.AbstractPlayer;
 import evaluation.optimisation.ITPSearchSpace;
+import evaluation.optimisation.TunableParameters;
 import games.puertorico.PuertoRicoActionHeuristic001;
 import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
 import org.apache.spark.sql.catalyst.expressions.Abs$;
@@ -211,6 +212,24 @@ public class TunableParametersTest {
     }
 
     @Test
+    public void toJSONWithoutNestedDefaults() {
+        params.setParameterValue("budgetType", BUDGET_TIME);
+        CoarseTunableHeuristic heuristic = new CoarseTunableHeuristic();
+        heuristic.setParameterValue("heuristicType", SCORE_PLUS);
+        params.setParameterValue("heuristic", heuristic);
+
+        JSONObject json = params.instanceToJSON(true, Collections.emptyMap());
+
+        MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(params.allParametersAndValuesEqual(noChange));
+        JSONObject heuristicJSON = (JSONObject) json.get("heuristic");
+        assertEquals("SCORE_PLUS", heuristicJSON.get("heuristicType"));
+
+        MCTSParams fromJSON = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(fromJSON.allParametersAndValuesEqual(noChange));
+    }
+
+    @Test
     public void toJSONWithParameterisedJSONObject() {
         JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_Heuristic.json");
         params.setRawJSON(json);
@@ -319,7 +338,31 @@ public class TunableParametersTest {
         JSONObject heuristicJSON = (JSONObject) json.get("heuristic");
         assertNotNull(heuristicJSON);
         assertEquals("players.heuristics.CoarseTunableHeuristic", heuristicJSON.get("class"));
-        assertNull(heuristicJSON.get("heuristicType"));
+        assertEquals("WIN_ONLY", heuristicJSON.get("heuristicType"));
+    }
+
+    @Test
+    public void writingJSONWithDefaultUsesClassDefault() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_CoarseTunableFixed.json");
+        assertEquals("RANDOM", params.getDefaultParameterValue("rolloutType").toString());
+        int[] settings = new int[]{0, 0, 0, 1, 2, 0, 2};
+        JSONObject json = itp.constructAgentJSON(settings);
+        JSONObject fileJson = itp.constructAgentJSONToWriteToFile(settings);
+
+        assertEquals("MAST", json.get("rolloutType"));
+        assertEquals("MAST", fileJson.get("rolloutType"));
+    }
+
+    @Test
+    public void writingJSONWithDefaultUsesNestedClassDefault() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_CoarseTunableFixed.json");
+        assertEquals("LEADER", params.getDefaultParameterValue("heuristic.heuristicType").toString());
+        int[] settings = new int[]{0, 0, 0, 1, 2, 0, 2};
+        JSONObject json = itp.constructAgentJSON(settings);
+        JSONObject fileJson = itp.constructAgentJSONToWriteToFile(settings);
+
+        assertEquals("LEADER", ((JSONObject) json.get("heuristic")).get("heuristicType"));
+        assertEquals("LEADER", ((JSONObject) fileJson.get("heuristic")).get("heuristicType"));
     }
 
     @Test
