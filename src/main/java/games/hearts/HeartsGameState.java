@@ -9,6 +9,7 @@ import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.hearts.heuristics.HeartsHeuristic;
+import utilities.DeterminisationUtilities;
 
 import java.util.ArrayList;
 import java.util.*;
@@ -34,6 +35,11 @@ public class HeartsGameState extends AbstractGameState {
     public Map<Integer, Integer> playerPoints;
     public List<Map.Entry<Integer, FrenchCard>> currentPlayedCards = new ArrayList<>();
     public FrenchCard.Suite firstCardSuit;
+    /**
+     * For each player, the suits that they are publicly known to be void in; i.e. the suits that
+     * were led in a trick this round to which they did not follow suit.
+     */
+    public List<Set<FrenchCard.Suite>> knownVoids;
 
     public HeartsGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -72,6 +78,14 @@ public class HeartsGameState extends AbstractGameState {
      */
     public List<Deck<FrenchCard>> getPlayerDecks() {
         return playerDecks;
+    }
+
+    /**
+     * The suits that the specified player is publicly known to be void in, from having failed to
+     * follow suit earlier in the current round. This is information available to all players.
+     */
+    public Set<FrenchCard.Suite> getKnownVoids(int playerId) {
+        return knownVoids.get(playerId);
     }
 
     public void scorePointsAtEndOfRound() {
@@ -160,32 +174,35 @@ public class HeartsGameState extends AbstractGameState {
 
         copy.firstCardSuit = firstCardSuit;
 
+        // Deep Copy knownVoids
+        copy.knownVoids = new ArrayList<>();
+        for (Set<FrenchCard.Suite> voids : knownVoids) {
+            Set<FrenchCard.Suite> voidCopy = EnumSet.noneOf(FrenchCard.Suite.class);
+            voidCopy.addAll(voids);
+            copy.knownVoids.add(voidCopy);
+        }
+
         if (getCoreGameParameters().partialObservable && playerId != -1) {
-            // Now we need to blank out the passed cards that the player cannot see
-            // and these need to go into the draw deck for shuffling
+            // We cannot see the cards that the other players have passed, so we put these into their hands.
+            // The agent can then use its opponent model to figure out what was passed.
+            // Passing is all simultaneous
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
-                    copy.drawDeck.add(copy.pendingPasses.get(i));
-                    copy.drawDeck.add(copy.playerDecks.get(i));
-                    copy.playerDecks.get(i).clear();
+                    copy.playerDecks.get(i).add(copy.pendingPasses.get(i));
                     copy.pendingPasses.get(i).clear();
                 }
             }
-            copy.drawDeck.shuffle(redeterminisationRnd);
 
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
-                        copy.playerDecks.get(i).add(copy.drawDeck.draw());
-                    }
-                    for (int j = 0; j < pendingPasses.get(i).size(); j++) {
-                        // We put the previously pending cards into the hand
-                        // the agent can then use its opponent model to figure out what was passed
-                        // Passing is all simultaneous
-                        copy.playerDecks.get(i).add(copy.drawDeck.draw());
-                    }
-                }
-            }
+            // Then we reshuffle everything we cannot see across the other hands and the draw deck.
+            // A player who has failed to follow suit is known to hold no cards of that suit, so we
+            // must not deal them any.
+            List<Deck<FrenchCard>> decksToShuffle = new ArrayList<>(copy.playerDecks);
+            decksToShuffle.add(copy.drawDeck);
+            BiPredicate<Deck<FrenchCard>, FrenchCard> voidConstraint =
+                    ((HeartsParameters) gameParameters).rememberVoids
+                            ? (deck, card) -> deck.getOwnerId() < 0 || !copy.knownVoids.get(deck.getOwnerId()).contains(card.suite)
+                            : null;  // a null constraint gives the unconstrained reshuffle
+            DeterminisationUtilities.reshuffle(playerId, decksToShuffle, c -> true, redeterminisationRnd, voidConstraint);
         }
 
         return copy;
@@ -236,14 +253,15 @@ public class HeartsGameState extends AbstractGameState {
                 Objects.equals(pendingPasses, that.pendingPasses) &&
                 Objects.equals(playerPoints, that.playerPoints) &&
                 Objects.equals(currentPlayedCards, that.currentPlayedCards) &&
-                Objects.equals(firstCardSuit, that.firstCardSuit);
+                Objects.equals(firstCardSuit, that.firstCardSuit) &&
+                Objects.equals(knownVoids, that.knownVoids);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, heartsBroken,
                 firstCardSuit, trickDecks,
-                pendingPasses, playerPoints, currentPlayedCards);
+                pendingPasses, playerPoints, currentPlayedCards, knownVoids);
         result = 31 * result + Arrays.hashCode(playerTricksTaken);
         return result;
     }

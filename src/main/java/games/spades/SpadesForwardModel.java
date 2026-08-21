@@ -13,6 +13,7 @@ import utilities.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -286,6 +287,11 @@ public class SpadesForwardModel extends StandardForwardModel {
         state.setGamePhase(SpadesGameState.Phase.BIDDING);
         state.setSpadesBroken(false);
         state.leadSuit = null;
+
+        // known voids are only valid for the current round, as hands are re-dealt each round
+        for (Set<FrenchCard.Suite> voids : state.knownVoids) {
+            voids.clear();
+        }
 
         for (int i = 0; i < state.getNPlayers(); i++) {
             Deck<FrenchCard> hand = state.getPlayerHands().get(i);
