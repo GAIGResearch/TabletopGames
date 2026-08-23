@@ -8,6 +8,7 @@ import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("unchecked")
 public class SGGameState extends AbstractGameState {
@@ -35,6 +36,27 @@ public class SGGameState extends AbstractGameState {
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+    }
+    @Override
+    public List<Integer> getCurrentSimultaneousPlayers() {
+        if (isActionInProgress()) {
+            return Collections.singletonList(getCurrentPlayer());
+        }
+        if (playerHands == null) {
+            return Collections.singletonList(getCurrentPlayer());
+        }
+        // only report players who still have to choose this turn. a player who has already
+        // committed a card must not be asked again, or they end up playing two cards.
+        List<Integer> toDecide = IntStream.range(0, getNPlayers())
+                .filter(p -> cardChoices.get(p).isEmpty())
+                .boxed()
+                .toList();
+        if (toDecide.isEmpty()) {
+            // everyone has chosen, so the cards should already have been revealed and the
+            // choices cleared. if we get here the turn cycle is broken, so say so loudly.
+            throw new AssertionError("All players have chosen but the turn has not been resolved");
+        }
+        return toDecide;
     }
 
     @Override
@@ -125,7 +147,7 @@ public class SGGameState extends AbstractGameState {
             }
 
             // We don't know what other players have chosen for this round, hide card choices
-            turnOwner = playerId;
+            copy.turnOwner = playerId;
             for (int i = 0; i < getNPlayers(); i++) {
                 copy.cardChoices.add(new ArrayList<>());
                 if (i == playerId) {

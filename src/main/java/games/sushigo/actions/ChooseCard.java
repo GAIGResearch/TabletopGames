@@ -25,7 +25,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((SGGameState) gs).addCardChoice(this, gs.getCurrentPlayer());
+        ((SGGameState) gs).addCardChoice(this, this.playerId);
         if (useChopsticks) {
             gs.setActionInProgress(this);
         }
@@ -36,7 +36,10 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // Chopsticks allowing to pick second card, different from that already selected
         SGGameState sggs = (SGGameState) state;
-        int idxSelected = sggs.getCardChoices().get(playerId).get(0).cardIdx;
+        // if the first choice isnt there (can get wiped during a search) then dont exclude
+        // anything, so any card in hand is ok for the second pick
+        int idxSelected = sggs.getCardChoices().get(playerId).isEmpty() ? -1
+                : sggs.getCardChoices().get(playerId).get(0).cardIdx;
         List<AbstractAction> actions = new ArrayList<>();
 
         Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(playerId);
@@ -59,7 +62,11 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        chopstickChooseDone = true;
+        // only finish once THIS player has played their second card. if two players use
+        // chopsticks the same turn, another players move could end ours too early otherwise.
+        if (action instanceof ChooseCard cc && cc.playerId == playerId && cc != this) {
+            chopstickChooseDone = true;
+        }
     }
 
     @Override

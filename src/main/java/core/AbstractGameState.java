@@ -174,18 +174,18 @@ public abstract class AbstractGameState {
      * This defaults to one team per player and should be overridden
      * in child classes if relevant to the game
      */
-    public int getTeam(int player) {
-        return player;
-    }
-
+    public int getTeam(int player) { return player;}
     public int getCurrentPlayer() {
         return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }
 
-    public final CoreConstants.GameResult[] getPlayerResults() {
-        return playerResults;
+    /**
+     * Returns a list of the players in a game state that support simultaneous moves
+     */
+    public List<Integer> getCurrentSimultaneousPlayers(){
+        return Collections.singletonList(getCurrentPlayer());
     }
-
+    public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final Set<Integer> getWinners() {
         Set<Integer> winners = new HashSet<>();
         for (int i = 0; i < playerResults.length; i++) {
