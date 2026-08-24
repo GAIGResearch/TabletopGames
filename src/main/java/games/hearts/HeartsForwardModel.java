@@ -56,6 +56,12 @@ public class HeartsForwardModel extends StandardForwardModel {
         hgs.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         hgs.playerTricksTaken = new int[hgs.getNPlayers()];
 
+        // known voids are only valid for the current round, as hands are re-dealt each round
+        hgs.knownVoids = new ArrayList<>();
+        for (int i = 0; i < hgs.getNPlayers(); i++) {
+            hgs.knownVoids.add(EnumSet.noneOf(FrenchCard.Suite.class));
+        }
+
         int numOfPlayers = hgs.getNPlayers();
 
         hgs.drawDeck.removeAll(params.cardsToRemove.get(numOfPlayers));
