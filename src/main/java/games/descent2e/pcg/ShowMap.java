@@ -10,13 +10,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static games.descent2e.pcg.GenerateBoards.*;
-
 public class ShowMap {
     private Quest quest;
     private GraphBoard board;
 
-    private ShowMAPElite parent;
+    private ShowMAPElite parentElite;
+    private ShowFeasibleBoards parentList;
 
     private final JFrame window;
 
@@ -26,9 +25,10 @@ public class ShowMap {
 
     private final String dataPath = "data/descent2e/img/";
 
-    public ShowMap(CreateOffspring co, Quest quest, GraphBoard board, int id, float fit, ShowMAPElite parent) {
+    public ShowMap(CreateOffspring co, Quest quest, GraphBoard board, int id, float fit, ShowMAPElite parentElite, ShowFeasibleBoards parentList) {
 
-        this.parent = parent;
+        this.parentElite = parentElite;
+        this.parentList = parentList;
 
         window = new JFrame(quest.getName());
         window.setSize(maxWidth, maxHeight);
@@ -109,7 +109,10 @@ public class ShowMap {
             @Override
             public void actionPerformed(ActionEvent e) {
                 window.dispose();
-                parent.show();
+                if (parentElite != null)
+                    parentElite.show();
+                if (parentList != null)
+                    parentList.show();
             }
         });
         JPanel buttons = new JPanel();

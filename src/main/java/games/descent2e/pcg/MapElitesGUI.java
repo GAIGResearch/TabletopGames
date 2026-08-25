@@ -16,21 +16,36 @@ public class MapElitesGUI {
 
     public MapElitesGUI(CreateOffspring co) {
         window = new JFrame();
-        window.setTitle("Descent Procedural Content Generation - MAP Elites");
+        window.setTitle("Descent Procedural Content Generation - Results");
         window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         window.setSize(1200, 500);
         window.setResizable(false);
         window.setLocationRelativeTo(null);
         window.setLayout(new GridLayout(0, 1,10, 10));
 
-        panel = new JPanel(new GridLayout(0, 1, 10, 10));
+        panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1,10, 10));
         panel.setBackground(Color.CYAN);
+
+        if (!co.feasible.isEmpty()) {
+            JButton feasible = createButton("All Feasible Boards");
+            ShowFeasibleBoards list = new ShowFeasibleBoards(co);
+            list.prepare(co.feasible, co.feasibleFitness);
+            panel.add(feasible);
+            feasible.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    list.show();
+                    //hide();
+                }
+            });
+        }
 
         HashMap<Pair<Float, Float>, Pair<Integer, Float>> sizeGroups = co.map_SizeVsGroups;
 
         if (!sizeGroups.isEmpty()) {
             String name = "Size Vs Groups";
-            Button sizeVSgroups = createButton(name);
+            JButton sizeVSgroups = createButton(name);
 
             ShowMAPElite elite = new ShowMAPElite(sizeGroups, name);
             elite.prepare(co);
@@ -39,7 +54,7 @@ public class MapElitesGUI {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     elite.show();
-                    hide();
+                    //hide();
                 }
             });
 
@@ -50,7 +65,7 @@ public class MapElitesGUI {
 
         if (!healthGroups.isEmpty()) {
             String name = "Health Vs Groups";
-            Button healthVSgroups = createButton(name);
+            JButton healthVSgroups = createButton(name);
 
             ShowMAPElite elite = new ShowMAPElite(healthGroups, name);
             elite.prepare(co);
@@ -59,14 +74,14 @@ public class MapElitesGUI {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     elite.show();
-                    hide();
+                    //hide();
                 }
             });
 
             panel.add(healthVSgroups);
         }
 
-        Button close = createButton("Close");
+        JButton close = createButton("Close");
         close.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -87,10 +102,10 @@ public class MapElitesGUI {
         window.setVisible(false);
     }
 
-    public Button createButton(String label) {
-        Button button = new Button(label);
+    public JButton createButton(String label) {
+        JButton button = new JButton(label);
         button.setFocusable(false);
-        button.setFont(new Font("Arial", Font.PLAIN, 10));
+        //button.setFont(new Font("Arial", Font.PLAIN, 10));
         return button;
     }
 }

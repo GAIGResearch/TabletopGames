@@ -104,7 +104,7 @@ public class ShowMAPElite {
                                 for (BoardNode node : b.getBoardNodes()) {
                                     //System.out.println(node.getComponentName());
                                 }
-                                ShowMap map = new ShowMap(co, q, b, myID, fit, parent);
+                                ShowMap map = new ShowMap(co, q, b, myID, fit, parent, null);
                                 map.show();
                                 hide();
                             }
