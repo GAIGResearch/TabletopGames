@@ -106,9 +106,6 @@ public class Game {
             game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
 
-        if (game == null)
-            System.out.println("Error game: " + gameToPlay);
-
         if (listeners != null) {
             Set<String> agentNames = players.stream()
                     //           .peek(a -> System.out.println(a.toString()))
@@ -356,8 +353,6 @@ public class Game {
 
         if (debug) System.out.printf("Starting oneAction for players %s%n", activePlayers);
 
-        Map<Integer, AbstractAction> actionsChosen = new LinkedHashMap<>();
-        Map<Integer, List<AbstractAction>> lastObservedActions = new LinkedHashMap<>();
         Map<Integer, AbstractAction> actionsChosen = new HashMap<>();
         Map<Integer, List<AbstractAction>> availableActions = new HashMap<>();
 
@@ -402,7 +397,7 @@ public class Game {
             }
 
             actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
-            lastObservedActions.put(activePlayer, observedActions);
+            availableActions.put(activePlayer, observedActions);
 
             if (gameState.coreGameParameters.verbose)
                 System.out.println("Round: " + gameState.getRoundCounter());
@@ -459,7 +454,7 @@ public class Game {
         // fire ACTION_CHOSEN per player, only after all simultaneous players have chosen an action
         for (int p : activePlayers) {
             listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN,
-                    gameState, actionsChosen.get(p), lastObservedActions.get(p), p)));
+                    gameState, actionsChosen.get(p), availableActions.get(p), p)));
         }
 
         AbstractAction finalAction = actionsChosen.size() == 1
@@ -474,7 +469,7 @@ public class Game {
         // fire ACTION_TAKEN once per player after applying
         for (int p : activePlayers) {
             listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN,
-                    gameState, actionsChosen.get(p), lastObservedActions.get(p), p)));
+                    gameState, actionsChosen.get(p), availableActions.get(p), p)));
         }
 
         if (debug) System.out.printf("Finishing oneAction for players %s%n", activePlayers);
@@ -654,10 +649,6 @@ public class Game {
 
     public void setStopped(boolean stopped) {
         this.stop = stopped;
-    }
-
-    public void setActionValidation(boolean actionValidation) {
-        this.actionValidation = actionValidation;
     }
 
     public CoreParameters getCoreParameters() {
