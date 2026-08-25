@@ -23,6 +23,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,7 +49,7 @@ public class GenerateBoards {
     public static HashMap<String, HashMap<String, Monster>> monsters;
     public static HashMap<String, HashMap<String, Monster>> lieutenants;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException, InvocationTargetException {
 
         DescentGameData data = new DescentGameData();
         data.load(path);
@@ -60,7 +61,7 @@ public class GenerateBoards {
 
         boolean testing = false;
         if (testing) {
-            CreateOffspring co = new CreateOffspring();
+            CreateOffspring co = new CreateOffspring(10,0,0,30);
             co.begin();
         }
         else {

@@ -49,7 +49,7 @@ public class MapElitesGUI {
         HashMap<Pair<Float, Float>, Pair<Integer, Float>> healthGroups = co.map_HealthVsGroups;
 
         if (!healthGroups.isEmpty()) {
-            String name = "Health VS Groups";
+            String name = "Health Vs Groups";
             Button healthVSgroups = createButton(name);
 
             ShowMAPElite elite = new ShowMAPElite(healthGroups, name);

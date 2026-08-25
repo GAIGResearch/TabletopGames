@@ -52,7 +52,7 @@ public class ShowMAPElite {
 
         JPanel grid = new JPanel(new GridLayout(xRange, 1, 0,0));
 
-        System.out.println(xRange + " " + yRange);
+        //System.out.println(xRange + " " + yRange);
 
         id = new int[xRange][yRange];
         fitness = new float[xRange][yRange];
@@ -96,8 +96,8 @@ public class ShowMAPElite {
                         button.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                System.out.println("ID: " + myID);
-                                System.out.println("Fitness: " + fit);
+                                //System.out.println("ID: " + myID);
+                                //System.out.println("Fitness: " + fit);
                                 for (String[] monster : q.getMonsters()) {
                                     //System.out.println(Arrays.toString(monster));
                                 }
@@ -117,7 +117,7 @@ public class ShowMAPElite {
             //System.out.println(line);
             grid.add(row);
         }
-        System.out.println();
+        //System.out.println();
         for (int i = xRange; i > 0; i--) {
             StringBuilder line = new StringBuilder();
             for (int j = 0; j < yRange; j++)
@@ -153,8 +153,8 @@ public class ShowMAPElite {
 
         }
 
-        System.out.println("X Range: " + x.a + "-" + x.b);
-        System.out.println("Y Range: " + y.a + "-" + y.b);
+        //System.out.println("X Range: " + x.a + "-" + x.b);
+        //System.out.println("Y Range: " + y.a + "-" + y.b);
 
         minMax = new Pair<>(x, y);
 

@@ -11,6 +11,9 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 
 public class GenerateBoardsGUI {
 
@@ -78,6 +81,10 @@ public class GenerateBoardsGUI {
     JSlider heightSlide;
     JSlider widthSlide;
 
+    JButton create = null;
+    JTextArea generationText = null;
+    JScrollPane outputScroll = null;
+
     int minWeight = 0;
     int maxWeight = 1000;
 
@@ -101,9 +108,9 @@ public class GenerateBoardsGUI {
         mainWindow.setSize(1300, 700);
         mainWindow.setResizable(false);
         mainWindow.setLocationRelativeTo(null);
-        mainWindow.setLayout(new GridLayout(0, 1,10, 10));
+        mainWindow.setLayout(new GridLayout(0, 1,5, 5));
 
-        mainPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+        mainPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         mainPanel.setBackground(Color.CYAN);
 
         mainWindow.add(mainPanel);
@@ -514,21 +521,48 @@ public class GenerateBoardsGUI {
         weightControls.setBorder(weightSettings);
         mainPanel.add(weightControls);
 
-        JButton create = new JButton("Generate!");
+        JPanel outputHolder = new JPanel();
+        outputHolder.setLayout(new BoxLayout(outputHolder, BoxLayout.Y_AXIS));
+        create = new JButton("Generate!");
         JPanel buttonHolder = new JPanel(new FlowLayout());
+        buttonHolder.setPreferredSize(new Dimension(450, 30));
         buttonHolder.add(create);
         TitledBorder buttonSettings = new TitledBorder(blackline, "Board Generation");
         buttonSettings.setTitleJustification(TitledBorder.CENTER);
         buttonHolder.setBorder(buttonSettings);
-        mainPanel.add(buttonHolder);
+        outputHolder.add(buttonHolder);
+
+
+        generationText = new JTextArea(20, 50);
+        generationText.setLayout(new BoxLayout(generationText, BoxLayout.Y_AXIS));
+        TitledBorder generationOutput = new TitledBorder("Output");
+        generationOutput.setTitleJustification(TitledBorder.CENTER);
+        generationText.setBorder(generationOutput);
+        outputScroll = new JScrollPane(generationText);
+        outputScroll.setPreferredSize(new Dimension(450, 230));
+        outputHolder.add(outputScroll);
+
+        mainPanel.add(outputHolder);
         create.setEnabled(true);
+
+        GenerateBoardsGUI gui = this;
+        System.setOut(new PrintStream(new CustomOutputStream(generationText)));
 
         create.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(create.isEnabled()) {
-                    System.out.println("Generating " + (FIRSTLOOP + (GENERATIONLOOP * OFFSPRING)) + " Boards, with " + INFEASIBLE +"% chance of Infeasible Pool Parents!");
+                    create.setEnabled(false);
+                    generationText.setText("");
+                    generationText.revalidate();
+                    generationText.repaint();
+                    try {
+                        print("Generating " + (FIRSTLOOP + (GENERATIONLOOP * OFFSPRING)) + " Boards, with " + INFEASIBLE +"% chance of Infeasible Pool Parents!");
+                    } catch (InterruptedException | InvocationTargetException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     CreateOffspring co = new CreateOffspring(FIRSTLOOP, GENERATIONLOOP, OFFSPRING, INFEASIBLE);
+                    co.setGUI(gui);
 
                     if (defaultIdeals)
                         co.setIdeals(defaultSize, defaultGroups, defaultHealth, defaultHeight, defaultWidth);
@@ -538,10 +572,9 @@ public class GenerateBoardsGUI {
 
                     try {
                         co.begin();
-                    } catch (IOException ex) {
+                    } catch (IOException | InterruptedException | InvocationTargetException ex) {
                         throw new RuntimeException(ex);
                     }
-                    create.setEnabled(false);
                 }
             }
         });
@@ -554,6 +587,21 @@ public class GenerateBoardsGUI {
         button.setFocusable(false);
         button.setFont(new Font("Arial", Font.PLAIN, 10));
         return button;
+    }
+
+    void finished() {
+        if (create != null)
+            create.setEnabled(true);
+    }
+
+    void print(String string) throws InterruptedException, InvocationTargetException {
+        //String text = generationText.getText();
+        //generationText.setText(text + "\n" + string);
+        //generationText.revalidate();
+        System.out.println(string);
+        Rectangle rect = new Rectangle(generationText.getX(), generationText.getY(), generationText.getWidth(), generationText.getHeight());
+        generationText.paintImmediately(rect);
+        generationText.update(generationText.getGraphics());
     }
 
     class TotalLabel extends JLabel {
@@ -771,6 +819,22 @@ public class GenerateBoardsGUI {
                 }
                 totalGenerated.updateText();
             }
+        }
+    }
+
+    public class CustomOutputStream extends OutputStream {
+        private final JTextArea textArea;
+
+        public CustomOutputStream(JTextArea textArea) {
+            this.textArea = textArea;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            // redirects data to the text area
+            textArea.append(String.valueOf((char)b));
+            // scrolls the text area to the end of data
+            textArea.setCaretPosition(textArea.getDocument().getLength());
         }
     }
 

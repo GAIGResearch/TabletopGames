@@ -12,6 +12,7 @@ import utilities.Vector2D;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,6 +49,10 @@ public class CreateOffspring {
     public List<HashMap<String, Float>> infeasibleFitness = new ArrayList<>();
     public List<Boolean> feasibleList = new ArrayList<>();
 
+    public Pair<Quest, GraphBoard> bestQuest = null;
+    public float bestFitness = 0f;
+    public int bestID = 0;
+
     // MAP-Elites - Saved as <<Value, Value> , <Map ID, Fitness Score>>
     public HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_SizeVsGroups = new HashMap<>(); // Board Size vs Group Count
     public HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_HealthVsGroups = new HashMap<>(); // Total Health vs Group Count
@@ -68,6 +73,14 @@ public class CreateOffspring {
     int IDEAL_HEIGHT = 18; // 572 / 32
     int IDEAL_WIDTH = 15; // 493 / 32
 
+    float W_SIZE = 1;
+    float W_GROUPS = 1;
+    float W_HEALTH = 1;
+    float W_HEIGHT = 0;
+    float W_WIDTH = 0;
+
+    private GenerateBoardsGUI gui = null;
+
     public CreateOffspring() {
     }
 
@@ -86,8 +99,21 @@ public class CreateOffspring {
         IDEAL_WIDTH = width;
     }
 
-    public void begin() throws IOException {
-        FitnessFunction fitfunc = new FitnessFunction(IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH, IDEAL_HEIGHT, IDEAL_WIDTH);
+    void setWeights(float size, float group, float health, float height, float width) {
+        W_SIZE = size;
+        W_GROUPS = group;
+        W_HEALTH = health;
+        W_HEIGHT = height;
+        W_WIDTH = width;
+    }
+
+    void setGUI(GenerateBoardsGUI gui) {
+        this.gui = gui;
+    }
+
+    public void begin() throws IOException, InterruptedException, InvocationTargetException {
+        FitnessFunction fitfunc = new FitnessFunction(this, IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH, IDEAL_HEIGHT, IDEAL_WIDTH);
+        fitfunc.setWeights(W_SIZE, W_GROUPS, W_HEALTH, W_HEIGHT, W_WIDTH);
 
         /*for (Quest q : originalQuests) {
             System.out.println(q.getBoards());
@@ -114,7 +140,7 @@ public class CreateOffspring {
         }
 
         for (int i = 0; i < GENERATIONLOOP; i++) {
-            System.out.println(FIRSTLOOP + (i * OFFSPRING));
+            //System.out.println(FIRSTLOOP + (i * OFFSPRING));
             int choice = Random.randInt(100);
 
             // Failsafe - force Infeasible Parents
@@ -146,8 +172,9 @@ public class CreateOffspring {
         exportMAPElitesToJSON(MapElites.Size, MapElites.Groups);
         exportMAPElitesToJSON(MapElites.Health, MapElites.Groups);
 
-        System.out.println("Complete!");
-
+        float feasiblePercent = (100f * feasible.size() / (feasible.size() + infeasible.size()));
+        print(!feasible.isEmpty() ? "Complete! Generated " + feasible.size() + " Feasible Boards (" + feasiblePercent + "%), with Best Offspring: PCG-" + bestID + ", Fitness: " + bestFitness :
+                "Complete! Failed to generate a single Feasible board (" + infeasible.size() + " Infeasible)!");
         CreateOffspring co = this;
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -155,8 +182,16 @@ public class CreateOffspring {
             public void run() {
                 MapElitesGUI main = new MapElitesGUI(co);
                 main.show();
+                if (gui!=null)
+                    gui.finished();
             }
         });
+    }
+
+    void print(String string) throws InterruptedException, InvocationTargetException {
+        if (gui != null) {
+            gui.print(string);
+        }
     }
 
     private Pair<Quest, Quest> feasibleParents() {
@@ -312,10 +347,8 @@ public class CreateOffspring {
         return Math.sqrt(connect + geometry + repeats + spawning + consistency + size + groups + health + complexity + rules);
     }
 
-    void generateOffspring(Quest one, Quest two, FitnessFunction fitfunc) {
+    void generateOffspring(Quest one, Quest two, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
         nowServing++;
-        System.out.println("Generating Offspring " + nowServing);
-
         Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(one, two, "null", fitfunc);
 
         if (offspring.b)
@@ -324,10 +357,8 @@ public class CreateOffspring {
             infeasible.add(offspring.a);
     }
 
-    void generateOffspring(Quest one, Quest two, String isFeasible, FitnessFunction fitfunc) {
+    void generateOffspring(Quest one, Quest two, String isFeasible, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
         nowServing++;
-        System.out.println("Generating Offspring " + nowServing);
-
         Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(one, two, isFeasible, fitfunc);
 
         if (offspring.b)
@@ -336,7 +367,7 @@ public class CreateOffspring {
             infeasible.add(offspring.a);
     }
 
-    Pair<Pair<Quest, GraphBoard>, Boolean> createOffspring(Quest parent1, Quest parent2, String type, FitnessFunction fitfunc) {
+    Pair<Pair<Quest, GraphBoard>, Boolean> createOffspring(Quest parent1, Quest parent2, String type, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
         Quest newQuest;
         GraphBoard newBoard;
         Quest otherParent;
@@ -442,7 +473,7 @@ public class CreateOffspring {
             freeNodes = lastCheck.b;
 
             if (freeNodes) {
-                System.out.println("Do it again!");
+                //System.out.println("Do it again!");
             }
         }
 
@@ -470,7 +501,7 @@ public class CreateOffspring {
             boardReady = true;
 
             attempt++;
-            System.out.println("Attempt: " + attempt);
+            //print("Attempt: " + attempt);
 
             assembleBoard(finalNodes);
 
@@ -567,15 +598,22 @@ public class CreateOffspring {
 
         boolean feasible = scores.get("Feasible") > 0f;
 
+        Pair<Quest, GraphBoard> offspring = new Pair<>(newQuest, newBoard);
+
         if (feasible) {
             feasibleFitness.add(scores);
             addToMAPElites(scores);
+
+            float fitness = scores.get("Fitness");
+            if (fitness > bestFitness) {
+                bestID = nowServing;
+                bestFitness = fitness;
+                bestQuest = offspring;
+            }
         }
         else
             infeasibleFitness.add(scores);
         feasibleList.add(feasible);
-
-        Pair<Quest, GraphBoard> offspring = new Pair<>(newQuest, newBoard);
 
         return new Pair<>(offspring, feasible);
     }
@@ -1470,14 +1508,14 @@ public class CreateOffspring {
                 BoardNode node = nCaps.remove(0);
                 endcaps.remove(node);
                 retVal.remove(node);
-                System.out.println("Last Resort: Removing " + node.getComponentName());
+                //System.out.println("Last Resort: Removing " + node.getComponentName());
             }
             while (south > north && !sCaps.isEmpty()) {
                 south--;
                 BoardNode node = sCaps.remove(0);
                 endcaps.remove(node);
                 retVal.remove(node);
-                System.out.println("Last Resort: Removing " + node.getComponentName());
+                //System.out.println("Last Resort: Removing " + node.getComponentName());
             }
         }
         if (imbalanceEW) {
@@ -1486,24 +1524,24 @@ public class CreateOffspring {
                 BoardNode node = eCaps.remove(0);
                 endcaps.remove(node);
                 retVal.remove(node);
-                System.out.println("Last Resort: Removing " + node.getComponentName());
+                //System.out.println("Last Resort: Removing " + node.getComponentName());
             }
             while (west > east && !wCaps.isEmpty()) {
                 west--;
                 BoardNode node = wCaps.remove(0);
                 endcaps.remove(node);
                 retVal.remove(node);
-                System.out.println("Last Resort: Removing " + node.getComponentName());
+                //System.out.println("Last Resort: Removing " + node.getComponentName());
             }
         }
 
         // If all else fails, we give up - we can't save this board with the current mutations
         if (north != south) {
-            System.out.println("Still an imbalance - North: " + north + "; South: " + south);
+            //System.out.println("Still an imbalance - North: " + north + "; South: " + south);
             freeNodes = true;
         }
         if (east != west) {
-            System.out.println("Still an imbalance - East: " + east + "; West: " + west);
+            //System.out.println("Still an imbalance - East: " + east + "; West: " + west);
             freeNodes = true;
         }
 

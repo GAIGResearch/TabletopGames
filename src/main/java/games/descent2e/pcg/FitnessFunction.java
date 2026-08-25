@@ -16,6 +16,7 @@ import utilities.Pair;
 import utilities.Vector2D;
 
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
 
@@ -54,7 +55,10 @@ public class FitnessFunction {
     public int IDEAL_COMPLEXITY = 1;
     public int IDEAL_RULES = 1;
 
-    public FitnessFunction(int size, int group, float health, int height, int width) {
+    CreateOffspring co;
+
+    public FitnessFunction(CreateOffspring co, int size, int group, float health, int height, int width) {
+        this.co = co;
         IDEAL_SIZE = size;
         IDEAL_GROUP = group;
         IDEAL_HEALTH = health;
@@ -62,7 +66,8 @@ public class FitnessFunction {
         IDEAL_WIDTH  = width;
     }
 
-    public FitnessFunction(int size, int group, float health, int height, int width, int complexity, int rules) {
+    public FitnessFunction(CreateOffspring co, int size, int group, float health, int height, int width, int complexity, int rules) {
+        this.co = co;
         IDEAL_SIZE = size;
         IDEAL_GROUP = group;
         IDEAL_HEALTH = health;
@@ -394,7 +399,7 @@ public class FitnessFunction {
         return new Pair<>(monsterHealth, totalMonsters);
     }
 
-    HashMap<String, Float> getFitness(CreateOffspring co, Quest quest, GraphBoard board) {
+    HashMap<String, Float> getFitness(CreateOffspring co, Quest quest, GraphBoard board) throws InterruptedException, InvocationTargetException {
         HashMap<String, Float> scores = new HashMap<>();
 
         // Connectedness
@@ -471,60 +476,54 @@ public class FitnessFunction {
         float fitness = fitness(scores);
         scores.put("Fitness", fitness);
 
-        boolean feasible = checkFeasible(scores);
+        String failureCase = checkFeasible(scores);
+        boolean feasible = failureCase.contains("Feasible");
         float f = feasible ? 1f : 0f;
         scores.put("Feasible", f);
-        System.out.println(feasible);
+        co.print(feasible ? "Offspring " + co.nowServing + ": Feasible (Fitness: " + fitness + ")" : "Offspring " + co.nowServing + ": Infeasible; " + failureCase + " (Fitness: " + fitness + ")");
 
         return scores;
     }
 
-    boolean checkFeasible(HashMap<String, Float> scores) {
+    String checkFeasible(HashMap<String, Float> scores) throws InterruptedException, InvocationTargetException {
 
         // Connectedness Check
         if (scores.get("Connectedness") < 1f) {
-            System.out.println("Connectedness Failure");
-            return false;
+            return "Connectedness Failure";
         }
 
         // Free Edge Failure
         if (scores.get("Free Edges") > 0f) {
-            System.out.println("Free Edge Failure");
-            return false;
+            return "Free Edge Failure";
         }
 
         // Geometry Check
         if (scores.get("Geometry") < 1f) {
-            System.out.println("Geometry Failure");
-            return false;
+            return "Geometry Failure";
         }
 
         // No Repeating Monsters Check
         if (scores.get("Spawning") < 1f) {
-            System.out.println("Repeating Groups Failure");
-            return false;
+            return "Repeating Groups Failure";
         }
 
         // Consistency Check
         if (scores.get("Consistency") < 1f) {
-            System.out.println("Consistency Failure");
-            return false;
+            return "Consistency Failure";
         }
 
         // Board Size Check
         float size = scores.get("Size");
         if (size > ControlVariables.SIZE_MAX || size < ControlVariables.SIZE_MIN) {
-            System.out.println("Size Failure");
-            return false;
+            return "Size Failure";
         }
         // Monster Group Check
         float groups = scores.get("Groups");
         if (groups > ControlVariables.GROUP_MAX || groups < ControlVariables.GROUP_MIN) {
-            System.out.println("Group Count Failure");
-            return false;
+            return "Group Count Failure";
         }
 
-        return true;
+        return "Feasible";
     }
 
     private Pair<int[][], Integer> createBoard(CreateOffspring co, Quest q, GraphBoard b) {
