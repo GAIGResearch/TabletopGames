@@ -5,16 +5,15 @@ import core.actions.LogEvent;
 import core.components.Area;
 import core.components.Component;
 import core.components.PartialObservableDeck;
-import core.interfaces.*;
+import core.interfaces.IComponentContainer;
+import core.interfaces.IExtendedSequence;
+import core.interfaces.IGameEvent;
+import core.interfaces.IGamePhase;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
-import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
-import utilities.JSONUtils;
 import utilities.Pair;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -22,7 +21,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static core.CoreConstants.GameResult.*;
-import static evaluation.optimisation.TunableParameters.loadFromJSON;
 
 /**
  * Contains all game state information.
@@ -179,6 +177,7 @@ public abstract class AbstractGameState {
                 actionsInProgress.peek().getCurrentSimultaneousPlayers(this) :
                 Collections.singletonList(getCurrentPlayer());
     }
+
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final Set<Integer> getWinners() {
         Set<Integer> winners = new HashSet<>();
@@ -187,7 +186,6 @@ public abstract class AbstractGameState {
         }
         return winners;
     }
-
     public final Set<Integer> getTied() {
         Set<Integer> tied = new HashSet<>();
         for (int i = 0; i < playerResults.length; i++) {
@@ -195,15 +193,12 @@ public abstract class AbstractGameState {
         }
         return tied;
     }
-
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
-
     public final ElapsedCpuChessTimer[] getPlayerTimer() {
         return playerTimer;
     }
-
     public final GameType getGameType() {
         return gameType;
     }
@@ -215,7 +210,6 @@ public abstract class AbstractGameState {
     public List<String> getHistoryAsText() {
         return new ArrayList<>(historyText);
     }
-
     public int getGameID() {
         return gameID;
     }

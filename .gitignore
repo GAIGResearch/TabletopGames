@@ -41,6 +41,7 @@ src/main/java/META-INF/MANIFEST.MF
 
 src/pytag/env/
 metrics/out/*
+outputdir/*
 treeRecorder*
 .vscode/*
 

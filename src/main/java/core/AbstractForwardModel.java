@@ -140,39 +140,25 @@ public abstract class AbstractForwardModel {
      */
     public final void next(AbstractGameState currentState, AbstractAction action) {
         if (action != null) {
-
             if (action instanceof SimultaneousAction sa) {
-
                 for (Map.Entry<Integer, AbstractAction> entry : sa.getPlayerActions().entrySet()) {
                     currentState.recordAction(entry.getValue(), entry.getKey());
                 }
-
             } else {
-
                 int player = currentState.getCurrentPlayer();
                 currentState.recordAction(action, player);
-
             }
 
             _next(currentState, action);
 
         } else {
-
             if (currentState.coreGameParameters.verbose) {
                 System.out.println("Invalid action.");
             }
-
             illegalActionPlayed(currentState, action);
         }
-
         currentState.advanceGameTick();
     }
-
-
-
-
-
-
 
     /**
      * Computes the available actions and updates the game state accordingly.
@@ -188,12 +174,16 @@ public abstract class AbstractForwardModel {
         return computeAvailableActions(gameState, actionSpace, gameState.getCurrentPlayer());
     }
 
-
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace, int activePlayer) {
         // If there is an action in progress (see IExtendedSequence), then delegate to that
         List<AbstractAction> retValue;
         if (gameState.isActionInProgress()) {
-            retValue = gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace, activePlayer);
+            // we call appropriate method depending on the actionSpace and move simultaneity
+            if (actionSpace != null && !actionSpace.isDefault()) {
+                retValue = gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace, activePlayer);
+            } else {
+                retValue = gameState.getActionsInProgress().peek()._computeAvailableActions(gameState, activePlayer);
+            }
         } else if (actionSpace != null && !actionSpace.isDefault()) {
             retValue = _computeAvailableActions(gameState, actionSpace, activePlayer);
         } else {
@@ -201,8 +191,6 @@ public abstract class AbstractForwardModel {
         }
         return retValue;
     }
-
-
 
     /**
      * Performs any end of game computations, as needed.

@@ -4,7 +4,6 @@ import core.actions.AbstractAction;
 import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
-import core.interfaces.*;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
@@ -16,8 +15,10 @@ import gui.GamePanel;
 import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
-import utilities.*;
+import utilities.Pair;
+import utilities.Utils;
 
 import javax.swing.Timer;
 import javax.swing.*;
@@ -357,6 +358,8 @@ public class Game {
 
         Map<Integer, AbstractAction> actionsChosen = new LinkedHashMap<>();
         Map<Integer, List<AbstractAction>> lastObservedActions = new LinkedHashMap<>();
+        Map<Integer, AbstractAction> actionsChosen = new HashMap<>();
+        Map<Integer, List<AbstractAction>> availableActions = new HashMap<>();
 
         for (int activePlayer : activePlayers) {
             if (!gameState.isNotTerminalForPlayer(activePlayer))
@@ -367,7 +370,6 @@ public class Game {
             // copy state for this player
             double s = System.nanoTime();
             AbstractGameState observation = gameState.copy(activePlayer);
-            observation.setTurnOwner(activePlayer);
             copyTime += (System.nanoTime() - s);
 
             // compute available actions
@@ -426,21 +428,24 @@ public class Game {
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
                 agentTime += (System.nanoTime() - s);
                 nDecisions++;
-
-                if (action == null)
-                    throw new AssertionError("We have a NULL action in the Game loop");
-
-                // check timeout
-                if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-                    action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
-                }
-
-                if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
-                    System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
-                    action = null;
-                }
             }
 
+            if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
+                System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                action = null;
+            }
+
+            if (action == null)
+                throw new AssertionError("We have a NULL action in the Game loop");
+
+            // check timeout
+            if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+                action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
+            }
+
+            // fire ACTION_CHOSEN per player
+            AbstractAction finalAction = action;
+            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, observedActions, activePlayer)));
 
             // end timer for this player
             gameState.playerTimer[activePlayer].pause();
@@ -475,32 +480,6 @@ public class Game {
         if (debug) System.out.printf("Finishing oneAction for players %s%n", activePlayers);
         return finalAction;
     }
-
-
-//    // Check player timeout
-//        if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-//        action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
-//    } else {
-//        // Resolve action and game rules, time it
-//        s = System.nanoTime();
-//        if (overrideAction != null) {
-//            currentPlayer.overrideAction(action, overrideAction);
-//            action = overrideAction;
-//            // System.out.println("Overriding action with " + overrideAction);
-//            overrideAction = null;
-//        }
-//        // if requested, save a copy of the full undeterminized game state (we do this in the Game loop to avoid passing the real state to agents)
-//        if (action.saveGame() && gameState instanceof IToJSON serialisableGameState) {
-//            String directory = String.format("%s%s%s%sG%d", savedStateDirectory, File.separator, gameType.name(), File.separator, gameState.getGameID());
-//            Utils.createDirectory(directory);
-//            String filename = String.format("%sP%d_Tick%d.json", directory + File.separator, activePlayer, gameState.getGameTick());
-//            JSONUtils.writeJSON(serialisableGameState.toJSON(), filename);
-//        }
-//        // we copy the action before using it...so that the action returned by oneAction() does not have a state link
-//        forwardModel.next(gameState, action.copy());
-//        nextTime = (System.nanoTime() - s);
-//    }
-
 
     /**
      * Called at the end of game loop execution, when the game is over.
@@ -587,14 +566,6 @@ public class Game {
     }
 
     /**
-     * May be called by a third party observer (i.e. a listener) if it interjects an action to override a player
-     * @param overrideAction
-     */
-    public void setOverrideAction(AbstractAction overrideAction) {
-        this.overrideAction = overrideAction;
-    }
-
-    /**
      * Retrieves the number of game loop repetitions performed in this game.
      *
      * @return - tick number
@@ -656,13 +627,6 @@ public class Game {
         getGameState().clearListeners();
     }
 
-    public void setSavedStatesDirectory(String dir) {
-        savedStateDirectory = dir;
-    }
-    public String getSavedStatesDirectory() {
-        return savedStateDirectory;
-    }
-
     /**
      * Retrieves the list of players in the game.
      *
@@ -692,6 +656,10 @@ public class Game {
         this.stop = stopped;
     }
 
+    public void setActionValidation(boolean actionValidation) {
+        this.actionValidation = actionValidation;
+    }
+
     public CoreParameters getCoreParameters() {
         return gameState.coreGameParameters;
     }
@@ -719,7 +687,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "SeaSaltPaper");
+        String gameType = Utils.getArg(args, "game", "SushiGo");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -728,7 +696,7 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-//        players.add(new MCTSPlayer());
+        players.add(new MCTSPlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new RandomPlayer());
