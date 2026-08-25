@@ -152,38 +152,32 @@ public abstract class AbstractGameState {
     public CoreParameters getCoreGameParameters() {
         return coreGameParameters;
     }
-
     public final CoreConstants.GameResult getGameStatus() {
         return gameStatus;
     }
-
     public final AbstractParameters getGameParameters() {
         return this.gameParameters;
     }
-
-    public int getNPlayers() {
-        return nPlayers;
-    }
-
-    public int getNTeams() {
-        return nTeams;
-    }
-
+    public int getNPlayers() { return nPlayers; }
+    public int getNTeams() { return nTeams; }
     /**
      * Returns the team number the specified player is on.
      * This defaults to one team per player and should be overridden
      * in child classes if relevant to the game
      */
     public int getTeam(int player) { return player;}
+
     public int getCurrentPlayer() {
         return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }
 
     /**
-     * Returns a list of the players in a game state that support simultaneous moves
+     * This method returns a list of the players in a game state that has simultaneous moves
      */
     public List<Integer> getCurrentSimultaneousPlayers(){
-        return Collections.singletonList(getCurrentPlayer());
+        return isActionInProgress() ?
+                actionsInProgress.peek().getCurrentSimultaneousPlayers(this) :
+                Collections.singletonList(getCurrentPlayer());
     }
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final Set<Integer> getWinners() {
@@ -214,18 +208,10 @@ public abstract class AbstractGameState {
         return gameType;
     }
 
-
-    protected void setHistoryAt(int index, Pair<Integer, AbstractAction> action) {
-        history.set(index, action);
-    }
-
     /**
      * @return All actions that have been executed on this state since reset()/initialisation
      */
-    public List<Pair<Integer, AbstractAction>> getHistory() {
-        return new ArrayList<>(history);
-    }
-
+    public List<Pair<Integer, AbstractAction>> getHistory() { return new ArrayList<>(history);}
     public List<String> getHistoryAsText() {
         return new ArrayList<>(historyText);
     }
@@ -233,14 +219,8 @@ public abstract class AbstractGameState {
     public int getGameID() {
         return gameID;
     }
-
-    public int getRoundCounter() {
-        return roundCounter;
-    }
-
-    public int getTurnCounter() {
-        return turnCounter;
-    }
+    public int getRoundCounter() {return roundCounter;}
+    public int getTurnCounter() {return turnCounter;}
 
     /**
      * In general getCurrentPlayer() should be used to find the current player.
@@ -249,27 +229,19 @@ public abstract class AbstractGameState {
      *
      * @return the player whose turn it currently is (which may be different to the next player to act)
      */
-    public int getTurnOwner() {
-        return turnOwner;
-    }
-
-    public int getFirstPlayer() {
-        return firstPlayer;
-    }
+    public int getTurnOwner() {return turnOwner;}
+    public int getFirstPlayer() {return firstPlayer;}
 
     // Setters
     void setCoreGameParameters(CoreParameters coreGameParameters) {
         this.coreGameParameters = coreGameParameters;
     }
-
     public final void setGameStatus(CoreConstants.GameResult status) {
         this.gameStatus = status;
     }
-
     public final void setPlayerResult(CoreConstants.GameResult result, int playerIdx) {
         this.playerResults[playerIdx] = result;
     }
-
     public final void setGamePhase(IGamePhase gamePhase) {
         this.gamePhase = gamePhase;
     }
@@ -277,15 +249,9 @@ public abstract class AbstractGameState {
     void setGameID(int id) {
         gameID = id;
     } // package level deliberately
+    void advanceGameTick() {tick++;}
 
-    void advanceGameTick() {
-        tick++;
-    }
-
-    public void setTurnOwner(int newTurnOwner) {
-        turnOwner = newTurnOwner;
-    }
-
+    public void setTurnOwner(int newTurnOwner) {turnOwner = newTurnOwner;}
     public void setFirstPlayer(int newFirstPlayer) {
         firstPlayer = newFirstPlayer;
         turnOwner = newFirstPlayer;
@@ -296,13 +262,11 @@ public abstract class AbstractGameState {
      * Use this as a default; there is no need to create your own.
      * The one exception to this guideline is in the copy() method, where redeterminisation should *not* use this generator.
      * It should use redeterminisationRnd instead.
-     *
      * @return the Random to use for game decisions/events
      */
     public Random getRnd() {
         return rnd;
     }
-
     public void addListener(IGameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
@@ -320,11 +284,7 @@ public abstract class AbstractGameState {
     public final boolean isNotTerminalForPlayer(int player) {
         return playerResults[player] == GAME_ONGOING && gameStatus == GAME_ONGOING;
     }
-
-    public final int getGameTick() {
-        return tick;
-    }
-
+    public final int getGameTick() {return tick;}
     public final Component getComponentById(int id) {
         Component c = allComponents.getComponent(id);
         if (c == null) {
@@ -419,6 +379,9 @@ public abstract class AbstractGameState {
             s.playerTimer[i] = playerTimer[i].copy();
         }
 
+        if (playerId != -1 && coreGameParameters.partialObservable) {
+            s.redeterminise(playerId);
+        }
         // Update the list of components for ID matching in actions.
         s.addAllComponents();
         return s;
@@ -434,6 +397,13 @@ public abstract class AbstractGameState {
         historyText.add("Player " + player + " : " + action.getString(this));
     }
 
+    /**
+     * Override with logic to redeterminise the game state from the perspective of the specified player
+     * @param playerId
+     */
+    public void redeterminise(int playerId) {
+        // do nothing as the default
+    }
 
     // helper function to avoid time-consuming string manipulations if the message is not actually
     // going to be logged anywhere
@@ -586,9 +556,7 @@ public abstract class AbstractGameState {
      *
      * @return the number of levels of tiebreaks in the game
      */
-    public int getTiebreakLevels() {
-        return 5;
-    }
+    public int getTiebreakLevels() {return 5;}
 
     /**
      * Returns the ordinal position of a player using getGameScore().

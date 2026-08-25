@@ -4,9 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
-import core.actions.DoNothing;
 import core.interfaces.*;
-import core.interfaces.IToJSON;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
@@ -18,14 +16,12 @@ import gui.GamePanel;
 import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 import utilities.*;
 
 import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,14 +54,6 @@ public class Game {
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
     private boolean pause, stop;
     private boolean debug = false;
-    private boolean actionValidation = true;
-    // Video recording
-    private Rectangle areaBounds;
-    private boolean recordingVideo = false;
-    String fileName = "output.mp4";
-    String formatName = "mp4";
-    String codecName = null;
-    int snapsPerSecond = 10;
     private int turnPause;
     protected AbstractAction overrideAction;
     protected String savedStateDirectory = "SavedStates";
@@ -368,7 +356,7 @@ public class Game {
         if (debug) System.out.printf("Starting oneAction for players %s%n", activePlayers);
 
         Map<Integer, AbstractAction> actionsChosen = new LinkedHashMap<>();
-        List<AbstractAction> lastObservedActions = new ArrayList<>();
+        Map<Integer, List<AbstractAction>> lastObservedActions = new LinkedHashMap<>();
 
         for (int activePlayer : activePlayers) {
             if (!gameState.isNotTerminalForPlayer(activePlayer))
@@ -395,7 +383,7 @@ public class Game {
                     topOfStack = actionsInProgress.peek();
                 }
                 if (gameState.getHistory().size() > 1) {
-                    lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1).b;
+                    lastAction = gameState.getHistory().getLast().b;
                 }
                 if (debug) {
                     System.out.println("---\nActions in progress:");
@@ -412,7 +400,7 @@ public class Game {
             }
 
             actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
-            lastObservedActions = observedActions;
+            lastObservedActions.put(activePlayer, observedActions);
 
             if (gameState.coreGameParameters.verbose)
                 System.out.println("Round: " + gameState.getRoundCounter());
@@ -423,7 +411,7 @@ public class Game {
             // start timer for this player
             gameState.playerTimer[activePlayer].resume();
 
-            AbstractAction action = null;
+            AbstractAction action;
             if (observedActions.size() == 1 && !currentPlayer.considerSingletonActions) {
                 // Can only do 1 action, so do it.
                 action = observedActions.getFirst();
@@ -434,31 +422,25 @@ public class Game {
                 if (debug)
                     System.out.printf("About to get action for player %d%n", activePlayer);
                 action = currentPlayer.getAction(observation, observedActions);
-                if (actionValidation && !observedActions.contains(action))
-                    throw new AssertionError("Action played that was not in the list of available actions: " + action
-                            + "\nAvailable actions: " + observedActions);
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
                 agentTime += (System.nanoTime() - s);
                 nDecisions++;
+
+                if (action == null)
+                    throw new AssertionError("We have a NULL action in the Game loop");
+
+                // check timeout
+                if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+                    action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
+                }
+
+                if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
+                    System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                    action = null;
+                }
             }
 
-            if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
-                System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
-                action = null;
-            }
-
-            if (action == null)
-                throw new AssertionError("We have a NULL action in the Game loop");
-
-            // check timeout
-            if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-                action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
-            }
-
-            // fire ACTION_CHOSEN per player
-            AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, observedActions, activePlayer)));
 
             // end timer for this player
             gameState.playerTimer[activePlayer].pause();
@@ -469,9 +451,14 @@ public class Game {
 
             actionsChosen.put(activePlayer, action);
         }
+        // fire ACTION_CHOSEN per player, only after all simultaneous players have chosen an action
+        for (int p : activePlayers) {
+            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN,
+                    gameState, actionsChosen.get(p), lastObservedActions.get(p), p)));
+        }
 
         AbstractAction finalAction = actionsChosen.size() == 1
-                ? actionsChosen.get(activePlayers.get(0))
+                ? actionsChosen.get(activePlayers.getFirst())
                 : new SimultaneousAction(actionsChosen);
 
         // apply once
@@ -479,11 +466,11 @@ public class Game {
         forwardModel.next(gameState, finalAction.copy());
         nextTime = (System.nanoTime() - s);
 
-        lastPlayer = activePlayers.get(activePlayers.size() - 1);
-
-        // fire ACTION_TAKEN once after applying
-        List<AbstractAction> finalObservedActions = lastObservedActions;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction.copy(), finalObservedActions, lastPlayer)));
+        // fire ACTION_TAKEN once per player after applying
+        for (int p : activePlayers) {
+            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN,
+                    gameState, actionsChosen.get(p), lastObservedActions.get(p), p)));
+        }
 
         if (debug) System.out.printf("Finishing oneAction for players %s%n", activePlayers);
         return finalAction;
@@ -703,10 +690,6 @@ public class Game {
 
     public void setStopped(boolean stopped) {
         this.stop = stopped;
-    }
-
-    public void setActionValidation(boolean actionValidation) {
-        this.actionValidation = actionValidation;
     }
 
     public CoreParameters getCoreParameters() {
