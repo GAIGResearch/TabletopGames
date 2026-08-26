@@ -23,18 +23,30 @@ public class ShowFeasibleBoards {
         this.co = co;
         window = new JFrame();
         window.setTitle("Feasible Procedurally Generated Descent Quests");
-        window.setSize(1700, 700);
+        window.setSize(1500, 800);
         window.setResizable(false);
         window.setLocationRelativeTo(null);
-        window.setLayout(new GridBagLayout());
+        window.setLayout(new BorderLayout());
 
         panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(Color.CYAN);
 
         JScrollPane feasibleScroll = new JScrollPane(panel);
-        feasibleScroll.setPreferredSize(new Dimension(1600, 700));
-        window.add(feasibleScroll);
+        feasibleScroll.setPreferredSize(new Dimension(1400, 700));
+        window.add(feasibleScroll, BorderLayout.CENTER);
+
+        JPanel exit = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        exit.setBackground(Color.CYAN);
+        JButton exitButton = new JButton("Close");
+        exitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hide();
+            }
+        });
+        exit.add(exitButton);
+        window.add(exit, BorderLayout.PAGE_END);
     }
 
     public void show() {
