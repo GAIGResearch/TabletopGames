@@ -56,6 +56,7 @@ public class CreateOffspring {
     // MAP-Elites - Saved as <<Value, Value> , <Map ID, Fitness Score>>
     public HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_SizeVsGroups = new HashMap<>(); // Board Size vs Group Count
     public HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_HealthVsGroups = new HashMap<>(); // Total Health vs Group Count
+    public HashMap<Pair<Float, Float>, Pair<Integer, Float>> map_HeightVsWidth = new HashMap<>(); // Board Height vs Board Width
 
     // Counters for tiles allowed multiple times
     int transition = 0;
@@ -171,6 +172,7 @@ public class CreateOffspring {
         exportPCGToJSON(false);
         exportMAPElitesToJSON(MapElites.Size, MapElites.Groups);
         exportMAPElitesToJSON(MapElites.Health, MapElites.Groups);
+        exportMAPElitesToJSON(MapElites.Height, MapElites.Width);
 
         float feasiblePercent = (100f * feasible.size() / (feasible.size() + infeasible.size()));
         print(!feasible.isEmpty() ? "Complete! Generated " + feasible.size() + " Feasible Boards (" + feasiblePercent + "%), with Best Offspring: PCG-" + bestID + ", Fitness: " + bestFitness :
@@ -997,6 +999,22 @@ public class CreateOffspring {
         return null;
     }
 
+    HashMap<String, Float> getScoresByID(int id, boolean isFeasible) {
+        if (isFeasible) {
+            for (HashMap<String, Float> fitness : feasibleFitness) {
+                if (fitness.get("ID").intValue() == id)
+                    return fitness;
+            }
+        }
+        else {
+            for (HashMap<String, Float> fitness : infeasibleFitness) {
+                if (fitness.get("ID").intValue() == id)
+                    return fitness;
+            }
+        }
+        return null;
+    }
+
     List<BoardNode> crossoverMutate(List<BoardNode> crossoverNodes, List<BoardNode> baseNodes) {
 
         List<BoardNode> retVal = new ArrayList<>();
@@ -1683,6 +1701,34 @@ public class CreateOffspring {
         }
     }
 
+    void makeConnections(BoardNode node, List<String[]> unique, List<String> usedConnects, List<String> usedPairs, List<String[]> finalSet) {
+        String name = node.getComponentName();
+        for (String[] pair : unique) {
+            if (finalSet.contains(pair))
+                continue;
+
+            String a = pair[0];
+            String tileA = a.split(":")[0];
+            String b = pair[1];
+            String tileB = b.split(":")[0];
+
+            if (!name.contains(tileA) && name.contains(tileB))
+                continue;
+
+            List<String> newPair = Arrays.asList(tileA, tileB);
+            Collections.sort(newPair);
+            String key = newPair.get(0) + "," + newPair.get(1);
+
+            if (!usedConnects.contains(a) && !usedConnects.contains(b) && !usedPairs.contains(key)) {
+                finalSet.add(pair);
+                usedConnects.add(a);
+                usedConnects.add(b);
+                usedPairs.add(key);
+
+            }
+        }
+    }
+
     String fixNodeName (String name) {
         if (name.contains("transition")) {
             transition++;
@@ -1700,24 +1746,33 @@ public class CreateOffspring {
     }
 
     void addToMAPElites(HashMap<String, Float> scores) {
-        Pair<Float, Float> mapKey = new Pair<>(scores.get("Size"), scores.get("Groups"));
+        Pair<Float, Float> mapKeySG = new Pair<>(scores.get("Size"), scores.get("Groups"));
         Pair<Integer, Float> mapResult = new Pair<>(nowServing, scores.get("Fitness"));
-        if (map_SizeVsGroups.containsKey(mapKey)) {
-            Pair<Integer, Float> oldResult = map_SizeVsGroups.get(mapKey);
+        if (map_SizeVsGroups.containsKey(mapKeySG)) {
+            Pair<Integer, Float> oldResult = map_SizeVsGroups.get(mapKeySG);
             if (oldResult.b < mapResult.b)
-                map_SizeVsGroups.put(mapKey, mapResult);
+                map_SizeVsGroups.put(mapKeySG, mapResult);
         }
         else
-            map_SizeVsGroups.put(mapKey, mapResult);
+            map_SizeVsGroups.put(mapKeySG, mapResult);
 
-        mapKey = new Pair<>((float) Math.floor(scores.get("Total Health")), scores.get("Groups"));
-        if (map_HealthVsGroups.containsKey(mapKey)) {
-            Pair<Integer, Float> oldResult = map_HealthVsGroups.get(mapKey);
+        Pair<Float, Float> mapKeyHG = new Pair<>((float) Math.floor(scores.get("Total Health")), scores.get("Groups"));
+        if (map_HealthVsGroups.containsKey(mapKeyHG)) {
+            Pair<Integer, Float> oldResult = map_HealthVsGroups.get(mapKeyHG);
             if (oldResult.b < mapResult.b)
-                map_HealthVsGroups.put(mapKey, mapResult);
+                map_HealthVsGroups.put(mapKeyHG, mapResult);
         }
         else
-            map_HealthVsGroups.put(mapKey, mapResult);
+            map_HealthVsGroups.put(mapKeyHG, mapResult);
+
+        Pair<Float, Float> mapKeyHW = new Pair<>(scores.get("Height"), scores.get("Width"));
+        if (map_HeightVsWidth.containsKey(mapKeyHW)) {
+            Pair<Integer, Float> oldResult = map_HeightVsWidth.get(mapKeyHW);
+            if (oldResult.b < mapResult.b)
+                map_HeightVsWidth.put(mapKeyHW, mapResult);
+        }
+        else
+            map_HeightVsWidth.put(mapKeyHW, mapResult);
     }
 
     void exportPCGToJSON(boolean isFeasible) throws IOException {
@@ -1916,7 +1971,6 @@ public class CreateOffspring {
     void exportMAPElitesToJSON(MapElites first, MapElites second) throws IOException {
 
         HashMap<Pair<Float, Float>, Pair<Integer, Float>> mapElite = new HashMap<>();
-
         switch(first) {
             case Size:
                 if (second.equals(MapElites.Groups))
@@ -1925,6 +1979,10 @@ public class CreateOffspring {
             case Health:
                 if (second.equals(MapElites.Groups))
                     mapElite = map_HealthVsGroups;
+                break;
+            case Height:
+                if (second.equals(MapElites.Width))
+                    mapElite = map_HeightVsWidth;
                 break;
         }
 

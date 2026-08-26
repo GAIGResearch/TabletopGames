@@ -81,6 +81,26 @@ public class MapElitesGUI {
             panel.add(healthVSgroups);
         }
 
+        HashMap<Pair<Float, Float>, Pair<Integer, Float>> heightWidth = co.map_HeightVsWidth;
+
+        if (!heightWidth.isEmpty()) {
+            String name = "Height Vs Width";
+            JButton heightVSwidth = createButton(name);
+
+            ShowMAPElite elite = new ShowMAPElite(heightWidth, name);
+            elite.prepare(co);
+
+            heightVSwidth.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    elite.show();
+                    //hide();
+                }
+            });
+
+            panel.add(heightVSwidth);
+        }
+
         JButton close = createButton("Close");
         close.addActionListener(new ActionListener() {
             @Override

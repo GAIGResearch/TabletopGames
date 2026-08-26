@@ -87,6 +87,7 @@ public class ShowMAPElite {
                 if (fit > 0f) {
 
                     Pair<Quest, GraphBoard> quest = co.getQuestByID(myID, true);
+                    HashMap<String, Float> scores = co.getScoresByID(myID, true);
                     if (quest != null) {
                         Quest q = quest.a;
                         GraphBoard b = quest.b;
@@ -104,7 +105,7 @@ public class ShowMAPElite {
                                 for (BoardNode node : b.getBoardNodes()) {
                                     //System.out.println(node.getComponentName());
                                 }
-                                ShowMap map = new ShowMap(co, q, b, myID, fit, parent, null);
+                                ShowMap map = new ShowMap(co, q, b, myID, scores, parent, null);
                                 map.show();
                                 hide();
                             }

@@ -91,7 +91,7 @@ public class ShowFeasibleBoards {
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ShowMap map = new ShowMap(co, q, board, id, f, null, parent);
+                    ShowMap map = new ShowMap(co, q, board, id, scores, null, parent);
                     map.show();
                     hide();
                 }

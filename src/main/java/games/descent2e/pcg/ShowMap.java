@@ -31,7 +31,7 @@ public class ShowMap {
 
     private final String dataPath = "data/descent2e/img/";
 
-    public ShowMap(CreateOffspring co, Quest quest, GraphBoard board, int id, float fit, ShowMAPElite parentElite, ShowFeasibleBoards parentList) {
+    public ShowMap(CreateOffspring co, Quest quest, GraphBoard board, int id, HashMap<String, Float> scores, ShowMAPElite parentElite, ShowFeasibleBoards parentList) {
 
         this.parentElite = parentElite;
         this.parentList = parentList;
