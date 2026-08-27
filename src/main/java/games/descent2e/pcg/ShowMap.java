@@ -57,7 +57,7 @@ public class ShowMap {
         JPanel left = new JPanel();
         left.setLayout(new FlowLayout(FlowLayout.CENTER));
         left.setBackground(Color.CYAN);
-        left.setPreferredSize(new Dimension(200, 700));
+        left.setPreferredSize(new Dimension(300, 700));
 
         JPanel fitness = new JPanel();
         fitness.setLayout(new BoxLayout(fitness, BoxLayout.Y_AXIS));
@@ -66,7 +66,7 @@ public class ShowMap {
         fitnessBorder.setTitleJustification(TitledBorder.CENTER);
         fitness.setBorder(fitnessBorder);
         fitness.setLayout(new BoxLayout(fitness, BoxLayout.Y_AXIS));
-        fitness.setPreferredSize(new Dimension(200, 390));
+        fitness.setPreferredSize(new Dimension(300, 390));
         JLabel fitnessLabel = new JLabel("Score: " + scores.get("Fitness"));
 
         float size = scores.get("Size");
@@ -133,7 +133,7 @@ public class ShowMap {
         tilesBorder.setTitleJustification(TitledBorder.CENTER);
         tilesPanel.setBorder(tilesBorder);
         tilesPanel.setBackground(Color.CYAN);
-        tilesPanel.setPreferredSize(new Dimension(200, 300));
+        tilesPanel.setPreferredSize(new Dimension(300, 300));
 
         Collection<BoardNode> nodes = board.getBoardNodes();
         JLabel tileCount = new JLabel(nodes.size() + " Tiles Used");
@@ -163,7 +163,7 @@ public class ShowMap {
         positions.setBackground(Color.CYAN);
         positions.setLayout(new BorderLayout());
 
-        positions.setPreferredSize(new Dimension(200, 700));
+        positions.setPreferredSize(new Dimension(300, 700));
 
         JPanel traits = new JPanel();
         traits.setLayout(new BoxLayout(traits, BoxLayout.Y_AXIS));
@@ -194,7 +194,7 @@ public class ShowMap {
             if (m.equals("OpenSmall"))
                 m = "Open Group (Small)";
             else if (m.equals("Open"))
-                m += "Group";
+                m += " Group";
 
             JLabel monsterSpawn = new JLabel(m + ": " + pos);
             spawningContainer.add(monsterSpawn);

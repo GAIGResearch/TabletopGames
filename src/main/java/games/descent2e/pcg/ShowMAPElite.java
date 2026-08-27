@@ -6,6 +6,8 @@ import games.descent2e.concepts.Quest;
 import utilities.Pair;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,6 +21,7 @@ public class ShowMAPElite {
     private int yRange;
     private float minFitness = Float.MAX_VALUE;
     private float maxFitness = Float.MIN_VALUE;
+    private float absoluteFitness = 10f;
 
     private float[][] fitness;
     private int[][] id;
@@ -28,12 +31,13 @@ public class ShowMAPElite {
     public ShowMAPElite(HashMap<Pair<Float, Float>, Pair<Integer, Float>> elite, String name) {
         window = new JFrame();
         window.setTitle(name);
-        window.setSize(1600, 700);
+        window.setSize(1400, 700);
         window.setResizable(true);
         window.setLocationRelativeTo(null);
-        window.setLayout(new GridLayout(0,1, 10, 10));
+        window.setLayout(new BorderLayout());
 
-        panel = new JPanel(new GridBagLayout());
+        panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(Color.CYAN);
 
         this.elite = elite;
@@ -50,7 +54,11 @@ public class ShowMAPElite {
     public void prepare(CreateOffspring co) {
         minMax(elite);
 
-        JPanel grid = new JPanel(new GridLayout(xRange, 1, 0,0));
+        Color[] colours = MapColours.getColourStops(MapColours.Colours.Viridis);
+
+        JPanel grid = new JPanel();
+        grid.setLayout(new BoxLayout(grid, BoxLayout.Y_AXIS));
+        grid.setPreferredSize(new Dimension(xRange * 10, yRange * 10));
 
         //System.out.println(xRange + " " + yRange);
 
@@ -68,7 +76,8 @@ public class ShowMAPElite {
 
         int counter = 0;
         for (int i = xRange; i > 0; i--) {
-            JPanel row = new JPanel(new GridLayout(1, yRange, 0,0));
+            JPanel row = new JPanel();
+            row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
             StringBuilder line = new StringBuilder();
             for (int j = 0; j < yRange; j++) {
                 counter++;
@@ -78,10 +87,10 @@ public class ShowMAPElite {
 
                 line.append(myID).append(" ");
 
-                Button button = new Button(Integer.toString(counter));
-                button.setFont(new Font("Arial", Font.PLAIN, 1));
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(100, 100));
 
-                button.setBackground(getColour(fit));
+                button.setBackground(getColour(fit, colours));
                 row.add(button);
 
                 if (fit > 0f) {
@@ -127,7 +136,66 @@ public class ShowMAPElite {
         }
 
         panel.add(grid);
-        window.add(panel);
+        window.add(panel, BorderLayout.CENTER);
+
+        Border blackline = BorderFactory.createLineBorder(Color.black);
+
+        JPanel legendContainer = new JPanel();
+        legendContainer.setBackground(Color.WHITE);
+        legendContainer.setLayout(new BoxLayout(legendContainer, BoxLayout.Y_AXIS));
+        TitledBorder legendBorder = new TitledBorder(blackline, "Fitness Legend");
+        legendBorder.setTitleJustification(TitledBorder.CENTER);
+        legendContainer.setBorder(legendBorder);
+        JPanel legendBox = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        legendBox.setPreferredSize(new Dimension(1000, 30));
+        legendBox.setBackground(Color.WHITE);
+
+        int columns = 100;
+        JPanel legend = new JPanel(new GridLayout(1, columns, 0, 0));
+        legend.setBackground(Color.WHITE);
+        legend.setBorder(blackline);
+        for (int i = 0; i < columns; i++) {
+            JPanel legendPiece = new JPanel();
+            legendPiece.setBackground(interpolate((float) i / columns, colours));
+            legend.add(legendPiece);
+        }
+        legendBox.add(legend);
+        legendContainer.add(legendBox);
+
+        JPanel legendLabelContainer = new JPanel(new FlowLayout());
+        legendLabelContainer.setPreferredSize(new Dimension(1020, 40));
+        legendLabelContainer.setBackground(Color.WHITE);
+        JPanel legendLabelContainer2 = new JPanel(new GridLayout(1, 0, 5, 5));
+        legendLabelContainer2.setBackground(Color.WHITE);
+        legendLabelContainer2.setPreferredSize(new Dimension(1020, 40));
+
+        JPanel labelContainerStart = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        labelContainerStart.add(new JLabel(Float.toString(absoluteFitness / 2)));
+        labelContainerStart.setBackground(Color.WHITE);
+        legendLabelContainer2.add(labelContainerStart);
+
+        int labelCount = 5;
+        for (int i = 1; i < labelCount; i++) {
+            JPanel labelContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            labelContainer.add(new JLabel(Float.toString(labelCount + i * (absoluteFitness / (2 * labelCount)))));
+            labelContainer.setBackground(Color.WHITE);
+            legendLabelContainer2.add(labelContainer);
+        }
+
+        JPanel labelContainerEnd = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        labelContainerEnd.add(new JLabel(Float.toString(absoluteFitness)));
+        labelContainerEnd.setBackground(Color.WHITE);
+        legendLabelContainer2.add(labelContainerEnd);
+
+        /*legendLabelContainer2.add(new JLabel(Integer.toString((int) (absoluteFitness / 2))));
+        legendLabelContainer2.add(new JLabel(Float.toString(5 * (absoluteFitness / 8))));
+        legendLabelContainer2.add(new JLabel(Float.toString(3 * (absoluteFitness / 4))));
+        legendLabelContainer2.add(new JLabel(Float.toString(7 * (absoluteFitness / 8))));
+        legendLabelContainer2.add(new JLabel(Integer.toString((int) absoluteFitness)));*/
+        legendLabelContainer.add(legendLabelContainer2);
+        legendContainer.add(legendLabelContainer);
+
+        window.add(legendContainer, BorderLayout.PAGE_END);
 
     }
 
@@ -151,6 +219,8 @@ public class ShowMAPElite {
                 minFitness = fitness;
             if (fitness > maxFitness)
                 maxFitness = fitness;
+            if (fitness > absoluteFitness)
+                absoluteFitness = fitness;
 
         }
 
@@ -164,27 +234,28 @@ public class ShowMAPElite {
         yRange = (int) (y.b - y.a + 1);
     }
 
-    private Color getColour(double fitness) {
+    private Color getColour(double fitness, Color[] colours) {
+        if (fitness <= 0f)
+            return Color.BLACK;
         if (fitness < minFitness)
-            return Color.WHITE;
+            return colours[0];
 
         if (maxFitness == minFitness)
-            return Color.RED;
+            return colours[colours.length-1];
 
-        return interpolate((fitness - minFitness) / (maxFitness - minFitness));
+        return interpolate((fitness - (absoluteFitness / 2)) / (absoluteFitness), colours);
     }
 
-    // Cycle through Blue, Cyan, Green, Yellow, Red
-    private Color interpolate(double t) {
+    private Color interpolate(double t, Color[] colours) {
 
         if (t < 0.25) {
-            return blend(Color.BLUE, Color.CYAN, t / 0.25);
+            return blend(colours[0], colours[1], t / 0.25);
         } else if (t < 0.5) {
-            return blend(Color.CYAN, Color.GREEN, (t - 0.25) / 0.25);
+            return blend(colours[1], colours[2], (t - 0.25) / 0.25);
         } else if (t < 0.75) {
-            return blend(Color.GREEN, Color.YELLOW, (t - 0.5) / 0.25);
+            return blend(colours[2], colours[3], (t - 0.5) / 0.25);
         } else {
-            return blend(Color.YELLOW, Color.RED, (t - 0.75) / 0.25);
+            return blend(colours[3], colours[4], (t - 0.75) / 0.25);
         }
     }
 
