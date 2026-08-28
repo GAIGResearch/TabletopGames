@@ -215,7 +215,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
                 removeUsedChopsticks(gs, i);
             }
         }
-        int expectedPlayerCards = gs.getPlayerHands().get(0).getSize();
+        int expectedPlayerCards = gs.getPlayerHands().getFirst().getSize();
         for (int i = 1; i < gs.getNPlayers(); i++) {
             if (gs.getPlayerHands().get(i).getSize() != expectedPlayerCards) {
                 throw new AssertionError("Player " + i + " has " + gs.getPlayerHands().get(i).getSize() + " cards, expected " + expectedPlayerCards);
