@@ -112,7 +112,7 @@ public class CreateOffspring {
         this.gui = gui;
     }
 
-    public void begin() throws IOException, InterruptedException, InvocationTargetException {
+    public void begin(int generationID) throws IOException, InterruptedException, InvocationTargetException {
         FitnessFunction fitfunc = new FitnessFunction(this, IDEAL_SIZE, IDEAL_GROUP, IDEAL_HEALTH, IDEAL_HEIGHT, IDEAL_WIDTH);
         fitfunc.setWeights(W_SIZE, W_GROUPS, W_HEALTH, W_HEIGHT, W_WIDTH);
 
@@ -182,7 +182,7 @@ public class CreateOffspring {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MapElitesGUI main = new MapElitesGUI(co);
+                MapElitesGUI main = new MapElitesGUI(co, generationID);
                 main.show();
                 if (gui!=null)
                     gui.finished();

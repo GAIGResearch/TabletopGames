@@ -100,7 +100,10 @@ public class GenerateBoardsGUI {
     JSlider weightHeightSlide;
     JSlider weightWidthSlide;
 
-    public GenerateBoardsGUI() {
+    private int generationID = 1;
+
+    public GenerateBoardsGUI(int id) {
+        generationID = id;
     }
 
     public void load() {
@@ -571,10 +574,11 @@ public class GenerateBoardsGUI {
                     co.setWeights(W_SIZE, W_GROUPS, W_HEALTH, W_HEIGHT, W_WIDTH);
 
                     try {
-                        co.begin();
+                        co.begin(generationID);
                     } catch (IOException | InterruptedException | InvocationTargetException ex) {
                         throw new RuntimeException(ex);
                     }
+                    generationID++;
                 }
             }
         });

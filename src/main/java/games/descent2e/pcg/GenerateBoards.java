@@ -27,6 +27,8 @@ public class GenerateBoards {
     public static HashMap<String, HashMap<String, Monster>> monsters;
     public static HashMap<String, HashMap<String, Monster>> lieutenants;
 
+    static int generationID = 1;
+
     public static void main(String[] args) throws IOException, InterruptedException, InvocationTargetException {
 
         DescentGameData data = new DescentGameData();
@@ -39,11 +41,11 @@ public class GenerateBoards {
 
         boolean testing = false;
         if (testing) {
-            CreateOffspring co = new CreateOffspring(10,0,0,30);
-            co.begin();
+            CreateOffspring co = new CreateOffspring(77,0,0,30);
+            co.begin(generationID);
         }
         else {
-            GenerateBoardsGUI gui = new GenerateBoardsGUI();
+            GenerateBoardsGUI gui = new GenerateBoardsGUI(generationID);
             gui.load();
         }
     }
