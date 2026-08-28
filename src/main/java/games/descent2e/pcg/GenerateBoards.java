@@ -1,39 +1,17 @@
 package games.descent2e.pcg;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.crypto.tink.subtle.Random;
-import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.components.GridBoard;
-import core.properties.Property;
-import core.properties.PropertyInt;
-import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameData;
 import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
-import org.apache.hadoop.shaded.com.nimbusds.jose.shaded.json.JSONObject;
-import org.apache.hadoop.shaded.com.nimbusds.jose.shaded.json.JSONStyle;
-import utilities.Pair;
-import utilities.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.List;
-
-import static core.CoreConstants.nodeHash;
-import static games.descent2e.pcg.ControlVariables.*;
-import static games.descent2e.pcg.FitnessFunction.*;
 
 public class GenerateBoards {
 

@@ -2,6 +2,7 @@ package games.descent2e.pcg;
 
 import core.components.BoardNode;
 import core.components.GraphBoard;
+import core.properties.PropertyStringArray;
 import games.descent2e.concepts.Quest;
 import games.descent2e.gui.DescentGridBoardView;
 import org.jdesktop.swingx.border.DropShadowBorder;
@@ -188,10 +189,13 @@ public class ShowMap {
 
         positions.setPreferredSize(new Dimension(300, 700));
 
+        JPanel traitsContainer = new JPanel(new GridLayout(1, 2, 5, 5));
+        traitsContainer.setBackground(Color.CYAN);
+
         JPanel traits = new JPanel();
         traits.setLayout(new BoxLayout(traits, BoxLayout.Y_AXIS));
         traits.setBackground(Color.WHITE);
-        TitledBorder traitsText = new TitledBorder(blackline, "Open Group Monster Traits");
+        TitledBorder traitsText = new TitledBorder(blackline, "Monster Traits");
         traitsText.setTitleJustification(TitledBorder.CENTER);
         traits.setBorder(traitsText);
         for (String trait: quest.getMonsterTraits()) {
@@ -199,7 +203,30 @@ public class ShowMap {
             traits.add(t);
         }
 
-        positions.add(traits, BorderLayout.PAGE_START);
+        JPanel openGroups = new JPanel();
+        openGroups.setLayout(new BoxLayout(openGroups, BoxLayout.Y_AXIS));
+        openGroups.setBackground(Color.WHITE);
+        TitledBorder openText = new TitledBorder(blackline, "Open Group Options");
+        openText.setTitleJustification(TitledBorder.CENTER);
+        openGroups.setBorder(openText);
+
+        if (quest.getMonsterTraits().contains("All")) {
+            openGroups.add(new JLabel("All Monsters Legal"));
+        }
+        for (String monster : GenerateBoards.monsters.keySet()) {
+            String[] monsterTraits = ((PropertyStringArray) GenerateBoards.monsters.get(monster).get("super").getProperty("traits")).getValues();
+            for (String mTrait : monsterTraits) {
+                if (quest.getMonsterTraits().contains(mTrait)) {
+                    JLabel m = new JLabel(monster);
+                    openGroups.add(m);
+                    break;
+                }
+            }
+        }
+
+        traitsContainer.add(traits);
+        traitsContainer.add(openGroups);
+        positions.add(traitsContainer, BorderLayout.PAGE_START);
 
         String dataPath = "data/descent2e/img/";
         int imageSize = 50;
