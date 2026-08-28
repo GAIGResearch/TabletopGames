@@ -6,6 +6,7 @@ import games.descent2e.concepts.Quest;
 import games.descent2e.gui.DescentGridBoardView;
 import org.jdesktop.swingx.border.DropShadowBorder;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -13,6 +14,9 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +36,7 @@ public class ShowMap {
 
     private final String dataPath = "data/descent2e/img/";
 
-    public ShowMap(CreateOffspring co, Quest quest, GraphBoard board, int id, HashMap<String, Float> scores, ShowMAPElite parentElite, ShowFeasibleBoards parentList) {
+    public ShowMap(CreateOffspring co, Quest quest, GraphBoard board, int id, HashMap<String, Float> scores, ShowMAPElite parentElite, ShowFeasibleBoards parentList) throws IOException {
 
         this.parentElite = parentElite;
         this.parentList = parentList;
@@ -143,9 +147,12 @@ public class ShowMap {
         tileCountHold.add(tileCount);
         tilesPanel.add(tileCountHold);
 
+        HashMap<String, Integer> tileOrder = new HashMap<>();
+
         int colourID = 0;
         List<Color> colours = DescentGridBoardView.colours;
         for (String tile : co.gridRefs.get(id).keySet()) {
+            tileOrder.put(tile, colourID);
             JLabel nodeName = new JLabel(tile);
             JPanel nodeColour = new JPanel();
             nodeColour.setPreferredSize(new Dimension(15, 8));
@@ -184,7 +191,7 @@ public class ShowMap {
         JPanel traits = new JPanel();
         traits.setLayout(new BoxLayout(traits, BoxLayout.Y_AXIS));
         traits.setBackground(Color.WHITE);
-        TitledBorder traitsText = new TitledBorder(blackline, "Traits");
+        TitledBorder traitsText = new TitledBorder(blackline, "Open Group Monster Traits");
         traitsText.setTitleJustification(TitledBorder.CENTER);
         traits.setBorder(traitsText);
         for (String trait: quest.getMonsterTraits()) {
@@ -194,26 +201,74 @@ public class ShowMap {
 
         positions.add(traits, BorderLayout.PAGE_START);
 
+        String dataPath = "data/descent2e/img/";
+        int imageSize = 50;
+
+        BufferedImage heroIcon = ImageIO.read(new File(dataPath + "heroes/healer.png"));
+        JLabel heroPicture = new JLabel(new ImageIcon(heroIcon.getScaledInstance(imageSize, imageSize, Image.SCALE_SMOOTH)));
+
         JPanel spawningContainer = new JPanel();
         spawningContainer.setBackground(Color.WHITE);
         spawningContainer.setLayout(new BoxLayout(spawningContainer, BoxLayout.Y_AXIS));
         TitledBorder positionText = new TitledBorder(blackline,"Starting Positions:");
         positionText.setTitleJustification(TitledBorder.CENTER);
         spawningContainer.setBorder(positionText);
-        JLabel heroSpawn = new JLabel("Heroes: " + quest.getStartingTile());
-        spawningContainer.add(heroSpawn);
+        JPanel heroSpawnContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        heroSpawnContainer.setBackground(Color.WHITE);
+        String heroTile = quest.getStartingTile();
+        JLabel heroSpawn = new JLabel("Heroes: " + heroTile);
+        JPanel heroColour = new JPanel();
+        heroColour.setPreferredSize(new Dimension(15, 8));
+        heroColour.setMaximumSize(new Dimension(15,8));
+        colourID = tileOrder.getOrDefault(heroTile, -1);
+        heroColour.setBackground(colours.get(colourID % colours.size()));
+        heroColour.setBorder(blackline);
+        heroSpawnContainer.add(heroSpawn);
+        heroSpawnContainer.add(heroColour);
+        heroSpawnContainer.add(heroPicture);
+        spawningContainer.add(heroSpawnContainer);
 
         for (String[] monster : quest.getMonsters()) {
+            JPanel monsterContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            monsterContainer.setBackground(Color.WHITE);
+
             String m = monster[0].split(":")[0];
             String pos = monster[1];
+            boolean isLieutenant = monster[0].split(":")[1].contains("lieutenant");
 
-            if (m.equals("OpenSmall"))
+            String monsterPath = dataPath;
+
+            if (m.equals("OpenSmall")) {
                 m = "Open Group (Small)";
-            else if (m.equals("Open"))
+                monsterPath += "tokens/mysteryobjective.png";
+            }
+            else if (m.equals("Open")) {
                 m += " Group";
+                monsterPath += "tokens/mysteryobjective.png";
+            }
+            else {
+                if (isLieutenant)
+                    monsterPath += "monsters/" + m.replace(" ", "-").toLowerCase() + ".png";
+                else
+                    monsterPath += "monsters/" + m.replace(" ", "-").toLowerCase() + "-master.png";
+            }
+
+            BufferedImage monsterIcon = ImageIO.read(new File(monsterPath));
+            JLabel monsterPicture = new JLabel(new ImageIcon(monsterIcon.getScaledInstance(imageSize, imageSize, Image.SCALE_SMOOTH)));
 
             JLabel monsterSpawn = new JLabel(m + ": " + pos);
-            spawningContainer.add(monsterSpawn);
+
+            JPanel monsterColour = new JPanel();
+            monsterColour.setPreferredSize(new Dimension(15, 8));
+            monsterColour.setMaximumSize(new Dimension(15,8));
+            colourID = tileOrder.getOrDefault(pos, colours.size()-1);
+            monsterColour.setBackground(colours.get(colourID % colours.size()));
+            monsterColour.setBorder(blackline);
+
+            monsterContainer.add(monsterSpawn);
+            monsterContainer.add(monsterColour);
+            monsterContainer.add(monsterPicture);
+            spawningContainer.add(monsterContainer);
         }
 
         positions.add(spawningContainer, BorderLayout.CENTER);

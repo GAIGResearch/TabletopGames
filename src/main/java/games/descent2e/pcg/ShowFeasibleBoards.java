@@ -10,6 +10,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +95,12 @@ public class ShowFeasibleBoards {
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ShowMap map = new ShowMap(co, q, board, id, scores, null, parent);
+                    ShowMap map = null;
+                    try {
+                        map = new ShowMap(co, q, board, id, scores, null, parent);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     map.show();
                     hide();
                 }

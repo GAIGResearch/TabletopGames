@@ -11,6 +11,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class ShowMAPElite {
@@ -128,7 +129,12 @@ public class ShowMAPElite {
                                 for (BoardNode node : b.getBoardNodes()) {
                                     //System.out.println(node.getComponentName());
                                 }
-                                ShowMap map = new ShowMap(co, q, b, myID, scores, parent, null);
+                                ShowMap map = null;
+                                try {
+                                    map = new ShowMap(co, q, b, myID, scores, parent, null);
+                                } catch (IOException ex) {
+                                    throw new RuntimeException(ex);
+                                }
                                 map.show();
                                 hide();
                             }
