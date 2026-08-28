@@ -108,7 +108,6 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
         // Check if round is over
         if (isRoundOver(gs)) {
 
-            endRound(gs);
             _endRound(gs);
 
             gs.clearCardChoices();
@@ -143,7 +142,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
     public void _endRound(SGGameState gs) {
 
-
+        endRound(gs); // superclass method
         // Apply card end of round rules
         for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
             type.onRoundEnd(gs);
@@ -272,23 +271,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        SGGameState sggs = (SGGameState) gameState;
-        List<AbstractAction> actions = new ArrayList<>();
-
-        int currentPlayer = sggs.getCurrentPlayer();
-        Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(currentPlayer);
-        if (currentPlayerHand.getSize() == 0) {
-            throw new AssertionError("Player " + currentPlayer + " has no cards in hand before the round is over");
-        }
-        for (int i = 0; i < currentPlayerHand.getSize(); i++) {
-            // All players can do is choose a card in hand to play.
-            actions.add(new ChooseCard(currentPlayer, i, false));
-            if (sggs.playedCardTypes[currentPlayer].get(Chopsticks).getValue() > 0 && currentPlayerHand.getSize() > 1) {
-                // If the player played chopsticks in a previous round, then they can choose to use the chopsticks now (and will choose one extra card in hand)
-                actions.add(new ChooseCard(currentPlayer, i, true));
-            }
-        }
-        return actions;
+        return _computeAvailableActions(gameState, gameState.getCurrentPlayer());
     }
 
     @Override

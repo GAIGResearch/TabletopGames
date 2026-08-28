@@ -5,14 +5,15 @@ import core.actions.LogEvent;
 import core.components.Area;
 import core.components.Component;
 import core.components.PartialObservableDeck;
-import core.interfaces.IComponentContainer;
-import core.interfaces.IExtendedSequence;
-import core.interfaces.IGameEvent;
-import core.interfaces.IGamePhase;
+import core.interfaces.*;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import utilities.ElapsedCpuChessTimer;
+import utilities.JSONUtils;
 import utilities.Pair;
 
 import java.util.*;
@@ -828,7 +829,7 @@ public abstract class AbstractGameState {
         this.nTeams = ((Number) json.get("nTeams")).intValue();
 
         if (json.containsKey("gameParams")) {  // We only support serialization of tunable parameters (otherwise we just pick up the defaults)
-            this.gameParameters = loadFromJSON((TunableParameters<?>) getGameParameters(), (JSONObject) json.get("gameParams"));
+            this.gameParameters = TunableParameters.loadFromJSON((TunableParameters<?>) getGameParameters(), (JSONObject) json.get("gameParams"));
         }
 
         JSONArray playerResultsJson = (JSONArray) json.get("playerResults");

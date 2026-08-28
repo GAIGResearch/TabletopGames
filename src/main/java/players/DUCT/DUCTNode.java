@@ -12,12 +12,12 @@ import static utilities.Utils.noise;
 import static utilities.Utils.normalise;
 
 /**
- * A node in the DUCT tree. Main field is playerActionStats wich holds stats per player per action,
+ * A node in the DUCT tree. Main field is playerActionStats which holds stats per player per action,
  * so each player has its own UCB values. At a simultaneous node every acting player picks its own
- * action independantly from its own stats, the picks are combined into one joint action, and the
- * child is stored under that joint action. Thats the decoupling that makes it DUCT and not plain UCT.
+ * action independently from its own stats, the picks are combined into one joint action, and the
+ * child is stored under that joint action. That's the decoupling that makes it DUCT and not plain UCT.
  *
- * Its open loop: one state copy per iteration and the forward model changes it as we go down the tree.
+ * It is open loop: one state copy per iteration and the forward model changes it as we go down the tree.
  *
  * Who acts at a node comes straight from the game state via getCurrentSimultaneousPlayers(). The
  * game is the thing that knows whether one player or several are deciding in parallel, so we just
@@ -29,7 +29,7 @@ public class DUCTNode {
     // stats per player, per action. outer key = player, inner key = an action. filled in lazily.
     final Map<Integer, Map<AbstractAction, ActionStats>> playerActionStats = new HashMap<>();
 
-    // avaliable actions for each acting player this iteration, refreshed each descent
+    // available actions for each acting player this iteration, refreshed each descent
     Map<Integer, List<AbstractAction>> playerCurrentActions = new HashMap<>();
 
     // children keyed by the joint action that leads to them
@@ -56,7 +56,7 @@ public class DUCTNode {
 
     int fmCallsCount;   // forward model calls so far (root only)
 
-    // this iterations path, rebuilt each time and kept on the root
+    // this iteration's path, rebuilt each time and kept on the root
     List<DUCTNode> currentNodeTrajectory;
     List<Map<Integer, AbstractAction>> currentActionTrajectory;
 
@@ -120,7 +120,7 @@ public class DUCTNode {
     }
 
     // sync the node to the current state: work out who acts + their actions, add any new actions
-    // we havent seen before (can happen after redeterminising)
+    // we haven't seen before (can happen after redeterminising)
     void updateForOpenLoopState(AbstractGameState gs) {
         this.openLoopState = gs;
         this.terminalNode = !gs.isNotTerminal();
@@ -150,10 +150,10 @@ public class DUCTNode {
 
         while (!cur.terminalNode && cur.depth < params.maxTreeDepth) {
 
-            if (cur.actingPlayers.isEmpty() || cur.playerCurrentActions.isEmpty()) break;
+          //  if (cur.actingPlayers.isEmpty() || cur.playerCurrentActions.isEmpty()) break;
 
             Map<Integer, AbstractAction> choices = cur.selectJointAction();
-            if (choices.isEmpty()) break;
+            if (choices.isEmpty()) throw new AssertionError("No actions available at " + cur);
 
             AbstractAction jointAction = buildJointAction(choices, cur.actingPlayers);
 
@@ -181,13 +181,13 @@ public class DUCTNode {
         return cur;
     }
 
-    // each acting player independantly picks its own action via UCB
+    // each acting player independently picks its own action via UCB
     private Map<Integer, AbstractAction> selectJointAction() {
         Map<Integer, AbstractAction> choices = new LinkedHashMap<>();
         for (int player : actingPlayers) {
             List<AbstractAction> available =
                     playerCurrentActions.getOrDefault(player, Collections.emptyList());
-            if (available.isEmpty()) continue;
+            if (available.isEmpty()) throw new AssertionError("No actions available for player " + player);
             choices.put(player, selectActionForPlayer(player, available));
         }
         return choices;
@@ -197,9 +197,9 @@ public class DUCTNode {
     private AbstractAction buildJointAction(Map<Integer, AbstractAction> choices,
                                             List<Integer> acting) {
         if (acting.size() == 1) {
-            return choices.get(acting.get(0));
+            return choices.get(acting.getFirst());
         }
-        Map<Integer, AbstractAction> ordered = new LinkedHashMap<>();
+        Map<Integer, AbstractAction> ordered = new HashMap<>();
         for (int player : acting) {
             AbstractAction a = choices.get(player);
             if (a != null) ordered.put(player, a);
@@ -227,7 +227,8 @@ public class DUCTNode {
             }
         }
 
-        return best != null ? best : shuffled.get(0);
+        if (best == null) throw new AssertionError("No actions available for player " + player);
+        return best;
     }
 
     // UCB1 = mean value for this player + K * sqrt(log(N)/n). actions not tried yet get
@@ -246,9 +247,7 @@ public class DUCTNode {
         double q = stats.totValue[player] / n;
 
         // scale to [0,1] once we have some reward bounds from a rollout
-        if (params.normaliseRewards
-                && root.highReward > root.lowReward
-                && root.highReward != Double.NEGATIVE_INFINITY) {
+        if (params.normaliseRewards && root.highReward > root.lowReward) {
             q = normalise(q, root.lowReward, root.highReward);
         }
 
@@ -342,15 +341,6 @@ public class DUCTNode {
         }
 
         return best != null ? best : validActions.get(rnd.nextInt(validActions.size()));
-    }
-
-    int getVisits() { return nVisits; }
-
-    int getDepth() { return depth; }
-
-    Map<AbstractAction, ActionStats> getPlayerActionStats(int player) {
-        return Collections.unmodifiableMap(
-                playerActionStats.getOrDefault(player, Collections.emptyMap()));
     }
 
     @Override

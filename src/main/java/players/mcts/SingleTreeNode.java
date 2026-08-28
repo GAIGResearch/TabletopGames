@@ -193,7 +193,6 @@ public class SingleTreeNode {
      * This method looks at the actions available this time round, and initialises relevant parts of the
      * node information that will then be used during the rest of the decision-making process from this node.
      *
-     * @param actionState
      */
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         openLoopState = actionState;

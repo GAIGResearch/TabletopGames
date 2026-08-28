@@ -39,11 +39,13 @@ public class SGGameState extends AbstractGameState {
     }
     @Override
     public List<Integer> getCurrentSimultaneousPlayers() {
+        // TODO: This should really be intercepted at the AbstractLevel, given that has ownership of actionsInProgress
+        // TODO: and avoid future implementations missing this check
         if (isActionInProgress()) {
-            return Collections.singletonList(getCurrentPlayer());
+            return super.getCurrentSimultaneousPlayers();
         }
         if (playerHands == null) {
-            return Collections.singletonList(getCurrentPlayer());
+            throw new AssertionError("No player has a hand");
         }
         // only report players who still have to choose this turn. a player who has already
         // committed a card must not be asked again, or they end up playing two cards.
@@ -66,7 +68,7 @@ public class SGGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             addAll(playerHands);
             add(drawPile);
             add(discardPile);
