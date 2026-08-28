@@ -2,7 +2,6 @@ package games.descent2e.gui;
 
 import core.components.BoardNode;
 import core.components.GridBoard;
-import core.properties.PropertyColor;
 import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
@@ -60,6 +59,14 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
 
     HashMap<Vector2D, List<Vector2D>> notConnectedMap;
     HashMap<Vector2D, Pair<Image, Pair<Integer, Integer>>> tileImageTopLeftCorners;
+    HashMap<Vector2D, String> tileNames;
+
+    List<String> tileList = new ArrayList<>();
+    public static final List<Color> colours = List.of(new Color(255, 0, 0), new Color(0, 255, 0), new Color(0,0,255),
+                                                    new Color(255, 255, 0), new Color(0, 255, 255), new Color(255,0,255),
+                                                    new Color(255, 128, 0), new Color(128, 255, 0), new Color(128,0,255),
+                                                    new Color(255, 0, 128), new Color(0, 255, 128), new Color(0,128,255),
+                                                    new Color(192, 192, 192), new Color(128, 128, 128), new Color(64, 64, 64));
 
     Vector2D cellHighlight;
 
@@ -92,6 +99,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         }
 
         tileImageTopLeftCorners = new HashMap<>();
+        tileNames = new HashMap<>();
         for (String tile: gridReferences.keySet()) {
             int minX = Integer.MAX_VALUE;
             int minY = Integer.MAX_VALUE;
@@ -117,6 +125,8 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
             Image img2 = rotateImage((BufferedImage) img, new Pair<>(img.getWidth(null), img.getHeight(null)), orientation);
 
             tileImageTopLeftCorners.put(new Vector2D(minX, minY), new Pair<>(img2, new Pair<>(maxX-minX+1, maxY-minY+1)));
+            tileNames.put(new Vector2D(minX, minY), tile);
+            tileList.add(tile);
         }
 
     }
@@ -144,6 +154,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
 
         // Cache the top-left corners of rotated tile images for quick drawing
         tileImageTopLeftCorners = new HashMap<>();
+        tileNames = new HashMap<>();
         for (String tile: gameState.getGridReferences().keySet()) {
             int minX = Integer.MAX_VALUE;
             int minY = Integer.MAX_VALUE;
@@ -163,6 +174,8 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
             Image img2 = rotateImage((BufferedImage) img, new Pair<>(img.getWidth(null), img.getHeight(null)), orientation);
 
             tileImageTopLeftCorners.put(new Vector2D(minX, minY), new Pair<>(img2, new Pair<>(maxX-minX+1, maxY-minY+1)));
+            tileNames.put(new Vector2D(minX, minY), tile);
+            tileList.add(tile);
         }
 
         actionHighlights = new HashSet<>();
@@ -235,9 +248,17 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
 
         if (prettyVersion) {
             // Draw map tile images
+            g.setFont(new Font("Arial", Font.BOLD, 15));
             for (Map.Entry<Vector2D, Pair<Image, Pair<Integer, Integer>>> e : tileImageTopLeftCorners.entrySet()) {
                 g.drawImage(e.getValue().a, offset + panX + e.getKey().getX() * descentItemSize, offset + panY + e.getKey().getY() * descentItemSize,
                         e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
+                if (gameState == null) {
+                    String name = tileNames.get(e.getKey());
+                    g.setColor(colours.get(tileList.indexOf(name) % colours.size()));
+                    g.drawRect(offset + panX + e.getKey().getX() * descentItemSize, offset + panY + e.getKey().getY() * descentItemSize,
+                            e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize);
+                    g.drawString(name, (int) (1.2 * offset) + panX + e.getKey().getX() * descentItemSize, (int) (2.2 * offset) + panY + e.getKey().getY() * descentItemSize);
+                }
             }
         } else {
             drawGridBoardWithGraphConnectivity(g, (GridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());

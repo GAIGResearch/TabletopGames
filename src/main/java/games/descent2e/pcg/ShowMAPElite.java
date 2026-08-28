@@ -56,9 +56,16 @@ public class ShowMAPElite {
 
         Color[] colours = MapColours.getColourStops(MapColours.Colours.Viridis);
 
+        int squareSize = 40;
+        Dimension gridSize = new Dimension(squareSize, squareSize);
+
         JPanel grid = new JPanel();
         grid.setLayout(new BoxLayout(grid, BoxLayout.Y_AXIS));
-        grid.setPreferredSize(new Dimension(xRange * 10, yRange * 10));
+        grid.setPreferredSize(new Dimension((xRange + 1) * squareSize, (yRange + 1) * squareSize));
+        grid.setMinimumSize(new Dimension((xRange + 1) * squareSize, (yRange + 1) * squareSize));
+        grid.setMaximumSize(new Dimension((xRange + 1) * squareSize, (yRange + 1) * squareSize));
+        grid.setBackground(Color.WHITE);
+        grid.setBorder(BorderFactory.createLineBorder(Color.black));
 
         //System.out.println(xRange + " " + yRange);
 
@@ -78,17 +85,24 @@ public class ShowMAPElite {
         for (int i = xRange; i > 0; i--) {
             JPanel row = new JPanel();
             row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
-            StringBuilder line = new StringBuilder();
+            row.setBackground(Color.WHITE);
+
+            JPanel label = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            label.add(new JLabel(String.valueOf(i)));
+            label.setMinimumSize(gridSize);
+            label.setMaximumSize(gridSize);
+            row.add(label);
             for (int j = 0; j < yRange; j++) {
                 counter++;
 
                 int myID = id[i-1][j];
                 float fit = fitness[i-1][j];
 
-                line.append(myID).append(" ");
-
-                JButton button = new JButton();
-                button.setPreferredSize(new Dimension(100, 100));
+                JButton button = new JButton(String.valueOf(myID));
+                button.setFont(button.getFont().deriveFont(Font.BOLD, 4));
+                button.setForeground(Color.WHITE);
+                button.setMaximumSize(gridSize);
+                button.setMinimumSize(gridSize);
 
                 button.setBackground(getColour(fit, colours));
                 row.add(button);
@@ -143,15 +157,19 @@ public class ShowMAPElite {
         JPanel legendContainer = new JPanel();
         legendContainer.setBackground(Color.WHITE);
         legendContainer.setLayout(new BoxLayout(legendContainer, BoxLayout.Y_AXIS));
+        legendContainer.setMaximumSize(new Dimension(window.getWidth(), 60));
         TitledBorder legendBorder = new TitledBorder(blackline, "Fitness Legend");
         legendBorder.setTitleJustification(TitledBorder.CENTER);
         legendContainer.setBorder(legendBorder);
         JPanel legendBox = new JPanel(new FlowLayout(FlowLayout.CENTER));
         legendBox.setPreferredSize(new Dimension(1000, 30));
+        legendBox.setMaximumSize(new Dimension(1000, 30));
         legendBox.setBackground(Color.WHITE);
 
         int columns = 100;
         JPanel legend = new JPanel(new GridLayout(1, columns, 0, 0));
+        legend.setPreferredSize(new Dimension(1000, 15));
+        legend.setMaximumSize(new Dimension(1000, 15));
         legend.setBackground(Color.WHITE);
         legend.setBorder(blackline);
         for (int i = 0; i < columns; i++) {
@@ -163,11 +181,13 @@ public class ShowMAPElite {
         legendContainer.add(legendBox);
 
         JPanel legendLabelContainer = new JPanel(new FlowLayout());
-        legendLabelContainer.setPreferredSize(new Dimension(1020, 40));
+        legendLabelContainer.setPreferredSize(new Dimension(1020, 30));
+        legendLabelContainer.setMaximumSize(new Dimension(1020, 30));
         legendLabelContainer.setBackground(Color.WHITE);
         JPanel legendLabelContainer2 = new JPanel(new GridLayout(1, 0, 5, 5));
         legendLabelContainer2.setBackground(Color.WHITE);
-        legendLabelContainer2.setPreferredSize(new Dimension(1020, 40));
+        legendLabelContainer2.setPreferredSize(new Dimension(1020, 30));
+        legendLabelContainer2.setMaximumSize(new Dimension(1020, 30));
 
         JPanel labelContainerStart = new JPanel(new FlowLayout(FlowLayout.LEFT));
         labelContainerStart.add(new JLabel(Float.toString(absoluteFitness / 2)));
@@ -179,6 +199,7 @@ public class ShowMAPElite {
             JPanel labelContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
             labelContainer.add(new JLabel(Float.toString(labelCount + i * (absoluteFitness / (2 * labelCount)))));
             labelContainer.setBackground(Color.WHITE);
+            //labelContainer.setBorder(blackline);
             legendLabelContainer2.add(labelContainer);
         }
 
@@ -260,9 +281,9 @@ public class ShowMAPElite {
     }
 
     private Color blend(Color x, Color y, double t) {
-        int r = (int)((x.getRed() * (1 - t)) + (y.getRed() * t));
-        int g = (int)((x.getGreen() * (1 - t)) + (y.getGreen() * t));
-        int b = (int)((x.getBlue() * (1 - t)) + (y.getBlue() * t));
+        int r = Math.min(255, Math.max(0, (int)((x.getRed() * (1 - t)) + (y.getRed() * t))));
+        int g = Math.min(255, Math.max(0, (int)((x.getGreen() * (1 - t)) + (y.getGreen() * t))));
+        int b = Math.min(255, Math.max(0, (int)((x.getBlue() * (1 - t)) + (y.getBlue() * t))));
         return new Color(r, g, b);
     }
 }

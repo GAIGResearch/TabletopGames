@@ -478,7 +478,7 @@ public class GenerateBoardsGUI {
         weightControls.add(weightHeightContainer);
 
         JPanel weightWidthContainer = new JPanel(new FlowLayout());
-        JLabel weightWidthLabel = new JLabel("Ideal Board Height Weight:");
+        JLabel weightWidthLabel = new JLabel("Ideal Board Width Weight:");
         JLabel weightPercent5 = new JLabel("%");
 
         NumberField weightwidthcount = new NumberField((W_HEIGHT * 100), Category.weightWidth, minWeight, maxWeight);

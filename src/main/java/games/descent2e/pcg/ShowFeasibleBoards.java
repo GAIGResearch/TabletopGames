@@ -6,6 +6,7 @@ import games.descent2e.concepts.Quest;
 import utilities.Pair;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -78,6 +79,8 @@ public class ShowFeasibleBoards {
             }
         }
 
+        Border blackline = BorderFactory.createLineBorder(Color.black);
+
         ShowFeasibleBoards parent = this;
 
         for (Pair<HashMap<String, Float>, Pair<Quest, GraphBoard>> quest : feasibleList) {
@@ -121,6 +124,7 @@ public class ShowFeasibleBoards {
             container.add(groups);
             container.add(monsters);
             container.add(health);
+            container.setBorder(blackline);
             panel.add(container);
         }
         panel.revalidate();

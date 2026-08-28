@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 public class ShowMap {
     private Quest quest;
@@ -61,7 +62,7 @@ public class ShowMap {
 
         JPanel fitness = new JPanel();
         fitness.setLayout(new BoxLayout(fitness, BoxLayout.Y_AXIS));
-        fitness.setBackground(Color.CYAN);
+        fitness.setBackground(Color.WHITE);
         TitledBorder fitnessBorder = new TitledBorder(blackline, "Fitness");
         fitnessBorder.setTitleJustification(TitledBorder.CENTER);
         fitness.setBorder(fitnessBorder);
@@ -99,7 +100,7 @@ public class ShowMap {
         JLabel groupsLabel = new JLabel("Monster Groups: " + (int) groups);
         JLabel groupsWeight = new JLabel(Float.toString(co.W_GROUPS * (1f - (Math.abs(co.IDEAL_GROUP - groups) / co.IDEAL_GROUP)) * totalWeightsModifier));
         float health = scores.get("Health");
-        JLabel healthLabel = new JLabel("Average Health: " + health);
+        JLabel healthLabel = new JLabel("Average Health: " + health + " HP");
         JLabel healthWeight = new JLabel(Float.toString(co.W_HEALTH * (1f - (Math.abs(co.IDEAL_HEALTH - health) / co.IDEAL_HEALTH)) * totalWeightsModifier));
         JLabel heightLabel = new JLabel("Board Height: " + (int) height);
         JLabel heightWeight = new JLabel(Float.toString(co.W_HEIGHT * (1f - (Math.abs(co.IDEAL_HEIGHT - height) / co.IDEAL_HEIGHT)) * totalWeightsModifier));
@@ -128,20 +129,35 @@ public class ShowMap {
         fitness.add(widthWeight);
 
         JPanel tilesPanel = new JPanel();
-        tilesPanel.setLayout(new BoxLayout(tilesPanel, BoxLayout.Y_AXIS));
+        tilesPanel.setLayout(new GridLayout(0,1,5,5));
         TitledBorder tilesBorder = new TitledBorder(blackline, "Tiles");
         tilesBorder.setTitleJustification(TitledBorder.CENTER);
         tilesPanel.setBorder(tilesBorder);
-        tilesPanel.setBackground(Color.CYAN);
-        tilesPanel.setPreferredSize(new Dimension(300, 300));
+        tilesPanel.setBackground(Color.WHITE);
+        tilesPanel.setPreferredSize(new Dimension(300, 325));
 
         Collection<BoardNode> nodes = board.getBoardNodes();
+        JPanel tileCountHold = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        tileCountHold.setBackground(Color.WHITE);
         JLabel tileCount = new JLabel(nodes.size() + " Tiles Used");
-        tilesPanel.add(tileCount);
+        tileCountHold.add(tileCount);
+        tilesPanel.add(tileCountHold);
 
-        for (BoardNode node : nodes) {
-            JLabel nodeName = new JLabel(node.getComponentName());
-            tilesPanel.add(nodeName);
+        int colourID = 0;
+        List<Color> colours = DescentGridBoardView.colours;
+        for (String tile : co.gridRefs.get(id).keySet()) {
+            JLabel nodeName = new JLabel(tile);
+            JPanel nodeColour = new JPanel();
+            nodeColour.setPreferredSize(new Dimension(15, 8));
+            nodeColour.setMaximumSize(new Dimension(15,8));
+            nodeColour.setBackground(colours.get(colourID % colours.size()));
+            nodeColour.setBorder(blackline);
+            colourID++;
+            JPanel node = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            node.setBackground(Color.WHITE);
+            node.add(nodeName);
+            node.add(nodeColour);
+            tilesPanel.add(node);
         }
 
         left.add(fitness);
@@ -167,7 +183,7 @@ public class ShowMap {
 
         JPanel traits = new JPanel();
         traits.setLayout(new BoxLayout(traits, BoxLayout.Y_AXIS));
-        traits.setBackground(Color.CYAN);
+        traits.setBackground(Color.WHITE);
         TitledBorder traitsText = new TitledBorder(blackline, "Traits");
         traitsText.setTitleJustification(TitledBorder.CENTER);
         traits.setBorder(traitsText);
@@ -179,7 +195,7 @@ public class ShowMap {
         positions.add(traits, BorderLayout.PAGE_START);
 
         JPanel spawningContainer = new JPanel();
-        spawningContainer.setBackground(Color.CYAN);
+        spawningContainer.setBackground(Color.WHITE);
         spawningContainer.setLayout(new BoxLayout(spawningContainer, BoxLayout.Y_AXIS));
         TitledBorder positionText = new TitledBorder(blackline,"Starting Positions:");
         positionText.setTitleJustification(TitledBorder.CENTER);
