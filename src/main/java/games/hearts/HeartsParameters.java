@@ -19,7 +19,7 @@ import java.util.*;
  * <p>The class can optionally extend from {@link evaluation.optimisation.TunableParameters} instead, which allows to use
  * automatic game parameter optimisation tools in the framework.</p>
  */
-public class HeartsParameters extends AbstractParameters {
+public class HeartsParameters extends TunableParameters<HeartsParameters> {
     public String dataPath = "data/FrenchCards/";
     public final int shootTheMoon = 26;
     public final int heartCard = 1;
@@ -29,6 +29,9 @@ public class HeartsParameters extends AbstractParameters {
     public final int queenOfSpades = 13;
     public final int cardsPassedPerRound = 3;
     public final int matchScore = 50;
+    // If true then a player who fails to follow suit is remembered as being void in it, and
+    // redeterminisation will not deal them any cards of that suit
+    public boolean rememberVoids = true;
 
     // Number of cards per player - index to array is nPlayers
     public final int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
@@ -37,6 +40,7 @@ public class HeartsParameters extends AbstractParameters {
     Map<Integer, List<FrenchCard>> cardsToRemove = new HashMap<>();
 
     public HeartsParameters() {
+        addTunableParameter("rememberVoids", true, Arrays.asList(false, true));
         cardsToRemove.put(3, Collections.singletonList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
         cardsToRemove.put(4, Collections.emptyList());
         cardsToRemove.put(5, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
@@ -48,6 +52,16 @@ public class HeartsParameters extends AbstractParameters {
         cardsToRemove.put(7, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
                 new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 3),
                 new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3)));
+    }
+
+    @Override
+    public void _reset() {
+        rememberVoids = (boolean) getParameterValue("rememberVoids");
+    }
+
+    @Override
+    public HeartsParameters instantiate() {
+        return this;
     }
 
     public String getDataPath() {
@@ -64,9 +78,7 @@ public class HeartsParameters extends AbstractParameters {
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof HeartsParameters)) return false;
-        if (!super.equals(o)) return false;
-        HeartsParameters that = (HeartsParameters) o;
+        if (!(o instanceof HeartsParameters that)) return false;
         return Objects.equals(dataPath, that.dataPath);
     }
 

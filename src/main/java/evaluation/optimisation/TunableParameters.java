@@ -435,7 +435,8 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                     Map<String, Integer> subSettings = settings.entrySet().stream()
                             .filter(e -> e.getKey().contains("."))
                             .collect(toMap(e -> e.getKey().substring(e.getKey().indexOf(".") + 1), Map.Entry::getValue));
-                    value = tp.instanceToJSON(excludeDefaults, subSettings);
+                    // because all values are hoisted up to the top level in a search space, we do not reliably have all the defaults at lower levels
+                    value = tp.instanceToJSON(false, subSettings);
                 } else {
                     if (value instanceof Enum) {
                         value = value.toString();

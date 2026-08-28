@@ -3,6 +3,7 @@ package games.spades;
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class SpadesParameters extends TunableParameters<SpadesParameters> {
@@ -20,6 +21,9 @@ public class SpadesParameters extends TunableParameters<SpadesParameters> {
     
     public boolean allowBlindNil = false;
     public boolean allowNilOverbid = false; // Nil can be bid even if team has >= 500 points
+    // If true then a player who fails to follow suit is remembered as being void in it, and
+    // redeterminisation will not deal them any cards of that suit
+    public boolean rememberVoids = true;
     
     public SpadesParameters() {
         super();
@@ -37,6 +41,7 @@ public class SpadesParameters extends TunableParameters<SpadesParameters> {
         addTunableParameter("allowBlindNil", false);
         addTunableParameter("allowNilOverbid", false);
         addTunableParameter("pointsPerTrick", 10);
+        addTunableParameter("rememberVoids", true, Arrays.asList(false, true));
     }
 
     @Override
@@ -52,6 +57,7 @@ public class SpadesParameters extends TunableParameters<SpadesParameters> {
         allowBlindNil = (boolean) getParameterValue("allowBlindNil");
         allowNilOverbid = (boolean) getParameterValue("allowNilOverbid");
         pointsPerTrick = (int) getParameterValue("pointsPerTrick");
+        rememberVoids = (boolean) getParameterValue("rememberVoids");
     }
     
     public SpadesParameters(long seed) {

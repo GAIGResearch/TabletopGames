@@ -253,12 +253,23 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         return itp.instanceToJSON(true, settingsMap);
     }
 
-    @SuppressWarnings("unchecked")
-    public void writeAgentJSON(int[] settings, String fileName) {
+    /*
+    This is subtly different from the above method in that it will write the JSON to a file.
+    This means that it needs to use the defaults from the underlying classes, and not from the search space
+    This is because for those items with no setting (i.e. fixed in search space), we need to pick up this as the default during search
+    BUT - the default is elided when we write to file is not in settings
+     */
+    public JSONObject constructAgentJSONToWriteToFile(int[] settings) {
         JSONObject json = constructAgentJSON(settings);
         int budget = (int) itp.getParameterValue("budget");
         if (budget > 0)
             json.put("budget", budget);
+        return json;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void writeAgentJSON(int[] settings, String fileName) {
+        JSONObject json = constructAgentJSONToWriteToFile(settings);
         JSONUtils.writeJSON(json, fileName);
     }
 

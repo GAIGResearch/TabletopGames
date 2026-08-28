@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IPrintable;
 import games.spades.SpadesGameState;
+import games.spades.SpadesParameters;
 import utilities.Pair;
 
 import java.util.AbstractMap;
@@ -40,6 +41,12 @@ public class PlayCard extends AbstractAction implements IPrintable {
         // Remove card from player's hand
         if (!playerHand.getComponents().remove(card)) {
             throw new AssertionError("Card not found in player's hand: " + card.toString());
+        }
+
+        if (!state.getCurrentTrick().isEmpty() && card.suite != state.getLeadSuit()
+                && ((SpadesParameters) state.getGameParameters()).rememberVoids) {
+            // The player could not follow suit, so everyone now knows they are void in it
+            state.knownVoids.get(playerId).add(state.getLeadSuit());
         }
         
         // Add card to current trick

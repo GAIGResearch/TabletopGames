@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IPrintable;
 import games.hearts.HeartsGameState;
+import games.hearts.HeartsParameters;
 
 import java.util.AbstractMap;
 import java.util.Objects;
@@ -34,6 +35,10 @@ public class Play extends AbstractAction implements IPrintable {
 
                 if (hgs.currentPlayedCards.isEmpty()) {
                     hgs.firstCardSuit = card.suite;  // Save the suit of the first card
+                } else if (card.suite != hgs.firstCardSuit
+                        && ((HeartsParameters) hgs.getGameParameters()).rememberVoids) {
+                    // The player could not follow suit, so everyone now knows they are void in it
+                    hgs.knownVoids.get(playerID).add(hgs.firstCardSuit);
                 }
 
                 // Store played card and its player ID
