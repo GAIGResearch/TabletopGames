@@ -17,12 +17,16 @@ import java.util.HashMap;
 public class ShowMAPElite {
     private final JFrame window;
     private JPanel panel;
-    private Pair<Pair<Float, Float>, Pair<Float, Float>> minMax;
+    private JScrollPane scroll;
+    private Pair<Pair<Float, Float>, Pair<Float, Float>> minMax; // xMin, xMax; yMin, yMax
     private int xRange;
     private int yRange;
     private float minFitness = Float.MAX_VALUE;
     private float maxFitness = Float.MIN_VALUE;
     private float absoluteFitness = 10f;
+
+    private String xLabel;
+    private String yLabel;
 
     private float[][] fitness;
     private int[][] id;
@@ -38,10 +42,13 @@ public class ShowMAPElite {
         window.setLayout(new BorderLayout());
 
         panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         panel.setBackground(Color.CYAN);
 
         this.elite = elite;
+
+        xLabel = name.split(" Vs ")[0];
+        yLabel = name.split(" Vs ")[1];
     }
 
     public void show() {
@@ -62,9 +69,6 @@ public class ShowMAPElite {
 
         JPanel grid = new JPanel();
         grid.setLayout(new BoxLayout(grid, BoxLayout.Y_AXIS));
-        grid.setPreferredSize(new Dimension((xRange + 1) * squareSize, (yRange + 1) * squareSize));
-        grid.setMinimumSize(new Dimension((xRange + 1) * squareSize, (yRange + 1) * squareSize));
-        grid.setMaximumSize(new Dimension((xRange + 1) * squareSize, (yRange + 1) * squareSize));
         grid.setBackground(Color.WHITE);
         grid.setBorder(BorderFactory.createLineBorder(Color.black));
 
@@ -88,10 +92,16 @@ public class ShowMAPElite {
             row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
             row.setBackground(Color.WHITE);
 
+            String labelName = String.valueOf(i - 1 + minMax.a.a.intValue());
+            if (xRange == 1 || i == xRange / 2) {
+                labelName = xLabel + " " + labelName;
+            }
+
             JPanel label = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            label.add(new JLabel(String.valueOf(i)));
+            label.add(new JLabel(labelName));
             label.setMinimumSize(gridSize);
             label.setMaximumSize(gridSize);
+            label.setBackground(Color.WHITE);
             row.add(label);
             for (int j = 0; j < yRange; j++) {
                 counter++;
@@ -147,16 +157,39 @@ public class ShowMAPElite {
             //System.out.println(line);
             grid.add(row);
         }
-        //System.out.println();
-        for (int i = xRange; i > 0; i--) {
-            StringBuilder line = new StringBuilder();
-            for (int j = 0; j < yRange; j++)
-                line.append(fitness[i-1][j]).append(" ");
-            //System.out.println(line);
+        JPanel yAxis = new JPanel();
+        yAxis.setLayout(new BoxLayout(yAxis, BoxLayout.X_AXIS));
+        yAxis.setBackground(Color.WHITE);
+        JLabel blank = new JLabel("");
+        blank.setBackground(Color.WHITE);
+        blank.setForeground(Color.WHITE);
+        blank.setPreferredSize(gridSize);
+        blank.setMaximumSize(gridSize);
+        blank.setMinimumSize(gridSize);
+        yAxis.add(blank);
+        for (int i = minMax.b.a.intValue(); i <= minMax.b.b.intValue(); i++) {
+            JPanel axisContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            axisContainer.setBackground(Color.WHITE);
+            JLabel axisLabel = new JLabel(String.valueOf(i));
+            axisContainer.setPreferredSize(gridSize);
+            axisContainer.setMinimumSize(gridSize);
+            axisContainer.setMaximumSize(gridSize);
+            axisContainer.add(axisLabel);
+            yAxis.add(axisContainer);
         }
+        grid.add(yAxis);
+
+        JPanel yAxisNameContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        yAxisNameContainer.setBackground(Color.WHITE);
+        JLabel yAxisName = new JLabel(yLabel);
+        yAxisName.setBackground(Color.WHITE);
+        yAxisNameContainer.add(yAxisName);
+        grid.add(yAxisNameContainer);
+
 
         panel.add(grid);
-        window.add(panel, BorderLayout.CENTER);
+        scroll = new JScrollPane(panel);
+        window.add(scroll, BorderLayout.CENTER);
 
         Border blackline = BorderFactory.createLineBorder(Color.black);
 
