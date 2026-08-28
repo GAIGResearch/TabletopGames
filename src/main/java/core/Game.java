@@ -561,6 +561,14 @@ public class Game {
     }
 
     /**
+     * May be called by a third party observer (i.e. a listener) if it interjects an action to override a player
+     * @param overrideAction
+     */
+    public void setOverrideAction(AbstractAction overrideAction) {
+        this.overrideAction = overrideAction;
+    }
+
+    /**
      * Retrieves the number of game loop repetitions performed in this game.
      *
      * @return - tick number
@@ -620,6 +628,13 @@ public class Game {
     public void clearListeners() {
         listeners.clear();
         getGameState().clearListeners();
+    }
+
+    public void setSavedStatesDirectory(String dir) {
+        savedStateDirectory = dir;
+    }
+    public String getSavedStatesDirectory() {
+        return savedStateDirectory;
     }
 
     /**
