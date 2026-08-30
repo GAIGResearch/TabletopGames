@@ -36,17 +36,13 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // Chopsticks allowing to pick second card, different from that already selected
         SGGameState sggs = (SGGameState) state;
-        // if the first choice isnt there (can get wiped during a search) then dont exclude
-        // anything, so any card in hand is ok for the second pick
-        int idxSelected = sggs.getCardChoices().get(playerId).isEmpty() ? -1
-                : sggs.getCardChoices().get(playerId).get(0).cardIdx;
         List<AbstractAction> actions = new ArrayList<>();
 
         Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(playerId);
         for (int i = 0; i < currentPlayerHand.getSize(); i++) {
             // All players can do is choose a card in hand to play. Cannot chain chopsticks, only 1 per turn can be used.
             // So all of these actions can only be 'useChopsticks = false'
-            if (idxSelected != i) {
+            if (cardIdx != i) {
                 actions.add(new ChooseCard(playerId, i, false));
             }
         }

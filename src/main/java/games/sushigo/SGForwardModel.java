@@ -89,6 +89,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
         SGGameState gs = (SGGameState) currentState;
 
+        // TODO: Then check against Ibrahim's code
         int nextPlayer = gs.getCurrentPlayer();
         do {
             nextPlayer = (nextPlayer + 1) % gs.getNPlayers();
@@ -96,6 +97,8 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
                 && (!gs.cardChoices.get(nextPlayer).isEmpty()
                 || gs.getPlayerHands().get(nextPlayer).getSize() == 0));
 
+        // Theory is that allChosen is not being correctly detected
+        // OK - the porblem is that all four cards chosen get put in the first array in CardChoices (based on getCurrentPlayer one assumes)
         boolean allChosen = nextPlayer == gs.getCurrentPlayer();
         if (!allChosen) {
             endPlayerTurn(gs, nextPlayer);
@@ -136,7 +139,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
         // Advance turn
         if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            endPlayerTurn(gs, gs.getCurrentPlayer());
+            endPlayerTurn(gs, nextPlayer);
         }
     }
 

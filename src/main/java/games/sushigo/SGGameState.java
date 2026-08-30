@@ -124,43 +124,46 @@ public class SGGameState extends AbstractGameState {
                 }
                 copy.cardChoices.add(copiedItems);
             }
-        } else {
-            // Now we need to redeterminise
-            // We need to shuffle the hands of other players with the draw deck and then redraw
+        }
+        return copy;
+    }
 
-            // Add player hands unseen back to the draw pile
-            for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (!isHandKnown(playerId, p)) {
-                    copy.drawPile.add(playerHands.get(p));
-                }
+    @Override
+    public void redeterminise(int playerId) {
+        // We need to shuffle the hands of other players with the draw deck and then redraw
+
+        // Add player hands unseen back to the draw pile
+        for (int p = 0; p < playerHands.size(); p++) {
+            if (!isHandKnown(playerId, p)) {
+                drawPile.add(playerHands.get(p));
             }
-            copy.drawPile.shuffle(redeterminisationRnd);
+        }
+        drawPile.shuffle(redeterminisationRnd);
 
-            // Now we draw into the unknown player hands
-            for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (!isHandKnown(playerId, p)) {
-                    Deck<SGCard> hand = copy.playerHands.get(p);
-                    int handSize = hand.getSize();
-                    hand.clear();
-                    for (int i = 0; i < handSize; i++) {
-                        hand.add(copy.drawPile.draw());
-                    }
-                }
-            }
-
-            // We don't know what other players have chosen for this round, hide card choices
-            copy.turnOwner = playerId;
-            for (int i = 0; i < getNPlayers(); i++) {
-                copy.cardChoices.add(new ArrayList<>());
-                if (i == playerId) {
-                    for (ChooseCard cc : cardChoices.get(i)) {
-                        copy.cardChoices.get(i).add(cc.copy());
-                    }
+        // Now we draw into the unknown player hands
+        for (int p = 0; p < playerHands.size(); p++) {
+            if (!isHandKnown(playerId, p)) {
+                Deck<SGCard> hand = playerHands.get(p);
+                int handSize = hand.getSize();
+                hand.clear();
+                for (int i = 0; i < handSize; i++) {
+                    hand.add(drawPile.draw());
                 }
             }
         }
 
-        return copy;
+        // we have to set the turn owner so that getCurrentPlayer() returns the correct value
+        // all players think they are the current player when picking actions simultaneously
+        setTurnOwner(playerId);
+        // hide cardChoices (if made) of all other players
+        for (int i = 0; i < getNPlayers(); i++) {
+            cardChoices.add(new ArrayList<>());
+            if (i == playerId) {
+                for (ChooseCard cc : cardChoices.get(i)) {
+                    cardChoices.get(i).add(cc.copy());
+                }
+            }
+        }
     }
 
     /**
