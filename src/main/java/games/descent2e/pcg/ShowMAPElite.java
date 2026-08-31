@@ -207,15 +207,19 @@ public class ShowMAPElite {
 
         int columns = 100;
         JPanel legend = new JPanel(new GridLayout(1, columns, 0, 0));
-        legend.setPreferredSize(new Dimension(1000, 15));
-        legend.setMaximumSize(new Dimension(1000, 15));
         legend.setBackground(Color.WHITE);
         legend.setBorder(blackline);
+        JPanel legendStart = new JPanel();
+        legendStart.setBackground(Color.BLACK);
+        legend.add(legendStart);
         for (int i = 0; i < columns; i++) {
             JPanel legendPiece = new JPanel();
             legendPiece.setBackground(interpolate((float) i / columns, colours));
             legend.add(legendPiece);
         }
+        JPanel legendEnd = new JPanel();
+        legendEnd.setBackground(Color.BLACK);
+        legend.add(legendEnd);
         legendBox.add(legend);
         legendContainer.add(legendBox);
 
@@ -303,7 +307,7 @@ public class ShowMAPElite {
         if (maxFitness == minFitness)
             return colours[colours.length-1];
 
-        return interpolate((fitness - (absoluteFitness / 2)) / (absoluteFitness), colours);
+        return interpolate((fitness) / (absoluteFitness), colours);
     }
 
     private Color interpolate(double t, Color[] colours) {
