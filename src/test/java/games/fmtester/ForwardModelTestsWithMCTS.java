@@ -121,8 +121,13 @@ public class ForwardModelTestsWithMCTS {
     }
 
     @Test
-    public void testSushiGo() {
+    public void testSushiGoWithSeqUCT() {
         new ForwardModelTester("game=SushiGo", "nGames=2", "nPlayers=4", "agent=json\\players\\gameSpecific\\SushiGo\\SushiGo.json");
+    }
+
+    @Test
+    public void testSushiGoWithDUCT() {
+        new ForwardModelTester("game=SushiGo", "nGames=2", "nPlayers=4", "agent=json\\players\\gameSpecific\\SushiGo\\SushiGoDUCT.json");
     }
 
     @Test

@@ -1,0 +1,9 @@
+{
+  "budgetType": "BUDGET_TIME",
+  "rolloutLength": 30,
+  "heuristic": {
+    "class": "players.heuristics.LeaderHeuristic"
+  },
+  "class": "players.DUCT.DUCTParams",
+  "budget": 40
+}
