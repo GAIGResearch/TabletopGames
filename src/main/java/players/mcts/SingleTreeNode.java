@@ -1172,17 +1172,22 @@ public class SingleTreeNode {
      * In the case of vanilla MCTS, this is unchanged from the input result.
      * But, if we are interpolating some max/Q update, then this will change the result.
      */
-    protected double[] backUpSingleNode(AbstractAction actionTaken, double[] result) {
-        if (params.discardStateAfterEachIteration) {
-            if (depth > 0)
-                openLoopState = null; // releases for Garbage Collection
-            if (depth > 0 && !params.maintainMasterState)
-                state = null;
-        }
-        nVisits++;
-        // Here we look at statsFor(decisionPlayer).actionsFromOpenLoopState to see which ones were valid
+    /**
+     * Record one player's decision at this node: which of their actions were valid on the way
+     * through (so that valid-visit counts stay meaningful under progressive widening), and the
+     * result for the one they actually took.
+     * <p>
+     * Split out of backUpSingleNode so that a node with several acting players can run this once
+     * per player while running the policy tail below it exactly once. Note that node nVisits is
+     * deliberately NOT incremented here - there is one node, so there is one visit count.
+     *
+     * @return the actions considered, for the caller to reuse - see the note at the call site.
+     */
+    protected List<AbstractAction> updateActionStats(int actingPlayer, AbstractAction actionTaken, double[] result) {
+        PlayerDecisionStats pds = statsFor(actingPlayer);
+        // Here we look at the actions from the open loop state to see which ones were valid
         // when we passed through, and keep track of valid visits
-        List<AbstractAction> actionsToConsider = actionsToConsider(statsFor(decisionPlayer).actionsFromOpenLoopState);
+        List<AbstractAction> actionsToConsider = actionsToConsider(actingPlayer, pds.actionsFromOpenLoopState);
 
         // then we update the statistics for the action taken
         if (!actionsToConsider.contains(actionTaken)) {
@@ -1192,23 +1197,41 @@ public class SingleTreeNode {
             // If MCGS, then this is possible if we have looped in the graph, so that OpenLoopState refers
             // to a different state than the one for which the action was taken. This is awkward.
             // In the absence of any good information, we just increment the valid visits of all actions
-            for (ActionStats stats : statsFor(decisionPlayer).actionValues.values()) {
+            for (ActionStats stats : pds.actionValues.values()) {
                 stats.validVisits++;
             }
         } else {
             for (AbstractAction action : actionsToConsider) {
-                if (!statsFor(decisionPlayer).actionValues.containsKey(action))
-                    statsFor(decisionPlayer).actionValues.put(action, new ActionStats(result.length));
-                statsFor(decisionPlayer).actionValues.get(action).validVisits++;
+                if (!pds.actionValues.containsKey(action))
+                    pds.actionValues.put(action, new ActionStats(result.length));
+                pds.actionValues.get(action).validVisits++;
             }
         }
-        ActionStats stats = statsFor(decisionPlayer).actionValues.get(actionTaken);
+        ActionStats stats = pds.actionValues.get(actionTaken);
         if (stats == null)
             throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
         if (stats.validVisits == 0)
             throw new AssertionError("We have somehow failed to find the action taken in the list of valid actions");
 
         stats.update(result);
+        return actionsToConsider;
+    }
+
+    protected double[] backUpSingleNode(AbstractAction actionTaken, double[] result) {
+        if (params.discardStateAfterEachIteration) {
+            if (depth > 0)
+                openLoopState = null; // releases for Garbage Collection
+            if (depth > 0 && !params.maintainMasterState)
+                state = null;
+        }
+        nVisits++;
+        // The per-acting-player part of the backup. It returns the list of actions it considered,
+        // and the tail below reuses that list rather than recomputing it - which is what keeps this
+        // split identical to the single computation it replaces. actionsToConsider() is a function
+        // of nVisits and of the per-action visit counts, and updateActionStats has just incremented
+        // both, so a second call is not obviously the same query.
+        List<AbstractAction> actionsToConsider = updateActionStats(decisionPlayer, actionTaken, result);
+        ActionStats stats = getActionValues(decisionPlayer).get(actionTaken);
 
         if (params.treePolicy == RegretMatching) {
             int updateEvery = Math.max(actionsToConsider.size(), 10);

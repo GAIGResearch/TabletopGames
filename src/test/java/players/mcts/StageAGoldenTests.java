@@ -118,6 +118,14 @@ public class StageAGoldenTests {
             p.progressiveWideningConstant = 1.5;
             p.progressiveWideningExponent = 0.5;
         });
+        s.put("progressiveWideningTight", p -> {
+            // constant/exponent chosen so the widened subset actually grows during the search
+            // (1 action, then 2, then 3), which is what makes the backup sensitive to whether the
+            // considered list is recomputed after the visit counts have been incremented.
+            p.actionHeuristic = NAME_HEURISTIC;
+            p.progressiveWideningConstant = 1.2;
+            p.progressiveWideningExponent = 0.2;
+        });
         s.put("progressiveBias", p -> {
             p.actionHeuristic = NAME_HEURISTIC;
             p.progressiveBias = 0.5;
@@ -357,6 +365,8 @@ public class StageAGoldenTests {
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=ae656bccdc814390|rnd=-3582349705094124591");
         EXPECTED.put("lmr.progressiveWidening",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=f96b6b2aa83a0f4b|rnd=5149955473058966674");
+        EXPECTED.put("lmr.progressiveWideningTight",
+                "type=SingleTreeNode|roots=1|visits=200|nodes=139|fm=3450|copies=201|rollout=2000|digest=eaa173664a2914f7|rnd=-6993690106722028079");
         EXPECTED.put("lmr.progressiveBias",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=b3b36948bfe90bac|rnd=-3582349705094124591");
         EXPECTED.put("lmr.initialiseVisits",
