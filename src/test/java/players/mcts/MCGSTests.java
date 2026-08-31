@@ -26,7 +26,7 @@ public class MCGSTests {
     MCTSParams params;
 
     private final Predicate<SingleTreeNode> actionVisitsAddUp = node ->
-            node.getVisits() == node.actionValues.values().stream().mapToInt(s -> s.nVisits).sum();
+            node.getVisits() == node.getActionValues().values().stream().mapToInt(s -> s.nVisits).sum();
 
     private final Predicate<SingleTreeNode> allNodesForPlayerZero = node ->
             node.decisionPlayer == 0 && node.state.getCurrentPlayer() == 0;

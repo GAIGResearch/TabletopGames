@@ -129,14 +129,14 @@ public class BackupTests {
         assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
         assertEquals(50.5, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
 
-        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
-        assertEquals(25 * 0.9 + 0.5, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.0001);
+        assertEquals(26, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9 + 0.5, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).totValue[0], 0.0001);
 
-        assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
-        assertEquals(0.5, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
+        assertEquals(6, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).nVisits);
+        assertEquals(0.5, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).totValue[0], 0.0001);
 
-        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
-        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+        assertEquals(3, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).nVisits);
+        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).totValue[0], 0.0001);
     }
 
 
@@ -157,16 +157,16 @@ public class BackupTests {
         assertEquals(0, lastNode.getVisits());
 
         // no change at level 3
-        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
-        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+        assertEquals(3, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).nVisits);
+        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).totValue[0], 0.0001);
 
         // no change at level 2
-        assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
-        assertEquals(0.5, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
+        assertEquals(6, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).nVisits);
+        assertEquals(0.5, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).totValue[0], 0.0001);
 
         // no change at level 1
-        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
-        assertEquals(25 * 0.9 + 0.5, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
+        assertEquals(26, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9 + 0.5, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).totValue[0], 0.00001);
 
         // change at root
         double update = 30.0/51.0 * 0.5 + 21.0 / 51.0 * 1.0;
@@ -189,18 +189,18 @@ public class BackupTests {
         assertEquals(0, lastNode.getVisits());
 
         // 6 visits, Left is best action at 0.8
-        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
-        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+        assertEquals(3, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).nVisits);
+        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).totValue[0], 0.0001);
 
         // 26 Visits, Left and Middle are both 1.0 (Right has been taken 5 times with mean 0 reward)
         double update = 2.0/6.0 * 0.5 + 4.0 / 6.0 * 0.8;
-        assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
-        assertEquals(update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
+        assertEquals(6, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).nVisits);
+        assertEquals(update, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).totValue[0], 0.0001);
 
         // 51 Visits, Right is best at 1.0 (Left has been taken 25 times with mean 0.9 reward)
         update = 2.0/26.0 * update + 24.0 / 26.0 * 1.0;
-        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
-        assertEquals(25 * 0.9 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
+        assertEquals(26, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9 + update, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).totValue[0], 0.00001);
 
         // Middle is best action
         update = 2.0/51.0 * update + 49.0 / 51.0 * 1.0;
@@ -224,18 +224,18 @@ public class BackupTests {
         assertEquals(0, lastNode.getVisits());
 
         // 6 visits, Left is best action at 0.8
-        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
-        assertEquals(-0.07 - 0.07 - 0.05, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[1], 0.0001);
+        assertEquals(3, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).nVisits);
+        assertEquals(-0.07 - 0.07 - 0.05, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).totValue[1], 0.0001);
 
         // 26 Visits, Left and Middle are both 1.0 (Right has been taken 5 times with mean 0 reward)
         double update = -0.1  * (2.0/6.0 * 0.5 + 4.0 / 6.0 * 0.8);
-        assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
-        assertEquals(update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[1], 0.0001);
+        assertEquals(6, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).nVisits);
+        assertEquals(update, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).totValue[1], 0.0001);
 
         // 51 Visits, Right is best at 1.0 (Left has been taken 25 times with mean 0.9 reward)
         update = 2.0/26.0 * update + 24.0 / 26.0 * -0.1;
-        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
-        assertEquals(-2.5 * 0.9 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[1], 0.00001);
+        assertEquals(26, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).nVisits);
+        assertEquals(-2.5 * 0.9 + update, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).totValue[1], 0.00001);
 
         // Middle is best action
         update = 2.0/51.0 * update + 49.0 / 51.0 * -0.1;
@@ -268,20 +268,20 @@ public class BackupTests {
         assertEquals(0, lastNode.getVisits());
 
         // 6 visits, Left is best action at 0.8
-        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
-        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+        assertEquals(3, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).nVisits);
+        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).getActionValues().get(new LMRAction("Middle")).totValue[0], 0.0001);
 
         // 26 Visits, Left and Middle are both 1.0 (Right has been taken 5 times with mean 0 reward)
         double update = 2.0/6.0 * 0.5 + 4.0 / 6.0 * 0.8;
-        assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
-        assertEquals(update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
+        assertEquals(6, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).nVisits);
+        assertEquals(update, nodeTrajectory001.get(2).getActionValues().get(new LMRAction("Right")).totValue[0], 0.0001);
 
         // 51 Visits, Right is best at 1.0 (Left has been taken 25 times with mean 0.9 reward)
         update = 2.0/26.0 * update + 24.0 / 26.0 * 1.0;
-        assertEquals(25, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
-        assertEquals(25 * 0.9, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
-        assertEquals(11, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Right")).nVisits);
-        assertEquals(10.0 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Right")).totValue[0], 0.00001);
+        assertEquals(25, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Left")).totValue[0], 0.00001);
+        assertEquals(11, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Right")).nVisits);
+        assertEquals(10.0 + update, nodeTrajectory001.get(1).getActionValues().get(new LMRAction("Right")).totValue[0], 0.00001);
 
         // Middle is best action
      //   update = 2.0/51.0 * update + 49.0 / 51.0 * 1.0;

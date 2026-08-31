@@ -36,14 +36,14 @@ public class TreeStatistics {
                 .mapToDouble(i -> byDepth.getOrDefault(i, new ArrayList<>()).size() / (double) totalNodes)
                 .toArray();
         totalLeaves = (int) transpositionMap.values().stream().filter(n -> n.nVisits <= root.params.initialiseVisits).count();
-        meanActionsAtNode = transpositionMap.values().stream().mapToInt(n -> n.actionValues.size()).sum() / (double) totalNodes;
+        meanActionsAtNode = transpositionMap.values().stream().mapToInt(n -> n.getActionValues().size()).sum() / (double) totalNodes;
         meanActionsExpanded = transpositionMap.values().stream()
                 .mapToInt(
-                        n -> (int) n.actionValues.values().stream()
+                        n -> (int) n.getActionValues().values().stream()
                                 .filter(stats -> stats.nVisits > root.params.initialiseVisits)
                                 .count()
                 ).sum() / (double) Math.max(totalNodes - totalLeaves, 1);
-        maxActionsAtNode = transpositionMap.values().stream().mapToInt(n -> n.actionValues.size()).max().orElse(0);
+        maxActionsAtNode = transpositionMap.values().stream().mapToInt(n -> n.getActionValues().size()).max().orElse(0);
 
         // totalTerminalNodes = (int) transpositionMap.values().stream().filter(n -> !n.state.isNotTerminal()).count();
         leafDistribution = IntStream.range(0, depthReached + 1)
@@ -51,7 +51,7 @@ public class TreeStatistics {
                 .toArray();
         meanLeafDepth = totalLeaves > 0 ? IntStream.range(0, depthReached + 1).mapToDouble(i -> i * leafDistribution[i]).sum() : 0;
         meanNodeDepth = IntStream.range(0, depthReached + 1).mapToDouble(i -> i * nodeDistribution[i]).sum();
-        oneActionNodes = (int) transpositionMap.values().stream().filter(n -> n.actionValues.size() == 1).count();
+        oneActionNodes = (int) transpositionMap.values().stream().filter(n -> n.getActionValues().size() == 1).count();
     }
 
     public TreeStatistics(SingleTreeNode root) {
@@ -84,13 +84,13 @@ public class TreeStatistics {
                 nodesAtDepth[node.depth]++;
                 if (node.terminalNode)
                     gameTerminalNodesAtDepth[node.depth]++;
-                totalActions += node.actionValues.size();
+                totalActions += node.getActionValues().size();
                 // We have expanded an action if it has been visited more often than initialiseVisits
-                expandedActions += (int) node.actionValues.values().stream().filter(stats -> stats.nVisits > root.params.initialiseVisits).count();
-                if (node.actionValues.size() == 1)
+                expandedActions += (int) node.getActionValues().values().stream().filter(stats -> stats.nVisits > root.params.initialiseVisits).count();
+                if (node.getActionValues().size() == 1)
                     oneAction++;
-                if (node.actionValues.size() > maxActions)
-                    maxActions = node.actionValues.size();
+                if (node.getActionValues().size() > maxActions)
+                    maxActions = node.getActionValues().size();
                 for (SingleTreeNode child : node.children.values().stream()
                         .filter(Objects::nonNull)
                         .flatMap(Arrays::stream)
@@ -99,7 +99,7 @@ public class TreeStatistics {
                     if (child != null)
                         nodeQueue.add(child);
                 }
-                if (node.actionValues.values().stream().allMatch(stats -> stats.nVisits <= root.params.initialiseVisits))
+                if (node.getActionValues().values().stream().allMatch(stats -> stats.nVisits <= root.params.initialiseVisits))
                     leavesAtDepth[node.depth]++;
             }
             if (node.depth > greatestDepth)

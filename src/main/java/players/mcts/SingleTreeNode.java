@@ -45,9 +45,9 @@ public class SingleTreeNode {
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
     // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
     protected int lastActorInRollout, lastTurnInRollout, lastRoundInRollout, turnAtStartOfRollout, roundAtStartOfRollout;
-    List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
-    Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
-    Map<AbstractAction, Double> actionPDFEstimates = new HashMap<>();
+    private List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
+    private Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
+    private Map<AbstractAction, Double> actionPDFEstimates = new HashMap<>();
     // Depth of this node
     protected int depth;
     // the id of the player who makes the decision at this node
@@ -59,7 +59,7 @@ public class SingleTreeNode {
     double initialisationTimeTaken;
     protected double highReward = Double.NEGATIVE_INFINITY;
     protected double lowReward = Double.POSITIVE_INFINITY;
-    protected Map<AbstractAction, Double> regretMatchingAverage = new HashMap<>();
+    private Map<AbstractAction, Double> regretMatchingAverage = new HashMap<>();
     protected int nodeClash;
     // Root node of tree
     protected SingleTreeNode root;
@@ -69,7 +69,7 @@ public class SingleTreeNode {
     // could be by any player - each of which would transition to a different Node OpenLoop search. (Closed Loop will
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new LinkedHashMap<>();
-    Map<AbstractAction, ActionStats> actionValues = new HashMap<>();
+    private Map<AbstractAction, ActionStats> actionValues = new HashMap<>();
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     // ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
     // The total value of all trajectories through this node (one element per player)
@@ -728,6 +728,14 @@ public class SingleTreeNode {
 
     public ActionStats getActionStats(AbstractAction action) {
         return actionValues.get(action);
+    }
+
+    /**
+     * The action statistics for this node, keyed by action. This is the live map, not a copy -
+     * callers within the package rely on being able to see later updates through it.
+     */
+    public Map<AbstractAction, ActionStats> getActionValues() {
+        return actionValues;
     }
 
     public List<Pair<Integer, AbstractAction>> getActionsInRollout() {

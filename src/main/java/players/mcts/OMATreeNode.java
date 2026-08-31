@@ -81,7 +81,7 @@ public class OMATreeNode extends SingleTreeNode {
                 AbstractAction actionTakenFromChild = selfActionsOnly.get(i + 1);
                 if (currentNode.decisionPlayer != player)
                     throw new AssertionError("We have a mismatch between the player who took the action and the player who should be acting");
-                if (!currentNode.actionValues.containsKey(actionTakenFromParent))
+                if (!currentNode.getActionValues().containsKey(actionTakenFromParent))
                     throw new AssertionError("We should not have a value for the action taken from the parent");
                 currentNode.OMABackup(result, actionTakenFromParent, actionTakenFromChild);
             }

@@ -373,8 +373,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
         int players = root.state.getNPlayers();
         if (root != null && root.getVisits() > 1) {
-            for (AbstractAction action : root.actionValues.keySet()) {
-                ActionStats stats = root.actionValues.get(action);
+            for (AbstractAction action : root.getActionValues().keySet()) {
+                ActionStats stats = root.getActionValues().get(action);
                 int visits = stats == null ? 0 : stats.nVisits;
                 double visitProportion = visits / (double) root.getVisits();
                 double[] meanValues = new double[players];
@@ -385,7 +385,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
                         heuristicValues[p] = getStateHeuristic().evaluateState(root.getState(), p);
                     }
                 }
-                double actionValue = getParameters().actionHeuristic.evaluateAction(action, root.state, root.actionsFromOpenLoopState);
+                double actionValue = getParameters().actionHeuristic.evaluateAction(action, root.state, root.getActionsFromOpenLoopState());
 
                 Map<String, Object> actionValues = new HashMap<>();
                 actionValues.put("visits", visits);

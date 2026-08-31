@@ -284,7 +284,7 @@ public class StageAGoldenTests {
                     .append(node.getActor()).append(';')
                     .append(node.getVisits()).append(';')
                     .append(node.terminalNode).append('\n');
-            for (Map.Entry<AbstractAction, ActionStats> e : node.actionValues.entrySet()) {
+            for (Map.Entry<AbstractAction, ActionStats> e : node.getActionValues().entrySet()) {
                 ActionStats st = e.getValue();
                 sb.append("  ").append(e.getKey()).append(';')
                         .append(st.nVisits).append(';')

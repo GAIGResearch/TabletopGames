@@ -51,7 +51,7 @@ public class MultiTreeMCTSTests {
                     ).sum();
 
     private final Predicate<SingleTreeNode> actionVisitsAddUp = node ->
-            node.getVisits() == node.actionValues.values().stream().mapToInt(s -> s.nVisits).sum();
+            node.getVisits() == node.getActionValues().values().stream().mapToInt(s -> s.nVisits).sum();
 
     @Before
     public void setup() {
