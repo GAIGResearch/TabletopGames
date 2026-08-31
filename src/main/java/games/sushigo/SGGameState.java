@@ -37,6 +37,7 @@ public class SGGameState extends AbstractGameState {
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
+
     @Override
     public List<Integer> getCurrentSimultaneousPlayers() {
         // TODO: This should really be intercepted at the AbstractLevel, given that has ownership of actionsInProgress
@@ -116,14 +117,12 @@ public class SGGameState extends AbstractGameState {
         copy.discardPile = discardPile.copy();
         copy.cardChoices = new ArrayList<>();
 
-        if (playerId == -1) {
-            for (int i = 0; i < getNPlayers(); i++) {
-                List<ChooseCard> copiedItems = new ArrayList<>();
-                for (ChooseCard cc : cardChoices.get(i)) {
-                    copiedItems.add(cc.copy());
-                }
-                copy.cardChoices.add(copiedItems);
+        for (int i = 0; i < getNPlayers(); i++) {
+            List<ChooseCard> copiedItems = new ArrayList<>();
+            for (ChooseCard cc : cardChoices.get(i)) {
+                copiedItems.add(cc.copy());
             }
+            copy.cardChoices.add(copiedItems);
         }
         return copy;
     }
@@ -155,6 +154,7 @@ public class SGGameState extends AbstractGameState {
         // we have to set the turn owner so that getCurrentPlayer() returns the correct value
         // all players think they are the current player when picking actions simultaneously
         setTurnOwner(playerId);
+        cardChoices = new ArrayList<>();
         // hide cardChoices (if made) of all other players
         for (int i = 0; i < getNPlayers(); i++) {
             cardChoices.add(new ArrayList<>());
