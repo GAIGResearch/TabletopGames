@@ -45,9 +45,6 @@ public class SingleTreeNode {
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
     // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
     protected int lastActorInRollout, lastTurnInRollout, lastRoundInRollout, turnAtStartOfRollout, roundAtStartOfRollout;
-    private List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
-    private Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
-    private Map<AbstractAction, Double> actionPDFEstimates = new HashMap<>();
     // Depth of this node
     protected int depth;
     // the id of the player who makes the decision at this node
@@ -59,7 +56,6 @@ public class SingleTreeNode {
     double initialisationTimeTaken;
     protected double highReward = Double.NEGATIVE_INFINITY;
     protected double lowReward = Double.POSITIVE_INFINITY;
-    private Map<AbstractAction, Double> regretMatchingAverage = new HashMap<>();
     protected int nodeClash;
     // Root node of tree
     protected SingleTreeNode root;
@@ -69,7 +65,9 @@ public class SingleTreeNode {
     // could be by any player - each of which would transition to a different Node OpenLoop search. (Closed Loop will
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new LinkedHashMap<>();
-    private Map<AbstractAction, ActionStats> actionValues = new HashMap<>();
+    // The candidate actions and statistics for each player who decides at this node.
+    // Today that is always exactly one entry, for decisionPlayer.
+    protected final Map<Integer, PlayerDecisionStats> statsByPlayer = new HashMap<>();
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     // ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
     // The total value of all trajectories through this node (one element per player)
@@ -144,6 +142,16 @@ public class SingleTreeNode {
             decisionPlayer = state.getCurrentPlayer();
         }
 
+        // instantiate() is also how a reused root is re-homed (see rootify), and the five per-player
+        // fields deliberately survive that - it is how tree reuse keeps the root's statistics.
+        // Re-key rather than allocate, so that carries over even if decisionPlayer changed, which
+        // the MCGS reuse path in MCTSPlayer permits (it has no equivalent of the guard at :189).
+        if (statsByPlayer.size() == 1 && !statsByPlayer.containsKey(decisionPlayer)) {
+            PlayerDecisionStats existing = statsByPlayer.values().iterator().next();
+            statsByPlayer.clear();
+            statsByPlayer.put(decisionPlayer, existing);
+        }
+
         // then set up available actions, and set openLoopState
         setActionsFromOpenLoopState(rootState);
 
@@ -197,16 +205,16 @@ public class SingleTreeNode {
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer && actionState.isNotTerminalForPlayer(decisionPlayer)) {
-            actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
+            statsFor(decisionPlayer).actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
             //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
-//                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-            if (actionsFromOpenLoopState.size() != actionsFromOpenLoopState.stream().distinct().count())
+//                statsFor(decisionPlayer).actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
+            if (statsFor(decisionPlayer).actionsFromOpenLoopState.size() != statsFor(decisionPlayer).actionsFromOpenLoopState.stream().distinct().count())
                 throw new AssertionError("Duplicate actions found in action list: " +
-                        actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-            if ((params.useActionHeuristicForMoveOrdering && nVisits < actionsFromOpenLoopState.size())
+                        statsFor(decisionPlayer).actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
+            if ((params.useActionHeuristicForMoveOrdering && nVisits < statsFor(decisionPlayer).actionsFromOpenLoopState.size())
                     || params.pUCTTemperature <= 10000.0 || params.progressiveWideningConstant > 1.0
                     || params.progressiveBias > 0 || params.initialiseVisits > 0) {
-                // We only need to calculate actionValueEstimates if we are going to be using the data in one of these variants
+                // We only need to calculate statsFor(decisionPlayer).actionValueEstimates if we are going to be using the data in one of these variants
                 // If not, then we can save processing time by not calculating them
                 // actionHeuristicRecalculationThreshold defines how often we recalculate the action values
                 // if the actionHeuristic is fixed, then this should be set to a very high value
@@ -214,17 +222,17 @@ public class SingleTreeNode {
                 // change over the course of the search. Setting it to 1 will update it on every visit; but possibly
                 // at a high additional computational cost.
                 if (params.actionHeuristic != IActionHeuristic.nullReturn) {
-                    if (actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
+                    if (statsFor(decisionPlayer).actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                         // in this case we initialise all action values
-                        double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
-                        for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
-                            actionValueEstimates.put(actionsFromOpenLoopState.get(i), actionValues[i]);
+                        double[] heuristicScores = params.actionHeuristic.evaluateAllActions(statsFor(decisionPlayer).actionsFromOpenLoopState, actionState);
+                        for (int i = 0; i < statsFor(decisionPlayer).actionsFromOpenLoopState.size(); i++) {
+                            statsFor(decisionPlayer).actionValueEstimates.put(statsFor(decisionPlayer).actionsFromOpenLoopState.get(i), heuristicScores[i]);
                         }
                     } else {
                         // we just initialise the new actions
-                        for (AbstractAction action : actionsFromOpenLoopState) {
-                            if (!actionValueEstimates.containsKey(action)) {
-                                actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState, actionsFromOpenLoopState));
+                        for (AbstractAction action : statsFor(decisionPlayer).actionsFromOpenLoopState) {
+                            if (!statsFor(decisionPlayer).actionValueEstimates.containsKey(action)) {
+                                statsFor(decisionPlayer).actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState, statsFor(decisionPlayer).actionsFromOpenLoopState));
                             }
                         }
                     }
@@ -243,26 +251,26 @@ public class SingleTreeNode {
                 // Generally if using pUCT we would expect FPU to also be used to give effective pruning, rather than the
                 // explicit pruning of Progressive Widening.
                 double[] pdf;
-                actionPDFEstimates = new HashMap<>();
+                statsFor(decisionPlayer).actionPDFEstimates = new HashMap<>();
                 if (params.pUCTTemperature > 0.0) {
                     // in this case we construct a Boltzmann
-                    double[] actionValues = actionsFromOpenLoopState.stream().
-                            mapToDouble(a -> actionValueEstimates.getOrDefault(a, 0.0)).toArray();
-                    pdf = pdf(exponentiatePotentials(actionValues, params.pUCTTemperature));
+                    double[] heuristicScores = statsFor(decisionPlayer).actionsFromOpenLoopState.stream().
+                            mapToDouble(a -> statsFor(decisionPlayer).actionValueEstimates.getOrDefault(a, 0.0)).toArray();
+                    pdf = pdf(exponentiatePotentials(heuristicScores, params.pUCTTemperature));
 
                 } else {
                     // in this case, we first set any negative values to zero, and then construct the pdf directly
-                    double[] actionValues = actionsFromOpenLoopState.stream().
-                            mapToDouble(a -> Math.max(0.0, actionValueEstimates.getOrDefault(a, 0.0))).toArray();
-                    pdf = pdf(actionValues);
+                    double[] heuristicScores = statsFor(decisionPlayer).actionsFromOpenLoopState.stream().
+                            mapToDouble(a -> Math.max(0.0, statsFor(decisionPlayer).actionValueEstimates.getOrDefault(a, 0.0))).toArray();
+                    pdf = pdf(heuristicScores);
                 }
-                for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
-                    actionPDFEstimates.put(actionsFromOpenLoopState.get(i), pdf[i]);
+                for (int i = 0; i < statsFor(decisionPlayer).actionsFromOpenLoopState.size(); i++) {
+                    statsFor(decisionPlayer).actionPDFEstimates.put(statsFor(decisionPlayer).actionsFromOpenLoopState.get(i), pdf[i]);
                 }
             }
-            for (AbstractAction action : actionsFromOpenLoopState) {
-                if (!actionValues.containsKey(action)) {
-                    actionValues.put(action, new ActionStats(actionState.getNPlayers()));
+            for (AbstractAction action : statsFor(decisionPlayer).actionsFromOpenLoopState) {
+                if (!statsFor(decisionPlayer).actionValues.containsKey(action)) {
+                    statsFor(decisionPlayer).actionValues.put(action, new ActionStats(actionState.getNPlayers()));
                     children.put(action.copy(), null); // mark a new node to be expanded
                     // This *does* rely on a good equals method being implemented for Actions
                     if (!children.containsKey(action))
@@ -273,13 +281,13 @@ public class SingleTreeNode {
                         // This also ignores Progressive widening and initialises all possible actions
                         // As with pUCT, this won't cause any major issues, but will mean that the effective node visits
                         // will be higher than the visits of the considered actions.
-                        ActionStats stats = actionValues.get(action);
-                        double actionEstimate = actionValueEstimates.getOrDefault(action, 0.0);
+                        ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
+                        double actionEstimate = statsFor(decisionPlayer).actionValueEstimates.getOrDefault(action, 0.0);
                         if (params.normaliseRewards) {
                             if (actionEstimate > root.highReward) root.highReward = actionEstimate;
                             if (actionEstimate < root.lowReward) root.lowReward = actionEstimate;
                         }
-                        int nActions = Math.max(actionValues.size(), actionsFromOpenLoopState.size());
+                        int nActions = Math.max(statsFor(decisionPlayer).actionValues.size(), statsFor(decisionPlayer).actionsFromOpenLoopState.size());
                         stats.nVisits = params.initialiseVisits;
                         stats.validVisits = params.initialiseVisits * nActions;
                         stats.totValue[decisionPlayer] = actionEstimate * params.initialiseVisits;
@@ -305,7 +313,7 @@ public class SingleTreeNode {
         initialisationTimeTaken = 0.0;
         nodeClash = 0;
         rolloutActionsTaken = 0;
-        regretMatchingAverage.clear();
+        statsFor(decisionPlayer).regretMatchingAverage.clear();
     }
 
     /**
@@ -423,12 +431,12 @@ public class SingleTreeNode {
      * (this is called often enough it can make a measurable difference)
      */
     public int actionVisits(AbstractAction action) {
-        ActionStats stats = actionValues.get(action);
+        ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
         return stats == null ? 0 : stats.nVisits;
     }
 
     public int actionValidVisits(AbstractAction action) {
-        ActionStats stats = actionValues.get(action);
+        ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
         return stats == null ? 0 : stats.validVisits;
     }
 
@@ -437,7 +445,7 @@ public class SingleTreeNode {
      * or 0.0 if none has been recorded.
      */
     public double actionHeuristicValue(AbstractAction action) {
-        return actionValueEstimates.getOrDefault(action, 0.0);
+        return statsFor(decisionPlayer).actionValueEstimates.getOrDefault(action, 0.0);
     }
 
     /**
@@ -446,13 +454,13 @@ public class SingleTreeNode {
      * actions retained from a reused tree that are no longer valid.
      */
     public List<AbstractAction> getActionsFromOpenLoopState() {
-        return actionsFromOpenLoopState;
+        return statsFor(decisionPlayer).actionsFromOpenLoopState;
     }
 
     private int validVisitsFor(AbstractAction action) {
         if (params.information == Closed_Loop)
             return nVisits;
-        ActionStats stats = actionValues.get(action);
+        ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
         return stats == null ? 1 : stats.validVisits;
     }
 
@@ -461,17 +469,17 @@ public class SingleTreeNode {
      * (this is called often enough it can make a measurable difference)
      */
     public double actionTotValue(AbstractAction action, int playerId) {
-        ActionStats stats = actionValues.get(action);
+        ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
         return stats == null ? 0.0 : stats.totValue[playerId];
     }
 
     public double nodeValue(int playerId) {
         if (nVisits == 0) return 0.0;
-        return actionValues.values().stream().mapToDouble(s -> s.totValue[playerId]).sum() / nVisits;
+        return statsFor(decisionPlayer).actionValues.values().stream().mapToDouble(s -> s.totValue[playerId]).sum() / nVisits;
     }
 
     private double actionSquaredValue(AbstractAction action, int playerId) {
-        ActionStats stats = actionValues.get(action);
+        ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
         return stats == null ? 0.0 : stats.squaredTotValue[playerId];
     }
 
@@ -480,7 +488,7 @@ public class SingleTreeNode {
      * For this reason not converted to old-style java loop as there would be no performance gain
      */
     int[] actionVisits() {
-        return actionValues.values().stream()
+        return statsFor(decisionPlayer).actionValues.values().stream()
                 .mapToInt(a -> a.nVisits)
                 .toArray();
     }
@@ -500,7 +508,7 @@ public class SingleTreeNode {
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         while (cur.openLoopState.isNotTerminalForPlayer(cur.decisionPlayer) &&
-                cur.depth < params.maxTreeDepth && !cur.actionsFromOpenLoopState.isEmpty()) {
+                cur.depth < params.maxTreeDepth && !cur.statsFor(cur.decisionPlayer).actionsFromOpenLoopState.isEmpty()) {
             // Move to next child given by relevant selection function
             AbstractAction chosen = cur.treePolicyAction(true);
 
@@ -541,8 +549,8 @@ public class SingleTreeNode {
             // depending on the advantage heuristic used.
             // However, we do break ties in favour of already expanded actions
             List<AbstractAction> sortedActions = new ArrayList<>(allAvailable);
-            sortedActions.sort(Comparator.comparingDouble(a -> -actionValueEstimates.getOrDefault(a, 0.0) -
-                    actionValues.getOrDefault(a, new ActionStats(1)).nVisits * 1e-6));
+            sortedActions.sort(Comparator.comparingDouble(a -> -statsFor(decisionPlayer).actionValueEstimates.getOrDefault(a, 0.0) -
+                    statsFor(decisionPlayer).actionValues.getOrDefault(a, new ActionStats(1)).nVisits * 1e-6));
             return new ArrayList<>(sortedActions.subList(0, actionsToConsider));
         }
         return new ArrayList<>(allAvailable);
@@ -632,7 +640,7 @@ public class SingleTreeNode {
 
         // actionsToConsider takes care of any Progressive Widening in play, so we only consider the
         // widened subset
-        List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState);
+        List<AbstractAction> availableActions = actionsToConsider(statsFor(decisionPlayer).actionsFromOpenLoopState);
         if (availableActions.isEmpty())
             throw new AssertionError("We need to have at least one option");
 
@@ -642,8 +650,8 @@ public class SingleTreeNode {
         } else {
             // first we shuffle to break ties
             Collections.shuffle(availableActions, rnd);
-            // then get the actionValues
-            double[] actionValues = actionValues(availableActions);
+            // then get the statsFor(decisionPlayer).actionValues
+            double[] policyValues = actionValues(availableActions);
             // then pick the best one
             actionChosen = switch (params.treePolicy) {
                 case Uniform -> availableActions.get(rnd.nextInt(availableActions.size()));
@@ -655,8 +663,8 @@ public class SingleTreeNode {
                     AbstractAction bestAction = null;
                     double bestValue = -Double.MAX_VALUE;
                     for (int i = 0; i < availableActions.size(); i++) {
-                        if (actionValues[i] > bestValue) {
-                            bestValue = actionValues[i];
+                        if (policyValues[i] > bestValue) {
+                            bestValue = policyValues[i];
                             bestAction = availableActions.get(i);
                         }
                     }
@@ -681,8 +689,8 @@ public class SingleTreeNode {
                     if (explore && rnd.nextDouble() < params.exploreEpsilon) {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
-                    double[] pdf = pdf(actionValues);
-                    long nonZeroActions = Arrays.stream(actionValues).filter(v -> v > 0.0).count();
+                    double[] pdf = pdf(policyValues);
+                    long nonZeroActions = Arrays.stream(policyValues).filter(v -> v > 0.0).count();
                     if (nonZeroActions == 0) {
                         // if we have no non-zero values, then we just pick one at random
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
@@ -727,7 +735,28 @@ public class SingleTreeNode {
     }
 
     public ActionStats getActionStats(AbstractAction action) {
-        return actionValues.get(action);
+        return statsFor(decisionPlayer).actionValues.get(action);
+    }
+
+    /**
+     * The statistics for one acting player at this node, created on demand.
+     * <p>
+     * Every read and write of the five per-player fields goes through here. Creating on demand
+     * rather than in instantiate() is required by ForestNode, whose constructor sets its fields
+     * directly and returns - it never calls instantiate() at all, and then calls
+     * initialiseRootMetrics(), which touches regretMatchingAverage.
+     * <p>
+     * The guard is temporary. A node currently has statistics for exactly one player, so any call
+     * with a different id is a threading mistake made while this refactor is in flight - and the
+     * mistake compiles cleanly, because the wrong player id is just another int. It fails loudly
+     * instead under the existing suite. It comes out when nodes really can have several acting
+     * players.
+     */
+    private PlayerDecisionStats statsFor(int actingPlayer) {
+        if (actingPlayer != decisionPlayer)
+            throw new AssertionError("This node holds statistics only for P" + decisionPlayer
+                    + ", not P" + actingPlayer);
+        return statsByPlayer.computeIfAbsent(actingPlayer, PlayerDecisionStats::new);
     }
 
     /**
@@ -735,7 +764,7 @@ public class SingleTreeNode {
      * callers within the package rely on being able to see later updates through it.
      */
     public Map<AbstractAction, ActionStats> getActionValues() {
-        return actionValues;
+        return statsFor(decisionPlayer).actionValues;
     }
 
     public List<Pair<Integer, AbstractAction>> getActionsInRollout() {
@@ -852,7 +881,7 @@ public class SingleTreeNode {
         if (params.pUCTTemperature < 10000.0) {
             // in this case we multiply the exploration term by the pUCT factor (the probability that the action would be taken by
             // our actionHeuristic). These were calculated in setActionsFromOpenLoopState
-            explorationTerm *= actionPDFEstimates.get(action);
+            explorationTerm *= statsFor(decisionPlayer).actionPDFEstimates.get(action);
         }
 
         // Paranoid/SelfOnly control determines childValue here
@@ -917,7 +946,7 @@ public class SingleTreeNode {
 
     private double getBiasValue(AbstractAction action) {
         int actionVisits = actionVisits(action);
-        return params.progressiveBias * actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
+        return params.progressiveBias * statsFor(decisionPlayer).actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
     }
 
     /**
@@ -1067,9 +1096,9 @@ public class SingleTreeNode {
                 state = null;
         }
         nVisits++;
-        // Here we look at actionsFromOpenLoopState to see which ones were valid
+        // Here we look at statsFor(decisionPlayer).actionsFromOpenLoopState to see which ones were valid
         // when we passed through, and keep track of valid visits
-        List<AbstractAction> actionsToConsider = actionsToConsider(actionsFromOpenLoopState);
+        List<AbstractAction> actionsToConsider = actionsToConsider(statsFor(decisionPlayer).actionsFromOpenLoopState);
 
         // then we update the statistics for the action taken
         if (!actionsToConsider.contains(actionTaken)) {
@@ -1079,17 +1108,17 @@ public class SingleTreeNode {
             // If MCGS, then this is possible if we have looped in the graph, so that OpenLoopState refers
             // to a different state than the one for which the action was taken. This is awkward.
             // In the absence of any good information, we just increment the valid visits of all actions
-            for (ActionStats stats : actionValues.values()) {
+            for (ActionStats stats : statsFor(decisionPlayer).actionValues.values()) {
                 stats.validVisits++;
             }
         } else {
             for (AbstractAction action : actionsToConsider) {
-                if (!actionValues.containsKey(action))
-                    actionValues.put(action, new ActionStats(result.length));
-                actionValues.get(action).validVisits++;
+                if (!statsFor(decisionPlayer).actionValues.containsKey(action))
+                    statsFor(decisionPlayer).actionValues.put(action, new ActionStats(result.length));
+                statsFor(decisionPlayer).actionValues.get(action).validVisits++;
             }
         }
-        ActionStats stats = actionValues.get(actionTaken);
+        ActionStats stats = statsFor(decisionPlayer).actionValues.get(actionTaken);
         if (stats == null)
             throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
         if (stats.validVisits == 0)
@@ -1111,9 +1140,9 @@ public class SingleTreeNode {
         // otherwise we do some more complex backup
         double resultToPropagateUpwards[] = result.clone();
         AbstractAction bestAction = bestAction(actionsToConsider);
-        double[] maxValue = actionValues.get(bestAction).totValue.clone();
+        double[] maxValue = statsFor(decisionPlayer).actionValues.get(bestAction).totValue.clone();
         for (int i = 0; i < maxValue.length; i++) {
-            maxValue[i] /= actionValues.get(bestAction).nVisits;
+            maxValue[i] /= statsFor(decisionPlayer).actionValues.get(bestAction).nVisits;
         }
         return switch (params.backupPolicy) {
             case MonteCarlo:
@@ -1158,7 +1187,7 @@ public class SingleTreeNode {
         AbstractAction bestAction = null;
         double maxValue = -Double.MAX_VALUE;
         for (AbstractAction action : actionsToConsider) {
-            ActionStats temp = actionValues.get(action);
+            ActionStats temp = statsFor(decisionPlayer).actionValues.get(action);
             double value = temp.nVisits == 0 ? -Double.MAX_VALUE :
                     temp.totValue[decisionPlayer] / temp.nVisits;
             if (value > maxValue) {
@@ -1199,13 +1228,13 @@ public class SingleTreeNode {
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching) {
             // RM uses a special policy as the average of all previous root policies
-            if (regretMatchingAverage.isEmpty()) // in case we have not yet updated the regret matching average
-                updateRegretMatchingAverage(actionsToConsider(actionsFromOpenLoopState));
+            if (statsFor(decisionPlayer).regretMatchingAverage.isEmpty()) // in case we have not yet updated the regret matching average
+                updateRegretMatchingAverage(actionsToConsider(statsFor(decisionPlayer).actionsFromOpenLoopState));
             bestAction = regretMatchingAverage();
         } else {
             // We iterate through all actions valid in the original root state
             // as openLoopState is fine with SingleTreeNode or MultiTreeNode
-            List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState);
+            List<AbstractAction> availableActions = actionsToConsider(statsFor(decisionPlayer).actionsFromOpenLoopState);
             if (state != null && (
                     (redeterminisationPlayer != -1 && redeterminisationPlayer != decisionPlayer)
                             || params.opponentTreePolicy == MCGS
@@ -1216,7 +1245,7 @@ public class SingleTreeNode {
             }
             List<Pair<AbstractAction, Double>> tempValues = new ArrayList<>();
             for (AbstractAction action : availableActions) {
-                if (!actionValues.containsKey(action)) {
+                if (!statsFor(decisionPlayer).actionValues.containsKey(action)) {
                     throw new AssertionError("Hashcode / equals contract issue for " + action);
                 }
                 double childValue = getValue(action);
@@ -1248,7 +1277,7 @@ public class SingleTreeNode {
         if (bestAction == null) {
             if (nVisits < 2) {
 //                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
-                bestAction = actionValues.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
+                bestAction = statsFor(decisionPlayer).actionValues.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
             } else
                 throw new AssertionError("Unexpected - no selection made.");
         }
@@ -1257,8 +1286,8 @@ public class SingleTreeNode {
     }
 
     public double getValue(AbstractAction action) {
-        if (actionValues.get(action) != null) {
-            ActionStats stats = actionValues.get(action);
+        if (statsFor(decisionPlayer).actionValues.get(action) != null) {
+            ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
             if (params.selectionPolicy == SIMPLE)
                 return stats.totValue[decisionPlayer] / (stats.nVisits + params.noiseEpsilon);
             else
@@ -1271,16 +1300,16 @@ public class SingleTreeNode {
         double[] av = actionValues(actionsToConsider);
         double[] pdf = pdf(av);
         for (int i = 0; i < actionsToConsider.size(); i++) {
-            regretMatchingAverage.merge(actionsToConsider.get(i), pdf[i], Double::sum);
+            statsFor(decisionPlayer).regretMatchingAverage.merge(actionsToConsider.get(i), pdf[i], Double::sum);
         }
     }
 
     protected AbstractAction regretMatchingAverage() {
-        List<AbstractAction> actionsToConsider = actionsToConsider(actionsFromOpenLoopState);
+        List<AbstractAction> actionsToConsider = actionsToConsider(statsFor(decisionPlayer).actionsFromOpenLoopState);
         double[] potentials = new double[actionsToConsider.size()];
         int count = 0;
         for (AbstractAction action : actionsToConsider) {
-            potentials[count] = regretMatchingAverage.getOrDefault(action, 0.0);
+            potentials[count] = statsFor(decisionPlayer).regretMatchingAverage.getOrDefault(action, 0.0);
             count++;
         }
         double[] pdf = pdf(potentials);
@@ -1384,9 +1413,9 @@ public class SingleTreeNode {
                     .collect(joining(", "));
         }
         retValue.append(String.format("%d total visits, value %s, with %d children, %d actions, depth %d, FMCalls %d: \n",
-                nVisits, valueString, children.size(), actionValues.size(), depth, fmCallsCount));
+                nVisits, valueString, children.size(), statsFor(decisionPlayer).actionValues.size(), depth, fmCallsCount));
         // sort all actions by visit count
-        List<AbstractAction> sortedActions = actionValues.keySet().stream()
+        List<AbstractAction> sortedActions = statsFor(decisionPlayer).actionValues.keySet().stream()
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(a -> -actionVisits(a)))
                 .toList();
