@@ -406,8 +406,8 @@ measured.
 
 ### 7.1 Defects that must be fixed, not worked around
 
-**D1 — `SGGameState.redeterminise` discards the observer's own card choice.** Verified, live on this
-branch:
+**D1 — `SGGameState.redeterminise` discarded the observer's own card choice.** Fixed; this was the
+Step 0 commit. The code was:
 
 ```java
 setTurnOwner(playerId);
@@ -433,8 +433,8 @@ is Step 0 of §8, because it is a behaviour change and must precede the no-op re
 `SGForwardModel._afterAction` additionally skips players whose hand is empty. Reconcile before
 Stage B.
 
-**D3 — `ForestNode` has no test coverage at all.** Nothing in `src/test/java/players/mcts/`
-exercises `numDeterminizations > 1`. That matters here because `ForestNode` never calls
+**D3 — `ForestNode` had no test coverage at all** (now fixed - see §8). Nothing in
+`src/test/java/players/mcts/` exercised `numDeterminizations > 1`. That matters here because `ForestNode` never calls
 `instantiate` (§8, A3) — a refactor that assumes it does will NPE on every forest run and ship
 undetected. Stage A adds a smoke test.
 
@@ -521,13 +521,18 @@ iteration order** — do not sort; the order is exactly what is being pinned —
 `action | nVisits | validVisits | doubleToLongBits(totValue[i]) | doubleToLongBits(squaredTotValue[i])`.
 SHA-256 the result and assert the literal.
 
-Restricted to `LMRGame` because `LMRAction.hashCode()` is `name.hashCode()`, and String hashing is
-spec-defined, so LMR trees are byte-reproducible across JVM runs. Real games are not automatically
-safe: `Enum.hashCode()` is identity-based in Java, so any action folding an enum through
-`Objects.hash(...)` gives run-varying `HashMap` order, which feeds the summation order in
-`nodeValue:470` and can flip a UCB comparison. **Before writing the assertion, capture the digest
-twice in two separate JVM runs and confirm they match.** If they do not, that substrate is unusable
-and mechanism (i) carries the proof alone.
+Restricted to `LMRGame`, and this turned out to matter for a different and more fundamental reason
+than anticipated. **`AbstractGameState.redeterminisationRnd` (:107) is deliberately unseeded, and
+`copy()` reseeds that copy's RNG from it (:354)** - so any game whose forward model consumes
+`gs.rnd` takes a different trajectory on every run of the same build. That is a framework design
+decision (hidden information must not be predictable from the game seed), not something a test
+should work around. LMRGame is reproducible precisely because it never consumes `gs.rnd`;
+Dominion, which shuffles, is not - verified by capturing twice in separate JVMs and diffing, which
+is worth doing before pinning any value.
+
+So the Dominion scenarios are checked structurally (node type, sub-root count, total visits) rather
+than exactly. That is still enough to catch a refactor that drops statistics, mis-keys a table or
+throws; exact coverage comes from the LMR set, which runs Information_Set with full digests.
 
 Configurations to cover, reusing the existing `TestMCTSPlayer` / `new Random(303897)` /
 `new LMTParameters(302)` harness from `MCTSTreeSelectionTests`: `UCB`, `UCB_Tuned`, `EXP3`,
@@ -704,6 +709,51 @@ Lambda/MaxLambda/MaxMC.
 
 *Acceptance: A1 unchanged.*
 
+
+### What actually landed, and where it differed from the plan above
+
+Stage A is implemented, as seven commits on `duct`, in the order given. Every one of them was
+checked against the full set in §10.1 plus `ForwardModelTestsWithMCTS#testSushiGoWithSeqUCT` and
+`#testSushiGoWithDUCT`, and the golden values captured at A1 have not moved since.
+
+Five things came out differently from the plan, all of them discovered by doing it:
+
+1. **The Dominion scenarios cannot be pinned exactly, for a better reason than the one predicted.**
+   Not enum hash codes, but the unseeded `redeterminisationRnd` described in A1 above. Worth
+   knowing generally: *no* test in this repo can pin exact search behaviour for a game that shuffles.
+
+2. **`statsFor` creating on demand is the only population path, and `instantiate` never allocates.**
+   The plan had `instantiate` re-key an object it might also have to create. Making `statsFor` the
+   sole creation point is simpler and removes the failure mode outright: there is no code path that
+   can hand a reused root an empty table. `instantiate` only re-keys, for the case where
+   `decisionPlayer` changes (the MCGS reuse path permits this; the standard path asserts against it).
+
+3. **The reward-index/table-selector split is threaded as an object, not a second int** (§4.2), and
+   that decision was forced rather than merely preferred: `nodeValue(int, int)` breaks `toString`'s
+   `this::nodeValue` reference outright.
+
+4. **Two API consequences of adding overloads**, neither anticipated:
+   - the `int[]` form of `actionVisits` had to become `actionVisitCounts(int)`, since overloading on
+     `int` collides with `actionVisits(AbstractAction)`;
+   - adding two-argument `actionVisits` overloads makes `root::actionVisits` an *inexact* method
+     reference, so javac stops inferring a comparator's type variable through it where the target
+     type is not already fixed. Two call sites in `MCTSDecisionRecorder` became explicit lambdas.
+     (A third, in `TestUndoOpponentFlank`, still compiles - its target type is fixed by `Stream.max`.)
+
+5. **The `backUpSingleNode` recomputation hazard is real but not demonstrable.** Reusing the list
+   returned by `updateActionStats` keeps the split identical by construction, but no configuration
+   could be found where recomputing actually differs - with distinct action-heuristic values the
+   widening sort is stable under the tie-break. Recorded as correctness by construction rather than
+   as a fixed bug. A `progressiveWideningTight` scenario was added to the golden set anyway, chosen
+   so the widened subset genuinely grows during the search (139 nodes rather than 201).
+
+Two claims from §7.1 were confirmed by experiment rather than left as assertions: swapping
+`actionValues` to a `LinkedHashMap` - a change to iteration order and nothing else - moves the LMR
+digests, and the `SGGameState.redeterminise` defect (D1) fails the new test without its fix.
+
+`ForestNode` (D3) now has coverage: it is exercised as a golden scenario, and confirmed to be the
+one root that reaches `initialiseRootMetrics()` without ever calling `instantiate()`.
+
 ### Explicitly out of Stage A
 
 `MCTSParams.decoupled` and its `_reset` clamps; `actingPlayers` / `actingPlayersAt`;
@@ -852,6 +902,11 @@ have something to compare against.
   iteration (`BasicDUCTPlayer:72-73`). That matches MCTS `Information_Set` — the default,
   `MCTSParams:31` — at `SingleTreeNode:344`, but **not** `Open_Loop` (:338, `copy(-1)`, no
   redeterminisation). Set `information` explicitly and identically on both sides.
+- **No search over a shuffling game is reproducible between runs.**
+  `AbstractGameState.redeterminisationRnd` (:107) is unseeded, and `copy()` reseeds that copy's RNG
+  from it (:354), so any game whose forward model consumes `gs.rnd` takes a different trajectory
+  every run. Any head-to-head between MCTS and DUCT therefore has to average over many games; a
+  single seeded game proves nothing, and no test can pin exact search behaviour for such a game.
 - **`DUCTNode.backUp` never increments `nVisits` on the newly expanded leaf**, because the leaf is
   created after `next()` returns and is not in `currentNodeTrajectory`. `SingleTreeNode` does count
   it. Node counts are therefore off by one per iteration between the two implementations.
