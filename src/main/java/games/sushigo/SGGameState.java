@@ -154,12 +154,15 @@ public class SGGameState extends AbstractGameState {
         // we have to set the turn owner so that getCurrentPlayer() returns the correct value
         // all players think they are the current player when picking actions simultaneously
         setTurnOwner(playerId);
+        // hide cardChoices (if made) of all other players, but keep our own:
+        // getCurrentSimultaneousPlayers() decides who still has to move from cardChoices being empty,
+        // so losing our own choice here would have us asked to play a second card.
+        List<List<ChooseCard>> oldChoices = cardChoices;
         cardChoices = new ArrayList<>();
-        // hide cardChoices (if made) of all other players
         for (int i = 0; i < getNPlayers(); i++) {
             cardChoices.add(new ArrayList<>());
             if (i == playerId) {
-                for (ChooseCard cc : cardChoices.get(i)) {
+                for (ChooseCard cc : oldChoices.get(i)) {
                     cardChoices.get(i).add(cc.copy());
                 }
             }
