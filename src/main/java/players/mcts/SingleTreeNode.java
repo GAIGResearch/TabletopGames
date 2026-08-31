@@ -136,10 +136,10 @@ public class SingleTreeNode {
         if (parent != null) {
             depth = parent.depth + 1;
             factory = parent.factory;
-            decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
+            decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : soleActingPlayer(state);
         } else { // this is the root node (possibly reused from previous tree)
             resetDepth(this);
-            decisionPlayer = state.getCurrentPlayer();
+            decisionPlayer = soleActingPlayer(state);
         }
 
         // instantiate() is also how a reused root is re-homed (see rootify), and the five per-player
@@ -194,6 +194,20 @@ public class SingleTreeNode {
     }
 
     /**
+     * Which player decides at the node we are about to create, find or record an action for.
+     * <p>
+     * Every place the search asks "who is acting here?" goes through this. Today the answer is
+     * always the state's current player, so this is exactly the code it replaces; the point is that
+     * there is now one place to change. When decoupled UCT lands this returns the single acting
+     * player where there is one, and -1 where several players decide at once - because a node at
+     * which three players move simultaneously has no single decision player, and inventing one
+     * would silently attribute their statistics to whoever was picked.
+     */
+    protected int soleActingPlayer(AbstractGameState s) {
+        return s.getCurrentPlayer();
+    }
+
+    /**
      * This is a key method. It is called when the tree search 'moves' to this node.
      * Because we are using Open Loop search, we need to make sure that the state is updated to reflect the
      * state in the current trajectory; each visit to the node may have a different underlying state, and it's
@@ -205,106 +219,121 @@ public class SingleTreeNode {
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer && actionState.isNotTerminalForPlayer(decisionPlayer)) {
-            statsFor(decisionPlayer).actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
-            //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
-//                statsFor(decisionPlayer).actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-            if (statsFor(decisionPlayer).actionsFromOpenLoopState.size() != statsFor(decisionPlayer).actionsFromOpenLoopState.stream().distinct().count())
-                throw new AssertionError("Duplicate actions found in action list: " +
-                        statsFor(decisionPlayer).actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-            if ((params.useActionHeuristicForMoveOrdering && nVisits < statsFor(decisionPlayer).actionsFromOpenLoopState.size())
-                    || params.pUCTTemperature <= 10000.0 || params.progressiveWideningConstant > 1.0
-                    || params.progressiveBias > 0 || params.initialiseVisits > 0) {
-                // We only need to calculate statsFor(decisionPlayer).actionValueEstimates if we are going to be using the data in one of these variants
-                // If not, then we can save processing time by not calculating them
-                // actionHeuristicRecalculationThreshold defines how often we recalculate the action values
-                // if the actionHeuristic is fixed, then this should be set to a very high value
-                // if, like MAST, the actionHeuristic is dynamic, then this should be set to a lower value as estimates may
-                // change over the course of the search. Setting it to 1 will update it on every visit; but possibly
-                // at a high additional computational cost.
-                if (params.actionHeuristic != IActionHeuristic.nullReturn) {
-                    if (statsFor(decisionPlayer).actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
-                        // in this case we initialise all action values
-                        double[] heuristicScores = params.actionHeuristic.evaluateAllActions(statsFor(decisionPlayer).actionsFromOpenLoopState, actionState);
-                        for (int i = 0; i < statsFor(decisionPlayer).actionsFromOpenLoopState.size(); i++) {
-                            statsFor(decisionPlayer).actionValueEstimates.put(statsFor(decisionPlayer).actionsFromOpenLoopState.get(i), heuristicScores[i]);
-                        }
-                    } else {
-                        // we just initialise the new actions
-                        for (AbstractAction action : statsFor(decisionPlayer).actionsFromOpenLoopState) {
-                            if (!statsFor(decisionPlayer).actionValueEstimates.containsKey(action)) {
-                                statsFor(decisionPlayer).actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState, statsFor(decisionPlayer).actionsFromOpenLoopState));
-                            }
-                        }
-                    }
-                } else {
-                    params.pUCTTemperature = 10001.0;
-                    params.progressiveBias = 0.0;
-                    params.initialiseVisits = 0;
-                    params.progressiveWideningConstant = 0.0;
-                    //System.out.println("Warning: actionHeuristic is nullReturn, so pUCT, initialiseVisits, progressive bias and pruning are disabled");
-                }
-            }
-            if (params.pUCTTemperature < 10000.0) {
-                // construct the pdf for the pUCT selection
-                // This ignores Progressive widening. This should not be a major issue, but means the pdf is calculated
-                // over all possible actions, rather than just the ones we are considering
-                // Generally if using pUCT we would expect FPU to also be used to give effective pruning, rather than the
-                // explicit pruning of Progressive Widening.
-                double[] pdf;
-                statsFor(decisionPlayer).actionPDFEstimates = new HashMap<>();
-                if (params.pUCTTemperature > 0.0) {
-                    // in this case we construct a Boltzmann
-                    double[] heuristicScores = statsFor(decisionPlayer).actionsFromOpenLoopState.stream().
-                            mapToDouble(a -> statsFor(decisionPlayer).actionValueEstimates.getOrDefault(a, 0.0)).toArray();
-                    pdf = pdf(exponentiatePotentials(heuristicScores, params.pUCTTemperature));
-
-                } else {
-                    // in this case, we first set any negative values to zero, and then construct the pdf directly
-                    double[] heuristicScores = statsFor(decisionPlayer).actionsFromOpenLoopState.stream().
-                            mapToDouble(a -> Math.max(0.0, statsFor(decisionPlayer).actionValueEstimates.getOrDefault(a, 0.0))).toArray();
-                    pdf = pdf(heuristicScores);
-                }
-                for (int i = 0; i < statsFor(decisionPlayer).actionsFromOpenLoopState.size(); i++) {
-                    statsFor(decisionPlayer).actionPDFEstimates.put(statsFor(decisionPlayer).actionsFromOpenLoopState.get(i), pdf[i]);
-                }
-            }
-            for (AbstractAction action : statsFor(decisionPlayer).actionsFromOpenLoopState) {
-                if (!statsFor(decisionPlayer).actionValues.containsKey(action)) {
-                    statsFor(decisionPlayer).actionValues.put(action, new ActionStats(actionState.getNPlayers()));
-                    children.put(action.copy(), null); // mark a new node to be expanded
-                    // This *does* rely on a good equals method being implemented for Actions
-                    if (!children.containsKey(action))
-                        throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
-                    // Then we seed the statistics with heuristic biases (if so parameterised)
-                    // This assumes that we have had params.initialiseVisits trials of each action before we start
-                    if (params.initialiseVisits > 0) {
-                        // This also ignores Progressive widening and initialises all possible actions
-                        // As with pUCT, this won't cause any major issues, but will mean that the effective node visits
-                        // will be higher than the visits of the considered actions.
-                        ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
-                        double actionEstimate = statsFor(decisionPlayer).actionValueEstimates.getOrDefault(action, 0.0);
-                        if (params.normaliseRewards) {
-                            if (actionEstimate > root.highReward) root.highReward = actionEstimate;
-                            if (actionEstimate < root.lowReward) root.lowReward = actionEstimate;
-                        }
-                        int nActions = Math.max(statsFor(decisionPlayer).actionValues.size(), statsFor(decisionPlayer).actionsFromOpenLoopState.size());
-                        stats.nVisits = params.initialiseVisits;
-                        stats.validVisits = params.initialiseVisits * nActions;
-                        stats.totValue[decisionPlayer] = actionEstimate * params.initialiseVisits;
-                        stats.squaredTotValue[decisionPlayer] = actionEstimate * actionEstimate * params.initialiseVisits;
-                        if (params.paranoid) // default to zero for other players, unless we're paranoid
-                            for (int i = 0; i < actionState.getNPlayers(); i++)
-                                if (i != decisionPlayer)
-                                    stats.totValue[i] = -stats.totValue[decisionPlayer];
-                        if (nVisits < params.initialiseVisits * nActions) {
-                            nVisits = params.initialiseVisits * nActions;
-                        }
-                    }
-                }
-            }
+            setActionsForPlayer(actionState, decisionPlayer);
         } else if (!params.opponentTreePolicy.selfOnlyTree) {
             throw new AssertionError("Expected?");
             // How have we got to a state in which the decision player is not the active player?
+        }
+    }
+
+    /**
+     * Work out one player's options at this node on this iteration, and initialise their statistics.
+     * <p>
+     * Separated from the guard above so that a node at which several players decide can call this
+     * once per acting player. Today there is only ever one, so this runs once.
+     * <p>
+     * Note the 3-arg computeAvailableActions: the 2-arg form it replaces is defined as exactly this
+     * call with actionState.getCurrentPlayer(), and the guard in the caller establishes that this is
+     * the same player - so it is the same call, made explicit.
+     */
+    protected void setActionsForPlayer(AbstractGameState actionState, int actingPlayer) {
+        PlayerDecisionStats pds = statsFor(actingPlayer);
+        pds.actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace, actingPlayer);
+        //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", actingPlayer, actionState.getCurrentPlayer(),
+//                pds.actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
+        if (pds.actionsFromOpenLoopState.size() != pds.actionsFromOpenLoopState.stream().distinct().count())
+            throw new AssertionError("Duplicate actions found in action list: " +
+                    pds.actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
+        if ((params.useActionHeuristicForMoveOrdering && nVisits < pds.actionsFromOpenLoopState.size())
+                || params.pUCTTemperature <= 10000.0 || params.progressiveWideningConstant > 1.0
+                || params.progressiveBias > 0 || params.initialiseVisits > 0) {
+            // We only need to calculate actionValueEstimates if we are going to be using the data in one of these variants
+            // If not, then we can save processing time by not calculating them
+            // actionHeuristicRecalculationThreshold defines how often we recalculate the action values
+            // if the actionHeuristic is fixed, then this should be set to a very high value
+            // if, like MAST, the actionHeuristic is dynamic, then this should be set to a lower value as estimates may
+            // change over the course of the search. Setting it to 1 will update it on every visit; but possibly
+            // at a high additional computational cost.
+            if (params.actionHeuristic != IActionHeuristic.nullReturn) {
+                if (pds.actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
+                    // in this case we initialise all action values
+                    double[] heuristicScores = params.actionHeuristic.evaluateAllActions(pds.actionsFromOpenLoopState, actionState);
+                    for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
+                        pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i), heuristicScores[i]);
+                    }
+                } else {
+                    // we just initialise the new actions
+                    for (AbstractAction action : pds.actionsFromOpenLoopState) {
+                        if (!pds.actionValueEstimates.containsKey(action)) {
+                            pds.actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState, pds.actionsFromOpenLoopState));
+                        }
+                    }
+                }
+            } else {
+                params.pUCTTemperature = 10001.0;
+                params.progressiveBias = 0.0;
+                params.initialiseVisits = 0;
+                params.progressiveWideningConstant = 0.0;
+                //System.out.println("Warning: actionHeuristic is nullReturn, so pUCT, initialiseVisits, progressive bias and pruning are disabled");
+            }
+        }
+        if (params.pUCTTemperature < 10000.0) {
+            // construct the pdf for the pUCT selection
+            // This ignores Progressive widening. This should not be a major issue, but means the pdf is calculated
+            // over all possible actions, rather than just the ones we are considering
+            // Generally if using pUCT we would expect FPU to also be used to give effective pruning, rather than the
+            // explicit pruning of Progressive Widening.
+            double[] pdf;
+            pds.actionPDFEstimates = new HashMap<>();
+            if (params.pUCTTemperature > 0.0) {
+                // in this case we construct a Boltzmann
+                double[] heuristicScores = pds.actionsFromOpenLoopState.stream().
+                        mapToDouble(a -> pds.actionValueEstimates.getOrDefault(a, 0.0)).toArray();
+                pdf = pdf(exponentiatePotentials(heuristicScores, params.pUCTTemperature));
+
+            } else {
+                // in this case, we first set any negative values to zero, and then construct the pdf directly
+                double[] heuristicScores = pds.actionsFromOpenLoopState.stream().
+                        mapToDouble(a -> Math.max(0.0, pds.actionValueEstimates.getOrDefault(a, 0.0))).toArray();
+                pdf = pdf(heuristicScores);
+            }
+            for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
+                pds.actionPDFEstimates.put(pds.actionsFromOpenLoopState.get(i), pdf[i]);
+            }
+        }
+        for (AbstractAction action : pds.actionsFromOpenLoopState) {
+            if (!pds.actionValues.containsKey(action)) {
+                pds.actionValues.put(action, new ActionStats(actionState.getNPlayers()));
+                children.put(action.copy(), null); // mark a new node to be expanded
+                // This *does* rely on a good equals method being implemented for Actions
+                if (!children.containsKey(action))
+                    throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
+                // Then we seed the statistics with heuristic biases (if so parameterised)
+                // This assumes that we have had params.initialiseVisits trials of each action before we start
+                if (params.initialiseVisits > 0) {
+                    // This also ignores Progressive widening and initialises all possible actions
+                    // As with pUCT, this won't cause any major issues, but will mean that the effective node visits
+                    // will be higher than the visits of the considered actions.
+                    ActionStats stats = pds.actionValues.get(action);
+                    double actionEstimate = pds.actionValueEstimates.getOrDefault(action, 0.0);
+                    if (params.normaliseRewards) {
+                        if (actionEstimate > root.highReward) root.highReward = actionEstimate;
+                        if (actionEstimate < root.lowReward) root.lowReward = actionEstimate;
+                    }
+                    int nActions = Math.max(pds.actionValues.size(), pds.actionsFromOpenLoopState.size());
+                    stats.nVisits = params.initialiseVisits;
+                    stats.validVisits = params.initialiseVisits * nActions;
+                    stats.totValue[actingPlayer] = actionEstimate * params.initialiseVisits;
+                    stats.squaredTotValue[actingPlayer] = actionEstimate * actionEstimate * params.initialiseVisits;
+                    if (params.paranoid) // default to zero for other players, unless we're paranoid
+                        for (int i = 0; i < actionState.getNPlayers(); i++)
+                            if (i != actingPlayer)
+                                stats.totValue[i] = -stats.totValue[actingPlayer];
+                    if (nVisits < params.initialiseVisits * nActions) {
+                        nVisits = params.initialiseVisits * nActions;
+                    }
+                }
+            }
         }
     }
 
@@ -571,7 +600,7 @@ public class SingleTreeNode {
             if (params.information == Closed_Loop) {
                 // we do not advance
                 // but we do want to track the actions taken (otherwise done in advanceState)
-                actionsInTree.add(new Pair<>(cur.openLoopState.getCurrentPlayer(), chosen));
+                actionsInTree.add(new Pair<>(cur.soleActingPlayer(cur.openLoopState), chosen));
             } else {
                 cur.advanceState(cur.openLoopState, chosen, false);
             }
@@ -617,7 +646,7 @@ public class SingleTreeNode {
 
     protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
-        int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
+        int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : soleActingPlayer(nextState);
         SingleTreeNode tn = createChildNode(actionCopy, nextState);
         // It is possible that we are expanding a node because a different player is the next to act
         SingleTreeNode[] newNodeArray = children.get(actionCopy);
@@ -650,7 +679,7 @@ public class SingleTreeNode {
             lastActorInRollout = gs.getCurrentPlayer();
             root.actionsInRollout.add(new Pair<>(lastActorInRollout, act));
         } else {
-            root.actionsInTree.add(new Pair<>(gs.getCurrentPlayer(), act));
+            root.actionsInTree.add(new Pair<>(soleActingPlayer(gs), act));
         }
         forwardModel.next(gs, act.copy());
         root.fmCallsCount++;
@@ -785,7 +814,7 @@ public class SingleTreeNode {
             return Arrays.stream(nodeArray).filter(Objects::nonNull).findFirst().orElse(null);
         } else {
             //  int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : openLoopState.getCurrentPlayer();
-            SingleTreeNode nextNode = nodeArray[openLoopState.getCurrentPlayer()];
+            SingleTreeNode nextNode = nodeArray[soleActingPlayer(openLoopState)];
 //            if (params.opponentTreePolicy.selfOnlyTree && nextNode.decisionPlayer != decisionPlayer) {
 //                nodeArray[nextPlayer] = SingleTreeNode.createChildNode(this, actionChosen.copy(), openLoopState, factory);
 //                nextNode = nodeArray[nextPlayer];
@@ -1352,6 +1381,12 @@ public class SingleTreeNode {
                             || params.opponentTreePolicy == MCGSSelfOnly)) {
                 // In these cases we need to recompute the available actions from the root state to ensure that
                 // we only consider the ones that are valid in the caller (in MCGS case it is possible that we have a loop round to the root)
+                // This stays the 2-arg form, i.e. the root state's current player. That is decisionPlayer,
+                // but only by a whole-program invariant (nobody reassigns root.state) rather than by a local
+                // guard, so assert it rather than quietly passing decisionPlayer instead.
+                if (state.getCurrentPlayer() != decisionPlayer)
+                    throw new AssertionError("Root state's current player is P" + state.getCurrentPlayer()
+                            + " but the root decides for P" + decisionPlayer);
                 availableActions = actionsToConsider(forwardModel.computeAvailableActions(state, params.actionSpace));
             }
             List<Pair<AbstractAction, Double>> tempValues = new ArrayList<>();
