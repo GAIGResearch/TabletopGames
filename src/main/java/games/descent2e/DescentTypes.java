@@ -24,7 +24,8 @@ import static games.descent2e.components.Figure.Attribute.MovePoints;
 public class DescentTypes {
 
     public enum Campaign {
-        HeirsOfBlood;
+        HeirsOfBlood,
+        PCG;
 
         private Quest[] quests;
         public Quest[] getQuests() {

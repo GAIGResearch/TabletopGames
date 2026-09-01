@@ -82,6 +82,8 @@ public class CreateOffspring {
 
     private GenerateBoardsGUI gui = null;
 
+    private Set<Integer> savedBoards = new HashSet<>();
+
     public CreateOffspring() {
     }
 
@@ -1013,6 +1015,14 @@ public class CreateOffspring {
             }
         }
         return null;
+    }
+
+    public void saveBoard(int id) {
+        savedBoards.add(id);
+    }
+
+    public boolean isBoardSaved(int id) {
+        return savedBoards.contains(id);
     }
 
     List<BoardNode> crossoverMutate(List<BoardNode> crossoverNodes, List<BoardNode> baseNodes) {

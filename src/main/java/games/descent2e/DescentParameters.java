@@ -6,12 +6,14 @@ import games.descent2e.components.DiceType;
 import java.util.*;
 
 import static games.descent2e.DescentTypes.Campaign.HeirsOfBlood;
+import static games.descent2e.DescentTypes.Campaign.PCG;
 import static games.descent2e.components.DiceType.RED;
 
 public class DescentParameters extends AbstractParameters {
 
     public String dataPath = "data/descent2e/";
     public DescentTypes.Campaign campaign = HeirsOfBlood;
+    //public DescentTypes.Campaign campaign = PCG;
 
     public int nActionsPerFigure = 2;
     public Map<DiceType, Integer> reviveDice = new HashMap<>() {{

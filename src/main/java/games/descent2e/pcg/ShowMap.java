@@ -1,11 +1,17 @@
 package games.descent2e.pcg;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.properties.PropertyStringArray;
 import games.descent2e.concepts.Quest;
 import games.descent2e.gui.DescentGridBoardView;
+import org.apache.commons.io.FileUtils;
 import org.jdesktop.swingx.border.DropShadowBorder;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import utilities.JSONUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,10 +23,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 public class ShowMap {
     private Quest quest;
@@ -301,11 +313,21 @@ public class ShowMap {
         positions.add(spawningContainer, BorderLayout.CENTER);
 
         JButton save = new JButton("Save");
+        if (co.isBoardSaved(id)) {
+            save.setText("Saved!");
+            save.setEnabled(false);
+        }
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 save.setText("Saved!");
                 save.setEnabled(false);
+                try {
+                    co.saveBoard(id);
+                    save(quest, board);
+                } catch (IOException | ParseException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
 
@@ -313,7 +335,7 @@ public class ShowMap {
         exit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                window.dispose();
+                hide();
                 if (parentElite != null)
                     parentElite.show();
                 if (parentList != null)
@@ -335,5 +357,130 @@ public class ShowMap {
 
     public void hide() {
         window.setVisible(false);
+    }
+
+    public void save(Quest quest, GraphBoard board) throws IOException, ParseException {
+        String questPath = "data/descent2e/mainQuests.json";
+        String boardPath = "data/descent2e/boards.json";
+        String pcgPath = "data/descent2e/campaigns/PCG.json";
+
+        Files.writeString(Path.of(pcgPath), "{\n  \"name\": \"PCG\",\n  \"quests\":\n    [\n      \"" + quest.getName() + "\"\n    ]\n}\n");
+
+        String questData = FileUtils.readFileToString(new File(questPath), StandardCharsets.UTF_8);
+        questData = questData.substring(0, questData.lastIndexOf("]") - 1) + ", ";
+        Files.writeString(Path.of(questPath), questData);
+
+        String boardData = FileUtils.readFileToString(new File(boardPath), StandardCharsets.UTF_8);
+        boardData = boardData.substring(0, boardData.lastIndexOf("]") - 1) + ", ";
+        Files.writeString(Path.of(boardPath), boardData);
+
+        StringBuilder outputQ = new StringBuilder("{\"");
+        outputQ.append("id\":\"").append(quest.getName()).append("\"");
+        outputQ.append(",\"act\":").append(quest.getAct());
+        outputQ.append(",\"starting-gold\":").append(quest.getGold());
+        outputQ.append(",\"starting-xp\":").append(quest.getStartingXP());
+        outputQ.append(",\"traits\": [\"").append(String.join("\", \"", quest.getMonsterTraits())).append("\"]");
+        outputQ.append(",\"monsters\": [");
+        int monsterMax = quest.getMonsters().size();
+        int monsterCounter = 0;
+        for (String[] monster : quest.getMonsters()) {
+            monsterCounter++;
+            outputQ.append("[\"").append(monster[0]).append("\", \"").append(monster[1]).append("\"]");
+            if (monsterCounter < monsterMax)
+                outputQ.append(",");
+            else
+                outputQ.append("]");
+        }
+
+        outputQ.append(",\"tokens\": []");
+        outputQ.append(",\"rules\": []");
+        outputQ.append(",\"game-over\": [{" +
+                "\"id\": \"CountGameOver\"," +
+                "\"count\": {" +
+                "\"type\": \"NFiguresAlive\"," +
+                "\"figureNameContains\": \"Hero\"}," +
+                "\"target\": 0," +
+                "\"comparison-type\": \"Equal\"," +
+                "\"result-heroes\": \"LOSE_GAME\"," +
+                "\"result-overlord\": \"WIN_GAME\"" +
+                "},{" +
+                "\"id\": \"CountGameOver\"," +
+                "\"count\": {" +
+                "\"type\": \"NFiguresAlive\"," +
+                "\"figureNameContains\": \"Monster\"}," +
+                "\"target\": 0," +
+                "\"comparison-type\": \"Equal\"," +
+                "\"result-heroes\": \"WIN_GAME\"," +
+                "\"result-overlord\": \"LOSE_GAME\"" +
+                "}]");
+
+        outputQ.append(",\"common-rewards\": [{" +
+                "\"rewardType\": \"Attribute\"," +
+                "\"attribute\": \"XP\"," +
+                "\"value\": 1.0" +
+                "}]");
+        outputQ.append(",\"overlord-rewards\": [{" +
+                "\"rewardType\": \"Attribute\"," +
+                "\"attribute\": \"XP\"," +
+                "\"value\": 1.0," +
+                "\"mustWinToReceive\": true" +
+                "}]");
+        outputQ.append(",\"boards\": [ \"").append(board.getComponentName()).append("\"]");
+        outputQ.append(",\"starting-tile\": \"").append(quest.getStartingTile()).append("\"");
+
+        outputQ.append("}");
+
+        ObjectMapper mapper = new ObjectMapper();
+        Object q = mapper.readValue(outputQ.toString(), Object.class);
+        String prettyQ = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(q) + "]";
+        Files.writeString(Path.of(questPath),prettyQ + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+
+        StringBuilder outputB = new StringBuilder("{");
+
+        outputB.append("\"type\": \"graph\",");
+        outputB.append("\"verticesKey\": \"name\",");
+        outputB.append("\"neighboursKey\": \"neighbours\",");
+        outputB.append("\"maxNeighbours\": -1,");
+        outputB.append("\"id\": \"").append(board.getComponentName()).append("\",");
+        outputB.append("\"nodes\": [");
+        int nodeCount = 0;
+        for (BoardNode node : board.getBoardNodes()) {
+            nodeCount++;
+
+            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
+            String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+
+            outputB.append("{ \"name\": [\"String\", \"").append(node.getComponentName()).append("\"],");
+            outputB.append("\"orientation\": [\"Integer\", ").append(node.getProperty("orientation")).append("],");
+            outputB.append("\"neighbours\": [\"String[]\", [");
+
+            int neighbourCount = 0;
+            for (String neighbour : neighbours) {
+                neighbourCount++;
+                outputB.append("\"").append(neighbour).append("\"");
+                if (neighbourCount < neighbours.length)
+                    outputB.append(", ");
+                else
+                    outputB.append("]],");
+            }
+            outputB.append("\"connections\": [\"String[]\", [");
+            neighbourCount = 0;
+            for (String connect : connections) {
+                neighbourCount++;
+                outputB.append("\"").append(connect).append("\"");
+                if (neighbourCount < connections.length)
+                    outputB.append(", ");
+                else
+                    outputB.append("]]}");
+            }
+            if (nodeCount < board.getBoardNodes().size())
+                outputB.append(",");
+            else
+                outputB.append("]}");
+        }
+
+        Object b = mapper.readValue(outputB.toString(), Object.class);
+        String prettyB = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(b) +"]";
+        Files.writeString(Path.of(boardPath),prettyB + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 }

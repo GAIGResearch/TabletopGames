@@ -100,7 +100,7 @@ public class ShowMAPElite {
             JPanel label = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             label.add(new JLabel(labelName));
             label.setMinimumSize(gridSize);
-            label.setMaximumSize(gridSize);
+            label.setMaximumSize(new Dimension(squareSize * 2, squareSize));
             label.setBackground(Color.WHITE);
             row.add(label);
             for (int j = 0; j < yRange; j++) {
@@ -160,7 +160,7 @@ public class ShowMAPElite {
         JPanel yAxis = new JPanel();
         yAxis.setLayout(new BoxLayout(yAxis, BoxLayout.X_AXIS));
         yAxis.setBackground(Color.WHITE);
-        JLabel blank = new JLabel("");
+        JLabel blank = new JLabel("_");
         blank.setBackground(Color.WHITE);
         blank.setForeground(Color.WHITE);
         blank.setPreferredSize(gridSize);
@@ -168,7 +168,7 @@ public class ShowMAPElite {
         blank.setMinimumSize(gridSize);
         yAxis.add(blank);
         for (int i = minMax.b.a.intValue(); i <= minMax.b.b.intValue(); i++) {
-            JPanel axisContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            JPanel axisContainer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             axisContainer.setBackground(Color.WHITE);
             JLabel axisLabel = new JLabel(String.valueOf(i));
             axisContainer.setPreferredSize(gridSize);
