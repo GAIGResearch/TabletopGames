@@ -39,6 +39,32 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * The players who still have to choose this turn: everyone in the cave whose choice has not yet
+     * been recorded in actionsPlayed. Players who have left the cave make no decision at all until
+     * the next cave starts.
+     */
+    public List<Integer> getPlayersStillToChoose() {
+        return IntStream.range(0, getNPlayers())
+                .filter(p -> playerInCave.get(p) && !actionsPlayed.containsKey(p))
+                .boxed()
+                .toList();
+    }
+
+    @Override
+    public List<Integer> getCurrentSimultaneousPlayers() {
+        if (isActionInProgress()) {
+            return super.getCurrentSimultaneousPlayers();
+        }
+        List<Integer> toDecide = getPlayersStillToChoose();
+        if (toDecide.isEmpty()) {
+            // every player in the cave has chosen, so the forward model should already have
+            // resolved the turn and cleared the choices. Say so loudly rather than return nobody.
+            throw new AssertionError("All players in the cave have chosen but the turn has not been resolved");
+        }
+        return toDecide;
+    }
+
     // helper data class to store interesting information
     static class PlayerTurnRecord {
         public final int player;
@@ -125,23 +151,32 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
 
         dgs.playerInCave.addAll(playerInCave);
 
-        // mainDeck and is actionsPlayed are hidden.
-        if (getCoreGameParameters().partialObservable && playerId != -1)
-        {
-            dgs.mainDeck.shuffle(redeterminisationRnd);
-
-            dgs.actionsPlayed.clear();
-
-            // TODO: We also should remove the history entries for the removed actions
-            // This is not formally necessary, as nothing currently uses this information, but in
-            // a competition setting for example, it would be critical. There is no simple way to do this at the moment
-            // because history (as part of the super-class) is only copied after we return from this _copy() method.
-
-           // Randomize actions for other players (or any other modelling approach)
-            // is now the responsibility of the deciding agent (see for example OSLA)
-
-        }
+        // Hidden information (the main deck order, and the other players' choices this turn) is
+        // dealt with in redeterminise(), which the superclass calls on the copy when appropriate.
         return dgs;
+    }
+
+    @Override
+    public void redeterminise(int playerId) {
+        mainDeck.shuffle(redeterminisationRnd);
+
+        // Hide the choices the other players have already made this turn, but keep our own:
+        // getCurrentSimultaneousPlayers() decides who still has to choose from actionsPlayed, so
+        // losing our own choice here would have us asked to choose a second time.
+        // Modelling what the others chose is the responsibility of the deciding agent.
+        AbstractAction ownChoice = actionsPlayed.get(playerId);
+        actionsPlayed.clear();
+        if (ownChoice != null)
+            actionsPlayed.put(playerId, ownChoice.copy());
+
+        // All players choose at once, so every player sees themselves as the current player.
+        // This is what the 2-argument computeAvailableActions() reads.
+        setTurnOwner(playerId);
+
+        // TODO: We also should remove the history entries for the removed actions
+        // This is not formally necessary, as nothing currently uses this information, but in
+        // a competition setting for example, it would be critical. There is no simple way to do this at the moment
+        // because history (as part of the super-class) is only copied after we return from this _copy() method.
     }
 
     @Override

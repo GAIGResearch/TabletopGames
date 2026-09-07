@@ -8,7 +8,6 @@ import core.components.Deck;
 import core.interfaces.ITreeActionSpace;
 import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
-import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.cards.DiamantCard.HazardType;
 import games.diamant.components.ActionsPlayed;
@@ -100,8 +99,10 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     }
 
     /**
-     * In this game, all players play the action at the same time.
-     * When an agent call next, the action is just stored in the gameState.
+     * In this game, all players in the cave choose at the same time. Executing an action just
+     * records the choice in the game state; the turn is resolved once every player in the cave has
+     * chosen. Choices may arrive one at a time (the turn is handed round the players still to
+     * choose) or all together as a single SimultaneousAction, and both reach the same state.
      *
      * @param currentState: current state of the game
      * @param action:       action to be executed
@@ -110,13 +111,47 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DiamantGameState dgs = (DiamantGameState) currentState;
         int startingRound = dgs.getRoundCounter();
-        // If all players have an action, execute them
-        if (dgs.actionsPlayed.size() == dgs.getNPlayers()) {
+        if (dgs.getPlayersStillToChoose().isEmpty()) {
             playActions(dgs);
             dgs.actionsPlayed.clear();
         }
+        // If the cave ended, endRound has already handed the turn to the first player of the new one
         if (dgs.getRoundCounter() == startingRound && dgs.isNotTerminal())
-            endPlayerTurn(dgs);
+            endPlayerTurn(dgs, nextPlayerToChoose(dgs));
+    }
+
+    /**
+     * The player who holds the turn when a new cave starts: the lowest-numbered player who was
+     * outside the cave when it ended, or player 0 if nobody was. Called before everyone is put back
+     * into the cave.
+     * <p>
+     * For the game itself any player would do, since everyone chooses at once. The choice matters
+     * to the open-loop search tree, which files the node reached after an action under the player
+     * who then holds the turn. When the cave continues, that is one of the players who chose to
+     * continue; when a hazard ends it, everyone is back in the cave and all of them decide next.
+     * The same joint action leads to both, by chance, so the turn owner after a collapse must not be
+     * one of the continuing players, or the two outcomes would share a node with different sets of
+     * acting players.
+     */
+    private int firstPlayerOfNextCave(DiamantGameState dgs) {
+        for (int p = 0; p < dgs.getNPlayers(); p++)
+            if (!dgs.playerInCave.get(p))
+                return p;
+        return 0;
+    }
+
+    /**
+     * The next player, cycling round from the current one, who is in the cave and has not yet
+     * chosen this turn. Players who have left the cave are never given the turn.
+     */
+    private int nextPlayerToChoose(DiamantGameState dgs) {
+        int current = dgs.getCurrentPlayer();
+        for (int i = 1; i <= dgs.getNPlayers(); i++) {
+            int p = (current + i) % dgs.getNPlayers();
+            if (dgs.playerInCave.get(p) && !dgs.actionsPlayed.containsKey(p))
+                return p;
+        }
+        throw new AssertionError("No player in the cave is still to choose");
     }
 
 
@@ -204,7 +239,7 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     private void prepareNewCave(DiamantGameState dgs) {
         DiamantParameters dp = (DiamantParameters) dgs.getGameParameters();
 
-        endRound(dgs);
+        endRound(dgs, firstPlayerOfNextCave(dgs));
 
         dgs.nCave++;
 
@@ -235,24 +270,29 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     }
 
 
-    /**
-     * Gets the possible actions to be played
-     * If the player is not in the cave, only OutOfCave action can be played
-     * If the player is in the cave, there are only two actions: ExitFromCave, ContinueInCave
-     *
-     * @param gameState: current game state
-     */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, gameState.getCurrentPlayer());
+    }
+
+    /**
+     * Gets the possible actions for the given player.
+     * A player in the cave has exactly two: ExitFromCave and ContinueInCave.
+     * A player who has left the cave has no decision to make until the next cave, and is never
+     * given the turn (see DiamantGameState.getCurrentSimultaneousPlayers), so their list is empty.
+     *
+     * @param gameState:    current game state
+     * @param activePlayer: the player whose actions are wanted
+     */
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int activePlayer) {
         DiamantGameState dgs = (DiamantGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
-        // If the player is still in the cave
-        if (dgs.playerInCave.get(gameState.getCurrentPlayer())) {
-            actions.add(new ContinueInCave());
-            actions.add(new ExitFromCave());
-        } else
-            actions.add(new OutOfCave());
+        if (dgs.playerInCave.get(activePlayer)) {
+            actions.add(new ContinueInCave(activePlayer));
+            actions.add(new ExitFromCave(activePlayer));
+        }
 
         return actions;
     }
@@ -320,7 +360,6 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         ActionTreeNode tree = new ActionTreeNode(0, "root");
         tree.addChild(0, "continue");
         tree.addChild(0, "exit");
-        tree.addChild(0, "out"); // dummy action for staying in cave
         return tree;
     }
 
@@ -328,11 +367,10 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
         DiamantGameState dgs = (DiamantGameState) gameState;
         root.resetTree();
-        if (dgs.playerInCave.get(gameState.getCurrentPlayer())) {
-            root.findChildrenByName("continue").setAction(new ContinueInCave());
-            root.findChildrenByName("exit").setAction(new ExitFromCave());
-        } else {
-            root.findChildrenByName("out").setAction(new OutOfCave());
+        int player = gameState.getCurrentPlayer();
+        if (dgs.playerInCave.get(player)) {
+            root.findChildrenByName("continue").setAction(new ContinueInCave(player));
+            root.findChildrenByName("exit").setAction(new ExitFromCave(player));
         }
         return root;
     }
