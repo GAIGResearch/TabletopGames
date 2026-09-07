@@ -1,5 +1,6 @@
 package players.mcts;
 
+import core.actions.AbstractAction;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -84,13 +85,21 @@ public class TreeStatistics {
                 nodesAtDepth[node.depth]++;
                 if (node.terminalNode)
                     gameTerminalNodesAtDepth[node.depth]++;
-                totalActions += node.getActionValues().size();
-                // We have expanded an action if it has been visited more often than initialiseVisits
-                expandedActions += (int) node.getActionValues().values().stream().filter(stats -> stats.nVisits > root.params.initialiseVisits).count();
-                if (node.getActionValues().size() == 1)
+                // One table per acting player: a sequential node has one, a decoupled simultaneous
+                // node one per player. Action counts are summed across them.
+                List<Integer> actors = node.isMultiActor() ? node.getActingPlayers() : List.of(node.getActor());
+                int actionsHere = 0;
+                for (int p : actors) {
+                    Map<AbstractAction, ActionStats> table = node.getActionValues(p);
+                    actionsHere += table.size();
+                    // We have expanded an action if it has been visited more often than initialiseVisits
+                    expandedActions += (int) table.values().stream().filter(stats -> stats.nVisits > root.params.initialiseVisits).count();
+                }
+                totalActions += actionsHere;
+                if (actionsHere == 1)
                     oneAction++;
-                if (node.getActionValues().size() > maxActions)
-                    maxActions = node.getActionValues().size();
+                if (actionsHere > maxActions)
+                    maxActions = actionsHere;
                 for (SingleTreeNode child : node.children.values().stream()
                         .filter(Objects::nonNull)
                         .flatMap(Arrays::stream)
@@ -99,7 +108,11 @@ public class TreeStatistics {
                     if (child != null)
                         nodeQueue.add(child);
                 }
-                if (node.getActionValues().values().stream().allMatch(stats -> stats.nVisits <= root.params.initialiseVisits))
+                boolean leaf = true;
+                for (int p : actors)
+                    if (!node.getActionValues(p).values().stream().allMatch(stats -> stats.nVisits <= root.params.initialiseVisits))
+                        leaf = false;
+                if (leaf)
                     leavesAtDepth[node.depth]++;
             }
             if (node.depth > greatestDepth)

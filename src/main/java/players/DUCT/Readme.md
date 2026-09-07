@@ -2,10 +2,11 @@
 
 *Draft 3. Revised in the light of JG's review comments on draft 2, and of a line-by-line
 verification pass over `SingleTreeNode` and every one of its consumers. JG's comments are answered in
-place rather than left inline; the review history is in §12. No code has been changed.*
+place rather than left inline; the review history is in §12. Stage A and Stage B have both since
+landed on `duct`; §8 and §9 each end with a record of what was actually built.*
 
-Line references are against the `duct` branch at the time of writing and move as soon as the first
-edit lands. Anything marked **verified** was checked against the working tree while writing draft 3.
+Line references are against the `duct` branch at the time of writing.
+Anything marked **verified** was checked against the working tree while writing draft 3.
 
 ---
 
@@ -59,7 +60,7 @@ will ever arrive unless the two implementations become one.
   `DUCTParams.decoupled`. Not a new `OpponentTreePolicy` value.
 - `players/DUCT` stays as an independently verifiable reference baseline. Retiring it is not covered.
 - MCGS is out of scope.
-- §8 (Stage A) is the actionable part. §9 (Stage B) is deliberately an outline.
+- §8 (Stage A) and §9 (Stage B) are both implemented; each ends with what actually landed.
 
 ---
 
@@ -87,7 +88,7 @@ The four obligations:
 
 2. **The forward model must accept single-player actions applied one at a time**, and sequence them
    itself. `SGForwardModel._afterAction` cycles to the next player who has not yet chosen and only
-   reveals once everyone has. This is what makes MCTS rollouts, `advanceToTurnOfPlayer`, opponent
+   reveals once everyone has. DiamantForwardModel does the same (and every other game that has simultaneous moves) This is what makes MCTS rollouts, `advanceToTurnOfPlayer`, opponent
    models, OSLA, RHEA and every non-decoupled agent work on the game at all — and it is why
    rollouts stay sequential (§4.5) rather than building joint actions for symmetry.
 
@@ -152,13 +153,13 @@ Not just `actionValues`. Reading `setActionsFromOpenLoopState` (:197-301), `tree
 (:629-697) and `backUpSingleNode` (:1054-1147) together, **five** fields are per-acting-player, and
 they co-vary — written together in one pass, read together in the next:
 
-| Field | Line | Type | Role |
-|---|---|---|---|
-| `actionsFromOpenLoopState` | :48 | `List<AbstractAction>` | the candidates this player has *this iteration* |
-| `actionValues` | :72 | `Map<AbstractAction, ActionStats>` | visits/value per candidate |
-| `actionValueEstimates` | :49 | `Map<AbstractAction, Double>` | action-heuristic scores (move ordering, progressive bias) |
-| `actionPDFEstimates` | :50 | `Map<AbstractAction, Double>` | pUCT prior |
-| `regretMatchingAverage` | :62 | `Map<AbstractAction, Double>` | RM average policy |
+| Field | Line | Type | Role                                                                           |
+|---|---|---|--------------------------------------------------------------------------------|
+| `actionsFromOpenLoopState` | :48 | `List<AbstractAction>` | the candidates this player has *this iteration* (i.e. in this determinisation) |
+| `actionValues` | :72 | `Map<AbstractAction, ActionStats>` | visits/value per candidate                                                     |
+| `actionValueEstimates` | :49 | `Map<AbstractAction, Double>` | action-heuristic scores (move ordering, progressive bias)                      |
+| `actionPDFEstimates` | :50 | `Map<AbstractAction, Double>` | pUCT prior                                                                     |
+| `regretMatchingAverage` | :62 | `Map<AbstractAction, Double>` | RM average policy                                                              |
 
 Group them into one small container, `PlayerDecisionStats`, a new package-visible class in
 `players.mcts`:
@@ -190,12 +191,10 @@ and capacity trajectory — and it is *observed*: `nodeValue:468-471` sums over 
 order fixes the floating-point summation and can flip a UCB comparison), `bestAction():1243` does
 `keySet().stream().findFirst()`, and `toString():1381-1384` sorts stably so ties fall back to table
 order. `new HashMap<>(4)` changes the table length and therefore the order.
+[JG: This outright ban of LinkedHashMap is downright wrong. Sometimes this is required to ensure that the order of iteration though the Actions is i insertion order an dnot in hash code order, as an Action can get different hashcodes (due to changing Component Ids) depending on details of the game state]
+[JG: Follow the existing conventions in SingleTreeNode - they are there for a reason]
 
-**`nVisits` stays a single node-level counter.** This is where the draft 1 sibling design paid its
-largest hidden tax: it needed explicit parity maintenance, or else `nodeValue`, `validVisitsFor`,
-progressive widening, EXP3, RM and the RM update cadence all silently degraded for non-primary
-players. Here there is exactly one node, so exactly one visit count — which is also what `DUCTNode`
-does. The trap disappears rather than being managed.
+**`nVisits` stays a single node-level counter.** 
 
 ### 4.2 Two different meanings of "player" — and how to thread them safely
 
@@ -253,13 +252,13 @@ The consequences, in full:
   to make. That is what keeps `bestAction()`, `getValue()`, `MCTSPlayer.getDecisionStats`,
   `MCTSMetrics` and `MCTSDecisionRecorder` correct with no change at all.
 
-The Stage A seam is therefore one method:
+The seam is therefore one method, added in **Stage B**. (Stage A landed it as a bare
+`getCurrentPlayer()` pass-through; that was reverted on review as indirection with no value until
+the body changes - see §8, "What actually landed", item 6. The six sites that ask "who acts here?"
+call `getCurrentPlayer()` directly today, exactly as on master.)
 
 ```java
-// Stage A body - literally today's behaviour
-protected int soleActingPlayer(AbstractGameState s) { return s.getCurrentPlayer(); }
-
-// Stage B body
+// Stage B - replaces the six direct getCurrentPlayer() calls listed under Step A7
 protected int soleActingPlayer(AbstractGameState s) {
     if (!params.decoupled) return s.getCurrentPlayer();
     List<Integer> acting = s.getCurrentSimultaneousPlayers();
@@ -355,7 +354,18 @@ matching `_reset()` read.
 
 **`MCTSParams._reset()` guards**, following the clamp precedent at `MCTSParams:152-156`
 (auto-correct plus a console warning): force `decoupled = false` unless
-`opponentTreePolicy == OneTree`; force `information != Closed_Loop`; force `reuseTree = false`.
+`opponentTreePolicy == OneTree`; force `reuseTree = false` while §6.1 is outstanding. `Closed_Loop`
+and `RegretMatching` are **not** clamped - both are in Stage B (§6, §9).
+
+*As landed:* `_reset()` clamps `decoupled` off, **silently**, when `opponentTreePolicy != OneTree`
+or `numDeterminizations > 1`. Silently because `decoupled` defaults to true, so the warning would
+fire for every MCGS, SelfOnly or forest configuration on every game, simultaneous or not, to report
+a default being overridden by a deliberate choice. The same test is repeated on the node
+(`SingleTreeNode.decoupled()`), because the tests set parameter fields directly and never pass
+through `_reset()`. `reuseTree` is **not** clamped in `_reset()` at all: that would switch reuse off
+for every sequential game whenever `decoupled` is at its default. Instead `MCTSPlayer.newRootNode`
+skips reuse, with one console warning per player instance, only when the new root state is itself
+a simultaneous decision under `decoupled` - the one case §6.1 has not yet made work.
 
 **`MCTSPlayer:307`** — the assertion
 
@@ -377,17 +387,102 @@ is the model to copy.
 
 ---
 
-## 6. What must be gated off, and why
+## 6. What is gated off, what is deferred, and why
+
+Gated off under `decoupled` (clamped in `MCTSParams._reset()`, §5). None of these makes sense with
+simultaneous moves, so the gate is permanent:
 
 | Feature | Reason |
 |---|---|
-| `Closed_Loop` | `treePolicy` never advances the state (:510-513 only appends to `actionsInTree`), so decoupled selection has nothing to select against; and `nextNodeInTree:710-714` returns the first non-null child regardless of actor. `MultiTreeNode:34-37` sets the precedent of force-switching to `Open_Loop`. |
 | `SelfOnly` | `treePolicyAction:630` throws whenever the current player is not `decisionPlayer`, and `advanceToTurnOfPlayer:603-628` advances players one at a time and never builds a joint action. |
 | `MultiTree` | `MultiTreeNode:141` throws on `p != currentLocation[p].decisionPlayer`. |
 | `OMA` / `OMA_All` | `OMATreeNode.backUp:78-86` walks `selfActionsOnly` and asserts `currentNode.actionValues.containsKey(actionTakenFromParent)`. Those entries would be *joint* actions while the table is keyed by *components*, so :84 fires; `OMAChildren` is likewise keyed by single actions. |
-| `RegretMatching` | The average-policy refresh at :1092-1098 sits in the part of `backUpSingleNode` that runs once per node, not once per player (§9). Gate off until the fan-out is extended, rather than shipping a policy silently maintained for only one player. |
-| `reuseTree` | Degrades silently rather than crashing. `AbstractForwardModel:143-146` records *component* actions in history, so `backtrack`'s match at `MCTSPlayer:210` succeeds - but the forward walk `children.get(action)` at `MCTSPlayer:227-228` compares components against joint keys, always misses, and rebuilds the tree every turn. |
 | `numDeterminizations > 1` | `ForestNode:121` reads `roots[i].actionValues` and `totValue[decisionPlayer]`; correct for the primary player only, so a decoupled forest would silently ignore the other players' tables. The `OneTree`-only gate covers it. |
+
+Two features that draft 3 had in that table are **in Stage B** on re-examination (review in §12):
+
+- **`Closed_Loop` needs one change, not a gate.** Draft 3's objection was that `treePolicy` never
+  advances the state, so decoupled selection had "nothing to select against". That is wrong: the
+  candidates at a multi-actor node come from the 3-arg `computeAvailableActions` applied to the
+  state stored against the node when it was created (§9 step 3), and a stored, never-advanced state
+  is precisely what `Closed_Loop` keeps. The second objection, that the `Closed_Loop` branch of
+  `nextNodeInTree` (:806-808) returns the first non-null child "regardless of actor", is no
+  objection either: a deterministic joint transition has exactly one child. Expansion
+  (`expandNode:641`) already applies the chosen action to a copy and stores the result, and
+  `AbstractForwardModel.next:143-146` already applies a `SimultaneousAction` component by component.
+  The one site that does need work is the `Closed_Loop` bypass at `treePolicy:594-597`, which
+  appends a single `(getCurrentPlayer(), chosen)` pair to `actionsInTree` without going through
+  `advanceState`: at a multi-actor node it must record the same thing `advanceState` records there,
+  a `(-1, jointAction)` pair, so that `backUp` and `MASTBackup` see the identical shape on both
+  paths. That is §9 step 4a, with its own test (§10.2, item 14). *As landed:* exactly that, one
+  line, via `soleActingPlayer`.
+- **`RegretMatching` needs a small extension, not a gate.** Two sites act on `decisionPlayer`
+  alone, and both simply loop over the acting players in Stage B (§9 step 5): the average-policy
+  refresh in `backUpSingleNode` (:1257-1263), which is keyed off node `nVisits` with `updateEvery`
+  derived from *that player's* `actionsToConsider`; and `initialiseRootMetrics` (:339), which
+  clears only that player's `regretMatchingAverage`. `bestAction` (:1361-1365) is right as it
+  stands, since the action returned from the root is always the `decisionPlayer`'s. Test at §10.2,
+  item 15.
+
+**One limitation introduced by Stage B, documented rather than gated.** The `Lambda`, `MaxLambda`
+and `MaxMC` backup tails in `backUpSingleNode` interpolate the result with the running mean of
+*the* action taken, or of the best action - a single-actor notion. At a multi-actor node there is
+one such quantity per acting player and no principled way to combine them, so at those nodes the
+backup is plain Monte Carlo whatever `backupPolicy` says; single-actor nodes in the same tree still
+apply the configured policy. `StageBDecoupledTests.nonMonteCarloBackupIsMonteCarloAtMultiActorNodes`
+pins this (on the all-multi-actor fixture the Lambda and MaxMC trees are byte-identical to the
+Monte Carlo one). A per-player generalisation is a possible follow-up; it is not needed for the
+MCTS-vs-DUCT comparison, which uses Monte Carlo backups on both sides.
+
+### 6.1 Deferred, not gated: `reuseTree` with simultaneous moves
+
+`reuseTree` is clamped to `false` under `decoupled` **for the moment only**. Tree reuse has to work
+with simultaneous moves, and it is the first item after Stage B; the clamp exists so that Stage B
+can land without it, and must come out when it does. Nothing here is hard, but it is three
+coordinated changes in `MCTSPlayer` plus a test, and it is not needed to compare MCTS against DUCT
+(§11), which is Stage B's purpose.
+
+**Why it does not work today.** Under joint keys the reuse path degrades silently rather than
+crashing. `AbstractForwardModel.next:141-149` records *component* actions in history, one per
+player, whether the game applied a `SimultaneousAction` or the players' actions one at a time; so
+`backtrack`'s backward search for `lastAction` (`MCTSPlayer:209`) still succeeds. But the forward
+walk then looks up each component in `children` (`MCTSPlayer:227`), which at a multi-actor node
+holds *joint* keys, so it always misses, `newRoot` is `null`, and the tree is rebuilt every turn -
+which is exactly what `reuseTree=false` does, at the cost of the backtrack.
+
+**What already works, verified.** The history is in the right shape: components are recorded per
+player in both application paths, and the entries for one simultaneous turn are contiguous.
+`SimultaneousAction` equality and hash code are those of its `Map<Integer, AbstractAction>`, so the
+order in which the components appear in history does not matter (SushiGo starts each simultaneous
+turn with whichever player chose last, so that order is *not* by player id). And the miss case is
+already graceful: when the real joint action was never expanded in the tree - likely under
+`Information_Set`, where the tree's joint children were built against redeterminised opponent
+hands - the lookup returns `null` and the tree is rebuilt, as it is today when a child is absent.
+
+**What has to change** (line references current on `duct` at the time of writing):
+
+1. `MCTSPlayer.backtrack:201-245` - the forward walk. On reaching a node whose `actingPlayers`
+   has more than one entry, consume the next `actingPlayers.size()` history entries, check their
+   player ids equal that acting set, build a `SimultaneousAction` from them, and look up
+   `children.get(joint)`. The child array is indexed by the next state's `getCurrentPlayer()` in
+   every case - Stage B left `expandNode` and `nextNodeInTree` unchanged in that respect - and
+   after a joint action SushiGo leaves the turn owner where it was, so at a multi-actor successor
+   that index is the searching player. Backtrack must index the same way. Any mismatch (a missing
+   entry, an unexpected player) sets `newRoot = null` and falls through to the existing rebuild.
+2. `SingleTreeNode.rootify:160` and the re-key block in `instantiate:145-166` - the new root
+   after a real simultaneous turn *is* a multi-actor node (that is what a decoupled SushiGo root
+   is), with `decisionPlayer == -1` and one `PlayerDecisionStats` per acting player. The re-key
+   block already leaves a multi-entry table alone; what `rootify` must additionally do is
+   establish the searching agent as the root's decision owner (§4.3, "the root always has a valid
+   `decisionPlayer`") without disturbing the other players' tables.
+3. `MCTSPlayer:189-190` - the assertion that `newRoot.decisionPlayer == gameState.getCurrentPlayer()`
+   fails by construction for a reused multi-actor root and must be relaxed to "the current player
+   is in the root's acting set".
+
+**Test** (to add alongside §10.2): 3-player SushiGo, `reuseTree=true`, `decoupled=true`; play one
+full simultaneous turn with all three seats MCTS; assert that the second search's root has
+`inheritedVisits > 0` and that its `statsByPlayer` keys equal the new acting set. A second case
+under `Information_Set` asserts only that the search completes, since reuse there is best-effort.
 
 Unaffected, verified: `TreeStatistics:87-102`, `TreeRecorder`, `MCTSExpertIterationListener`,
 `MCTSDecisionRecorder`, `allNodesInTree:1347-1363` — all traverse `children` or read
@@ -433,6 +528,14 @@ is Step 0 of §8, because it is a behaviour change and must precede the no-op re
 `SGForwardModel._afterAction` additionally skips players whose hand is empty. Reconcile before
 Stage B.
 
+**Resolved (JG, on review of Stage A):** the hand-empty clause was removed from
+`SGForwardModel._afterAction`, so both sides now select on `cardChoices` alone. It was an incorrect
+silent failure rather than a real case: SushiGo hands are always equal in size (a chopsticks play
+takes two cards and returns one, net one, like everyone else), so a player with an empty hand
+while others still hold cards cannot arise, and had it arisen the old clause would have declared
+"all chosen" with that player never asked. Verified: the seven SushiGo unit tests and both
+`ForwardModelTestsWithMCTS` SushiGo runs pass with the change.
+
 **D3 — `ForestNode` had no test coverage at all** (now fixed - see §8). Nothing in
 `src/test/java/players/mcts/` exercised `numDeterminizations > 1`. That matters here because `ForestNode` never calls
 `instantiate` (§8, A3) — a refactor that assumes it does will NPE on every forest run and ship
@@ -470,6 +573,16 @@ dead: :1106 already dereferences `bestAction`.
   actions, `treePolicy`'s loop condition sees a non-empty list, and `treePolicyAction` selects an
   action that is illegal in the current state. Fixing it is a behaviour change, so it belongs in
   Stage B, where the `else` branch drops the entry from `statsByPlayer` outright.
+  *As landed:* at a multi-actor node the candidate list of every player not acting on this visit is
+  emptied, but the entry itself is kept. Dropping it would discard that player's accumulated
+  statistics at the node, and an empty candidate list is exactly what the tree policy's loop
+  condition (`hasDecisionToMake`) tests. The sequential path is unchanged and still throws.
+- **The turn owner after a simultaneous turn depends on how it was applied.** Applied one
+  component at a time, `SGForwardModel._afterAction` hands the next turn to whoever chose last;
+  applied as one `SimultaneousAction`, the turn owner is unchanged. Harmless, since the acting set
+  is everyone either way, and `games.sushigo.SimultaneousActionTests` records it - but it means
+  the *current player* of a state after a joint action in the tree is the searching player, while
+  after the same turn in a rollout it is not.
 
 ---
 
@@ -677,9 +790,15 @@ Lambda/MaxLambda/MaxMC.
 
 ### Step A7 — the acting-player seam
 
-- Add `protected int soleActingPlayer(AbstractGameState s) { return s.getCurrentPlayer(); }` (§4.3)
-  and route the six sites that ask "who acts here": `instantiate:141`, `instantiate:144`,
-  `treePolicy:513`, `expandNode:554`, `advanceState:587`, `nextNodeInTree:717`.
+> **First bullet reverted on review.** JG: "It just hides the call to getCurrentPlayer(). Remove
+> this from Stage A; I fail to see the value." The seam landed in `8ec3b5ac5` and was taken out
+> again; the six sites call `getCurrentPlayer()` directly, as on master, and the helper arrives
+> with its real body in Stage B (§9 step 2). The remaining bullets of this step stand.
+
+- ~~Add `protected int soleActingPlayer(AbstractGameState s) { return s.getCurrentPlayer(); }` (§4.3)
+  and route the six sites that ask "who acts here"~~: `instantiate:141`, `instantiate:144`,
+  `treePolicy:513`, `expandNode:554`, `advanceState:587`, `nextNodeInTree:717`. The site list is
+  kept because it is what Stage B routes through the helper.
 
   `treePolicy:513` is easy to miss: it is the `Closed_Loop` bypass that appends to `actionsInTree`
   without going through `advanceState`, and it is what `backUp:997-1005` asserts against.
@@ -716,7 +835,8 @@ Stage A is implemented, as seven commits on `duct`, in the order given. Every on
 checked against the full set in §10.1 plus `ForwardModelTestsWithMCTS#testSushiGoWithSeqUCT` and
 `#testSushiGoWithDUCT`, and the golden values captured at A1 have not moved since.
 
-Five things came out differently from the plan, all of them discovered by doing it:
+Six things came out differently from the plan, five of them discovered by doing it and one by
+review:
 
 1. **The Dominion scenarios cannot be pinned exactly, for a better reason than the one predicted.**
    Not enum hash codes, but the unseeded `redeterminisationRnd` described in A1 above. Worth
@@ -747,6 +867,14 @@ Five things came out differently from the plan, all of them discovered by doing 
    as a fixed bug. A `progressiveWideningTight` scenario was added to the golden set anyway, chosen
    so the widened subset genuinely grows during the search (139 nodes rather than 201).
 
+6. **The `soleActingPlayer` seam was reverted after review.** It landed as planned in
+   `8ec3b5ac5`, a `getCurrentPlayer()` pass-through routed through six sites. JG's objection: it
+   hides the call and has no value until its body changes. Removed; the six sites are back to
+   direct `getCurrentPlayer()` calls, identical to master, and the helper is now a Stage B item
+   (§9 step 2). The full Stage A test set (88 tests across the §10.1 classes) and both SushiGo
+   forward-model runs pass after the revert. The `setActionsForPlayer` extraction and the 3-arg
+   `computeAvailableActions` call from the same step are unchanged.
+
 Two claims from §7.1 were confirmed by experiment rather than left as assertions: swapping
 `actionValues` to a `LinkedHashMap` - a change to iteration order and nothing else - moves the LMR
 digests, and the `SGGameState.redeterminise` defect (D1) fails the new test without its fix.
@@ -756,22 +884,25 @@ one root that reaches `initialiseRootMetrics()` without ever calling `instantiat
 
 ### Explicitly out of Stage A
 
-`MCTSParams.decoupled` and its `_reset` clamps; `actingPlayers` / `actingPlayersAt`;
-`jointTreePolicyAction`; the backup fan-out; MAST expansion into a fresh list; suppressing the child
+`MCTSParams.decoupled` and its `_reset` clamps; `soleActingPlayer` (reverted, see item 6 above);
+`actingPlayers` / `actingPlayersAt`; `jointTreePolicyAction`; the backup fan-out; MAST expansion into a fresh list; suppressing the child
 placeholder; the `MCTSPlayer:307` assertion; the gating in §6; the `setActionsFromOpenLoopState`
 stale-list `else`-clear; converting `bestAction():1207`; per-player `toString()` and its
 `children.get(action).length` NPE; setting the root's `decisionPlayer` from `player.getPlayerID()`.
 
 ---
 
-## 9. Stage B — outline
+## 9. Stage B
 
-Behaviour, behind `MCTSParams.decoupled`. Not yet detailed to Stage A's level.
+Behaviour, behind `MCTSParams.decoupled`. The outline as reviewed comes first; what actually landed,
+and where it differed, is at the end of the section.
 
-1. Add `MCTSParams.decoupled` and the `_reset()` clamps (§5).
-2. Add `List<Integer> actingPlayers` and `actingPlayersAt(state)`; give `soleActingPlayer` its
-   Stage B body (§4.3), including `decisionPlayer = -1` and the throwing no-arg accessors at
-   multi-actor nodes. Delete the Stage A assertion in `statsFor`.
+1. Add `MCTSParams.decoupled` and the `_reset()` clamps (§5): `OneTree` only, and `reuseTree`
+   off until §6.1 is done. `Closed_Loop` and `RegretMatching` are not clamped.
+2. Add `List<Integer> actingPlayers` and `actingPlayersAt(state)`; add `soleActingPlayer` with its
+   Stage B body (§4.3) and route the six sites listed under Step A7 through it, including
+   `decisionPlayer = -1` and the throwing no-arg accessors at multi-actor nodes. Delete the Stage A
+   assertion in `statsFor`.
 3. Make `setActionsFromOpenLoopState` loop `setActionsForPlayer` over `actingPlayers`, using the
    3-arg `computeAvailableActions`, and **clear explicitly** when we are not acting — dropping the
    entry from `statsByPlayer` rather than resetting four fields individually (§7.2).
@@ -780,9 +911,19 @@ Behaviour, behind `MCTSParams.decoupled`. Not yet detailed to Stage A's level.
    per acting player and wraps the results in a `SimultaneousAction`. Suppress the
    `children.put(action.copy(), null)` placeholder on multi-actor nodes, so `children` only ever
    holds joint keys.
+
+   4a. **`Closed_Loop` bypass.** `treePolicy:594-597` skips `advanceState` under `Closed_Loop` and
+   appends `(getCurrentPlayer(), chosen)` to `actionsInTree` itself. At a multi-actor node
+   `chosen` is a `SimultaneousAction`, and this must append the same `(-1, joint)` pair that
+   `advanceState` appends there, so that `backUp` and `MASTBackup` see identical shapes on both
+   paths and `actionsInTree` stays index-aligned with `currentNodeTrajectory`. That is the whole
+   of the `Closed_Loop` work (§6); selection and `nextNodeInTree` need nothing.
 5. Fan out the backup: for each acting player, `updateActionStats(p, componentAction, result)`; then
-   run the policy tail once. Note the RM refresh at :1092-1098 is keyed off node `nVisits`, so it
-   must move inside the fan-out for RM to work decoupled — or RM stays gated (§6).
+   run the policy tail once. The `RegretMatching` refresh (:1257-1263) goes *inside* the fan-out:
+   `updateEvery` and `updateRegretMatchingAverage(p, actionsToConsider)` are per player, since each
+   player's `actionsToConsider` list is their own, while the `nVisits` cadence it keys off is the
+   shared node counter. `initialiseRootMetrics:339` likewise clears `regretMatchingAverage` for
+   every entry in `statsByPlayer`, not only `decisionPlayer`'s (§6).
 6. Expand `SimultaneousAction` in `MASTBackup` rather than in `advanceState`, so `actionsInTree`
    stays index-aligned with `currentNodeTrajectory` — but build a **fresh list**:
    `updateMASTStatistics:401-419` (`case Both`) aliases `rollout` and mutates it in place
@@ -793,7 +934,59 @@ Behaviour, behind `MCTSParams.decoupled`. Not yet detailed to Stage A's level.
 7. Convert `bestAction():1207` to the 3-arg form with `decisionPlayer`, replacing the Stage A
    tripwire, and relax the `MCTSPlayer:307` assertion.
 8. Add the §6 gating and the `toString()` work from §5.
-9. Reconcile **D2**, and settle the two-chopsticks case in §7.2.
+9. ~~Reconcile **D2**~~ (done, see §7.1), and settle the two-chopsticks case in §7.2.
+
+After Stage B, first: `reuseTree` under `decoupled` (§6.1), and remove its clamp.
+
+### What actually landed, and where it differed from the outline above
+
+Stage B is implemented on `duct`, as one change to `SingleTreeNode`, `MCTSParams`, `MCTSPlayer` and
+`TreeStatistics`. The full Stage A check set (§10.1), the new Stage B classes (§10.2), both SushiGo
+`ForwardModelTestsWithMCTS` runs and the seven SushiGo unit tests pass; every Stage A golden value
+is unchanged, so the sequential path is still bit-identical to master. Where it differed:
+
+1. **The root keeps `getCurrentPlayer()` as its decision owner.** `soleActingPlayer` returns -1
+   at a multi-actor state, which is right for a child but not for the root, which is multi-actor
+   *and* has an owner (§4.3). So three of the six A7 sites route through the helper (the child
+   branch of `instantiate`, the `Closed_Loop` bypass and `advanceState`); the root
+   assignment in `instantiate` stays as it was. `expandNode` and `nextNodeInTree` also stay as they
+   were: the child array is indexed by the next state's `getCurrentPlayer()`, which after a joint
+   action is still the searching player (§7.2, turn-owner note), so a joint transition always has
+   exactly one child.
+2. **The one real bug was the reward index.** The selection internals (`ucbValue`, `exp3Value`,
+   `rmValue`, `getActionValue`, and `bestAction(pds, ...)`) read `totValue[decisionPlayer]`, the
+   §4.2 confusion made concrete: at a multi-actor node that is `totValue[-1]`. Each table now
+   indexes by its own `pds.player`, which coincides with `decisionPlayer` at every sequential node
+   (the goldens prove it) and is each player's own reward at a decoupled one. Found by
+   `testSushiGoWithSeqUCT` on the first run.
+3. **Step 3's "drop the entry" became "empty the candidate list"** (§7.2).
+4. **Steps 4a and 6 became simpler than planned.** `actionsInTree` holds one `(-1, joint)` pair
+   per multi-actor node, from `advanceState` and the `Closed_Loop` bypass alike. `backUp` checks
+   a joint entry against `isMultiActor()` rather than `decisionPlayer`, `backUpSingleNode` fans
+   `updateActionStats` out per component, and `MASTBackup` expands the joint action per component
+   *as it reads it* - no fresh list, because nothing ever mutates the list it is given.
+5. **The non-Monte-Carlo backup tails fall back to Monte Carlo at multi-actor nodes** (§6).
+6. **Step 1's clamps are as described in §5**: `decoupled` silently off for non-`OneTree` or
+   forest configurations, repeated on the node; `reuseTree` skipped at a simultaneous root by
+   `MCTSPlayer` rather than clamped in `_reset()`.
+7. **Step 8's accessors.** The no-argument accessors throw at a multi-actor node, via `statsFor`;
+   `getActor()` returns -1 there rather than throwing, since it is an int read by loggers.
+   `nodeValue(playerId)` reads any acting player's table (`anyStats`), which is sound because every
+   player's table sums to the same node total. `toString` prints one block per acting player;
+   `TreeStatistics` sums action counts across players. Not adapted, and so throwing on a decoupled
+   tree: `TreeRecorder`, `MCTSExpertIterationListener`, `MCTSDecisionRecorder` and `LearnedValue`,
+   which all call `getActionValues()` per node. Follow-up.
+8. **The two-chopsticks case works** (§7.2): `SushiGoDecoupledTests.chopsticksInsideTree` forces
+   two players to hold Chopsticks, finds joint actions in which both use them, and checks that the
+   node after any chopsticks joint action has a single acting player who is one of the users.
+9. **`MCTSParams._reset()` order.** The `decoupled` read sits at the end of `_reset()`, after
+   `numDeterminizations`, because the clamp depends on it.
+
+Decoupled behaviour is now pinned the way Stage A pinned sequential behaviour:
+`StageBDecoupledTests.decoupledTreesUnchanged` holds digests for eleven decoupled scenarios on the
+simultaneous LMR fixture, and `decoupledOffIsExactlySequentialSearch` checks that the same fixture
+searched with `decoupled=false` reproduces the Stage A `lmr.ucb` digest byte for byte - the §2
+contract as a test.
 
 ---
 
@@ -872,6 +1065,23 @@ java -cp "target/classes;target/test-classes;$(cat cp.txt)" \
 13. In `src/test/java/games/sushigo/`: apply a hand-built `SimultaneousAction` covering all players
     and assert `cardChoices` cleared, hands rotated and equal-sized, and
     `getCurrentSimultaneousPlayers()` again returning everyone.
+14. **`closedLoopJointTrajectory`** — the synthetic fixture (item 5) under `Closed_Loop`,
+    `decoupled=true`; after a seeded search assert that every `root.children` key is a
+    `SimultaneousAction` with exactly one non-null child, that `actionsInTree` after an iteration
+    holds one `(player, component)` pair per acting player per multi-actor node visited (§9 step
+    4a), and `visitAccounting` (item 7) holds. `MCTSNodesAndVisitsTests` stays the sequential
+    `Closed_Loop` guard.
+15. **`regretMatchingPerPlayer`** — the synthetic fixture with `treePolicy=RegretMatching`,
+    `decoupled=true`; after enough iterations for at least one refresh, assert
+    `statsByPlayer.get(p).regretMatchingAverage` is non-empty and sums to the refresh count for
+    **each** acting player, and that `initialiseRootMetrics()` empties all of them.
+
+*As landed:* `players.mcts.StageBDecoupledTests` (items 5 to 9, 12, 14 and 15, the sequential
+cross-check, the non-OneTree gate, the backup-tail limitation, and the pinned decoupled digests),
+`players.mcts.SushiGoDecoupledTests` (items 4, 10, 11 and 12 on real SushiGo, plus MAST, EXP3,
+`Closed_Loop`, `RegretMatching`, the reuse skip through the real game loop, and a whole game with
+mixed seats) and `games.sushigo.SimultaneousActionTests` (item 13, and joint-versus-sequential
+application). The fixture is `players.mcts.SimultaneousLMRGame`.
 
 `ForwardModelTestsWithMCTS.testSushiGoWithSeqUCT` runs MCTS over SushiGo with
 `json/players/gameSpecific/SushiGo/SushiGo.json`, which sets `OneTree`, `MAST: Both`, `UCB_Tuned`
@@ -983,3 +1193,55 @@ the `MultiTreeNode:31` and `SGGameState:150` attributions (§4.3); and three lat
 2's Stage A that would each have broken it — `instantiate` allocating instead of re-keying,
 `ForestNode` never calling `instantiate`, and the `backUpSingleNode` split recomputing
 `actionsToConsider` (§8, A3 and A6). It adds four defects found in the existing code (§7.1).
+
+**Stage A review (JG, 6 September 2026).** Comments on the landed Stage A code and on §6, with
+what was done about each:
+
+> **JG (on §6, `Closed_Loop`):** Can you recheck on Closed Loop. The state is not advanced, but is
+> instead stored against the node on first creation. I don't see why this should be a problem with
+> simultaneous moves?
+
+Correct; the gate is withdrawn. Draft 3's "nothing to select against" overlooked that per-player
+candidates come from the 3-arg `computeAvailableActions` on the stored state, which is what
+`Closed_Loop` has. The only real touchpoint is the `actionsInTree` bypass in `treePolicy`, now §9
+step 4a. §6 has the full argument.
+
+> **JG (on §6, `RegretMatching`):** Should be fine with simultaneous moves... mark this for the
+> next phase.
+
+Taken further: it is in Stage B rather than a later phase, because the change is two loops over
+the acting players (§6, §9 step 5). SelfOnly, MultiTree, OMA and `numDeterminizations` stay gated,
+as JG confirmed.
+
+> **JG (on §6, `reuseTree`):** Ditto for reuseTree. This needs to work with simultaneous moves.
+
+Agreed as a requirement; deferred as work. §6.1 records why it fails today, what already works on
+the history side, the three changes needed in `MCTSPlayer` and `rootify`, and the test, and §9
+names it as the first item after Stage B. The clamp stays until then.
+
+> **JG (in `SingleTreeNode.instantiate`, on the re-key block):** This comment is gibberish to me. I
+> would like an explanation of what this code is doing - and why we ignore this if we have
+> multiple players.
+
+The comment was rewritten in place. In short: a reused root goes through `instantiate` again, the
+statistics have to survive that as they did when they were bare fields, and `decisionPlayer` has
+just been recomputed, so the single entry is moved to the new key. The standard reuse path asserts
+the player has not changed, so it is a no-op there; the MCGS transposition path can re-home a node
+created for a different player, and the old code silently kept its statistics, which the re-key
+reproduces. Multi-entry tables are left alone because their keys are real player ids that do not
+depend on the state's current player.
+
+> **JG (on `soleActingPlayer`):** I do not like this at all. It just hides the call to
+> getCurrentPlayer(). Remove this from Stage A; I fail to see the value.
+
+Removed; §4.3 and §8 A7 updated, and the helper moved to §9 step 2. Tests unchanged and passing.
+
+> **JG (on §7.1 D2):** I have amended this, and removed the check on empty player hands; which was
+> an incorrect silent fail.
+
+Verified and recorded under D2.
+
+Also noted by JG and not yet acted on: the "never substitute `LinkedHashMap`" wording in §4.1 and
+in the `PlayerDecisionStats` javadoc overstates a Stage A invariance rule as a design principle, and
+should be reworded to "preserve the map types `SingleTreeNode` already used" (the code already
+does). JG's inline comment there is left in place until that is done.

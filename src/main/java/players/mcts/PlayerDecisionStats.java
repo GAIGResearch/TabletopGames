@@ -12,9 +12,9 @@ import java.util.Map;
  * <p>
  * These five pieces of state co-vary: they are written together as a node is (re)visited in
  * {@link SingleTreeNode#setActionsFromOpenLoopState}, and read together by the tree policy on the
- * way back down. Holding them in one object is what will let a node carry a set of them - one per
- * acting player - when decoupled UCT lands; today every node holds exactly one, for its own
- * decisionPlayer, and behaviour is unchanged.
+ * way back down. Holding them in one object is what lets a node carry a set of them:
+ * one per simultaneously-moving player at a multi-actor node of a decoupled
+ * search, and exactly one, for its own decisionPlayer, at every node of a sequential one.
  * <p>
  * This is a data holder with no behaviour and no back-reference to the node. The selection policy
  * stays on {@link SingleTreeNode}, where it also needs params, the root's reward bounds, the parent
@@ -25,7 +25,7 @@ import java.util.Map;
  * {@code nodeValue} sums over {@code values()} - so the order fixes the floating-point summation,
  * and can flip a UCB comparison. A LinkedHashMap, a TreeMap, or a presized HashMap all change it.
  */
-class PlayerDecisionStats {
+public class PlayerDecisionStats {
 
     /** The player whose decision these statistics describe. */
     final int player;

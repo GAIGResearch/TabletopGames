@@ -28,6 +28,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
     protected Map<Object, Integer> oldGraphKeys = new HashMap<>();
     protected List<Object> recentlyRemovedKeys = new ArrayList<>();
+    // one warning per player instance, see newRootNode()
+    private boolean warnedReuseTreeDecoupled = false;
 
     public MCTSPlayer() {
         this(new MCTSParams());
@@ -108,7 +110,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
                 System.out.println("\tBacktracking for player " + mtRoot.roots[p].decisionPlayer);
             newRoots[p] = backtrack(mtRoot.roots[p], state);
             if (newRoots[p] != null) {
-                // here we do not do a full rootification as that would set the turnOwner and currentPlayer
+                // here we do not fully rootify as that would set the turnOwner and currentPlayer
                 // to the decision player, which we want to avoid
                 newRoots[p].rootify(oldRoot, null);
                 newRoots[p].resetDepth(newRoots[p]);
@@ -164,6 +166,17 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
         // Now for standard open loop processing
         SingleTreeNode newRoot = null;
+        if (params.reuseTree && root != null && params.decoupled && gameState.getCurrentSimultaneousPlayers().size() > 1) {
+            // Tree reuse across a simultaneous turn is not yet supported with decoupled search:
+            // backtrack() walks the history one component action at a time, while the old root's
+            // children are keyed by joint actions, so the walk would always miss. Start afresh
+            // instead. See the DUCT Readme, §6.1, for what it will take to implement this.
+            if (!warnedReuseTreeDecoupled) {
+                System.out.println("reuseTree is not yet supported with decoupled search on a simultaneous turn; building a new tree");
+                warnedReuseTreeDecoupled = true;
+            }
+            root = null;
+        }
         if (params.reuseTree && root != null) {
             // we see if we can reuse the tree
             // We need to look at all actions taken since our last action
@@ -304,7 +317,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         }
         MASTStats = root.MASTStatistics;
 
-        if (root.children.size() > 3 * actions.size() && !(root instanceof MCGSNode) && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+        // At a multi-actor root the children are joint actions, whose count is bounded by the
+        // iteration budget rather than by this player's action count, so the check does not apply.
+        // [JG: we still want a check for this though to detect issues at Simultaneous nodes. In this case a sensible limit is 3 x the cross product of the actions available]
+        if (root.children.size() > 3 * actions.size() && !(root instanceof MCGSNode) && !root.isMultiActor() && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
         lastAction = Pair.of(gameState.getCurrentPlayer(), root.bestAction());
         return lastAction.b.copy();

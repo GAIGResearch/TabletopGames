@@ -38,6 +38,8 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.SelectionPolicy selectionPolicy = SIMPLE;  // In general better than ROBUST
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
+    // Decoupled UCT on simultaneous-move turns: every player who moves at once decides at the same node
+    public boolean decoupled = true;
     public boolean paranoid = false;
     public MCTSEnums.RolloutIncrement rolloutIncrementType = TICK;
     public MCTSEnums.Strategies rolloutType = RANDOM;
@@ -100,6 +102,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("selectionPolicy", SIMPLE, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
+        addTunableParameter("decoupled", true, Arrays.asList(false, true));
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", IStateHeuristic.class, AbstractGameState::getHeuristicScore);
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
@@ -220,6 +223,12 @@ public class MCTSParams extends PlayerParameters {
         }
         DDAGameThreshold = (double) getParameterValue("DDAGameThreshold");
         DDAMoveThreshold = (double) getParameterValue("DDAMoveThreshold");
+        decoupled = (boolean) getParameterValue("decoupled");
+        if (decoupled && (opponentTreePolicy != OneTree || numDeterminizations > 1)) {
+            // Decoupling only ever engages on a simultaneous turn, and every opponent tree policy
+            // other than OneTree assumes one actor per node.
+            decoupled = false;
+        }
     }
 
     @Override

@@ -255,7 +255,7 @@ public class StageAGoldenTests {
         return Arrays.stream(subRoots).filter(Objects::nonNull).toList();
     }
 
-    private static String summary(SingleTreeNode root, Random rnd, boolean withDigest) {
+    static String summary(SingleTreeNode root, Random rnd, boolean withDigest) {
         List<SingleTreeNode> roots = searchRoots(root);
         int visits = 0, fmCalls = 0, copies = 0, rolloutActions = 0, nodes = 0;
         StringBuilder dump = new StringBuilder();
@@ -292,15 +292,22 @@ public class StageAGoldenTests {
                     .append(node.getActor()).append(';')
                     .append(node.getVisits()).append(';')
                     .append(node.terminalNode).append('\n');
-            for (Map.Entry<AbstractAction, ActionStats> e : node.getActionValues().entrySet()) {
-                ActionStats st = e.getValue();
-                sb.append("  ").append(e.getKey()).append(';')
-                        .append(st.nVisits).append(';')
-                        .append(st.validVisits);
-                for (int i = 0; i < st.totValue.length; i++)
-                    sb.append(';').append(Double.doubleToLongBits(st.totValue[i]))
-                            .append(':').append(Double.doubleToLongBits(st.squaredTotValue[i]));
-                sb.append('\n');
+            // One table per acting player. A sequential node has exactly one and is dumped exactly
+            // as before (no player header), so the Stage A digests are unaffected; a multi-actor
+            // node of a decoupled search gets one headed block per player.
+            List<Integer> actors = node.isMultiActor() ? node.getActingPlayers() : List.of(node.getActor());
+            for (int p : actors) {
+                if (node.isMultiActor()) sb.append(" P").append(p).append('\n');
+                for (Map.Entry<AbstractAction, ActionStats> e : node.getActionValues(p).entrySet()) {
+                    ActionStats st = e.getValue();
+                    sb.append("  ").append(e.getKey()).append(';')
+                            .append(st.nVisits).append(';')
+                            .append(st.validVisits);
+                    for (int i = 0; i < st.totValue.length; i++)
+                        sb.append(';').append(Double.doubleToLongBits(st.totValue[i]))
+                                .append(':').append(Double.doubleToLongBits(st.squaredTotValue[i]));
+                    sb.append('\n');
+                }
             }
         }
         return sb.toString();
@@ -322,8 +329,8 @@ public class StageAGoldenTests {
 
     /**
      * Scenarios whose exact numbers cannot be pinned, because they are not reproducible between runs
-     * at all. {@code AbstractGameState.redeterminisationRnd} (:107) is deliberately unseeded, and
-     * every {@code copy()} reseeds that copy's RNG from it (:354), so any game whose forward model
+     * at all. {@code AbstractGameState.redeterminisationRnd} is deliberately unseeded, and
+     * every {@code AbstractGameState.copy()} reseeds that copy's RNG from it, so any game whose forward model
      * consumes {@code gs.rnd} - Dominion shuffles its deck - takes a different trajectory on every
      * run. That is a framework design decision (hidden information must not be predictable from the
      * game seed), not something this test should try to work around.
