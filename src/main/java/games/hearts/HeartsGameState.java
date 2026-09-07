@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.*;
 
 import java.util.function.*;
+import java.util.stream.IntStream;
 
 
 /**
@@ -67,6 +68,45 @@ public class HeartsGameState extends AbstractGameState {
     public enum Phase implements IGamePhase {
         PASSING,
         PLAYING
+    }
+
+    /**
+     * Passing happens one card at a time, all players at once: everyone commits their first card,
+     * then everyone their second, and so on. This is the number of cards committed by the players
+     * who have committed fewest, i.e. the sub-turn the passing phase is currently on.
+     */
+    public int fewestPendingPasses() {
+        return pendingPasses.stream().mapToInt(List::size).min().orElse(0);
+    }
+
+    /**
+     * The players who have not yet committed a card in the current passing sub-turn: those who have
+     * committed only as many cards as the player who has committed fewest. Empty once everyone has
+     * committed all the cards the round requires.
+     */
+    public List<Integer> getPlayersStillToPass() {
+        int fewest = fewestPendingPasses();
+        if (fewest >= ((HeartsParameters) gameParameters).cardsPassedPerRound)
+            return List.of();
+        return IntStream.range(0, getNPlayers())
+                .filter(p -> pendingPasses.get(p).size() == fewest)
+                .boxed()
+                .toList();
+    }
+
+    /**
+     * Passing is simultaneous; trick play is sequential. This is the switch between the two: while
+     * passing, everyone still to commit a card this sub-turn decides at once; otherwise it is just
+     * the current player, as for any sequential game.
+     */
+    @Override
+    public List<Integer> getCurrentSimultaneousPlayers() {
+        if (isActionInProgress() || getGamePhase() != Phase.PASSING)
+            return super.getCurrentSimultaneousPlayers();
+        List<Integer> toDecide = getPlayersStillToPass();
+        if (toDecide.isEmpty())
+            throw new AssertionError("Every player has passed but the passes have not been resolved");
+        return toDecide;
     }
 
     public Deck<FrenchCard> getDrawDeck() {
@@ -182,30 +222,48 @@ public class HeartsGameState extends AbstractGameState {
             copy.knownVoids.add(voidCopy);
         }
 
-        if (getCoreGameParameters().partialObservable && playerId != -1) {
-            // We cannot see the cards that the other players have passed, so we put these into their hands.
-            // The agent can then use its opponent model to figure out what was passed.
-            // Passing is all simultaneous
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    copy.playerDecks.get(i).add(copy.pendingPasses.get(i));
-                    copy.pendingPasses.get(i).clear();
-                }
-            }
+        // Hidden information is dealt with in redeterminise(), which the superclass calls on the
+        // copy when appropriate.
+        return copy;
+    }
 
-            // Then we reshuffle everything we cannot see across the other hands and the draw deck.
-            // A player who has failed to follow suit is known to hold no cards of that suit, so we
-            // must not deal them any.
-            List<Deck<FrenchCard>> decksToShuffle = new ArrayList<>(copy.playerDecks);
-            decksToShuffle.add(copy.drawDeck);
-            BiPredicate<Deck<FrenchCard>, FrenchCard> voidConstraint =
-                    ((HeartsParameters) gameParameters).rememberVoids
-                            ? (deck, card) -> deck.getOwnerId() < 0 || !copy.knownVoids.get(deck.getOwnerId()).contains(card.suite)
-                            : null;  // a null constraint gives the unconstrained reshuffle
-            DeterminisationUtilities.reshuffle(playerId, decksToShuffle, c -> true, redeterminisationRnd, voidConstraint);
+    @Override
+    public void redeterminise(int playerId) {
+        // We cannot see the cards the other players have committed to pass, but we can see how many.
+        // Put their pending passes back into their hands, reshuffle everything we cannot see, and then
+        // draw the same number of (now unknown) cards back out into their pending passes. Our own
+        // pending passes are kept: getPlayersStillToPass() counts them to decide who is still to pass,
+        // so losing them would have us asked to pass the same card again.
+        int[] pendingCounts = new int[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (i == playerId) continue;
+            pendingCounts[i] = pendingPasses.get(i).size();
+            playerDecks.get(i).add(pendingPasses.get(i));
+            pendingPasses.get(i).clear();
         }
 
-        return copy;
+        // Reshuffle everything we cannot see across the other hands and the draw deck.
+        // A player who has failed to follow suit is known to hold no cards of that suit, so we
+        // must not deal them any.
+        List<Deck<FrenchCard>> decksToShuffle = new ArrayList<>(playerDecks);
+        decksToShuffle.add(drawDeck);
+        BiPredicate<Deck<FrenchCard>, FrenchCard> voidConstraint =
+                ((HeartsParameters) gameParameters).rememberVoids
+                        ? (deck, card) -> deck.getOwnerId() < 0 || !knownVoids.get(deck.getOwnerId()).contains(card.suite)
+                        : null;  // a null constraint gives the unconstrained reshuffle
+        DeterminisationUtilities.reshuffle(playerId, decksToShuffle, c -> true, redeterminisationRnd, voidConstraint);
+
+        for (int i = 0; i < getNPlayers(); i++) {
+            for (int k = 0; k < pendingCounts[i]; k++) {
+                pendingPasses.get(i).add(playerDecks.get(i).draw());
+            }
+        }
+
+        // Passing is simultaneous, so while it lasts every player sees themselves as the current
+        // player; that is what the 2-argument computeAvailableActions() reads. Trick play is
+        // sequential, and there the turn owner is the real current player and must be left alone.
+        if (getGamePhase() == Phase.PASSING)
+            setTurnOwner(playerId);
     }
 
     @Override
@@ -235,6 +293,13 @@ public class HeartsGameState extends AbstractGameState {
         retValue.add(drawDeck.getComponentID());
         for (Component c : drawDeck.getComponents()) {
             retValue.add(c.getComponentID());
+        }
+        // the cards the other players have committed to pass are hidden until the passes resolve
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (p == playerId) continue;
+            for (Component c : pendingPasses.get(p)) {
+                retValue.add(c.getComponentID());
+            }
         }
         return retValue;
     }

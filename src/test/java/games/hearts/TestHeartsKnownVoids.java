@@ -203,8 +203,9 @@ public class TestHeartsKnownVoids {
         for (int i = 0; i < 50; i++) {
             HeartsGameState copy = (HeartsGameState) gameState.copy(0);
             for (int p = 0; p < gameState.getNPlayers(); p++) {
-                assertEquals(gameState.getPlayerDecks().get(p).getSize() + (p == 0 ? 0 : gameState.pendingPasses.get(p).size()),
-                        copy.getPlayerDecks().get(p).getSize());
+                // hand sizes are public, as is the number of cards each player has committed to pass
+                assertEquals(gameState.getPlayerDecks().get(p).getSize(), copy.getPlayerDecks().get(p).getSize());
+                assertEquals(gameState.pendingPasses.get(p).size(), copy.pendingPasses.get(p).size());
             }
             assertEquals(ownHand, copy.getPlayerDecks().get(0).getComponents());
 
