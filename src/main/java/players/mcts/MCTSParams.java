@@ -39,7 +39,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
     // Decoupled UCT on simultaneous-move turns: every player who moves at once decides at the same node
-    public boolean decoupled = true;
+    public boolean decoupled = false;
     public boolean paranoid = false;
     public MCTSEnums.RolloutIncrement rolloutIncrementType = TICK;
     public MCTSEnums.Strategies rolloutType = RANDOM;
@@ -102,7 +102,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("selectionPolicy", SIMPLE, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
-        addTunableParameter("decoupled", true, Arrays.asList(false, true));
+        addTunableParameter("decoupled", false, Arrays.asList(false, true));
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", IStateHeuristic.class, AbstractGameState::getHeuristicScore);
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));

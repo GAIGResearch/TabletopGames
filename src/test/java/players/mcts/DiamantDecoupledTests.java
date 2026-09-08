@@ -32,6 +32,7 @@ public class DiamantDecoupledTests {
         p.rolloutLength = 30;
         p.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         p.information = MCTSEnums.Information.Information_Set;
+        p.decoupled = true;  // these tests exercise the decoupled path; the default is sequential
         tweak.accept(p);
         return p;
     }
@@ -130,6 +131,43 @@ public class DiamantDecoupledTests {
             for (AbstractAction key : root.children.keySet())
                 assertEquals(Set.of(1, 3), ((SimultaneousAction) key).getPlayerActions().keySet());
         }
+    }
+
+    @Test
+    public void nodeValueWhereTheRootPlayerIsNotActing() {
+        // Once the searching player has left the cave the others still decide together, so the tree
+        // holds multi-actor nodes at which the root player does not act and has no statistics table;
+        // and because all joint successors of an action share one child slot, a node can be visited
+        // with different acting sets on different iterations. nodeValue(p) must report the mean
+        // reward over every visit regardless: it must agree with the table of any player who acted
+        // on every visit, and must not create a table for a player who never acted here.
+        // Regression test: reading the root player's table gave 0 at such nodes, and reading the
+        // last visit's first actor gave a partial sum when that player had acted on only some visits.
+        Game g = fourMCTS(707, p -> p.budget = 400);
+        decide(g, 0);
+        SingleTreeNode root = root(g, 0);
+        int rootAbsentNodes = 0, checkedAgainstTables = 0;
+        for (SingleTreeNode node : root.allNodesInTree()) {
+            if (node.getVisits() == 0) continue;
+            boolean rootAbsent = node.isMultiActor() && !node.statsByPlayer.containsKey(0);
+            if (rootAbsent) rootAbsentNodes++;
+            for (Map.Entry<Integer, PlayerDecisionStats> e : node.statsByPlayer.entrySet()) {
+                Collection<ActionStats> table = e.getValue().actionValues.values();
+                if (table.stream().mapToInt(s -> s.nVisits).sum() != node.getVisits())
+                    continue; // this player acted on only some visits, so their table is a partial sum
+                checkedAgainstTables++;
+                for (int player = 0; player < 4; player++) {
+                    final int pid = player;
+                    double expected = table.stream().mapToDouble(s -> s.totValue[pid]).sum() / node.getVisits();
+                    assertEquals("node value for P" + pid + " at depth " + node.depth + " via P" + e.getKey() + "'s table",
+                            expected, node.nodeValue(pid), 1e-9);
+                }
+            }
+            if (rootAbsent)
+                assertFalse("nodeValue created a table for a player who does not act here", node.statsByPlayer.containsKey(0));
+        }
+        assertTrue("expected nodes at which the root player never acted, found none", rootAbsentNodes > 0);
+        assertTrue(checkedAgainstTables > 0);
     }
 
     @Test

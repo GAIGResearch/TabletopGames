@@ -70,9 +70,11 @@ public class SingleTreeNode {
     // The candidate actions and statistics for each player who decides at this node.
     protected final Map<Integer, PlayerDecisionStats> statsByPlayer = new HashMap<>();
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a Map per player. Action -> (visits, totValue)
-    // The total value of all trajectories through this node (one element per player)
+    // The total value of all trajectories through this node (one element per player), over every visit
+    // whoever was acting. Kept on the node rather than derived from a player's action table, because at a
+    // multi-actor node the acting set can differ between visits and no single table then covers them all.
+    protected double[] totValue;
     private Supplier<? extends SingleTreeNode> factory;
-    // Total value of this node
     protected List<SingleTreeNode> currentNodeTrajectory;
     protected List<Pair<Integer, AbstractAction>> actionsInTree;
     List<Pair<Integer, AbstractAction>> actionsInRollout;
@@ -241,9 +243,6 @@ public class SingleTreeNode {
         } else {
             // Several players decide here. Each gets their own candidate list and statistics; the child
             // will be keyed by the joint action.
-            if (parent != null && decisionPlayer != -1)  // this is different from the root, for which we *do* have a decisionPlayer
-                throw new AssertionError("Node created for P" + decisionPlayer +
-                        " alone is now visited with acting players " + actingPlayers);
             for (int p : actingPlayers) {
                 if (actionState.isNotTerminalForPlayer(p))
                     setActionsForPlayer(actionState, p);
@@ -536,9 +535,6 @@ public class SingleTreeNode {
     }
 
     /**
-     * Uses plain java loop instead of streams for performance
-     * (this is called often enough it can make a measurable difference)
-     * <p>
      * Note that {@code playerId} here is the index into the <i>reward</i> vector, not a selector for
      * whose statistics table to read - the two are different ideas that happen to coincide today.
      * Where the table has to be chosen, a {@link PlayerDecisionStats} is passed rather than a second
@@ -554,7 +550,7 @@ public class SingleTreeNode {
     }
 
     public double nodeValue(int playerId) {
-        return nodeValue(statsFor(decisionPlayer), playerId);
+        return nVisits == 0 ? 0.0 : totValue[playerId] / nVisits;
     }
 
     private double nodeValue(PlayerDecisionStats pds, int playerId) {
@@ -608,7 +604,8 @@ public class SingleTreeNode {
             // In Closed_Loop we make a copy of a state only when we expand and add a new node to the tree.
             if (params.information == Closed_Loop) {
                 // we do not advance, but do track the actions taken (otherwise done in advanceState)
-                actionsInTree.add(new Pair<>(cur.decisionPlayer, chosen));
+                // -1 for a joint action at a multi-actor node, as advanceState records it
+                actionsInTree.add(new Pair<>(cur.isMultiActor() ? -1 : cur.decisionPlayer, chosen));
             } else {
                 cur.advanceState(cur.openLoopState, chosen, false);
             }
@@ -667,17 +664,23 @@ public class SingleTreeNode {
 
     protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
-        int nextPlayer = (params.opponentTreePolicy.selfOnlyTree || params.decoupled) ? decisionPlayer :
-                nextState.getCurrentSimultaneousPlayers().getFirst();
         SingleTreeNode tn = createChildNode(actionCopy, nextState);
         // It is possible that we are expanding a node because a different player is the next to act
         SingleTreeNode[] newNodeArray = children.get(actionCopy);
         if (newNodeArray == null)
-            newNodeArray = new SingleTreeNode[nextState.getNPlayers()];
-        newNodeArray[nextPlayer] = tn;
-        // we store this by id of the player who will take their turn next (or the tree owner for simultaneous actions)
+            newNodeArray = new SingleTreeNode[nextState.getNPlayers() + 1];  // see childSlot() for the extra slot
+        newNodeArray[childSlot(nextState)] = tn;
         children.put(actionCopy, newNodeArray);
         return tn;
+    }
+
+    /**
+     * The index in a child array at which the node for the given next state is stored. A single-actor
+     * state is filed under its current player. A state in which several players decide
+     * (decoupled search) is filed in the extra slot at index nPlayers
+     */
+    protected int childSlot(AbstractGameState nextState) {
+        return actingPlayersAt(nextState).size() > 1 ? nextState.getNPlayers() : nextState.getCurrentPlayer();
     }
 
     protected SingleTreeNode createChildNode(AbstractAction actionCopy, AbstractGameState nextState) {
@@ -854,7 +857,7 @@ public class SingleTreeNode {
             // in this case we have determinism...there should just be a single child node in the array...so we get that
             return Arrays.stream(nodeArray).filter(Objects::nonNull).findFirst().orElse(null);
         } else {
-            SingleTreeNode nextNode = nodeArray[openLoopState.getCurrentPlayer()];
+            SingleTreeNode nextNode = nodeArray[childSlot(openLoopState)];
             if (nextNode != null)
                 nextNode.setActionsFromOpenLoopState(openLoopState);
             return nextNode;
@@ -873,8 +876,6 @@ public class SingleTreeNode {
      * The statistics for the specified acting player at this node
      */
     private PlayerDecisionStats statsFor(int actingPlayer) {
-        if (actingPlayer < 0)
-            throw new AssertionError("No single decision player at this node (acting: " + actingPlayers);
         return statsByPlayer.computeIfAbsent(actingPlayer, PlayerDecisionStats::new);
     }
 
@@ -1280,6 +1281,8 @@ public class SingleTreeNode {
                 state = null;
         }
         nVisits++;
+        if (totValue == null) totValue = new double[result.length];
+        for (int i = 0; i < result.length; i++) totValue[i] += result[i];
         if (isMultiActor()) {
             // Decoupled backup: each acting player credits their own component of the joint action,
             // against their own table. The regret-matching refresh is per player too.

@@ -32,6 +32,7 @@ public class SushiGoDecoupledTests {
         p.rolloutLength = 30;
         p.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         p.information = MCTSEnums.Information.Information_Set;
+        p.decoupled = true;  // these tests exercise the decoupled path; the default is sequential
         tweak.accept(p);
         return p;
     }

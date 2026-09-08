@@ -126,12 +126,13 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
      * into the cave.
      * <p>
      * For the game itself any player would do, since everyone chooses at once. The choice matters
-     * to the open-loop search tree, which files the node reached after an action under the player
-     * who then holds the turn. When the cave continues, that is one of the players who chose to
-     * continue; when a hazard ends it, everyone is back in the cave and all of them decide next.
-     * The same joint action leads to both, by chance, so the turn owner after a collapse must not be
-     * one of the continuing players, or the two outcomes would share a node with different sets of
-     * acting players.
+     * to a sequential open-loop search tree, which files the node reached after an action under the
+     * player who then holds the turn. When the cave continues, that is one of the players who chose
+     * to continue; when a hazard ends it, everyone is back in the cave and all of them decide next.
+     * The same action leads to both, by chance, so the turn owner after a collapse must not be one
+     * of the continuing players, or the two outcomes would share a node. A decoupled search files a
+     * successor in which several players decide in a slot of its own (SingleTreeNode.childSlot),
+     * so it does not depend on this choice.
      */
     private int firstPlayerOfNextCave(DiamantGameState dgs) {
         for (int p = 0; p < dgs.getNPlayers(); p++)
