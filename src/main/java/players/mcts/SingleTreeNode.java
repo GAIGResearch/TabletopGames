@@ -58,24 +58,18 @@ public class SingleTreeNode {
     protected double highReward = Double.NEGATIVE_INFINITY;
     protected double lowReward = Double.POSITIVE_INFINITY;
     protected int nodeClash;
-    // Root node of tree
     protected SingleTreeNode root;
-    // Parent of this node
     SingleTreeNode parent;
     // Children of this node. The value is an Array because we have to cater for the possibility that the next decision
-    // could be by any player - each of which would transition to a different Node OpenLoop search. (Closed Loop will
+    // could be by any player - and this may differ on each iteration with OpenLoop search. (Closed Loop will
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new LinkedHashMap<>();
-    // The candidate actions and statistics for each player who decides at this node.
-    // One entry per acting player: exactly one (for decisionPlayer) in a sequential search, and one
-    // per simultaneously-moving player at a multi-actor node of a decoupled search.
-    protected final Map<Integer, PlayerDecisionStats> statsByPlayer = new HashMap<>();
-    // The players who decide at this node, as reported by the game state on the most recent visit.
-    // A singleton everywhere in a sequential search; several entries at a simultaneous-move node
-    // when params.decoupled is on. Children of such a node are keyed by the joint SimultaneousAction.
+    // The players who decide at this node, as reported by the game state on the most recent visit (in Open Loop)
+    // A single player in a sequential search; several entries at a simultaneous-move node in decoupled search.
     protected List<Integer> actingPlayers = Collections.emptyList();
-    List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
-    // ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
+    // The candidate actions and statistics for each player who decides at this node.
+    protected final Map<Integer, PlayerDecisionStats> statsByPlayer = new HashMap<>();
+    List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a Map per player. Action -> (visits, totValue)
     // The total value of all trajectories through this node (one element per player)
     private Supplier<? extends SingleTreeNode> factory;
     // Total value of this node
@@ -142,28 +136,27 @@ public class SingleTreeNode {
         if (parent != null) {
             depth = parent.depth + 1;
             factory = parent.factory;
-            decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : soleActingPlayer(state);
+            // decisionPlayer is the actingPlayer; or the root player in the case of simultaneous actions
+            decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer
+                    : actingPlayersAt(state).size() > 1 ? root.decisionPlayer : state.getCurrentPlayer();
         } else { // this is the root node (possibly reused from previous tree)
             resetDepth(this);
-            // The root always has a decision owner - the player we are searching on behalf of -
-            // even when several players act at once there (a decoupled search of a simultaneous
-            // turn). bestAction(), the rollout policy and paranoid backups all key off it.
+            // The root always has a decision owner - the player the search is on behalf of
+            // True even for decoupled search
             decisionPlayer = state.getCurrentPlayer();
         }
 
-        // Tree reuse only. instantiate() runs a second time on a node only via rootify(), i.e.
-        // under reuseTree, and the statistics must survive that. decisionPlayer has just been
-        // recomputed from the new root state, so move the single existing entry to that key.
-        // The standard reuse path asserts the player is unchanged and the Toad path picks the
-        // child by that player, so both are no-ops here; the MCGS reuse path can re-home a node
-        // created for a different player, and this keeps its statistics under the new
-        // decisionPlayer, as the old code did.
-        // A multi-actor node (decoupled UCT) holds one entry per acting player under real
-        // player ids, which do not depend on the current player, so there is nothing to re-key.
+        // During Tree reuse instantiate() runs a second time on a node only via rootify(), i.e.
+        // under reuseTree, and the statistics must not be deleted. decisionPlayer has just been
+        // recomputed from the new root state, so move the single existing entry to that key (this can change under MCGS).
+        // A multi-actor node (decoupled UCT) holds one entry per acting player,
+        // which do not depend on the current player, so there is nothing to change.
+        // (Also decoupled UCT currently does not support tree reuse)
         if (statsByPlayer.size() == 1 && !statsByPlayer.containsKey(decisionPlayer)) {
             PlayerDecisionStats existing = statsByPlayer.values().iterator().next();
             statsByPlayer.clear();
             statsByPlayer.put(decisionPlayer, existing);
+            // JG: I need to understand the precise scenario under which the new root node has a different actingPlayer...I am not sure I see how this can happen?
         }
 
         // then set up available actions, and set openLoopState
@@ -208,35 +201,12 @@ public class SingleTreeNode {
     }
 
     /**
-     * Whether this search lets several players decide at one node. Only a OneTree search over a
-     * single determinisation can: every other opponent tree policy, and ForestNode, assumes one
-     * actor per node. MCTSParams._reset() clamps the parameter the same way; this repeats the
-     * check so that parameters set directly (as the tests do) behave identically.
-     */
-    protected boolean decoupled() {
-        return params.decoupled && params.opponentTreePolicy == OneTree && params.numDeterminizations <= 1;
-    }
-
-    /**
-     * The players who decide in the given state. In a sequential search that is always just the
-     * current player; in a decoupled search it is whatever the game reports, which is several
-     * players on a simultaneous turn. Sequential search must never ask the game the second
-     * question, since getCurrentPlayer() is what every sequential agent in the framework relies on.
+     * The players who decide in the given state. In a standard sequential search that is always just the
+     * current player; in a decoupled search it may be several players on a simultaneous turn.
      */
     protected List<Integer> actingPlayersAt(AbstractGameState s) {
-        if (!decoupled()) return Collections.singletonList(s.getCurrentPlayer());
+        if (!params.decoupled) return Collections.singletonList(s.getCurrentPlayer());
         return s.getCurrentSimultaneousPlayers();
-    }
-
-    /**
-     * The single player who decides in the given state, or -1 when several do at once. A node at
-     * which three players move simultaneously has no single decision player, and inventing one
-     * would silently attribute their statistics to whoever was picked - so the sequential
-     * accessors that take no acting player throw at such a node instead.
-     */
-    protected int soleActingPlayer(AbstractGameState s) {
-        List<Integer> acting = actingPlayersAt(s);
-        return acting.size() == 1 ? acting.get(0) : -1;
     }
 
     /** True when several players decide at this node, i.e. its children are keyed by joint actions. */
@@ -250,67 +220,41 @@ public class SingleTreeNode {
     }
 
     /**
-     * Whether the tree policy can select an action here: every acting player is still in the game
-     * and has at least one candidate action this iteration. In a sequential search this is the
-     * single-player condition the tree policy has always used.
-     */
-    protected boolean hasDecisionToMake() {
-        if (!isMultiActor())
-            return openLoopState.isNotTerminalForPlayer(decisionPlayer) && !statsFor(decisionPlayer).actionsFromOpenLoopState.isEmpty();
-        for (int p : actingPlayers) {
-            if (!openLoopState.isNotTerminalForPlayer(p) || statsFor(p).actionsFromOpenLoopState.isEmpty())
-                return false;
-        }
-        return true;
-    }
-
-    /**
      * Called when the tree search 'moves' to this node.
      * When we are using Open Loop search, we need to make sure that the state is updated to reflect the
      * state in the current trajectory; each visit to the node may have a different underlying state, and it's
      * perfectly possible for different actions to be available on different visits.
-     * This method looks at the actions available this time round, and initialises relevant parts of the
-     * node information that will then be used during the rest of the decision-making process from this node.
+     * This method looks at the actions available this time round and initialises relevant parts of the
+     * node information that will then be used during the rest of the decision-making process at this node.
      *
      */
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         openLoopState = actionState;
         actingPlayers = actingPlayersAt(actionState);
         if (!isMultiActor()) {
-            // The sequential path, unchanged: one acting player, who must be this node's decision player.
+            // The standard sequential path, for which getCurrentPlayer() is used
             if (actionState.getCurrentPlayer() == this.decisionPlayer && actionState.isNotTerminalForPlayer(decisionPlayer)) {
                 setActionsForPlayer(actionState, decisionPlayer);
             } else if (!params.opponentTreePolicy.selfOnlyTree) {
-                throw new AssertionError("Expected?");
-                // How have we got to a state in which the decision player is not the active player?
+                throw new AssertionError("Unexpected non-self current player");
             }
-            return;
-        }
-        // Several players decide here. Each gets their own candidate list and statistics; the child
-        // will be keyed by the joint action. A node created as single-actor cannot become
-        // multi-actor on a later visit (the root is the exception: it is multi-actor with a valid
-        // decision owner, see instantiate()).
-        if (parent != null && decisionPlayer != -1)
-            throw new AssertionError("Node created for P" + decisionPlayer + " alone is now visited with acting players " + actingPlayers);
-        for (int p : actingPlayers) {
-            if (actionState.isNotTerminalForPlayer(p))
-                setActionsForPlayer(actionState, p);
-            else
-                statsFor(p).actionsFromOpenLoopState = new ArrayList<>();
-        }
-        // A player who acted here on an earlier visit but not on this one must not keep a stale
-        // candidate list, or the tree policy would select an action that is illegal in this state.
-        for (Map.Entry<Integer, PlayerDecisionStats> e : statsByPlayer.entrySet()) {
-            if (!actingPlayers.contains(e.getKey()))
-                e.getValue().actionsFromOpenLoopState = new ArrayList<>();
+        } else {
+            // Several players decide here. Each gets their own candidate list and statistics; the child
+            // will be keyed by the joint action.
+            if (parent != null && decisionPlayer != -1)  // this is different from the root, for which we *do* have a decisionPlayer
+                throw new AssertionError("Node created for P" + decisionPlayer +
+                        " alone is now visited with acting players " + actingPlayers);
+            for (int p : actingPlayers) {
+                if (actionState.isNotTerminalForPlayer(p))
+                    setActionsForPlayer(actionState, p);
+                else
+                    throw new AssertionError("A player who is allegedly active *must* have some actions available");
+            }
         }
     }
 
     /**
-     * Work out one player's options at this node on this iteration, and initialise their statistics.
-     * <p>
-     * Separated from the guard above so that a node at which several players decide can call this
-     * once per acting player; a sequential node calls it once, for its decision player.
+     * Work out one player's options at this node on this iteration and initialise their statistics.
      */
     protected void setActionsForPlayer(AbstractGameState actionState, int actingPlayer) {
         PlayerDecisionStats pds = statsFor(actingPlayer);
@@ -350,7 +294,6 @@ public class SingleTreeNode {
                 params.progressiveBias = 0.0;
                 params.initialiseVisits = 0;
                 params.progressiveWideningConstant = 0.0;
-                //System.out.println("Warning: actionHeuristic is nullReturn, so pUCT, initialiseVisits, progressive bias and pruning are disabled");
             }
         }
         if (params.pUCTTemperature < 10000.0) {
@@ -383,8 +326,7 @@ public class SingleTreeNode {
                 // This *does* rely on a good equals method being implemented for Actions
                 if (!pds.actionValues.containsKey(action.copy()))
                     throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
-                // mark a new node to be expanded. Not at a multi-actor node: there the children are
-                // keyed by the joint action, never by one player's component.
+                // mark a new node to be expanded (except at a multi-actor node where the children are keyed by the joint action
                 if (!isMultiActor())
                     children.put(action.copy(), null);
                 // Then we seed the statistics with heuristic biases (if so parameterised)
@@ -421,9 +363,6 @@ public class SingleTreeNode {
         initialisationTimeTaken = 0.0;
         nodeClash = 0;
         rolloutActionsTaken = 0;
-        // every acting player's average policy, not only the decision owner's - a decoupled root
-        // maintains one per simultaneously-moving player
-        statsFor(decisionPlayer).regretMatchingAverage.clear();
         for (PlayerDecisionStats pds : statsByPlayer.values())
             pds.regretMatchingAverage.clear();
     }
@@ -589,14 +528,6 @@ public class SingleTreeNode {
         return statsFor(actingPlayer).actionsFromOpenLoopState;
     }
 
-    private int validVisitsFor(AbstractAction action) {
-        return validVisitsFor(decisionPlayer, action);
-    }
-
-    private int validVisitsFor(int actingPlayer, AbstractAction action) {
-        return validVisitsFor(statsFor(actingPlayer), action);
-    }
-
     private int validVisitsFor(PlayerDecisionStats pds, AbstractAction action) {
         if (params.information == Closed_Loop)
             return nVisits;
@@ -623,16 +554,12 @@ public class SingleTreeNode {
     }
 
     public double nodeValue(int playerId) {
-        return nodeValue(anyStats(), playerId);
+        return nodeValue(statsFor(decisionPlayer), playerId);
     }
 
     private double nodeValue(PlayerDecisionStats pds, int playerId) {
         if (nVisits == 0) return 0.0;
         return pds.actionValues.values().stream().mapToDouble(s -> s.totValue[playerId]).sum() / nVisits;
-    }
-
-    private double actionSquaredValue(AbstractAction action, int playerId) {
-        return actionSquaredValue(statsFor(decisionPlayer), action, playerId);
     }
 
     private double actionSquaredValue(PlayerDecisionStats pds, AbstractAction action, int playerId) {
@@ -662,17 +589,16 @@ public class SingleTreeNode {
      * Selection + expansion steps.
      * - Tree is traversed until a node not fully expanded is found.
      * - A new child of this node is added to the tree.
+     *  This is only called on the root node and then navigates the tree within this loop (it is not recursive)
      *
      * @return - new node added to the tree.
      */
     protected SingleTreeNode treePolicy() {
 
-        // Caution - this is only called on the root node.
-
         SingleTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.hasDecisionToMake() && cur.depth < params.maxTreeDepth) {
+        while (cur.hasDecisionToMakeInTree() && cur.depth < params.maxTreeDepth) {
             // Move to next child given by relevant selection function. At a multi-actor node this
             // is one selection per acting player, combined into a SimultaneousAction.
             AbstractAction chosen = cur.jointTreePolicyAction(true);
@@ -681,9 +607,8 @@ public class SingleTreeNode {
             // this is then updated with all actions (and stored in openLoopState on each node it visits).
             // In Closed_Loop we make a copy of a state only when we expand and add a new node to the tree.
             if (params.information == Closed_Loop) {
-                // we do not advance
-                // but we do want to track the actions taken (otherwise done in advanceState)
-                actionsInTree.add(new Pair<>(cur.soleActingPlayer(cur.openLoopState), chosen));
+                // we do not advance, but do track the actions taken (otherwise done in advanceState)
+                actionsInTree.add(new Pair<>(cur.decisionPlayer, chosen));
             } else {
                 cur.advanceState(cur.openLoopState, chosen, false);
             }
@@ -701,6 +626,20 @@ public class SingleTreeNode {
             cur = nextNode;
         }
         return cur;
+    }
+    /**
+     * Whether the tree policy can select an action here: every acting player is still in the game
+     * and has at least one candidate action this iteration. In a sequential search this is just the
+     * current player.
+     */
+    protected boolean hasDecisionToMakeInTree() {
+        if (!isMultiActor())
+            return openLoopState.isNotTerminalForPlayer(decisionPlayer) && !statsFor(decisionPlayer).actionsFromOpenLoopState.isEmpty();
+        for (int p : actingPlayers) {
+            if (!openLoopState.isNotTerminalForPlayer(p) || statsFor(p).actionsFromOpenLoopState.isEmpty())
+                return false;
+        }
+        return true;
     }
 
     protected List<AbstractAction> actionsToConsider(List<AbstractAction> allAvailable) {
@@ -726,16 +665,17 @@ public class SingleTreeNode {
         return new ArrayList<>(allAvailable);
     }
 
-
     protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
-        int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
+        int nextPlayer = (params.opponentTreePolicy.selfOnlyTree || params.decoupled) ? decisionPlayer :
+                nextState.getCurrentSimultaneousPlayers().getFirst();
         SingleTreeNode tn = createChildNode(actionCopy, nextState);
         // It is possible that we are expanding a node because a different player is the next to act
         SingleTreeNode[] newNodeArray = children.get(actionCopy);
         if (newNodeArray == null)
             newNodeArray = new SingleTreeNode[nextState.getNPlayers()];
-        newNodeArray[nextPlayer] = tn; // we store this by id of the player who will take their turn next
+        newNodeArray[nextPlayer] = tn;
+        // we store this by id of the player who will take their turn next (or the tree owner for simultaneous actions)
         children.put(actionCopy, newNodeArray);
         return tn;
     }
@@ -763,7 +703,9 @@ public class SingleTreeNode {
             root.actionsInRollout.add(new Pair<>(lastActorInRollout, act));
         } else {
             // -1 for a joint action at a multi-actor node; backUp() and MASTBackup() expand it
-            root.actionsInTree.add(new Pair<>(soleActingPlayer(gs), act));
+            // this is the one time (actionsInTree) where -1 is a valid number for an acting player
+            int actingPlayer = actingPlayersAt(gs).size() > 1 ? -1 : gs.getCurrentPlayer();
+            root.actionsInTree.add(new Pair<>(actingPlayer, act));
         }
         forwardModel.next(gs, act.copy());
         root.fmCallsCount++;
@@ -883,10 +825,9 @@ public class SingleTreeNode {
 
     /**
      * The action to take from this node on the way down the tree. At a single-actor node that is
-     * the decision player's tree-policy choice, exactly as before. At a multi-actor node every
-     * acting player chooses independently from their own statistics, and the choices are combined
-     * into one SimultaneousAction in acting-player order - which is also the key the child is
-     * stored under, so the same joint choice reaches the same child.
+     * the decision player's action. At a multi-actor node every
+     * acting player chooses independently and the choices are combined
+     * into a SimultaneousAction.
      */
     protected AbstractAction jointTreePolicyAction(boolean explore) {
         if (!isMultiActor())
@@ -913,13 +854,7 @@ public class SingleTreeNode {
             // in this case we have determinism...there should just be a single child node in the array...so we get that
             return Arrays.stream(nodeArray).filter(Objects::nonNull).findFirst().orElse(null);
         } else {
-            //  int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : openLoopState.getCurrentPlayer();
             SingleTreeNode nextNode = nodeArray[openLoopState.getCurrentPlayer()];
-//            if (params.opponentTreePolicy.selfOnlyTree && nextNode.decisionPlayer != decisionPlayer) {
-//                nodeArray[nextPlayer] = SingleTreeNode.createChildNode(this, actionChosen.copy(), openLoopState, factory);
-//                nextNode = nodeArray[nextPlayer];
-//            }
-            // pick up the existing one, and set the state
             if (nextNode != null)
                 nextNode.setActionsFromOpenLoopState(openLoopState);
             return nextNode;
@@ -935,37 +870,16 @@ public class SingleTreeNode {
     }
 
     /**
-     * The statistics for one acting player at this node, created on demand.
-     * <p>
-     * Every read and write of the five per-player fields goes through here. Creating on demand
-     * rather than in instantiate() is required by ForestNode
-     * <p>
-     * The guard catches the one mistake that compiles cleanly: asking for "the" table at a node
-     * that has several. The no-argument accessors pass decisionPlayer, which is -1 at a
-     * multi-actor node, so any of them reaching such a node fails here rather than silently
-     * reading one player's statistics as if they were the node's.
+     * The statistics for the specified acting player at this node
      */
     private PlayerDecisionStats statsFor(int actingPlayer) {
         if (actingPlayer < 0)
-            throw new AssertionError("No single decision player at this node (acting: " + actingPlayers
-                    + "); use the accessor that names the acting player");
+            throw new AssertionError("No single decision player at this node (acting: " + actingPlayers);
         return statsByPlayer.computeIfAbsent(actingPlayer, PlayerDecisionStats::new);
     }
 
     /**
-     * A table to read node-level quantities from at a multi-actor node. nodeValue() sums one
-     * player's table; every acting player's table sums to the same total, because each visit
-     * records the same result vector against exactly one action per player. So for that purpose
-     * any acting player's table will do, and this picks the first.
-     */
-    private PlayerDecisionStats anyStats() {
-        if (decisionPlayer != -1) return statsFor(decisionPlayer);
-        if (actingPlayers.isEmpty()) throw new AssertionError("No acting players recorded at this node");
-        return statsFor(actingPlayers.get(0));
-    }
-
-    /**
-     * The action statistics for this node, keyed by action. This is the live map, not a copy -
+     * The action statistics for this node, keyed by action. This is a live map, not a copy -
      * callers within the package rely on being able to see later updates through it.
      */
     public Map<AbstractAction, ActionStats> getActionValues() {
@@ -1368,9 +1282,7 @@ public class SingleTreeNode {
         nVisits++;
         if (isMultiActor()) {
             // Decoupled backup: each acting player credits their own component of the joint action,
-            // against their own table, with the same result vector. The regret-matching refresh is
-            // per player too, since each player's considered list (and so their cadence) is their
-            // own; the nVisits it keys off is the shared node counter.
+            // against their own table. The regret-matching refresh is per player too.
             SimultaneousAction joint = (SimultaneousAction) actionTaken;
             for (int p : actingPlayers) {
                 AbstractAction component = joint.getPlayerActions().get(p);
@@ -1383,17 +1295,13 @@ public class SingleTreeNode {
                         updateRegretMatchingAverage(p, considered);
                 }
             }
-            // The Lambda / MaxLambda / MaxMC tails below interpolate the result with "the" action's
-            // running mean, or with the best action's - a single-actor notion. At a multi-actor node
-            // there is one such quantity per player and no principled way to combine them, so the
-            // backup here is plain Monte Carlo whatever the policy. Recorded in the DUCT Readme, §6.
+            // The Lambda / MaxLambda / MaxMC tails below are only valid with sequential tree search, so the
+            // backup here is plain Monte Carlo whatever the policy.
+            // TODO: We could implement a MAX backup with simultaneous action nodes - we can calculate for each player the best action (marginalising out the results of the other players)
+            // TODO: Then we interpolate with this MAX value for each player separately
             return result;
         }
-        // The per-acting-player part of the backup. It returns the list of actions it considered,
-        // and the tail below reuses that list rather than recomputing it - which is what keeps this
-        // split identical to the single computation it replaces. actionsToConsider() is a function
-        // of nVisits and of the per-action visit counts, and updateActionStats has just incremented
-        // both, so a second call is not obviously the same query.
+        // The per-acting-player part of the backup
         List<AbstractAction> actionsToConsider = updateActionStats(decisionPlayer, actionTaken, result);
         ActionStats stats = getActionValues(decisionPlayer).get(actionTaken);
 
@@ -1480,9 +1388,7 @@ public class SingleTreeNode {
         for (Pair<Integer, AbstractAction> pair : rolloutActions) {
             if (pair.b instanceof SimultaneousAction joint) {
                 // A joint action from a multi-actor tree node: MAST is per player per component
-                // action, so expand it here. The list itself is left untouched, because it is
-                // the same list as actionsInTree (or an alias of actionsInRollout), which must stay
-                // index-aligned with currentNodeTrajectory.
+                // action, so expand it here. The list itself must stay index-aligned with currentNodeTrajectory.
                 for (Map.Entry<Integer, AbstractAction> e : joint.getPlayerActions().entrySet())
                     MASTBackupOne(e.getKey(), e.getValue(), delta);
             } else {
@@ -1527,9 +1433,7 @@ public class SingleTreeNode {
                             || params.opponentTreePolicy == MCGSSelfOnly)) {
                 // In these cases we need to recompute the available actions from the root state to ensure that
                 // we only consider the ones that are valid in the caller (in MCGS case it is possible that we have a loop round to the root)
-                // The root's own player's actions, asked for by name: at a decoupled root the state's
-                // current player is still the decision owner, but asking explicitly is what a
-                // multi-actor node requires, and it is the same call at a sequential root.
+                // At a decoupled root the state's current player is still the decision owner
                 availableActions = actionsToConsider(forwardModel.computeAvailableActions(state, params.actionSpace, decisionPlayer));
             }
             List<Pair<AbstractAction, Double>> tempValues = new ArrayList<>();
@@ -1565,7 +1469,6 @@ public class SingleTreeNode {
 
         if (bestAction == null) {
             if (nVisits < 2) {
-//                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
                 bestAction = statsFor(decisionPlayer).actionValues.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
             } else
                 throw new AssertionError("Unexpected - no selection made.");

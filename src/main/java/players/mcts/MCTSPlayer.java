@@ -28,9 +28,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
     protected Map<Object, Integer> oldGraphKeys = new HashMap<>();
     protected List<Object> recentlyRemovedKeys = new ArrayList<>();
-    // one warning per player instance, see newRootNode()
-    private boolean warnedReuseTreeDecoupled = false;
-
     public MCTSPlayer() {
         this(new MCTSParams());
     }
@@ -167,14 +164,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         // Now for standard open loop processing
         SingleTreeNode newRoot = null;
         if (params.reuseTree && root != null && params.decoupled && gameState.getCurrentSimultaneousPlayers().size() > 1) {
-            // Tree reuse across a simultaneous turn is not yet supported with decoupled search:
-            // backtrack() walks the history one component action at a time, while the old root's
-            // children are keyed by joint actions, so the walk would always miss. Start afresh
-            // instead. See the DUCT Readme, §6.1, for what it will take to implement this.
-            if (!warnedReuseTreeDecoupled) {
-                System.out.println("reuseTree is not yet supported with decoupled search on a simultaneous turn; building a new tree");
-                warnedReuseTreeDecoupled = true;
-            }
+            // Tree reuse across a simultaneous turn is not yet supported with decoupled search
             root = null;
         }
         if (params.reuseTree && root != null) {
