@@ -201,7 +201,7 @@ order. `new HashMap<>(4)` changes the table length and therefore the order.
 `actionTotValue(action, playerId)` (:463), `nodeValue(playerId)` (:468) and
 `actionSquaredValue(action, playerId)` (:473) already take a player id — but it is the **reward
 index** into `ActionStats.totValue[]`, and today it is always passed as `decisionPlayer`. The
-decoupled version introduces a second, distinct meaning: **which player's statistics table to read**.
+decoupled version introduces a second, distinct meaning: **whose `ActionStats` to read**.
 They coincide at every current call site, but they are not the same concept, and paranoid backup
 already makes `totValue[i]` meaningful for `i != decisionPlayer`.
 
@@ -243,17 +243,17 @@ The consequences, in full:
 
 - `decisionPlayer` is retained only in its two *other* meanings: the **reward index** (§4.2), and
   **the search owner at the root**.
-- "Which player's statistics table" becomes a separate, explicitly threaded concept — `actingPlayer`
+- "Whose `ActionStats`" becomes a separate, explicitly threaded concept — `actingPlayer`
   selecting a `PlayerDecisionStats`.
 - At a multi-actor node Stage B set `decisionPlayer = -1`, and the no-arg compatibility accessors
-  threw there, so that any accidental "whose table?" use failed loudly.
+  threw there, so that any accidental "whose `ActionStats`?" use failed loudly.
   *Revised after Stage B (JG, September 2026):* a multi-actor node now carries the **root's**
   decision owner in `decisionPlayer`, so the field means one thing everywhere - the player the
-  search is on behalf of - and the no-arg accessors read that player's table. At a multi-actor
+  search is on behalf of - and the no-arg accessors read that player's `ActionStats`. At a multi-actor
   node where the root player is not acting (Diamant, once the searching player has left the cave
-  while others continue) there is no such table: `nodeValue(playerId)` does not consult a table at
-  all but the node's own per-player `totValue` (§9 item 7), while `getActionValues()` and the other
-  no-arg readers create and return an empty table rather than throwing.
+  while others continue) there are no such `ActionStats`: `nodeValue(playerId)` consults no player's
+  `ActionStats` at all, but the node's own per-player `totValue` (§9 item 7), while `getActionValues()` and the other
+  no-arg readers create and return an empty `ActionStats` map rather than throwing.
   The tree policy and the backup only ever use the named `actingPlayer` form, so the search itself
   never reads it. This is, in effect, draft 2's `primaryActor` fallback adopted after all.
 - The **root** always has a valid `decisionPlayer`, because we only search when we have a decision
@@ -403,7 +403,7 @@ action count. Exempt multi-actor roots.
 `children.get(action).length` — a *component* action against a joint-keyed `children`. Once the
 placeholder `children.put(..., null)` is suppressed on multi-actor nodes, that is an NPE whenever
 `state == null`, which is the default at depth > 0 with `discardStateAfterEachIteration=true`.
-Reached via `TreeRecorder` and the debug print at `MCTSPlayer:303`. With per-player tables,
+Reached via `TreeRecorder` and the debug print at `MCTSPlayer:303`. With per-player `ActionStats`,
 `toString` should also print one block per entry in `statsByPlayer` — `DUCTNode.toString():346-367`
 is the model to copy.
 
@@ -418,8 +418,8 @@ simultaneous moves, so the gate is permanent:
 |---|---|
 | `SelfOnly` | `treePolicyAction:630` throws whenever the current player is not `decisionPlayer`, and `advanceToTurnOfPlayer:603-628` advances players one at a time and never builds a joint action. |
 | `MultiTree` | `MultiTreeNode:141` throws on `p != currentLocation[p].decisionPlayer`. |
-| `OMA` / `OMA_All` | `OMATreeNode.backUp:78-86` walks `selfActionsOnly` and asserts `currentNode.actionValues.containsKey(actionTakenFromParent)`. Those entries would be *joint* actions while the table is keyed by *components*, so :84 fires; `OMAChildren` is likewise keyed by single actions. |
-| `numDeterminizations > 1` | `ForestNode:121` reads `roots[i].actionValues` and `totValue[decisionPlayer]`; correct for the primary player only, so a decoupled forest would silently ignore the other players' tables. The `OneTree`-only gate covers it. |
+| `OMA` / `OMA_All` | `OMATreeNode.backUp:78-86` walks `selfActionsOnly` and asserts `currentNode.actionValues.containsKey(actionTakenFromParent)`. Those entries would be *joint* actions while `actionValues` is keyed by *components*, so :84 fires; `OMAChildren` is likewise keyed by single actions. |
+| `numDeterminizations > 1` | `ForestNode:121` reads `roots[i].actionValues` and `totValue[decisionPlayer]`; correct for the primary player only, so a decoupled forest would silently ignore the other players' `ActionStats`. The `OneTree`-only gate covers it. |
 
 Two features that draft 3 had in that table are **in Stage B** on re-examination (review in §12):
 
@@ -494,8 +494,8 @@ hands - the lookup returns `null` and the tree is rebuilt, as it is today when a
    after a real simultaneous turn *is* a multi-actor node (that is what a decoupled SushiGo root
    is), with one `PlayerDecisionStats` per acting player and, since the post-Stage-B revision of
    §4.3, `decisionPlayer` already equal to the old root's owner - the same agent. The re-key block
-   leaves a multi-entry table alone, and `instantiate` recomputes the owner from the new root
-   state, so `rootify` has only to leave the other players' tables undisturbed.
+   leaves a multi-entry `statsByPlayer` alone, and `instantiate` recomputes the owner from the new
+   root state, so `rootify` has only to leave the other players' `ActionStats` undisturbed.
 3. `MCTSPlayer:189-190` - the assertion that `newRoot.decisionPlayer == gameState.getCurrentPlayer()`
    fails by construction for a reused multi-actor root and must be relaxed to "the current player
    is in the root's acting set".
@@ -671,7 +671,8 @@ Dominion, which shuffles, is not - verified by capturing twice in separate JVMs 
 is worth doing before pinning any value.
 
 So the Dominion scenarios are checked structurally (node type, sub-root count, total visits) rather
-than exactly. That is still enough to catch a refactor that drops statistics, mis-keys a table or
+than exactly. That is still enough to catch a refactor that drops statistics, mis-keys an
+`ActionStats` map or
 throws; exact coverage comes from the LMR set, which runs Information_Set with full digests.
 
 Configurations to cover, reusing the existing `TestMCTSPlayer` / `new Random(303897)` /
@@ -736,7 +737,7 @@ Plus a two-line **`ForestNode` smoke test** (`numDeterminizations > 1`) — see 
   `rootify`** (:152-164, which calls `instantiate(null, null, newState)`). That is exactly how tree
   reuse keeps the root's statistics. Allocating a fresh `PlayerDecisionStats` there silently empties
   every reused root while leaving `nVisits` and `children` intact, and nothing throws because
-  :263-296 repopulates the table for the currently available actions. Reached from `MCTSPlayer:196`
+  :263-296 repopulates `actionValues` for the currently available actions. Reached from `MCTSPlayer:196`
   (`reuseTree`), `MCTSPlayer:152-162` (MCGS reuse — and that path has **no** `decisionPlayer` guard,
   unlike `MCTSPlayer:189`, so the key itself can change), and `ToadMCTSPlayer:67`. Insert between
   :145 and :148:
@@ -872,10 +873,10 @@ review:
 2. **`statsFor` creating on demand is the only population path, and `instantiate` never allocates.**
    The plan had `instantiate` re-key an object it might also have to create. Making `statsFor` the
    sole creation point is simpler and removes the failure mode outright: there is no code path that
-   can hand a reused root an empty table. `instantiate` only re-keys, for the case where
+   can hand a reused root an empty `ActionStats` map. `instantiate` only re-keys, for the case where
    `decisionPlayer` changes (the MCGS reuse path permits this; the standard path asserts against it).
 
-3. **The reward-index/table-selector split is threaded as an object, not a second int** (§4.2), and
+3. **The reward-index / `ActionStats`-selector split is threaded as an object, not a second int** (§4.2), and
    that decision was forced rather than merely preferred: `nodeValue(int, int)` breaks `toString`'s
    `this::nodeValue` reference outright.
 
@@ -994,8 +995,8 @@ is unchanged, so the sequential path is still bit-identical to master. Where it 
    index happened to keep them apart.
 2. **The one real bug was the reward index.** The selection internals (`ucbValue`, `exp3Value`,
    `rmValue`, `getActionValue`, and `bestAction(pds, ...)`) read `totValue[decisionPlayer]`, the
-   §4.2 confusion made concrete: at a multi-actor node that is `totValue[-1]`. Each table now
-   indexes by its own `pds.player`, which coincides with `decisionPlayer` at every sequential node
+   §4.2 confusion made concrete: at a multi-actor node that is `totValue[-1]`. Each player's
+   `ActionStats` are now indexed by their own `pds.player`, which coincides with `decisionPlayer` at every sequential node
    (the goldens prove it) and is each player's own reward at a decoupled one. Found by
    `testSushiGoWithSeqUCT` on the first run.
 3. **Step 3's "drop the entry" became "empty the candidate list"** (§7.2).
@@ -1010,14 +1011,14 @@ is unchanged, so the sequential path is still bit-identical to master. Where it 
    simultaneous root by `MCTSPlayer` rather than clamped in `_reset()`.
 7. **Step 8's accessors.** In Stage B the no-argument accessors threw at a multi-actor node, via
    `statsFor`, and `getActor()` returned -1 there. *After Stage B (JG)* both read the root
-   player's table (§4.3, revised). `nodeValue(playerId)` reads a per-player total kept on the node
-   itself (`totValue`, accumulated in `backUpSingleNode` beside `nVisits`) rather than summing any
-   player's table: with joint successors sharing one child slot (item 1) a node's acting set can
-   differ between visits, so no single player's table need cover every visit, and "any acting
-   player's table sums to the same total" no longer holds. `toString` prints one block per acting player; `TreeStatistics` sums action
+   player's `ActionStats` (§4.3, revised). `nodeValue(playerId)` reads a per-player total kept on the
+   node itself (`totValue`, accumulated in `backUpSingleNode` beside `nVisits`) rather than summing any
+   player's `ActionStats`: with joint successors sharing one child slot (item 1) a node's acting set
+   can differ between visits, so no single player's `ActionStats` need cover every visit, and "any
+   acting player's `ActionStats` sum to the same total" no longer holds. `toString` prints one block per acting player; `TreeStatistics` sums action
    counts across players. `TreeRecorder`, `MCTSExpertIterationListener`, `MCTSDecisionRecorder`
    and `LearnedValue`, which all call `getActionValues()` per node, no longer throw on a decoupled
-   tree, but at a node where the root player is not acting they see an empty table. Follow-up.
+   tree, but at a node where the root player is not acting they see an empty `ActionStats` map. Follow-up.
 8. **The two-chopsticks case works** (§7.2): `SushiGoDecoupledTests.chopsticksInsideTree` forces
    two players to hold Chopsticks, finds joint actions in which both use them, and checks that the
    node after any chopsticks joint action has a single acting player who is one of the users.
@@ -1270,7 +1271,7 @@ statistics have to survive that as they did when they were bare fields, and `dec
 just been recomputed, so the single entry is moved to the new key. The standard reuse path asserts
 the player has not changed, so it is a no-op there; the MCGS transposition path can re-home a node
 created for a different player, and the old code silently kept its statistics, which the re-key
-reproduces. Multi-entry tables are left alone because their keys are real player ids that do not
+reproduces. Multi-entry `statsByPlayer` maps are left alone because their keys are real player ids that do not
 depend on the state's current player.
 
 > **JG (on `soleActingPlayer`):** I do not like this at all. It just hides the call to
@@ -1312,11 +1313,11 @@ found four defects in that commit, all fixed in the same session:
 3. The non-decoupled branch of the same line used the first of `getCurrentSimultaneousPlayers()`,
    which in Diamant after a cave collapse is not the turn owner, so plain sequential MCTS on
    Diamant failed with "Unexpected non-self current player". Same fix.
-4. `nodeValue(playerId)` read the root player's table unconditionally and so returned 0 at the
+4. `nodeValue(playerId)` read the root player's `ActionStats` unconditionally and so returned 0 at the
    quarter or so of Diamant nodes where the root player is not acting. It was first changed to
-   read the first acting player's table; the regression test written for it then showed that a
-   node visited with different acting sets (shared joint slot, item 2) can leave that player's
-   table a partial sum - one visit's reward divided by twelve visits, in one case. The node now
+   read the first acting player's `ActionStats`; the regression test written for it then showed that
+   a node visited with different acting sets (shared joint slot, item 2) can leave that player's
+   `ActionStats` a partial sum - one visit's reward divided by twelve visits, in one case. The node now
    keeps its own per-player `totValue`, accumulated in the backup, and `nodeValue` reads that
    (§9 item 7). `DiamantDecoupledTests.nodeValueWhereTheRootPlayerIsNotActing` pins it, and
    fails against both earlier bodies.
@@ -1327,3 +1328,37 @@ actor field masked, every tree is byte-identical to the Stage B one, so only the
 multi-actor children changed. Two Stage B tests that asserted -1 were rewritten to the new
 convention. `nonOneTreePolicyIsNeverDecoupled`, which asserted the removed node-level gate, was
 deleted (§5).
+
+**One node value, not two (JG, 9 September 2026).** `SingleTreeNode` carried two `nodeValue`
+methods: the public one reading the node's own `totValue`, and a private one summing an acting
+player's `ActionStats`, used as the baseline in `rmValue` and `exp3Value`. Two definitions of one
+quantity had already drifted. `initialiseVisits` seeds each action's `ActionStats` with
+`estimate * initialiseVisits` of fake value and raises node `nVisits` to match, but never touched
+node `totValue`, so the public method divided an unseeded numerator by a seeded denominator and
+returned a value no consumer wanted - notably `LearnedValue`, which subtracts it from action means
+that do carry the seed. The seeding block now mirrors what it writes into the `ActionStats` onto
+node `totValue`, and the private method is gone; `actionValues` calls `nodeValue(pds.player)`.
+
+At a multi-actor node each acting player seeds only their own slot of `totValue`, so the seeds land
+in disjoint slots and nothing is counted twice; the paranoid cross-terms are left out there, having
+no principled owner. One approximation remains there: `nVisits` is clamped to the largest acting
+player's fake visit count rather than the sum of them, so all slots share a denominator sized by
+whichever player has the most actions, and a player with fewer stays a little diluted. It is exact
+where the acting players have equally many actions, which covers Diamant (two each) and the
+simultaneous LMR fixture (three each).
+
+The sequential path no longer clamps at all. `nVisits` gains `initialiseVisits` per seeded action,
+which reaches the same total as the clamp on a node's first visit and, unlike the clamp, also
+credits an action discovered once the node already has real visits - an open-loop action set that
+grows, as in Dominion or Diamant, used to add such an action's fake value to the numerator while the
+clamp silently declined to fire. No pinned digest moved: the only scenarios that seed are the two
+LMR fixtures, whose action set is the same on every visit.
+
+With that in place the two methods agree exactly at every sequential node: node `totValue` and the
+acting player's `ActionStats` receive the same seeds and the same per-visit result. A probe over the
+LMR and simultaneous-LMR fixtures found visit counts identical everywhere and value differences of
+at most 2.8e-14, purely the reassociation of one accumulated sum against a sum over a `HashMap`.
+Regret matching amplifies that: `Math.max(0.0, regret)` and the pdf that follows turn a last-bit
+difference into a different action, so `lmr.regretMatching` and the decoupled `regretMatching`
+digests moved. Both were regenerated. No other scenario changed, `initialiseVisits` included, since
+it runs UCB and never consults node value.

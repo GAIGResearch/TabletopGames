@@ -343,7 +343,7 @@ public class StageBDecoupledTests {
         EXPECTED.put("exp3",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2538|copies=201|rollout=2000|digest=972e93e16a2d6d89|rnd=745567633726733450");
         EXPECTED.put("regretMatching",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2644|copies=201|rollout=2000|digest=832537166a1cf220|rnd=3032803597294232314");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2645|copies=201|rollout=2000|digest=90491cbf2944d5ad|rnd=-5201140804532177895");
         EXPECTED.put("greedy",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=196|fm=3010|copies=201|rollout=2000|digest=3c0311683c599bd2|rnd=-7828797891413438531");
         EXPECTED.put("closedLoop",

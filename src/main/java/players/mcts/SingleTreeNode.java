@@ -70,8 +70,9 @@ public class SingleTreeNode {
     protected final Map<Integer, PlayerDecisionStats> statsByPlayer = new HashMap<>();
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a Map per player. Action -> (visits, totValue)
     // The total value of all trajectories through this node (one element per player), over every visit
-    // whoever was acting. Kept on the node rather than derived from a player's action table, because at a
-    // multi-actor node the acting set can differ between visits and no single table then covers them all.
+    // whoever was acting. Kept on the node rather than derived from one player's ActionStats, because at a
+    // multi-actor node the acting set can differ between visits and no single player's ActionStats
+    // then cover them all.
     protected double[] totValue;
     private Supplier<? extends SingleTreeNode> factory;
     protected List<SingleTreeNode> currentNodeTrajectory;
@@ -349,8 +350,24 @@ public class SingleTreeNode {
                         for (int i = 0; i < actionState.getNPlayers(); i++)
                             if (i != actingPlayer)
                                 stats.totValue[i] = -stats.totValue[actingPlayer];
-                    if (nVisits < params.initialiseVisits * nActions) {
-                        nVisits = params.initialiseVisits * nActions;
+                    // The node's own total has to move with the fake visits below, or nodeValue() divides an
+                    // unseeded numerator by a seeded denominator.
+                    if (totValue == null) totValue = new double[actionState.getNPlayers()];
+                    if (isMultiActor()) {
+                        // Each acting player seeds only their own slot, so the seeds land in disjoint slots
+                        // The denominator then takes the largest acting player's fake visit count
+                        totValue[actingPlayer] += stats.totValue[actingPlayer];
+                        if (nVisits < params.initialiseVisits * nActions) {
+                            nVisits = params.initialiseVisits * nActions;
+                        }
+                    } else {
+                        // Mirror the whole vector, paranoid cross-terms included, so that totValue stays
+                        // exactly equal to the sum over the acting player's ActionStats, and count the fake
+                        // visits per seeded action, so an action discovered once the node already has real
+                        // visits adds to the denominator as well.
+                        for (int i = 0; i < totValue.length; i++)
+                            totValue[i] += stats.totValue[i];
+                        nVisits += params.initialiseVisits;
                     }
                 }
             }
@@ -528,23 +545,16 @@ public class SingleTreeNode {
     }
 
     private int validVisitsFor(PlayerDecisionStats pds, AbstractAction action) {
-        return validVisitsFor(pds.actionValues.get(action));
-    }
-
-    /**
-     * As above, for a caller that has already looked the {@link ActionStats} up (null if the action
-     * has no statistics yet). The tree policy fetches them once per action and reuses them.
-     */
-    private int validVisitsFor(ActionStats stats) {
         if (params.information == Closed_Loop)
             return nVisits;
+        ActionStats stats = pds.actionValues.get(action);
         return stats == null ? 1 : stats.validVisits;
     }
 
     /**
      * Note that {@code playerId} here is the index into the <i>reward</i> vector, not a selector for
-     * whose statistics table to read - the two are different ideas that happen to coincide today.
-     * Where the table has to be chosen, a {@link PlayerDecisionStats} is passed rather than a second
+     * whose ActionStats to read - the two are different ideas that happen to coincide today.
+     * Where the ActionStats have to be chosen, a {@link PlayerDecisionStats} is passed rather than a second
      * int, so the two can never be swapped by accident.
      */
     public double actionTotValue(AbstractAction action, int playerId) {
@@ -558,19 +568,6 @@ public class SingleTreeNode {
 
     public double nodeValue(int playerId) {
         return nVisits == 0 ? 0.0 : totValue[playerId] / nVisits;
-    }
-
-    /**
-     * The mean value over one player's action table. This is the same for every action at the node, so
-     * callers that need it for a whole set of actions should calculate it once and pass it down, rather
-     * than call this per action - see {@link #actionValues(int, List)}.
-     */
-    private double nodeValue(PlayerDecisionStats pds, int playerId) {
-        if (nVisits == 0) return 0.0;
-        double sum = 0.0;
-        for (ActionStats stats : pds.actionValues.values())
-            sum += stats.totValue[playerId];
-        return sum / nVisits;
     }
 
     /**
@@ -781,9 +778,7 @@ public class SingleTreeNode {
         } else {
             // first we shuffle to break ties
             Collections.shuffle(availableActions, rnd);
-            // then pick the best one. Each branch calculates the values it actually needs - the UCB family
-            // works straight off ucbValue() below, so calling actionValues() for them as well would
-            // evaluate every action twice.
+            // then pick the best one. Each branch calculates the values it actually needs
             actionChosen = switch (params.treePolicy) {
                 case Uniform -> availableActions.get(rnd.nextInt(availableActions.size()));
                 case Greedy -> {
@@ -808,7 +803,7 @@ public class SingleTreeNode {
                     AbstractAction bestAction = null;
                     double bestValue = -Double.MAX_VALUE;
                     for (AbstractAction availableAction : availableActions) {
-                        double uctValue = ucbValue(pds, availableAction, pds.actionValues.get(availableAction));
+                        double uctValue = ucbValue(pds, availableAction);
                         if (uctValue > bestValue) {
                             bestValue = uctValue;
                             bestAction = availableAction;
@@ -930,39 +925,38 @@ public class SingleTreeNode {
         // The node mean is the same for every action, so calculate it once here instead of once per action
         // inside rmValue()/exp3Value(), which made this loop quadratic in the number of actions.
         double nodeValue = switch (params.treePolicy) {
-            case RegretMatching, NoAveragingRM, EXP3 -> nodeValue(pds, pds.player);
+            case RegretMatching, NoAveragingRM, EXP3 -> nodeValue(pds.player);
             default -> 0.0;
         };
         double[] retValue = new double[actionsToConsider.size()];
         for (int i = 0; i < actionsToConsider.size(); i++) {
             AbstractAction action = actionsToConsider.get(i);
-            // one map lookup per action; every value method below works off these same statistics
-            ActionStats stats = pds.actionValues.get(action);
             retValue[i] = switch (params.treePolicy) {
                 case Uniform -> 1.0;
-                case Greedy -> getFullValue(pds, action, stats);
-                case UCB, AlphaGo, UCB_Tuned -> ucbValue(pds, action, stats);
-                case RegretMatching, NoAveragingRM -> rmValue(pds, action, stats, nodeValue);
-                case EXP3 -> exp3Value(pds, action, stats, nodeValue);
+                case Greedy -> getFullValue(pds, action);
+                case UCB, AlphaGo, UCB_Tuned -> ucbValue(pds, action);
+                case RegretMatching, NoAveragingRM -> rmValue(pds, action, nodeValue);
+                case EXP3 -> exp3Value(pds, action, nodeValue);
             };
         }
         return retValue;
     }
 
-    private double getFullValue(PlayerDecisionStats pds, AbstractAction action, ActionStats stats) {
-        int actionVisits = stats == null ? 0 : stats.nVisits;
-        double value = getActionValue(pds, stats);
+    private double getFullValue(PlayerDecisionStats pds, AbstractAction action) {
+        double value = getActionValue(pds, action);
+        int actionVisits = actionVisits(pds, action);
         if (params.normaliseRewards && actionVisits > 0) {
             value = normalise(value, root.lowReward, root.highReward);
         }
         if (params.progressiveBias > 0)
-            value += getBiasValue(pds, action, actionVisits);
+            value += getBiasValue(pds, action);
         // apply OMA
-        value = getOMAValue(pds, action, value, actionVisits);
+        value = getOMAValue(pds, action, value);
         return value;
     }
 
-    private double getOMAValue(PlayerDecisionStats pds, AbstractAction action, double childValue, int actionVisits) {
+    private double getOMAValue(PlayerDecisionStats pds, AbstractAction action, double childValue) {
+        int actionVisits = actionVisits(pds, action);
         double retValue = childValue;
         // consider OMA term
         if (params.omaVisits > 0 && (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA)) {
@@ -998,17 +992,17 @@ public class SingleTreeNode {
         return retValue;
     }
 
-    private double ucbValue(PlayerDecisionStats pds, AbstractAction action, ActionStats stats) {
-
+    private double ucbValue(PlayerDecisionStats pds, AbstractAction action) {
         // Find 'UCB' value - this is the base to which we then add exploration
-        double childValue = getFullValue(pds, action, stats);
-        int actionVisits = stats == null ? 0 : stats.nVisits;
+        double childValue = getFullValue(pds, action);
+        int actionVisits = actionVisits(pds, action);
 
         // Now for the exploration term
         // default to standard UCB
-        int effectiveTotalVisits = validVisitsFor(stats);
+        int effectiveTotalVisits = validVisitsFor(pds, action);
         // use first play urgency as replacement for exploration term if action not previously taken
         double explorationTerm = params.firstPlayUrgency;
+        ActionStats stats = pds.actionValues.get(action);
         if (actionVisits > 0) {
             explorationTerm = switch (params.treePolicy) {
                 case UCB_Tuned -> {
@@ -1053,14 +1047,9 @@ public class SingleTreeNode {
         return uctValue;
     }
 
-    public double exp3Value(AbstractAction action) {
-        PlayerDecisionStats pds = statsFor(decisionPlayer);
-        return exp3Value(pds, action, pds.actionValues.get(action), nodeValue(pds, pds.player));
-    }
-
-    private double exp3Value(PlayerDecisionStats pds, AbstractAction action, ActionStats stats, double nodeValue) {
-        double actionValue = getActionValue(pds, stats);
-        int actionVisits = stats == null ? 0 : stats.nVisits;
+    private double exp3Value(PlayerDecisionStats pds, AbstractAction action, double nodeValue) {
+        double actionValue = getActionValue(pds, action);
+        int actionVisits = actionVisits(pds, action);
         // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
         // NaN or Infinities when we exponentiate)
         if (actionVisits > 0) {
@@ -1070,7 +1059,7 @@ public class SingleTreeNode {
                 actionValue = actionValue - nodeValue;
         }
         if (params.progressiveBias > 0)
-            actionValue += getBiasValue(pds, action, actionVisits);
+            actionValue += getBiasValue(pds, action);
         double retValue = Math.exp(actionValue / params.exp3Boltzmann);
 
         if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
@@ -1084,32 +1073,30 @@ public class SingleTreeNode {
         return retValue;
     }
 
-    public double rmValue(AbstractAction action) {
-        PlayerDecisionStats pds = statsFor(decisionPlayer);
-        return rmValue(pds, action, pds.actionValues.get(action), nodeValue(pds, pds.player));
-    }
-
-    private double rmValue(PlayerDecisionStats pds, AbstractAction action, ActionStats stats, double nodeValue) {
-        int actionVisits = stats == null ? 0 : stats.nVisits;
-        double actionValue = getActionValue(pds, stats);
+    private double rmValue(PlayerDecisionStats pds, AbstractAction action, double nodeValue) {
+        double actionValue = getActionValue(pds, action);
         if (params.progressiveBias > 0)
-            actionValue += getBiasValue(pds, action, actionVisits);
+            actionValue += getBiasValue(pds, action);
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits;
         double regret = potentialValue - nodeValue * nVisits;
         // We add FPU after all the exponentiation for safety
+        int actionVisits = actionVisits(pds, action);
         if (actionVisits == 0) {
             regret += params.firstPlayUrgency;
         }
         return Math.max(0.0, regret);
     }
 
-    private double getActionValue(PlayerDecisionStats pds, ActionStats stats) {
+    private double getActionValue(PlayerDecisionStats pds, AbstractAction action) {
+        int actionVisits = actionVisits(pds, action);
         // if we are at 'expansion' phase, then we break ties by expansion policy (which is the same actionHeuristic as progressive bias)
-        return stats == null || stats.nVisits == 0 ? 0.0 : stats.totValue[pds.player] / stats.nVisits;
+        return actionVisits > 0 ? actionTotValue(pds, action, pds.player) / actionVisits : 0.0;
     }
 
-    private double getBiasValue(PlayerDecisionStats pds, AbstractAction action, int actionVisits) {
+
+    private double getBiasValue(PlayerDecisionStats pds, AbstractAction action) {
+        int actionVisits = actionVisits(pds, action);
         return params.progressiveBias * pds.actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
     }
 
@@ -1317,7 +1304,7 @@ public class SingleTreeNode {
         for (int i = 0; i < result.length; i++) totValue[i] += result[i];
         if (isMultiActor()) {
             // Decoupled backup: each acting player credits their own component of the joint action,
-            // against their own table. The regret-matching refresh is per player too.
+            // against their own ActionStats. The regret-matching refresh is per player too.
             SimultaneousAction joint = (SimultaneousAction) actionTaken;
             for (int p : actingPlayers) {
                 AbstractAction component = joint.getPlayerActions().get(p);

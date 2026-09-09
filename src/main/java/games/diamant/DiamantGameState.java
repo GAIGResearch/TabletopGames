@@ -43,9 +43,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
      * The players who still have to choose this turn: everyone in the cave whose choice has not yet
      * been recorded in actionsPlayed. Players who have left the cave make no decision at all until
      * the next cave starts.
-     * <p>
-     * A plain loop rather than a stream: the decoupled tree search calls this on every node visit and
-     * every forward model call, so the pipeline set-up shows up in profiles.
      */
     public List<Integer> getPlayersStillToChoose() {
         List<Integer> retValue = new ArrayList<>(getNPlayers());

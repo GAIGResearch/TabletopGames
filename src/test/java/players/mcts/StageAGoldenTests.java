@@ -357,7 +357,7 @@ public class StageAGoldenTests {
         EXPECTED.put("lmr.exp3",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2827|copies=201|rollout=2000|digest=c7ff90d04d8e2bf2|rnd=8392300257802280572");
         EXPECTED.put("lmr.regretMatching",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2859|copies=201|rollout=2000|digest=dfdd5b8daca10400|rnd=4025718201467067252");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2887|copies=201|rollout=2000|digest=dd3532d3c33a1729|rnd=-6000209673900900145");
         EXPECTED.put("lmr.greedy",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=178|fm=3378|copies=201|rollout=2000|digest=caa2b4bdb1705aa4|rnd=-2865431006968055350");
         EXPECTED.put("lmr.normalised",

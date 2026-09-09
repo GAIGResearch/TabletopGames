@@ -74,8 +74,8 @@ why `statsFor` creates its statistics on demand rather than `instantiate` alloca
 - **`statsFor` is the sole creation point, and `instantiate` never allocates.** The plan had
   `instantiate` re-key an object it might also have to create; making `statsFor` the only creator is
   simpler and removes the failure mode outright — there is no path that can hand a reused root an
-  empty table. `instantiate` only re-keys, for the case where `decisionPlayer` changes.
-- **The reward-index / table-selector distinction is threaded as an object, not a second int.** This
+  empty `ActionStats` map. `instantiate` only re-keys, for the case where `decisionPlayer` changes.
+- **The reward-index / `ActionStats`-selector distinction is threaded as an object, not a second int.** This
   was forced rather than merely preferred: `nodeValue(int, int)` breaks `toString`'s
   `this::nodeValue` reference outright.
 - **`soleActingPlayer` returns an `int`, not a list.** Nothing in Stage A consumes a list, and dead
