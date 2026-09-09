@@ -9,7 +9,6 @@ import utilities.*;
 
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -260,7 +259,7 @@ public class SingleTreeNode {
         pds.actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace, actingPlayer);
         //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", actingPlayer, actionState.getCurrentPlayer(),
 //                pds.actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-        if (pds.actionsFromOpenLoopState.size() != pds.actionsFromOpenLoopState.stream().distinct().count())
+        if (new HashSet<>(pds.actionsFromOpenLoopState).size() != pds.actionsFromOpenLoopState.size())
             throw new AssertionError("Duplicate actions found in action list: " +
                     pds.actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
         if ((params.useActionHeuristicForMoveOrdering && nVisits < pds.actionsFromOpenLoopState.size())
@@ -303,16 +302,17 @@ public class SingleTreeNode {
             // explicit pruning of Progressive Widening.
             double[] pdf;
             pds.actionPDFEstimates = new HashMap<>();
+            double[] heuristicScores = new double[pds.actionsFromOpenLoopState.size()];
             if (params.pUCTTemperature > 0.0) {
                 // in this case we construct a Boltzmann
-                double[] heuristicScores = pds.actionsFromOpenLoopState.stream().
-                        mapToDouble(a -> pds.actionValueEstimates.getOrDefault(a, 0.0)).toArray();
+                for (int i = 0; i < heuristicScores.length; i++)
+                    heuristicScores[i] = pds.actionValueEstimates.getOrDefault(pds.actionsFromOpenLoopState.get(i), 0.0);
                 pdf = pdf(exponentiatePotentials(heuristicScores, params.pUCTTemperature));
 
             } else {
                 // in this case, we first set any negative values to zero, and then construct the pdf directly
-                double[] heuristicScores = pds.actionsFromOpenLoopState.stream().
-                        mapToDouble(a -> Math.max(0.0, pds.actionValueEstimates.getOrDefault(a, 0.0))).toArray();
+                for (int i = 0; i < heuristicScores.length; i++)
+                    heuristicScores[i] = Math.max(0.0, pds.actionValueEstimates.getOrDefault(pds.actionsFromOpenLoopState.get(i), 0.0));
                 pdf = pdf(heuristicScores);
             }
             for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
@@ -528,9 +528,16 @@ public class SingleTreeNode {
     }
 
     private int validVisitsFor(PlayerDecisionStats pds, AbstractAction action) {
+        return validVisitsFor(pds.actionValues.get(action));
+    }
+
+    /**
+     * As above, for a caller that has already looked the {@link ActionStats} up (null if the action
+     * has no statistics yet). The tree policy fetches them once per action and reuses them.
+     */
+    private int validVisitsFor(ActionStats stats) {
         if (params.information == Closed_Loop)
             return nVisits;
-        ActionStats stats = pds.actionValues.get(action);
         return stats == null ? 1 : stats.validVisits;
     }
 
@@ -553,14 +560,17 @@ public class SingleTreeNode {
         return nVisits == 0 ? 0.0 : totValue[playerId] / nVisits;
     }
 
+    /**
+     * The mean value over one player's action table. This is the same for every action at the node, so
+     * callers that need it for a whole set of actions should calculate it once and pass it down, rather
+     * than call this per action - see {@link #actionValues(int, List)}.
+     */
     private double nodeValue(PlayerDecisionStats pds, int playerId) {
         if (nVisits == 0) return 0.0;
-        return pds.actionValues.values().stream().mapToDouble(s -> s.totValue[playerId]).sum() / nVisits;
-    }
-
-    private double actionSquaredValue(PlayerDecisionStats pds, AbstractAction action, int playerId) {
-        ActionStats stats = pds.actionValues.get(action);
-        return stats == null ? 0.0 : stats.squaredTotValue[playerId];
+        double sum = 0.0;
+        for (ActionStats stats : pds.actionValues.values())
+            sum += stats.totValue[playerId];
+        return sum / nVisits;
     }
 
     /**
@@ -771,9 +781,9 @@ public class SingleTreeNode {
         } else {
             // first we shuffle to break ties
             Collections.shuffle(availableActions, rnd);
-            // then get the statsFor(decisionPlayer).actionValues
-            double[] policyValues = actionValues(actingPlayer, availableActions);
-            // then pick the best one
+            // then pick the best one. Each branch calculates the values it actually needs - the UCB family
+            // works straight off ucbValue() below, so calling actionValues() for them as well would
+            // evaluate every action twice.
             actionChosen = switch (params.treePolicy) {
                 case Uniform -> availableActions.get(rnd.nextInt(availableActions.size()));
                 case Greedy -> {
@@ -781,6 +791,7 @@ public class SingleTreeNode {
                     if (explore && rnd.nextDouble() < params.exploreEpsilon) {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
+                    double[] policyValues = actionValues(actingPlayer, availableActions);
                     AbstractAction bestAction = null;
                     double bestValue = -Double.MAX_VALUE;
                     for (int i = 0; i < availableActions.size(); i++) {
@@ -797,7 +808,7 @@ public class SingleTreeNode {
                     AbstractAction bestAction = null;
                     double bestValue = -Double.MAX_VALUE;
                     for (AbstractAction availableAction : availableActions) {
-                        double uctValue = ucbValue(pds, availableAction);
+                        double uctValue = ucbValue(pds, availableAction, pds.actionValues.get(availableAction));
                         if (uctValue > bestValue) {
                             bestValue = uctValue;
                             bestAction = availableAction;
@@ -810,9 +821,16 @@ public class SingleTreeNode {
                     if (explore && rnd.nextDouble() < params.exploreEpsilon) {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
+                    double[] policyValues = actionValues(actingPlayer, availableActions);
                     double[] pdf = pdf(policyValues);
-                    long nonZeroActions = Arrays.stream(policyValues).filter(v -> v > 0.0).count();
-                    if (nonZeroActions == 0) {
+                    boolean anyNonZero = false;
+                    for (double policyValue : policyValues) {
+                        if (policyValue > 0.0) {
+                            anyNonZero = true;
+                            break;
+                        }
+                    }
+                    if (!anyNonZero) {
                         // if we have no non-zero values, then we just pick one at random
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
@@ -855,7 +873,9 @@ public class SingleTreeNode {
         if (nodeArray == null) return null;
         if (params.information == Closed_Loop) {
             // in this case we have determinism...there should just be a single child node in the array...so we get that
-            return Arrays.stream(nodeArray).filter(Objects::nonNull).findFirst().orElse(null);
+            for (SingleTreeNode node : nodeArray)
+                if (node != null) return node;
+            return null;
         } else {
             SingleTreeNode nextNode = nodeArray[childSlot(openLoopState)];
             if (nextNode != null)
@@ -907,35 +927,42 @@ public class SingleTreeNode {
 
     public double[] actionValues(int actingPlayer, List<AbstractAction> actionsToConsider) {
         PlayerDecisionStats pds = statsFor(actingPlayer);
+        // The node mean is the same for every action, so calculate it once here instead of once per action
+        // inside rmValue()/exp3Value(), which made this loop quadratic in the number of actions.
+        double nodeValue = switch (params.treePolicy) {
+            case RegretMatching, NoAveragingRM, EXP3 -> nodeValue(pds, pds.player);
+            default -> 0.0;
+        };
         double[] retValue = new double[actionsToConsider.size()];
         for (int i = 0; i < actionsToConsider.size(); i++) {
             AbstractAction action = actionsToConsider.get(i);
+            // one map lookup per action; every value method below works off these same statistics
+            ActionStats stats = pds.actionValues.get(action);
             retValue[i] = switch (params.treePolicy) {
                 case Uniform -> 1.0;
-                case Greedy -> getFullValue(pds, action);
-                case UCB, AlphaGo, UCB_Tuned -> ucbValue(pds, action);
-                case RegretMatching, NoAveragingRM -> rmValue(pds, action);
-                case EXP3 -> exp3Value(pds, action);
+                case Greedy -> getFullValue(pds, action, stats);
+                case UCB, AlphaGo, UCB_Tuned -> ucbValue(pds, action, stats);
+                case RegretMatching, NoAveragingRM -> rmValue(pds, action, stats, nodeValue);
+                case EXP3 -> exp3Value(pds, action, stats, nodeValue);
             };
         }
         return retValue;
     }
 
-    private double getFullValue(PlayerDecisionStats pds, AbstractAction action) {
-        double value = getActionValue(pds, action);
-        int actionVisits = actionVisits(pds, action);
+    private double getFullValue(PlayerDecisionStats pds, AbstractAction action, ActionStats stats) {
+        int actionVisits = stats == null ? 0 : stats.nVisits;
+        double value = getActionValue(pds, stats);
         if (params.normaliseRewards && actionVisits > 0) {
             value = normalise(value, root.lowReward, root.highReward);
         }
         if (params.progressiveBias > 0)
-            value += getBiasValue(pds, action);
+            value += getBiasValue(pds, action, actionVisits);
         // apply OMA
-        value = getOMAValue(pds, action, value);
+        value = getOMAValue(pds, action, value, actionVisits);
         return value;
     }
 
-    private double getOMAValue(PlayerDecisionStats pds, AbstractAction action, double childValue) {
-        int actionVisits = actionVisits(pds, action);
+    private double getOMAValue(PlayerDecisionStats pds, AbstractAction action, double childValue, int actionVisits) {
         double retValue = childValue;
         // consider OMA term
         if (params.omaVisits > 0 && (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA)) {
@@ -971,15 +998,15 @@ public class SingleTreeNode {
         return retValue;
     }
 
-    private double ucbValue(PlayerDecisionStats pds, AbstractAction action) {
+    private double ucbValue(PlayerDecisionStats pds, AbstractAction action, ActionStats stats) {
 
         // Find 'UCB' value - this is the base to which we then add exploration
-        double childValue = getFullValue(pds, action);
-        int actionVisits = actionVisits(pds, action);
+        double childValue = getFullValue(pds, action, stats);
+        int actionVisits = stats == null ? 0 : stats.nVisits;
 
         // Now for the exploration term
         // default to standard UCB
-        int effectiveTotalVisits = validVisitsFor(pds, action);
+        int effectiveTotalVisits = validVisitsFor(stats);
         // use first play urgency as replacement for exploration term if action not previously taken
         double explorationTerm = params.firstPlayUrgency;
         if (actionVisits > 0) {
@@ -987,13 +1014,14 @@ public class SingleTreeNode {
                 case UCB_Tuned -> {
                     double range = root.highReward - root.lowReward;
                     if (range < 1e-6) range = 1e-6;
-                    double meanSq = actionSquaredValue(pds, action, pds.player) / actionVisits;
+                    // actionVisits > 0 means stats is non-null
+                    double meanSq = stats.squaredTotValue[pds.player] / actionVisits;
                     double standardVar = 0.25;
                     if (params.normaliseRewards) {
                         // we also need to standardise the sum of squares to calculate the variance
                         meanSq = (meanSq
                                 + root.lowReward * root.lowReward
-                                - 2 * root.lowReward * actionTotValue(pds, action, pds.player) / actionVisits
+                                - 2 * root.lowReward * stats.totValue[pds.player] / actionVisits
                         ) / (range * range);
                     } else {
                         // we need to modify the standard variance as it is not on a 0..1 basis (which is where 0.25 comes from)
@@ -1026,22 +1054,23 @@ public class SingleTreeNode {
     }
 
     public double exp3Value(AbstractAction action) {
-        return exp3Value(statsFor(decisionPlayer), action);
+        PlayerDecisionStats pds = statsFor(decisionPlayer);
+        return exp3Value(pds, action, pds.actionValues.get(action), nodeValue(pds, pds.player));
     }
 
-    private double exp3Value(PlayerDecisionStats pds, AbstractAction action) {
-        double actionValue = getActionValue(pds, action);
-        int actionVisits = actionVisits(pds, action);
+    private double exp3Value(PlayerDecisionStats pds, AbstractAction action, ActionStats stats, double nodeValue) {
+        double actionValue = getActionValue(pds, stats);
+        int actionVisits = stats == null ? 0 : stats.nVisits;
         // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
         // NaN or Infinities when we exponentiate)
         if (actionVisits > 0) {
             if (params.normaliseRewards)
                 actionValue = normalise(actionValue, root.lowReward, root.highReward);
             else
-                actionValue = actionValue - nodeValue(pds, pds.player);
+                actionValue = actionValue - nodeValue;
         }
         if (params.progressiveBias > 0)
-            actionValue += getBiasValue(pds, action);
+            actionValue += getBiasValue(pds, action, actionVisits);
         double retValue = Math.exp(actionValue / params.exp3Boltzmann);
 
         if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
@@ -1056,33 +1085,31 @@ public class SingleTreeNode {
     }
 
     public double rmValue(AbstractAction action) {
-        return rmValue(statsFor(decisionPlayer), action);
+        PlayerDecisionStats pds = statsFor(decisionPlayer);
+        return rmValue(pds, action, pds.actionValues.get(action), nodeValue(pds, pds.player));
     }
 
-    private double rmValue(PlayerDecisionStats pds, AbstractAction action) {
-        double actionValue = getActionValue(pds, action);
+    private double rmValue(PlayerDecisionStats pds, AbstractAction action, ActionStats stats, double nodeValue) {
+        int actionVisits = stats == null ? 0 : stats.nVisits;
+        double actionValue = getActionValue(pds, stats);
         if (params.progressiveBias > 0)
-            actionValue += getBiasValue(pds, action);
-        double nodeValue = nodeValue(pds, pds.player);
+            actionValue += getBiasValue(pds, action, actionVisits);
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits;
         double regret = potentialValue - nodeValue * nVisits;
         // We add FPU after all the exponentiation for safety
-        int actionVisits = actionVisits(pds, action);
         if (actionVisits == 0) {
             regret += params.firstPlayUrgency;
         }
         return Math.max(0.0, regret);
     }
 
-    private double getActionValue(PlayerDecisionStats pds, AbstractAction action) {
-        int actionVisits = actionVisits(pds, action);
+    private double getActionValue(PlayerDecisionStats pds, ActionStats stats) {
         // if we are at 'expansion' phase, then we break ties by expansion policy (which is the same actionHeuristic as progressive bias)
-        return actionVisits > 0 ? actionTotValue(pds, action, pds.player) / actionVisits : 0.0;
+        return stats == null || stats.nVisits == 0 ? 0.0 : stats.totValue[pds.player] / stats.nVisits;
     }
 
-    private double getBiasValue(PlayerDecisionStats pds, AbstractAction action) {
-        int actionVisits = actionVisits(pds, action);
+    private double getBiasValue(PlayerDecisionStats pds, AbstractAction action, int actionVisits) {
         return params.progressiveBias * pds.actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
     }
 
@@ -1186,11 +1213,16 @@ public class SingleTreeNode {
         // after each iteration we update the min and max rewards seen, to be used in future iterations.
         // These are only stored on the root
         if (params.normaliseRewards || params.treePolicy == UCB_Tuned) {
-            DoubleSummaryStatistics stats = Arrays.stream(result).summaryStatistics();
-            if (root.lowReward > stats.getMin())
-                root.lowReward = stats.getMin();
-            if (root.highReward < stats.getMax())
-                root.highReward = stats.getMax();
+            double min = Double.POSITIVE_INFINITY;
+            double max = Double.NEGATIVE_INFINITY;
+            for (double reward : result) {
+                if (reward < min) min = reward;
+                if (reward > max) max = reward;
+            }
+            if (root.lowReward > min)
+                root.lowReward = min;
+            if (root.highReward < max)
+                root.highReward = max;
         }
         if (root.lowReward == Double.NEGATIVE_INFINITY || root.highReward == Double.POSITIVE_INFINITY)
             throw new AssertionError("We have somehow failed to update the min or max rewards");

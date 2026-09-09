@@ -8,7 +8,6 @@ import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 @SuppressWarnings("unchecked")
 public class SGGameState extends AbstractGameState {
@@ -50,10 +49,12 @@ public class SGGameState extends AbstractGameState {
         }
         // only report players who still have to choose this turn. a player who has already
         // committed a card must not be asked again, or they end up playing two cards.
-        List<Integer> toDecide = IntStream.range(0, getNPlayers())
-                .filter(p -> cardChoices.get(p).isEmpty())
-                .boxed()
-                .toList();
+        // A plain loop rather than a stream: the decoupled tree search calls this on every node visit
+        // and every forward model call, so the pipeline set-up shows up in profiles.
+        List<Integer> toDecide = new ArrayList<>(getNPlayers());
+        for (int p = 0; p < getNPlayers(); p++)
+            if (cardChoices.get(p).isEmpty())
+                toDecide.add(p);
         if (toDecide.isEmpty()) {
             // everyone has chosen, so the cards should already have been revealed and the
             // choices cleared. if we get here the turn cycle is broken, so say so loudly.

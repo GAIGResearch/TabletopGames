@@ -2,6 +2,7 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -57,10 +58,10 @@ public class OMATreeNode extends SingleTreeNode {
                 continue;  // for OMA we only consider the root player
 
             // We only care about our actions for OMA stats
-            int finalPlayer = player;
-            List<AbstractAction> selfActionsOnly = root.actionsInTree.stream()
-                    .filter(p -> p.a == finalPlayer).map(p -> p.b)
-                    .toList();
+            List<AbstractAction> selfActionsOnly = new ArrayList<>();
+            for (Pair<Integer, AbstractAction> actionInTree : root.actionsInTree)
+                if (actionInTree.a == player)
+                    selfActionsOnly.add(actionInTree.b);
             List<OMATreeNode> nodes = new ArrayList<>();
             OMATreeNode currentNode = this;
             do {

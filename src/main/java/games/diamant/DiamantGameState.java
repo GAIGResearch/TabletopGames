@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -33,22 +32,27 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     List<Boolean> playerInCave;
 
     public List<Integer> getPlayersInCave() {
-        return IntStream.range(0, getNPlayers())
-                .filter(i -> playerInCave.get(i))
-                .boxed()
-                .collect(Collectors.toList());
+        List<Integer> retValue = new ArrayList<>(getNPlayers());
+        for (int i = 0; i < getNPlayers(); i++)
+            if (playerInCave.get(i))
+                retValue.add(i);
+        return retValue;
     }
 
     /**
      * The players who still have to choose this turn: everyone in the cave whose choice has not yet
      * been recorded in actionsPlayed. Players who have left the cave make no decision at all until
      * the next cave starts.
+     * <p>
+     * A plain loop rather than a stream: the decoupled tree search calls this on every node visit and
+     * every forward model call, so the pipeline set-up shows up in profiles.
      */
     public List<Integer> getPlayersStillToChoose() {
-        return IntStream.range(0, getNPlayers())
-                .filter(p -> playerInCave.get(p) && !actionsPlayed.containsKey(p))
-                .boxed()
-                .toList();
+        List<Integer> retValue = new ArrayList<>(getNPlayers());
+        for (int p = 0; p < getNPlayers(); p++)
+            if (playerInCave.get(p) && !actionsPlayed.containsKey(p))
+                retValue.add(p);
+        return retValue;
     }
 
     @Override

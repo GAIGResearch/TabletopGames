@@ -220,9 +220,13 @@ public abstract class Utils {
     public static double[] pdf(double[] potentials) {
         // convert potentials into legal pdf
         double[] pdf = new double[potentials.length];
-        double sum = Arrays.stream(potentials).sum();
-        if (Double.isNaN(sum) || Double.isInfinite(sum) || sum <= 0.0)  // default to uniform distribution
-            return Arrays.stream(potentials).map(d -> 1.0 / potentials.length).toArray();
+        double sum = 0.0;
+        for (double potential : potentials)
+            sum += potential;
+        if (Double.isNaN(sum) || Double.isInfinite(sum) || sum <= 0.0) {  // default to uniform distribution
+            Arrays.fill(pdf, 1.0 / potentials.length);
+            return pdf;
+        }
         for (int i = 0; i < potentials.length; i++) {
             if (potentials[i] < 0.0) {
                 throw new IllegalArgumentException("Negative potential in pdf");
