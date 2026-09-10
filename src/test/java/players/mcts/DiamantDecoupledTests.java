@@ -196,8 +196,33 @@ public class DiamantDecoupledTests {
     }
 
     @Test
+    public void wholeGameWithMaxMCBackup() {
+        // mixed single-actor and multi-actor nodes, nodes where the root player does not act, and
+        // acting sets that vary between visits: nothing may throw with a max backup in play
+        Game g = fourMCTS(808, p -> {
+            p.budget = 50;
+            p.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
+            p.maxBackupThreshold = 5;
+        });
+        g.run();
+        assertFalse(g.getGameState().isNotTerminal());
+    }
+
+    @Test
+    public void wholeGameWithParanoidMaxMCBackup() {
+        Game g = fourMCTS(909, p -> {
+            p.budget = 50;
+            p.paranoid = true;
+            p.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
+            p.maxBackupThreshold = 5;
+        });
+        g.run();
+        assertFalse(g.getGameState().isNotTerminal());
+    }
+
+    @Test
     public void wholeGameWithMixedSeats() {
-        Game g = game(606, List.of(mcts(p -> p.budget = 50), new RandomPlayer(new Random(3)),
+        Game g = game(606,List.of(mcts(p -> p.budget = 50), new RandomPlayer(new Random(3)),
                 mcts(p -> p.decoupled = false), new RandomPlayer(new Random(4))));
         g.run();
         assertFalse(g.getGameState().isNotTerminal());

@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.actions.SimultaneousAction;
 import games.GameType;
 import games.sushigo.SGGameState;
@@ -164,6 +165,15 @@ public class SushiGoDecoupledTests {
     }
 
     @Test
+    public void maxLambdaBackup() {
+        Game g = threeMCTS(1212, p -> {
+            p.backupPolicy = MCTSEnums.BackupPolicy.MaxLambda;
+            p.backupLambda = 0.8;
+        });
+        assertEquals(1, ((ChooseCard) decide(g, 1)).playerId);
+    }
+
+    @Test
     public void exp3() {
         Game g = threeMCTS(707, p -> p.treePolicy = MCTSEnums.TreePolicy.EXP3);
         assertEquals(2, ((ChooseCard) decide(g, 2)).playerId);
@@ -213,6 +223,34 @@ public class SushiGoDecoupledTests {
         }
         assertTrue("no joint action used chopsticks", chopstickChildren > 0);
         assertTrue("no joint action had both players using chopsticks", bothChopsticks > 0);
+    }
+
+    @Test
+    public void rootChildCountIsCheckedAgainstTheJointActionSpace() {
+        Game g = threeMCTS(1313, p -> {
+        });
+        AbstractGameState obs = g.getGameState().copy(0);
+        List<AbstractAction> actions = g.getForwardModel().computeAvailableActions(obs);
+        TestMCTSPlayer player = (TestMCTSPlayer) g.getPlayers().get(0);
+        player.getAction(obs, actions);
+        SingleTreeNode root = player.getRoot();
+        assertTrue(root.isMultiActor());
+
+        // the bound is the product of the acting players' action counts at the root
+        int product = 1;
+        for (int p : root.getActingPlayers()) product *= root.getActionValues(p).size();
+        assertEquals(product, root.jointActionSpaceSize());
+        assertTrue(product > actions.size());
+        assertTrue(root.children.size() <= product);
+
+        // the check runs only when this player's action space differs from the game's
+        player.getParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Flat);
+        player.checkRootChildCount(root, actions, obs);
+        // a joint-keyed root with more children than three times the joint action space is an error
+        for (int i = root.children.size(); i <= 3 * product; i++)
+            root.children.put(new SimultaneousAction(Map.of(0, new LMRAction("fake" + i))), null);
+        AssertionError e = assertThrows(AssertionError.class, () -> player.checkRootChildCount(root, actions, obs));
+        assertTrue(e.getMessage(), e.getMessage().contains("joint actions over players [0, 1, 2]"));
     }
 
     @Test

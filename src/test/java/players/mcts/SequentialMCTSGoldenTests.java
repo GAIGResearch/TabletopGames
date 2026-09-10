@@ -28,12 +28,14 @@ import java.util.function.Consumer;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Characterisation ("golden") tests pinning the exact behaviour of {@link SingleTreeNode}.
+ * Characterisation ("golden") tests recording the exact behaviour of sequential search in
+ * {@link SingleTreeNode}: the search that runs when {@code MCTSParams.decoupled} is false, which is
+ * every configuration other than decoupled UCT on a simultaneous-move game.
  * <p>
- * These exist to support the Stage A refactor of the MCTS package (moving the five per-acting-player
- * fields into a PlayerDecisionStats container), which is required to be a *provable no-op*. The
- * values below were captured against the tree as it stood before that refactor began; any change to
- * them means behaviour changed.
+ * The values below were captured before the per-player statistics ({@link PlayerDecisionStats}) and
+ * the decoupled path were added, and have not moved since. Any change to them means sequential
+ * behaviour changed, whatever the change was meant to do. The decoupled counterpart is
+ * {@link DecoupledUCTTests}; see {@code players/mcts/DecoupledUCT.md}.
  * <p>
  * Two independent mechanisms are used per scenario:
  * <ol>
@@ -43,14 +45,14 @@ import static org.junit.Assert.assertEquals;
  *     the separately-seeded rollout and opponent-model policies, which the canary alone would not
  *     see.</li>
  *     <li><b>A tree digest.</b> A deterministic walk of every node, emitting visits and the full
- *     action statistics table <i>in map iteration order</i> - the order itself is pinned, because
+ *     action statistics table <i>in map iteration order</i> - the order itself is part of the golden value, because
  *     {@code nodeValue} sums over {@code values()} and so the floating-point summation order is
  *     observable in the search's decisions.</li>
  * </ol>
  * To re-baseline after a deliberate behaviour change, run {@link #main} and paste its output over
  * the block in the static initialiser.
  */
-public class StageAGoldenTests {
+public class SequentialMCTSGoldenTests {
 
     // ------------------------------------------------------------------ deterministic heuristics
 
@@ -182,7 +184,7 @@ public class StageAGoldenTests {
     /**
      * A search on the stateless two-player LMR fixture. Chosen as the digest substrate because
      * LMRAction.hashCode() is name.hashCode(), and String hashing is specified by the JLS, so the
-     * HashMap iteration order this pins is stable across JVM runs. Real-game actions frequently fold
+     * HashMap iteration order this records is stable across JVM runs. Real-game actions frequently fold
      * an enum into their hashCode, and Enum.hashCode() is identity-based and so varies per run.
      */
     private static String lmrSearch(Consumer<MCTSParams> tweak) {
@@ -202,13 +204,13 @@ public class StageAGoldenTests {
 
     /**
      * Real MCTS decisions in a three-player game of Dominion, driven the way MCTSNodesAndVisitsTests
-     * does. The tree digest is not pinned here (see above); the counters and the RNG canary are.
+     * does. The tree digest is not recorded here (see above); the counters and the RNG canary are.
      */
     private static String dominionSearch(Consumer<MCTSParams> tweak, int decisions) {
         MCTSParams params = baseParams();
         // Information_Set is deliberately NOT the default here: Dominion.redeterminise iterates
         // enum-keyed collections, whose iteration order follows Enum.hashCode() - an identity hash that
-        // varies per JVM run. The resulting searches are not reproducible and so cannot be pinned.
+        // varies per JVM run. The resulting searches are not reproducible and so cannot be recorded exactly.
         // Information_Set is covered by the LMR scenarios above, which are reproducible.
         params.information = MCTSEnums.Information.Open_Loop;
         tweak.accept(params);
@@ -293,7 +295,7 @@ public class StageAGoldenTests {
                     .append(node.getVisits()).append(';')
                     .append(node.terminalNode).append('\n');
             // One table per acting player. A sequential node has exactly one and is dumped exactly
-            // as before (no player header), so the Stage A digests are unaffected; a multi-actor
+            // as before (no player header), so the sequential digests are unaffected; a multi-actor
             // node of a decoupled search gets one headed block per player.
             List<Integer> actors = node.isMultiActor() ? node.getActingPlayers() : List.of(node.getActor());
             for (int p : actors) {
@@ -328,7 +330,7 @@ public class StageAGoldenTests {
     // ------------------------------------------------------------------ expected values
 
     /**
-     * Scenarios whose exact numbers cannot be pinned, because they are not reproducible between runs
+     * Scenarios whose exact numbers cannot be recorded, because they are not reproducible between runs
      * at all. {@code AbstractGameState.redeterminisationRnd} is deliberately unseeded, and
      * every {@code AbstractGameState.copy()} reseeds that copy's RNG from it, so any game whose forward model
      * consumes {@code gs.rnd} - Dominion shuffles its deck - takes a different trajectory on every

@@ -307,13 +307,29 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         }
         MASTStats = root.MASTStatistics;
 
-        // At a multi-actor root the children are joint actions, whose count is bounded by the
-        // iteration budget rather than by this player's action count, so the check does not apply.
-        // [JG: we still want a check for this though to detect issues at Simultaneous nodes. In this case a sensible limit is 3 x the cross product of the actions available]
-        if (root.children.size() > 3 * actions.size() && !(root instanceof MCGSNode) && !root.isMultiActor() && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
-            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
+        checkRootChildCount(root, actions, gameState);
         lastAction = Pair.of(gameState.getCurrentPlayer(), root.bestAction());
         return lastAction.b.copy();
+    }
+
+    /**
+     * Sanity check on the tree after a search. The root player's own actions at the root are fixed,
+     * so a fresh tree cannot have more children than that action count at a sequential root, or
+     * than the product of the acting players' action counts at a multi-actor root, where the
+     * children are joint actions. Three times that is the tolerance. Not applied under MCGS
+     * (transpositions) or tree reuse (the root was not built from this state).
+     */
+    protected void checkRootChildCount(SingleTreeNode root, List<AbstractAction> actions, AbstractGameState gameState) {
+        if (root instanceof MCGSNode || getParameters().reuseTree)
+            return;
+        // Long-standing guard: the check runs only when this player's action space differs from the game's.
+        if (getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+            return;
+        int expected = root.isMultiActor() ? root.jointActionSpaceSize() : actions.size();
+        if (root.children.size() > 3 * expected)
+            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d%s",
+                    root.children.size(), expected,
+                    root.isMultiActor() ? " (joint actions over players " + root.getActingPlayers() + ")" : ""));
     }
 
     @Override

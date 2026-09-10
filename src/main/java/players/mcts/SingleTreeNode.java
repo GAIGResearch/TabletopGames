@@ -222,6 +222,19 @@ public class SingleTreeNode {
     }
 
     /**
+     * The number of distinct actions this node could key children by: at a sequential node the
+     * number of actions the decision player has ever had here, and at a multi-actor node the
+     * product of that count over the acting players, since the children are joint actions.
+     * Used as the base of the sanity check on the root's child count in MCTSPlayer.
+     */
+    public int jointActionSpaceSize() {
+        long size = 1;
+        for (int p : isMultiActor() ? actingPlayers : List.of(decisionPlayer))
+            size *= statsFor(p).actionValues.size();
+        return (int) Math.min(size, Integer.MAX_VALUE);
+    }
+
+    /**
      * Called when the tree search 'moves' to this node.
      * When we are using Open Loop search, we need to make sure that the state is updated to reflect the
      * state in the current trajectory; each visit to the node may have a different underlying state, and it's
@@ -1305,7 +1318,17 @@ public class SingleTreeNode {
         if (isMultiActor()) {
             // Decoupled backup: each acting player credits their own component of the joint action,
             // against their own ActionStats. The regret-matching refresh is per player too.
+            //
+            // Under a Lambda / MaxLambda / MaxMC policy each acting player's entry of the value handed
+            // to the parent is then mixed with that player's own counterfactual, read from their own
+            // table (see mixWithOwnCounterfactual). A player who does not act here keeps the entry
+            // they arrived with. Under paranoid the mix is applied to the paranoid player alone and
+            // mirrored into every other entry, as processResultsForParanoidOrSelfOnly shaped the raw
+            // result; at a node where the paranoid player does not act nothing is mixed.
             SimultaneousAction joint = (SimultaneousAction) actionTaken;
+            boolean mixing = params.backupPolicy != MCTSEnums.BackupPolicy.MonteCarlo;
+            int paranoid = params.paranoid ? (root.paranoidPlayer == -1 ? root.decisionPlayer : root.paranoidPlayer) : -1;
+            double[] toPropagate = mixing ? result.clone() : result;
             for (int p : actingPlayers) {
                 AbstractAction component = joint.getPlayerActions().get(p);
                 if (component == null)
@@ -1316,12 +1339,17 @@ public class SingleTreeNode {
                     if (nVisits >= updateEvery && nVisits % updateEvery == 0)
                         updateRegretMatchingAverage(p, considered);
                 }
+                if (!mixing) continue;
+                if (paranoid == -1) {
+                    toPropagate[p] = mixWithOwnCounterfactual(statsFor(p), component, considered, result[p]);
+                } else if (p == paranoid) {
+                    double v = mixWithOwnCounterfactual(statsFor(p), component, considered, result[p]);
+                    for (int i = 0; i < toPropagate.length; i++)
+                        toPropagate[i] = i == p ? v : -v;
+                }
+                // paranoid and p != paranoid: this player's counterfactual is never consulted
             }
-            // The Lambda / MaxLambda / MaxMC tails below are only valid with sequential tree search, so the
-            // backup here is plain Monte Carlo whatever the policy.
-            // TODO: We could implement a MAX backup with simultaneous action nodes - we can calculate for each player the best action (marginalising out the results of the other players)
-            // TODO: Then we interpolate with this MAX value for each player separately
-            return result;
+            return toPropagate;
         }
         // The per-acting-player part of the backup
         List<AbstractAction> actionsToConsider = updateActionStats(decisionPlayer, actionTaken, result);
@@ -1382,6 +1410,43 @@ public class SingleTreeNode {
                 }
         };
 
+    }
+
+    /**
+     * One acting player's entry of the value handed to the parent from a multi-actor node: their
+     * own reward on this iteration, mixed under the backup policy with their own counterfactual,
+     * read from their own table after this visit has been added. The counterfactual is the mean of
+     * the action taken (Lambda) or of the player's best action (MaxLambda, MaxMC) over every visit
+     * on which they played it, whatever the other players did - the decoupled estimate of its value.
+     * <p>
+     * Called only for a policy other than MonteCarlo, so the taken action always has a visit and
+     * bestAction() never has to fall back to a random draw. The sequential tail in backUpSingleNode
+     * is a separate piece of arithmetic and is deliberately not routed through here.
+     */
+    private double mixWithOwnCounterfactual(PlayerDecisionStats pds, AbstractAction taken,
+                                            List<AbstractAction> considered, double own) {
+        int p = pds.player;
+        switch (params.backupPolicy) {
+            case Lambda -> {
+                ActionStats s = pds.actionValues.get(taken);
+                return params.backupLambda * own + (1.0 - params.backupLambda) * s.totValue[p] / s.nVisits;
+            }
+            case MaxLambda -> {
+                ActionStats b = pds.actionValues.get(bestAction(pds, considered));
+                return params.backupLambda * own + (1.0 - params.backupLambda) * b.totValue[p] / b.nVisits;
+            }
+            case MaxMC -> {
+                if (nVisits <= params.maxBackupThreshold) return own;
+                AbstractAction best = bestAction(pds, considered);
+                if (best.equals(taken)) return own;
+                double w = (nVisits - params.maxBackupThreshold) / (double) nVisits;
+                ActionStats b = pds.actionValues.get(best);
+                return (1.0 - w) * own + w * b.totValue[p] / b.nVisits;
+            }
+            default -> {
+                return own;
+            }
+        }
     }
 
     public AbstractAction bestAction(List<AbstractAction> actionsToConsider) {

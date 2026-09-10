@@ -15,8 +15,8 @@ import java.util.List;
  * deterministically without SushiGo's reveal-and-rotate machinery.
  * <p>
  * A search with {@code decoupled = false} over this game must be indistinguishable from one over
- * plain LMRGame - that is the sequential-play contract in the DUCT Readme, §2, and
- * {@link StageBDecoupledTests} checks it against the Stage A golden digest.
+ * plain LMRGame - that is the sequential-play contract in players/mcts/DecoupledUCT.md, and
+ * {@link DecoupledUCTTests} checks it against the sequential golden digest.
  */
 class SimultaneousLMRGame extends LMRGame {
 

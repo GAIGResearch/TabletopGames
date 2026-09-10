@@ -14,23 +14,24 @@ import java.util.function.Consumer;
 import static org.junit.Assert.*;
 
 /**
- * The decoupled (Stage B) path of {@link SingleTreeNode}, on the deterministic
+ * Decoupled UCT ({@code MCTSParams.decoupled = true}) in {@link SingleTreeNode}, on the deterministic
  * {@link SimultaneousLMRGame} fixture, where every node is a multi-actor node with nine joint
- * actions. SushiGo coverage of the same path is in {@link SushiGoDecoupledTests}.
+ * actions. The same path on real games is covered by {@link SushiGoDecoupledTests} and
+ * {@link DiamantDecoupledTests}; the design is described in {@code players/mcts/DecoupledUCT.md}.
  * <p>
- * The pinned summaries at the bottom are the decoupled counterpart of {@link StageAGoldenTests}:
- * they were captured when Stage B landed and any change to them means decoupled behaviour changed.
+ * The recorded summaries at the bottom are the decoupled counterpart of {@link SequentialMCTSGoldenTests}:
+ * any change to them means decoupled behaviour changed.
  * Re-baseline by running {@link #main} and pasting its output over the static block.
  */
-public class StageBDecoupledTests {
+public class DecoupledUCTTests {
 
     private static final IStateHeuristic TICK_HEURISTIC =
             (gs, playerId) -> (((gs.getGameTick() * 37 + playerId * 11) % 23) / 23.0) - 0.5;
     private static final IActionHeuristic NAME_HEURISTIC =
             (action, state, contextActions) -> (Math.abs(action.toString().hashCode()) % 11) / 11.0;
 
-    /** The Stage A golden value for lmr.ucb - a decoupled=false search over the simultaneous fixture must reproduce it. */
-    private static final String STAGE_A_LMR_UCB =
+    /** The sequential golden value for lmr.ucb - a decoupled=false search over the simultaneous fixture must reproduce it. */
+    private static final String SEQUENTIAL_LMR_UCB =
             "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=99208fada037db8e|rnd=-3582349705094124591";
 
     private static MCTSParams baseParams() {
@@ -74,7 +75,7 @@ public class StageBDecoupledTests {
     private static String summary(Consumer<MCTSParams> tweak) {
         Random rnd = new Random(303897);
         SingleTreeNode root = search(tweak, rnd);
-        return StageAGoldenTests.summary(root, rnd, true);
+        return SequentialMCTSGoldenTests.summary(root, rnd, true);
     }
 
     private static SimultaneousAction joint(String a0, String a1) {
@@ -203,15 +204,15 @@ public class StageBDecoupledTests {
 
     @Test
     public void decoupledOffIsExactlySequentialSearch() {
-        // the same fixture, searched sequentially, is byte-for-byte the Stage A lmr.ucb tree
-        assertEquals(STAGE_A_LMR_UCB, summary(p -> p.decoupled = false));
+        // the same fixture, searched sequentially, is byte-for-byte the sequential lmr.ucb tree
+        assertEquals(SEQUENTIAL_LMR_UCB, summary(p -> p.decoupled = false));
         SingleTreeNode root = search(p -> p.decoupled = false);
         assertFalse(root.isMultiActor());
         for (AbstractAction key : root.children.keySet())
             assertTrue(key instanceof LMRAction);
     }
 
-    // ------------------------------------------------------------------ variants admitted to Stage B
+    // ------------------------------------------------------------------ tree-policy and information variants
 
     @Test
     public void closedLoopJointTrajectory() {
@@ -267,16 +268,21 @@ public class StageBDecoupledTests {
     }
 
     @Test
-    public void nonMonteCarloBackupIsMonteCarloAtMultiActorNodes() {
-        // documented limitation (DUCT Readme, §6): every node here is multi-actor, so the Lambda
-        // and MaxMC tails never run and the tree is identical to the plain Monte Carlo one
+    public void nonMonteCarloBackupChangesTheTree() {
+        // every node here is multi-actor, so this only holds once the Lambda, MaxLambda and MaxMC
+        // policies apply at multi-actor nodes (see MaxBackupAtSimultaneousNodes.md); the exact
+        // arithmetic is checked by DecoupledBackupTests
         String plain = summary(p -> {
         });
-        assertEquals(plain, summary(p -> {
+        assertNotEquals(plain, summary(p -> {
             p.backupPolicy = MCTSEnums.BackupPolicy.Lambda;
             p.backupLambda = 0.8;
         }));
-        assertEquals(plain, summary(p -> {
+        assertNotEquals(plain, summary(p -> {
+            p.backupPolicy = MCTSEnums.BackupPolicy.MaxLambda;
+            p.backupLambda = 0.8;
+        }));
+        assertNotEquals(plain, summary(p -> {
             p.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
             p.maxBackupThreshold = 20;
         }));
@@ -296,7 +302,7 @@ public class StageBDecoupledTests {
         assertEquals(6.0, stats.meanActionsAtNode, 1e-9);
     }
 
-    // ------------------------------------------------------------------ pinned decoupled behaviour
+    // ------------------------------------------------------------------ recorded decoupled behaviour
 
     private static Map<String, Consumer<MCTSParams>> scenarios() {
         Map<String, Consumer<MCTSParams>> s = new LinkedHashMap<>();
@@ -329,6 +335,23 @@ public class StageBDecoupledTests {
             p.initialiseVisits = 3;
         });
         s.put("paranoid", p -> p.paranoid = true);
+        s.put("backupLambda", p -> {
+            p.backupPolicy = MCTSEnums.BackupPolicy.Lambda;
+            p.backupLambda = 0.8;
+        });
+        s.put("backupMaxLambda", p -> {
+            p.backupPolicy = MCTSEnums.BackupPolicy.MaxLambda;
+            p.backupLambda = 0.8;
+        });
+        s.put("backupMaxMC", p -> {
+            p.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
+            p.maxBackupThreshold = 20;
+        });
+        s.put("paranoidMaxMC", p -> {
+            p.paranoid = true;
+            p.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
+            p.maxBackupThreshold = 20;
+        });
         return s;
     }
 
@@ -358,6 +381,14 @@ public class StageBDecoupledTests {
                 "type=SingleTreeNode|roots=1|visits=209|nodes=201|fm=2534|copies=201|rollout=2000|digest=3a40422f380969e0|rnd=-934894581532007506");
         EXPECTED.put("paranoid",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2521|copies=201|rollout=2000|digest=ba7701a8e0f6b0db|rnd=-3001675053116265653");
+        EXPECTED.put("backupLambda",
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2531|copies=201|rollout=2000|digest=4cc6b880c4b3e0e3|rnd=-3953438874914226041");
+        EXPECTED.put("backupMaxLambda",
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2536|copies=201|rollout=2000|digest=8e4cd0372b836b55|rnd=-70209294015491365");
+        EXPECTED.put("backupMaxMC",
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2556|copies=201|rollout=2000|digest=7db9807b6d5f0179|rnd=-8422679398580237036");
+        EXPECTED.put("paranoidMaxMC",
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2519|copies=201|rollout=2000|digest=febf38d46d7ebe69|rnd=-3209300573717352861");
     }
 
     @Test

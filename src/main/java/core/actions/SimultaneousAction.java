@@ -47,16 +47,14 @@ public class SimultaneousAction extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "";
+        return toString();
     }
 
-
-    // AI GENERATED toString debugging helper func......
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("SimultaneousAction{");
+        StringBuilder sb = new StringBuilder("SimultaneousAction{\n");
         for (Map.Entry<Integer, AbstractAction> entry : playerActions.entrySet()) {
-            sb.append("player").append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
+            sb.append("\tplayer ").append(entry.getKey()).append(" : ").append(entry.getValue()).append(", \n");
         }
         sb.append("}");
         return sb.toString();
