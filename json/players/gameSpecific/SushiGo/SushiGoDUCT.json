@@ -4,6 +4,7 @@
   "heuristic": {
     "class": "players.heuristics.LeaderHeuristic"
   },
-  "class": "players.DUCT.DUCTParams",
+  "class": "players.mcts.MCTSParams",
+  "decoupled" : true,
   "budget": 40
 }
