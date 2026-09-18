@@ -438,10 +438,6 @@ public class Game {
                 action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
             }
 
-            // fire ACTION_CHOSEN per player
-            AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, observedActions, activePlayer)));
-
             // end timer for this player
             gameState.playerTimer[activePlayer].pause();
             gameState.playerTimer[activePlayer].incrementAction();
