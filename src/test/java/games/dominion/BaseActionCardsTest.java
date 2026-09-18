@@ -527,6 +527,50 @@ public class BaseActionCardsTest {
     }
 
     @Test
+    public void merchantMerchantMilitia() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MERCHANT, 0, DeckType.HAND);
+        state.addCard(CardType.MERCHANT, 0, DeckType.HAND);
+        state.addCard(CardType.MILITIA, 0, DeckType.HAND);
+        state.addCard(CardType.SILVER, 0, DeckType.HAND);
+        state.addCard(CardType.MOAT, 1, DeckType.HAND);
+
+        Merchant merchant = new Merchant(0);
+
+        fm.next(state, merchant);
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(Play, state.getGamePhase());
+        assertEquals(1, state.getActionsLeft());
+
+        merchant = new Merchant(0);
+        fm.next(state, merchant);
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(Play, state.getGamePhase());
+        assertEquals(1, state.getActionsLeft());
+
+        int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
+
+        Militia militia = new Militia(0);
+        fm.next(state, militia);
+        assertTrue(state.isActionInProgress());
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(Play, state.getGamePhase());
+        assertEquals(0, state.getActionsLeft());
+
+        do {
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            fm.next(state, actions.getFirst());
+        } while (state.isActionInProgress());
+
+        assertFalse(state.isActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(Buy, state.getGamePhase());
+        assertEquals(1, state.getBuysLeft());
+        // Bonmus of 4. Two from Militia and Two from Merchants
+        assertEquals(treasureValue + 4, state.getAvailableSpend(0));
+    }
+
+    @Test
     public void merchantsWithTwoSilver() {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.MERCHANT, 0, DeckType.HAND);

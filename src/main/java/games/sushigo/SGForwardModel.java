@@ -82,53 +82,60 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
+
+        // Ignore intermediate actions inside extended sequences
         if (currentState.isActionInProgress())
-            return; // we only want to trigger this processing if an extended action sequence (i.e. Chopsticks) has been terminated
+            return;
 
         SGGameState gs = (SGGameState) currentState;
 
-        // Check if all players made their choice
         int nextPlayer = gs.getCurrentPlayer();
         do {
             nextPlayer = (nextPlayer + 1) % gs.getNPlayers();
-        } while (nextPlayer != gs.getCurrentPlayer() && !gs.cardChoices.get(nextPlayer).isEmpty());
+        } while (nextPlayer != gs.getCurrentPlayer()
+                && !gs.cardChoices.get(nextPlayer).isEmpty());
 
-        if (nextPlayer == gs.getCurrentPlayer()) {
-            // They did! Reveal all cards at once. Process card reveal rules.
-            revealCards(gs);
-
-            // Check if the round is over
-            if (isRoundOver(gs)) {
-                // It is! Process end of round rules.
-                endRound(gs);
-                _endRound(gs);
-
-                // Clear card choices from this turn, ready for the next simultaneous choice.
-                gs.clearCardChoices();
-
-                // Check if the game is over
-                if (gs.getRoundCounter() >= ((SGParameters)gs.getGameParameters()).nRounds) {
-                    // It is! Process end of game rules.
-                    for (SGCard.SGCardType type: values()) {
-                        type.onGameEnd(gs);
-                    }
-                    // Decide winner
-                    endGame(gs);
-                    return;
-                }
-
-                _startRound(gs);
-                return;
-            } else {
-                // Round is not over, keep going. Rotate hands for next player turns.
-                rotatePlayerHands(gs);
-
-                // Clear card choices from this turn, ready for the next simultaneous choice.
-                gs.clearCardChoices();
-            }
+        // Theory is that allChosen is not being correctly detected
+        // OK - the porblem is that all four cards chosen get put in the first array in CardChoices (based on getCurrentPlayer one assumes)
+        boolean allChosen = nextPlayer == gs.getCurrentPlayer();
+        if (!allChosen) {
+            endPlayerTurn(gs, nextPlayer);
+            return;
         }
 
-        // End player turn
+        // Reveal all selected cards
+        revealCards(gs);
+
+        // Check if round is over
+        if (isRoundOver(gs)) {
+
+            _endRound(gs);
+
+            gs.clearCardChoices();
+
+            // Game finished?
+            if (gs.getRoundCounter() >= ((SGParameters) gs.getGameParameters()).nRounds) {
+
+                for (SGCard.SGCardType type : values()) {
+                    type.onGameEnd(gs);
+                }
+
+                endGame(gs);
+                return;
+            }
+
+            // Start next round
+            _startRound(gs);
+            return;
+        }
+
+        // Continue current round
+        rotatePlayerHands(gs);
+
+        // Clear submitted choices for next simultaneous turn
+        gs.clearCardChoices();
+
+        // Advance turn
         if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
             endPlayerTurn(gs, nextPlayer);
         }
@@ -136,7 +143,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
     public void _endRound(SGGameState gs) {
 
-
+        endRound(gs); // superclass method
         // Apply card end of round rules
         for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
             type.onRoundEnd(gs);
@@ -184,9 +191,17 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
     void revealCards(SGGameState gs) {
         for (int i = 0; i < gs.getNPlayers(); i++) {
             Deck<SGCard> hand = gs.getPlayerHands().get(i);
-            for (ChooseCard cc: gs.cardChoices.get(i)) {
-                SGCard cardToReveal = hand.get(cc.cardIdx);
+            boolean usedChopsticks = false;
 
+            // both picks index into the original hand so grab the cards first then remove them.
+            // if you remove one first the index for the second card ends up wrong.
+            List<SGCard> cardsToReveal = new ArrayList<>();
+            for (ChooseCard cc : gs.cardChoices.get(i)) {
+                cardsToReveal.add(hand.get(cc.cardIdx));
+                if (cc.useChopsticks) usedChopsticks = true;
+            }
+
+            for (SGCard cardToReveal : cardsToReveal) {
                 hand.remove(cardToReveal);
                 gs.playedCards.get(i).add(cardToReveal);
                 gs.playedCardTypes[i].get(cardToReveal.type).increment(cardToReveal.count);
@@ -194,13 +209,14 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
                 //Add points to player
                 cardToReveal.type.onReveal(gs, i);
+            }
 
-                if (cc.useChopsticks) {
-                    removeUsedChopsticks(gs, i);
-                }
+            // put the chopstick back only after both cards are gone
+            if (usedChopsticks) {
+                removeUsedChopsticks(gs, i);
             }
         }
-        int expectedPlayerCards = gs.getPlayerHands().get(0).getSize();
+        int expectedPlayerCards = gs.getPlayerHands().getFirst().getSize();
         for (int i = 1; i < gs.getNPlayers(); i++) {
             if (gs.getPlayerHands().get(i).getSize() != expectedPlayerCards) {
                 throw new AssertionError("Player " + i + " has " + gs.getPlayerHands().get(i).getSize() + " cards, expected " + expectedPlayerCards);
@@ -256,21 +272,27 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, gameState.getCurrentPlayer());
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int activePlayer) {
         SGGameState sggs = (SGGameState) gameState;
         List<AbstractAction> actions = new ArrayList<>();
 
-        int currentPlayer = sggs.getCurrentPlayer();
-        Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(currentPlayer);
+        Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(activePlayer);
+        if (currentPlayerHand.getSize() == 0) {
+            throw new AssertionError("Player " + activePlayer + " has no cards in hand before the round is over");
+        }
         for (int i = 0; i < currentPlayerHand.getSize(); i++) {
-            // All players can do is choose a card in hand to play.
-            actions.add(new ChooseCard(currentPlayer, i, false));
-            if (sggs.playedCardTypes[currentPlayer].get(Chopsticks).getValue() > 0 && currentPlayerHand.getSize() > 1) {
-                // If the player played chopsticks in a previous round, then they can choose to use the chopsticks now (and will choose one extra card in hand)
-                actions.add(new ChooseCard(currentPlayer, i, true));
+            actions.add(new ChooseCard(activePlayer, i, false));
+            if (sggs.playedCardTypes[activePlayer].get(Chopsticks).getValue() > 0 && currentPlayerHand.getSize() > 1) {
+                actions.add(new ChooseCard(activePlayer, i, true));
             }
         }
         return actions;
     }
+
 
     @Override
     public ActionTreeNode initActionTree(AbstractGameState gameState) {

@@ -38,13 +38,37 @@ public class SGGameState extends AbstractGameState {
     }
 
     @Override
+    public List<Integer> getCurrentSimultaneousPlayers() {
+        // TODO: This should really be intercepted at the AbstractLevel, given that has ownership of actionsInProgress
+        // TODO: and avoid future implementations missing this check
+        if (isActionInProgress()) {
+            return super.getCurrentSimultaneousPlayers();
+        }
+        if (playerHands == null) {
+            throw new AssertionError("No player has a hand");
+        }
+        // only report players who still have to choose this turn. a player who has already
+        // committed a card must not be asked again, or they end up playing two cards.
+        List<Integer> toDecide = new ArrayList<>(getNPlayers());
+        for (int p = 0; p < getNPlayers(); p++)
+            if (cardChoices.get(p).isEmpty())
+                toDecide.add(p);
+        if (toDecide.isEmpty()) {
+            // everyone has chosen, so the cards should already have been revealed and the
+            // choices cleared. if we get here the turn cycle is broken
+            throw new AssertionError("All players have chosen but the turn has not been resolved");
+        }
+        return toDecide;
+    }
+
+    @Override
     protected GameType _getGameType() {
         return GameType.SushiGo;
     }
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             addAll(playerHands);
             add(drawPile);
             add(discardPile);
@@ -92,51 +116,56 @@ public class SGGameState extends AbstractGameState {
         copy.discardPile = discardPile.copy();
         copy.cardChoices = new ArrayList<>();
 
-        if (playerId == -1) {
-            for (int i = 0; i < getNPlayers(); i++) {
-                List<ChooseCard> copiedItems = new ArrayList<>();
-                for (ChooseCard cc : cardChoices.get(i)) {
-                    copiedItems.add(cc.copy());
-                }
-                copy.cardChoices.add(copiedItems);
+        for (int i = 0; i < getNPlayers(); i++) {
+            List<ChooseCard> copiedItems = new ArrayList<>();
+            for (ChooseCard cc : cardChoices.get(i)) {
+                copiedItems.add(cc.copy());
             }
-        } else {
-            // Now we need to redeterminise
-            // We need to shuffle the hands of other players with the draw deck and then redraw
+            copy.cardChoices.add(copiedItems);
+        }
+        return copy;
+    }
 
-            // Add player hands unseen back to the draw pile
-            for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (!isHandKnown(playerId, p)) {
-                    copy.drawPile.add(playerHands.get(p));
-                }
+    @Override
+    public void redeterminise(int playerId) {
+        // We need to shuffle the hands of other players with the draw deck and then redraw
+
+        // Add player hands unseen back to the draw pile
+        for (int p = 0; p < playerHands.size(); p++) {
+            if (!isHandKnown(playerId, p)) {
+                drawPile.add(playerHands.get(p));
             }
-            copy.drawPile.shuffle(redeterminisationRnd);
+        }
+        drawPile.shuffle(redeterminisationRnd);
 
-            // Now we draw into the unknown player hands
-            for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (!isHandKnown(playerId, p)) {
-                    Deck<SGCard> hand = copy.playerHands.get(p);
-                    int handSize = hand.getSize();
-                    hand.clear();
-                    for (int i = 0; i < handSize; i++) {
-                        hand.add(copy.drawPile.draw());
-                    }
-                }
-            }
-
-            // We don't know what other players have chosen for this round, hide card choices
-            turnOwner = playerId;
-            for (int i = 0; i < getNPlayers(); i++) {
-                copy.cardChoices.add(new ArrayList<>());
-                if (i == playerId) {
-                    for (ChooseCard cc : cardChoices.get(i)) {
-                        copy.cardChoices.get(i).add(cc.copy());
-                    }
+        // Now we draw into the unknown player hands
+        for (int p = 0; p < playerHands.size(); p++) {
+            if (!isHandKnown(playerId, p)) {
+                Deck<SGCard> hand = playerHands.get(p);
+                int handSize = hand.getSize();
+                hand.clear();
+                for (int i = 0; i < handSize; i++) {
+                    hand.add(drawPile.draw());
                 }
             }
         }
 
-        return copy;
+        // we have to set the turn owner so that getCurrentPlayer() returns the correct value
+        // all players think they are the current player when picking actions simultaneously
+        setTurnOwner(playerId);
+        // hide cardChoices (if made) of all other players, but keep our own:
+        // getCurrentSimultaneousPlayers() decides who still has to move from cardChoices being empty,
+        // so losing our own choice here would have us asked to play a second card.
+        List<List<ChooseCard>> oldChoices = cardChoices;
+        cardChoices = new ArrayList<>();
+        for (int i = 0; i < getNPlayers(); i++) {
+            cardChoices.add(new ArrayList<>());
+            if (i == playerId) {
+                for (ChooseCard cc : oldChoices.get(i)) {
+                    cardChoices.get(i).add(cc.copy());
+                }
+            }
+        }
     }
 
     /**

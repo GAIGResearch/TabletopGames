@@ -1,12 +1,15 @@
 package games.sushigo;
 
 import core.actions.AbstractAction;
+import games.sushigo.actions.ChooseCard;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class shuffleTests {
 
@@ -113,5 +116,33 @@ public class shuffleTests {
 
     }
 
+
+    @Test
+    public void ownCardChoiceSurvivesRedeterminisation() {
+        // Player 0 commits a card. When player 0 then takes their own observation of the state,
+        // their choice must still be recorded - otherwise getCurrentSimultaneousPlayers() reports
+        // player 0 as still to move, and they would be asked to play a second card.
+        int chooser = state.getCurrentPlayer();
+        fm.next(state, new ChooseCard(chooser, 0, false));
+        assertEquals(1, state.getCardChoices().get(chooser).size());
+
+        SGGameState copy = (SGGameState) state.copy(chooser);
+
+        assertEquals(1, copy.getCardChoices().get(chooser).size());
+        assertEquals(state.getCardChoices().get(chooser).get(0), copy.getCardChoices().get(chooser).get(0));
+        assertFalse(copy.getCurrentSimultaneousPlayers().contains(chooser));
+    }
+
+    @Test
+    public void otherPlayersCardChoicesAreHiddenByRedeterminisation() {
+        int chooser = state.getCurrentPlayer();
+        fm.next(state, new ChooseCard(chooser, 0, false));
+
+        int observer = (chooser + 1) % state.getNPlayers();
+        SGGameState copy = (SGGameState) state.copy(observer);
+
+        assertTrue(copy.getCardChoices().get(chooser).isEmpty());
+        assertTrue(copy.getCurrentSimultaneousPlayers().contains(observer));
+    }
 }
 

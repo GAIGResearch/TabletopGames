@@ -125,11 +125,11 @@ public class MCTSNodesAndVisitsTests {
             if (availableActions.size() > 1 && state.getCurrentPlayer() == 0) {
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
                 assertEquals(200, mctsPlayer.getRoot(0).getVisits());
-                int childVisits = mctsPlayer.getRoot(0).actionValues.values().stream()
+                int childVisits = mctsPlayer.getRoot(0).getActionValues().values().stream()
                         .mapToInt(actionStats -> actionStats.nVisits).sum();
                 assertEquals(200, childVisits);
-                for (AbstractAction child : mctsPlayer.getRoot(0).actionValues.keySet()) {
-                    int timesActionTaken = mctsPlayer.getRoot(0).actionValues.get(child).nVisits;
+                for (AbstractAction child : mctsPlayer.getRoot(0).getActionValues().keySet()) {
+                    int timesActionTaken = mctsPlayer.getRoot(0).getActionValues().get(child).nVisits;
                     if (timesActionTaken > 0)
                         assertEquals(timesActionTaken - 1,
                                 Arrays.stream(mctsPlayer.getRoot(0).children.get(child))

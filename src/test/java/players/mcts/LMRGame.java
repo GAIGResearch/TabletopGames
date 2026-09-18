@@ -11,7 +11,12 @@ import java.util.List;
 public class LMRGame extends AbstractGameState {
 
     public LMRGame(AbstractParameters gameParameters) {
-        super(gameParameters, 2);
+        this(gameParameters, 2);
+    }
+
+    /** For fixtures that need a different player count (e.g. a player who never acts). */
+    protected LMRGame(AbstractParameters gameParameters, int nPlayers) {
+        super(gameParameters, nPlayers);
     }
 
     // A Simple Game State for testing MCTS - this has no state at all, and 3 possible actions

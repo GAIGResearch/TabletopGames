@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.SimultaneousAction;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IComponentContainer;
@@ -43,10 +44,8 @@ public class HeartsForwardModel extends StandardForwardModel {
 
     public void _setupRound(HeartsGameState hgs) {
         HeartsParameters params = (HeartsParameters) hgs.getGameParameters();
-        hgs.setGamePhase(HeartsGameState.Phase.PASSING);
         hgs.heartsBroken = false;
 
-        hgs.setFirstPlayer(0);
         hgs.pendingPasses = new ArrayList<>(hgs.getNPlayers());
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             hgs.pendingPasses.add(new ArrayList<>());
@@ -76,66 +75,101 @@ public class HeartsForwardModel extends StandardForwardModel {
                 playerDeck.add(hgs.drawDeck.draw());
             }
         }
+
+        if (passDirection(hgs) == 0) {
+            // No passing this round, so nobody has a decision to make until the first trick
+            startPlayingPhase(hgs);
+        } else {
+            hgs.setGamePhase(HeartsGameState.Phase.PASSING);
+            hgs.setFirstPlayer(0);
+        }
     }
 
+    /**
+     * How many seats to the left the passed cards travel this round: left, right, across, and then
+     * a round with no passing at all.
+     */
+    private int passDirection(HeartsGameState hgs) {
+        switch (hgs.getRoundCounter() % 4) {
+            case 0:
+                return 1;
+            case 1:
+                return hgs.getNPlayers() - 1;
+            case 2:
+                return hgs.getNPlayers() / 2;
+            case 3:
+                return 0;
+            default:
+                throw new IllegalStateException("Unexpected value: " + hgs.getRoundCounter());
+        }
+    }
+
+    /**
+     * Everyone has committed all their cards: hand them on, and start trick play with the player
+     * who now holds the starting card.
+     */
+    private void resolvePasses(HeartsGameState hgs) {
+        int passDirection = passDirection(hgs);
+        for (int i = 0; i < hgs.getNPlayers(); i++) {
+            Deck<FrenchCard> nextPlayerDeck = hgs.playerDecks.get((i + passDirection) % hgs.getNPlayers());
+            for (FrenchCard card : hgs.pendingPasses.get(i)) {
+                nextPlayerDeck.add(card);
+            }
+            hgs.pendingPasses.get(i).clear();
+        }
+        startPlayingPhase(hgs);
+    }
+
+    private void startPlayingPhase(HeartsGameState hgs) {
+        HeartsParameters params = (HeartsParameters) hgs.getGameParameters();
+        hgs.setGamePhase(HeartsGameState.Phase.PLAYING);
+        for (int i = 0; i < hgs.getNPlayers(); i++) {
+            if (hgs.playerDecks.get(i).contains(params.startingCard)) {
+                hgs.setFirstPlayer(i);
+                return;
+            }
+        }
+        throw new AssertionError("No player holds the starting card " + params.startingCard);
+    }
+
+    /**
+     * The next player, cycling round from the current one, who has not yet committed a card in the
+     * current passing sub-turn. At the end of a sub-turn that is simply the next player round.
+     */
+    private int nextPlayerToPass(HeartsGameState hgs) {
+        List<Integer> stillToPass = hgs.getPlayersStillToPass();
+        int current = hgs.getCurrentPlayer();
+        for (int i = 1; i <= hgs.getNPlayers(); i++) {
+            int p = (current + i) % hgs.getNPlayers();
+            if (stillToPass.contains(p))
+                return p;
+        }
+        throw new AssertionError("No player is still to pass");
+    }
 
     public void _afterAction(AbstractGameState gameState, AbstractAction action) {
         HeartsGameState hgs = (HeartsGameState) gameState;
         HeartsParameters params = (HeartsParameters) hgs.getGameParameters();
 
         if (hgs.getGamePhase() == HeartsGameState.Phase.PASSING) {
-            if (action instanceof Pass) {
-
-                // Check if current player has passed 3 cards
-                int cardsPassed = hgs.pendingPasses.get(hgs.getCurrentPlayer()).size();
-                if (cardsPassed == params.cardsPassedPerRound) {
-                    // Check if all players have passed their cards
-                    if (hgs.pendingPasses.stream().allMatch(passes -> passes.size() == 3)) {
-                        hgs.setGamePhase(HeartsGameState.Phase.PLAYING);
-
-                        // Determine the pass direction based on the current round
-                        int passDirection;
-                        switch (hgs.getRoundCounter() % 4) {
-                            case 0:  // To the left
-                                passDirection = 1;
-                                break;
-                            case 1:  // To the right
-                                passDirection = hgs.getNPlayers() - 1;
-                                break;
-                            case 2:  // Across the table (for 4 players)
-                                passDirection = hgs.getNPlayers() / 2;
-                                break;
-                            case 3:  // No passing
-                                passDirection = 0;
-                                break;
-                            default:
-                                throw new IllegalStateException("Unexpected value: " + hgs.getRoundCounter());
-                        }
-
-                        // Add pending passes to next player's deck
-                        for (int i = 0; i < hgs.getNPlayers(); i++) {
-                            Deck<FrenchCard> nextPlayerDeck = hgs.playerDecks.get((i + passDirection) % hgs.getNPlayers());
-                            for (FrenchCard card : hgs.pendingPasses.get(i)) {
-                                nextPlayerDeck.add(card);
-                            }
-                            hgs.pendingPasses.get(i).clear();  // Clear this player's pending passes
-                        }
-                        // Set the first player of the PLAYING phase to be the player who has the 2 of clubs
-                        for (int i = 0; i < hgs.getNPlayers(); i++) {
-                            Deck<FrenchCard> playerDeck1 = hgs.playerDecks.get(i);
-                            if (playerDeck1.contains(params.startingCard)) {
-                                hgs.setFirstPlayer(i);
-                                return;
-                            }
-                        }
-                    }
-
-                    // End player's turn here after 3 passes
-                    endPlayerTurn(hgs);
-                }
-            } else {
+            if (!(action instanceof Pass) && !(action instanceof SimultaneousAction)) {
                 throw new IllegalArgumentException("Invalid action type during PASSING phase.");
             }
+            // Passing is simultaneous, one card at a time: everyone commits a card, then everyone
+            // commits their next one. The choices may arrive one player at a time, in which case the
+            // turn is handed round the players still to commit, or all together as one
+            // SimultaneousAction; either way the passes resolve once everyone has committed all of
+            // theirs, and trick play starts with the holder of the starting card.
+            int fewest = hgs.fewestPendingPasses();
+            int most = hgs.pendingPasses.stream().mapToInt(List::size).max().orElse(0);
+            if (most > fewest + 1) {
+                throw new AssertionError("A player has committed a card before everyone had committed the previous one");
+            }
+            if (fewest == params.cardsPassedPerRound) {
+                resolvePasses(hgs);
+                return;
+            }
+            endPlayerTurn(hgs, nextPlayerToPass(hgs));
         } else {
             // Check if all players have played a card in this round
             if (hgs.currentPlayedCards.size() == hgs.getNPlayers()) {
@@ -152,18 +186,27 @@ public class HeartsForwardModel extends StandardForwardModel {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, gameState.getCurrentPlayer());
+    }
+
+    /**
+     * The actions open to the given player. While passing, any player still to commit a card this
+     * sub-turn may pass any card in their hand. During trick play only the player whose turn it is
+     * has any actions at all.
+     */
+    @Override
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int player) {
         HeartsGameState hgs = (HeartsGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = hgs.getCurrentPlayer();
         Deck<FrenchCard> playerHand = hgs.playerDecks.get(player);
 
         if (hgs.getGamePhase() == HeartsGameState.Phase.PASSING) {
-            // Generate Pass action for each card in the player's hand
-            List<FrenchCard> cards = playerHand.getComponents();
-            for (FrenchCard card : cards) {
-                actions.add(new Pass(player, card));
+            if (hgs.getPlayersStillToPass().contains(player)) {
+                for (FrenchCard card : playerHand.getComponents()) {
+                    actions.add(new Pass(player, card));
+                }
             }
-        } else {
+        } else if (player == hgs.getCurrentPlayer()) {
 
             if (!hgs.trickDecks.stream().flatMap(IComponentContainer::stream).findAny().isPresent()) {
                 // First turn of the game, the player with 2 of clubs must play it

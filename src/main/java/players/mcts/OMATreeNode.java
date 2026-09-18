@@ -2,6 +2,7 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -57,10 +58,10 @@ public class OMATreeNode extends SingleTreeNode {
                 continue;  // for OMA we only consider the root player
 
             // We only care about our actions for OMA stats
-            int finalPlayer = player;
-            List<AbstractAction> selfActionsOnly = root.actionsInTree.stream()
-                    .filter(p -> p.a == finalPlayer).map(p -> p.b)
-                    .toList();
+            List<AbstractAction> selfActionsOnly = new ArrayList<>();
+            for (Pair<Integer, AbstractAction> actionInTree : root.actionsInTree)
+                if (actionInTree.a == player)
+                    selfActionsOnly.add(actionInTree.b);
             List<OMATreeNode> nodes = new ArrayList<>();
             OMATreeNode currentNode = this;
             do {
@@ -81,7 +82,7 @@ public class OMATreeNode extends SingleTreeNode {
                 AbstractAction actionTakenFromChild = selfActionsOnly.get(i + 1);
                 if (currentNode.decisionPlayer != player)
                     throw new AssertionError("We have a mismatch between the player who took the action and the player who should be acting");
-                if (!currentNode.actionValues.containsKey(actionTakenFromParent))
+                if (!currentNode.getActionValues().containsKey(actionTakenFromParent))
                     throw new AssertionError("We should not have a value for the action taken from the parent");
                 currentNode.OMABackup(result, actionTakenFromParent, actionTakenFromChild);
             }

@@ -5,7 +5,6 @@ import core.actions.AbstractAction;
 import games.GameType;
 import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
-import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.cards.DiamantCard.DiamantCardType;
 import org.junit.Test;
@@ -177,21 +176,15 @@ public class DiamantRelicTest {
         assertEquals(java.util.Arrays.toString(expected), java.util.Arrays.toString(actual));
     }
 
-    // Helper: Execute player actions for a round.
-    // For each player, true = stay (ContinueInCave), false = leave (ExitFromCave), null = OutOfCave
+    // Helper: Execute player actions for a turn.
+    // For each player in the cave, true = stay (ContinueInCave), false = leave (ExitFromCave).
+    // Players who have already left the cave make no choice, so nothing is applied for them.
     private void executePlayerActions(Game game, DiamantGameState state, boolean[] stayOrLeave) {
-        AbstractAction[] actions = new AbstractAction[stayOrLeave.length];
         for (int i = 0; i < stayOrLeave.length; i++) {
-            if (!state.playerInCave.get(i)) {
-                actions[i] = new OutOfCave();
-            } else if (stayOrLeave[i]) {
-                actions[i] = new ContinueInCave();
-            } else {
-                actions[i] = new ExitFromCave();
-            }
-        }
-        for (int i = 0; i < stayOrLeave.length; i++) {
-            game.getForwardModel().next(state, actions[i]);
+            if (!state.playerInCave.get(i))
+                continue;
+            AbstractAction action = stayOrLeave[i] ? new ContinueInCave(i) : new ExitFromCave(i);
+            game.getForwardModel().next(state, action);
         }
     }
 }
