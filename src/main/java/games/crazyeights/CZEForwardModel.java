@@ -18,10 +18,6 @@ import static core.CoreConstants.VisibilityMode.*;
 
 /**
  * <p>The forward model contains all the game rules and logic for Crazy Eights.</p>
- * <p>See claude_game_creator/CrazyEights_plan.txt for the implementation phases. Implemented:
- * Phase A (deal, matching rules with suit nomination for Eights, drawing, winning by emptying your hand) and
- * Phase B (reshuffling the discards into a new stock, passing, and the blocked-game ending),
- * Phase C (ranking) and Phase D (optional dealer nomination of the suit for a starter Eight).</p>
  */
 public class CZEForwardModel extends StandardForwardModel {
 
@@ -49,7 +45,7 @@ public class CZEForwardModel extends StandardForwardModel {
         state.consecutivePasses = 0;
         if (params.dealerNominatesStarterSuit && CZEGameState.isEight(starter))
             // the dealer chooses the suit before player 0 starts; starterEightSuit is only a placeholder until then
-            state.setActionInProgress(new CZEStarterSuitNomination());
+            state.setActionInProgress(new CZEStarterSuitNomination(state.getNPlayers() - 1));
     }
 
     @Override
@@ -61,14 +57,14 @@ public class CZEForwardModel extends StandardForwardModel {
             if (!state.canPlay(card)) continue;
             if (CZEGameState.isEight(card)) {
                 for (FrenchCard.Suite suit : FrenchCard.Suite.values())
-                    actions.add(new PlayCard(player, card, suit));
+                    actions.add(new PlayCard(card, suit));
             } else {
-                actions.add(new PlayCard(player, card, card.suite));
+                actions.add(new PlayCard(card, card.suite));
             }
         }
         if (actions.isEmpty()) {
             // You must play if you can; only otherwise draw, and pass only if there is nothing to draw
-            actions.add(state.canDraw() ? new DrawCard(player) : new Pass(player));
+            actions.add(state.canDraw() ? new DrawCard() : new Pass());
         }
         return actions;
     }

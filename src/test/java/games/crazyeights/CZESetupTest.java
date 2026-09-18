@@ -32,7 +32,7 @@ public class CZESetupTest {
     @Test
     public void suitToMatchIsTheStarterCardsSuitOrTheParameterSuitIfItIsAnEight() {
         CZEParameters params = new CZEParameters();
-        params.starterEightSuit = Clubs;   // not the default, so the parameter is seen to be used
+        params.setParameterValue("starterEightSuit", Clubs);   // not the default, so the parameter is seen to be used
         int eights = 0, others = 0;
         for (int seed = 0; seed < 500; seed++) {
             params.setRandomSeed(seed);

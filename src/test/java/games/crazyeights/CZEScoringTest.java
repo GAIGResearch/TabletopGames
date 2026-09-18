@@ -18,7 +18,7 @@ import static games.crazyeights.CZETestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Phase C: penalty points and ordinal positions at the end of the game.
+ * Penalty points and ordinal positions at the end of the game.
  * <p>
  * After a player goes out, players are ranked by penalty points (lowest first, equal penalties share a position).
  * After a blocked game they are ranked by cards in hand (fewest first, equal counts share), penalties ignored.
@@ -78,10 +78,10 @@ public class CZEScoringTest {
         giveHand(state, 0, card("8D"), card("AS"), card("5C"));
         assertEquals(50 + 1 + 5, state.handPenalty(0));
 
-        params.eightPenalty = 20;
+        params.setParameterValue("eightPenalty", 20);
         assertEquals(20 + 1 + 5, state.handPenalty(0));
 
-        params.acePenalty = 15;
+        params.setParameterValue("acePenalty", 15);
         assertEquals(20 + 15 + 5, state.handPenalty(0));
     }
 
@@ -98,7 +98,7 @@ public class CZEScoringTest {
         giveHand(state, 3, card("2D"), card("2S"), card("AC"));    // 3 cards, 5 (Ace = 1)
         assertEquals(0, state.getCurrentPlayer());
 
-        fm.next(state, new PlayCard(0, card("9H"), Hearts));
+        fm.next(state, new PlayCard(card("9H"), Hearts));
 
         assertFalse(state.isNotTerminal());
         // by penalty, not by cards in hand: P0 (0) 1st, P2 and P3 (5) share 2nd, P1 (50) 4th
@@ -115,10 +115,10 @@ public class CZEScoringTest {
         giveHand(state, 1, card("KD"));               // 1 card, 10
         giveHand(state, 2, card("QS"), card("JC"));   // 2 cards, 20
         leaveNothingToDraw(state, 3);                 // every other card
-        assertEquals(List.of(new Pass(0)), fm.computeAvailableActions(state));
+        assertEquals(List.of(new Pass()), fm.computeAvailableActions(state));
         state.setConsecutivePasses(3);                // the other three players have passed (see CZEBlockedGameTest)
 
-        fm.next(state, new Pass(0));
+        fm.next(state, new Pass());
 
         assertFalse(state.isNotTerminal());
         assertArrayEquals(new GameResult[]{LOSE_GAME, WIN_GAME, LOSE_GAME, LOSE_GAME}, state.getPlayerResults());
@@ -139,11 +139,11 @@ public class CZEScoringTest {
         leaveNothingToDraw(state, 2);                 // every other card, including all the Eights
         state.setConsecutivePasses(1);                // player 2 passed last (cannot really happen, see CZEBlockedGameTest)
 
-        assertEquals(List.of(new Pass(0)), fm.computeAvailableActions(state));
-        fm.next(state, new Pass(0));
+        assertEquals(List.of(new Pass()), fm.computeAvailableActions(state));
+        fm.next(state, new Pass());
         assertTrue(state.isNotTerminal());
-        assertEquals(List.of(new Pass(1)), fm.computeAvailableActions(state));
-        fm.next(state, new Pass(1));
+        assertEquals(List.of(new Pass()), fm.computeAvailableActions(state));
+        fm.next(state, new Pass());
 
         assertFalse(state.isNotTerminal());
         assertArrayEquals(new GameResult[]{WIN_GAME, WIN_GAME, LOSE_GAME}, state.getPlayerResults());
@@ -183,7 +183,7 @@ public class CZEScoringTest {
                     fm.next(state, actions.get(rnd.nextInt(actions.size())));
                 }
                 assertFalse(label + ": did not end within 5000 actions", state.isNotTerminal());
-                // a blocked game cannot arise from real play with one deck (Phase B finding), so someone went out
+                // a blocked game cannot arise from real play with one deck, so someone went out
                 assertTrue(label + ": expected a normal win", state.getConsecutivePasses() < nPlayers);
 
                 int[] penalties = new int[nPlayers];

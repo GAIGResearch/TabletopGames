@@ -24,6 +24,7 @@ public class HeartsPlayerView extends HeartsDeckView {
         this.width = playerWidth + border*2;
         this.height = playerHeight + border + borderBottom;
         this.playerID = playerID;
+        setDisplayOrder(FrenchCard.HAND_DISPLAY_ORDER);
     }
 
     @Override

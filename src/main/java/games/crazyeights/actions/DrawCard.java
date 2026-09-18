@@ -6,19 +6,11 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import games.crazyeights.CZEGameState;
 
-import java.util.Objects;
-
 /**
  * Draw the top card of the stock into the hand. Only available when no card can be played; ends the turn.
  * If the stock is empty, the discards under the top card are first shuffled to form a new stock.
  */
 public class DrawCard extends AbstractAction {
-
-    public final int player;
-
-    public DrawCard(int player) {
-        this.player = player;
-    }
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -33,7 +25,7 @@ public class DrawCard extends AbstractAction {
             discards.add(top);
             stock.shuffle(state.getRnd());
         }
-        state.getPlayerHands().get(player).add(stock.draw());
+        state.getPlayerHands().get(state.getCurrentPlayer()).add(stock.draw());
         return true;
     }
 
@@ -44,12 +36,12 @@ public class DrawCard extends AbstractAction {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof DrawCard that && player == that.player;
+        return o instanceof DrawCard;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, "DrawCard");
+        return 382901;
     }
 
     @Override

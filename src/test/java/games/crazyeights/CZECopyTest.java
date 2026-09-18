@@ -68,7 +68,7 @@ public class CZECopyTest {
         CZETestUtils.setTopDiscard(state, CZETestUtils.card("5H"));
         CZETestUtils.giveHand(state, 0, CZETestUtils.card("9C"), CZETestUtils.card("KS"));
         CZETestUtils.leaveNothingToDraw(state, 1);
-        fm.next(state, new Pass(0));
+        fm.next(state, new Pass());
         assertEquals(1, state.getConsecutivePasses());
 
         CZEGameState copy = (CZEGameState) state.copy();

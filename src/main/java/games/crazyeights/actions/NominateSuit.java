@@ -5,19 +5,15 @@ import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import games.crazyeights.CZEGameState;
 
-import java.util.Objects;
-
 /**
- * The dealer nominates the suit to match when the starter card is an Eight (Phase D, only when
+ * The dealer nominates the suit to match when the starter card is an Eight (only when
  * CZEParameters.dealerNominatesStarterSuit is true).
  */
 public class NominateSuit extends AbstractAction {
 
-    public final int player;
     public final FrenchCard.Suite suit;
 
-    public NominateSuit(int player, FrenchCard.Suite suit) {
-        this.player = player;
+    public NominateSuit(FrenchCard.Suite suit) {
         this.suit = suit;
     }
 
@@ -34,12 +30,12 @@ public class NominateSuit extends AbstractAction {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof NominateSuit that && player == that.player && suit == that.suit;
+        return o instanceof NominateSuit that && suit == that.suit;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, suit, "NominateSuit");
+        return suit.ordinal() + 382904;
     }
 
     @Override

@@ -28,6 +28,10 @@ import games.catan.gui.CatanGUI;
 import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
+import games.agram.AgramForwardModel;
+import games.agram.gui.AgramGUIManager;
+import games.agram.AgramGameState;
+import games.agram.AgramParameters;
 import games.chinesecheckers.gui.CCGUIManager;
 import games.chess.ChessForwardModel;
 import games.chess.ChessGameState;
@@ -333,6 +337,9 @@ public enum GameType {
     Hearts(3, 7, Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
+    Agram(2, 5, Arrays.asList(Cards, Simple),
+            List.of(TrickTaking),
+            AgramGameState.class, AgramForwardModel.class, AgramParameters.class, AgramGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             List.of(GridMovement),

@@ -33,24 +33,24 @@ public class CZEGameFlowTest {
 
         // P0: only the Nine of Hearts matches the Five of Hearts
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(List.of(new PlayCard(0, card("9H"), Hearts)), fm.computeAvailableActions(state));
-        fm.next(state, new PlayCard(0, card("9H"), Hearts));
+        assertEquals(List.of(new PlayCard(card("9H"), Hearts)), fm.computeAvailableActions(state));
+        fm.next(state, new PlayCard(card("9H"), Hearts));
 
         // P1: neither a Heart nor a Nine, so must draw
         assertEquals(1, state.getCurrentPlayer());
-        assertEquals(List.of(new DrawCard(1)), fm.computeAvailableActions(state));
-        fm.next(state, new DrawCard(1));
+        assertEquals(List.of(new DrawCard()), fm.computeAvailableActions(state));
+        fm.next(state, new DrawCard());
         assertEquals(3, state.getPlayerHands().get(1).getSize());
 
         // P2: plays the Eight and nominates Spades
         assertEquals(2, state.getCurrentPlayer());
-        fm.next(state, new PlayCard(2, card("8C"), Spades));
+        fm.next(state, new PlayCard(card("8C"), Spades));
         assertEquals(Spades, state.getCurrentSuit());
 
         // P0: the Three of Spades is their last card
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(List.of(new PlayCard(0, card("3S"), Spades)), fm.computeAvailableActions(state));
-        fm.next(state, new PlayCard(0, card("3S"), Spades));
+        assertEquals(List.of(new PlayCard(card("3S"), Spades)), fm.computeAvailableActions(state));
+        fm.next(state, new PlayCard(card("3S"), Spades));
 
         assertFalse(state.isNotTerminal());
         assertEquals(WIN_GAME, state.getPlayerResults()[0]);
@@ -71,30 +71,30 @@ public class CZEGameFlowTest {
 
         // P0 and P1: no Heart, Five or Eight, and nothing to draw
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(List.of(new Pass(0)), fm.computeAvailableActions(state));
-        fm.next(state, new Pass(0));
+        assertEquals(List.of(new Pass()), fm.computeAvailableActions(state));
+        fm.next(state, new Pass());
         assertEquals(1, state.getConsecutivePasses());
-        assertEquals(List.of(new Pass(1)), fm.computeAvailableActions(state));
-        fm.next(state, new Pass(1));
+        assertEquals(List.of(new Pass()), fm.computeAvailableActions(state));
+        fm.next(state, new Pass());
         assertEquals(2, state.getConsecutivePasses());
         assertTrue(state.isNotTerminal());
 
         // P2: plays the Eight of Hearts nominating Diamonds, resetting the count
         assertEquals(2, state.getCurrentPlayer());
-        fm.next(state, new PlayCard(2, card("8H"), Diamonds));
+        fm.next(state, new PlayCard(card("8H"), Diamonds));
         assertEquals(0, state.getConsecutivePasses());
 
         // P0: stock is empty but the Five of Hearts is under the top card, so it can be drawn
-        assertEquals(List.of(new DrawCard(0)), fm.computeAvailableActions(state));
-        fm.next(state, new DrawCard(0));
+        assertEquals(List.of(new DrawCard()), fm.computeAvailableActions(state));
+        fm.next(state, new DrawCard());
         assertTrue(state.getPlayerHands().get(0).contains(card("5H")));
         assertEquals(List.of(card("8H")), state.getDiscardPile().getComponents());
         assertEquals(Diamonds, state.getCurrentSuit());
         assertEquals(0, state.getDrawDeck().getSize());
 
         // P1: nothing to play or draw again
-        assertEquals(List.of(new Pass(1)), fm.computeAvailableActions(state));
-        fm.next(state, new Pass(1));
+        assertEquals(List.of(new Pass()), fm.computeAvailableActions(state));
+        fm.next(state, new Pass());
         assertEquals(1, state.getConsecutivePasses());
         assertTrue(state.isNotTerminal());
         assertAllCardsPresent(state);

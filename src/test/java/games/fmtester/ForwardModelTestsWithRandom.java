@@ -1,6 +1,7 @@
 package games.fmtester;
 
 import evaluation.ForwardModelTester;
+import games.agram.AgramParameters;
 import games.crazyeights.CZEParameters;
 import org.junit.Test;
 
@@ -159,6 +160,17 @@ public class ForwardModelTestsWithRandom {
         new ForwardModelTester("game=CrazyEights", "nGames=2", "nPlayers=5");
         new ForwardModelTester("game=CrazyEights", "nGames=2", "nPlayers=8");
         CZEParameters params = new CZEParameters();
-        params.dealerNominatesStarterSuit = true;
+        params.setParameterValue("dealerNominatesStarterSuit", true);
         new ForwardModelTester(params, "game=CrazyEights", "nGames=5", "nPlayers=3");
-    }}
+    }
+
+    @Test
+    public void testAgram() {
+        new ForwardModelTester("game=Agram", "nGames=2", "nPlayers=2");
+        new ForwardModelTester("game=Agram", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=Agram", "nGames=2", "nPlayers=5");
+        AgramParameters params = new AgramParameters();
+        params.setParameterValue("nDeals", 3);
+        new ForwardModelTester(params, "game=Agram", "nGames=2", "nPlayers=4");
+    }
+}

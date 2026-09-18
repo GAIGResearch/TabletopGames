@@ -26,6 +26,7 @@ public class CZEPlayerView extends JComponent {
         this.playerId = playerId;
         this.handView = new CZEDeckView(playerId, hand, false, dataPath,
                 new Rectangle(border, border, playerAreaWidth, cardHeight));
+        this.handView.setDisplayOrder(FrenchCard.HAND_DISPLAY_ORDER);
     }
 
     @Override

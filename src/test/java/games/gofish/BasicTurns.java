@@ -14,6 +14,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BasicTurns {
 
@@ -23,6 +24,8 @@ public class BasicTurns {
 
     @Before
     public void setup() {
+        // a fixed deal: the default seed is the clock time, so each run would otherwise test a different deal
+        params.setRandomSeed(42);
         state = new GoFishGameState(params, 4);
         fm.setup(state);
     }
@@ -41,7 +44,7 @@ public class BasicTurns {
 
     @Test
     public void testSequenceOfAskThenFish() {
-        params.continueOnDrawingSameRank = false;
+        params.setParameterValue("continueOnDrawingSameRank", false);
         GoFishAsk askAction = getNextAction(false);
         state.drawDeck.add(new FrenchCard(FrenchCardType.Number, Suite.Hearts, askAction.rankAsked));
         long currentCards = state.playerHands.get(0).getSize();
@@ -55,7 +58,7 @@ public class BasicTurns {
 
     @Test
     public void testSequenceOfAskThenFishContinueOnDrawSameRank() {
-        params.continueOnDrawingSameRank = true;
+        params.setParameterValue("continueOnDrawingSameRank", true);
         GoFishAsk askAction = getNextAction(false);
         state.drawDeck.add(new FrenchCard(FrenchCardType.Number, Suite.Hearts, askAction.rankAsked));
         long currentCards = state.playerHands.get(0).getSize();
@@ -212,13 +215,14 @@ public class BasicTurns {
         GoFishAsk ask = new GoFishAsk(target, rank);
         fm.next(state, ask);
 
-        // TODO: Split this into two tests
         if (takenCount == 2) {
+            // 2 + 2 completes a book: all four cards (books are held as cards) leave the hand for the books
             assertEquals(0, totalOfRankInHand(asker, rank));
-            assertEquals(1, state.getPlayerBooks().get(asker).stream().filter(b -> b.number == rank).count());
-        } else
+            assertEquals(4, state.getPlayerBooks().get(asker).stream().filter(b -> b.number == rank).count());
+        } else {
             assertEquals(takenCount + 2, totalOfRankInHand(asker, rank));
-        assertEquals(takenCount + 1, visibleToAllOfRankInHand(asker, rank));
+            assertEquals(takenCount + 1, visibleToAllOfRankInHand(asker, rank));
+        }
     }
 
     @Test
@@ -338,27 +342,25 @@ public class BasicTurns {
         return visible;
     }
 
+    /**
+     * An ask by the current player for a rank they hold, which the target does (willSucceed) or does not hold.
+     * The asker's cards of that rank plus those they gain (the target's, or one fished card) stay below four, so no
+     * book is completed and the hand sizes the tests expect are not changed by one.
+     */
     private GoFishAsk getNextAction(boolean willSucceed) {
         int player = state.getCurrentPlayer();
-        int rankToPick = -1;
-        int playerToTarget = -1;
-        for (int p = 0; p < 4; p++) {
+        for (int p = 0; p < state.getNPlayers(); p++) {
             if (p == player) continue;
             for (int r = 2; r <= 14; r++) {
-                int finalR = r;
-                if (state.playerHands.get(player).stream().anyMatch(card -> card.number == finalR)) {
-                    boolean matches = willSucceed ?
-                            state.playerHands.get(p).stream().anyMatch(card -> card.number == finalR) :
-                            state.playerHands.get(p).stream().noneMatch(card -> card.number == finalR);
-
-                    if (matches) {
-                        rankToPick = r;
-                        playerToTarget = p;
-                        break;
-                    }
-                }
+                int held = totalOfRankInHand(player, r);
+                int targetHeld = totalOfRankInHand(p, r);
+                if (held == 0) continue;
+                boolean suitable = willSucceed ? targetHeld > 0 && held + targetHeld < 4 : targetHeld == 0 && held + 1 < 4;
+                if (suitable)
+                    return new GoFishAsk(p, r);
             }
         }
-        return new GoFishAsk(playerToTarget, rankToPick);
+        fail("No suitable ask in this deal (willSucceed = " + willSucceed + ")");
+        return null;
     }
 }

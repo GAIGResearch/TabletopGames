@@ -31,6 +31,7 @@ public class GoFishPlayerView extends JComponent {
                 null,
                 new Rectangle(border, border + 20, playerAreaWidth, cardHeight)
         );
+        this.playerHandView.setDisplayOrder(FrenchCard.HAND_DISPLAY_ORDER);
     }
 
     @Override

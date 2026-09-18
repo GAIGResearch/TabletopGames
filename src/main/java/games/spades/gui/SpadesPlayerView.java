@@ -9,6 +9,8 @@ import utilities.ImageIO;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * GUI component for displaying a player's hand in Spades.
@@ -71,24 +73,18 @@ public class SpadesPlayerView extends ComponentView {
     private void drawHand(Graphics2D g, Rectangle rect) {
         if (deck == null || deck.getSize() == 0) return;
         
-        // Take a snapshot to avoid concurrent modification
-        int cardCount = deck.getSize();
+        // Take a snapshot to avoid concurrent modification; face-up hands are laid out in the classic order
+        List<FrenchCard> cards = inDisplayOrder();
+        int cardCount = cards.size();
         if (cardCount == 0) return;
         
         cardRects = new Rectangle[cardCount];
         int spacing = Math.min(15, Math.max(5, (rect.width - CARD_WIDTH) / Math.max(1, cardCount - 1)));
         
         for (int i = 0; i < cardCount; i++) {
-            // Defensive check to prevent IndexOutOfBoundsException
-            if (i >= deck.getSize()) break;
+            if (i >= cards.size()) break;
             
-            FrenchCard card;
-            try {
-                card = deck.get(i);
-            } catch (IndexOutOfBoundsException e) {
-                // Card was removed during painting, skip
-                break;
-            }
+            FrenchCard card = cards.get(i);
             
             if (card == null) continue;
             
@@ -139,16 +135,20 @@ public class SpadesPlayerView extends ComponentView {
     }
     
     public FrenchCard getHighlightedCard() {
-        if (deck != null && highlightedCard >= 0 && highlightedCard < deck.getSize()) {
-            try {
-                return deck.get(highlightedCard);
-            } catch (IndexOutOfBoundsException e) {
-                // Card was removed, reset highlight
-                highlightedCard = -1;
-                return null;
-            }
-        }
+        List<FrenchCard> cards = inDisplayOrder();
+        if (highlightedCard >= 0 && highlightedCard < cards.size())
+            return cards.get(highlightedCard);
+        highlightedCard = -1;
         return null;
+    }
+
+    /** The cards in the order they are laid out: the classic hand order when face-up, otherwise deck order. */
+    private List<FrenchCard> inDisplayOrder() {
+        if (deck == null) return new ArrayList<>();
+        List<FrenchCard> cards = new ArrayList<>(deck.getComponents());
+        if (isVisible)
+            cards.sort(FrenchCard.HAND_DISPLAY_ORDER);
+        return cards;
     }
     
     public void setDeck(Deck<FrenchCard> newDeck) {

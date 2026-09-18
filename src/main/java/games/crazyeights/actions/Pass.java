@@ -3,18 +3,10 @@ package games.crazyeights.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
-import java.util.Objects;
-
 /**
  * Pass the turn. Only available when no card can be played and none can be drawn.
  */
 public class Pass extends AbstractAction {
-
-    public final int player;
-
-    public Pass(int player) {
-        this.player = player;
-    }
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -29,12 +21,12 @@ public class Pass extends AbstractAction {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Pass that && player == that.player;
+        return o instanceof Pass;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, "Pass");
+        return 382902;
     }
 
     @Override

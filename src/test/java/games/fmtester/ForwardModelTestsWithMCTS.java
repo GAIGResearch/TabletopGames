@@ -1,6 +1,7 @@
 package games.fmtester;
 
 import evaluation.ForwardModelTester;
+import games.agram.AgramParameters;
 import games.catan.CatanParameters;
 import games.crazyeights.CZEParameters;
 import games.descent2e.DescentParameters;
@@ -226,7 +227,15 @@ public class ForwardModelTestsWithMCTS {
     public void testCrazyEights() {
         new ForwardModelTester("game=CrazyEights", "nGames=2", "nPlayers=3", "agent=json\\players\\mcts.json");
         CZEParameters params = new CZEParameters();
-        params.dealerNominatesStarterSuit = true;
+        params.setParameterValue("dealerNominatesStarterSuit", true);
         new ForwardModelTester(params, "game=CrazyEights", "nGames=3", "nPlayers=2", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testAgram() {
+        new ForwardModelTester("game=Agram", "nGames=2", "nPlayers=3", "agent=json\\players\\mcts.json");
+        AgramParameters params = new AgramParameters();
+        params.setParameterValue("nDeals", 3);
+        new ForwardModelTester(params, "game=Agram", "nGames=2", "nPlayers=2", "agent=json\\players\\mcts.json");
     }
 }

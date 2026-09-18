@@ -146,7 +146,6 @@ public class CZEGameState extends AbstractGameState {
 
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
             // Other players' hands and the stock are unknown: shuffle them together, keeping hand sizes.
-            // The visibility modes of the decks determine what is hidden from playerId.
             List<Deck<FrenchCard>> decks = new ArrayList<>(copy.playerHands);
             decks.add(copy.drawDeck);
             DeterminisationUtilities.reshuffle(playerId, decks, c -> true, redeterminisationRnd);
@@ -177,12 +176,12 @@ public class CZEGameState extends AbstractGameState {
     /**
      * Normally players are ranked by penalty points (via getGameScore): the player who went out is 1st, then the
      * lowest penalty. In a blocked game (every player passed in succession) players are instead ranked by the number
-     * of cards in hand, fewest first, with tied players sharing a position - consistent with the blocked-game results.
+     * of cards in hand, fewest first, with tied players sharing a position.
      */
     @Override
     public int getOrdinalPosition(int playerId) {
         if (consecutivePasses >= getNPlayers())
-            // no tiebreak function, so players on the same number of cards share a position
+            // players on the same number of cards share a position
             return getOrdinalPosition(playerId, p -> (double) -playerHands.get(p).getSize(), null);
         return super.getOrdinalPosition(playerId);
     }

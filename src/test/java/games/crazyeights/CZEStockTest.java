@@ -16,7 +16,7 @@ import static games.crazyeights.CZETestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Phase B: drawing when the stock is empty reshuffles the discards under the top card into a new stock.
+ * Drawing when the stock is empty reshuffles the discards under the top card into a new stock.
  */
 public class CZEStockTest {
 
@@ -59,7 +59,7 @@ public class CZEStockTest {
         putUnderTopDiscard(state, card("2D"));
         assertEquals(0, state.getDrawDeck().getSize());
 
-        assertEquals(List.of(new DrawCard(0)), fm.computeAvailableActions(state));
+        assertEquals(List.of(new DrawCard()), fm.computeAvailableActions(state));
     }
 
     @Test
@@ -74,7 +74,7 @@ public class CZEStockTest {
         assertEquals(0, state.getDrawDeck().getSize());
         assertTrue("enough discards to shuffle", underTop.size() > 10);
 
-        fm.next(state, new DrawCard(0));
+        fm.next(state, new DrawCard());
 
         assertEquals("only the top card stays on the discard pile", List.of(card("8C")), state.getDiscardPile().getComponents());
         assertEquals(Hearts, state.getCurrentSuit());
@@ -99,7 +99,7 @@ public class CZEStockTest {
         leaveNothingToDraw(state, 1);
         putUnderTopDiscard(state, card("2D"));
 
-        fm.next(state, new DrawCard(0));
+        fm.next(state, new DrawCard());
 
         assertEquals(Set.of(card("9C"), card("KS"), card("2D")), new HashSet<>(hand(0).getComponents()));
         assertEquals(List.of(card("5H")), state.getDiscardPile().getComponents());
@@ -113,7 +113,7 @@ public class CZEStockTest {
         setTopDiscard(state, card("8C"), Hearts);
         giveHand(state, 0, card("9C"), card("KS"));
         moveStockUnderTopDiscard(state);
-        fm.next(state, new DrawCard(0));
+        fm.next(state, new DrawCard());
 
         CZEGameState copy = (CZEGameState) state.copy(0);
         assertEquals(List.of(card("8C")), copy.getDiscardPile().getComponents());

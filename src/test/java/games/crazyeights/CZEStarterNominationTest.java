@@ -18,7 +18,7 @@ import static games.crazyeights.CZETestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Phase D: with dealerNominatesStarterSuit on, a starter Eight is followed by the dealer (the last player) nominating
+ * With dealerNominatesStarterSuit on, a starter Eight is followed by the dealer (the last player) nominating
  * the suit to match, before player 0 plays first. Unit tests use direct setup; integration tests drive a real game
  * with fm.next.
  */
@@ -29,7 +29,7 @@ public class CZEStarterNominationTest {
     private static Set<AbstractAction> nominationsFor(int dealer) {
         Set<AbstractAction> actions = new HashSet<>();
         for (FrenchCard.Suite suit : FrenchCard.Suite.values())
-            actions.add(new NominateSuit(dealer, suit));
+            actions.add(new NominateSuit(suit));
         return actions;
     }
 
@@ -40,8 +40,8 @@ public class CZEStarterNominationTest {
     /** Parameters with the dealer's nomination on, and a starter-Eight suit that is not the default. */
     private static CZEParameters nominationParams() {
         CZEParameters params = new CZEParameters();
-        params.dealerNominatesStarterSuit = true;
-        params.starterEightSuit = Clubs;
+        params.setParameterValue("dealerNominatesStarterSuit", true);
+        params.setParameterValue("starterEightSuit", Clubs);
         return params;
     }
 
@@ -90,7 +90,7 @@ public class CZEStarterNominationTest {
         // the same deal as stateWithEightStarter, differing only by the parameter
         CZEParameters params = nominationParams();
         seedGivingStarter(params, 3, true);
-        params.dealerNominatesStarterSuit = false;
+        params.setParameterValue("dealerNominatesStarterSuit", false);
         CZEGameState state = new CZEGameState(params, 3);
         fm.setup(state);
         assertTrue("arrangement: starter is an Eight", CZEGameState.isEight(state.getTopCard()));
@@ -111,13 +111,13 @@ public class CZEStarterNominationTest {
         int stockSize = state.getDrawDeck().getSize();
 
         assertEquals(2, state.getCurrentPlayer());
-        fm.next(state, new NominateSuit(2, Diamonds));
+        fm.next(state, new NominateSuit(Diamonds));
 
         assertEquals(Diamonds, state.getCurrentSuit());
         assertFalse("nomination complete", state.isActionInProgress());
         // the nomination is not a turn: player 0 on the dealer's left still plays first
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(List.of(new PlayCard(0, card("5D"), Diamonds)), fm.computeAvailableActions(state));
+        assertEquals(List.of(new PlayCard(card("5D"), Diamonds)), fm.computeAvailableActions(state));
         // not a pass, and nothing moved
         assertEquals(0, state.getConsecutivePasses());
         assertTrue(state.isNotTerminal());
@@ -145,7 +145,7 @@ public class CZEStarterNominationTest {
 
         // nominating in the copy leaves the original still waiting for the dealer
         int originalHash = state.hashCode();
-        fm.next(copy, new NominateSuit(2, Spades));
+        fm.next(copy, new NominateSuit(Spades));
         assertEquals(Spades, copy.getCurrentSuit());
         assertNotEquals(state, copy);
         assertEquals(originalHash, state.hashCode());
@@ -171,22 +171,22 @@ public class CZEStarterNominationTest {
         // Dealer (player 2) nominates Diamonds rather than the fixed Clubs
         assertEquals(2, state.getCurrentPlayer());
         assertEquals(nominationsFor(2), new HashSet<>(fm.computeAvailableActions(state)));
-        fm.next(state, new NominateSuit(2, Diamonds));
+        fm.next(state, new NominateSuit(Diamonds));
 
         // P0: only the Diamond matches (the Nine of Clubs would have matched the fixed suit)
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(List.of(new PlayCard(0, card("5D"), Diamonds)), fm.computeAvailableActions(state));
-        fm.next(state, new PlayCard(0, card("5D"), Diamonds));
+        assertEquals(List.of(new PlayCard(card("5D"), Diamonds)), fm.computeAvailableActions(state));
+        fm.next(state, new PlayCard(card("5D"), Diamonds));
 
         // P1: King of Diamonds matches the Five of Diamonds by suit
         assertEquals(1, state.getCurrentPlayer());
-        assertEquals(List.of(new PlayCard(1, card("KD"), Diamonds)), fm.computeAvailableActions(state));
-        fm.next(state, new PlayCard(1, card("KD"), Diamonds));
+        assertEquals(List.of(new PlayCard(card("KD"), Diamonds)), fm.computeAvailableActions(state));
+        fm.next(state, new PlayCard(card("KD"), Diamonds));
 
         // P2: the dealer's nomination was not their turn, so they now play normally
         assertEquals(2, state.getCurrentPlayer());
-        assertEquals(List.of(new PlayCard(2, card("7D"), Diamonds)), fm.computeAvailableActions(state));
-        fm.next(state, new PlayCard(2, card("7D"), Diamonds));
+        assertEquals(List.of(new PlayCard(card("7D"), Diamonds)), fm.computeAvailableActions(state));
+        fm.next(state, new PlayCard(card("7D"), Diamonds));
 
         assertEquals(0, state.getCurrentPlayer());
         assertTrue(state.isNotTerminal());

@@ -24,6 +24,7 @@ public class PokerPlayerView extends PokerDeckView {
         this.width = playerAreaWidth + border*2;
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
+        setDisplayOrder(FrenchCard.HAND_DISPLAY_ORDER);
     }
 
     /**

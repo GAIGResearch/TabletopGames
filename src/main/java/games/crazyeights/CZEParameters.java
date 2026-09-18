@@ -1,15 +1,16 @@
 package games.crazyeights;
 
-import core.AbstractParameters;
 import core.components.FrenchCard;
+import evaluation.optimisation.TunableParameters;
 
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Parameters for Crazy Eights (Basic Game, as described at https://www.pagat.com/eights/crazy8s.html).
  * All rule constants should be read from here rather than hard-coded in the state or forward model.
  */
-public class CZEParameters extends AbstractParameters {
+public class CZEParameters extends TunableParameters<CZEParameters> {
 
     // Cards dealt to each player (Pagat: five each, or seven each with only two players)
     public int nCardsPerPlayer = 5;
@@ -28,39 +29,43 @@ public class CZEParameters extends AbstractParameters {
     // Pagat: if the starter card is an Eight, the dealer (the last player) nominates the suit before play begins
     public boolean dealerNominatesStarterSuit = false;
 
+    public CZEParameters() {
+        addTunableParameter("nCardsPerPlayer", 5, Arrays.asList(3, 4, 5, 6, 7));
+        addTunableParameter("nCardsPerPlayerTwoPlayers", 7, Arrays.asList(5, 6, 7, 8, 9, 10));
+        addTunableParameter("eightPenalty", 50, Arrays.asList(20, 30, 50));
+        addTunableParameter("pictureCardPenalty", 10);
+        addTunableParameter("acePenalty", 1);
+        addTunableParameter("starterEightSuit", FrenchCard.Suite.Hearts, List.of(FrenchCard.Suite.values()));
+        addTunableParameter("dealerNominatesStarterSuit", false, Arrays.asList(false, true));
+    }
+
+    @Override
+    public void _reset() {
+        nCardsPerPlayer = (int) getParameterValue("nCardsPerPlayer");
+        nCardsPerPlayerTwoPlayers = (int) getParameterValue("nCardsPerPlayerTwoPlayers");
+        eightPenalty = (int) getParameterValue("eightPenalty");
+        pictureCardPenalty = (int) getParameterValue("pictureCardPenalty");
+        acePenalty = (int) getParameterValue("acePenalty");
+        starterEightSuit = (FrenchCard.Suite) getParameterValue("starterEightSuit");
+        dealerNominatesStarterSuit = (boolean) getParameterValue("dealerNominatesStarterSuit");
+    }
+
     public int cardsToDeal(int nPlayers) {
         return nPlayers == 2 ? nCardsPerPlayerTwoPlayers : nCardsPerPlayer;
     }
 
     @Override
-    protected AbstractParameters _copy() {
-        CZEParameters copy = new CZEParameters();
-        copy.nCardsPerPlayer = nCardsPerPlayer;
-        copy.nCardsPerPlayerTwoPlayers = nCardsPerPlayerTwoPlayers;
-        copy.eightPenalty = eightPenalty;
-        copy.pictureCardPenalty = pictureCardPenalty;
-        copy.acePenalty = acePenalty;
-        copy.starterEightSuit = starterEightSuit;
-        copy.dealerNominatesStarterSuit = dealerNominatesStarterSuit;
-        return copy;
+    protected CZEParameters _copy() {
+        return new CZEParameters();  // TunableParameters.copy() copies the parameter values
     }
 
     @Override
     protected boolean _equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CZEParameters that)) return false;
-        return nCardsPerPlayer == that.nCardsPerPlayer &&
-                nCardsPerPlayerTwoPlayers == that.nCardsPerPlayerTwoPlayers &&
-                eightPenalty == that.eightPenalty &&
-                pictureCardPenalty == that.pictureCardPenalty &&
-                acePenalty == that.acePenalty &&
-                starterEightSuit == that.starterEightSuit &&
-                dealerNominatesStarterSuit == that.dealerNominatesStarterSuit;
+        return o instanceof CZEParameters;  // TunableParameters.equals() compares the parameter values
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), nCardsPerPlayer, nCardsPerPlayerTwoPlayers,
-                eightPenalty, pictureCardPenalty, acePenalty, starterEightSuit, dealerNominatesStarterSuit);
+    public CZEParameters instantiate() {
+        return this;
     }
 }

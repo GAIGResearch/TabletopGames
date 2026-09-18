@@ -13,7 +13,7 @@ import static games.crazyeights.CZETestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Phase B: the game ends when every player passes in succession; the fewest cards in hand wins.
+ * The game ends when every player passes in succession; the fewest cards in hand wins.
  * <p>
  * With a full 52-card deck a genuine all-pass sequence cannot arise (Pass needs every other card to be in a hand,
  * and whoever holds an Eight can always play it), so the earlier passes are arranged with the test-only
@@ -42,7 +42,7 @@ public class CZEBlockedGameTest {
         giveHand(state, 1, card("KD"));                // 1 card, penalty 10
         leaveNothingToDraw(state, 2);
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(List.of(new Pass(0)), fm.computeAvailableActions(state));
+        assertEquals(List.of(new Pass()), fm.computeAvailableActions(state));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class CZEBlockedGameTest {
         arrangeNothingToPlayOrDrawForPlayerZero();
         state.setConsecutivePasses(1);
 
-        fm.next(state, new Pass(0));
+        fm.next(state, new Pass());
 
         assertEquals(2, state.getConsecutivePasses());
         assertTrue(state.isNotTerminal());
@@ -63,7 +63,7 @@ public class CZEBlockedGameTest {
         giveHand(state, 0, card("9C"), card("KS"));   // stock still has cards
         state.setConsecutivePasses(2);
 
-        fm.next(state, new DrawCard(0));
+        fm.next(state, new DrawCard());
 
         assertEquals(0, state.getConsecutivePasses());
         assertTrue(state.isNotTerminal());
@@ -74,7 +74,7 @@ public class CZEBlockedGameTest {
         arrangeNothingToPlayOrDrawForPlayerZero();
         state.setConsecutivePasses(2);
 
-        fm.next(state, new Pass(0));   // third pass in succession with 3 players
+        fm.next(state, new Pass());   // third pass in succession with 3 players
 
         assertFalse(state.isNotTerminal());
         assertEquals(GAME_END, state.getGameStatus());
@@ -90,7 +90,7 @@ public class CZEBlockedGameTest {
         leaveNothingToDraw(state, 2);
         state.setConsecutivePasses(2);
 
-        fm.next(state, new Pass(0));
+        fm.next(state, new Pass());
 
         assertFalse(state.isNotTerminal());
         assertArrayEquals(new GameResult[]{WIN_GAME, WIN_GAME, LOSE_GAME}, state.getPlayerResults());
