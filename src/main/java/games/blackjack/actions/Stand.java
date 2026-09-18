@@ -2,22 +2,20 @@ package games.blackjack.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IPrintable;
-import games.blackjack.BlackjackGameState;
 
-import java.util.Objects;
-
-public class Stand extends AbstractAction implements IPrintable {
+/**
+ * Take no more cards on the hand being played.
+ */
+public class Stand extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // Nothing to do
-        return true;
+        return true;  // the forward model moves on to the next hand
     }
 
     @Override
-    public AbstractAction copy() {
-        return this; //immutable
+    public Stand copy() {
+        return this; // immutable
     }
 
     @Override
@@ -27,12 +25,12 @@ public class Stand extends AbstractAction implements IPrintable {
 
     @Override
     public int hashCode() {
-        return 904344;
+        return 730237;
     }
 
     @Override
-    public String getString(AbstractGameState gameState){
-        return "Stand";
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 
     @Override

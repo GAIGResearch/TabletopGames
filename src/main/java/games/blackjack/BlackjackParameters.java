@@ -1,79 +1,101 @@
 package games.blackjack;
 
-import core.AbstractParameters;
-import core.Game;
 import evaluation.optimisation.TunableParameters;
-import games.GameType;
 
 import java.util.Arrays;
-import java.util.Objects;
+import java.util.List;
 
-public class BlackjackParameters extends TunableParameters {
-    public String dataPath = "data/FrenchCards/";
+/**
+ * Parameters for Blackjack (https://www.pagat.com/banking/blackjack.html). The defaults are the Valet variant:
+ * 10 chips, even bets from 2 to 10, a single hand, no doubling and no splitting.
+ */
+public class BlackjackParameters extends TunableParameters<BlackjackParameters> {
 
-    public int nCardsPerPlayer = 2;
-    public int jackCard = 10;
-    public int queenCard = 10;
-    public int kingCard = 10;
-    public int aceCardBelowThreshold = 1;
-    public int aceCardAboveThreshold = 11;
-    public int pointThreshold = 10;
-    public int winScore = 21;
-    public int dealerStand = 17;
-    public int nDealerCardsHidden = 1;
+    // Chips each player starts with
+    public int startingChips = 10;
+
+    // Bets must be even (so that insurance, half the bet, and a 3:2 natural payout are whole chips).
+    // A player may bet any even amount from minBet to the smaller of maxBet and their chips.
+    public int minBet = 2;
+    public int maxBet = 10;
+
+    // A winning 21 is paid payout21 : 1 (floor(bet x payout21) won) instead of 1:1. With payout21NaturalOnly only a
+    // natural gets it, paid as soon as the dealer is known not to have Blackjack (Pagat, with payout21 1.5);
+    // otherwise any winning 21 does, at settlement (RECYCLE, the default).
+    public double payout21 = 2.0;
+    public boolean payout21NaturalOnly = false;
+
+    // Hands played in a game. The game ends sooner if nobody has the chips for the minimum bet
+    public int nHands = 1;
+
+    // The dealer draws on a soft 17 (otherwise stands on every 17)
+    public boolean dealerHitsSoft17 = false;
+
+    // A player may double down on their first two cards (not a natural): double the bet, take one card, and stop
+    public boolean doubleDown = false;
+
+    // A player may split a pair of the same rank, up to maxHandsAfterSplit hands in all. Split Aces take one card
+    // each; there is no doubling after a split, and a 21 after a split is not a natural
+    public boolean splitting = false;
+    public int maxHandsAfterSplit = 4;
 
     public BlackjackParameters() {
-        addTunableParameter("nCardsPerPlayer", 2, Arrays.asList(1,2,3,4,5));
-        addTunableParameter("jackCard", 10, Arrays.asList(5, 10, 15, 20));
-        addTunableParameter("queenCard", 10, Arrays.asList(5, 10, 15, 20));
-        addTunableParameter("kingCard", 10, Arrays.asList(5, 10, 15, 20));
-        addTunableParameter("aceCardBelowThreshold", 1, Arrays.asList(1, 2, 3, 4));
-        addTunableParameter("aceCardAboveThreshold", 11, Arrays.asList(10, 13, 15, 17, 20));
-        addTunableParameter("pointThreshold", 10, Arrays.asList(7, 10, 15));
-        addTunableParameter("winScore", 21, Arrays.asList(15, 21, 30, 50));
-        addTunableParameter("dealerStand", 17, Arrays.asList(5, 7, 10, 13, 15, 17, 20));
-        addTunableParameter("nDealerCardsHidden", 1, Arrays.asList(0,1,2,3,4,5));
-        _reset();
+        addTunableParameter("startingChips", 10, Arrays.asList(10, 20, 50, 100));
+        addTunableParameter("minBet", 2);
+        addTunableParameter("maxBet", 10, Arrays.asList(10, 20, 50));
+        addTunableParameter("payout21", 2.0, Arrays.asList(1.0, 1.2, 1.5, 2.0));
+        addTunableParameter("payout21NaturalOnly", false, List.of(false, true));
+        addTunableParameter("nHands", 1, Arrays.asList(1, 3, 5, 10));
+        addTunableParameter("dealerHitsSoft17", false, List.of(false, true));
+        addTunableParameter("doubleDown", false, List.of(false, true));
+        addTunableParameter("splitting", false, List.of(false, true));
+        addTunableParameter("maxHandsAfterSplit", 4, Arrays.asList(2, 3, 4));
+    }
+
+    /**
+     * The chips won by a winning 21 on a bet of this size (payout21 : 1, rounded down), not counting the bet itself.
+     */
+    public int winningsOn21(int bet) {
+        return (int) Math.floor(bet * payout21);
+    }
+
+    /**
+     * An upper bound on the chips a player can hold at the end of the game: the starting chips plus, for each hand,
+     * the most one hand can win. That is the largest stake (maxBet on every split hand, or doubled) paid at the better
+     * of 1:1 and payout21, plus insurance on half of maxBet paid 2:1.
+     */
+    public int maxChips() {
+        int maxStake = maxBet * Math.max(splitting ? maxHandsAfterSplit : 1, doubleDown ? 2 : 1);
+        int maxWinPerHand = (int) Math.ceil(maxStake * Math.max(1.0, payout21)) + maxBet;
+        return startingChips + nHands * maxWinPerHand;
     }
 
     @Override
     public void _reset() {
-        nCardsPerPlayer = (int) getParameterValue("nCardsPerPlayer");
-        jackCard = (int) getParameterValue("jackCard");
-        queenCard = (int) getParameterValue("queenCard");
-        kingCard = (int) getParameterValue("kingCard");
-        aceCardBelowThreshold = (int) getParameterValue("aceCardBelowThreshold");
-        aceCardAboveThreshold = (int) getParameterValue("aceCardAboveThreshold");
-        pointThreshold = (int) getParameterValue("pointThreshold");
-        winScore = (int) getParameterValue("winScore");
-        dealerStand = (int) getParameterValue("dealerStand");
-        nDealerCardsHidden = (int) getParameterValue("nDealerCardsHidden");
-    }
-
-    public String getDataPath(){
-        return dataPath;
+        startingChips = (int) getParameterValue("startingChips");
+        minBet = (int) getParameterValue("minBet");
+        maxBet = (int) getParameterValue("maxBet");
+        payout21 = (double) getParameterValue("payout21");
+        payout21NaturalOnly = (boolean) getParameterValue("payout21NaturalOnly");
+        nHands = (int) getParameterValue("nHands");
+        dealerHitsSoft17 = (boolean) getParameterValue("dealerHitsSoft17");
+        doubleDown = (boolean) getParameterValue("doubleDown");
+        splitting = (boolean) getParameterValue("splitting");
+        maxHandsAfterSplit = (int) getParameterValue("maxHandsAfterSplit");
     }
 
     @Override
-    protected AbstractParameters _copy() {
-        return new BlackjackParameters();
+    protected BlackjackParameters _copy() {
+        return new BlackjackParameters();  // TunableParameters.copy() copies the parameter values
     }
 
     @Override
-    public boolean _equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BlackjackParameters)) return false;
-        BlackjackParameters that = (BlackjackParameters) o;
-        return nCardsPerPlayer == that.nCardsPerPlayer && jackCard == that.jackCard && queenCard == that.queenCard && kingCard == that.kingCard && aceCardBelowThreshold == that.aceCardBelowThreshold && aceCardAboveThreshold == that.aceCardAboveThreshold && pointThreshold == that.pointThreshold && winScore == that.winScore && dealerStand == that.dealerStand && nDealerCardsHidden == that.nDealerCardsHidden && Objects.equals(dataPath, that.dataPath);
+    protected boolean _equals(Object o) {
+        return o instanceof BlackjackParameters;  // TunableParameters.equals() compares the parameter values
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, jackCard, queenCard, kingCard, aceCardBelowThreshold, aceCardAboveThreshold, pointThreshold, winScore, dealerStand, nDealerCardsHidden);
-    }
-
-    @Override
-    public Game instantiate() {
-        return new Game(GameType.Blackjack, new BlackjackForwardModel(), new BlackjackGameState(this, GameType.Blackjack.getMinPlayers()));
+    public BlackjackParameters instantiate() {
+        return this;
     }
 }
