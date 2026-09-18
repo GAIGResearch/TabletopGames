@@ -507,13 +507,13 @@ public class TestSpades {
         gameState.getPlayerHands().get(player).add(card1);
         forwardModel.next(gameState, new PlayCard(card1));
 
-        gameState.getPlayerHands().get(player + 1 % 4).add(card2);
+        gameState.getPlayerHands().get((player + 1) % 4).add(card2);
         forwardModel.next(gameState, new PlayCard(card2));
 
-        gameState.getPlayerHands().get(player + 2 % 4).add(card3);
+        gameState.getPlayerHands().get((player + 2) % 4).add(card3);
         forwardModel.next(gameState, new PlayCard(card3));
 
-        gameState.getPlayerHands().get(player + 3 % 4).add(card4);
+        gameState.getPlayerHands().get((player + 3) % 4).add(card4);
         forwardModel.next(gameState, new PlayCard(card4));
     }
 }

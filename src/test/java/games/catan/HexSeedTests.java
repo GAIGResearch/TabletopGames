@@ -4,6 +4,7 @@ import games.catan.components.CatanTile;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class HexSeedTests {
 
@@ -51,35 +52,33 @@ public class HexSeedTests {
                 boardCopy[i][j] = board[i][j].copy();
             }
         }
-        for (int loop = 0; loop < 9; loop++) {
+        // the initial setup used the default seed of 0, so start from seed 1
+        for (int loop = 1; loop < 10; loop++) {
             params.setRandomSeed(loop);
             fm.setup(state);
             board = state.getBoard();
+            int landTiles = 0;
+            int numberMatches = 0;
+            int typeMatches = 0;
+            int bothMatch = 0;
             for (int i = 0; i < board.length; i++) {
                 for (int j = 0; j < board[i].length; j++) {
                     assertEquals(boardCopy[i][j].x, board[i][j].x);
                     assertEquals(boardCopy[i][j].y, board[i][j].y);
-                    int numberMatches = 0;
-                    int typeMatches = 0;
-                    int bothMatch = 0;
                     if (board[i][j].getTileType() != CatanTile.TileType.SEA) {
-                        System.out.println("Checking " + board[i][j].toString() + " vs " + boardCopy[i][j].toString());
-                        if (boardCopy[i][j].getNumber() == board[i][j].getNumber()) {
-                            numberMatches++;
-                        }
-                        if (boardCopy[i][j].getTileType() == board[i][j].getTileType()) {
-                            typeMatches++;
-                        }
-                        if (boardCopy[i][j].getNumber() == board[i][j].getNumber() && boardCopy[i][j].getTileType() == board[i][j].getTileType()) {
-                            bothMatch++;
-                        }
+                        landTiles++;
+                        boolean numberMatch = boardCopy[i][j].getNumber() == board[i][j].getNumber();
+                        boolean typeMatch = boardCopy[i][j].getTileType() == board[i][j].getTileType();
+                        if (numberMatch) numberMatches++;
+                        if (typeMatch) typeMatches++;
+                        if (numberMatch && typeMatch) bothMatch++;
                     }
-                    // we allow for some small error margin, as with a random shuffle some things will match
-                    assertEquals(numberMatches, 2, 2);
-                    assertEquals(typeMatches, 3, 3);
-                    assertEquals(bothMatch, 1, 1);
                 }
             }
+            // a random shuffle will leave some tiles matching, but nowhere near the whole board
+            assertTrue("seed " + loop + ": " + numberMatches + " of " + landTiles + " numbers match", numberMatches <= landTiles / 2);
+            assertTrue("seed " + loop + ": " + typeMatches + " of " + landTiles + " types match", typeMatches <= landTiles / 2);
+            assertTrue("seed " + loop + ": " + bothMatch + " of " + landTiles + " tiles match", bothMatch <= landTiles / 4);
         }
     }
 

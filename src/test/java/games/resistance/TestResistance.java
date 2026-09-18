@@ -444,7 +444,7 @@ public class TestResistance {
                 listOfResistanceKnownIdentityCards.add(playerState.getPlayerHandCards().get(j).get(2).cardType);
             }
 
-            if (listOfResistanceKnownIdentityCards != listOfIdentityCards) {
+            if (!listOfResistanceKnownIdentityCards.equals(listOfIdentityCards)) {
                 atLeastOneHandRearranged += 1;
             }
         }

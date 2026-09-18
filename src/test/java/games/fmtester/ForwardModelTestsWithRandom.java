@@ -1,6 +1,7 @@
 package games.fmtester;
 
 import evaluation.ForwardModelTester;
+import games.crazyeights.CZEParameters;
 import org.junit.Test;
 
 public class ForwardModelTestsWithRandom {
@@ -151,4 +152,13 @@ public class ForwardModelTestsWithRandom {
         fmt = new ForwardModelTester("game=GoFish", "nGames=1", "nPlayers=4");
         fmt = new ForwardModelTester("game=GoFish", "nGames=1", "nPlayers=5");
     }
-}
+
+    @Test
+    public void testCrazyEights() {
+        new ForwardModelTester("game=CrazyEights", "nGames=2", "nPlayers=2");
+        new ForwardModelTester("game=CrazyEights", "nGames=2", "nPlayers=5");
+        new ForwardModelTester("game=CrazyEights", "nGames=2", "nPlayers=8");
+        CZEParameters params = new CZEParameters();
+        params.dealerNominatesStarterSuit = true;
+        new ForwardModelTester(params, "game=CrazyEights", "nGames=5", "nPlayers=3");
+    }}

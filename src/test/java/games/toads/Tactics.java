@@ -51,7 +51,7 @@ public class Tactics {
         // Flank is now 6 : 6  (draw)
 
         assertEquals(0, state.battlesWon[0][0]);
-        assertEquals(0, state.battlesWon[1][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class Tactics {
         // Flank is now 6 : 4  (p0 wins) - IconBearer is not cancelled; but has no effect
 
         assertEquals(1, state.battlesWon[0][0]);
-        assertEquals(0, state.battlesWon[1][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test

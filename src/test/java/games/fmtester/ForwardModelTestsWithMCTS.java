@@ -2,6 +2,7 @@ package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import games.catan.CatanParameters;
+import games.crazyeights.CZEParameters;
 import games.descent2e.DescentParameters;
 import games.dominion.DominionIParameters;
 import games.dominion.DominionParameters;
@@ -183,7 +184,7 @@ public class ForwardModelTestsWithMCTS {
 
     @Test
     public void testSeaSaltPaper() {
-        new ForwardModelTester("game=SeaSaltPaper", "nGames=3", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\Poker.json");
+        new ForwardModelTester("game=SeaSaltPaper", "nGames=3", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 
     @Test
@@ -221,4 +222,11 @@ public class ForwardModelTestsWithMCTS {
         new ForwardModelTester("game=GoFish", "nGames=3", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 
+    @Test
+    public void testCrazyEights() {
+        new ForwardModelTester("game=CrazyEights", "nGames=2", "nPlayers=3", "agent=json\\players\\mcts.json");
+        CZEParameters params = new CZEParameters();
+        params.dealerNominatesStarterSuit = true;
+        new ForwardModelTester(params, "game=CrazyEights", "nGames=3", "nPlayers=2", "agent=json\\players\\mcts.json");
+    }
 }

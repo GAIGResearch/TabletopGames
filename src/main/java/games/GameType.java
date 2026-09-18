@@ -33,6 +33,10 @@ import games.chess.ChessForwardModel;
 import games.chess.ChessGameState;
 import games.chess.ChessParameters;
 import games.chess.ChessGUIManager;
+import games.crazyeights.CZEForwardModel;
+import games.crazyeights.gui.CZEGUIManager;
+import games.crazyeights.CZEGameState;
+import games.crazyeights.CZEParameters;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -230,6 +234,10 @@ public enum GameType {
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             UnoGameState.class, UnoForwardModel.class, UnoGameParameters.class, UnoGUIManager.class),
+    CrazyEights(2, 8,
+            Arrays.asList(Cards, Simple),
+            Arrays.asList(HandManagement, TakeThat, MultiUseCards, SuddenDeathEnding),
+            CZEGameState.class, CZEForwardModel.class, CZEParameters.class, CZEGUIManager.class),
     Virus(2, 6,
             Arrays.asList(Cards, Medical),
             Arrays.asList(CardDrafting, SetCollection, TakeThat),

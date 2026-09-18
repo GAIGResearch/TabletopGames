@@ -108,7 +108,7 @@ public class TestPartialObservabilityCopy {
 
         // but the drawpile should have exactly the same cards in it
         Map<CardType, Long> originalCards = state.getDeck(DeckType.DRAW, 0).stream().collect(groupingBy(DominionCard::cardType, counting()));
-        Map<CardType, Long> myCopyCards = state.getDeck(DeckType.DRAW, 0).stream().collect(groupingBy(DominionCard::cardType, counting()));
+        Map<CardType, Long> myCopyCards = myCopy.getDeck(DeckType.DRAW, 0).stream().collect(groupingBy(DominionCard::cardType, counting()));
         assertEquals(originalCards, myCopyCards);
     }
 
