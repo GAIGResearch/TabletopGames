@@ -23,6 +23,11 @@ import static core.CoreConstants.VisibilityMode;
  * * A deck to draw from
  * * Components played on the player's area
  * * Discard pile
+ * <p>
+ * Index 0 is the <b>top</b> of the deck: {@link #draw()}, {@link #peek()} and {@link #add(Component)} all work on
+ * index 0, and {@link #addToBottom(Component)} / {@link #pickLast()} on the last index. So when cards are added one
+ * by one with add(), the first card added ends up at the <b>last</b> index, and get(0) is the most recent - read a
+ * first-dealt card (an up card, a starter) with get(getSize() - 1), not peek() or get(0).
  */
 public class Deck<T extends Component> extends Component implements IComponentContainer<T>, Iterable<T>, IToJSON {
 
@@ -182,9 +187,10 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     /**
-     * Draws the first component of the deck
+     * Draws (removes and returns) the top component of the deck, at index 0: the one most recently added with
+     * {@link #add(Component)}.
      *
-     * @return the first component of the deck
+     * @return the top component of the deck, or null if the deck is empty
      */
     public T draw() {
         return pick(0);
@@ -225,7 +231,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     /**
-     * Peeks (without drawing) the first component of the deck
+     * Peeks (without drawing) the top component of the deck, at index 0
      *
      * @return The component peeked.
      */
@@ -264,7 +270,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     /**
-     * Adds a component to a deck.
+     * Adds a component to the top of a deck (index 0), so it is the next one drawn.
      *
      * @param c component to add
      * @return true if within capacity, false otherwise.

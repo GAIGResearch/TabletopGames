@@ -2,6 +2,7 @@ package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import games.agram.AgramParameters;
+import games.blackjack.BlackjackParameters;
 import games.crazyeights.CZEParameters;
 import org.junit.Test;
 
@@ -172,5 +173,20 @@ public class ForwardModelTestsWithRandom {
         AgramParameters params = new AgramParameters();
         params.setParameterValue("nDeals", 3);
         new ForwardModelTester(params, "game=Agram", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testBlackjack() {
+        new ForwardModelTester("game=Blackjack", "nGames=2", "nPlayers=1");
+        new ForwardModelTester("game=Blackjack", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=Blackjack", "nGames=2", "nPlayers=7");
+        BlackjackParameters params = new BlackjackParameters();
+        params.setParameterValue("nHands", 5);
+        params.setParameterValue("doubleDown", true);
+        params.setParameterValue("splitting", true);
+        params.setParameterValue("dealerHitsSoft17", true);
+        params.setParameterValue("payout21NaturalOnly", true);
+        params.setParameterValue("payout21", 1.5);
+        new ForwardModelTester(params, "game=Blackjack", "nGames=2", "nPlayers=4");
     }
 }

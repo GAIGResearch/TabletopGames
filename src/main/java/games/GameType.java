@@ -259,9 +259,9 @@ public enum GameType {
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio, Bluffing),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             PokerGameState.class, PokerForwardModel.class, PokerGameParameters.class, PokerGUIManager.class),
-    Blackjack(2, 7,
-            Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
-            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+    Blackjack(1, 7,
+            Arrays.asList(Cards, Economic, Simple, Banking),
+            List.of(PushYourLuck),
             BlackjackGameState.class, BlackjackForwardModel.class, BlackjackParameters.class, BlackjackGUIManager.class),
     Diamant(2, 6,
             Arrays.asList(Adventure, Bluffing, Exploration),
@@ -666,7 +666,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame, Civilization, Ancient, CodeBreaking;
+        Wargame, Civilization, Ancient, CodeBreaking, Banking;
 
         /**
          * @return a list of all games within this category.
