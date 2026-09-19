@@ -4,6 +4,7 @@ import evaluation.ForwardModelTester;
 import games.agram.AgramParameters;
 import games.blackjack.BlackjackParameters;
 import games.crazyeights.CZEParameters;
+import games.cribbage.CribbageParameters;
 import org.junit.Test;
 
 public class ForwardModelTestsWithRandom {
@@ -188,5 +189,17 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("payout21NaturalOnly", true);
         params.setParameterValue("payout21", 1.5);
         new ForwardModelTester(params, "game=Blackjack", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testCribbage() {
+        new ForwardModelTester("game=Cribbage", "nGames=3", "nPlayers=2");
+        CribbageParameters params = new CribbageParameters();
+        params.setParameterValue("nRounds", 8);
+        params.setParameterValue("targetScore", 61);
+        params.setParameterValue("playFifteenPoints", 2);
+        params.setParameterValue("runsIncludeStarter", true);
+        params.setParameterValue("cribFlushNeedsStarter", true);
+        new ForwardModelTester(params, "game=Cribbage", "nGames=3", "nPlayers=2");
     }
 }

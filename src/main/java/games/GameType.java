@@ -37,6 +37,10 @@ import games.chess.ChessForwardModel;
 import games.chess.ChessGameState;
 import games.chess.ChessParameters;
 import games.chess.ChessGUIManager;
+import games.cribbage.CribbageForwardModel;
+import games.cribbage.gui.CribbageGUIManager;
+import games.cribbage.CribbageGameState;
+import games.cribbage.CribbageParameters;
 import games.crazyeights.CZEForwardModel;
 import games.crazyeights.gui.CZEGUIManager;
 import games.crazyeights.CZEGameState;
@@ -340,6 +344,9 @@ public enum GameType {
     Agram(2, 5, Arrays.asList(Cards, Simple),
             List.of(TrickTaking),
             AgramGameState.class, AgramForwardModel.class, AgramParameters.class, AgramGUIManager.class),
+    Cribbage(2, 2, Arrays.asList(Cards, Number),
+            Arrays.asList(HandManagement, PatternBuilding, SetCollection),
+            CribbageGameState.class, CribbageForwardModel.class, CribbageParameters.class, CribbageGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             List.of(GridMovement),

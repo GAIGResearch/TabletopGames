@@ -5,6 +5,7 @@ import games.agram.AgramParameters;
 import games.blackjack.BlackjackParameters;
 import games.catan.CatanParameters;
 import games.crazyeights.CZEParameters;
+import games.cribbage.CribbageParameters;
 import games.descent2e.DescentParameters;
 import games.dominion.DominionIParameters;
 import games.dominion.DominionParameters;
@@ -248,5 +249,15 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("doubleDown", true);
         params.setParameterValue("splitting", true);
         new ForwardModelTester(params, "game=Blackjack", "nGames=2", "nPlayers=3", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testCribbage() {
+        new ForwardModelTester("game=Cribbage", "nGames=2", "nPlayers=2", "agent=json\\players\\mcts.json");
+        CribbageParameters params = new CribbageParameters();
+        params.setParameterValue("nRounds", 4);
+        params.setParameterValue("targetScore", 31);
+        params.setParameterValue("runsIncludeStarter", true);
+        new ForwardModelTester(params, "game=Cribbage", "nGames=2", "nPlayers=2", "agent=json\\players\\mcts.json");
     }
 }
