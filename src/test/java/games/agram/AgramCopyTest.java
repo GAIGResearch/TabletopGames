@@ -1,7 +1,7 @@
 package games.agram;
 
 import core.components.FrenchCard;
-import games.agram.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +27,7 @@ public class AgramCopyTest {
 
     /**
      * One complete trick (won by player 2, who then leads) and one card of the next: the trick in progress,
-     * discard pile and trickLeader are all non-trivial.
+     * discard pile and trick leader are all non-trivial.
      */
     private void playATrickAndAHalf() {
         giveHand(state, 0, "4H", "6C", "8C");
@@ -35,7 +35,7 @@ public class AgramCopyTest {
         giveHand(state, 2, "AH", "AC", "10S");
         playCards(state, fm, "4H", "9H", "AH", "AC");
         // arrangement guard: player 2 won the first trick and led the Ace of Clubs to the second
-        assertEquals(2, state.getTrickLeader());
+        assertEquals(2, state.getCurrentTrick().getLeader());
         assertEquals(cards("AC"), cardsOf(state.getCurrentTrick()));
         assertEquals(0, state.getCurrentPlayer());
     }
@@ -61,14 +61,14 @@ public class AgramCopyTest {
         assertEquals(state, copy);
         assertEquals(state.hashCode(), copy.hashCode());
         assertEquals(cards("AC"), cardsOf(copy.getCurrentTrick()));
-        assertEquals(2, copy.getTrickLeader());
+        assertEquals(2, copy.getCurrentTrick().getLeader());
         assertEquals(0, copy.getCurrentPlayer());
 
         // playing the same cards in both keeps them equal: player 2's Ace of Clubs wins trick 2 in each
         playCards(state, fm, "8C", "5C");
         playCards(copy, fm, "8C", "5C");
         assertEquals(state, copy);
-        assertEquals(2, copy.getTrickLeader());
+        assertEquals(2, copy.getCurrentTrick().getLeader());
         assertEquals(2, copy.getCurrentPlayer());
     }
 
@@ -88,7 +88,7 @@ public class AgramCopyTest {
             assertEquals(cardsOf(state.getPlayerHands().get(0)), cardsOf(copy.getPlayerHands().get(0)));
             assertEquals(cardsOf(state.getCurrentTrick()), cardsOf(copy.getCurrentTrick()));
             assertEquals(cardsOf(state.getDiscardPile()), cardsOf(copy.getDiscardPile()));
-            assertEquals(state.getTrickLeader(), copy.getTrickLeader());
+            assertEquals(state.getCurrentTrick().getLeader(), copy.getCurrentTrick().getLeader());
             assertEquals(state.getCurrentPlayer(), copy.getCurrentPlayer());
             for (int p = 1; p < 3; p++)
                 assertEquals(state.getPlayerHands().get(p).getSize(), copy.getPlayerHands().get(p).getSize());

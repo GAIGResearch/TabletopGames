@@ -2,7 +2,7 @@ package games.spades;
 
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
-import games.spades.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,9 +34,8 @@ public class TestSpadesKnownVoids {
 
     @Test
     public void knownVoidsStartEmpty() {
-        assertEquals(4, gameState.knownVoids.size());
         for (int p = 0; p < 4; p++) {
-            assertTrue(gameState.getKnownVoids(p).isEmpty());
+            assertTrue(gameState.getKnownVoids().get(p).isEmpty());
         }
     }
 
@@ -52,15 +51,15 @@ public class TestSpadesKnownVoids {
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
 
             int player = gameState.getCurrentPlayer();
-            FrenchCard.Suite ledSuit = gameState.getLeadSuit();
-            boolean failsToFollow = chosen instanceof PlayCard && !gameState.getCurrentTrick().isEmpty()
+            FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
+            boolean failsToFollow = chosen instanceof PlayCard && !(gameState.getCurrentTrick().getSize() == 0)
                     && ((PlayCard) chosen).card.suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
 
             if (failsToFollow) {
                 assertTrue("Player " + player + " failed to follow " + ledSuit + " but this was not recorded",
-                        gameState.getKnownVoids(player).contains(ledSuit));
+                        gameState.getKnownVoids().get(player).contains(ledSuit));
                 return;
             }
         }
@@ -79,14 +78,14 @@ public class TestSpadesKnownVoids {
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
 
             int player = gameState.getCurrentPlayer();
-            FrenchCard.Suite ledSuit = gameState.getLeadSuit();
-            boolean followsSuit = chosen instanceof PlayCard && !gameState.getCurrentTrick().isEmpty()
+            FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
+            boolean followsSuit = chosen instanceof PlayCard && !(gameState.getCurrentTrick().getSize() == 0)
                     && ((PlayCard) chosen).card.suite == ledSuit;
 
             forwardModel.next(gameState, chosen);
 
             if (followsSuit) {
-                assertFalse(gameState.getKnownVoids(player).contains(ledSuit));
+                assertFalse(gameState.getKnownVoids().get(player).contains(ledSuit));
             }
         }
     }
@@ -104,7 +103,7 @@ public class TestSpadesKnownVoids {
             forwardModel.next(gameState, actions.get(rnd.nextInt(actions.size())));
 
             for (int p = 0; p < gameState.getNPlayers(); p++) {
-                for (FrenchCard.Suite suit : gameState.getKnownVoids(p)) {
+                for (FrenchCard.Suite suit : gameState.getKnownVoids().get(p)) {
                     voidsSeen++;
                     assertFalse("Player " + p + " is recorded void in " + suit + " but holds one",
                             gameState.getPlayerHands().get(p).stream().anyMatch(c -> c.suite == suit));
@@ -125,13 +124,13 @@ public class TestSpadesKnownVoids {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             forwardModel.next(gameState, actions.get(rnd.nextInt(actions.size())));
             if (gameState.getRoundCounter() == 0) {
-                voidSeenInFirstRound |= gameState.knownVoids.stream().anyMatch(v -> !v.isEmpty());
+                voidSeenInFirstRound |= java.util.stream.IntStream.range(0, 4).anyMatch(p -> !gameState.getKnownVoids().get(p).isEmpty());
             }
         }
         assertTrue("Expected at least one void to be recorded in the first round", voidSeenInFirstRound);
         assertEquals(1, gameState.getRoundCounter());
         for (int p = 0; p < gameState.getNPlayers(); p++) {
-            assertTrue(gameState.getKnownVoids(p).isEmpty());
+            assertTrue(gameState.getKnownVoids().get(p).isEmpty());
         }
     }
 
@@ -143,7 +142,7 @@ public class TestSpadesKnownVoids {
     public void knownVoidsAreCopied() {
         playUntilOpponentVoid();
         int voidPlayer = firstOpponentWithVoid();
-        FrenchCard.Suite voidSuit = gameState.getKnownVoids(voidPlayer).iterator().next();
+        FrenchCard.Suite voidSuit = gameState.getKnownVoids().get(voidPlayer).iterator().next();
 
         SpadesGameState fullCopy = (SpadesGameState) gameState.copy();
         SpadesGameState playerCopy = (SpadesGameState) gameState.copy(0);
@@ -151,8 +150,8 @@ public class TestSpadesKnownVoids {
         assertEquals(gameState.knownVoids, playerCopy.knownVoids);
 
         // and the copies must be independent of the original
-        Set<FrenchCard.Suite> originalVoids = gameState.getKnownVoids(voidPlayer);
-        fullCopy.getKnownVoids(voidPlayer).clear();
+        Set<FrenchCard.Suite> originalVoids = gameState.getKnownVoids().get(voidPlayer);
+        fullCopy.getKnownVoids().get(voidPlayer).clear();
         assertTrue(originalVoids.contains(voidSuit));
     }
 
@@ -179,7 +178,7 @@ public class TestSpadesKnownVoids {
             SpadesGameState copy = (SpadesGameState) gameState.copy(0);
             for (int p = 1; p < gameState.getNPlayers(); p++) {
                 if (gameState.getPlayerHands().get(p).getSize() == 0) continue;
-                for (FrenchCard.Suite suit : gameState.getKnownVoids(p)) {
+                for (FrenchCard.Suite suit : gameState.getKnownVoids().get(p)) {
                     if (hiddenCards.stream().anyMatch(c -> c.suite == suit)) opportunities++;
                     if (copy.getPlayerHands().get(p).stream().anyMatch(c -> c.suite == suit)) violations++;
                 }
@@ -225,7 +224,7 @@ public class TestSpadesKnownVoids {
 
     private int firstOpponentWithVoid() {
         for (int p = 1; p < gameState.getNPlayers(); p++) {
-            if (!gameState.getKnownVoids(p).isEmpty() && gameState.getPlayerHands().get(p).getSize() > 0)
+            if (!gameState.getKnownVoids().get(p).isEmpty() && gameState.getPlayerHands().get(p).getSize() > 0)
                 return p;
         }
         return -1;
@@ -265,7 +264,7 @@ public class TestSpadesKnownVoids {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             forwardModel.next(gameState, actions.get(rnd.nextInt(actions.size())));
             for (int p = 0; p < gameState.getNPlayers(); p++)
-                assertTrue(gameState.getKnownVoids(p).isEmpty());
+                assertTrue(gameState.getKnownVoids().get(p).isEmpty());
         }
     }
 
@@ -286,8 +285,8 @@ public class TestSpadesKnownVoids {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
             int player = gameState.getCurrentPlayer();
-            FrenchCard.Suite ledSuit = gameState.getLeadSuit();
-            boolean failsToFollow = chosen instanceof PlayCard && !gameState.getCurrentTrick().isEmpty()
+            FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
+            boolean failsToFollow = chosen instanceof PlayCard && !(gameState.getCurrentTrick().getSize() == 0)
                     && ((PlayCard) chosen).card.suite != ledSuit;
 
             forwardModel.next(gameState, chosen);

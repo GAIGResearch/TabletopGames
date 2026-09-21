@@ -5,7 +5,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
-import games.agram.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class AgramMatchGameTest {
     private static void assertNewDealLedBy(String label, AgramGameState state, int leader) {
         assertTrue(label + ": the match goes on", state.isNotTerminal());
         assertEquals(label + ": current player", leader, state.getCurrentPlayer());
-        assertEquals(label + ": trickLeader", leader, state.getTrickLeader());
+        assertEquals(label + ": trick leader", leader, state.getCurrentTrick().getLeader());
         for (int p = 0; p < state.getNPlayers(); p++)
             assertEquals(label + ": hand size, player " + p, 6, state.getPlayerHands().get(p).getSize());
         assertAllCardsPresent(state);
@@ -145,7 +145,7 @@ public class AgramMatchGameTest {
                                 assertEquals(at, 0, state.getDiscardPile().getSize());
                                 for (int p = 0; p < nPlayers; p++)
                                     assertEquals(at + ": known voids cleared, player " + p, Set.of(),
-                                            state.getKnownVoids(p));
+                                            state.getKnownVoids().get(p));
                                 redeals++;
                             }
                         }

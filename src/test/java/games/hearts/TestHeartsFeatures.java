@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import games.hearts.actions.Pass;
-import games.hearts.actions.Play;
+import games.tricktaking.PlayCard;
 import games.hearts.metrics.HeartsActionFeatures;
 import games.hearts.metrics.HeartsStateFeatures;
 import org.junit.Before;
@@ -48,7 +48,7 @@ public class TestHeartsFeatures {
         // Test Play action
         // Move to PLAYING phase
         state.setGamePhase(HeartsGameState.Phase.PLAYING);
-        Play playAction = new Play(0, card);
+        PlayCard playAction = new PlayCard(card);
         double[] playFeatures = actionFeatures.doubleVector(playAction, state, 0);
         
         assertEquals(0.0, playFeatures[0], 0.001); // isPass

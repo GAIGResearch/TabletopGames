@@ -32,6 +32,10 @@ import games.agram.AgramForwardModel;
 import games.agram.gui.AgramGUIManager;
 import games.agram.AgramGameState;
 import games.agram.AgramParameters;
+import games.whist.WhistForwardModel;
+import games.whist.WhistGameState;
+import games.whist.WhistParameters;
+import games.whist.gui.WhistGUIManager;
 import games.chinesecheckers.gui.CCGUIManager;
 import games.chess.ChessForwardModel;
 import games.chess.ChessGameState;
@@ -387,7 +391,10 @@ public enum GameType {
             PickominoGUIManager.class),
     Spades(4,4,Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement, TakeThat),
-            SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class);
+            SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class),
+    Whist(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement),
+            WhistGameState.class, WhistForwardModel.class, WhistParameters.class, WhistGUIManager.class);
 
 
     // Core classes where the game is defined

@@ -5,10 +5,12 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
-import games.agram.actions.PlayCard;
+import games.tricktaking.KnownVoids;
+import games.tricktaking.PlayCard;
+import games.tricktaking.PlayRule;
+import games.tricktaking.Trick;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 import static core.CoreConstants.VisibilityMode.*;
@@ -40,26 +42,24 @@ public class AgramForwardModel extends StandardForwardModel {
         if (params.nCardsPerPlayer * state.getNPlayers() > state.drawDeck.getSize())
             throw new IllegalArgumentException("Not enough cards to deal " + params.nCardsPerPlayer + " cards to "
                     + state.getNPlayers() + " players");
-        state.currentTrick = new Deck<>("CurrentTrick", VISIBLE_TO_ALL);
         state.discardPile = new Deck<>("DiscardPile", VISIBLE_TO_ALL);
         state.playerHands = new ArrayList<>();
-        state.knownVoids = new ArrayList<>();
-        for (int p = 0; p < state.getNPlayers(); p++) {
+        for (int p = 0; p < state.getNPlayers(); p++)
             state.playerHands.add(new Deck<>("Hand " + p, p, VISIBLE_TO_OWNER));
-            state.knownVoids.add(EnumSet.noneOf(FrenchCard.Suite.class));
-        }
+        state.knownVoids = new KnownVoids(state.getNPlayers());
         state.dealsWon = new int[state.getNPlayers()];
 
         // the dealer is the last player, so player 0 (the next player after the dealer) leads the first trick
-        deal(state);
-        state.trickLeader = 0;
+        state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), 0);
+        deal(state, 0);
         state.setFirstPlayer(0);
     }
 
     /**
      * Gather all the cards into the draw deck, shuffle, deal a fresh hand to each player and clear the known voids.
+     * The given player leads the first trick.
      */
-    private void deal(AgramGameState state) {
+    private void deal(AgramGameState state, int leader) {
         AgramParameters params = (AgramParameters) state.getGameParameters();
         for (Deck<FrenchCard> hand : state.playerHands) {
             state.drawDeck.add(hand);
@@ -68,13 +68,13 @@ public class AgramForwardModel extends StandardForwardModel {
         state.drawDeck.add(state.discardPile);
         state.discardPile.clear();
         state.drawDeck.add(state.currentTrick);
-        state.currentTrick.clear();
+        state.currentTrick.reset(leader);
         state.drawDeck.shuffle(state.getRnd());
         for (int p = 0; p < state.getNPlayers(); p++) {
             for (int i = 0; i < params.nCardsPerPlayer; i++)
                 state.playerHands.get(p).add(state.drawDeck.draw());
-            state.knownVoids.get(p).clear();
         }
+        state.knownVoids.clear();
     }
 
     /**
@@ -84,28 +84,23 @@ public class AgramForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         AgramGameState state = (AgramGameState) gameState;
-        List<FrenchCard> hand = state.getPlayerHands().get(state.getCurrentPlayer()).getComponents();
-        FrenchCard.Suite lead = state.getLeadSuit();
-        boolean mustFollow = lead != null && hand.stream().anyMatch(c -> c.suite == lead);
+        List<FrenchCard> hand = state.getPlayerHand(state.getCurrentPlayer()).getComponents();
         List<AbstractAction> actions = new ArrayList<>();
-        for (FrenchCard card : hand) {
-            if (!mustFollow || card.suite == lead)
-                actions.add(new PlayCard(card));
-        }
+        for (FrenchCard card : PlayRule.FOLLOW_SUIT.legalPlays(hand, state.currentTrick))
+            actions.add(new PlayCard(card));
         return actions;
     }
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         AgramGameState state = (AgramGameState) currentState;
-        if (state.currentTrick.getSize() < state.getNPlayers()) {
+        if (!state.currentTrick.isComplete()) {
             endPlayerTurn(state);
             return;
         }
-        int winner = state.currentTrickWinner();
+        int winner = state.currentTrick.winner(null);  // Agram has no trumps
         state.discardPile.add(state.currentTrick);
-        state.currentTrick.clear();
-        state.trickLeader = winner;
+        state.currentTrick.reset(winner);
         if (state.playerHands.stream().anyMatch(h -> h.getSize() > 0)) {
             endPlayerTurn(state, winner);
             return;
@@ -119,8 +114,7 @@ public class AgramForwardModel extends StandardForwardModel {
             // the winner deals the next deal, so the player after them leads
             int leader = (winner + 1) % state.getNPlayers();
             endRound(state, leader);
-            deal(state);
-            state.trickLeader = leader;
+            deal(state, leader);
         }
     }
 }

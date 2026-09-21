@@ -4,7 +4,7 @@ import core.AbstractForwardModel;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
-import games.agram.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import org.junit.Test;
 
 import java.util.ArrayList;

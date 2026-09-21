@@ -9,6 +9,9 @@ import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.hearts.heuristics.HeartsHeuristic;
+import games.tricktaking.ITrickTakingState;
+import games.tricktaking.KnownVoids;
+import games.tricktaking.Trick;
 import utilities.DeterminisationUtilities;
 
 import java.util.ArrayList;
@@ -26,7 +29,7 @@ import java.util.stream.IntStream;
  * <p>Computation may be included in functions here for ease of access, but only if this is querying the game state information.
  * Functions on the game state should never <b>change</b> the state of the game.</p>
  */
-public class HeartsGameState extends AbstractGameState {
+public class HeartsGameState extends AbstractGameState implements ITrickTakingState {
     List<Deck<FrenchCard>> playerDecks;
     Deck<FrenchCard> drawDeck;
     public List<Deck<FrenchCard>> trickDecks;
@@ -34,16 +37,16 @@ public class HeartsGameState extends AbstractGameState {
     public int[] playerTricksTaken;
     public List<List<FrenchCard>> pendingPasses;
     public Map<Integer, Integer> playerPoints;
-    public List<Map.Entry<Integer, FrenchCard>> currentPlayedCards = new ArrayList<>();
-    public FrenchCard.Suite firstCardSuit;
+    public Trick currentTrick;
     /**
      * For each player, the suits that they are publicly known to be void in; i.e. the suits that
      * were led in a trick this round to which they did not follow suit.
      */
-    public List<Set<FrenchCard.Suite>> knownVoids;
+    public KnownVoids knownVoids;
 
     public HeartsGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+        currentTrick = new Trick("CurrentTrick", nPlayers, 0);
     }
 
     @Override
@@ -60,7 +63,8 @@ public class HeartsGameState extends AbstractGameState {
         retValue.addAll(drawDeck.getComponents());
         retValue.addAll(trickDecks);
         trickDecks.stream().flatMap(e -> e.getComponents().stream()).forEach(retValue::add);
-        currentPlayedCards.forEach(e -> retValue.add(e.getValue()));
+        retValue.add(currentTrick);
+        retValue.addAll(currentTrick.getComponents());
 
         return retValue;
     }
@@ -120,12 +124,23 @@ public class HeartsGameState extends AbstractGameState {
         return playerDecks;
     }
 
+    @Override
+    public Deck<FrenchCard> getPlayerHand(int player) {
+        return playerDecks.get(player);
+    }
+
+    @Override
+    public Trick getCurrentTrick() {
+        return currentTrick;
+    }
+
     /**
-     * The suits that the specified player is publicly known to be void in, from having failed to
+     * The suits that each player is publicly known to be void in, from having failed to
      * follow suit earlier in the current round. This is information available to all players.
      */
-    public Set<FrenchCard.Suite> getKnownVoids(int playerId) {
-        return knownVoids.get(playerId);
+    @Override
+    public KnownVoids getKnownVoids() {
+        return knownVoids;
     }
 
     public void scorePointsAtEndOfRound() {
@@ -206,21 +221,8 @@ public class HeartsGameState extends AbstractGameState {
         copy.playerPoints = new HashMap<>(playerPoints);
 
 
-        // Deep Copy currentRoundCards
-        copy.currentPlayedCards = new ArrayList<>();
-        for (Map.Entry<Integer, FrenchCard> entry : currentPlayedCards) {
-            copy.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().copy()));
-        }
-
-        copy.firstCardSuit = firstCardSuit;
-
-        // Deep Copy knownVoids
-        copy.knownVoids = new ArrayList<>();
-        for (Set<FrenchCard.Suite> voids : knownVoids) {
-            Set<FrenchCard.Suite> voidCopy = EnumSet.noneOf(FrenchCard.Suite.class);
-            voidCopy.addAll(voids);
-            copy.knownVoids.add(voidCopy);
-        }
+        copy.currentTrick = currentTrick.copy();
+        copy.knownVoids = knownVoids.copy();
 
         // Hidden information is dealt with in redeterminise(), which the superclass calls on the
         // copy when appropriate.
@@ -244,14 +246,10 @@ public class HeartsGameState extends AbstractGameState {
 
         // Reshuffle everything we cannot see across the other hands and the draw deck.
         // A player who has failed to follow suit is known to hold no cards of that suit, so we
-        // must not deal them any.
+        // must not deal them any (none are recorded if HeartsParameters.rememberVoids is off).
         List<Deck<FrenchCard>> decksToShuffle = new ArrayList<>(playerDecks);
         decksToShuffle.add(drawDeck);
-        BiPredicate<Deck<FrenchCard>, FrenchCard> voidConstraint =
-                ((HeartsParameters) gameParameters).rememberVoids
-                        ? (deck, card) -> deck.getOwnerId() < 0 || !knownVoids.get(deck.getOwnerId()).contains(card.suite)
-                        : null;  // a null constraint gives the unconstrained reshuffle
-        DeterminisationUtilities.reshuffle(playerId, decksToShuffle, c -> true, redeterminisationRnd, voidConstraint);
+        DeterminisationUtilities.reshuffle(playerId, decksToShuffle, c -> true, redeterminisationRnd, knownVoids::permits);
 
         for (int i = 0; i < getNPlayers(); i++) {
             for (int k = 0; k < pendingCounts[i]; k++) {
@@ -317,16 +315,14 @@ public class HeartsGameState extends AbstractGameState {
                 Objects.equals(trickDecks, that.trickDecks) &&
                 Objects.equals(pendingPasses, that.pendingPasses) &&
                 Objects.equals(playerPoints, that.playerPoints) &&
-                Objects.equals(currentPlayedCards, that.currentPlayedCards) &&
-                Objects.equals(firstCardSuit, that.firstCardSuit) &&
+                Objects.equals(currentTrick, that.currentTrick) &&
                 Objects.equals(knownVoids, that.knownVoids);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, heartsBroken,
-                firstCardSuit, trickDecks,
-                pendingPasses, playerPoints, currentPlayedCards, knownVoids);
+                trickDecks, pendingPasses, playerPoints, currentTrick, knownVoids);
         result = 31 * result + Arrays.hashCode(playerTricksTaken);
         return result;
     }

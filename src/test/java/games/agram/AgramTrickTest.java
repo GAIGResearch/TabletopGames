@@ -30,7 +30,7 @@ public class AgramTrickTest {
     private void assertTrickWonBy(int winner, List<?> trickCards) {
         assertTrue("the game is not over after the first of two tricks", state.isNotTerminal());
         assertEquals("winner is to act", winner, state.getCurrentPlayer());
-        assertEquals("winner leads the next trick", winner, state.getTrickLeader());
+        assertEquals("winner leads the next trick", winner, state.getCurrentTrick().getLeader());
         assertEquals(0, state.getCurrentTrick().getSize());
         assertEquals(new HashSet<>(trickCards), new HashSet<>(state.getDiscardPile().getComponents()));
         assertEquals(trickCards.size(), state.getDiscardPile().getSize());
@@ -100,7 +100,7 @@ public class AgramTrickTest {
 
         // player 2's Ace of Clubs wins trick 2; both tricks are now on the discard pile
         assertEquals(2, state.getCurrentPlayer());
-        assertEquals(2, state.getTrickLeader());
+        assertEquals(2, state.getCurrentTrick().getLeader());
         assertEquals(0, state.getCurrentTrick().getSize());
         assertEquals(6, state.getDiscardPile().getSize());
         assertTrue(state.isNotTerminal());

@@ -2,6 +2,7 @@ package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import games.agram.AgramParameters;
+import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.crazyeights.CZEParameters;
 import games.cribbage.CribbageParameters;
@@ -164,6 +165,17 @@ public class ForwardModelTestsWithRandom {
         CZEParameters params = new CZEParameters();
         params.setParameterValue("dealerNominatesStarterSuit", true);
         new ForwardModelTester(params, "game=CrazyEights", "nGames=5", "nPlayers=3");
+    }
+
+    @Test
+    public void testWhist() {
+        new ForwardModelTester("game=Whist", "nGames=2", "nPlayers=4");
+        WhistParameters params = new WhistParameters();
+        params.setParameterValue("nDeals", 3);
+        params.setParameterValue("trumpMode", WhistParameters.TrumpMode.ROTATION);
+        params.setParameterValue("noTrumpsInRotation", true);
+        params.setParameterValue("rememberVoids", false);
+        new ForwardModelTester(params, "game=Whist", "nGames=2", "nPlayers=4");
     }
 
     @Test

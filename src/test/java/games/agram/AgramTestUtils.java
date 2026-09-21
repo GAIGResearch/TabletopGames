@@ -6,7 +6,7 @@ import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
-import games.agram.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import players.simple.RandomPlayer;
 import games.GameType;
 
@@ -187,7 +187,7 @@ final class AgramTestUtils {
      */
     static void assertHandsRespectKnownVoids(String label, AgramGameState handsFrom, AgramGameState voidsFrom) {
         for (int p = 0; p < voidsFrom.getNPlayers(); p++) {
-            Set<FrenchCard.Suite> voids = voidsFrom.getKnownVoids(p);
+            Set<FrenchCard.Suite> voids = voidsFrom.getKnownVoids().get(p);
             for (FrenchCard c : handsFrom.getPlayerHands().get(p).getComponents())
                 assertFalse(label + ": player " + p + " is known to be void in " + voids + " but holds " + c,
                         voids.contains(c.suite));

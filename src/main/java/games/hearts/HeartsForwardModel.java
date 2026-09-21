@@ -8,8 +8,11 @@ import core.actions.SimultaneousAction;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IComponentContainer;
-import games.hearts.actions.Play;
 import games.hearts.actions.Pass;
+import games.tricktaking.KnownVoids;
+import games.tricktaking.PlayCard;
+import games.tricktaking.PlayRule;
+import games.tricktaking.Trick;
 
 import java.util.*;
 
@@ -56,10 +59,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         hgs.playerTricksTaken = new int[hgs.getNPlayers()];
 
         // known voids are only valid for the current round, as hands are re-dealt each round
-        hgs.knownVoids = new ArrayList<>();
-        for (int i = 0; i < hgs.getNPlayers(); i++) {
-            hgs.knownVoids.add(EnumSet.noneOf(FrenchCard.Suite.class));
-        }
+        hgs.knownVoids = new KnownVoids(hgs.getNPlayers());
 
         int numOfPlayers = hgs.getNPlayers();
 
@@ -126,6 +126,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             if (hgs.playerDecks.get(i).contains(params.startingCard)) {
                 hgs.setFirstPlayer(i);
+                hgs.currentTrick.reset(i);
                 return;
             }
         }
@@ -171,8 +172,9 @@ public class HeartsForwardModel extends StandardForwardModel {
             }
             endPlayerTurn(hgs, nextPlayerToPass(hgs));
         } else {
-            // Check if all players have played a card in this round
-            if (hgs.currentPlayedCards.size() == hgs.getNPlayers()) {
+            if (action instanceof PlayCard play && play.card.suite == FrenchCard.Suite.Hearts)
+                hgs.heartsBroken = true;
+            if (hgs.currentTrick.isComplete()) {
                 endTrick(hgs);
                 if (hgs.isNotTerminal()) {
                     startNewTrick(hgs);
@@ -212,37 +214,16 @@ public class HeartsForwardModel extends StandardForwardModel {
                 // First turn of the game, the player with 2 of clubs must play it
                 for (FrenchCard card : playerHand.getComponents()) {
                     if (card.suite == FrenchCard.Suite.Clubs && card.number == 2) {
-                        actions.add(new Play(player, card));
+                        actions.add(new PlayCard(card));
                         return actions;  // Return immediately, no other actions available
                     }
                 }
             }
 
-            if (hgs.firstCardSuit == null) {
-                // this is the lead player, they can play any card (except for Hearts if they are not yet broken, or they have no choice)
-                boolean onlyHasHearts = playerHand.getComponents().stream().allMatch(card -> card.suite == FrenchCard.Suite.Hearts);
-                for (FrenchCard card : playerHand.getComponents()) {
-                    if (onlyHasHearts || hgs.heartsBroken || card.suite != FrenchCard.Suite.Hearts) {
-                        actions.add(new Play(player, card));
-                    }
-                }
-            } else {
-                // Check if player has any cards of the lead suit
-                boolean hasLeadSuit = playerHand.getComponents().stream().anyMatch(card -> card.suite.equals(hgs.firstCardSuit));
-
-                if (hasLeadSuit) {
-                    // Player can only play cards of the lead suit
-                    for (FrenchCard card : playerHand.getComponents()) {
-                        if (card.suite.equals(hgs.firstCardSuit)) {
-                            actions.add(new Play(player, card));
-                        }
-                    }
-                } else {
-                    for (FrenchCard card : playerHand.getComponents()) {
-                        actions.add(new Play(player, card));
-                    }
-                }
-            }
+            // hearts may not be led until they are broken, unless the leader holds nothing else
+            PlayRule rule = hgs.heartsBroken ? PlayRule.FOLLOW_SUIT : PlayRule.leadRestricted(FrenchCard.Suite.Hearts);
+            for (FrenchCard card : rule.legalPlays(playerHand.getComponents(), hgs.currentTrick))
+                actions.add(new PlayCard(card));
         }
 
 
@@ -251,28 +232,13 @@ public class HeartsForwardModel extends StandardForwardModel {
 
     public void endTrick(HeartsGameState hgs) {
         HeartsParameters params = (HeartsParameters) hgs.getGameParameters();
-        int highestCardValue = -1;
-        int winningPlayerID = -1;
-        for (Map.Entry<Integer, FrenchCard> entry : hgs.currentPlayedCards) {
-            FrenchCard card = entry.getValue();
-            if (card.suite.equals(hgs.firstCardSuit) && card.number > highestCardValue) {
-                highestCardValue = card.number;
-                winningPlayerID = entry.getKey();
-            }
-        }
-
-        // Add all cards from this round to the winner's trick deck
-        if (winningPlayerID != -1) {
-            for (Map.Entry<Integer, FrenchCard> entry : hgs.currentPlayedCards) {
-                hgs.trickDecks.get(winningPlayerID).add(entry.getValue());
-            }
-            hgs.playerTricksTaken[winningPlayerID]++;
-
-            hgs.setFirstPlayer(winningPlayerID);
-        } else {
-            throw new AssertionError("We must have a trick winner");
-        }
-        hgs.currentPlayedCards.clear();
+        // Hearts has no trumps: the highest card of the suit led wins, and its player takes the trick
+        Trick trick = hgs.currentTrick;
+        int winningPlayerID = trick.winner(null);
+        hgs.trickDecks.get(winningPlayerID).add(trick);
+        hgs.playerTricksTaken[winningPlayerID]++;
+        hgs.setFirstPlayer(winningPlayerID);
+        trick.reset(winningPlayerID);
 
         // Check if all cards from player hands have been played
         if (hgs.playerDecks.stream().allMatch(deck -> deck.getSize() == 0)) {
@@ -295,7 +261,6 @@ public class HeartsForwardModel extends StandardForwardModel {
     }
 
     private void startNewTrick(HeartsGameState hgs) {
-        hgs.firstCardSuit = null;
         endPlayerTurn(hgs, hgs.getFirstPlayer());
     }
 

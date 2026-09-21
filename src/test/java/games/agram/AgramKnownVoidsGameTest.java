@@ -4,7 +4,7 @@ import core.AbstractForwardModel;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
-import games.agram.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class AgramKnownVoidsGameTest {
 
     private static void assertVoids(AgramGameState state, Set<?>... expected) {
         for (int p = 0; p < expected.length; p++)
-            assertEquals("player " + p, expected[p], state.getKnownVoids(p));
+            assertEquals("player " + p, expected[p], state.getKnownVoids().get(p));
     }
 
     @Test
@@ -78,14 +78,14 @@ public class AgramKnownVoidsGameTest {
                     int player = state.getCurrentPlayer();
                     List<AbstractAction> actions = fm.computeAvailableActions(state);
                     PlayCard chosen = (PlayCard) actions.get(rnd.nextInt(actions.size()));
-                    FrenchCard.Suite lead = state.getLeadSuit();
+                    FrenchCard.Suite lead = state.getCurrentTrick().getLeadSuit();
                     if (lead != null && chosen.card.suite != lead && expected.get(player).add(lead))
                         voidsRecorded++;
                     fm.next(state, chosen);
 
                     String at = label + ", step " + steps;
                     for (int p = 0; p < nPlayers; p++)
-                        assertEquals(at + ", player " + p, expected.get(p), state.getKnownVoids(p));
+                        assertEquals(at + ", player " + p, expected.get(p), state.getKnownVoids().get(p));
                     // the recorded voids are true: nobody holds a card of a suit they are known to be void in
                     assertHandsRespectKnownVoids(at, state, state);
 

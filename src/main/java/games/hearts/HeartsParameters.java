@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.Game;
 import core.components.FrenchCard;
 import evaluation.optimisation.TunableParameters;
+import games.tricktaking.ITrickTakingParameters;
 import games.GameType;
 
 import java.util.*;
@@ -19,7 +20,7 @@ import java.util.*;
  * <p>The class can optionally extend from {@link evaluation.optimisation.TunableParameters} instead, which allows to use
  * automatic game parameter optimisation tools in the framework.</p>
  */
-public class HeartsParameters extends TunableParameters<HeartsParameters> {
+public class HeartsParameters extends TunableParameters<HeartsParameters> implements ITrickTakingParameters {
     public String dataPath = "data/FrenchCards/";
     public final int shootTheMoon = 26;
     public final int heartCard = 1;
@@ -57,6 +58,11 @@ public class HeartsParameters extends TunableParameters<HeartsParameters> {
     @Override
     public void _reset() {
         rememberVoids = (boolean) getParameterValue("rememberVoids");
+    }
+
+    @Override
+    public boolean rememberVoids() {
+        return rememberVoids;
     }
 
     @Override

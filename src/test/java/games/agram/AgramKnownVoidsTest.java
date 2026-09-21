@@ -32,25 +32,25 @@ public class AgramKnownVoidsTest {
     @Test
     public void aFollowerWhoCannotFollowSuitIsKnownVoidInTheSuitLed() {
         for (int p = 0; p < 3; p++)
-            assertEquals("no voids are known at the start, player " + p, Set.of(), state.getKnownVoids(p));
+            assertEquals("no voids are known at the start, player " + p, Set.of(), state.getKnownVoids().get(p));
 
         giveHand(state, 0, "4H", "8D");
         giveHand(state, 1, "5C", "7D");     // no Hearts
         giveHand(state, 2, "9H", "3S");
 
         fm.next(state, play("4H"));
-        assertEquals("the leader records nothing", Set.of(), state.getKnownVoids(0));
+        assertEquals("the leader records nothing", Set.of(), state.getKnownVoids().get(0));
 
         fm.next(state, play("5C"));
         // recorded as soon as the card is played, and in the suit led (Hearts), not the suit played (Clubs)
-        assertEquals(Set.of(Hearts), state.getKnownVoids(1));
-        assertEquals(Set.of(), state.getKnownVoids(0));
-        assertEquals(Set.of(), state.getKnownVoids(2));
+        assertEquals(Set.of(Hearts), state.getKnownVoids().get(1));
+        assertEquals(Set.of(), state.getKnownVoids().get(0));
+        assertEquals(Set.of(), state.getKnownVoids().get(2));
 
         fm.next(state, play("9H"));
-        assertEquals("a follower who follows suit records nothing", Set.of(), state.getKnownVoids(2));
-        assertEquals(Set.of(), state.getKnownVoids(0));
-        assertEquals("the void outlasts the trick", Set.of(Hearts), state.getKnownVoids(1));
+        assertEquals("a follower who follows suit records nothing", Set.of(), state.getKnownVoids().get(2));
+        assertEquals(Set.of(), state.getKnownVoids().get(0));
+        assertEquals("the void outlasts the trick", Set.of(Hearts), state.getKnownVoids().get(1));
     }
 
     @Test
@@ -64,9 +64,9 @@ public class AgramKnownVoidsTest {
         assertEquals(0, state.getCurrentTrick().getSize());
         assertEquals(3, state.getDiscardPile().getSize());
 
-        assertEquals(Set.of(Hearts), state.getKnownVoids(2));
-        assertEquals(Set.of(), state.getKnownVoids(0));
-        assertEquals(Set.of(), state.getKnownVoids(1));
+        assertEquals(Set.of(Hearts), state.getKnownVoids().get(2));
+        assertEquals(Set.of(), state.getKnownVoids().get(0));
+        assertEquals(Set.of(), state.getKnownVoids().get(1));
     }
 
     @Test
@@ -75,24 +75,24 @@ public class AgramKnownVoidsTest {
         giveHand(state, 1, "5C", "7D");     // no Hearts; no Clubs once the Five is played
         giveHand(state, 2, "9H", "AC");
         playCards(state, fm, "4H", "5C", "9H");   // player 2 wins and leads
-        assertEquals(Set.of(Hearts), state.getKnownVoids(1));
+        assertEquals(Set.of(Hearts), state.getKnownVoids().get(1));
 
         AgramGameState copy = (AgramGameState) state.copy();
         assertEquals(state, copy);
         assertEquals(state.hashCode(), copy.hashCode());
         for (int p = 0; p < 3; p++)
-            assertEquals("player " + p, state.getKnownVoids(p), copy.getKnownVoids(p));
+            assertEquals("player " + p, state.getKnownVoids().get(p), copy.getKnownVoids().get(p));
 
         // knownVoids is public, so a redeterminised copy keeps it too
         AgramGameState redeterminised = (AgramGameState) state.copy(0);
         for (int p = 0; p < 3; p++)
-            assertEquals("redeterminised, player " + p, state.getKnownVoids(p), redeterminised.getKnownVoids(p));
+            assertEquals("redeterminised, player " + p, state.getKnownVoids().get(p), redeterminised.getKnownVoids().get(p));
 
         // a new void recorded in the copy (player 1 cannot follow Clubs) leaves the original alone
         int originalHash = state.hashCode();
         playCards(copy, fm, "AC", "6C", "7D");
-        assertEquals(Set.of(Hearts, Clubs), copy.getKnownVoids(1));
-        assertEquals(Set.of(Hearts), state.getKnownVoids(1));
+        assertEquals(Set.of(Hearts, Clubs), copy.getKnownVoids().get(1));
+        assertEquals(Set.of(Hearts), state.getKnownVoids().get(1));
         assertEquals(originalHash, state.hashCode());
 
         // two states differing only in knownVoids are neither equal nor hashed alike
@@ -114,9 +114,9 @@ public class AgramKnownVoidsTest {
         playCards(state, fm, "4H", "7D", "3H");     // player 0 wins with the Four of Hearts
         // arrangement guard
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(Set.of(), state.getKnownVoids(0));
-        assertEquals(Set.of(Hearts), state.getKnownVoids(1));
-        assertEquals(Set.of(Clubs), state.getKnownVoids(2));
+        assertEquals(Set.of(), state.getKnownVoids().get(0));
+        assertEquals(Set.of(Hearts), state.getKnownVoids().get(1));
+        assertEquals(Set.of(Clubs), state.getKnownVoids().get(2));
     }
 
     private static boolean holdsSuit(AgramGameState s, int player, FrenchCard.Suite suit) {

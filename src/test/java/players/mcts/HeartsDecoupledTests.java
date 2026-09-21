@@ -8,7 +8,7 @@ import core.actions.SimultaneousAction;
 import games.GameType;
 import games.hearts.HeartsGameState;
 import games.hearts.actions.Pass;
-import games.hearts.actions.Play;
+import games.tricktaking.PlayCard;
 import org.junit.Test;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
@@ -33,6 +33,7 @@ public class HeartsDecoupledTests {
         p.rolloutLength = 30;
         p.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         p.information = MCTSEnums.Information.Information_Set;
+        p.decoupled = true;  // these tests exercise the decoupled path; the default is sequential
         tweak.accept(p);
         return p;
     }
@@ -55,7 +56,6 @@ public class HeartsDecoupledTests {
 
     private static int playerOf(AbstractAction a) {
         if (a instanceof Pass pass) return pass.playerID;
-        if (a instanceof Play play) return play.playerID;
         throw new AssertionError("unexpected action " + a);
     }
 
@@ -161,15 +161,13 @@ public class HeartsDecoupledTests {
         assertTrue(g.getForwardModel().computeAvailableActions(state).size() > 1);
 
         AbstractAction chosen = decide(g, current);
-        assertTrue(chosen instanceof Play);
-        assertEquals(current, playerOf(chosen));
+        assertTrue(chosen instanceof PlayCard);
         SingleTreeNode root = root(g, current);
         assertFalse(root.isMultiActor());
         assertEquals(current, root.getActor());
         assertEquals(List.of(current), root.getActingPlayers());
         for (AbstractAction key : root.children.keySet()) {
-            assertTrue(key instanceof Play);
-            assertEquals(current, playerOf(key));
+            assertTrue(key instanceof PlayCard);
         }
     }
 

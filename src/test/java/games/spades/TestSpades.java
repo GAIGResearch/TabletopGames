@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.spades.actions.Bid;
-import games.spades.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import org.junit.*;
 
 import java.util.List;

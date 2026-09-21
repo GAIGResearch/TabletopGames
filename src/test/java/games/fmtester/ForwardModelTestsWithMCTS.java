@@ -2,6 +2,7 @@ package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import games.agram.AgramParameters;
+import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.catan.CatanParameters;
 import games.crazyeights.CZEParameters;
@@ -231,6 +232,17 @@ public class ForwardModelTestsWithMCTS {
         CZEParameters params = new CZEParameters();
         params.setParameterValue("dealerNominatesStarterSuit", true);
         new ForwardModelTester(params, "game=CrazyEights", "nGames=3", "nPlayers=2", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testWhist() {
+        new ForwardModelTester("game=Whist", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
+        WhistParameters params = new WhistParameters();
+        params.setParameterValue("nDeals", 3);
+        params.setParameterValue("trumpMode", WhistParameters.TrumpMode.ROTATION);
+        params.setParameterValue("noTrumpsInRotation", true);
+        params.setParameterValue("rememberVoids", false);
+        new ForwardModelTester(params, "game=Whist", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 
     @Test

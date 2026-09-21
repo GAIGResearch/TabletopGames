@@ -2,7 +2,7 @@ package games.hearts;
 
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
-import games.hearts.actions.Play;
+import games.tricktaking.PlayCard;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,9 +35,8 @@ public class TestHeartsKnownVoids {
 
     @Test
     public void knownVoidsStartEmpty() {
-        assertEquals(4, gameState.knownVoids.size());
         for (int p = 0; p < 4; p++) {
-            assertTrue(gameState.getKnownVoids(p).isEmpty());
+            assertTrue(gameState.getKnownVoids().get(p).isEmpty());
         }
     }
 
@@ -53,15 +52,15 @@ public class TestHeartsKnownVoids {
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
 
             int player = gameState.getCurrentPlayer();
-            FrenchCard.Suite ledSuit = gameState.firstCardSuit;
-            boolean failsToFollow = chosen instanceof Play && ledSuit != null
-                    && ((Play) chosen).card.suite != ledSuit;
+            FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
+            boolean failsToFollow = chosen instanceof PlayCard && ledSuit != null
+                    && ((PlayCard) chosen).card.suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
 
             if (failsToFollow) {
                 assertTrue("Player " + player + " failed to follow " + ledSuit + " but this was not recorded",
-                        gameState.getKnownVoids(player).contains(ledSuit));
+                        gameState.getKnownVoids().get(player).contains(ledSuit));
                 return;
             }
         }
@@ -80,14 +79,14 @@ public class TestHeartsKnownVoids {
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
 
             int player = gameState.getCurrentPlayer();
-            FrenchCard.Suite ledSuit = gameState.firstCardSuit;
-            boolean followsSuit = chosen instanceof Play && ledSuit != null
-                    && ((Play) chosen).card.suite == ledSuit;
+            FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
+            boolean followsSuit = chosen instanceof PlayCard && ledSuit != null
+                    && ((PlayCard) chosen).card.suite == ledSuit;
 
             forwardModel.next(gameState, chosen);
 
             if (followsSuit) {
-                assertFalse(gameState.getKnownVoids(player).contains(ledSuit));
+                assertFalse(gameState.getKnownVoids().get(player).contains(ledSuit));
             }
         }
     }
@@ -104,9 +103,9 @@ public class TestHeartsKnownVoids {
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
 
             int player = gameState.getCurrentPlayer();
-            FrenchCard.Suite ledSuit = gameState.firstCardSuit;
-            boolean failsToFollow = chosen instanceof Play && ledSuit != null
-                    && ((Play) chosen).card.suite != ledSuit;
+            FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
+            boolean failsToFollow = chosen instanceof PlayCard && ledSuit != null
+                    && ((PlayCard) chosen).card.suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
 
@@ -115,12 +114,12 @@ public class TestHeartsKnownVoids {
                 HeartsGameState playerCopy = (HeartsGameState) gameState.copy(0);
                 assertEquals(gameState.knownVoids, fullCopy.knownVoids);
                 assertEquals(gameState.knownVoids, playerCopy.knownVoids);
-                assertTrue(fullCopy.getKnownVoids(player).contains(ledSuit));
-                assertTrue(playerCopy.getKnownVoids(player).contains(ledSuit));
+                assertTrue(fullCopy.getKnownVoids().get(player).contains(ledSuit));
+                assertTrue(playerCopy.getKnownVoids().get(player).contains(ledSuit));
 
                 // and the copies must be independent of the original
-                Set<FrenchCard.Suite> originalVoids = gameState.getKnownVoids(player);
-                fullCopy.getKnownVoids(player).clear();
+                Set<FrenchCard.Suite> originalVoids = gameState.getKnownVoids().get(player);
+                fullCopy.getKnownVoids().get(player).clear();
                 assertTrue(originalVoids.contains(ledSuit));
                 return;
             }
@@ -141,7 +140,7 @@ public class TestHeartsKnownVoids {
             forwardModel.next(gameState, actions.get(rnd.nextInt(actions.size())));
 
             for (int p = 0; p < gameState.getNPlayers(); p++) {
-                for (FrenchCard.Suite suit : gameState.getKnownVoids(p)) {
+                for (FrenchCard.Suite suit : gameState.getKnownVoids().get(p)) {
                     voidsSeen++;
                     assertFalse("Player " + p + " is recorded void in " + suit + " but holds one",
                             gameState.getPlayerDecks().get(p).stream().anyMatch(c -> c.suite == suit));
@@ -176,7 +175,7 @@ public class TestHeartsKnownVoids {
             HeartsGameState copy = (HeartsGameState) gameState.copy(0);
             for (int p = 1; p < gameState.getNPlayers(); p++) {
                 if (gameState.getPlayerDecks().get(p).getSize() == 0) continue;
-                for (FrenchCard.Suite suit : gameState.getKnownVoids(p)) {
+                for (FrenchCard.Suite suit : gameState.getKnownVoids().get(p)) {
                     if (hiddenCards.stream().anyMatch(c -> c.suite == suit)) opportunities++;
                     if (copy.getPlayerDecks().get(p).stream().anyMatch(c -> c.suite == suit)) violations++;
                 }
@@ -227,7 +226,7 @@ public class TestHeartsKnownVoids {
 
     private boolean opponentWithVoidAndCardsInHand() {
         for (int p = 1; p < gameState.getNPlayers(); p++) {
-            if (!gameState.getKnownVoids(p).isEmpty() && gameState.getPlayerDecks().get(p).getSize() > 0)
+            if (!gameState.getKnownVoids().get(p).isEmpty() && gameState.getPlayerDecks().get(p).getSize() > 0)
                 return true;
         }
         return false;
@@ -244,13 +243,13 @@ public class TestHeartsKnownVoids {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             forwardModel.next(gameState, actions.get(rnd.nextInt(actions.size())));
             if (gameState.getRoundCounter() == 0) {
-                voidSeenInFirstRound |= gameState.knownVoids.stream().anyMatch(v -> !v.isEmpty());
+                voidSeenInFirstRound |= java.util.stream.IntStream.range(0, 4).anyMatch(p -> !gameState.getKnownVoids().get(p).isEmpty());
             }
         }
         assertTrue("Expected at least one void to be recorded in the first round", voidSeenInFirstRound);
         assertEquals(1, gameState.getRoundCounter());
         for (int p = 0; p < gameState.getNPlayers(); p++) {
-            assertTrue(gameState.getKnownVoids(p).isEmpty());
+            assertTrue(gameState.getKnownVoids().get(p).isEmpty());
         }
     }
 
@@ -281,7 +280,7 @@ public class TestHeartsKnownVoids {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             forwardModel.next(gameState, actions.get(rnd.nextInt(actions.size())));
             for (int p = 0; p < gameState.getNPlayers(); p++)
-                assertTrue(gameState.getKnownVoids(p).isEmpty());
+                assertTrue(gameState.getKnownVoids().get(p).isEmpty());
         }
     }
 
@@ -302,9 +301,9 @@ public class TestHeartsKnownVoids {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
             int player = gameState.getCurrentPlayer();
-            FrenchCard.Suite ledSuit = gameState.firstCardSuit;
-            boolean failsToFollow = chosen instanceof Play && ledSuit != null
-                    && ((Play) chosen).card.suite != ledSuit;
+            FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
+            boolean failsToFollow = chosen instanceof PlayCard && ledSuit != null
+                    && ((PlayCard) chosen).card.suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
             if (failsToFollow) observedVoids.get(player).add(ledSuit);

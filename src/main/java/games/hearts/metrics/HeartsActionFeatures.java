@@ -7,7 +7,7 @@ import core.interfaces.IActionFeatureVector;
 import games.hearts.HeartsGameState;
 import games.hearts.HeartsParameters;
 import games.hearts.actions.Pass;
-import games.hearts.actions.Play;
+import games.tricktaking.PlayCard;
 
 import java.util.Map;
 
@@ -43,7 +43,7 @@ public class HeartsActionFeatures implements IActionFeatureVector {
         FrenchCard card = null;
         boolean isPass = false;
 
-        if (action instanceof Play play) {
+        if (action instanceof PlayCard play) {
             card = play.card;
         } else if (action instanceof Pass pass) {
             card = pass.card1;
@@ -67,18 +67,18 @@ public class HeartsActionFeatures implements IActionFeatureVector {
             features[7] = isQoS ? 1.0 : 0.0;
 
             if (!isPass) {
-                features[8] = (hgs.firstCardSuit != null && card.suite == hgs.firstCardSuit) ? 1.0 : 0.0;
+                features[8] = (hgs.currentTrick.getLeadSuit() != null && card.suite == hgs.currentTrick.getLeadSuit()) ? 1.0 : 0.0;
 
                 // Wins trick?
                 boolean wins = false;
-                if (hgs.firstCardSuit == null) {
+                if (hgs.currentTrick.getLeadSuit() == null) {
                     wins = true; // Leading a card "wins" so far
-                } else if (card.suite == hgs.firstCardSuit) {
+                } else if (card.suite == hgs.currentTrick.getLeadSuit()) {
                     int highestInTrick = -1;
-                    for (Map.Entry<Integer, FrenchCard> entry : hgs.currentPlayedCards) {
-                        if (entry.getValue().suite == hgs.firstCardSuit) {
-                            if (entry.getValue().number > highestInTrick) {
-                                highestInTrick = entry.getValue().number;
+                    for (FrenchCard played : hgs.currentTrick.getComponents()) {
+                        if (played.suite == hgs.currentTrick.getLeadSuit()) {
+                            if (played.number > highestInTrick) {
+                                highestInTrick = played.number;
                             }
                         }
                     }

@@ -9,7 +9,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import games.GameType;
 import games.hearts.actions.Pass;
-import games.hearts.actions.Play;
+import games.tricktaking.PlayCard;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 import utilities.Pair;
@@ -63,7 +63,6 @@ public class HeartsSimultaneousTests {
 
     private static int playerOf(AbstractAction a) {
         if (a instanceof Pass pass) return pass.playerID;
-        if (a instanceof Play play) return play.playerID;
         throw new AssertionError("unexpected action " + a);
     }
 
@@ -114,7 +113,7 @@ public class HeartsSimultaneousTests {
         }
         List<AbstractAction> actions = fm.computeAvailableActions(s);
         assertEquals(1, actions.size());
-        assertEquals(new Play(holder, ((HeartsParameters) s.getGameParameters()).startingCard), actions.get(0));
+        assertEquals(new PlayCard(((HeartsParameters) s.getGameParameters()).startingCard), actions.get(0));
         assertTrue(fm.computeAvailableActions(s, null, (holder + 1) % 4).isEmpty());
     }
 
@@ -251,7 +250,8 @@ public class HeartsSimultaneousTests {
                     List<AbstractAction> actions = fm.computeAvailableActions(s);
                     assertFalse(actions.isEmpty());
                     AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
-                    assertEquals(p, playerOf(chosen));
+                    if (chosen instanceof Pass)  // a PlayCard carries no player: it is always the current player's
+                        assertEquals(p, playerOf(chosen));
                     assertEquals(s.getGamePhase() == PASSING, chosen instanceof Pass);
                     fm.next(s, chosen);
                 }
@@ -269,8 +269,10 @@ public class HeartsSimultaneousTests {
             assertFalse(s.isNotTerminal());
             int passes = 0;
             for (Pair<Integer, AbstractAction> h : s.getHistory()) {
-                assertEquals("history records the wrong player", (int) h.a, playerOf(h.b));
-                if (h.b instanceof Pass) passes++;
+                if (h.b instanceof Pass) {
+                    assertEquals("history records the wrong player", (int) h.a, playerOf(h.b));
+                    passes++;
+                }
             }
             // three cards per player in every passing round
             assertEquals(0, passes % (3 * nPlayers));

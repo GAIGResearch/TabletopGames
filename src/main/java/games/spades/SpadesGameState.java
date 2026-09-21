@@ -9,36 +9,32 @@ import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.tricktaking.ITrickTakingState;
+import games.tricktaking.KnownVoids;
+import games.tricktaking.Trick;
 import utilities.DeterminisationUtilities;
-import utilities.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.BiPredicate;
 
-public class SpadesGameState extends AbstractGameState implements IPrintable {
+public class SpadesGameState extends AbstractGameState implements IPrintable, ITrickTakingState {
 
     List<Deck<FrenchCard>> playerHands;
-    public List<Pair<Integer, FrenchCard>> currentTrick = new ArrayList<>();
+    public Trick currentTrick;
     public List<List<Deck<FrenchCard>>> tricksWon;
     public int[] playerBids;
     public int[] tricksTaken;
     public int[] teamScores;
     public int[] teamSandbags;
     public boolean[] playerBlindNil;
-    public FrenchCard.Suite leadSuit;
     public boolean spadesBroken = false;
     /**
      * For each player, the suits that they are publicly known to be void in; i.e. the suits that
      * were led in a trick this round to which they did not follow suit.
      */
-    public List<Set<FrenchCard.Suite>> knownVoids;
+    public KnownVoids knownVoids;
 
     public enum Phase implements IGamePhase {
         BIDDING,
@@ -58,10 +54,8 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         teamScores = new int[2];
         teamSandbags = new int[2];
         playerBlindNil = new boolean[nPlayers];
-        knownVoids = new ArrayList<>();
-        for (int i = 0; i < nPlayers; i++) {
-            knownVoids.add(EnumSet.noneOf(FrenchCard.Suite.class));
-        }
+        knownVoids = new KnownVoids(nPlayers);
+        currentTrick = new Trick("CurrentTrick", nPlayers, 0);
     }
 
     @Override
@@ -85,9 +79,8 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
             }
         }
 
-        for (Pair<Integer, FrenchCard> entry : currentTrick) {
-            components.add(entry.b);
-        }
+        components.add(currentTrick);
+        components.addAll(currentTrick.getComponents());
 
         return components;
     }
@@ -96,9 +89,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
     protected SpadesGameState _copy(int playerId) {
         SpadesGameState copy = new SpadesGameState(gameParameters, getNPlayers());
 
-        copy.currentTrick = new ArrayList<>();
-        // the Pair<Integer, FrenchCard> that represents a trick is immutable
-        copy.currentTrick.addAll(currentTrick);
+        copy.currentTrick = currentTrick.copy();
 
         copy.tricksWon = new ArrayList<>();
         for (List<Deck<FrenchCard>> playerTricks : tricksWon) {
@@ -111,15 +102,9 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         copy.teamScores = Arrays.copyOf(teamScores, teamScores.length);
         copy.teamSandbags = Arrays.copyOf(teamSandbags, teamSandbags.length);
         copy.playerBlindNil = Arrays.copyOf(playerBlindNil, playerBlindNil.length);
-        copy.leadSuit = leadSuit;
         copy.spadesBroken = spadesBroken;
 
-        copy.knownVoids = new ArrayList<>();
-        for (Set<FrenchCard.Suite> voids : knownVoids) {
-            Set<FrenchCard.Suite> voidCopy = EnumSet.noneOf(FrenchCard.Suite.class);
-            voidCopy.addAll(voids);
-            copy.knownVoids.add(voidCopy);
-        }
+        copy.knownVoids = knownVoids.copy();
 
         copy.playerHands = new ArrayList<>();
         for (int i = 0; i < playerHands.size(); i++) {
@@ -136,12 +121,9 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
                     otherPlayerDecks.add(copy.playerHands.get(p));
             }
             // a player who has failed to follow suit is known to hold no cards of that suit,
-            // so we must not deal them any
-            BiPredicate<Deck<FrenchCard>, FrenchCard> voidConstraint =
-                    ((SpadesParameters) gameParameters).rememberVoids
-                            ? (deck, card) -> deck.getOwnerId() < 0 || !copy.knownVoids.get(deck.getOwnerId()).contains(card.suite)
-                            : null;  // a null constraint gives the unconstrained reshuffle
-            DeterminisationUtilities.reshuffle(playerId, otherPlayerDecks, x -> true, redeterminisationRnd, voidConstraint);
+            // so we must not deal them any (none are recorded if SpadesParameters.rememberVoids is off)
+            DeterminisationUtilities.reshuffle(playerId, otherPlayerDecks, x -> true, redeterminisationRnd,
+                    copy.knownVoids::permits);
         }
 
         return copy;
@@ -175,12 +157,18 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         return playerHands;
     }
 
+    @Override
+    public Deck<FrenchCard> getPlayerHand(int player) {
+        return playerHands.get(player);
+    }
+
     /**
-     * The suits that the specified player is publicly known to be void in, from having failed to
+     * The suits that each player is publicly known to be void in, from having failed to
      * follow suit earlier in the current round. This is information available to all players.
      */
-    public Set<FrenchCard.Suite> getKnownVoids(int playerId) {
-        return knownVoids.get(playerId);
+    @Override
+    public KnownVoids getKnownVoids() {
+        return knownVoids;
     }
 
     public int getPlayerBid(int playerId) {
@@ -230,21 +218,9 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         this.spadesBroken = broken;
     }
 
-    public FrenchCard.Suite getLeadSuit() {
-        return leadSuit;
-    }
-
-    public void setLeadSuit(FrenchCard.Suite suit) {
-        this.leadSuit = suit;
-    }
-
-    public List<Pair<Integer, FrenchCard>> getCurrentTrick() {
+    @Override
+    public Trick getCurrentTrick() {
         return currentTrick;
-    }
-
-    public void clearCurrentTrick() {
-        currentTrick.clear();
-        leadSuit = null;
     }
 
     @Override
@@ -261,15 +237,13 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
                 Arrays.equals(teamScores, that.teamScores) &&
                 Arrays.equals(teamSandbags, that.teamSandbags) &&
                 Arrays.equals(playerBlindNil, that.playerBlindNil) &&
-                leadSuit == that.leadSuit &&
                 spadesBroken == that.spadesBroken &&
                 Objects.equals(knownVoids, that.knownVoids);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerHands, currentTrick, tricksWon,
-                leadSuit == null ? -1 : leadSuit.ordinal(), spadesBroken, knownVoids);
+        int result = Objects.hash(super.hashCode(), playerHands, currentTrick, tricksWon, spadesBroken, knownVoids);
         result = 31 * result + Arrays.hashCode(playerBids);
         result = 31 * result + Arrays.hashCode(tricksTaken);
         result = 31 * result + Arrays.hashCode(teamScores);
@@ -285,10 +259,10 @@ public class SpadesGameState extends AbstractGameState implements IPrintable {
         System.out.println("Spades Broken: " + spadesBroken);
 
         // Current trick information
-        if (!currentTrick.isEmpty()) {
-            System.out.println("\nCurrent Trick (Lead Suit: " + leadSuit + "):");
-            for (Pair<Integer, FrenchCard> entry : currentTrick) {
-                System.out.println("  Player " + entry.a + ": " + entry.b);
+        if (currentTrick.getSize() > 0) {
+            System.out.println("\nCurrent Trick (Lead Suit: " + currentTrick.getLeadSuit() + "):");
+            for (int i = 0; i < currentTrick.getSize(); i++) {
+                System.out.println("  Player " + currentTrick.playerOf(i) + ": " + currentTrick.get(i));
             }
         }
 

@@ -2,7 +2,7 @@ package games.agram;
 
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
-import games.agram.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -61,12 +61,12 @@ public class AgramMatchTest {
 
         // player 1 won, so deals the next deal: player 2 leads it
         assertEquals(2, state.getCurrentPlayer());
-        assertEquals(2, state.getTrickLeader());
+        assertEquals(2, state.getCurrentTrick().getLeader());
 
         // all 35 cards were gathered and re-dealt: a full hand each, even though the first deal was one trick long
         for (int p = 0; p < 3; p++) {
             assertEquals("hand size, player " + p, 6, state.getPlayerHands().get(p).getSize());
-            assertEquals("known voids are cleared for a new deal, player " + p, Set.of(), state.getKnownVoids(p));
+            assertEquals("known voids are cleared for a new deal, player " + p, Set.of(), state.getKnownVoids().get(p));
         }
         assertEquals(17, state.getDrawDeck().getSize());
         assertEquals(0, state.getCurrentTrick().getSize());
@@ -87,7 +87,7 @@ public class AgramMatchTest {
         assertFalse(state.isNotTerminal());
         // there is no re-deal after the last deal: its tricks and voids remain
         assertEquals(3, state.getDiscardPile().getSize());
-        assertEquals(Set.of(Hearts), state.getKnownVoids(2));
+        assertEquals(Set.of(Hearts), state.getKnownVoids().get(2));
         assertEquals(0, state.getDealsWon(0));
         assertEquals(1, state.getDealsWon(1));
         assertEquals(0, state.getDealsWon(2));

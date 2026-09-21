@@ -7,7 +7,7 @@ import core.components.Deck;
 
 import java.util.List;
 
-import games.hearts.actions.Play;
+import games.tricktaking.PlayCard;
 import games.hearts.actions.Pass;
 import org.junit.*;
 import core.components.FrenchCard;
@@ -124,9 +124,9 @@ public class TestHearts {
         List<AbstractAction> actions = forwardModel._computeAvailableActions(gameState);
         // Only one action should be available: playing 2 of Clubs
         assertEquals(1, actions.size());
-        assertTrue(actions.get(0) instanceof Play);
-        assertEquals(FrenchCard.Suite.Clubs, ((Play)actions.get(0)).card.suite);
-        assertEquals(2, ((Play)actions.get(0)).card.number);
+        assertTrue(actions.get(0) instanceof PlayCard);
+        assertEquals(FrenchCard.Suite.Clubs, ((PlayCard)actions.get(0)).card.suite);
+        assertEquals(2, ((PlayCard)actions.get(0)).card.number);
     }
 
     @Test
@@ -135,8 +135,8 @@ public class TestHearts {
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
         gameState.heartsBroken = true;
 
-        // Set the leading suit to Clubs, for instance
-        gameState.firstCardSuit = FrenchCard.Suite.Clubs;
+        // Clubs have been led, for instance
+        gameState.currentTrick.play(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 5));
 
         // Assume that player 0 doesn't have any clubs
         Deck<FrenchCard> playerDeck = gameState.getPlayerDecks().get(0);
@@ -151,8 +151,8 @@ public class TestHearts {
         // Check that all cards in the player's deck are among the available actions
         assertEquals(playerDeck.getSize(), actions.size());
         for (AbstractAction action : actions) {
-            assertTrue(action instanceof Play);
-            FrenchCard card = ((Play) action).card;
+            assertTrue(action instanceof PlayCard);
+            FrenchCard card = ((PlayCard) action).card;
             assertTrue(playerDeck.contains(card));
         }
     }
@@ -202,28 +202,26 @@ public class TestHearts {
     public void testEndTurnWithRoundWinner() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
+        gameState.currentTrick.reset(0);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:
         // Player 0 played Club 3
-        Play play0 = new Play(0, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play0.playerID, play0.card));
+        FrenchCard play0 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3);
+        gameState.currentTrick.play(play0);
 
         // Player 1 played Club 2
-        Play play1 = new Play(1, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play1.playerID, play1.card));
+        FrenchCard play1 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2);
+        gameState.currentTrick.play(play1);
 
         // Player 2 played Club 4 (highest in the trick)
-        Play play2 = new Play(2, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 4));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play2.playerID, play2.card));
-
-        // Set the firstCardSuit as Club which was set when first card was played
-        gameState.firstCardSuit = FrenchCard.Suite.Clubs;
+        FrenchCard play2 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 4);
+        gameState.currentTrick.play(play2);
 
         // Set the player's deck
-        gameState.getPlayerDecks().get(play0.playerID).add(play0.card);
-        gameState.getPlayerDecks().get(play1.playerID).add(play1.card);
-        gameState.getPlayerDecks().get(play2.playerID).add(play2.card);
+        gameState.getPlayerDecks().get(0).add(play0);
+        gameState.getPlayerDecks().get(1).add(play1);
+        gameState.getPlayerDecks().get(2).add(play2);
 
         // Call _endTurn
         forwardModel.endTrick(gameState);
@@ -232,48 +230,46 @@ public class TestHearts {
         assertEquals(2, gameState.getFirstPlayer());
 
         // Verify that the winning player has the trick cards
-        assertTrue(gameState.trickDecks.get(2).contains(play0.card));
-        assertTrue(gameState.trickDecks.get(2).contains(play1.card));
-        assertTrue(gameState.trickDecks.get(2).contains(play2.card));
+        assertTrue(gameState.trickDecks.get(2).contains(play0));
+        assertTrue(gameState.trickDecks.get(2).contains(play1));
+        assertTrue(gameState.trickDecks.get(2).contains(play2));
     }
 
     @Test
     public void testEndTurnTrickDeck() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
+        gameState.currentTrick.reset(0);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:
         // Player 0 played Club 3
-        Play play0 = new Play(0, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play0.playerID, play0.card));
+        FrenchCard play0 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3);
+        gameState.currentTrick.play(play0);
 
         // Player 1 played Club 2
-        Play play1 = new Play(1, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play1.playerID, play1.card));
+        FrenchCard play1 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2);
+        gameState.currentTrick.play(play1);
 
         // Player 2 played Club 4 (highest in the trick)
-        Play play2 = new Play(2, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 4));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play2.playerID, play2.card));
-
-        // Set the firstCardSuit as Club which was set when first card was played
-        gameState.firstCardSuit = FrenchCard.Suite.Clubs;
+        FrenchCard play2 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 4);
+        gameState.currentTrick.play(play2);
 
         // Set the player's deck
-        gameState.getPlayerDecks().get(play0.playerID).add(play0.card);
-        gameState.getPlayerDecks().get(play1.playerID).add(play1.card);
-        gameState.getPlayerDecks().get(play2.playerID).add(play2.card);
+        gameState.getPlayerDecks().get(0).add(play0);
+        gameState.getPlayerDecks().get(1).add(play1);
+        gameState.getPlayerDecks().get(2).add(play2);
 
         // Call endTurn
         forwardModel.endTrick(gameState);
 
         // Verify that the trick deck is cleared
-        assertTrue(gameState.currentPlayedCards.isEmpty());
+        assertEquals(0, gameState.currentTrick.getSize());
 
         // Verify that the winning player has the trick cards
-        assertTrue(gameState.trickDecks.get(2).contains(play0.card));
-        assertTrue(gameState.trickDecks.get(2).contains(play1.card));
-        assertTrue(gameState.trickDecks.get(2).contains(play2.card));
+        assertTrue(gameState.trickDecks.get(2).contains(play0));
+        assertTrue(gameState.trickDecks.get(2).contains(play1));
+        assertTrue(gameState.trickDecks.get(2).contains(play2));
 
         // If cards go to winning player, check their deck size.
         assertEquals(3, gameState.trickDecks.get(2).getSize());
@@ -283,28 +279,26 @@ public class TestHearts {
     public void testEndTurnNewRound() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
+        gameState.currentTrick.reset(0);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:
         // Player 0 played Club 3
-        Play play0 = new Play(0, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play0.playerID, play0.card));
+        FrenchCard play0 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3);
+        gameState.currentTrick.play(play0);
 
         // Player 1 played Club 2
-        Play play1 = new Play(1, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play1.playerID, play1.card));
+        FrenchCard play1 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2);
+        gameState.currentTrick.play(play1);
 
         // Player 2 played Club 4 (highest in the trick)
-        Play play2 = new Play(2, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 4));
-        gameState.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play2.playerID, play2.card));
-
-        // Set the firstCardSuit as Club which was set when first card was played
-        gameState.firstCardSuit = FrenchCard.Suite.Clubs;
+        FrenchCard play2 = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 4);
+        gameState.currentTrick.play(play2);
 
         // Set the player's deck
-        gameState.getPlayerDecks().get(play0.playerID).add(play0.card);
-        gameState.getPlayerDecks().get(play1.playerID).add(play1.card);
-        gameState.getPlayerDecks().get(play2.playerID).add(play2.card);
+        gameState.getPlayerDecks().get(0).add(play0);
+        gameState.getPlayerDecks().get(1).add(play1);
+        gameState.getPlayerDecks().get(2).add(play2);
 
         // Clear all the cards from player's deck
         gameState.getPlayerDecks().clear();

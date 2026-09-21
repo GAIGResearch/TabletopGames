@@ -3,11 +3,13 @@ package games.spades.gui;
 import core.components.FrenchCard;
 import gui.views.CardView;
 import games.spades.SpadesGameState;
+import games.tricktaking.Trick;
 import utilities.ImageIO;
 import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -145,7 +147,12 @@ public class SpadesTrickView extends JPanel {
     public void updateTrick(SpadesGameState gameState) {
         if (gameState != null) {
             try {
-                this.currentTrick = gameState.getCurrentTrick();
+                // a snapshot of the trick: who played each card, in the order played
+                Trick trick = gameState.getCurrentTrick();
+                List<Pair<Integer, FrenchCard>> plays = new ArrayList<>();
+                for (int i = 0; i < trick.getSize(); i++)
+                    plays.add(new Pair<>(trick.playerOf(i), trick.get(i)));
+                this.currentTrick = plays;
             } catch (Exception e) {
                 // If there's an error, clear the trick
                 this.currentTrick = null;

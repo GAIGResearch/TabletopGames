@@ -7,7 +7,7 @@ import core.actions.AbstractAction;
 import games.spades.SpadesGameState;
 import games.spades.SpadesParameters;
 import games.spades.actions.Bid;
-import games.spades.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;

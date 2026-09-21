@@ -92,7 +92,7 @@ public class AgramPlayRulesTest {
         // in play order: index 0 is the lead card
         assertEquals(cards("9H", "3H"), cardsOf(state.getCurrentTrick()));
         assertEquals(2, state.getCurrentPlayer());
-        assertEquals("trick still open, so the leader is unchanged", 0, state.getTrickLeader());
+        assertEquals("trick still open, so the leader is unchanged", 0, state.getCurrentTrick().getLeader());
 
         assertEquals(0, state.getDiscardPile().getSize());
         assertEquals("the undealt cards are never used", undealt, state.getDrawDeck().getSize());

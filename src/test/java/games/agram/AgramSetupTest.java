@@ -26,7 +26,7 @@ public class AgramSetupTest {
             assertEquals(0, state.getCurrentTrick().getSize());
             assertEquals(0, state.getDiscardPile().getSize());
             assertEquals(0, state.getCurrentPlayer());
-            assertEquals(0, state.getTrickLeader());
+            assertEquals(0, state.getCurrentTrick().getLeader());
             // exactly the 35 Agram cards: no J/Q/K/2 and no Ace of Spades
             assertAllCardsPresent(state);
         }

@@ -3,8 +3,12 @@ package games.agram.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.components.FrenchCard;
 import games.agram.AgramGameState;
 import games.agram.AgramParameters;
+import games.tricktaking.gui.CardArt;
+import games.tricktaking.gui.PlayerHandView;
+import games.tricktaking.gui.TrickView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -26,18 +30,12 @@ import java.util.Set;
  */
 public class AgramGUIManager extends AbstractGUIManager {
 
-    static final String dataPath = "data/FrenchCards/";
-    // ♦ diamond, ♥ heart, ♣ club, ♠ spade - in the order of FrenchCard.Suite
-    static final String[] SUIT_SYMBOLS = {"♦", "♥", "♣", "♠"};
-
     static final int playerAreaWidth = 300;
-    static final int cardWidth = 80;
-    static final int cardHeight = 105;
     // one player area: the cards, the status line underneath, and the titled border below that
-    static final int playerAreaHeight = cardHeight + 43;
+    static final int playerAreaHeight = CardArt.cardHeight + 43;
 
-    AgramPlayerView[] playerViews;
-    AgramTrickView trickView;
+    PlayerHandView[] playerViews;
+    TrickView trickView;
     Border[] playerViewBorders;
     TitledBorder[] playerTitles;
     String[] agentNames;
@@ -53,13 +51,13 @@ public class AgramGUIManager extends AbstractGUIManager {
         AgramGameState state = (AgramGameState) gameState;
         int nPlayers = state.getNPlayers();
 
-        trickView = new AgramTrickView(nPlayers);
+        trickView = new TrickView(nPlayers);
         int nHorizAreas = nPlayers <= 3 ? 2 : 3;
         this.width = Math.max(playerAreaWidth * nHorizAreas + 40, trickView.getPreferredSize().width + 2 * playerAreaWidth);
         // three bands: the North player, the East/West players and the trick (the taller of the two), and the South player
         this.height = playerAreaHeight * 2 + Math.max(playerAreaHeight, trickView.getPreferredSize().height) + 40;
 
-        parent.setBackground(ImageIO.GetInstance().getImage(dataPath + "table-background.jpg"));
+        parent.setBackground(ImageIO.GetInstance().getImage(CardArt.dataPath + "table-background.jpg"));
 
         // without these the tabbed pane's content area paints over the parent's background image
         UIManager.put("TabbedPane.contentOpaque", false);
@@ -74,7 +72,7 @@ public class AgramGUIManager extends AbstractGUIManager {
         tabs.add("Rules", createRulesPanel());
 
         // Player areas: player 0 at the bottom, then round the table
-        playerViews = new AgramPlayerView[nPlayers];
+        playerViews = new PlayerHandView[nPlayers];
         playerViewBorders = new Border[nPlayers];
         playerTitles = new TitledBorder[nPlayers];
         agentNames = new String[nPlayers];
@@ -87,13 +85,14 @@ public class AgramGUIManager extends AbstractGUIManager {
             sides[s].setOpaque(false);   // an unused side would otherwise paint a grey block over the table
         }
         for (int i = 0; i < nPlayers; i++) {
-            AgramPlayerView playerView = new AgramPlayerView(state.getPlayerHands().get(i), i);
+            PlayerHandView playerView = new PlayerHandView(state.getPlayerHands().get(i), i, playerAreaWidth);
             playerView.setOpaque(false);
             String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
             agentNames[i] = split[split.length - 1];
             TitledBorder title = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i,
                     TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
+            title.setTitleColor(Color.white);   // the table background is dark
             playerTitles[i] = title;
             playerViewBorders[i] = title;
             playerView.setBorder(title);
@@ -142,14 +141,40 @@ public class AgramGUIManager extends AbstractGUIManager {
         int dealer = (state.getFirstPlayer() + state.getNPlayers() - 1) % state.getNPlayers();
 
         for (int i = 0; i < playerViews.length; i++) {
-            playerViews[i].update(state, showHand(state, i), params.nDeals > 1);
+            String deals = params.nDeals > 1 ? "deals won " + state.getDealsWon(i) : "";
+            playerViews[i].update(state.getPlayerHands().get(i), showHand(state, i),
+                    state.getKnownVoids().get(i), deals);
             playerTitles[i].setTitle("Player " + i + " [" + agentNames[i] + "]" + (i == dealer ? " - dealer" : ""));
             playerViews[i].setBorder(i == currentPlayer && state.isNotTerminal()
                     ? BorderFactory.createCompoundBorder(highlightActive, playerViewBorders[i])
                     : playerViewBorders[i]);
         }
-        trickView.update(state);
+        updateTrickView(state, params);
         parent.repaint();
+    }
+
+    /**
+     * The centre panel: the deal and trick numbers, the suit led, and how many tricks have been played.
+     */
+    private void updateTrickView(AgramGameState state, AgramParameters params) {
+        int tricksDone = state.getDiscardPile().getSize() / state.getNPlayers();
+        int trick = Math.min(tricksDone + 1, params.nCardsPerPlayer);
+        String header = (params.nDeals > 1 ? "Deal " + (state.getRoundCounter() + 1) + " of " + params.nDeals + "   " : "")
+                + "Trick " + trick + " of " + params.nCardsPerPlayer
+                + (trick == params.nCardsPerPlayer ? "  - the last trick wins" : "");
+        FrenchCard.Suite lead = state.getCurrentTrick().getLeadSuit();
+        String leadText;
+        if (!state.isNotTerminal()) {
+            // the trick leader is the winner of the last trick, which has gone to the discard pile
+            header = params.nDeals > 1 ? "Match over" : "Game over";
+            leadText = "Player " + state.getCurrentTrick().getLeader() + " won the last trick"
+                    + (params.nDeals > 1 ? " of the last deal" : " and the game");
+        } else leadText = lead == null
+                ? "Player " + state.getCurrentTrick().getLeader() + " to lead"
+                : "Suit led: " + CardArt.suitText(lead) + "   -   highest " + lead.name() + " wins";
+        String footer = "Tricks played this deal: " + tricksDone + "     Cards not dealt: "
+                + state.getDrawDeck().getSize() + " (unused)";
+        trickView.update(state.getCurrentTrick(), null, header, leadText, footer, state.isNotTerminal());
     }
 
     /**

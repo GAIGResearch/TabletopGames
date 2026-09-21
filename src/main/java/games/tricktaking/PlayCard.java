@@ -1,12 +1,12 @@
-package games.agram.actions;
+package games.tricktaking;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
-import games.agram.AgramGameState;
 
 /**
- * Play a card from the hand to the current trick.
+ * The current player plays a card from their hand to the current trick, recording any void it reveals (if
+ * {@link ITrickTakingParameters#rememberVoids()}). Works on any state implementing {@link ITrickTakingState}.
  */
 public class PlayCard extends AbstractAction {
 
@@ -18,13 +18,13 @@ public class PlayCard extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        AgramGameState state = (AgramGameState) gs;
-        int player = state.getCurrentPlayer();
-        FrenchCard.Suite lead = state.getLeadSuit();
-        if (lead != null && card.suite != lead)
-            state.getKnownVoids(player).add(lead);  // failing to follow suit shows everyone the player has none
-        state.getPlayerHands().get(player).remove(card);
-        state.getCurrentTrick().addToBottom(card);  // index 0 stays the lead card
+        ITrickTakingState state = (ITrickTakingState) gs;
+        int player = gs.getCurrentPlayer();
+        Trick trick = state.getCurrentTrick();
+        state.getPlayerHand(player).remove(card);  // throws if the player does not hold the card
+        if (((ITrickTakingParameters) gs.getGameParameters()).rememberVoids())
+            state.getKnownVoids().record(player, trick, card);
+        trick.play(card);
         return true;
     }
 
@@ -40,7 +40,7 @@ public class PlayCard extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return card.hashCode() + 518201;
+        return card.hashCode() + 730417;
     }
 
     @Override
