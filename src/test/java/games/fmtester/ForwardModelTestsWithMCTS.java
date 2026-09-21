@@ -2,6 +2,7 @@ package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import games.agram.AgramParameters;
+import games.cuckoo.CuckooParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.catan.CatanParameters;
@@ -243,6 +244,14 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("noTrumpsInRotation", true);
         params.setParameterValue("rememberVoids", false);
         new ForwardModelTester(params, "game=Whist", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testCuckoo() {
+        new ForwardModelTester("game=Cuckoo", "nGames=2", "nPlayers=6", "agent=json\\players\\mcts.json");
+        CuckooParameters params = new CuckooParameters();
+        params.setParameterValue("nLives", 1);
+        new ForwardModelTester(params, "game=Cuckoo", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 
     @Test

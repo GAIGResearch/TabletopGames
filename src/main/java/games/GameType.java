@@ -32,6 +32,10 @@ import games.agram.AgramForwardModel;
 import games.agram.gui.AgramGUIManager;
 import games.agram.AgramGameState;
 import games.agram.AgramParameters;
+import games.cuckoo.CuckooForwardModel;
+import games.cuckoo.CuckooGameState;
+import games.cuckoo.CuckooParameters;
+import games.cuckoo.gui.CuckooGUIManager;
 import games.whist.WhistForwardModel;
 import games.whist.WhistGameState;
 import games.whist.WhistParameters;
@@ -348,6 +352,9 @@ public enum GameType {
     Agram(2, 5, Arrays.asList(Cards, Simple),
             List.of(TrickTaking),
             AgramGameState.class, AgramForwardModel.class, AgramParameters.class, AgramGUIManager.class),
+    Cuckoo(4, 10, Arrays.asList(Cards, Simple),
+            Arrays.asList(PlayerElimination, TakeThat),
+            CuckooGameState.class, CuckooForwardModel.class, CuckooParameters.class, CuckooGUIManager.class),
     Cribbage(2, 2, Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, PatternBuilding, SetCollection),
             CribbageGameState.class, CribbageForwardModel.class, CribbageParameters.class, CribbageGUIManager.class),

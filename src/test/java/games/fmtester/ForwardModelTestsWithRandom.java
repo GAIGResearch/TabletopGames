@@ -2,6 +2,7 @@ package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import games.agram.AgramParameters;
+import games.cuckoo.CuckooParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.crazyeights.CZEParameters;
@@ -186,6 +187,15 @@ public class ForwardModelTestsWithRandom {
         AgramParameters params = new AgramParameters();
         params.setParameterValue("nDeals", 3);
         new ForwardModelTester(params, "game=Agram", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testCuckoo() {
+        new ForwardModelTester("game=Cuckoo", "nGames=2", "nPlayers=6");
+        new ForwardModelTester("game=Cuckoo", "nGames=2", "nPlayers=4");
+        CuckooParameters params = new CuckooParameters();
+        params.setParameterValue("nLives", 1);
+        new ForwardModelTester(params, "game=Cuckoo", "nGames=2", "nPlayers=10");
     }
 
     @Test
