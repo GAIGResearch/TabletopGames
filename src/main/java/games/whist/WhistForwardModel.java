@@ -21,9 +21,6 @@ import static core.CoreConstants.VisibilityMode.*;
  */
 public class WhistForwardModel extends StandardForwardModel {
 
-    private static final FrenchCard.Suite[] ROTATION =
-            {FrenchCard.Suite.Hearts, FrenchCard.Suite.Diamonds, FrenchCard.Suite.Spades, FrenchCard.Suite.Clubs};
-
     @Override
     protected void _setup(AbstractGameState firstState) {
         WhistGameState state = (WhistGameState) firstState;
@@ -56,7 +53,7 @@ public class WhistForwardModel extends StandardForwardModel {
             hand.clear();
         }
         deck.add(state.currentTrick);
-        state.currentTrick.reset((state.getDealer() + 1) % nPlayers);
+        state.currentTrick = new Trick("CurrentTrick", nPlayers, (state.getDealer() + 1) % nPlayers);
         deck.add(state.discardPile);
         state.discardPile.clear();
         deck.shuffle(state.getRnd());
@@ -85,11 +82,8 @@ public class WhistForwardModel extends StandardForwardModel {
                 state.trumpSuit = lastCard.suite;
             }
             case ROTATION -> {
-                // Hearts, Diamonds, Spades, Clubs from the first deal, then (optionally) a deal with no trumps
-                int cycle = params.noTrumpsInRotation ? ROTATION.length + 1 : ROTATION.length;
-                int index = state.getRoundCounter() % cycle;
                 state.trumpCard = null;
-                state.trumpSuit = index < ROTATION.length ? ROTATION[index] : null;
+                state.trumpSuit = params.rotationTrumps(state.getRoundCounter());
             }
         }
     }
@@ -120,7 +114,7 @@ public class WhistForwardModel extends StandardForwardModel {
         int winner = trick.winner(state.trumpSuit);
         state.tricksTaken[winner]++;
         state.discardPile.add(trick);
-        trick.reset(winner);
+        state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), winner);
         if (state.playerHands.stream().anyMatch(h -> h.getSize() > 0)) {
             endPlayerTurn(state, winner);
             return;
@@ -149,8 +143,7 @@ public class WhistForwardModel extends StandardForwardModel {
     }
 
     /**
-     * Both partners of the side with more points win, and the other side loses; equal points is a draw. The default
-     * implementation would call two partners sharing first place a draw.
+     * Both partners of the side with more points win, and the other side loses; equal points is a draw.
      */
     @Override
     protected void endGame(AbstractGameState gs) {

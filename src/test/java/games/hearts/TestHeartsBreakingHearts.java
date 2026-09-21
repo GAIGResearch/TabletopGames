@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.tricktaking.PlayCard;
+import games.tricktaking.Trick;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,7 +57,7 @@ public class TestHeartsBreakingHearts {
      * An empty trick for this player to lead, with the turn theirs.
      */
     private void toLead(int player) {
-        gameState.currentTrick.reset(player);
+        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), player);
         gameState.setFirstPlayer(player);
     }
 
@@ -92,7 +93,7 @@ public class TestHeartsBreakingHearts {
     @Test
     public void aPlayerUnableToFollowSuitMayDiscardAHeartWhileUnbroken() {
         giveHand(1, "4H", "QH", "6C");
-        gameState.currentTrick.reset(0);
+        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
         gameState.currentTrick.play(card("KS"));  // player 0 has led spades
         gameState.setTurnOwner(1);
         // player 1 holds no spade, so the whole hand is legal - the lead restriction applies only to leading
@@ -102,7 +103,7 @@ public class TestHeartsBreakingHearts {
     @Test
     public void discardingAHeartBreaksHearts() {
         giveHand(1, "4H", "QH", "6C");
-        gameState.currentTrick.reset(0);
+        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
         gameState.currentTrick.play(card("KS"));  // player 0 has led spades
         gameState.setTurnOwner(1);
 

@@ -96,7 +96,7 @@ public class SpadesForwardModel extends StandardForwardModel {
                 for (FrenchCard card : trick.getComponents())
                     trickDeck.addToBottom(card);
                 state.tricksWon.get(trickWinner).add(trickDeck);
-                trick.reset(trickWinner);
+                state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), trickWinner);
                 endPlayerTurn(state, trickWinner);
 
                 if (state.getPlayerHands().get(0).getSize() == 0) {
@@ -207,7 +207,7 @@ public class SpadesForwardModel extends StandardForwardModel {
         }
 
         // the first player of the round bids first, and then leads the first trick
-        state.currentTrick.reset(state.getFirstPlayer());
+        state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), state.getFirstPlayer());
         state.setGamePhase(SpadesGameState.Phase.BIDDING);
         state.setSpadesBroken(false);
 

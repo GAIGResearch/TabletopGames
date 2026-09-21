@@ -126,7 +126,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             if (hgs.playerDecks.get(i).contains(params.startingCard)) {
                 hgs.setFirstPlayer(i);
-                hgs.currentTrick.reset(i);
+                hgs.currentTrick = new Trick("CurrentTrick", hgs.getNPlayers(), i);
                 return;
             }
         }
@@ -238,7 +238,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         hgs.trickDecks.get(winningPlayerID).add(trick);
         hgs.playerTricksTaken[winningPlayerID]++;
         hgs.setFirstPlayer(winningPlayerID);
-        trick.reset(winningPlayerID);
+        hgs.currentTrick = new Trick("CurrentTrick", hgs.getNPlayers(), winningPlayerID);
 
         // Check if all cards from player hands have been played
         if (hgs.playerDecks.stream().allMatch(deck -> deck.getSize() == 0)) {

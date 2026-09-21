@@ -8,6 +8,7 @@ import core.components.Deck;
 import java.util.List;
 
 import games.tricktaking.PlayCard;
+import games.tricktaking.Trick;
 import games.hearts.actions.Pass;
 import org.junit.*;
 import core.components.FrenchCard;
@@ -202,7 +203,7 @@ public class TestHearts {
     public void testEndTurnWithRoundWinner() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
-        gameState.currentTrick.reset(0);
+        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:
@@ -239,7 +240,7 @@ public class TestHearts {
     public void testEndTurnTrickDeck() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
-        gameState.currentTrick.reset(0);
+        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:
@@ -279,7 +280,7 @@ public class TestHearts {
     public void testEndTurnNewRound() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
-        gameState.currentTrick.reset(0);
+        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:

@@ -1,5 +1,6 @@
 package games.whist;
 
+import core.components.FrenchCard;
 import evaluation.optimisation.TunableParameters;
 import games.tricktaking.ITrickTakingParameters;
 
@@ -18,6 +19,10 @@ public class WhistParameters extends TunableParameters<WhistParameters> implemen
      * WhistParameters.noTrumpsInRotation, a deal with no trumps), starting with Hearts.
      */
     public enum TrumpMode {TURN_UP, ROTATION}
+
+    // The trump suits of the ROTATION cycle, in order from the first deal
+    public static final List<FrenchCard.Suite> TRUMP_ROTATION =
+            List.of(FrenchCard.Suite.Hearts, FrenchCard.Suite.Diamonds, FrenchCard.Suite.Spades, FrenchCard.Suite.Clubs);
 
     // Deals in the game. The side with more points after the last deal wins
     public int nDeals = 1;
@@ -43,6 +48,15 @@ public class WhistParameters extends TunableParameters<WhistParameters> implemen
         trumpMode = (TrumpMode) getParameterValue("trumpMode");
         noTrumpsInRotation = (boolean) getParameterValue("noTrumpsInRotation");
         rememberVoids = (boolean) getParameterValue("rememberVoids");
+    }
+
+    /**
+     * The trump suit of the given deal (from 0) in ROTATION mode, or null for a deal with no trumps.
+     */
+    public FrenchCard.Suite rotationTrumps(int deal) {
+        int cycle = noTrumpsInRotation ? TRUMP_ROTATION.size() + 1 : TRUMP_ROTATION.size();
+        int index = deal % cycle;
+        return index < TRUMP_ROTATION.size() ? TRUMP_ROTATION.get(index) : null;
     }
 
     @Override

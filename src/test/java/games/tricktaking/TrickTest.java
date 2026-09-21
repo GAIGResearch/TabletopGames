@@ -101,16 +101,6 @@ public class TrickTest {
     }
 
     @Test
-    public void resetEmptiesTheTrickAndSetsTheNewLeader() {
-        Trick t = trick(0, "5H", "KH", "2H", "9H");
-        t.reset(2);
-        assertEquals(0, t.getSize());
-        assertEquals(2, t.getLeader());
-        assertNull(t.getLeadSuit());
-        assertEquals(2, t.playerOf(0));
-    }
-
-    @Test
     public void copyIsEqualAndIndependentAndEqualityDependsOnTheLeader() {
         Trick t = trick(1, "5H", "KH");
         Trick copy = t.copy();
@@ -121,12 +111,17 @@ public class TrickTest {
         assertEquals(cards("5H", "KH"), cardsOf(t));
         assertNotEquals(t, copy);
 
-        // same cards (none), same component, different leader
-        Trick a = trick(1);
-        Trick b = a.copy();
-        b.reset(2);
-        assertEquals(1, a.getLeader());
-        assertNotEquals(a, b);
-        assertNotEquals(a.hashCode(), b.hashCode());
+        // same cards (none), different leader
+        assertNotEquals(trick(1), trick(2));
+        assertNotEquals(trick(1).hashCode(), trick(2).hashCode());
+    }
+
+    @Test
+    public void tricksWithTheSameCardsAndLeaderAreEqualWhateverTheirComponentID() {
+        Trick a = trick(1, "5H", "KH");
+        Trick b = trick(1, "5H", "KH");
+        assertNotEquals(a.getComponentID(), b.getComponentID());
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
     }
 }

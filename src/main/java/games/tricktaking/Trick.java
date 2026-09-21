@@ -11,11 +11,14 @@ import java.util.Objects;
  * Index 0 is the lead card, and the card at index i was played by player (leader + i) % nPlayers.</p>
  *
  * <p>The game supplies the rules: which cards may be played (see {@link PlayRule}) and what is trumps.</p>
+ *
+ * <p>A game starts each trick with a new Trick, so two states in the same position hold Tricks with different
+ * componentIDs. Equality is therefore by value: the cards, the leader and the number of players.</p>
  */
 public class Trick extends Deck<FrenchCard> {
 
     private final int nPlayers;
-    private int leader;
+    private final int leader;
 
     public Trick(String name, int nPlayers, int leader) {
         super(name, VisibilityMode.VISIBLE_TO_ALL);
@@ -84,20 +87,12 @@ public class Trick extends Deck<FrenchCard> {
     }
 
     /**
-     * Whether the card beats the card currently winning the trick. FrenchCard numbers Aces 14, so Aces are high.
+     * Whether the card beats the card currently winning the trick.
      */
     private boolean beats(FrenchCard card, FrenchCard winning, FrenchCard.Suite trumps) {
         if (card.suite == winning.suite)
-            return card.number > winning.number;
+            return card.number > winning.number;  // FrenchCard numbers Aces 14, so Aces are high
         return card.suite == trumps;
-    }
-
-    /**
-     * Empties the trick, ready for the given player to lead the next one.
-     */
-    public void reset(int newLeader) {
-        clear();
-        leader = newLeader;
     }
 
     @Override
@@ -111,11 +106,11 @@ public class Trick extends Deck<FrenchCard> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Trick trick)) return false;
-        return super.equals(o) && nPlayers == trick.nPlayers && leader == trick.leader;
+        return nPlayers == trick.nPlayers && leader == trick.leader && components.equals(trick.components);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), nPlayers, leader);
+        return Objects.hash(components, nPlayers, leader);
     }
 }

@@ -24,13 +24,12 @@ import java.util.Objects;
  * <p>Components tracked:</p>
  * <ul>
  *     <li>playerHands - one Deck per player, VISIBLE_TO_OWNER</li>
- *     <li>currentTrick - the trick in progress, VISIBLE_TO_ALL; its leader leads (or led) it</li>
+ *     <li>currentTrick - the trick in progress, VISIBLE_TO_ALL</li>
  *     <li>discardPile - cards from completed tricks this deal, VISIBLE_TO_ALL</li>
  *     <li>trumpSuit - the trump suit of this deal, or null if there are no trumps</li>
- *     <li>trumpCard - the dealer's turned-up last card, or null if trumps were not set by a turned-up card. It is
- *     public knowledge that the dealer holds it until they play it</li>
- *     <li>tricksTaken - for each player, the tricks they have won this deal</li>
- *     <li>teamPoints - for each team, the points scored in completed deals</li>
+ *     <li>trumpCard - the dealer's turned-up last card, or null if trumps were not set by a turned-up card</li>
+ *     <li>tricksTaken - the tricks each player has won this deal</li>
+ *     <li>teamPoints - the points each *team* has scored for completed deals</li>
  *     <li>knownVoids - the suits each player is publicly known not to hold this deal</li>
  * </ul>
  */

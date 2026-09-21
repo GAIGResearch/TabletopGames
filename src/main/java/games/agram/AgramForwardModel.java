@@ -68,7 +68,7 @@ public class AgramForwardModel extends StandardForwardModel {
         state.drawDeck.add(state.discardPile);
         state.discardPile.clear();
         state.drawDeck.add(state.currentTrick);
-        state.currentTrick.reset(leader);
+        state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), leader);
         state.drawDeck.shuffle(state.getRnd());
         for (int p = 0; p < state.getNPlayers(); p++) {
             for (int i = 0; i < params.nCardsPerPlayer; i++)
@@ -100,7 +100,7 @@ public class AgramForwardModel extends StandardForwardModel {
         }
         int winner = state.currentTrick.winner(null);  // Agram has no trumps
         state.discardPile.add(state.currentTrick);
-        state.currentTrick.reset(winner);
+        state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), winner);
         if (state.playerHands.stream().anyMatch(h -> h.getSize() > 0)) {
             endPlayerTurn(state, winner);
             return;
