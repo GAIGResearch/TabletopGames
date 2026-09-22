@@ -42,6 +42,64 @@ public class GenerateBoards {
         monsters = data.getMonsters();
         lieutenants = data.getLieutenants();
 
+        for (int i = 0; i < CreateOffspring.endcapLimit; i++) {
+            String id = "-" + (i+1);
+            GridBoard tile = getTileByName("endcap1A");
+            assert tile != null;
+            GridBoard copy = tile.copyNewID();
+            copy.getProperties().clear();
+            for (int prop_key : tile.getProperties().keySet()) {
+                Property newProp = tile.getProperties().get(prop_key).copy();
+                copy.getProperties().put(prop_key, newProp);
+            }
+            copy.setComponentName(copy.getComponentName() + id);
+            tiles.add(copy);
+            tile = getTileByName("endcap1B");
+            assert tile != null;
+            copy = tile.copyNewID();
+            for (int prop_key : tile.getProperties().keySet()) {
+                Property newProp = tile.getProperties().get(prop_key).copy();
+                copy.getProperties().put(prop_key, newProp);
+            }
+            copy.setComponentName(copy.getComponentName() + id);
+            tiles.add(copy);
+        }
+        for (int i = 0; i < CreateOffspring.extenderLimit; i++) {
+            String id = "-" + (i+1);
+            GridBoard tile = getTileByName("extender1A");
+            assert tile != null;
+            GridBoard copy = tile.copyNewID();
+            copy.getProperties().clear();
+            for (int prop_key : tile.getProperties().keySet()) {
+                Property newProp = tile.getProperties().get(prop_key).copy();
+                copy.getProperties().put(prop_key, newProp);
+            }
+            copy.setComponentName(copy.getComponentName() + id);
+            tiles.add(copy);
+            tile = getTileByName("extender1B");
+            assert tile != null;
+            copy = tile.copyNewID();
+            for (int prop_key : tile.getProperties().keySet()) {
+                Property newProp = tile.getProperties().get(prop_key).copy();
+                copy.getProperties().put(prop_key, newProp);
+            }
+            copy.setComponentName(copy.getComponentName() + id);
+            tiles.add(copy);
+        }
+        for (int i = 0; i < CreateOffspring.transitionLimit; i++) {
+            String id = "-" + (i+1);
+            GridBoard tile = getTileByName("transition");
+            assert tile != null;
+            GridBoard copy = tile.copyNewID();
+            copy.getProperties().clear();
+            for (int prop_key : tile.getProperties().keySet()) {
+                Property newProp = tile.getProperties().get(prop_key).copy();
+                copy.getProperties().put(prop_key, newProp);
+            }
+            copy.setComponentName(copy.getComponentName() + id);
+            tiles.add(copy);
+        }
+
         for (int i = 0; i < originalQuests.size(); i++) {
             PCGBoard board = new PCGBoard(originalQuests.get(i), originalBoards.get(i));
             startingBoards.add(board);
@@ -49,7 +107,7 @@ public class GenerateBoards {
 
         boolean testing = true;
         if (testing) {
-            CreateOffspring co = new CreateOffspring(500,0,0,30);
+            CreateOffspring co = new CreateOffspring(500,200,10,30);
             co.begin(generationID);
         }
         else {
@@ -59,11 +117,15 @@ public class GenerateBoards {
     }
 
     public static GridBoard getTileByName(String name) {
-        if (name.contains("-"))
-            name = name.split("-")[0];
         for (GridBoard tile : tiles) {
             if (tile.getComponentName().equals(name)) {
-                return tile;
+                GridBoard copy = tile.copy();
+                copy.getProperties().clear();
+                for (int prop_key : tile.getProperties().keySet()) {
+                    Property newProp = tile.getProperties().get(prop_key).copy();
+                    copy.getProperties().put(prop_key, newProp);
+                }
+                return copy;
             }
         }
         return null;

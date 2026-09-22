@@ -69,9 +69,9 @@ public class CreateOffspring {
     int extender = 0;
 
     // Limitations imposed by the physical board
-    final int transitionLimit = 2;
-    final int endcapLimit = 5;
-    final int extenderLimit = 9;
+    static final int transitionLimit = 2;
+    static final int endcapLimit = 5;
+    static final int extenderLimit = 9;
 
     int IDEAL_SIZE = 166;
     int IDEAL_GROUP = 5;
@@ -446,14 +446,32 @@ public class CreateOffspring {
                     toRotate.add(node.copy());
             }
 
-            transition = 0;
-            endcap = 0;
-            extender = 0;
-
             // Fix names of Transitions, Endcaps and Extenders
             crossoverTiles.clear();
             freeNodes = rotateMutate(toRotate, crossoverTiles);
             finalNodes = new ArrayList<>(toRotate);
+        }
+
+        boolean boardReady = false;
+
+        int attempt = 0;
+
+        while(!boardReady) {
+            // Give up after 10 attempts
+            if (attempt > 10)
+                break;
+            attempt++;
+            boardReady = true;
+            assembleBoard(finalNodes);
+            for (PCGNode node : finalNodes) {
+                if (node.connects.size() != node.neighbours.size()) {
+                    boardReady = false;
+                    //System.out.println(attempt + ": I'll try spinning! That's a good trick!");
+                    crossoverTiles.clear();
+                    rotateMutate(finalNodes, crossoverTiles);
+                    break;
+                }
+            }
         }
         
         offspring.board = finalNodes;
@@ -982,20 +1000,7 @@ public class CreateOffspring {
     }
 
     GridBoard getTileByName(String name) {
-        if (name.contains("-"))
-            name = name.split("-")[0];
-        for (GridBoard tile : tiles) {
-            if (tile.getComponentName().equals(name)) {
-                GridBoard copy = tile.copy();
-                copy.getProperties().clear();
-                for (int prop_key : tile.getProperties().keySet()) {
-                    Property newProp = tile.getProperties().get(prop_key).copy();
-                    copy.getProperties().put(prop_key, newProp);
-                }
-                return copy;
-            }
-        }
-        return null;
+        return GenerateBoards.getTileByName(name);
     }
 
     GraphBoard getBoardByName(String name) {
@@ -1190,6 +1195,10 @@ public class CreateOffspring {
 
         int sideA = 0;
         int sideB = 0;
+
+        transition = 0;
+        endcap = 0;
+        extender = 0;
 
         // Fix the names first
         for (PCGNode node : nodes) {
@@ -1492,14 +1501,17 @@ public class CreateOffspring {
             if (!entrance) {
                 newNode = new PCGNode(sideB > sideA ? "entrance1B" : "entrance1A");
                 entrance = true;
+                newNode.nodeID = 1000 + Random.randInt(1000);
             }
             else if (!exit) {
                 newNode = new PCGNode(sideB > sideA ? "exit1B" : "exit1A");
                 exit = true;
+                newNode.nodeID = 9000 + Random.randInt(1000);
             }
             else if (endcap < endcapLimit) {
                 endcap++;
                 newNode = new PCGNode(sideB > sideA ? "endcap1B-" + endcap : "endcap1A-" + endcap);
+                newNode.nodeID = (endcap * 10000) + Random.randInt(1000);
             }
             if (newNode != null) {
                 if (north.size() < south.size()) {
@@ -1635,51 +1647,52 @@ public class CreateOffspring {
         return east.size() != west.size();
     }
 
-    void assembleBoard(List<BoardNode> nodes) {
+    void assembleBoard(List<PCGNode> nodes) {
         // Randomly assemble the new board
-        Map<String, String> pairings = new HashMap<>();
-        pairings.put("N-0", "S-0");
-        pairings.put("S-0", "N-0");
-        pairings.put("E-0", "W-0");
-        pairings.put("W-0", "E-0");
+        Map<Connection, Connection> pairings = new HashMap<>();
+        pairings.put(Connection.NORTH, Connection.SOUTH);
+        pairings.put(Connection.SOUTH, Connection.NORTH);
+        pairings.put(Connection.EAST, Connection.WEST);
+        pairings.put(Connection.WEST, Connection.EAST);
 
-        Map<String, Map<String, List<Pair<BoardNode, String>>>> possible = new HashMap<>();
+        Map<String, Map<Connection, List<Pair<PCGNode, Connection>>>> possible = new HashMap<>();
 
         // First, cleanse the board of any possible connections
-        for (BoardNode node : nodes) {
-            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
-            Arrays.fill(neighbours, "null");
+        for (PCGNode node : nodes) {
             node.clearNeighbours();
 
-            Map<String, List<Pair<BoardNode, String>>> connections = new HashMap<>();
+            Map<Connection, List<Pair<PCGNode, Connection>>> connections = new HashMap<>();
 
-            for (String c : ((PropertyStringArray) node.getProperty("connections")).getValues())
+            for (Connection c : node.connects)
                 connections.put(c, new ArrayList<>());
-            possible.put(node.getComponentName(), connections);
+            possible.put(node.name, connections);
         }
         // Then, go through all possible connections for each node
-        for (BoardNode n1 : nodes) {
-            for (BoardNode n2 : nodes) {
+        for (PCGNode n1 : nodes) {
+            for (PCGNode n2 : nodes) {
                 if (n1.equals(n2))
                     continue;
-
-                for (String connection : ((PropertyStringArray) n1.getProperty("connections")).getValues()) {
-                    String opposite = pairings.get(connection);
-
-                    String[] n2Connects = ((PropertyStringArray) n2.getProperty("connections")).getValues();
-                    if (Arrays.asList(n2Connects).contains(opposite)) {
-                        Map<String, List<Pair<BoardNode, String>>> link = possible.get(n1.getComponentName());
-                        List<Pair<BoardNode, String>> list = link.get(connection);
+                for (Connection connection : n1.connects) {
+                    Connection opposite = pairings.get(connection);
+                    if (n2.connects.contains(opposite)) {
+                        Map<Connection, List<Pair<PCGNode, Connection>>> link = possible.get(n1.name);
+                        List<Pair<PCGNode, Connection>> list = link.get(connection);
                         if (list == null) {
-                            System.out.println("n1: " + n1.getComponentName() + ": Real Name: " + n1.getProperty("name").toString());
-                            System.out.println("n2: " + n2.getComponentName() + ": Real Name: " + n2.getProperty("name").toString());
-                            System.out.println("Connection: " + connection);
+                            System.out.println(Arrays.toString(possible.keySet().toArray()));
+                            System.out.println(n1.name + "; " + n1.orientation + "; " + connection + "; " + n2.name + "; " + n2.orientation + "; " + opposite);
+                            for (Connection c : n1.connects)
+                                System.out.println(c);
+                            System.out.println("-");
+                            for (Connection c : n2.connects)
+                                System.out.println(c);
+                            System.out.println("-");
+                            for (Connection key : link.keySet()) {
+                                System.out.println(key + "; " + link.get(key));
+                            }
                         }
                         list.add(new Pair<>(n2, opposite));
                     }
-
                 }
-
             }
         }
 
@@ -1687,10 +1700,10 @@ public class CreateOffspring {
         List<String[]> unique = new ArrayList<>();
         Set<String> checked = new HashSet<>();
         for (String tile : possible.keySet()) {
-            for (String connection : possible.get(tile).keySet()) {
+            for (Connection connection : possible.get(tile).keySet()) {
                 String one = tile + ":" + connection;
-                for (Pair<BoardNode, String> piece : possible.get(tile).get(connection)) {
-                    String two = piece.a.getComponentName() + ":" + piece.b;
+                for (Pair<PCGNode, Connection> piece : possible.get(tile).get(connection)) {
+                    String two = piece.a.name + ":" + piece.b;
 
                     List<String> pair = Arrays.asList(one, two);
                     Collections.sort(pair);
@@ -1732,35 +1745,19 @@ public class CreateOffspring {
             String[] first = pair[0].split(":");
             String[] second = pair[1].split(":");
 
-            for (BoardNode node : nodes) {
-                if (node.getComponentName().equals(first[0])) {
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    for (int i = 0; i < connections.length; i++) {
-                        if (connections[i].equals(first[1])) {
-                            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
-                            neighbours[i] = second[0];
-                            for (BoardNode n2 : nodes) {
-                                if (n2.getComponentName().equals(second[0])) {
-                                    node.addNeighbourWithCost(n2);
-                                    break;
-                                }
-                            }
+            for (PCGNode node : nodes) {
+                if (node.name.equals(first[0])) {
+                    for (Connection connection : node.connects) {
+                        if (connection.toString().equals(first[1])) {
+                            node.neighbours.put(connection, second[0]);
                             break;
                         }
                     }
                 }
-                if (node.getComponentName().equals(second[0])) {
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    for (int i = 0; i < connections.length; i++) {
-                        if (connections[i].equals(second[1])) {
-                            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
-                            neighbours[i] = first[0];
-                            for (BoardNode n2 : nodes) {
-                                if (n2.getComponentName().equals(first[0])) {
-                                    node.addNeighbourWithCost(n2);
-                                    break;
-                                }
-                            }
+                if (node.name.equals(second[0])) {
+                    for (Connection connection : node.connects) {
+                        if (connection.toString().equals(second[1])) {
+                            node.neighbours.put(connection, first[0]);
                             break;
                         }
                     }
@@ -1863,25 +1860,23 @@ public class CreateOffspring {
         Files.write(fitnessOutput,"[\n".getBytes());
         int counter = 0;
         int max = set.size();
-        /*
-        for (PCGBoard pair : set) {
+
+        for (PCGBoard quest : set) {
             counter++;
-            Quest quest = pair.a;
-            GraphBoard board = pair.b;
 
             StringBuilder outputQ = new StringBuilder("{\"");
 
-            outputQ.append("id\":\"").append(quest.getName()).append("\"");
-            outputQ.append(",\"act\":").append(quest.getAct());
-            outputQ.append(",\"starting-gold\":").append(quest.getGold());
-            outputQ.append(",\"starting-xp\":").append(quest.getStartingXP());
-            outputQ.append(",\"traits\": [\"").append(String.join("\", \"", quest.getMonsterTraits())).append("\"]");
+            outputQ.append("id\":\"").append(quest.name).append("\"");
+            outputQ.append(",\"act\":").append(quest.act);
+            outputQ.append(",\"starting-gold\":").append(quest.gold);
+            outputQ.append(",\"starting-xp\":").append(quest.startingXP);
+            outputQ.append(",\"traits\": [\"").append(String.join("\", \"", quest.monsterTraits)).append("\"]");
             outputQ.append(",\"monsters\": [");
-            int monsterMax = quest.getMonsters().size();
+            int monsterMax = quest.monsters.size();
             int monsterCounter = 0;
-            for (String[] monster : quest.getMonsters()) {
+            for (Pair<String, String> monster : quest.monsters) {
                 monsterCounter++;
-                outputQ.append("[\"").append(monster[0]).append("\", \"").append(monster[1]).append("\"]");
+                outputQ.append("[\"").append(monster.a).append("\", \"").append(monster.b).append("\"]");
                 if (monsterCounter < monsterMax)
                     outputQ.append(",");
                 else
@@ -1921,8 +1916,8 @@ public class CreateOffspring {
                     "\"value\": 1.0," +
                     "\"mustWinToReceive\": true" +
                     "}]");
-            outputQ.append(",\"boards\": [ \"").append(board.getComponentName()).append("\"]");
-            outputQ.append(",\"starting-tile\": \"").append(quest.getStartingTile()).append("\"");
+            outputQ.append(",\"boards\": [ \"").append(quest.name.toLowerCase()).append("\"]");
+            outputQ.append(",\"starting-tile\": \"").append(quest.heroStartingPosition).append("\"");
 
             outputQ.append("}");
 
@@ -1934,46 +1929,48 @@ public class CreateOffspring {
             outputB.append("\"verticesKey\": \"name\",");
             outputB.append("\"neighboursKey\": \"neighbours\",");
             outputB.append("\"maxNeighbours\": -1,");
-            outputB.append("\"id\": \"").append(board.getComponentName()).append("\",");
+            outputB.append("\"id\": \"").append(quest.name.toLowerCase()).append("\",");
             outputB.append("\"nodes\": [");
             int nodeCount = 0;
-            for (BoardNode node : board.getBoardNodes()) {
+            for (PCGNode node : quest.board) {
                 nodeCount++;
 
-                String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
-                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+                List<Connection> connections = node.connects;
+                HashMap<Connection, String> neighbours = node.neighbours;
 
-                outputB.append("{ \"name\": [\"String\", \"").append(node.getComponentName()).append("\"],");
-                outputB.append("\"orientation\": [\"Integer\", ").append(node.getProperty("orientation")).append("],");
-                outputB.append("\"neighbours\": [\"String[]\", [");
+                outputB.append("{ \"name\": [\"String\", \"").append(node.name).append("\"],");
+                outputB.append("\"orientation\": [\"Integer\", ").append(node.orientation).append("],");
 
-                int neighbourCount = 0;
-                for (String neighbour : neighbours) {
+                StringBuilder neighbourString = new StringBuilder("\"neighbours\": [\"String[]\", []],");
+                StringBuilder connectionString = new StringBuilder("\"connections\": [\"String[]\", []]}");
+
+                /*int neighbourCount = 0;
+                for (Connection c : connections) {
+                    String connect = switch(c) {
+                        case NORTH -> "N-0";
+                        case EAST -> "E-0";
+                        case SOUTH -> "S-0";
+                        case WEST -> "W-0";
+                    };
                     neighbourCount++;
-                    outputB.append("\"").append(neighbour).append("\"");
-                    if (neighbourCount < neighbours.length)
-                        outputB.append(", ");
-                    else
-                        outputB.append("]],");
-                }
-                outputB.append("\"connections\": [\"String[]\", [");
-                neighbourCount = 0;
-                for (String connect : connections) {
-                    neighbourCount++;
-                    outputB.append("\"").append(connect).append("\"");
-                    if (neighbourCount < connections.length)
-                        outputB.append(", ");
-                    else
-                        outputB.append("]]}");
-                }
-                if (nodeCount < board.getBoardNodes().size())
+                    neighbourString.append("\"").append(node.neighbours.get(c)).append("\"");
+                    connectionString.append("\"").append(connect).append("\"");
+                    if (neighbourCount < node.neighbours.size()) {
+                        neighbourString.append(", ");
+                        connectionString.append(", ");
+                    }
+                    else {
+                        neighbourString.append("]],");
+                        connectionString.append("]]}");
+                    }
+                }*/
+                outputB.append(neighbourString);
+                outputB.append(connectionString);
+                if (nodeCount < quest.board.size())
                     outputB.append(",");
                 else
                     outputB.append("]}");
             }
-
-
-
 
             // -- FINAL OUTPUTS ---
 
@@ -2035,7 +2032,6 @@ public class CreateOffspring {
 
             Files.writeString(fitnessOutput,prettyS + System.lineSeparator(),StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         }
-         */
     }
 
     void exportMAPElitesToJSON(MapElites first, MapElites second) throws IOException {

@@ -453,6 +453,7 @@ public class FitnessFunction {
         scores.put("Spawning", spawning);
         scores.put("Consistency", consistency);
         scores.put("Size", size);
+        scores.put("Physical Size", Float.valueOf(result.b));
         scores.put("Height", height);
         scores.put("Width", width);
         scores.put("Tile Count", tiles);

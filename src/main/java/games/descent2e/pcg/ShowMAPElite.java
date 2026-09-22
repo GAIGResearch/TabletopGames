@@ -120,28 +120,18 @@ public class ShowMAPElite {
 
                 if (fit > 0f) {
 
-                    Pair<Quest, GraphBoard> quest = co.getQuestByID(myID, true);
+                    PCGBoard quest = co.getQuestByID(myID, true);
                     HashMap<String, Float> scores = co.getScoresByID(myID, true);
                     if (quest != null) {
-                        Quest q = quest.a;
-                        GraphBoard b = quest.b;
 
                         ShowMAPElite parent = this;
 
                         button.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                //System.out.println("ID: " + myID);
-                                //System.out.println("Fitness: " + fit);
-                                for (String[] monster : q.getMonsters()) {
-                                    //System.out.println(Arrays.toString(monster));
-                                }
-                                for (BoardNode node : b.getBoardNodes()) {
-                                    //System.out.println(node.getComponentName());
-                                }
                                 ShowMap map = null;
                                 try {
-                                    map = new ShowMap(co, q, b, myID, scores, parent, null);
+                                    map = new ShowMap(co, quest, myID, scores, parent, null);
                                 } catch (IOException ex) {
                                     throw new RuntimeException(ex);
                                 }

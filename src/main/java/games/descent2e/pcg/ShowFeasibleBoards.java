@@ -18,7 +18,7 @@ import java.util.List;
 public class ShowFeasibleBoards {
     private final JFrame window;
     private JPanel panel;
-    private List<Pair<HashMap<String, Float>, Pair<Quest, GraphBoard>>> feasibleList = new ArrayList<>();
+    private List<Pair<HashMap<String, Float>, PCGBoard>> feasibleList = new ArrayList<>();
     private CreateOffspring co;
 
     public ShowFeasibleBoards(CreateOffspring co) {
@@ -59,14 +59,14 @@ public class ShowFeasibleBoards {
         window.setVisible(false);
     }
 
-    public void prepare(List<Pair<Quest, GraphBoard>> feasible, List<HashMap<String, Float>> fitness) {
+    public void prepare(List<PCGBoard> feasible, List<HashMap<String, Float>> fitness) {
         feasibleList.clear();
         for (HashMap<String, Float> f : fitness) {
             int id = f.get("ID").intValue();
-            Pair<Quest, GraphBoard> quest = getQuest(id, feasible);
+            PCGBoard quest = getQuest(id, feasible);
             float fit = f.get("Fitness");
 
-            Pair<HashMap<String, Float>, Pair<Quest, GraphBoard>> result = new Pair<>(f, quest);
+            Pair<HashMap<String, Float>, PCGBoard> result = new Pair<>(f, quest);
             if (feasibleList.isEmpty()) {
                 feasibleList.add(result);
             }
@@ -84,20 +84,20 @@ public class ShowFeasibleBoards {
 
         ShowFeasibleBoards parent = this;
 
-        for (Pair<HashMap<String, Float>, Pair<Quest, GraphBoard>> quest : feasibleList) {
-            Quest q = quest.b.a;
-            GraphBoard board = quest.b.b;
-            String name = q.getName();
+        for (Pair<HashMap<String, Float>, PCGBoard> quest : feasibleList) {
+            PCGBoard q = quest.b;
+            String name = quest.b.name;
             int id = Integer.parseInt(name.split("-")[1]);
             HashMap<String, Float> scores = quest.a;
             float f = scores.get("Fitness");
             JButton button = new JButton(name + " - Fitness: " + f);
+
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     ShowMap map = null;
                     try {
-                        map = new ShowMap(co, q, board, id, scores, null, parent);
+                        map = new ShowMap(co, q, id, scores, null, parent);
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -107,15 +107,15 @@ public class ShowFeasibleBoards {
             });
 
             String monsterList = "";
-            for (String[] monster : q.getMonsters()) {
-                monsterList += monster[0].split(":")[0] + ", ";
+            for (Pair<String, String> monster : q.monsters) {
+                monsterList += monster.a.split(":")[0] + ", ";
             }
             String traitsList = "";
-            for (String trait : q.getMonsterTraits()) {
+            for (String trait : q.monsterTraits) {
                 traitsList += trait + ", ";
             }
 
-            JLabel tiles = new JLabel("Tiles Count: " + board.getBoardNodes().size() + ", ");
+            JLabel tiles = new JLabel("Tiles Count: " + scores.get("Tile Count").intValue() + ", ");
             JLabel size = new JLabel("Size: " + scores.get("Size").intValue() + " (" + scores.get("Height").intValue() + "x" + scores.get("Width").intValue() + "), ");
             JLabel traits = new JLabel("Traits: " + traitsList);
             JLabel groups = new JLabel("Groups: " + scores.get("Groups") + ", ");
@@ -137,9 +137,9 @@ public class ShowFeasibleBoards {
         panel.repaint();
     }
 
-    Pair<Quest, GraphBoard> getQuest (int target, List<Pair<Quest, GraphBoard>> feasible) {
-        for (Pair<Quest, GraphBoard> quest : feasible) {
-            int id = Integer.parseInt(quest.a.getName().split("-")[1]);
+    PCGBoard getQuest (int target, List<PCGBoard> feasible) {
+        for (PCGBoard quest : feasible) {
+            int id = Integer.parseInt(quest.name.split("-")[1]);
             if (id == target)
                 return quest;
         }

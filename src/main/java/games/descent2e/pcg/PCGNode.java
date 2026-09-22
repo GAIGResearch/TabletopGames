@@ -61,4 +61,14 @@ public class PCGNode {
     public void clearNeighbours() {
         neighbours.clear();
     }
+
+    public boolean equals(Object o) {
+        if (o instanceof PCGNode node2) {
+            return Objects.equals(node2.name, name) && node2.orientation == orientation && node2.maxConnections == maxConnections &&
+                    node2.size == size && node2.nodeID == nodeID &&
+                    Objects.equals(node2.connects, connects) && Objects.equals(node2.neighbours, neighbours);
+        }
+        return false;
+
+    }
 }

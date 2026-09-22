@@ -1,21 +1,15 @@
 package games.descent2e.pcg;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import core.components.BoardNode;
-import core.components.GraphBoard;
 import core.properties.PropertyStringArray;
-import games.descent2e.concepts.Quest;
 import games.descent2e.gui.DescentGridBoardView;
 import org.apache.commons.io.FileUtils;
 import org.jdesktop.swingx.border.DropShadowBorder;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.JSONUtils;
+import utilities.Pair;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -23,20 +17,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
 
 public class ShowMap {
-    private Quest quest;
-    private GraphBoard board;
+    private PCGBoard quest;
+    private List<PCGNode> board;
 
     private ShowMAPElite parentElite;
     private ShowFeasibleBoards parentList;
@@ -49,12 +40,14 @@ public class ShowMap {
 
     private final String dataPath = "data/descent2e/img/";
 
-    public ShowMap(CreateOffspring co, Quest quest, GraphBoard board, int id, HashMap<String, Float> scores, ShowMAPElite parentElite, ShowFeasibleBoards parentList) throws IOException {
+    public ShowMap(CreateOffspring co, PCGBoard quest, int id, HashMap<String, Float> scores, ShowMAPElite parentElite, ShowFeasibleBoards parentList) throws IOException {
 
         this.parentElite = parentElite;
         this.parentList = parentList;
+        this.quest = quest;
+        this.board = quest.board;
 
-        window = new JFrame(quest.getName());
+        window = new JFrame(quest.name);
         window.setSize(maxWidth, maxHeight);
         window.setResizable(false);
         window.setLocationRelativeTo(null);
@@ -68,7 +61,7 @@ public class ShowMap {
         top.setBackground(Color.CYAN);
         top.setBorder(blackline);
         top.setLayout(new FlowLayout());
-        JLabel nameLabel = new JLabel(quest.getName());
+        JLabel nameLabel = new JLabel(quest.name);
         top.add(nameLabel);
         window.add(top, BorderLayout.PAGE_START);
 
@@ -153,10 +146,9 @@ public class ShowMap {
         tilesPanel.setBackground(Color.WHITE);
         tilesPanel.setPreferredSize(new Dimension(300, 325));
 
-        Collection<BoardNode> nodes = board.getBoardNodes();
         JPanel tileCountHold = new JPanel(new FlowLayout(FlowLayout.CENTER));
         tileCountHold.setBackground(Color.WHITE);
-        JLabel tileCount = new JLabel(nodes.size() + " Tiles Used");
+        JLabel tileCount = new JLabel(board.size() + " Tiles Used");
         tileCountHold.add(tileCount);
         tilesPanel.add(tileCountHold);
 
@@ -210,7 +202,7 @@ public class ShowMap {
         TitledBorder traitsText = new TitledBorder(blackline, "Monster Traits");
         traitsText.setTitleJustification(TitledBorder.CENTER);
         traits.setBorder(traitsText);
-        for (String trait: quest.getMonsterTraits()) {
+        for (String trait: quest.monsterTraits) {
             JLabel t = new JLabel(trait);
             traits.add(t);
         }
@@ -222,13 +214,13 @@ public class ShowMap {
         openText.setTitleJustification(TitledBorder.CENTER);
         openGroups.setBorder(openText);
 
-        if (quest.getMonsterTraits().contains("All")) {
+        if (quest.monsterTraits.contains("All")) {
             openGroups.add(new JLabel("All Monsters Legal"));
         }
         for (String monster : GenerateBoards.monsters.keySet()) {
             String[] monsterTraits = ((PropertyStringArray) GenerateBoards.monsters.get(monster).get("super").getProperty("traits")).getValues();
             for (String mTrait : monsterTraits) {
-                if (quest.getMonsterTraits().contains(mTrait)) {
+                if (quest.monsterTraits.contains(mTrait)) {
                     JLabel m = new JLabel(monster);
                     openGroups.add(m);
                     break;
@@ -254,7 +246,7 @@ public class ShowMap {
         spawningContainer.setBorder(positionText);
         JPanel heroSpawnContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
         heroSpawnContainer.setBackground(Color.WHITE);
-        String heroTile = quest.getStartingTile();
+        String heroTile = quest.heroStartingPosition;
         JLabel heroSpawn = new JLabel("Heroes: " + heroTile);
         JPanel heroColour = new JPanel();
         heroColour.setPreferredSize(new Dimension(15, 8));
@@ -267,13 +259,13 @@ public class ShowMap {
         heroSpawnContainer.add(heroPicture);
         spawningContainer.add(heroSpawnContainer);
 
-        for (String[] monster : quest.getMonsters()) {
+        for (Pair<String, String> monster : quest.monsters) {
             JPanel monsterContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
             monsterContainer.setBackground(Color.WHITE);
 
-            String m = monster[0].split(":")[0];
-            String pos = monster[1];
-            boolean isLieutenant = monster[0].split(":")[1].contains("lieutenant");
+            String m = monster.a.split(":")[0];
+            String pos = monster.b;
+            boolean isLieutenant = monster.a.split(":")[1].contains("lieutenant");
 
             String monsterPath = dataPath;
 
@@ -324,7 +316,7 @@ public class ShowMap {
                 save.setEnabled(false);
                 try {
                     co.saveBoard(id);
-                    save(quest, board);
+                    save(quest);
                 } catch (IOException | ParseException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -359,12 +351,12 @@ public class ShowMap {
         window.setVisible(false);
     }
 
-    public void save(Quest quest, GraphBoard board) throws IOException, ParseException {
+    public void save(PCGBoard quest) throws IOException, ParseException {
         String questPath = "data/descent2e/mainQuests.json";
         String boardPath = "data/descent2e/boards.json";
         String pcgPath = "data/descent2e/campaigns/PCG.json";
 
-        Files.writeString(Path.of(pcgPath), "{\n  \"name\": \"PCG\",\n  \"quests\":\n    [\n      \"" + quest.getName() + "\"\n    ]\n}\n");
+        Files.writeString(Path.of(pcgPath), "{\n  \"name\": \"PCG\",\n  \"quests\":\n    [\n      \"" + quest.name + "\"\n    ]\n}\n");
 
         String questData = FileUtils.readFileToString(new File(questPath), StandardCharsets.UTF_8);
         questData = questData.substring(0, questData.lastIndexOf("]") - 1) + ", ";
@@ -375,17 +367,17 @@ public class ShowMap {
         Files.writeString(Path.of(boardPath), boardData);
 
         StringBuilder outputQ = new StringBuilder("{\"");
-        outputQ.append("id\":\"").append(quest.getName()).append("\"");
-        outputQ.append(",\"act\":").append(quest.getAct());
-        outputQ.append(",\"starting-gold\":").append(quest.getGold());
-        outputQ.append(",\"starting-xp\":").append(quest.getStartingXP());
-        outputQ.append(",\"traits\": [\"").append(String.join("\", \"", quest.getMonsterTraits())).append("\"]");
+        outputQ.append("id\":\"").append(quest.name).append("\"");
+        outputQ.append(",\"act\":").append(quest.act);
+        outputQ.append(",\"starting-gold\":").append(quest.gold);
+        outputQ.append(",\"starting-xp\":").append(quest.startingXP);
+        outputQ.append(",\"traits\": [\"").append(String.join("\", \"", quest.monsterTraits)).append("\"]");
         outputQ.append(",\"monsters\": [");
-        int monsterMax = quest.getMonsters().size();
+        int monsterMax = quest.monsters.size();
         int monsterCounter = 0;
-        for (String[] monster : quest.getMonsters()) {
+        for (Pair<String, String> monster : quest.monsters) {
             monsterCounter++;
-            outputQ.append("[\"").append(monster[0]).append("\", \"").append(monster[1]).append("\"]");
+            outputQ.append("[\"").append(monster.a).append("\", \"").append(monster.b).append("\"]");
             if (monsterCounter < monsterMax)
                 outputQ.append(",");
             else
@@ -425,8 +417,8 @@ public class ShowMap {
                 "\"value\": 1.0," +
                 "\"mustWinToReceive\": true" +
                 "}]");
-        outputQ.append(",\"boards\": [ \"").append(board.getComponentName()).append("\"]");
-        outputQ.append(",\"starting-tile\": \"").append(quest.getStartingTile()).append("\"");
+        outputQ.append(",\"boards\": [ \"").append(quest.name.toLowerCase()).append("\"]");
+        outputQ.append(",\"starting-tile\": \"").append(quest.heroStartingPosition).append("\"");
 
         outputQ.append("}");
 
@@ -441,39 +433,44 @@ public class ShowMap {
         outputB.append("\"verticesKey\": \"name\",");
         outputB.append("\"neighboursKey\": \"neighbours\",");
         outputB.append("\"maxNeighbours\": -1,");
-        outputB.append("\"id\": \"").append(board.getComponentName()).append("\",");
+        outputB.append("\"id\": \"").append(quest.name.toLowerCase()).append("\",");
         outputB.append("\"nodes\": [");
         int nodeCount = 0;
-        for (BoardNode node : board.getBoardNodes()) {
+        for (PCGNode node : board) {
             nodeCount++;
 
-            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
-            String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
+            List<Connection> connections = node.connects;
+            HashMap<Connection, String> neighbours = node.neighbours;
 
-            outputB.append("{ \"name\": [\"String\", \"").append(node.getComponentName()).append("\"],");
-            outputB.append("\"orientation\": [\"Integer\", ").append(node.getProperty("orientation")).append("],");
-            outputB.append("\"neighbours\": [\"String[]\", [");
+            outputB.append("{ \"name\": [\"String\", \"").append(node.name).append("\"],");
+            outputB.append("\"orientation\": [\"Integer\", ").append(node.orientation).append("],");
+
+            StringBuilder neighbourString = new StringBuilder("\"neighbours\": [\"String[]\", [");
+            StringBuilder connectionString = new StringBuilder("\"connections\": [\"String[]\", [");
 
             int neighbourCount = 0;
-            for (String neighbour : neighbours) {
+            for (Connection c : connections) {
+                String connect = switch(c) {
+                    case NORTH -> "N-0";
+                    case EAST -> "E-0";
+                    case SOUTH -> "S-0";
+                    case WEST -> "W-0";
+                };
                 neighbourCount++;
-                outputB.append("\"").append(neighbour).append("\"");
-                if (neighbourCount < neighbours.length)
-                    outputB.append(", ");
-                else
-                    outputB.append("]],");
+                neighbourString.append("\"").append(neighbours.get(c)).append("\"");
+                connectionString.append("\"").append(connect).append("\"");
+                if (neighbourCount < neighbours.size()) {
+                    neighbourString.append(", ");
+                    connectionString.append(", ");
+                }
+                else {
+                    neighbourString.append("]],");
+                    connectionString.append("]]}");
+                }
             }
-            outputB.append("\"connections\": [\"String[]\", [");
-            neighbourCount = 0;
-            for (String connect : connections) {
-                neighbourCount++;
-                outputB.append("\"").append(connect).append("\"");
-                if (neighbourCount < connections.length)
-                    outputB.append(", ");
-                else
-                    outputB.append("]]}");
-            }
-            if (nodeCount < board.getBoardNodes().size())
+            outputB.append(neighbourString);
+            outputB.append(connectionString);
+            if (nodeCount < quest.board.size())
                 outputB.append(",");
             else
                 outputB.append("]}");
