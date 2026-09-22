@@ -5,9 +5,12 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -99,6 +102,8 @@ public class GenerateBoardsGUI {
     JSlider weightHealthSlide;
     JSlider weightHeightSlide;
     JSlider weightWidthSlide;
+
+    JLabel nowserving = new JLabel("");
 
     private int generationID = 1;
 
@@ -524,12 +529,15 @@ public class GenerateBoardsGUI {
         weightControls.setBorder(weightSettings);
         mainPanel.add(weightControls);
 
+        updateServingLabel(0);
+
         JPanel outputHolder = new JPanel();
         outputHolder.setLayout(new BoxLayout(outputHolder, BoxLayout.Y_AXIS));
         create = new JButton("Generate!");
         JPanel buttonHolder = new JPanel(new FlowLayout());
         buttonHolder.setPreferredSize(new Dimension(450, 30));
         buttonHolder.add(create);
+        //buttonHolder.add(nowserving);
         TitledBorder buttonSettings = new TitledBorder(blackline, "Board Generation");
         buttonSettings.setTitleJustification(TitledBorder.CENTER);
         buttonHolder.setBorder(buttonSettings);
@@ -543,6 +551,12 @@ public class GenerateBoardsGUI {
         generationText.setBorder(generationOutput);
         outputScroll = new JScrollPane(generationText);
         outputScroll.setPreferredSize(new Dimension(450, 230));
+        /*outputScroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                e.getAdjustable().setValue(e.getAdjustable().getMaximum());
+            }
+        });*/
+
         outputHolder.add(outputScroll);
 
         mainPanel.add(outputHolder);
@@ -606,6 +620,10 @@ public class GenerateBoardsGUI {
         Rectangle rect = new Rectangle(generationText.getX(), generationText.getY(), generationText.getWidth(), generationText.getHeight());
         generationText.paintImmediately(rect);
         generationText.update(generationText.getGraphics());
+    }
+
+    void updateServingLabel(int id) {
+        nowserving.setText("Generating " + id + "/" + (FIRSTLOOP + (GENERATIONLOOP * OFFSPRING)));
     }
 
     class TotalLabel extends JLabel {
@@ -821,6 +839,7 @@ public class GenerateBoardsGUI {
                         source.setValue((int) (W_WIDTH * 100));
                     }
                 }
+                updateServingLabel(0);
                 totalGenerated.updateText();
             }
         }

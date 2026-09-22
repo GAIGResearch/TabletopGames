@@ -7,6 +7,7 @@ import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.properties.*;
 import games.descent2e.concepts.Quest;
+import utilities.Hash;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -38,18 +39,22 @@ public class CreateOffspring {
     private int OFFSPRING = 10;
     private int CHOOSE_INFEASIBLE = 30;
 
+    private int crossoverChance = 10; // Must be < 100;
+    private int deletionChance = 10;
+    private int rotationChance = 10;
+
     public HashMap<Integer, GridBoard> boards = new HashMap<>();
     public HashMap<Integer, Map<Integer, GridBoard>> boardTiles = new HashMap<>();
     public HashMap<Integer, int[][]> tileRefs = new HashMap<>();
     public HashMap<Integer, Map<String, Map<Vector2D, Vector2D>>> gridRefs = new HashMap<>();
 
-    public List<Pair<Quest, GraphBoard>> feasible = new ArrayList<>();
-    public List<Pair<Quest, GraphBoard>> infeasible = new ArrayList<>();
+    public List<PCGBoard> feasible = new ArrayList<>();
+    public List<PCGBoard> infeasible = new ArrayList<>();
     public List<HashMap<String, Float>> feasibleFitness = new ArrayList<>();
     public List<HashMap<String, Float>> infeasibleFitness = new ArrayList<>();
     public List<Boolean> feasibleList = new ArrayList<>();
 
-    public Pair<Quest, GraphBoard> bestQuest = null;
+    public PCGBoard bestQuest = null;
     public float bestFitness = 0f;
     public int bestID = 0;
 
@@ -136,8 +141,10 @@ public class CreateOffspring {
             while (y == x) {
                 y = Random.randInt(originalSize);
             }
-            Quest one = originalQuests.get(x);
-            Quest two = originalQuests.get(y);
+            PCGBoard one = startingBoards.get(x);
+            PCGBoard two = startingBoards.get(y);
+            //Quest one = originalQuests.get(x);
+            //Quest two = originalQuests.get(y);
 
             generateOffspring(one, two, fitfunc);
         }
@@ -152,7 +159,7 @@ public class CreateOffspring {
                 choice = 0;
 
             // 30% to pick parents from the Infeasible pool
-            Pair<Quest, Quest> parents;
+            Pair<PCGBoard, PCGBoard> parents;
             String isFeasible = "feasible";
 
             if (choice < CHOOSE_INFEASIBLE) {
@@ -161,8 +168,8 @@ public class CreateOffspring {
             }
             else {
                 if (infeasible.size() < 2)
-                    parents = new Pair<>(infeasible.get(0).a, infeasible.get(0).a);
-                parents = feasibleParents();
+                    parents = new Pair<>(infeasible.get(0), infeasible.get(0));
+                else parents = feasibleParents();
             }
 
             for (int j = 0; j < OFFSPRING; j++) {
@@ -198,7 +205,7 @@ public class CreateOffspring {
         }
     }
 
-    private Pair<Quest, Quest> feasibleParents() {
+    private Pair<PCGBoard, PCGBoard> feasibleParents() {
         int w, x, y, z;
         w = x = y = z = 0;
         boolean allDifferent = false;
@@ -259,13 +266,13 @@ public class CreateOffspring {
         else
             results.add(p4);
 
-        Quest first = feasible.get(results.get(0).a).a;
-        Quest second = feasible.get(results.get(1).a).a;
+        PCGBoard first = feasible.get(results.get(0).a);
+        PCGBoard second = feasible.get(results.get(1).a);
 
         return new Pair<>(first, second);
     }
 
-    private Pair<Quest, Quest> infeasibleParents(FitnessFunction fitfunc) {
+    private Pair<PCGBoard, PCGBoard> infeasibleParents(FitnessFunction fitfunc) {
         List<Pair<Integer, Double>> results = new ArrayList<>();
         float decay = 1.5f;
         float sigma = 5f;
@@ -312,16 +319,16 @@ public class CreateOffspring {
         for (int i = 0; i < n-1; i++) {
             increment += probability[i];
             if (roll <= increment) {
-                Quest one = infeasible.get(results.get(i).a).a;
-                Quest two = infeasible.get(results.get(i+1).a).a;
+                PCGBoard one = infeasible.get(results.get(i).a);
+                PCGBoard two = infeasible.get(results.get(i+1).a);
 
                 return new Pair<>(one, two);
             }
         }
 
         // Failsafe, return the last two in the pool
-        Quest one = infeasible.get(results.get(n-2).a).a;
-        Quest two = infeasible.get(results.get(n-1).a).a;
+        PCGBoard one = infeasible.get(results.get(n-2).a);
+        PCGBoard two = infeasible.get(results.get(n-1).a);
         return new Pair<>(one, two);
     }
 
@@ -351,9 +358,10 @@ public class CreateOffspring {
         return Math.sqrt(connect + geometry + repeats + spawning + consistency + size + groups + health + complexity + rules);
     }
 
-    void generateOffspring(Quest one, Quest two, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
+    void generateOffspring(PCGBoard one, PCGBoard two, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
         nowServing++;
-        Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(one, two, "null", fitfunc);
+        System.out.println("Now Serving: " + nowServing);
+        Pair<PCGBoard, Boolean> offspring = createOffspring(one, two,"null", fitfunc);
 
         if (offspring.b)
             feasible.add(offspring.a);
@@ -361,9 +369,10 @@ public class CreateOffspring {
             infeasible.add(offspring.a);
     }
 
-    void generateOffspring(Quest one, Quest two, String isFeasible, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
+    void generateOffspring(PCGBoard one, PCGBoard two, String isFeasible, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
         nowServing++;
-        Pair<Pair<Quest, GraphBoard>, Boolean> offspring = createOffspring(one, two, isFeasible, fitfunc);
+        System.out.println("Now Serving: " + nowServing);
+        Pair<PCGBoard, Boolean> offspring = createOffspring(one, two, isFeasible, fitfunc);
 
         if (offspring.b)
             feasible.add(offspring.a);
@@ -371,57 +380,170 @@ public class CreateOffspring {
             infeasible.add(offspring.a);
     }
 
-    Pair<Pair<Quest, GraphBoard>, Boolean> createOffspring(Quest parent1, Quest parent2, String type, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
-        Quest newQuest;
-        GraphBoard newBoard;
-        Quest otherParent;
-        GraphBoard otherBoard;
+    Pair<PCGBoard, Boolean> createOffspring(PCGBoard parent1, PCGBoard parent2, String type, FitnessFunction fitfunc) throws InterruptedException, InvocationTargetException {
+        PCGBoard questBase;
+        PCGBoard questOther;
+        PCGBoard boardBase;
+        PCGBoard boardOther;
 
         // Deciding which Parent is the Base Quest
         int choice = Random.randInt(2);
         if (choice == 0) {
-            newQuest = parent1.copy();
-            otherParent = parent2.copy();
+            questBase = parent1;
+            questOther = parent2;
         }
         else {
-            newQuest = parent2.copy();
-            otherParent = parent1.copy();
+            questBase = parent2;
+            questOther = parent1;
         }
 
         // Now, decide which Parent is the Base Board
         choice = Random.randInt(2);
         if (choice == 0) {
-            otherBoard = switch (type) {
-                case "feasible" -> {
-                    newBoard = Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0), true)).copy();
-                    yield Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0), true)).copy();
-                }
-                case "infeasible" -> {
-                    newBoard = Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0), false)).copy();
-                    yield Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0), false)).copy();
-                }
-                default -> {
-                    newBoard = Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0))).copy();
-                    yield Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0))).copy();
-                }
-            };
+            boardBase = parent1;
+            boardOther = parent2;
         }
         else {
-            otherBoard = switch (type) {
-                case "feasible" -> {
-                    newBoard = Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0), true)).copy();
-                    yield Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0), true)).copy();
-                }
-                case "infeasible" -> {
-                    newBoard = Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0), false)).copy();
-                    yield Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0), false)).copy();
-                }
-                default -> {
-                    newBoard = Objects.requireNonNull(getBoardByName(parent2.getBoards().get(0))).copy();
-                    yield Objects.requireNonNull(getBoardByName(parent1.getBoards().get(0))).copy();
-                }
-            };
+            boardBase = parent2;
+            boardOther = parent1;
         }
+
+        PCGBoard offspring = PCGBoard.createOffspring(questBase, boardBase, nowServing);
+
+        HashSet<String> tilesUsed = new HashSet<>();
+        for (PCGNode tile : offspring.board) {
+            tilesUsed.add(tile.name);
+        }
+
+        // --- BOARD MUTATIONS ---
+
+        List<PCGNode> finalNodes = new ArrayList<>();
+        HashSet<String> crossoverTiles = null;
+
+        boolean freeNodes = true;
+        while (freeNodes) {
+            List<PCGNode> crossover = new ArrayList<>(offspring.board);
+            crossoverTiles = new HashSet<>(tilesUsed);
+
+            // Crossover
+            for (PCGNode node : boardOther.board) {
+                if (Random.randInt(100) < crossoverChance) {
+                    if (!crossoverTiles.contains(node.name)) {
+                        crossover.add(node.copy());
+                        crossoverTiles.add(node.name);
+                    }
+                }
+            }
+
+            List<PCGNode> toRotate = new ArrayList<>();
+
+            // Deletion
+            for (PCGNode node : crossover) {
+                if (Random.randInt(100) < deletionChance) {
+                    crossoverTiles.remove(node.name);
+                }
+                else
+                    toRotate.add(node.copy());
+            }
+
+            transition = 0;
+            endcap = 0;
+            extender = 0;
+
+            // Fix names of Transitions, Endcaps and Extenders
+            crossoverTiles.clear();
+            freeNodes = rotateMutate(toRotate, crossoverTiles);
+            finalNodes = new ArrayList<>(toRotate);
+        }
+        
+        offspring.board = finalNodes;
+        tilesUsed = crossoverTiles;
+
+        // --- MONSTER MUTATIONS ---
+
+        HashSet<String> monstersUsed = new HashSet<>();
+        for (Pair<String, String> monster : offspring.monsters) {
+            if (monster.a.contains("Open")) continue;
+            monstersUsed.add(monster.a);
+        }
+
+        // Crossover
+
+        List<Pair<String, String>> newMonsters = new ArrayList<>(offspring.monsters);
+
+        for (Pair<String, String> monster : questOther.monsters) {
+            if (Random.randInt(100) < crossoverChance) {
+                if (monster.a.contains("Open"))
+                    newMonsters.add(monster);
+                else if (!monstersUsed.contains(monster.a)) {
+                    newMonsters.add(monster);
+                    monstersUsed.add(monster.a);
+                }
+            }
+        }
+
+        // Deletion
+        List<Pair<String, String>> finalMonsters = new ArrayList<>(newMonsters);
+        for (Pair<String, String> monster : newMonsters) {
+            if (Random.randInt(100) < deletionChance)
+                finalMonsters.remove(monster);
+        }
+
+        // Force a mutation if the group sizes are now too big or too small
+        boolean forceMutate = (finalMonsters.size() < GROUP_MIN) || (finalMonsters.size() > GROUP_MAX);
+        // Or if we roll for it
+        if (!forceMutate)
+            if (mutate() < MONSTER_MUTATE)
+                forceMutate = true;
+
+        while (forceMutate) {
+            finalMonsters = mutateMonsters(finalMonsters);
+            forceMutate = (finalMonsters.size() < GROUP_MIN) || (finalMonsters.size() > GROUP_MAX);
+        }
+
+        offspring.monsters = finalMonsters;
+
+        boolean legalSpawns = false;
+        int attempts = 0;
+        while (!legalSpawns) {
+            attempts++;
+            if (attempts > 10) break; // If we can't get a valid spawn set after 10 attempts, give up; this board is infeasible anyway
+            mutatePositions(offspring, tilesUsed);
+            if (!tilesUsed.contains(offspring.heroStartingPosition))
+                continue;
+            for (Pair<String, String> monster : offspring.monsters) {
+                if (!tilesUsed.contains(monster.b))
+                    continue;
+            }
+            legalSpawns = true;
+        }
+
+        mutateAct(offspring);
+        mutateXP(offspring);
+        mutateTraits(offspring);
+
+        HashMap<String, Float> scores = fitfunc.getFitness(this, offspring);
+
+        boolean feasible = scores.get("Feasible") > 0f;
+
+        if (feasible) {
+            feasibleFitness.add(scores);
+            addToMAPElites(scores);
+
+            float fitness = scores.get("Fitness");
+            if (fitness > bestFitness) {
+                bestID = nowServing;
+                bestFitness = fitness;
+                bestQuest = offspring;
+            }
+        }
+        else
+            infeasibleFitness.add(scores);
+        feasibleList.add(feasible);
+
+        return new Pair<>(offspring, feasible);
+
+        /*
 
         // -- BOARD MUTATIONS ---
 
@@ -542,84 +664,7 @@ public class CreateOffspring {
 
         newBoard.clearBoardNodes();
         newBoard.setBoardNodes(finalNodes);
-
-        // --- MONSTER MUTATIONS ---
-
-        List<String[]> monsters = newQuest.getMonsters();
-        List<String> monsterList = new ArrayList<>();
-        for (String[] m : monsters)
-            monsterList.add(m[0]);
-
-        // 10% crossover chance
-        List<String[]> parentMonsters = new ArrayList<>(otherParent.getMonsters());
-        for (String[] m : parentMonsters) {
-            if (Random.randInt(10) < 1) {
-                // Make sure we don't add duplicate Monsters
-                if (!monsterList.contains(m[0]) || m[0].contains("Open"))
-                    monsters.add(m);
-            }
-        }
-
-        // 10% deletion chance
-        List<String[]> finalMonsters = new ArrayList<>(monsters);
-        for (String[] m : monsters) {
-            if (Random.randInt(10) < 1) {
-                finalMonsters.remove(m);
-            }
-        }
-
-        // Force a mutation if the group sizes are now too big or too small
-        boolean forceMutate = (finalMonsters.size() < GROUP_MIN) || (finalMonsters.size() > GROUP_MAX);
-
-        if (!forceMutate)
-            if (mutate() < MONSTER_MUTATE)
-                forceMutate = true;
-
-        while (forceMutate) {
-            finalMonsters = mutateMonsters(finalMonsters);
-            forceMutate = (finalMonsters.size() < GROUP_MIN) || (finalMonsters.size() > GROUP_MAX);
-        }
-
-        mutateAct(newQuest);
-        mutateXP(newQuest);
-        mutateTraits(newQuest);
-
-        finalMonsters = mutatePositions(finalNodes, newQuest, finalMonsters);
-
-        newQuest.setMonsters(finalMonsters);
-
-
-
-        String newBoardName = "pcg-" + nowServing;
-        newBoard.setComponentName(newBoardName);
-        newQuest.setName("PCG-" + nowServing);
-        List<String> boards = newQuest.getBoards();
-        boards.clear();
-        boards.add(newBoardName);
-
-
-        HashMap<String, Float> scores = fitfunc.getFitness(this, newQuest, newBoard);
-
-        boolean feasible = scores.get("Feasible") > 0f;
-
-        Pair<Quest, GraphBoard> offspring = new Pair<>(newQuest, newBoard);
-
-        if (feasible) {
-            feasibleFitness.add(scores);
-            addToMAPElites(scores);
-
-            float fitness = scores.get("Fitness");
-            if (fitness > bestFitness) {
-                bestID = nowServing;
-                bestFitness = fitness;
-                bestQuest = offspring;
-            }
-        }
-        else
-            infeasibleFitness.add(scores);
-        feasibleList.add(feasible);
-
-        return new Pair<>(offspring, feasible);
+         */
     }
 
     String getRandomMonster(List<String> oldMonsters) {
@@ -667,8 +712,8 @@ public class CreateOffspring {
         return "Open:group";
     }
 
-    List<String[]> mutateMonsters(List<String[]> monsters) {
-        List<String[]> newMonsters = new ArrayList<>(monsters);
+    List<Pair<String, String>> mutateMonsters(List<Pair<String, String>> monsters) {
+        List<Pair<String, String>> newMonsters = new ArrayList<>(monsters);
         int mutate = mutate();
 
         int size = monsters.size();
@@ -690,12 +735,10 @@ public class CreateOffspring {
         // Add a new Monster to the groups
         if (add) {
             List<String> currentMonsters = new ArrayList<>();
-            for (String[] m : monsters) {
-                currentMonsters.add(m[0]);
+            for (Pair<String, String> m : monsters) {
+                currentMonsters.add(m.a);
             }
-            String[] newMonster = new  String[2];
-            newMonster[0] = getRandomMonster(currentMonsters);
-            newMonster[1] = "null";
+            Pair<String, String> newMonster = new Pair<>(getRandomMonster(currentMonsters), "null");
             newMonsters.add(newMonster);
         }
         // Remove a Monster from the groups
@@ -705,34 +748,29 @@ public class CreateOffspring {
         // Replace a Monster from the groups
         else {
             List<String> currentMonsters = new ArrayList<>();
-            for (String[] m : monsters) {
-                currentMonsters.add(m[0]);
+            for (Pair<String, String> m : monsters) {
+                currentMonsters.add(m.a);
             }
-            String newMonster = getRandomMonster(currentMonsters);
-            (newMonsters.get(Random.randInt(newMonsters.size())))[0] = newMonster;
+            int i = Random.randInt(newMonsters.size());
+            (newMonsters.get(i)).a = getRandomMonster(currentMonsters);
         }
-
         return newMonsters;
     }
 
-    List<String[]> mutatePositions(List<BoardNode> nodes, Quest quest, List<String[]> monsters) {
-        List<String> tiles = new ArrayList<>();
-        List<String> taken = new ArrayList<>();
-        for (BoardNode node : nodes) {
-            tiles.add(node.getComponentName());
-        }
-        Collections.shuffle(tiles);
-        String heroStart = quest.getStartingTile();
+    void mutatePositions(PCGBoard quest, HashSet<String> nodes) {
+        List<String> available = new ArrayList<>(nodes);
+        Collections.shuffle(available);
+        String heroStart = quest.heroStartingPosition;
 
         // First, check if the Heroes' original starting tile still exists or not
         // Then, roll Mutation chance (10%)
-        boolean forceHeroMutate = !tiles.contains(heroStart) || illegalHeroSpawns.contains(heroStart);
+        boolean forceHeroMutate = !nodes.contains(heroStart) || illegalHeroSpawns.contains(heroStart);
         if (!forceHeroMutate)
             forceHeroMutate = Random.randInt(10) < 1;
 
         if (forceHeroMutate) {
             heroStart = "null";
-            for (String tile : tiles) {
+            for (String tile : nodes) {
                 boolean legal = true;
                 for (String illegal : illegalHeroSpawns) {
                     if (tile.contains(illegal)) {
@@ -748,17 +786,19 @@ public class CreateOffspring {
         }
 
         // Save the new Heroes start
-        taken.add(heroStart);
-        quest.setStartingTile(heroStart);
+        available.remove(heroStart);
+        quest.heroStartingPosition = heroStart;
+
+        List<Pair<String, String>> monsters = quest.monsters;
 
         // Now repeat for every Monster
-        for (String[] monster : monsters) {
-            String name = monster[0];
-            String monsterPosition = monster[1];
-            boolean forceMonsterMutate = !tiles.contains(monsterPosition) || taken.contains(monsterPosition);
+        for (Pair<String, String> monster : monsters) {
+            String name = monster.a;
+            String monsterPosition = monster.b;
+            boolean forceMonsterMutate = !nodes.contains(monsterPosition) || !available.contains(monsterPosition);
 
             // Non-Lieutenant Monsters have additional restrictions
-            List<String> traits = quest.getMonsterTraits();
+            HashSet<String> traits = quest.monsterTraits;
             boolean lieutenant = true;
             boolean barghestOpen = traits.contains("Dark") || traits.contains("Wilderness") || traits.contains("All");
             boolean dragonOpen = traits.contains("Dark") || traits.contains("Cave") || traits.contains("All");
@@ -809,15 +849,15 @@ public class CreateOffspring {
 
             if (forceMonsterMutate) {
                 monsterPosition = "null";
-                monster[1] = monsterPosition;
+                monster.b = monsterPosition;
                 List<String> illegals = new ArrayList<>(illegalMonsterSpawns);
                 if (barghest)
                     illegals.addAll(illegalBarghestSpawns);
                 if (dragon)
                     illegals.addAll(illegalDragonSpawns);
 
-                for (String tile : tiles) {
-                    if (taken.contains(tile)) continue;
+                for (String tile : nodes) {
+                    if (!available.contains(tile)) continue;
 
                     if (lieutenant) {
                         monsterPosition = tile;
@@ -837,34 +877,34 @@ public class CreateOffspring {
                     }
                 }
             }
-            taken.add(monsterPosition);
-            monster[1] = monsterPosition;
+            available.remove(monsterPosition);
+            monster.b = monsterPosition;
         }
 
-        return monsters;
+        quest.monsters = monsters;
 
     }
 
-    void mutateAct(Quest quest) {
+    void mutateAct(PCGBoard quest) {
         int mutate = mutate();
         if (mutate < ACT_MUTATE) {
-            int newAct = (quest.getAct() % 2) + 1;
+            int newAct = (quest.act % 2) + 1;
             if (newAct > 1) {
-                quest.setStartingXP(quest.getStartingXP() + 5);
-                quest.setGold(quest.getGold() + 125);
+                quest.startingXP += 5;
+                quest.gold += 125;
             }
             else {
-                quest.setStartingXP(quest.getStartingXP() - 5);
-                quest.setGold(quest.getGold() - 125);
+                quest.startingXP -= 5;
+                quest.gold -= 125;
             }
-            quest.setAct(newAct);
+            quest.act = newAct;
         }
     }
 
-    void mutateXP(Quest quest) {
+    void mutateXP(PCGBoard quest) {
         int mutate = mutate();
         if (mutate < XP_MUTATE) {
-            int newXP = Random.randInt(5) + 5 * (quest.getAct() - 1);
+            int newXP = Random.randInt(5) + 5 * (quest.act - 1);
             int newGold = newXP * 25;
             if (newXP > 1) {
                 for (int i = 0; i < Random.randInt(newXP); i++) {
@@ -872,13 +912,13 @@ public class CreateOffspring {
                 }
             }
 
-            quest.setStartingXP(newXP);
-            quest.setGold(newGold);
+            quest.startingXP = newXP;
+            quest.gold = newGold;
         }
     }
 
-    void mutateTraits(Quest quest) {
-        List<String> oldTraits = quest.getMonsterTraits();
+    void mutateTraits(PCGBoard quest) {
+        HashSet<String> oldTraits = new HashSet<>(quest.monsterTraits);
         boolean add = oldTraits.size() < TRAITS_MIN;
         boolean remove = oldTraits.size() > TRAITS_MAX;
         boolean replace = false;
@@ -898,26 +938,27 @@ public class CreateOffspring {
 
         // Remove, in case of 'All' trait
         if (oldTraits.size() < TRAITS_MIN)
-            oldTraits = new ArrayList<>();
+            oldTraits.clear();
 
         // Add
         if (add) {
             List<String> traits = new ArrayList<>(TRAITS);
             Collections.shuffle(traits);
             for (String t : traits) {
-                if (!oldTraits.contains(t))
-                    oldTraits.add(t);
+                if (oldTraits.contains(t)) continue;
+                oldTraits.add(t);
                 if (oldTraits.size() >= TRAITS_MIN)
                     break;
             }
         }
         // Remove
         else if (remove) {
-            oldTraits.remove(Random.randInt(oldTraits.size()));
+            String r = oldTraits.toArray()[Random.randInt(oldTraits.size())].toString();
+            oldTraits.remove(r);
         }
         // Replace
         else if (replace) {
-            int r = Random.randInt(oldTraits.size());
+            String r = oldTraits.toArray()[Random.randInt(oldTraits.size())].toString();
             List<String> traits = new ArrayList<>(TRAITS);
             Collections.shuffle(traits);
             for (String t : traits) {
@@ -930,10 +971,10 @@ public class CreateOffspring {
         }
         // Set Traits to 'All'
         else {
-            oldTraits = new ArrayList<>();
+            oldTraits = new HashSet<>();
             oldTraits.add("All");
         }
-        quest.setMonsterTraits(oldTraits);
+        quest.monsterTraits = oldTraits;
     }
 
     int mutate() {
@@ -965,35 +1006,33 @@ public class CreateOffspring {
         return null;
     }
 
-    GraphBoard getBoardByName(String name, boolean isFeasible) {
+    PCGBoard getBoardByName(String name, boolean isFeasible) {
         if (isFeasible) {
-            for (Pair<Quest, GraphBoard> quest : feasible) {
-                GraphBoard board = quest.b;
-                if (board.getComponentName().equals(name))
-                    return board;
+            for (PCGBoard quest : feasible) {
+                if (quest.name.equals(name))
+                    return quest;
             }
         }
         else {
-            for (Pair<Quest, GraphBoard> quest : infeasible) {
-                GraphBoard board = quest.b;
-                if (board.getComponentName().equals(name))
-                    return board;
+            for (PCGBoard quest : infeasible) {
+                if (quest.name.equals(name))
+                    return quest;
             }
         }
         return null;
     }
 
-    Pair<Quest, GraphBoard> getQuestByID(int id, boolean isFeasible) {
+    PCGBoard getQuestByID(int id, boolean isFeasible) {
         if (isFeasible) {
-            for (Pair<Quest, GraphBoard> quest : feasible) {
-                String name = quest.a.getName();
+            for (PCGBoard quest : feasible) {
+                String name = quest.name;
                 if (Integer.parseInt(name.split("-")[1]) == id)
                     return quest;
             }
         }
         else {
-            for (Pair<Quest, GraphBoard> quest : infeasible) {
-                String name = quest.a.getName();
+            for (PCGBoard quest : infeasible) {
+                String name = quest.name;
                 if (Integer.parseInt(name.split("-")[1]) == id)
                     return quest;
             }
@@ -1143,40 +1182,50 @@ public class CreateOffspring {
         return retVal;
     }
 
-    List<BoardNode> rotateMutate (List<BoardNode> nodes) {
-        List<BoardNode> retVal = new ArrayList<>(nodes);
-        List<BoardNode> north = new ArrayList<>();
-        List<BoardNode> south = new ArrayList<>();
-        List<BoardNode> east = new ArrayList<>();
-        List<BoardNode> west = new ArrayList<>();
-        // 10% rotation chance
-        for (BoardNode node : retVal) {
-            String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-            if (Random.randInt(10) < 1) {
-                int rotation = Random.randInt(positions.size() - 1) + 1;
-                int oldRotate = ((PropertyInt) node.getProperty("orientation")).value;
-                node.setProperty(new PropertyInt("orientation", (oldRotate + rotation) % 4));
-                for (int i = 0; i < connections.length; i++) {
-                    if (positions.contains(connections[i])) {
-                        int index = positions.indexOf(connections[i]);
-                        connections[i] = positions.get((index + rotation) % 4);
-                        switch(connections[i]) {
-                            case "N-0" -> north.add(node);
-                            case "E-0" -> east.add(node);
-                            case "S-0" -> south.add(node);
-                            case "W-0" -> west.add(node);
-                        }
-                    }
-                }
+    boolean rotateMutate (List<PCGNode> nodes, HashSet<String> tiles) {
+        HashSet<PCGNode> north = new HashSet<>();
+        HashSet<PCGNode> south = new HashSet<>();
+        HashSet<PCGNode> east = new HashSet<>();
+        HashSet<PCGNode> west = new HashSet<>();
+
+        int sideA = 0;
+        int sideB = 0;
+
+        // Fix the names first
+        for (PCGNode node : nodes) {
+            String name = node.name.split("-")[0];
+            if (name.contains("transition")) {
+                transition++;
+                node.name = name + "-" + transition;
             }
-            else {
-                for (String connection : connections) {
-                    switch (connection) {
-                        case "N-0" -> north.add(node);
-                        case "E-0" -> east.add(node);
-                        case "S-0" -> south.add(node);
-                        case "W-0" -> west.add(node);
-                    }
+            else if (name.contains("endcap")) {
+                endcap++;
+                node.name = name + "-" + endcap;
+            }
+            else if (name.contains("extender")) {
+                extender++;
+                node.name = name + "-" + extender;
+            }
+            tiles.add(node.name);
+
+            if (node.name.contains("A"))
+                sideA++;
+            else if (node.name.contains("B"))
+                sideB++;
+
+            tiles.add(node.name);
+
+            // 10% rotation chance
+            if (Random.randInt(100) < rotationChance) {
+                int rotation = Random.randInt(PCGNode.connections.length - 1) + 1;
+                node.rotate(rotation);
+            }
+            for (Connection c : node.connects) {
+                switch (c) {
+                    case NORTH -> north.add(node);
+                    case EAST -> east.add(node);
+                    case SOUTH -> south.add(node);
+                    case WEST -> west.add(node);
                 }
             }
         }
@@ -1184,210 +1233,224 @@ public class CreateOffspring {
         // Edge case, where we have one tile that now is the lone North/South or East/West provider
         // If so, force a rotation
         if (north.size() == 1 && south.size() == 1) {
-            BoardNode suspect = north.get(0);
+            PCGNode suspect = (PCGNode) north.toArray()[0];
             if (south.contains(suspect)) {
                 //System.out.println("Edge case!");
-                int oldRotate = ((PropertyInt) suspect.getProperty("orientation")).value;
-                suspect.setProperty(new PropertyInt("orientation", (oldRotate + 1) % 4));
-                String[] connections = ((PropertyStringArray) suspect.getProperty("connections")).getValues();
-                for (int i = 0; i < connections.length; i++) {
-                    if (positions.contains(connections[i])) {
-                        int index = positions.indexOf(connections[i]);
-                        connections[i] = positions.get((index + 1) % 4);
+                suspect.rotate(1);
+                north.remove(suspect);
+                south.remove(suspect);
+                for (Connection c : suspect.connects) {
+                    switch (c) {
+                        case NORTH -> north.add(suspect);
+                        case EAST -> east.add(suspect);
+                        case SOUTH -> south.add(suspect);
+                        case WEST -> west.add(suspect);
                     }
                 }
             }
         }
         if (east.size() == 1 && west.size() == 1) {
-            BoardNode suspect = east.get(0);
+            PCGNode suspect = (PCGNode) east.toArray()[0];
             if (west.contains(suspect)) {
                 //System.out.println("Edge case!");
-                int oldRotate = ((PropertyInt) suspect.getProperty("orientation")).value;
-                suspect.setProperty(new PropertyInt("orientation", (oldRotate + 1) % 4));
-                String[] connections = ((PropertyStringArray) suspect.getProperty("connections")).getValues();
-                for (int i = 0; i < connections.length; i++) {
-                    if (positions.contains(connections[i])) {
-                        int index = positions.indexOf(connections[i]);
-                        connections[i] = positions.get((index + 1) % 4);
+                suspect.rotate(1);
+                east.remove(suspect);
+                west.remove(suspect);
+                for (Connection c : suspect.connects) {
+                    switch (c) {
+                        case NORTH -> north.add(suspect);
+                        case EAST -> east.add(suspect);
+                        case SOUTH -> south.add(suspect);
+                        case WEST -> west.add(suspect);
                     }
                 }
             }
         }
 
-        return retVal;
+        return addEndcaps(nodes, tiles, sideA, sideB, north, east, south, west);
     }
 
-    Pair<List<BoardNode>, Boolean> addEndcaps(List<BoardNode> nodes) {
+    Boolean addEndcaps(List<PCGNode> nodes, HashSet<String> tiles, int sideA, int sideB,
+                       HashSet<PCGNode> north, HashSet<PCGNode> east, HashSet<PCGNode> south, HashSet<PCGNode> west) {
         boolean freeNodes = false;
-        List<BoardNode> retVal = new ArrayList<>(nodes);
 
         // We include the Entrance and Exit as well as Endcaps
-        List<BoardNode> endcaps = new ArrayList<>();
-        List<BoardNode> nCaps = new ArrayList<>();
-        List<BoardNode> eCaps = new ArrayList<>();
-        List<BoardNode> sCaps = new ArrayList<>();
-        List<BoardNode> wCaps = new ArrayList<>();
-
-        int north = 0;
-        int east = 0;
-        int south = 0;
-        int west = 0;
-
-        int countA = 0;
-        int countB = 0;
+        HashSet<PCGNode> endcaps = new HashSet<>();
+        HashSet<PCGNode> nCaps = new HashSet<>();
+        HashSet<PCGNode> eCaps = new HashSet<>();
+        HashSet<PCGNode> sCaps = new HashSet<>();
+        HashSet<PCGNode> wCaps = new HashSet<>();
 
         boolean entrance = false;
         boolean exit = false;
         int endcap = 0;
 
-        for (BoardNode node : nodes) {
-            String name = node.getComponentName();
-
-            if (name.contains("A"))
-                countA++;
-            if (name.contains("B"))
-                countB++;
-
+        for (PCGNode node : north) {
+            String name = node.name;
             if (name.contains("endcap")) {
                 endcap++;
                 endcaps.add(node);
+                nCaps.add(node);
             }
             if (name.contains("entrance")) {
                 entrance = true;
                 endcaps.add(node);
+                nCaps.add(node);
             }
             if (name.contains("exit")) {
                 exit = true;
                 endcaps.add(node);
+                nCaps.add(node);
             }
-
-            String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-            for (String c : connections) {
-                switch (c) {
-                    case "N-0" -> {
-                        north++;
-                        if (endcaps.contains(node))
-                            nCaps.add(node);
-                    }
-                    case "E-0" -> {
-                        east++;
-                        if (endcaps.contains(node))
-                            eCaps.add(node);
-                    }
-                    case "S-0" -> {
-                        south++;
-                        if (endcaps.contains(node))
-                            sCaps.add(node);
-                    }
-                    case "W-0" -> {
-                        west++;
-                        if (endcaps.contains(node))
-                            wCaps.add(node);
-                    }
-                }
+        }
+        for (PCGNode node : east) {
+            String name = node.name;
+            if (name.contains("endcap")) {
+                endcap++;
+                endcaps.add(node);
+                eCaps.add(node);
+            }
+            if (name.contains("entrance")) {
+                entrance = true;
+                endcaps.add(node);
+                eCaps.add(node);
+            }
+            if (name.contains("exit")) {
+                exit = true;
+                endcaps.add(node);
+                eCaps.add(node);
+            }
+        }
+        for (PCGNode node : south) {
+            String name = node.name;
+            if (name.contains("endcap")) {
+                endcap++;
+                endcaps.add(node);
+                sCaps.add(node);
+            }
+            if (name.contains("entrance")) {
+                entrance = true;
+                endcaps.add(node);
+                sCaps.add(node);
+            }
+            if (name.contains("exit")) {
+                exit = true;
+                endcaps.add(node);
+                sCaps.add(node);
+            }
+        }
+        for (PCGNode node : west) {
+            String name = node.name;
+            if (name.contains("endcap")) {
+                endcap++;
+                endcaps.add(node);
+                wCaps.add(node);
+            }
+            if (name.contains("entrance")) {
+                entrance = true;
+                endcaps.add(node);
+                wCaps.add(node);
+            }
+            if (name.contains("exit")) {
+                exit = true;
+                endcaps.add(node);
+                wCaps.add(node);
             }
         }
         boolean imbalanceNS = false;
         boolean imbalanceEW = false;
-        if (north != south) {
+        if (north.size() != south.size()) {
             //System.out.println("Imbalance of North and South - N:" + north + "; S:" + south);
             imbalanceNS = true;
         }
-        if (east != west) {
+        if (east.size() != west.size()) {
             //System.out.println("Imbalance of East and West - E:" + east + "; W:" + west);
             imbalanceEW = true;
         }
 
         // First, see if there's a way to fix both imbalances, by rotating any existing endcaps
         while (imbalanceNS && imbalanceEW) {
-            boolean madeChange = false;
-            boolean canStop = true;
-            if (!(nCaps.isEmpty() && sCaps.isEmpty()))
-                canStop = false;
-            if (!(eCaps.isEmpty() && wCaps.isEmpty()))
-                canStop = false;
+            boolean canStop = nCaps.isEmpty() && sCaps.isEmpty() && eCaps.isEmpty() && wCaps.isEmpty();
             if (canStop)
                 break;
 
-            if (north > south && !nCaps.isEmpty()) {
-                BoardNode node = nCaps.remove(0);
-                north--;
+            boolean madeChange = false;
+
+            if (north.size() > south.size() && !nCaps.isEmpty()) {
+                PCGNode node = (PCGNode) nCaps.toArray()[0];
+                nCaps.remove(node);
+                north.remove(node);
                 madeChange = true;
-                if (east < west) {
+                if (east.size() < west.size()) {
                     eCaps.add(node);
-                    east++;
-                    node.setProperty(new PropertyInt("orientation", 1));
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    connections[0] = "E-0";
+                    east.add(node);
+                    node.orientation = 1;
+                    node.connects.set(0, Connection.EAST);
                 }
-                else if (west < east) {
+                else if (west.size() < east.size()) {
                     wCaps.add(node);
-                    west++;
-                    node.setProperty(new PropertyInt("orientation", 3));
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    connections[0] = "W-0";
+                    west.add(node);
+                    node.orientation = 3;
+                    node.connects.set(0, Connection.WEST);
                 }
             }
-            if (south > north && !sCaps.isEmpty()) {
-                BoardNode node = sCaps.remove(0);
-                south--;
+            if (south.size() > north.size() && !sCaps.isEmpty()) {
+                PCGNode node = (PCGNode) sCaps.toArray()[0];
+                sCaps.remove(node);
+                south.remove(node);
                 madeChange = true;
-                if (east < west) {
+                if (east.size() < west.size()) {
                     eCaps.add(node);
-                    east++;
-                    node.setProperty(new PropertyInt("orientation", 1));
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    connections[0] = "E-0";
+                    east.add(node);
+                    node.orientation = 1;
+                    node.connects.set(0, Connection.EAST);
                 }
-                else if (west < east) {
+                else if (west.size() < east.size()) {
                     wCaps.add(node);
-                    west++;
-                    node.setProperty(new PropertyInt("orientation", 3));
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    connections[0] = "W-0";
+                    west.add(node);
+                    node.orientation = 3;
+                    node.connects.set(0, Connection.WEST);
                 }
             }
-            if (east > west && !eCaps.isEmpty()) {
-                BoardNode node = eCaps.remove(0);
-                east--;
+            if (east.size() > west.size() && !eCaps.isEmpty()) {
+                PCGNode node = (PCGNode) eCaps.toArray()[0];
+                eCaps.remove(node);
+                east.remove(node);
                 madeChange = true;
-                if (north < south) {
+                if (north.size() < south.size()) {
                     nCaps.add(node);
-                    north++;
-                    node.setProperty(new PropertyInt("orientation", 0));
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    connections[0] = "N-0";
+                    north.add(node);
+                    node.orientation = 0;
+                    node.connects.set(0, Connection.NORTH);
                 }
-                else if (south < north) {
+                else if (south.size() < north.size()) {
                     sCaps.add(node);
-                    south++;
-                    node.setProperty(new PropertyInt("orientation", 2));
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    connections[0] = "S-0";
+                    south.add(node);
+                    node.orientation = 2;
+                    node.connects.set(0, Connection.SOUTH);
                 }
             }
-            if (west > east && !wCaps.isEmpty()) {
-                BoardNode node = wCaps.remove(0);
-                west--;
+            if (west.size() > east.size() && !wCaps.isEmpty()) {
+                PCGNode node = (PCGNode) wCaps.toArray()[0];
+                wCaps.remove(node);
+                west.remove(node);
                 madeChange = true;
-                if (north < south) {
+                if (north.size() < south.size()) {
                     nCaps.add(node);
-                    north++;
-                    node.setProperty(new PropertyInt("orientation", 0));
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    connections[0] = "N-0";
+                    north.add(node);
+                    node.orientation = 0;
+                    node.connects.set(0, Connection.NORTH);
                 }
-                else if (south < north) {
+                else if (south.size() < north.size()) {
                     sCaps.add(node);
-                    south++;
-                    node.setProperty(new PropertyInt("orientation", 2));
-                    String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                    connections[0] = "S-0";
+                    south.add(node);
+                    node.orientation = 2;
+                    node.connects.set(0, Connection.SOUTH);
                 }
             }
-            if (north == south)
+            if (north.size() == south.size())
                 imbalanceNS = false;
-            if (east == west)
+            if (east.size() == west.size())
                 imbalanceEW = false;
 
             // If, for whatever reason, we cycled through this and couldn't make a single change, abort
@@ -1398,183 +1461,178 @@ public class CreateOffspring {
         // Then, if there's still an imbalance, go and add the tiles in afterwards
         while (imbalanceNS) {
             // As changing North to South is a difference of 2, we need to make sure we're not just flip-flopping the one tile around
-            if (north > south+1 && !nCaps.isEmpty()) {
-                BoardNode node = nCaps.remove(0);
-                north--;
+            if (north.size() > south.size()+1 && !nCaps.isEmpty()) {
+                PCGNode node = (PCGNode) nCaps.toArray()[0];
+                nCaps.remove(node);
+                north.remove(node);
                 sCaps.add(node);
-                south++;
-                node.setProperty(new PropertyInt("orientation", 2));
-                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                connections[0] = "S-0";
-                if (north == south) {
+                south.add(node);
+                node.orientation = 2;
+                node.connects.set(0, Connection.SOUTH);
+                if (north.size() == south.size()) {
                     imbalanceNS = false;
                 }
                 continue;
             }
-            if (south > north+1 && !sCaps.isEmpty()) {
-                BoardNode node = sCaps.remove(0);
-                south--;
+            if (south.size() > north.size()+1 && !sCaps.isEmpty()) {
+                PCGNode node = (PCGNode) sCaps.toArray()[0];
+                sCaps.remove(node);
+                south.remove(node);
                 nCaps.add(node);
-                north++;
-                node.setProperty(new PropertyInt("orientation", 0));
-                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                connections[0] = "N-0";
-                if (north == south) {
+                north.add(node);
+                node.orientation = 0;
+                node.connects.set(0, Connection.NORTH);
+                if (north.size() == south.size()) {
                     imbalanceNS = false;
                 }
                 continue;
             }
 
-            BoardNode newNode = null;
+            PCGNode newNode = null;
             if (!entrance) {
-                newNode = new BoardNode(countB > countA ? "entrance1B" : "entrance1A");
+                newNode = new PCGNode(sideB > sideA ? "entrance1B" : "entrance1A");
                 entrance = true;
             }
             else if (!exit) {
-                newNode = new BoardNode(countB > countA ? "exit1B" : "exit1A");
+                newNode = new PCGNode(sideB > sideA ? "exit1B" : "exit1A");
                 exit = true;
             }
             else if (endcap < endcapLimit) {
                 endcap++;
-                newNode = new BoardNode(countB > countA ? "endcap1B-" + endcap : "endcap1A-" + endcap);
+                newNode = new PCGNode(sideB > sideA ? "endcap1B-" + endcap : "endcap1A-" + endcap);
             }
             if (newNode != null) {
-                newNode.setProperty(new PropertyString("name", newNode.getComponentName()));
-                newNode.setProperty(new PropertyStringArray("neighbours", neighbourHash, new String[]{"null"}));
-                if (north < south) {
-                    newNode.setProperty(new PropertyInt("orientation", 0));
-                    newNode.setProperty(new PropertyStringArray("connections", connectionHash, new String[]{"N-0"}));
-                    north++;
+                if (north.size() < south.size()) {
+                    newNode.orientation = 0;
+                    newNode.connects.add(Connection.NORTH);
+                    north.add(newNode);
                     nCaps.add(newNode);
                 }
                 else {
-                    newNode.setProperty(new PropertyInt("orientation", 2));
-                    newNode.setProperty(new PropertyStringArray("connections", connectionHash, new String[]{"S-0"}));
-                    south++;
+                    newNode.orientation = 2;
+                    newNode.connects.add(Connection.SOUTH);
+                    south.add(newNode);
                     sCaps.add(newNode);
                 }
                 endcaps.add(newNode);
-                retVal.add(newNode);
+                nodes.add(newNode);
+                tiles.add(newNode.name);
             }
             // If there's nothing more to be done, give up
             if (entrance && exit && endcap >= endcapLimit) {
                 break;
             }
-            if (north == south)
+            if (north.size() == south.size())
                 imbalanceNS = false;
         }
         while (imbalanceEW) {
-            if (east > west+1 && !eCaps.isEmpty()) {
-                BoardNode node = eCaps.remove(0);
-                east--;
+            if (east.size() > west.size()+1 && !eCaps.isEmpty()) {
+                PCGNode node = (PCGNode) eCaps.toArray()[0];
+                eCaps.remove(node);
+                east.remove(node);
                 wCaps.add(node);
-                west++;
-                node.setProperty(new PropertyInt("orientation", 3));
-                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                connections[0] = "W-0";
-                if (east == west) {
-                    imbalanceEW = false;
+                west.add(node);
+                node.orientation = 3;
+                node.connects.set(0, Connection.WEST);
+                if (east.size() == west.size()) {
+                    imbalanceNS = false;
                 }
                 continue;
             }
-            if (west > east+1 && !wCaps.isEmpty()) {
-                BoardNode node = wCaps.remove(0);
-                west--;
+            if (west.size() > east.size()+1 && !wCaps.isEmpty()) {
+                PCGNode node = (PCGNode) wCaps.toArray()[0];
+                wCaps.remove(node);
+                west.remove(node);
                 eCaps.add(node);
-                east++;
-                node.setProperty(new PropertyInt("orientation", 1));
-                String[] connections = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                connections[0] = "E-0";
-                if (east == west) {
+                east.add(node);
+                node.orientation = 1;
+                node.connects.set(0, Connection.EAST);
+                if (east.size() == west.size()) {
                     imbalanceNS = false;
                 }
                 continue;
             }
 
-            BoardNode newNode = null;
+            PCGNode newNode = null;
             if (!entrance) {
-                newNode = new BoardNode(countB > countA ? "entrance1B" : "entrance1A");
+                newNode = new PCGNode(sideB > sideA ? "entrance1B" : "entrance1A");
                 entrance = true;
             }
             else if (!exit) {
-                newNode = new BoardNode(countB > countA ? "exit1B" : "exit1A");
+                newNode = new PCGNode(sideB > sideA ? "exit1B" : "exit1A");
                 exit = true;
             }
             else if (endcap < endcapLimit) {
                 endcap++;
-                newNode = new BoardNode(countB > countA ? "endcap1B-" + endcap : "endcap1A-" + endcap);
+                newNode = new PCGNode(sideB > sideA ? "endcap1B-" + endcap : "endcap1A-" + endcap);
             }
             if (newNode != null) {
-                newNode.setProperty(new PropertyString("name", newNode.getComponentName()));
-                newNode.setProperty(new PropertyStringArray("neighbours", neighbourHash, new String[]{"null"}));
-                if (east < west) {
-                    newNode.setProperty(new PropertyInt("orientation", 1));
-                    newNode.setProperty(new PropertyStringArray("connections", connectionHash, new String[]{"E-0"}));
-                    east++;
+                if (east.size() < west.size()) {
+                    newNode.orientation = 1;
+                    newNode.connects.add(Connection.EAST);
+                    east.add(newNode);
                     eCaps.add(newNode);
                 }
                 else {
-                    newNode.setProperty(new PropertyInt("orientation", 3));
-                    newNode.setProperty(new PropertyStringArray("connections", connectionHash, new String[]{"W-0"}));
-                    west++;
+                    newNode.orientation = 3;
+                    newNode.connects.add(Connection.WEST);
+                    west.add(newNode);
                     wCaps.add(newNode);
                 }
                 endcaps.add(newNode);
-                retVal.add(newNode);
+                nodes.add(newNode);
+                tiles.add(newNode.name);
             }
             // If there's nothing more to be done, give up
             if (entrance && exit && endcap >= endcapLimit) {
                 break;
             }
-            if (east == west)
+            if (east.size() == west.size())
                 imbalanceEW = false;
         }
         // If there's still an imbalance, go and remove whatever Endcaps we can as a last resort
         if (imbalanceNS) {
-            while (north > south && !nCaps.isEmpty()) {
-                north--;
-                BoardNode node = nCaps.remove(0);
+            while (north.size() > south.size() && !nCaps.isEmpty()) {
+                PCGNode node = (PCGNode) nCaps.toArray()[0];
+                north.remove(node);
+                nCaps.remove(node);
                 endcaps.remove(node);
-                retVal.remove(node);
+                nodes.remove(node);
                 //System.out.println("Last Resort: Removing " + node.getComponentName());
             }
-            while (south > north && !sCaps.isEmpty()) {
-                south--;
-                BoardNode node = sCaps.remove(0);
+            while (south.size() > north.size() && !sCaps.isEmpty()) {
+                PCGNode node = (PCGNode) sCaps.toArray()[0];
+                south.remove(node);
+                sCaps.remove(node);
                 endcaps.remove(node);
-                retVal.remove(node);
+                nodes.remove(node);
                 //System.out.println("Last Resort: Removing " + node.getComponentName());
             }
         }
         if (imbalanceEW) {
-            while (east > west && !eCaps.isEmpty()) {
-                east--;
-                BoardNode node = eCaps.remove(0);
+            while (east.size() > west.size() && !eCaps.isEmpty()) {
+                PCGNode node = (PCGNode) eCaps.toArray()[0];
+                east.remove(node);
+                eCaps.remove(node);
                 endcaps.remove(node);
-                retVal.remove(node);
+                nodes.remove(node);
                 //System.out.println("Last Resort: Removing " + node.getComponentName());
             }
-            while (west > east && !wCaps.isEmpty()) {
-                west--;
-                BoardNode node = wCaps.remove(0);
+            while (west.size() > east.size() && !wCaps.isEmpty()) {
+                PCGNode node = (PCGNode) wCaps.toArray()[0];
+                west.remove(node);
+                wCaps.remove(node);
                 endcaps.remove(node);
-                retVal.remove(node);
+                nodes.remove(node);
                 //System.out.println("Last Resort: Removing " + node.getComponentName());
             }
         }
 
         // If all else fails, we give up - we can't save this board with the current mutations
-        if (north != south) {
-            //System.out.println("Still an imbalance - North: " + north + "; South: " + south);
-            freeNodes = true;
+        if (north.size() != south.size()) {
+            return true;
         }
-        if (east != west) {
-            //System.out.println("Still an imbalance - East: " + east + "; West: " + west);
-            freeNodes = true;
-        }
-
-
-        return new Pair<>(retVal, freeNodes);
+        return east.size() != west.size();
     }
 
     void assembleBoard(List<BoardNode> nodes) {
@@ -1788,7 +1846,7 @@ public class CreateOffspring {
     void exportPCGToJSON(boolean isFeasible) throws IOException {
 
         String destination = "feasible.json";
-        List<Pair<Quest, GraphBoard>> set = feasible;
+        List<PCGBoard> set = feasible;
         List<HashMap<String, Float>> fitness = feasibleFitness;
         if (!isFeasible) {
             destination = "infeasible.json";
@@ -1805,7 +1863,8 @@ public class CreateOffspring {
         Files.write(fitnessOutput,"[\n".getBytes());
         int counter = 0;
         int max = set.size();
-        for (Pair<Quest, GraphBoard> pair : set) {
+        /*
+        for (PCGBoard pair : set) {
             counter++;
             Quest quest = pair.a;
             GraphBoard board = pair.b;
@@ -1976,6 +2035,7 @@ public class CreateOffspring {
 
             Files.writeString(fitnessOutput,prettyS + System.lineSeparator(),StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         }
+         */
     }
 
     void exportMAPElitesToJSON(MapElites first, MapElites second) throws IOException {

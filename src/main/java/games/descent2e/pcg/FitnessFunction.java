@@ -128,60 +128,67 @@ public class FitnessFunction {
         return fitness;
     }
 
-    private int connectedness(GraphBoard board) {
+    private int connectedness(PCGBoard quest) {
         int islands = 0;
 
-        BoardNode[] nodes = board.getBoardNodeMap().values().toArray(new BoardNode[0]);
-
-        List<String> tiles = new ArrayList<>();
-        for (BoardNode n : nodes) {
-            if (tiles.contains(n.getComponentName())) continue;
-            islands++;
-            tiles.add(n.getComponentName());
-            for (BoardNode neighbour : n.getNeighbours().keySet()) {
-                if (tiles.contains(neighbour.getComponentName())) continue;
-                addNeighbours(neighbour, tiles);
+        HashSet<String> tiles = new HashSet<>();
+        for (PCGNode node : quest.board) {
+            if (!tiles.contains(node.name))
+                islands++;
+            else
+                tiles.add(node.name);
+            for (Connection c : node.neighbours.keySet()) {
+                String next = node.neighbours.get(c);
+                if (tiles.contains(next)) continue;
+                for (PCGNode n : quest.board)
+                    if (n.name.equals(next)) {
+                        addNeighbours(quest, n, tiles);
+                        break;
+                    }
             }
         }
         return islands;
     }
 
-    private int freeEdges(CreateOffspring co, GraphBoard board) {
+    private int freeEdges(List<PCGNode> board) {
         int freeEdges = 0;
 
-        BoardNode[] nodes = board.getBoardNodeMap().values().toArray(new BoardNode[0]);
-        for (BoardNode node : nodes) {
-            String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
-            for (String n : neighbours) {
-                if (n.equals("null"))
+        for (PCGNode node : board) {
+            for (Connection c : node.neighbours.keySet()) {
+                if (node.neighbours.get(c).equals("null"))
                     freeEdges++;
             }
-            int expected = ((PropertyInt) Objects.requireNonNull(co.getTileByName(node.getComponentName())).getProperty(nodeHash)).value;
-            if (neighbours.length != expected)
-                freeEdges += Math.max(expected - neighbours.length, 0);
+            int expected = node.maxConnections;
+            if (node.neighbours.size() != expected)
+                freeEdges += Math.max(expected - node.neighbours.size(), 0);
         }
 
         return freeEdges;
     }
 
-    private void addNeighbours(BoardNode n, List<String> tiles) {
-        if (tiles.contains(n.getComponentName())) return;
-        tiles.add(n.getComponentName());
-        for (BoardNode neighbour : n.getNeighbours().keySet()) {
-            if (tiles.contains(neighbour.getComponentName())) continue;
-            addNeighbours(neighbour, tiles);
+    private void addNeighbours(PCGBoard quest, PCGNode node, HashSet<String> tiles) {
+        if (tiles.contains(node.name)) return;
+        tiles.add(node.name);
+        for (Connection c : node.neighbours.keySet()) {
+            String next = node.neighbours.get(c);
+            if (tiles.contains(next)) continue;
+            for (PCGNode n : quest.board)
+                if (n.name.equals(next)) {
+                    addNeighbours(quest, n, tiles);
+                    break;
+                }
         }
     }
 
-    private boolean legalSpawns(CreateOffspring co, Quest quest, GraphBoard board) {
-        String heroTile = quest.getStartingTile();
+    private boolean legalSpawns(CreateOffspring co, PCGBoard quest) {
+        String heroTile = quest.heroStartingPosition;
         for (String tile : illegalHeroSpawns)
             if (heroTile.contains(tile))
                 return false;
 
         List<String> allNodes = new ArrayList<>();
-        for (BoardNode node : board.getBoardNodes())
-            allNodes.add(node.getComponentName());
+        for (PCGNode node : quest.board)
+            allNodes.add(node.name);
 
         List<String> occupied = new ArrayList<>();
         List<Pair<String, Integer>> occupiedSize = new ArrayList<>();
@@ -192,15 +199,15 @@ public class FitnessFunction {
         // Subtract 4 from the available space, one for each Hero
         occupiedSize.add(new Pair<>(heroTile, ((PropertyInt) node.getProperty(spaceHash)).value - 4));
 
-        List<String> traits = quest.getMonsterTraits();
+        HashSet<String> traits = quest.monsterTraits;
         boolean barghestOpen = traits.contains("Dark") || traits.contains("Wilderness") || traits.contains("All");
         boolean dragonOpen = traits.contains("Dark") || traits.contains("Cave") || traits.contains("All");
 
 
-        for (String[] monster : quest.getMonsters())
+        for (Pair<String, String> monster : quest.monsters)
         {
-            String monsterTile = monster[1];
-            String monsterName = monster[0];
+            String monsterName = monster.a;
+            String monsterTile = monster.b;
 
             // Make sure the tile is actually valid in the first place
             if (monsterTile.equals("null") || !allNodes.contains(monsterTile))
@@ -273,29 +280,18 @@ public class FitnessFunction {
         return true;
     }
 
-    private int getBoardSize(GraphBoard board) {
+    private int getBoardSize(List<PCGNode> board) {
         int size = 0;
-        List<String> nodes = new ArrayList<>();
-        for (BoardNode node : board.getBoardNodes()) {
-            nodes.add(node.getComponentName().split("-")[0]);
-        }
-        int checked = 0;
-        for (String node : nodes) {
-            for (GridBoard tile : GenerateBoards.tiles) {
-                if (tile.getComponentName().contains(node)) {
-                    checked++;
-                    size += Integer.parseInt(tile.getProperty(spaceHash).toString());
-                    break;
-                }
-            }
+        for (PCGNode node : board) {
+            size += node.size;
         }
         return size;
     }
 
-    private boolean noRepeats(Quest quest) {
+    private boolean noRepeats(PCGBoard quest) {
         List<String> monsters = new ArrayList<>();
-        for (String[] monster : quest.getMonsters()) {
-            String name = monster[0].split(":")[0];
+        for (Pair<String, String> monster : quest.monsters) {
+            String name = monster.a.split(":")[0];
             if (name.contains("Open")) continue;
             if (monsters.contains(name)) return true;
             monsters.add(name);
@@ -303,52 +299,49 @@ public class FitnessFunction {
         return false;
     }
 
-    private float consistency (GraphBoard board) {
+    private float consistency (List<PCGNode> board) {
         int errors = 0;
         int connections = 0;
 
-        BoardNode[] nodes = board.getBoardNodeMap().values().toArray(new BoardNode[0]);
-        for (BoardNode node : nodes) {
-            String tile = node.getComponentName();
+        for (PCGNode node : board) {
+            String tile = node.name;
             boolean checkTransition = tile.contains("transition");
             if (!checkTransition) {
-                for (String neighbour : ((PropertyStringArray) node.getProperty("neighbours")).getValues()) {
+                for (Connection c : node.neighbours.keySet()) {
+                    String neighbour = node.neighbours.get(c);
                     connections++;
                     if ((tile.contains("A") && neighbour.contains("B")) || (tile.contains("B") && neighbour.contains("A")))
                         errors++;
                 }
             }
             else {
-                int orientation = ((PropertyInt) node.getProperty("orientation")).value;
-                String[] cons = ((PropertyStringArray) node.getProperty("connections")).getValues();
-                String[] neighbours = ((PropertyStringArray) node.getProperty("neighbours")).getValues();
-                for (int i = 0; i < neighbours.length; i++) {
+                int orientation = node.orientation;
+                for (Connection c : node.neighbours.keySet()) {
+                    String neighbour = node.neighbours.get(c);
                     connections++;
-                    String neighbour = neighbours[i];
-                    String connect = cons[i];
                     switch (orientation) {
                         case 0:
-                            if (neighbour.contains("A") && !connect.contains("N"))
+                            if (neighbour.contains("A") && !c.equals(Connection.NORTH))
                                 errors++;
-                            if (neighbour.contains("B") && !connect.contains("S"))
+                            if (neighbour.contains("B") && !c.equals(Connection.SOUTH))
                                 errors++;
                             break;
                         case 1:
-                            if (neighbour.contains("A") && !connect.contains("E"))
+                            if (neighbour.contains("A") && !c.equals(Connection.EAST))
                                 errors++;
-                            if (neighbour.contains("B") && !connect.contains("W"))
+                            if (neighbour.contains("B") && !c.equals(Connection.WEST))
                                 errors++;
                             break;
                         case 2:
-                            if (neighbour.contains("A") && !connect.contains("S"))
+                            if (neighbour.contains("A") && !c.equals(Connection.SOUTH))
                                 errors++;
-                            if (neighbour.contains("B") && !connect.contains("N"))
+                            if (neighbour.contains("B") && !c.equals(Connection.NORTH))
                                 errors++;
                             break;
                         case 3:
-                            if (neighbour.contains("A") && !connect.contains("W"))
+                            if (neighbour.contains("A") && !c.equals(Connection.WEST))
                                 errors++;
-                            if (neighbour.contains("B") && !connect.contains("E"))
+                            if (neighbour.contains("B") && !c.equals(Connection.EAST))
                                 errors++;
                             break;
                     }
@@ -358,14 +351,14 @@ public class FitnessFunction {
         return (float) (connections - errors) / connections;
     }
 
-    private Pair<Float, Float> getMonsterHealth(Quest quest) {
+    private Pair<Float, Float> getMonsterHealth(PCGBoard quest) {
         float monsterHealth = 0f;
         float totalMonsters = 0f;
 
-        int act = quest.getAct();
+        int act = quest.act;
 
-        for (String[] monster : quest.getMonsters()) {
-            String[] name = monster[0].split(":");
+        for (Pair<String, String> monster : quest.monsters) {
+            String[] name = monster.a.split(":");
             if (name[0].contains("Open")) {
                 // Totals for OpenSmall: 4.6 Monsters
                 // Act 1 - 16.4 HP
@@ -399,21 +392,23 @@ public class FitnessFunction {
         return new Pair<>(monsterHealth, totalMonsters);
     }
 
-    HashMap<String, Float> getFitness(CreateOffspring co, Quest quest, GraphBoard board) throws InterruptedException, InvocationTargetException {
+    HashMap<String, Float> getFitness(CreateOffspring co, PCGBoard quest) throws InterruptedException, InvocationTargetException {
         HashMap<String, Float> scores = new HashMap<>();
 
-        // Connectedness
-        float connected = connectedness(board);
+        List<PCGNode> board = quest.board;
 
-        float freeEdge = freeEdges(co, board);
+        // Connectedness
+        float connected = connectedness(quest);
+
+        float freeEdge = freeEdges(board);
 
         // Map Size
         float size = getBoardSize(board);
 
-        float tiles = (float) board.getBoardNodes().size();
+        float tiles = (float) board.size();
 
         // Geometry
-        Pair<int[][], Integer> result = createBoard(co, quest, board);
+        Pair<int[][], Integer> result = createBoard(co, quest);
         float geometry = 0f;
         float height = 0f;
         float width = 0f;
@@ -431,20 +426,18 @@ public class FitnessFunction {
 
         // Legal Spawning
         // Boolean = Score 1 if all legal, 0 if conflict
-        float spawning = legalSpawns(co, quest, board) ? 1f : 0f;
+        float spawning = legalSpawns(co, quest) ? 1f : 0f;
 
         // Map Consistency
         float consistency = consistency(board);
 
         // Monster Groups
-        float groups = quest.getMonsters().size();
+        float groups = quest.monsters.size();
 
         // Monster Health
         Pair<Float, Float> health = getMonsterHealth(quest);
 
-        float averageHealth = health.a;
-        if (health.b > 0)
-            averageHealth = health.a / health.b;
+        float averageHealth = (health.b > 0) ? health.a / health.b : health.a;
 
         // Map Complexity
         float complexity = 1f;
@@ -469,9 +462,9 @@ public class FitnessFunction {
         scores.put("Total Health", health.a);
         scores.put("Complexity", complexity);
         scores.put("Rules", rules);
-        scores.put("Act", (float) quest.getAct());
-        scores.put("XP", (float) quest.getStartingXP());
-        scores.put("Gold", (float) quest.getGold());
+        scores.put("Act", (float) quest.act);
+        scores.put("XP", (float) quest.startingXP);
+        scores.put("Gold", (float) quest.gold);
 
         float fitness = fitness(scores);
         scores.put("Fitness", fitness);
@@ -514,19 +507,19 @@ public class FitnessFunction {
 
         // Board Size Check
         float size = scores.get("Size");
-        if (size > ControlVariables.SIZE_MAX || size < ControlVariables.SIZE_MIN) {
+        if (size > SIZE_MAX || size < SIZE_MIN) {
             return "Size Failure";
         }
         // Monster Group Check
         float groups = scores.get("Groups");
-        if (groups > ControlVariables.GROUP_MAX || groups < ControlVariables.GROUP_MIN) {
+        if (groups > GROUP_MAX || groups < GROUP_MIN) {
             return "Group Count Failure";
         }
 
         return "Feasible";
     }
 
-    private Pair<int[][], Integer> createBoard(CreateOffspring co, Quest q, GraphBoard b) {
+    private Pair<int[][], Integer> createBoard(CreateOffspring co, PCGBoard quest) {
 
         // Put together the master grid board
         // Find maximum board width and height, if all were put together side by side
@@ -536,17 +529,15 @@ public class FitnessFunction {
 
         int width = 0;
         int height = 0;
-        for (BoardNode bn : b.getBoardNodes()) {
+        for (PCGNode node : quest.board) {
             // Find width of this tile, according to orientation
-            String name = bn.getComponentName();
+            String name = node.name;
             GridBoard tile = co.getTileByName(name);
             if (tile != null) {
-
-                tile.setProperty(bn.getProperty(orientationHash));
+                tile.setProperty(new PropertyInt("orientation", node.orientation));
                 gridReferences.put(name, new HashMap<>());
                 tiles.put(tile.getComponentID(), tile);
-
-                int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
+                int orientation = node.orientation;
                 if (orientation % 2 == 0) {
                     width += tile.getWidth();
                     height += tile.getHeight();
@@ -564,33 +555,33 @@ public class FitnessFunction {
         // Create big board
         BoardNode[][] board = new BoardNode[height][width];  // Board nodes here will be the individual cells in the tiles
         int[][] tileReferences = new int[height][width];  // Reference to component ID of tile placed at that position
-        HashMap<BoardNode, BoardNode> drawn = new HashMap<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
+        HashMap<PCGNode, PCGNode> drawn = new HashMap<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
 
         // StartX / Y Will need to be adjusted to not draw on top of existing things
 
         // Find first tile, as board node in the board configuration graph board
-        int x = 0;
-        List<Object> nodes = Arrays.asList(b.getBoardNodeMap().values().toArray());
-        BoardNode firstTile = (BoardNode) nodes.get(x);
-        String startingTileName = q.getStartingTile();
-        while (!firstTile.getComponentName().contains(startingTileName) && x < nodes.size() - 1) {
-            x++;
-            firstTile = (BoardNode) nodes.get(x);
+        PCGNode firstTile = quest.board.get(0);
+        String startingTileName = quest.heroStartingPosition;
+        for (PCGNode node : quest.board) {
+            if (node.name.equals(startingTileName)) {
+                firstTile = node;
+                break;
+            }
         }
         // System.out.println("First tile:" + firstTile.getComponentName());
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
-            GridBoard tile = co.getTileByName(firstTile.getComponentName());
+            GridBoard tile = co.getTileByName(firstTile.name);
             assert tile != null;
-            tile.setComponentName(firstTile.getComponentName());
-            int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
+            tile.setComponentName(firstTile.name);
+            int orientation = firstTile.orientation;
             Component[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
             // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
             Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
             // Recursive call, will add all tiles in relation to their neighbours as per the board configuration
-            addTilesToBoard(co, null, firstTile, startX, startY, board, null, GenerateBoards.tiles, tileReferences, gridReferences, drawn, bounds, null);
+            addTilesToBoard(co, quest.board, null, firstTile, startX, startY, board, null, GenerateBoards.tiles, tileReferences, gridReferences, drawn, bounds, null);
 
             BoardNode[][] trimBoard = new BoardNode[bounds.height][bounds.width];
             int[][] trimTileRef = new int[bounds.height][bounds.width];
@@ -627,18 +618,19 @@ public class FitnessFunction {
         return null;
     }
 
-    private void addTilesToBoard(CreateOffspring co, BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
+    private void addTilesToBoard(CreateOffspring co, List<PCGNode> nodes, PCGNode parentTile, PCGNode tileToAdd, int x, int y,
+                                 BoardNode[][] board,
                                  BoardNode[][] tileGrid,
                                  List<GridBoard> tiles,
                                  int[][] tileReferences, Map<String, Map<Vector2D, Vector2D>> gridReferences,
-                                 Map<BoardNode, BoardNode> drawn,
+                                 Map<PCGNode, PCGNode> drawn,
                                  Rectangle bounds,
                                  String sideWithOpening) {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
-            GridBoard tile = co.getTileByName(tileToAdd.getComponentName());
-            tile.setComponentName(tileToAdd.getComponentName());
-            BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
+            GridBoard tile = co.getTileByName(tileToAdd.name);
+            tile.setComponentName(tileToAdd.name);
+            BoardNode[][] originalTileGrid = tile.rotate(tileToAdd.orientation);
             if (tileGrid == null) {
                 tileGrid = originalTileGrid;
             }
@@ -656,7 +648,7 @@ public class FitnessFunction {
 
                     // Set
                     board[i][j] = tileGrid[i - y][j - x].copy();
-                    board[i][j].setProperty(new PropertyInt("connections", (tileToAdd.getComponentID()+1)));
+                    board[i][j].setProperty(new PropertyInt("connections", (tileToAdd.nodeID)));
 
                     // Don't keep references for edge tiles
                     if (board[i][j] == null || board[i][j].getComponentName().equals("edge")
@@ -696,8 +688,16 @@ public class FitnessFunction {
             drawn.put(parentTile, tileToAdd);
 
             // Draw neighbours
-            for (BoardNode neighbour : tileToAdd.getNeighbours().keySet()) {
-
+            for (Connection c : tileToAdd.neighbours.keySet()) {
+                String target = tileToAdd.neighbours.get(c);
+                PCGNode neighbour = null;
+                for (PCGNode node : nodes) {
+                    if (node.name.equals(target)) {
+                        neighbour = node;
+                        break;
+                    }
+                }
+                assert neighbour != null;
                 if (drawn.containsKey(neighbour)) continue;
 
                 // Find location to start drawing neighbour
@@ -706,9 +706,9 @@ public class FitnessFunction {
                 if (connectionToNeighbour != null) {
                     connectionToNeighbour.b.add(x, y);
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
-                    GridBoard tileN = co.getTileByName(neighbour.getComponentName());
+                    GridBoard tileN = co.getTileByName(neighbour.name);
                     if (tileN != null) {
-                        BoardNode[][] tileGridN = tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
+                        BoardNode[][] tileGridN = tileN.rotate(neighbour.orientation);
 
                         // Find location to start drawing neighbour
                         Pair<String, Vector2D> conn2 = findConnection(neighbour, tileToAdd, findOpenings(tileGridN));
@@ -777,7 +777,7 @@ public class FitnessFunction {
                                 bounds.height += deltaMaxY;
 
                             // Draw neighbour recursively
-                            addTilesToBoard(co, tileToAdd, neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
+                            addTilesToBoard(co, nodes, tileToAdd, neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
                                     tiles, tileReferences, gridReferences, drawn, bounds, side);
                         }
                     }
@@ -786,20 +786,25 @@ public class FitnessFunction {
         }
     }
 
-    private Pair<String, Vector2D> findConnection(BoardNode from, BoardNode to, HashMap<String, ArrayList<Vector2D>> openings) {
-        String[] neighbours = ((PropertyStringArray) from.getProperty(neighbourHash)).getValues();
-        String[] connections = ((PropertyStringArray) from.getProperty(connectionHash)).getValues();
+    private Pair<String, Vector2D> findConnection(PCGNode from, PCGNode to, HashMap<String, ArrayList<Vector2D>> openings) {
+        List<String> neighbours = new ArrayList<>();
+        List<Connection> connections = new ArrayList<>();
 
-        for (int i = 0; i < neighbours.length; i++) {
-            if (neighbours[i].equalsIgnoreCase(to.getComponentName())) {
-                String conn = connections[i];
+        for (Connection c : from.neighbours.keySet()) {
+            connections.add(c);
+            neighbours.add(from.neighbours.get(c));
+        }
 
-                String side = conn.split("-")[0];
-                int countFromTop = Integer.parseInt(conn.split("-")[1]);
+        for (int i = 0; i < neighbours.size(); i++) {
+            if (neighbours.get(i).equalsIgnoreCase(to.name)) {
+                String side = switch (connections.get(i)) {
+                    case NORTH -> "N";
+                    case EAST -> "E";
+                    case SOUTH -> "S";
+                    case WEST -> "W";
+                };
                 if (openings.containsKey(side)) {
-                    if (countFromTop >= 0 && countFromTop < openings.get(side).size()) {
-                        return new Pair<>(side, openings.get(side).get(countFromTop));
-                    }
+                    return new Pair<>(side, openings.get(side).get(0));
                 }
                 break;
             }
