@@ -124,4 +124,77 @@ public class TrickTest {
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
     }
+
+    /**
+     * A 4-player trick in which the given player sits out, with the cards added in play order.
+     */
+    private static Trick trickWithout(int sittingOut, int leader, String... codes) {
+        Trick t = new Trick("Trick", 4, leader, CardOrder.STANDARD, sittingOut);
+        for (String c : codes)
+            t.addToBottom(card(c));
+        return t;
+    }
+
+    @Test
+    public void playerOfSkipsThePlayerSittingOut() {
+        // leader 3, player 1 sits out: 3, 0, then 2 (1 skipped)
+        Trick t = trickWithout(1, 3, "5H", "6H", "7H");
+        assertEquals(3, t.playerOf(0));
+        assertEquals(0, t.playerOf(1));
+        assertEquals(2, t.playerOf(2));
+        // leader 0, player 1 sits out: 0, then 2 (1 skipped), 3
+        Trick u = trickWithout(1, 0, "5H", "6H", "7H");
+        assertEquals(0, u.playerOf(0));
+        assertEquals(2, u.playerOf(1));
+        assertEquals(3, u.playerOf(2));
+        // leader 2, player 3 sits out: 2, then 0 (3 skipped), 1
+        Trick v = trickWithout(3, 2);
+        assertEquals(2, v.playerOf(0));
+        assertEquals(0, v.playerOf(1));
+        assertEquals(1, v.playerOf(2));
+        assertEquals(3, v.getSittingOut());
+    }
+
+    @Test
+    public void withAPlayerSittingOutThreeCardsCompleteTheTrick() {
+        Trick t = trickWithout(2, 1);
+        t.addToBottom(card("5H"));
+        t.addToBottom(card("6H"));
+        assertFalse(t.isComplete());
+        t.addToBottom(card("7H"));
+        // 4 players - 1 sitting out = 3 cards
+        assertTrue(t.isComplete());
+    }
+
+    @Test
+    public void theWinnerIsReportedByPlayerSkippingThePlayerSittingOut() {
+        // leader 3, player 1 sits out: 5H by 3, 6H by 0, KH (index 2, the highest) by 2 - not by (3 + 2) % 4 = 1
+        assertEquals(2, trickWithout(1, 3, "5H", "6H", "KH").winner(null));
+        // leader 0, player 1 sits out: 2S trump at index 1 is player 2's
+        assertEquals(2, trickWithout(1, 0, "AH", "2S", "KH").winner(Spades));
+    }
+
+    @Test
+    public void byDefaultNobodySitsOutAndEveryPlayerPlays() {
+        assertEquals(-1, new Trick("Trick", 4, 0).getSittingOut());
+        assertEquals(-1, new Trick("Trick", 4, 0, CardOrder.STANDARD).getSittingOut());
+        // with -1, index 1 of leader 0 is player 1 and the trick needs all 4 cards
+        Trick t = trickWithout(-1, 0, "5H", "6H", "7H");
+        assertEquals(1, t.playerOf(1));
+        assertFalse(t.isComplete());
+        assertEquals(trick(0, "5H", "6H", "7H"), t);
+    }
+
+    @Test
+    public void equalityAndCopyIncludeThePlayerSittingOut() {
+        Trick t = trickWithout(1, 0, "5H", "KH");
+        Trick copy = t.copy();
+        assertEquals(1, copy.getSittingOut());
+        assertEquals(t, copy);
+        assertEquals(t.hashCode(), copy.hashCode());
+        // same cards and leader, a different player (or nobody) sitting out
+        assertNotEquals(t, trickWithout(3, 0, "5H", "KH"));
+        assertNotEquals(t, trick(0, "5H", "KH"));
+        assertNotEquals(t.hashCode(), trick(0, "5H", "KH").hashCode());
+    }
 }

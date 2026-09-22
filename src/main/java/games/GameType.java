@@ -36,6 +36,10 @@ import games.cuckoo.CuckooForwardModel;
 import games.cuckoo.CuckooGameState;
 import games.cuckoo.CuckooParameters;
 import games.cuckoo.gui.CuckooGUIManager;
+import games.euchre.EuchreForwardModel;
+import games.euchre.EuchreGameState;
+import games.euchre.EuchreParameters;
+import games.euchre.gui.EuchreGUIManager;
 import games.whist.WhistForwardModel;
 import games.whist.WhistGameState;
 import games.whist.WhistParameters;
@@ -401,7 +405,10 @@ public enum GameType {
             SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class),
     Whist(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement),
-            WhistGameState.class, WhistForwardModel.class, WhistParameters.class, WhistGUIManager.class);
+            WhistGameState.class, WhistForwardModel.class, WhistParameters.class, WhistGUIManager.class),
+    Euchre(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement),
+            EuchreGameState.class, EuchreForwardModel.class, EuchreParameters.class, EuchreGUIManager.class);
 
 
     // Core classes where the game is defined

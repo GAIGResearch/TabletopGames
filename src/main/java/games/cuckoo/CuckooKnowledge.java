@@ -27,8 +27,7 @@ public class CuckooKnowledge {
 
     /**
      * Records a swap between two players. Every observer knows where the two cards went, so what they knew of one
-     * player's card they now know of the other's. So each of the two knows the card they gave away, and they also
-     * know the card they received.
+     * player's card they now know of the other's. So each of the two knows the card they gave away, and the card they received.
      */
     public void exchanged(int player, int neighbour) {
         for (boolean[] observer : known) {

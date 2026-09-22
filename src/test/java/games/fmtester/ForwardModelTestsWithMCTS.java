@@ -3,6 +3,8 @@ package games.fmtester;
 import evaluation.ForwardModelTester;
 import games.agram.AgramParameters;
 import games.cuckoo.CuckooParameters;
+import games.euchre.EuchreParameters;
+import games.gofish.GoFishParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.catan.CatanParameters;
@@ -225,6 +227,9 @@ public class ForwardModelTestsWithMCTS {
     @Test
     public void testGoFish() {
         new ForwardModelTester("game=GoFish", "nGames=3", "nPlayers=4", "agent=json\\players\\mcts.json");
+        GoFishParameters params = new GoFishParameters();
+        params.setParameterValue("playUntilAllBooks", true);
+        new ForwardModelTester(params, "game=GoFish", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 
     @Test
@@ -244,6 +249,16 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("noTrumpsInRotation", true);
         params.setParameterValue("rememberVoids", false);
         new ForwardModelTester(params, "game=Whist", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testEuchre() {
+        new ForwardModelTester("game=Euchre", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
+        EuchreParameters params = new EuchreParameters();
+        params.setParameterValue("targetScore", 10);
+        params.setParameterValue("sittingOutDealerPicksUp", false);
+        params.setParameterValue("rememberVoids", false);
+        new ForwardModelTester(params, "game=Euchre", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 
     @Test

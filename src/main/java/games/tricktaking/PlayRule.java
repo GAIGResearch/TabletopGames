@@ -19,12 +19,14 @@ public interface PlayRule {
 
     /**
      * Any card may be led; after that a player must follow the suit led if they can, and otherwise may play anything.
+     * A card's suit is the one the trick's {@link CardOrder} gives it.
      */
     PlayRule FOLLOW_SUIT = (hand, trick) -> {
         FrenchCard.Suite lead = trick.getLeadSuit();
-        if (lead == null || hand.stream().noneMatch(c -> c.suite == lead))
+        CardOrder order = trick.getOrder();
+        if (lead == null || hand.stream().noneMatch(c -> order.suitOf(c) == lead))
             return new ArrayList<>(hand);
-        return hand.stream().filter(c -> c.suite == lead).toList();
+        return hand.stream().filter(c -> order.suitOf(c) == lead).toList();
     };
 
     /**
@@ -33,9 +35,10 @@ public interface PlayRule {
      */
     static PlayRule leadRestricted(FrenchCard.Suite suit) {
         return (hand, trick) -> {
-            if (trick.getSize() > 0 || hand.stream().allMatch(c -> c.suite == suit))
+            CardOrder order = trick.getOrder();
+            if (trick.getSize() > 0 || hand.stream().allMatch(c -> order.suitOf(c) == suit))
                 return FOLLOW_SUIT.legalPlays(hand, trick);
-            return hand.stream().filter(c -> c.suite != suit).toList();
+            return hand.stream().filter(c -> order.suitOf(c) != suit).toList();
         };
     }
 }

@@ -41,7 +41,7 @@ public class CuckooForwardModel extends StandardForwardModel {
     }
 
     /**
-     * Gathers all the cards into the draw deck, shuffles it and deals one card to each player still in the game,
+     * Gathers all the cards into the draw deck, shuffles it, and deals one card to each player still in the game,
      * starting on the dealer's left. The player on the dealer's left decides first.
      */
     void deal(CuckooGameState state) {

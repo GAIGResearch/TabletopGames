@@ -3,6 +3,8 @@ package games.fmtester;
 import evaluation.ForwardModelTester;
 import games.agram.AgramParameters;
 import games.cuckoo.CuckooParameters;
+import games.euchre.EuchreParameters;
+import games.gofish.GoFishParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.crazyeights.CZEParameters;
@@ -152,10 +154,17 @@ public class ForwardModelTestsWithRandom {
 
     @Test
     public void testGoFish() {
-        ForwardModelTester fmt = new ForwardModelTester("game=GoFish", "nGames=1", "nPlayers=2");
-        fmt = new ForwardModelTester("game=GoFish", "nGames=1", "nPlayers=3");
-        fmt = new ForwardModelTester("game=GoFish", "nGames=1", "nPlayers=4");
-        fmt = new ForwardModelTester("game=GoFish", "nGames=1", "nPlayers=5");
+        for (int nPlayers = 2; nPlayers <= 6; nPlayers++)
+            new ForwardModelTester("game=GoFish", "nGames=1", "nPlayers=" + nPlayers);
+        // the old play-on rules, without the extra turns
+        GoFishParameters params = new GoFishParameters();
+        params.setParameterValue("playUntilAllBooks", true);
+        params.setParameterValue("continueOnSuccess", false);
+        params.setParameterValue("continueOnDrawingSameRank", false);
+        new ForwardModelTester(params, "game=GoFish", "nGames=2", "nPlayers=3");
+        params = new GoFishParameters();
+        params.setParameterValue("playUntilAllBooks", true);
+        new ForwardModelTester(params, "game=GoFish", "nGames=2", "nPlayers=5");
     }
 
     @Test
@@ -187,6 +196,16 @@ public class ForwardModelTestsWithRandom {
         AgramParameters params = new AgramParameters();
         params.setParameterValue("nDeals", 3);
         new ForwardModelTester(params, "game=Agram", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testEuchre() {
+        new ForwardModelTester("game=Euchre", "nGames=2", "nPlayers=4");
+        EuchreParameters params = new EuchreParameters();
+        params.setParameterValue("targetScore", 10);
+        params.setParameterValue("sittingOutDealerPicksUp", false);
+        params.setParameterValue("rememberVoids", false);
+        new ForwardModelTester(params, "game=Euchre", "nGames=2", "nPlayers=4");
     }
 
     @Test

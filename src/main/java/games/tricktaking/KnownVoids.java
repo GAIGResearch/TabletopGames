@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 /**
  * For each player, the suits they are publicly known not to hold, from having failed to follow suit to a trick.
@@ -40,7 +41,7 @@ public class KnownVoids {
      */
     public void record(int player, Trick trick, FrenchCard card) {
         FrenchCard.Suite lead = trick.getLeadSuit();
-        if (lead != null && card.suite != lead)
+        if (lead != null && trick.getOrder().suitOf(card) != lead)
             voids.get(player).add(lead);
     }
 
@@ -57,7 +58,18 @@ public class KnownVoids {
      * owner is not known to be void in the card's suit.
      */
     public boolean permits(Deck<FrenchCard> deck, FrenchCard card) {
-        return deck.getOwnerId() < 0 || !voids.get(deck.getOwnerId()).contains(card.suite);
+        return permits(deck, card.suite);
+    }
+
+    /**
+     * As {@link #permits(Deck, FrenchCard)}, but for a card belonging to the suit the order gives it.
+     */
+    public BiPredicate<Deck<FrenchCard>, FrenchCard> permits(CardOrder order) {
+        return (deck, card) -> permits(deck, order.suitOf(card));
+    }
+
+    private boolean permits(Deck<FrenchCard> deck, FrenchCard.Suite suit) {
+        return deck.getOwnerId() < 0 || !voids.get(deck.getOwnerId()).contains(suit);
     }
 
     public KnownVoids copy() {
