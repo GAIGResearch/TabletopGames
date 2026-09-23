@@ -43,6 +43,9 @@ public class CreateOffspring {
     private int deletionChance = 10;
     private int rotationChance = 10;
 
+    private int positionMutationChance = 10;
+    private int prioritiseEntranceChance = 80;
+
     public HashMap<Integer, GridBoard> boards = new HashMap<>();
     public HashMap<Integer, Map<Integer, GridBoard>> boardTiles = new HashMap<>();
     public HashMap<Integer, int[][]> tileRefs = new HashMap<>();
@@ -799,10 +802,20 @@ public class CreateOffspring {
         // Then, roll Mutation chance (10%)
         boolean forceHeroMutate = !nodes.contains(heroStart) || illegalHeroSpawns.contains(heroStart);
         if (!forceHeroMutate)
-            forceHeroMutate = Random.randInt(10) < 1;
+            forceHeroMutate = Random.randInt(100) < positionMutationChance;
 
         if (forceHeroMutate) {
             heroStart = null;
+
+            // Prioritise starting at the Entrance or Exit, if we can
+            if (Random.randInt(100) < prioritiseEntranceChance) {
+                List<String> possible = new ArrayList<>(entrances);
+                Collections.shuffle(possible);
+                for (String tile : possible) {
+                    if (nodes.contains(tile))
+                        heroStart = tile;
+                }
+            }
 
             if (heroStart == null) {
                 for (String tile : nodes) {

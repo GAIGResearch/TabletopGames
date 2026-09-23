@@ -8,6 +8,7 @@ public class ControlVariables {
 
     public static final List<String> TRAITS = List.of("Building", "Cave", "Civilized", "Cold", "Cursed", "Dark", "Hot", "Mountain", "Water", "Wilderness");
 
+    public static List<String> entrances = Arrays.asList("entrance1A", "entrance1B", "exit1A", "exit1B");
     public static List<String> illegalHeroSpawns = Arrays.asList("null", "endcap", "extender");
     public static List<String> illegalMonsterSpawns = Arrays.asList("null", "endcap", "entrance", "exit", "extender", "transition");
     public static List<String> illegalBarghestSpawns = Arrays.asList("27A", "27B", "28A", "28B", "29A", "29B", "30A", "30B");
