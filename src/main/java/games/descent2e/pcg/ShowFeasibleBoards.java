@@ -107,8 +107,8 @@ public class ShowFeasibleBoards {
             });
 
             String monsterList = "";
-            for (Pair<String, String> monster : q.monsters) {
-                monsterList += monster.a.split(":")[0] + ", ";
+            for (String[] monster : q.monsters) {
+                monsterList += monster[0].split(":")[0] + ", ";
             }
             String traitsList = "";
             for (String trait : q.monsterTraits) {

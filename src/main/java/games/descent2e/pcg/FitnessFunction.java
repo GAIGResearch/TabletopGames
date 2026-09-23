@@ -182,35 +182,39 @@ public class FitnessFunction {
 
     private boolean legalSpawns(CreateOffspring co, PCGBoard quest) {
         String heroTile = quest.heroStartingPosition;
-        for (String tile : illegalHeroSpawns)
-            if (heroTile.contains(tile))
-                return false;
+        if (heroTile == null)
+            return false;
+        if (illegalHeroSpawns.contains(heroTile.split("-")[0]))
+            return false;
 
-        List<String> allNodes = new ArrayList<>();
+        HashSet<String> allNodes = new HashSet<>();
         for (PCGNode node : quest.board)
             allNodes.add(node.name);
 
-        List<String> occupied = new ArrayList<>();
-        List<Pair<String, Integer>> occupiedSize = new ArrayList<>();
+        HashSet<String> occupied = new HashSet<>();
+        HashMap<String, Integer> occupiedSize = new HashMap<>();
 
         occupied.add(heroTile);
         GridBoard node = co.getTileByName(heroTile);
         assert node != null;
         // Subtract 4 from the available space, one for each Hero
-        occupiedSize.add(new Pair<>(heroTile, ((PropertyInt) node.getProperty(spaceHash)).value - 4));
+        occupiedSize.put(heroTile, ((PropertyInt) node.getProperty(spaceHash)).value - 4);
 
         HashSet<String> traits = quest.monsterTraits;
         boolean barghestOpen = traits.contains("Dark") || traits.contains("Wilderness") || traits.contains("All");
         boolean dragonOpen = traits.contains("Dark") || traits.contains("Cave") || traits.contains("All");
 
+        //String result = "Heroes: " + heroTile;
 
-        for (Pair<String, String> monster : quest.monsters)
+        for (String[] monster : quest.monsters)
         {
-            String monsterName = monster.a;
-            String monsterTile = monster.b;
+            String monsterName = monster[0];
+            String monsterTile = monster[1];
+
+            //result += "; " + monsterName + ": " + monsterTile;
 
             // Make sure the tile is actually valid in the first place
-            if (monsterTile.equals("null") || !allNodes.contains(monsterTile))
+            if (monsterTile == null || !allNodes.contains(monsterTile))
                 return false;
 
             // Lieutenants can be placed anywhere that Heroes can
@@ -218,35 +222,24 @@ public class FitnessFunction {
             boolean barghest = monsterName.contains("Open") && barghestOpen;
 
             if (!monsterName.contains("lieutenant")) {
-                for (String tile : illegalMonsterSpawns)
-                    if (monsterTile.contains(tile))
-                        return false;
+                if(illegalMonsterSpawns.contains(monsterTile.split("-")[0]))
+                    return false;
                 if (monsterName.contains("Barghest") || barghest) {
-                    for (String tile : illegalBarghestSpawns)
-                        if (monsterTile.contains(tile))
-                            return false;
+                    if(illegalBarghestSpawns.contains(monsterTile.split("-")[0]))
+                        return false;
                 }
                 if (monsterName.contains("Dragon") || dragon) {
-                    for (String tile : illegalBarghestSpawns)
-                        if (monsterTile.contains(tile))
-                            return false;
-                    for (String tile : illegalDragonSpawns)
-                        if (monsterTile.contains(tile))
-                            return false;
+                    if(illegalBarghestSpawns.contains(monsterTile.split("-")[0]))
+                        return false;
+                    if(illegalDragonSpawns.contains(monsterTile.split("-")[0]))
+                        return false;
                 }
             }
 
             if (occupied.contains(monsterTile)) {
-                int i = 0;
-                for (int j = 0; j < occupiedSize.size(); j++) {
-                    if (occupiedSize.get(j).a.equals(monsterTile)) {
-                        i = j;
-                        break;
-                    }
-                }
-                Pair<String, Integer> set = occupiedSize.get(i);
+                int size = occupiedSize.get(monsterTile);
                 if (monsterName.contains("lieutenant")) {
-                    set.b -= 1;
+                    size -= 1;
                 }
                 else {
                     Monster mon;
@@ -261,22 +254,27 @@ public class FitnessFunction {
                     else
                         mon = GenerateBoards.monsters.get(monsterName.split(":")[0]).get("super");
                     int count = ((PropertyIntArray) mon.getProperty("setup")).getValues()[2] + 1;
-                    String[] size = ((PropertyString) mon.getProperty("size")).value.split("x");
-                    int space = Integer.parseInt(size[0]) * Integer.parseInt(size[1]) * count;
-                    set.b -= space;
+                    String[] mSize = ((PropertyString) mon.getProperty("size")).value.split("x");
+                    int space = Integer.parseInt(mSize[0]) * Integer.parseInt(mSize[1]) * count;
+                    size -= space;
                 }
-                if (set.b < 0)
+                if (size < 0)
                     return false;
-                occupiedSize.set(i, set);
+                occupiedSize.put(monsterTile, size);
             }
             else {
                 occupied.add(monsterTile);
-                node = co.getTileByName(monsterTile);
-                assert node != null;
-                occupiedSize.add(new Pair<>(monsterTile, ((PropertyInt) node.getProperty(spaceHash)).value));
+                for (PCGNode n : quest.board) {
+                    if (n.name.equals(monsterTile)) {
+                        occupiedSize.put(monsterTile, n.size);
+                        break;
+                    }
+                }
             }
-
         }
+
+        //System.out.println(result);
+
         return true;
     }
 
@@ -290,8 +288,8 @@ public class FitnessFunction {
 
     private boolean noRepeats(PCGBoard quest) {
         List<String> monsters = new ArrayList<>();
-        for (Pair<String, String> monster : quest.monsters) {
-            String name = monster.a.split(":")[0];
+        for (String[] monster : quest.monsters) {
+            String name = monster[0].split(":")[0];
             if (name.contains("Open")) continue;
             if (monsters.contains(name)) return true;
             monsters.add(name);
@@ -357,8 +355,8 @@ public class FitnessFunction {
 
         int act = quest.act;
 
-        for (Pair<String, String> monster : quest.monsters) {
-            String[] name = monster.a.split(":");
+        for (String[] monster : quest.monsters) {
+            String[] name = monster[0].split(":");
             if (name[0].contains("Open")) {
                 // Totals for OpenSmall: 4.6 Monsters
                 // Act 1 - 16.4 HP

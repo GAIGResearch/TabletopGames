@@ -1,6 +1,5 @@
 package games.descent2e.pcg;
 
-import com.google.crypto.tink.subtle.Random;
 import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.components.GridBoard;
@@ -9,19 +8,17 @@ import core.properties.PropertyStringArray;
 import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.Quest;
-import utilities.Pair;
 
 import java.util.*;
 
 import static core.CoreConstants.nodeHash;
 import static core.CoreConstants.spaceHash;
 import static games.descent2e.pcg.GenerateBoards.getTileByName;
-import static games.descent2e.pcg.GenerateBoards.tiles;
 
 public class PCGBoard {
     String name;
     HashSet<String> monsterTraits = new HashSet<>();
-    List<Pair<String, String>> monsters = new ArrayList<>();
+    HashSet<String[]> monsters = new HashSet<>();
     String heroStartingPosition;
     int act = 1;
     int startingXP = 0;
@@ -40,9 +37,7 @@ public class PCGBoard {
     public PCGBoard (Quest quest, GraphBoard board) {
         name = quest.getName();
         monsterTraits.addAll(quest.getMonsterTraits());
-        for (String[] monster : quest.getMonsters()) {
-            monsters.add(new Pair<>(monster[0], monster[1]));
-        }
+        monsters.addAll(quest.getMonsters());
         heroStartingPosition = quest.getStartingTile();
         act = quest.getAct();
         startingXP = quest.getStartingXP();
@@ -69,6 +64,7 @@ public class PCGBoard {
             }
 
             GridBoard original = getTileByName(n);
+            assert original != null;
             int maxConnections = ((PropertyInt) original.getProperty(nodeHash)).value;
             int size = ((PropertyInt) original.getProperty(spaceHash)).value;
 
@@ -81,9 +77,8 @@ public class PCGBoard {
         PCGBoard copy = new PCGBoard();
         copy.name = name;
         copy.monsterTraits.addAll(monsterTraits);
-        for (Pair<String, String> monster : monsters) {
-            copy.monsters.add(new Pair<>(monster.a, monster.b));
-        }
+        for (String[] monster : monsters)
+            copy.monsters.add(monster.clone());
         copy.heroStartingPosition = heroStartingPosition;
         copy.act = act;
         copy.startingXP = startingXP;
@@ -127,9 +122,7 @@ public class PCGBoard {
         offspring.name = "PCG-" + id;
 
         offspring.monsterTraits.addAll(questTemplate.monsterTraits);
-        for (Pair<String, String> monster : questTemplate.monsters) {
-            offspring.monsters.add(new Pair<>(monster.a, monster.b));
-        }
+        offspring.monsters.addAll(questTemplate.monsters);
         offspring.heroStartingPosition = offspring.heroStartingPosition;
         offspring.act = questTemplate.act;
         offspring.startingXP = questTemplate.startingXP;

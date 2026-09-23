@@ -389,23 +389,23 @@ public class CreateOffspring {
         // Deciding which Parent is the Base Quest
         int choice = Random.randInt(2);
         if (choice == 0) {
-            questBase = parent1;
-            questOther = parent2;
+            questBase = parent1.copy();
+            questOther = parent2.copy();
         }
         else {
-            questBase = parent2;
-            questOther = parent1;
+            questBase = parent2.copy();
+            questOther = parent1.copy();
         }
 
         // Now, decide which Parent is the Base Board
         choice = Random.randInt(2);
         if (choice == 0) {
-            boardBase = parent1;
-            boardOther = parent2;
+            boardBase = parent1.copy();
+            boardOther = parent2.copy();
         }
         else {
-            boardBase = parent2;
-            boardOther = parent1;
+            boardBase = parent2.copy();
+            boardOther = parent1.copy();
         }
 
         PCGBoard offspring = PCGBoard.createOffspring(questBase, boardBase, nowServing);
@@ -480,31 +480,51 @@ public class CreateOffspring {
         // --- MONSTER MUTATIONS ---
 
         HashSet<String> monstersUsed = new HashSet<>();
-        for (Pair<String, String> monster : offspring.monsters) {
-            if (monster.a.contains("Open")) continue;
-            monstersUsed.add(monster.a);
+
+        HashSet<String> positions = new HashSet<>();
+        if (tilesUsed.contains(offspring.heroStartingPosition))
+            positions.add(offspring.heroStartingPosition);
+        else
+            offspring.heroStartingPosition = null;
+
+        for (String[] monster : offspring.monsters) {
+            if (tilesUsed.contains(monster[1]) && !positions.contains(monster[1]))
+                positions.add(monster[1]);
+            else
+                monster[1] = null;
+            if (monster[0].contains("Open")) continue;
+            monstersUsed.add(monster[0]);
         }
 
         // Crossover
 
-        List<Pair<String, String>> newMonsters = new ArrayList<>(offspring.monsters);
+        HashSet<String[]> newMonsters = new HashSet<>(offspring.monsters);
 
-        for (Pair<String, String> monster : questOther.monsters) {
+        for (String[] monster : questOther.monsters) {
             if (Random.randInt(100) < crossoverChance) {
-                if (monster.a.contains("Open"))
-                    newMonsters.add(monster);
-                else if (!monstersUsed.contains(monster.a)) {
-                    newMonsters.add(monster);
-                    monstersUsed.add(monster.a);
+                String name = monster[0];
+                String position = monster[1];
+                if (tilesUsed.contains(position) && !positions.contains(position))
+                    positions.add(position);
+                else
+                    position = null;
+                String[] toAdd = {name, position};
+                if (name.contains("Open"))
+                    newMonsters.add(toAdd);
+                else if (!monstersUsed.contains(name)) {
+                    newMonsters.add(toAdd);
+                    monstersUsed.add(name);
                 }
             }
         }
 
         // Deletion
-        List<Pair<String, String>> finalMonsters = new ArrayList<>(newMonsters);
-        for (Pair<String, String> monster : newMonsters) {
-            if (Random.randInt(100) < deletionChance)
+        HashSet<String[]> finalMonsters = new HashSet<>(newMonsters);
+        for (String[] monster : newMonsters) {
+            if (Random.randInt(100) < deletionChance) {
                 finalMonsters.remove(monster);
+                positions.remove(monster[1]);
+            }
         }
 
         // Force a mutation if the group sizes are now too big or too small
@@ -515,8 +535,7 @@ public class CreateOffspring {
                 forceMutate = true;
 
         while (forceMutate) {
-            finalMonsters = mutateMonsters(finalMonsters);
-            forceMutate = (finalMonsters.size() < GROUP_MIN) || (finalMonsters.size() > GROUP_MAX);
+            forceMutate = mutateMonsters(finalMonsters);
         }
 
         offspring.monsters = finalMonsters;
@@ -525,15 +544,12 @@ public class CreateOffspring {
         int attempts = 0;
         while (!legalSpawns) {
             attempts++;
-            if (attempts > 10) break; // If we can't get a valid spawn set after 10 attempts, give up; this board is infeasible anyway
-            mutatePositions(offspring, tilesUsed);
-            if (!tilesUsed.contains(offspring.heroStartingPosition))
-                continue;
-            for (Pair<String, String> monster : offspring.monsters) {
-                if (!tilesUsed.contains(monster.b))
-                    continue;
+            //System.out.println("Attempt: " + attempts);
+            legalSpawns = mutatePositions(offspring, tilesUsed);
+            if (attempts > 10) {
+                //System.out.println(nowServing + ": Giving up.");
+                break; // If we can't get a valid spawn set after 20 attempts, give up; this board is infeasible anyway
             }
-            legalSpawns = true;
         }
 
         mutateAct(offspring);
@@ -685,10 +701,9 @@ public class CreateOffspring {
          */
     }
 
-    String getRandomMonster(List<String> oldMonsters) {
-        String newMonster = "null";
-        String monType = "";
-        String otherType = "";
+    String getRandomMonster(HashSet<String> oldMonsters) {
+        String monType;
+        String otherType;
         int type = mutate();
         List<String> toAdd = new ArrayList<>();
         List<String> other = new ArrayList<>();
@@ -712,16 +727,11 @@ public class CreateOffspring {
         }
 
         Collections.shuffle(toAdd);
-        boolean done = false;
         for (String m : toAdd) {
             if (!oldMonsters.contains(m+monType)) {
-                newMonster = m;
-                done = true;
-                break;
+                return m + monType;
             }
         }
-        if (done)
-            return newMonster + monType;
         for (String m : other) {
             if (!oldMonsters.contains(m + otherType)) {
                 return m + otherType;
@@ -730,8 +740,7 @@ public class CreateOffspring {
         return "Open:group";
     }
 
-    List<Pair<String, String>> mutateMonsters(List<Pair<String, String>> monsters) {
-        List<Pair<String, String>> newMonsters = new ArrayList<>(monsters);
+    boolean mutateMonsters(HashSet<String[]> monsters) {
         int mutate = mutate();
 
         int size = monsters.size();
@@ -752,31 +761,37 @@ public class CreateOffspring {
 
         // Add a new Monster to the groups
         if (add) {
-            List<String> currentMonsters = new ArrayList<>();
-            for (Pair<String, String> m : monsters) {
-                currentMonsters.add(m.a);
+            HashSet<String> currentMonsters = new HashSet<>();
+            for (String[] m : monsters) {
+                currentMonsters.add(m[0]);
             }
-            Pair<String, String> newMonster = new Pair<>(getRandomMonster(currentMonsters), "null");
-            newMonsters.add(newMonster);
+            String[] newMonster = {getRandomMonster(currentMonsters), null};
+            monsters.add(newMonster);
         }
         // Remove a Monster from the groups
         else if (remove) {
-            newMonsters.remove(Random.randInt(newMonsters.size()));
+            String[] result = (String[]) monsters.toArray()[Random.randInt(monsters.size())];
+            monsters.remove(result);
         }
         // Replace a Monster from the groups
         else {
-            List<String> currentMonsters = new ArrayList<>();
-            for (Pair<String, String> m : monsters) {
-                currentMonsters.add(m.a);
+            HashSet<String> currentMonsters = new HashSet<>();
+            for (String[] m : monsters) {
+                currentMonsters.add(m[0]);
             }
-            int i = Random.randInt(newMonsters.size());
-            (newMonsters.get(i)).a = getRandomMonster(currentMonsters);
+            String[] result = (String[]) monsters.toArray()[Random.randInt(monsters.size())];
+            monsters.remove(result);
+            result[0] = getRandomMonster(currentMonsters);
+            monsters.add(result);
         }
-        return newMonsters;
+
+        // We want to be within the boundaries - if we fall outside of it, return true - and redo the mutations
+        return monsters.size() < GROUP_MIN || monsters.size() > GROUP_MAX;
     }
 
-    void mutatePositions(PCGBoard quest, HashSet<String> nodes) {
+    boolean mutatePositions(PCGBoard quest, HashSet<String> nodes) {
         List<String> available = new ArrayList<>(nodes);
+        HashSet<String> used = new HashSet<>();
         Collections.shuffle(available);
         String heroStart = quest.heroStartingPosition;
 
@@ -787,32 +802,28 @@ public class CreateOffspring {
             forceHeroMutate = Random.randInt(10) < 1;
 
         if (forceHeroMutate) {
-            heroStart = "null";
-            for (String tile : nodes) {
-                boolean legal = true;
-                for (String illegal : illegalHeroSpawns) {
-                    if (tile.contains(illegal)) {
-                        legal = false;
+            heroStart = null;
+
+            if (heroStart == null) {
+                for (String tile : nodes) {
+                    if (!illegalHeroSpawns.contains(tile.split("-")[0])) {
+                        heroStart = tile;
                         break;
                     }
-                }
-                if (legal) {
-                    heroStart = tile;
-                    break;
                 }
             }
         }
 
         // Save the new Heroes start
-        available.remove(heroStart);
+        used.add(heroStart);
         quest.heroStartingPosition = heroStart;
 
-        List<Pair<String, String>> monsters = quest.monsters;
+        HashSet<String[]> monsters = new HashSet<>(quest.monsters);
 
         // Now repeat for every Monster
-        for (Pair<String, String> monster : monsters) {
-            String name = monster.a;
-            String monsterPosition = monster.b;
+        for (String[] monster : monsters) {
+            String name = monster[0];
+            String monsterPosition = monster[1];
             boolean forceMonsterMutate = !nodes.contains(monsterPosition) || !available.contains(monsterPosition);
 
             // Non-Lieutenant Monsters have additional restrictions
@@ -835,29 +846,15 @@ public class CreateOffspring {
                 if (name.contains("Barghest") || barghest) {
                     barghest = true;
                     if (!forceMonsterMutate) {
-                        for (String tile : illegalBarghestSpawns)
-                            if (monsterPosition.contains(tile)) {
-                                forceMonsterMutate = true;
-                                break;
-                            }
+                        forceMonsterMutate = illegalBarghestSpawns.contains(monsterPosition.split("-")[0]);
                     }
                 }
                 if (name.contains("Dragon") || dragon) {
                     barghest = true;
                     dragon = true;
                     if (!forceMonsterMutate) {
-                        for (String tile : illegalBarghestSpawns)
-                            if (monsterPosition.contains(tile)) {
-                                forceMonsterMutate = true;
-                                break;
-                            }
-                    }
-                    if (!forceMonsterMutate) {
-                        for (String tile : illegalDragonSpawns)
-                            if (monsterPosition.contains(tile)) {
-                                forceMonsterMutate = true;
-                                break;
-                            }
+                        String split = monsterPosition.split("-")[0];
+                        forceMonsterMutate = illegalBarghestSpawns.contains(split) || illegalDragonSpawns.contains(split);
                     }
                 }
             }
@@ -866,8 +863,8 @@ public class CreateOffspring {
                 forceMonsterMutate = Random.randInt(10) < 1;
 
             if (forceMonsterMutate) {
-                monsterPosition = "null";
-                monster.b = monsterPosition;
+                monsterPosition = null;
+                monster[1] = monsterPosition;
                 List<String> illegals = new ArrayList<>(illegalMonsterSpawns);
                 if (barghest)
                     illegals.addAll(illegalBarghestSpawns);
@@ -875,7 +872,7 @@ public class CreateOffspring {
                     illegals.addAll(illegalDragonSpawns);
 
                 for (String tile : nodes) {
-                    if (!available.contains(tile)) continue;
+                    if (used.contains(tile)) continue;
 
                     if (lieutenant) {
                         monsterPosition = tile;
@@ -895,11 +892,18 @@ public class CreateOffspring {
                     }
                 }
             }
-            available.remove(monsterPosition);
-            monster.b = monsterPosition;
+            used.add(monsterPosition);
+            monster[1] = monsterPosition;
         }
 
         quest.monsters = monsters;
+
+        for (String[] monster : monsters) {
+            if (monster[1] == null || !used.contains(monster[1]))
+                return false;
+        }
+
+        return heroStart != null;
 
     }
 
@@ -1874,9 +1878,9 @@ public class CreateOffspring {
             outputQ.append(",\"monsters\": [");
             int monsterMax = quest.monsters.size();
             int monsterCounter = 0;
-            for (Pair<String, String> monster : quest.monsters) {
+            for (String[] monster : quest.monsters) {
                 monsterCounter++;
-                outputQ.append("[\"").append(monster.a).append("\", \"").append(monster.b).append("\"]");
+                outputQ.append("[\"").append(monster[0]).append("\", \"").append(monster[1]).append("\"]");
                 if (monsterCounter < monsterMax)
                     outputQ.append(",");
                 else

@@ -259,13 +259,13 @@ public class ShowMap {
         heroSpawnContainer.add(heroPicture);
         spawningContainer.add(heroSpawnContainer);
 
-        for (Pair<String, String> monster : quest.monsters) {
+        for (String[] monster : quest.monsters) {
             JPanel monsterContainer = new JPanel(new FlowLayout(FlowLayout.LEFT));
             monsterContainer.setBackground(Color.WHITE);
 
-            String m = monster.a.split(":")[0];
-            String pos = monster.b;
-            boolean isLieutenant = monster.a.split(":")[1].contains("lieutenant");
+            String m = monster[0].split(":")[0];
+            String pos = monster[1];
+            boolean isLieutenant = monster[0].split(":")[1].contains("lieutenant");
 
             String monsterPath = dataPath;
 
@@ -375,9 +375,9 @@ public class ShowMap {
         outputQ.append(",\"monsters\": [");
         int monsterMax = quest.monsters.size();
         int monsterCounter = 0;
-        for (Pair<String, String> monster : quest.monsters) {
+        for (String[] monster : quest.monsters) {
             monsterCounter++;
-            outputQ.append("[\"").append(monster.a).append("\", \"").append(monster.b).append("\"]");
+            outputQ.append("[\"").append(monster[0]).append("\", \"").append(monster[1]).append("\"]");
             if (monsterCounter < monsterMax)
                 outputQ.append(",");
             else
