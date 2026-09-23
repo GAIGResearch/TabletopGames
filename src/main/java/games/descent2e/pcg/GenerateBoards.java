@@ -107,7 +107,7 @@ public class GenerateBoards {
 
         boolean testing = true;
         if (testing) {
-            CreateOffspring co = new CreateOffspring(500,200,10,30);
+            CreateOffspring co = new CreateOffspring(500,200,20,30);
             co.begin(generationID);
         }
         else {

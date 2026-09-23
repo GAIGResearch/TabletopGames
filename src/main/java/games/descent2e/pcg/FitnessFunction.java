@@ -468,54 +468,82 @@ public class FitnessFunction {
         float fitness = fitness(scores);
         scores.put("Fitness", fitness);
 
-        String failureCase = checkFeasible(scores);
-        boolean feasible = failureCase.contains("Feasible");
+        HashMap<String, Boolean> failures = checkFeasible(scores);
+        co.increaseFailureCount(failures);
+        boolean feasible = failures.get("Feasible");
         float f = feasible ? 1f : 0f;
         scores.put("Feasible", f);
-        co.print(feasible ? "Offspring " + co.nowServing + ": Feasible (Fitness: " + fitness + ")" : "Offspring " + co.nowServing + ": Infeasible; " + failureCase + " (Fitness: " + fitness + ")");
+        co.print(feasible ? "Offspring " + co.nowServing + ": Feasible (Fitness: " + fitness + ")" : "Offspring " + co.nowServing + ": Infeasible; " + " (Fitness: " + fitness + ")");
 
         return scores;
     }
 
-    String checkFeasible(HashMap<String, Float> scores) throws InterruptedException, InvocationTargetException {
+    HashMap<String, Boolean> checkFeasible(HashMap<String, Float> scores) throws InterruptedException, InvocationTargetException {
+
+        boolean feasible = true;
+        HashMap<String, Boolean> failures = new HashMap<>();
 
         // Connectedness Check
         if (scores.get("Connectedness") < 1f) {
-            return "Connectedness Failure";
+            failures.put("Connectedness", false);
+            feasible = false;
         }
+        else
+            failures.put("Connectedness", true);
 
         // Free Edge Failure
         if (scores.get("Free Edges") > 0f) {
-            return "Free Edge Failure";
+            failures.put("Free Edges", false);
+            feasible = false;
         }
+        else
+            failures.put("Free Edges", true);
 
         // Geometry Check
         if (scores.get("Geometry") < 1f) {
-            return "Geometry Failure";
+            failures.put("Geometry", false);
+            feasible = false;
         }
+        else
+            failures.put("Geometry", true);
 
         // No Repeating Monsters Check
         if (scores.get("Spawning") < 1f) {
-            return "Repeating Groups Failure";
+            failures.put("Spawning", false);
+            feasible = false;
         }
+        else
+            failures.put("Spawning", true);
 
         // Consistency Check
         if (scores.get("Consistency") < 1f) {
-            return "Consistency Failure";
+            failures.put("Consistency", false);
+            feasible = false;
         }
+        else
+            failures.put("Consistency", true);
 
         // Board Size Check
         float size = scores.get("Size");
         if (size > SIZE_MAX || size < SIZE_MIN) {
-            return "Size Failure";
+            failures.put("Size", false);
+            feasible = false;
         }
+        else
+            failures.put("Size", true);
+
         // Monster Group Check
         float groups = scores.get("Groups");
         if (groups > GROUP_MAX || groups < GROUP_MIN) {
-            return "Group Count Failure";
+            failures.put("Groups", false);
+            feasible = false;
         }
+        else
+            failures.put("Groups", true);
 
-        return "Feasible";
+        failures.put("Feasible", feasible);
+
+        return failures;
     }
 
     private Pair<int[][], Integer> createBoard(CreateOffspring co, PCGBoard quest) {

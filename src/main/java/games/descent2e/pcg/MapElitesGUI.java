@@ -21,7 +21,7 @@ public class MapElitesGUI {
         window = new JFrame();
         window.setTitle("Descent Procedural Content Generation - Results");
         window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        window.setSize(1200, 500);
+        window.setSize(1400, 700);
         window.setResizable(false);
         window.setLocationRelativeTo(null);
         window.setLayout(new GridLayout(0, 1,5, 5));
@@ -61,6 +61,25 @@ public class MapElitesGUI {
         information.add(informationContainer);
         information.add(weightsContainer);
         panel.add(information);
+
+        JPanel failures = new JPanel();
+        information.setLayout(new BoxLayout(information, BoxLayout.Y_AXIS));
+        TitledBorder failureBorder = new TitledBorder(blackline, "Failures: " + co.infeasibleCount + " (" + ((float) ((1000 * co.infeasibleCount / co.feasibleList.size())) / 10f) + "%)");
+        failureBorder.setTitleJustification(TitledBorder.CENTER);
+        failures.setBorder(failureBorder);
+        failures.setBackground(Color.CYAN);
+
+        JPanel failureContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        failureContainer.setBackground(Color.CYAN);
+        failureContainer.add(new JLabel("Connectedness: " + co.connectedFail + " (" + ((float) ((1000 * co.connectedFail / co.infeasibleCount)) / 10f) + "%)"));
+        failureContainer.add(new JLabel("Free Edges: " + co.freeEdgeFail + " (" + ((float) ((1000 * co.freeEdgeFail / co.infeasibleCount)) / 10f) + "%)"));
+        failureContainer.add(new JLabel("Geometry: " + co.geometryFail + " (" + ((float) ((1000 * co.geometryFail / co.infeasibleCount)) / 10f) + "%)"));
+        failureContainer.add(new JLabel("Spawning: " + co.spawningFail + " (" + ((float) ((1000 * co.spawningFail / co.infeasibleCount)) / 10f) + "%)"));
+        failureContainer.add(new JLabel("Board Size: " + co.sizeFail + " (" + ((float) ((1000 * co.sizeFail / co.infeasibleCount)) / 10f) + "%)"));
+        failureContainer.add(new JLabel("Group Count: " + co.groupsFail + " (" + ((float) ((1000 * co.groupsFail / co.infeasibleCount)) / 10f) + "%)"));
+
+        failures.add(failureContainer);
+        panel.add(failures);
 
         if (!co.feasible.isEmpty()) {
             JButton feasible = createButton("All Feasible Boards");

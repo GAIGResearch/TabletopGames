@@ -6,8 +6,6 @@ import core.components.BoardNode;
 import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.properties.*;
-import games.descent2e.concepts.Quest;
-import utilities.Hash;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -20,8 +18,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-import static core.CoreConstants.*;
-import static games.descent2e.DescentConstants.connectionHash;
 import static games.descent2e.pcg.ControlVariables.*;
 import static games.descent2e.pcg.ControlVariables.illegalDragonSpawns;
 import static games.descent2e.pcg.GenerateBoards.*;
@@ -87,6 +83,15 @@ public class CreateOffspring {
     float W_HEALTH = 1;
     float W_HEIGHT = 0;
     float W_WIDTH = 0;
+
+    public int connectedFail = 0;
+    public int freeEdgeFail = 0;
+    public int geometryFail = 0;
+    public int spawningFail = 0;
+    public int consistencyFail = 0;
+    public int sizeFail = 0;
+    public int groupsFail = 0;
+    public int infeasibleCount = 0;
 
     private GenerateBoardsGUI gui = null;
 
@@ -180,16 +185,16 @@ public class CreateOffspring {
             }
         }
 
+        float feasiblePercent = (100f * feasible.size() / (feasible.size() + infeasible.size()));
+        System.out.println(!feasible.isEmpty() ? "Complete! Generated " + feasible.size() + " Feasible Boards (" + feasiblePercent + "%), with Best Offspring: PCG-" + bestID + ", Fitness: " + bestFitness :
+                "Complete! Failed to generate a single Feasible board (" + infeasible.size() + " Infeasible)!");
+        CreateOffspring co = this;
+
         exportPCGToJSON(true);
         exportPCGToJSON(false);
         exportMAPElitesToJSON(MapElites.Size, MapElites.Groups);
         exportMAPElitesToJSON(MapElites.Health, MapElites.Groups);
         exportMAPElitesToJSON(MapElites.Height, MapElites.Width);
-
-        float feasiblePercent = (100f * feasible.size() / (feasible.size() + infeasible.size()));
-        print(!feasible.isEmpty() ? "Complete! Generated " + feasible.size() + " Feasible Boards (" + feasiblePercent + "%), with Best Offspring: PCG-" + bestID + ", Fitness: " + bestFitness :
-                "Complete! Failed to generate a single Feasible board (" + infeasible.size() + " Infeasible)!");
-        CreateOffspring co = this;
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -1811,20 +1816,23 @@ public class CreateOffspring {
         }
     }
 
-    String fixNodeName (String name) {
-        if (name.contains("transition")) {
-            transition++;
-            return name.split("-")[0] + "-" + transition;
-        }
-        else if (name.contains("endcap")) {
-            endcap++;
-            return name.split("-")[0] + "-" + endcap;
-        }
-        else if (name.contains("extender")) {
-            extender++;
-            return name.split("-")[0] + "-" + extender;
-        }
-        return name;
+    void increaseFailureCount(HashMap<String, Boolean> failures) {
+        if (!failures.get("Connectedness"))
+            connectedFail++;
+        if (!failures.get("Free Edges"))
+            freeEdgeFail++;
+        if(!failures.get("Geometry"))
+            geometryFail++;
+        if(!failures.get("Spawning"))
+            spawningFail++;
+        if(!failures.get("Consistency"))
+            consistencyFail++;
+        if(!failures.get("Size"))
+            sizeFail++;
+        if(!failures.get("Groups"))
+            groupsFail++;
+        if(!failures.get("Feasible"))
+            infeasibleCount++;
     }
 
     void addToMAPElites(HashMap<String, Float> scores) {
@@ -1958,10 +1966,10 @@ public class CreateOffspring {
                 outputB.append("{ \"name\": [\"String\", \"").append(node.name).append("\"],");
                 outputB.append("\"orientation\": [\"Integer\", ").append(node.orientation).append("],");
 
-                StringBuilder neighbourString = new StringBuilder("\"neighbours\": [\"String[]\", []],");
-                StringBuilder connectionString = new StringBuilder("\"connections\": [\"String[]\", []]}");
+                StringBuilder neighbourString = new StringBuilder("\"neighbours\": [\"String[]\", [");
+                StringBuilder connectionString = new StringBuilder("\"connections\": [\"String[]\", [");
 
-                /*int neighbourCount = 0;
+                int neighbourCount = 0;
                 for (Connection c : connections) {
                     String connect = switch(c) {
                         case NORTH -> "N-0";
@@ -1980,7 +1988,7 @@ public class CreateOffspring {
                         neighbourString.append("]],");
                         connectionString.append("]]}");
                     }
-                }*/
+                }
                 outputB.append(neighbourString);
                 outputB.append(connectionString);
                 if (nodeCount < quest.board.size())
