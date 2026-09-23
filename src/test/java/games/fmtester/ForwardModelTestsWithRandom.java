@@ -5,6 +5,7 @@ import games.agram.AgramParameters;
 import games.cuckoo.CuckooParameters;
 import games.euchre.EuchreParameters;
 import games.gofish.GoFishParameters;
+import games.golfsix.GolfSixParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.crazyeights.CZEParameters;
@@ -165,6 +166,21 @@ public class ForwardModelTestsWithRandom {
         params = new GoFishParameters();
         params.setParameterValue("playUntilAllBooks", true);
         new ForwardModelTester(params, "game=GoFish", "nGames=2", "nPlayers=5");
+    }
+
+    @Test
+    public void testGolfSix() {
+        for (int nPlayers = 2; nPlayers <= 4; nPlayers++)
+            new ForwardModelTester("game=GolfSix", "nGames=2", "nPlayers=" + nPlayers);
+        GolfSixParameters params = new GolfSixParameters();
+        params.setParameterValue("nDeals", 3);
+        params.setParameterValue("finalTurns", true);
+        new ForwardModelTester(params, "game=GolfSix", "nGames=2", "nPlayers=3");
+        // the safeguard ends deals early
+        params = new GolfSixParameters();
+        params.setParameterValue("nDeals", 3);
+        params.setParameterValue("maxTurnsPerPlayer", 4);
+        new ForwardModelTester(params, "game=GolfSix", "nGames=2", "nPlayers=4");
     }
 
     @Test

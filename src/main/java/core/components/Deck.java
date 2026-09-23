@@ -551,18 +551,24 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         return sb.toString();
     }
 
+    /**
+     * Equal decks hold equal components in the same order, with the same visibility and owner. Who can see the cards
+     * is part of the game state, so decks that differ only in visibility are not equal. A subclass that adds state
+     * (see PartialObservableDeck) is never equal to a plain Deck.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Deck<?> deck)) return false;
+        if (!(o instanceof Deck<?> deck) || o.getClass() != getClass()) return false;
         if (!super.equals(o)) return false;
-        return capacity == deck.capacity &&
+        return capacity == deck.capacity && ownerId == deck.ownerId && visibility == deck.visibility &&
                 Objects.equals(components, deck.components);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(capacity, ownerId, componentID, components);
+        // the ordinal rather than the enum's identity hash, so the hash is the same from one run to the next
+        return Objects.hash(capacity, ownerId, componentID, visibility == null ? -1 : visibility.ordinal(), components);
     }
 
 }

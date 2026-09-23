@@ -5,6 +5,7 @@ import games.agram.AgramParameters;
 import games.cuckoo.CuckooParameters;
 import games.euchre.EuchreParameters;
 import games.gofish.GoFishParameters;
+import games.golfsix.GolfSixParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.catan.CatanParameters;
@@ -230,6 +231,15 @@ public class ForwardModelTestsWithMCTS {
         GoFishParameters params = new GoFishParameters();
         params.setParameterValue("playUntilAllBooks", true);
         new ForwardModelTester(params, "game=GoFish", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testGolfSix() {
+        new ForwardModelTester("game=GolfSix", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
+        GolfSixParameters params = new GolfSixParameters();
+        params.setParameterValue("nDeals", 2);
+        params.setParameterValue("finalTurns", true);
+        new ForwardModelTester(params, "game=GolfSix", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
     }
 
     @Test
