@@ -159,6 +159,7 @@ public class Trick extends Deck<FrenchCard> {
 
     @Override
     public int hashCode() {
+        // order is left out: CardOrder.STANDARD has no run-stable hash, and games hash their trump suit in the state
         return Objects.hash(components, nPlayers, leader, sittingOut);
     }
 }

@@ -6,8 +6,10 @@ import games.cuckoo.CuckooParameters;
 import games.euchre.EuchreParameters;
 import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
+import games.klaverjassen.KlaverjassenParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
+import games.goofspiel.GoofspielParameters;
 import games.catan.CatanParameters;
 import games.crazyeights.CZEParameters;
 import games.cribbage.CribbageParameters;
@@ -305,5 +307,25 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("targetScore", 31);
         params.setParameterValue("runsIncludeStarter", true);
         new ForwardModelTester(params, "game=Cribbage", "nGames=2", "nPlayers=2", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testGoofspiel() {
+        new ForwardModelTester("game=Goofspiel", "nGames=2", "nPlayers=2", "agent=json\\players\\mcts.json");
+        GoofspielParameters params = new GoofspielParameters();
+        params.setParameterValue("tieRule", GoofspielParameters.TieRule.DISCARD);
+        params.setParameterValue("cardsPerSuit", 5);
+        new ForwardModelTester(params, "game=Goofspiel", "nGames=2", "nPlayers=3", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testKlaverjassen() {
+        new ForwardModelTester("game=Klaverjassen", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
+        KlaverjassenParameters params = new KlaverjassenParameters();
+        params.setParameterValue("nHands", 3);
+        params.setParameterValue("partnerTrumpRule", KlaverjassenParameters.PartnerTrumpRule.NO_UNDERTRUMP);
+        params.setParameterValue("tieIsFailure", true);
+        params.setParameterValue("rememberVoids", false);
+        new ForwardModelTester(params, "game=Klaverjassen", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 }

@@ -17,6 +17,10 @@ import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
 import games.blackjack.gui.BlackjackGUIManager;
+import games.goofspiel.GoofspielForwardModel;
+import games.goofspiel.GoofspielGameState;
+import games.goofspiel.GoofspielParameters;
+import games.goofspiel.gui.GoofspielGUIManager;
 import games.cantstop.CantStopForwardModel;
 import games.cantstop.CantStopGameState;
 import games.cantstop.CantStopParameters;
@@ -48,6 +52,10 @@ import games.whist.WhistForwardModel;
 import games.whist.WhistGameState;
 import games.whist.WhistParameters;
 import games.whist.gui.WhistGUIManager;
+import games.klaverjassen.KlaverjassenForwardModel;
+import games.klaverjassen.KlaverjassenGameState;
+import games.klaverjassen.KlaverjassenParameters;
+import games.klaverjassen.gui.KlaverjassenGUIManager;
 import games.chinesecheckers.gui.CCGUIManager;
 import games.chess.ChessForwardModel;
 import games.chess.ChessGameState;
@@ -283,6 +291,10 @@ public enum GameType {
             Arrays.asList(Cards, Economic, Simple, Banking),
             List.of(PushYourLuck),
             BlackjackGameState.class, BlackjackForwardModel.class, BlackjackParameters.class, BlackjackGUIManager.class),
+    Goofspiel(2, 7,
+            Arrays.asList(Cards, Bluffing, Simple),
+            List.of(SimultaneousActionSelection),
+            GoofspielGameState.class, GoofspielForwardModel.class, GoofspielParameters.class, GoofspielGUIManager.class),
     Diamant(2, 6,
             Arrays.asList(Adventure, Bluffing, Exploration),
             Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
@@ -415,7 +427,10 @@ public enum GameType {
             WhistGameState.class, WhistForwardModel.class, WhistParameters.class, WhistGUIManager.class),
     Euchre(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement),
-            EuchreGameState.class, EuchreForwardModel.class, EuchreParameters.class, EuchreGUIManager.class);
+            EuchreGameState.class, EuchreForwardModel.class, EuchreParameters.class, EuchreGUIManager.class),
+    Klaverjassen(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking),
+            KlaverjassenGameState.class, KlaverjassenForwardModel.class, KlaverjassenParameters.class, KlaverjassenGUIManager.class);
 
 
     // Core classes where the game is defined
