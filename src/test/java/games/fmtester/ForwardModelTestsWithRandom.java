@@ -10,6 +10,7 @@ import games.klaverjassen.KlaverjassenParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.goofspiel.GoofspielParameters;
+import games.leducpoker.LeducPokerParameters;
 import games.crazyeights.CZEParameters;
 import games.cribbage.CribbageParameters;
 import org.junit.Test;
@@ -282,5 +283,15 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("tieIsFailure", true);
         params.setParameterValue("rememberVoids", false);
         new ForwardModelTester(params, "game=Klaverjassen", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testLeducPoker() {
+        new ForwardModelTester("game=LeducPoker", "nGames=5", "nPlayers=2");
+        LeducPokerParameters params = new LeducPokerParameters();
+        params.setParameterValue("nHands", 10);
+        params.setParameterValue("highCardUsesBoard", true);
+        params.setParameterValue("maxRaisesPerRound", 3);
+        new ForwardModelTester(params, "game=LeducPoker", "nGames=2", "nPlayers=2");
     }
 }

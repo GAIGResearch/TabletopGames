@@ -261,6 +261,35 @@ public class HeartsSimultaneousTests {
     }
 
     @Test
+    public void noPassingInAnyRoundWhenPassingIsSwitchedOff() {
+        for (int nPlayers = 3; nPlayers <= 7; nPlayers++) {
+            for (long seed = 10; seed < 15; seed++) {
+                HeartsParameters params = new HeartsParameters();
+                params.setParameterValue("passCards", false);
+                params.setRandomSeed(seed);
+                Game g = GameType.Hearts.createGameInstance(nPlayers, seed, params);
+                List<AbstractPlayer> players = new ArrayList<>();
+                for (int p = 0; p < nPlayers; p++) players.add(new RandomPlayer(new Random(seed + p)));
+                g.reset(players);
+                HeartsGameState s = (HeartsGameState) g.getGameState();
+                AbstractForwardModel fm = g.getForwardModel();
+                Random rnd = new Random(seed);
+                int round = -1;
+                while (s.isNotTerminal()) {
+                    if (s.getRoundCounter() != round) {
+                        round = s.getRoundCounter();
+                        assertEquals("round " + round + " should not pass", PLAYING, s.getGamePhase());
+                        assertEquals(holderOfStartingCard(s), s.getCurrentPlayer());
+                    }
+                    List<AbstractAction> actions = fm.computeAvailableActions(s);
+                    for (AbstractAction a : actions) assertFalse(a instanceof Pass);
+                    fm.next(s, actions.get(rnd.nextInt(actions.size())));
+                }
+            }
+        }
+    }
+
+    @Test
     public void randomPlayersFinishTheGameThroughTheGameLoop() {
         for (int nPlayers = 3; nPlayers <= 5; nPlayers++) {
             Game g = newGame(nPlayers, 20 + nPlayers);
@@ -277,6 +306,33 @@ public class HeartsSimultaneousTests {
             // three cards per player in every passing round
             assertEquals(0, passes % (3 * nPlayers));
             assertTrue(passes > 0);
+        }
+    }
+
+    @Test
+    public void gameEndsAfterMaxRoundsEvenIfNobodyHasReachedTheMatchScore() {
+        for (int maxRounds = 1; maxRounds <= 3; maxRounds++) {
+            for (long seed = 10; seed < 15; seed++) {
+                HeartsParameters params = new HeartsParameters();
+                params.setParameterValue("maxRounds", maxRounds);
+                params.setRandomSeed(seed);
+                Game g = GameType.Hearts.createGameInstance(4, seed, params);
+                List<AbstractPlayer> players = new ArrayList<>();
+                for (int p = 0; p < 4; p++) players.add(new RandomPlayer(new Random(seed + p)));
+                g.reset(players);
+                HeartsGameState s = (HeartsGameState) g.getGameState();
+                AbstractForwardModel fm = g.getForwardModel();
+                Random rnd = new Random(seed);
+                while (s.isNotTerminal()) {
+                    List<AbstractAction> actions = fm.computeAvailableActions(s);
+                    fm.next(s, actions.get(rnd.nextInt(actions.size())));
+                }
+                boolean matchScoreReached = s.playerPoints.values().stream().anyMatch(score -> score >= params.matchScore);
+                // the round counter is zero-based and endGame does not advance it
+                if (!matchScoreReached)
+                    assertEquals(maxRounds, s.getRoundCounter() + 1);
+                assertTrue(s.getRoundCounter() + 1 <= maxRounds);
+            }
         }
     }
 }

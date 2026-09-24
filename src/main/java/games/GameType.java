@@ -17,6 +17,10 @@ import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
 import games.blackjack.gui.BlackjackGUIManager;
+import games.leducpoker.LeducPokerForwardModel;
+import games.leducpoker.LeducPokerGameState;
+import games.leducpoker.LeducPokerParameters;
+import games.leducpoker.gui.LeducPokerGUIManager;
 import games.goofspiel.GoofspielForwardModel;
 import games.goofspiel.GoofspielGameState;
 import games.goofspiel.GoofspielParameters;
@@ -287,6 +291,10 @@ public enum GameType {
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio, Bluffing),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             PokerGameState.class, PokerForwardModel.class, PokerGameParameters.class, PokerGUIManager.class),
+    LeducPoker(2, 2,
+            Arrays.asList(Cards, Bluffing),
+            List.of(),
+            LeducPokerGameState.class, LeducPokerForwardModel.class, LeducPokerParameters.class, LeducPokerGUIManager.class),
     Blackjack(1, 7,
             Arrays.asList(Cards, Economic, Simple, Banking),
             List.of(PushYourLuck),

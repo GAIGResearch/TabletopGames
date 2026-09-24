@@ -87,9 +87,12 @@ public class HeartsForwardModel extends StandardForwardModel {
 
     /**
      * How many seats to the left the passed cards travel this round: left, right, across, and then
-     * a round with no passing at all.
+     * a round with no passing at all. If passing is switched off in the parameters, there is never
+     * any passing.
      */
     private int passDirection(HeartsGameState hgs) {
+        if (!((HeartsParameters) hgs.getGameParameters()).passCards)
+            return 0;
         switch (hgs.getRoundCounter() % 4) {
             case 0:
                 return 1;
@@ -243,14 +246,16 @@ public class HeartsForwardModel extends StandardForwardModel {
         // Check if all cards from player hands have been played
         if (hgs.playerDecks.stream().allMatch(deck -> deck.getSize() == 0)) {
             hgs.scorePointsAtEndOfRound();
-            boolean scoreAbove100 = hgs.playerPoints.values().stream().anyMatch(score -> score >= params.matchScore);
+            boolean matchScoreReached = hgs.playerPoints.values().stream().anyMatch(score -> score >= params.matchScore);
+            // the round counter is zero-based, so this is the number of hands now completed
+            boolean maxRoundsReached = hgs.getRoundCounter() + 1 >= params.maxRounds;
 
-            // If any player has reached 100 points or more, end the game
-            if (scoreAbove100) {
+            // If any player has reached the match score, or we have played the maximum number of hands, end the game
+            if (matchScoreReached || maxRoundsReached) {
                 endGame(hgs);
             } else {
                 endRound(hgs);
-                // If no player has reached 100 points yet, reshuffle and deal new hands
+                // Otherwise reshuffle and deal new hands
                 _setupRound(hgs);
             }
         }

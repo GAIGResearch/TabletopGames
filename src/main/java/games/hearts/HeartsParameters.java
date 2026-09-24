@@ -29,19 +29,30 @@ public class HeartsParameters extends TunableParameters<HeartsParameters> implem
     public final FrenchCard startingCard = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2);
     public final int queenOfSpades = 13;
     public final int cardsPassedPerRound = 3;
-    public final int matchScore = 50;
+    // The game ends at the end of the first hand (round) in which any player has at least this many points
+    public int matchScore = 50;
     // If true then a player who fails to follow suit is remembered as being void in it, and
     // redeterminisation will not deal them any cards of that suit
     public boolean rememberVoids = true;
+    // If false then the simultaneous card-passing phase at the start of each round is skipped
+    // entirely, and every round goes straight to trick play
+    public boolean passCards = true;
+    // The game also ends after this many hands (rounds), even if nobody has reached matchScore.
+    // The default is high enough that in practice the score ends the game
+    public int maxRounds = 100;
 
     // Number of cards per player - index to array is nPlayers
     public final int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
             17, 13, 10, 8, 7};
 
+    // Cards to remove for each number of players
     Map<Integer, List<FrenchCard>> cardsToRemove = new HashMap<>();
 
     public HeartsParameters() {
         addTunableParameter("rememberVoids", true, Arrays.asList(false, true));
+        addTunableParameter("passCards", true, Arrays.asList(false, true));
+        addTunableParameter("maxRounds", 100, Arrays.asList(1, 2, 3, 5, 10, 100));
+        addTunableParameter("matchScore", 50, Arrays.asList(25, 50, 75, 100));
         cardsToRemove.put(3, Collections.singletonList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
         cardsToRemove.put(4, Collections.emptyList());
         cardsToRemove.put(5, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
@@ -58,6 +69,9 @@ public class HeartsParameters extends TunableParameters<HeartsParameters> implem
     @Override
     public void _reset() {
         rememberVoids = (boolean) getParameterValue("rememberVoids");
+        passCards = (boolean) getParameterValue("passCards");
+        maxRounds = (int) getParameterValue("maxRounds");
+        matchScore = (int) getParameterValue("matchScore");
     }
 
     @Override
