@@ -45,7 +45,7 @@ public class FitnessFunction {
     public float W_RULES = 0;
 
     public float W_TOTAL = W_CONNECTED + W_GEOMETRY + W_REPEATS + W_SPAWNING + W_CONSISTENCY +
-                            W_SIZE + W_GROUP + W_HEALTH + W_HEALTH + W_HEIGHT + W_WIDTH + W_COMPLEXITY + W_RULES;
+                            W_SIZE + W_GROUP + W_HEALTH + W_HEIGHT + W_WIDTH + W_COMPLEXITY + W_RULES;
 
     public int IDEAL_SIZE = 166;
     public int IDEAL_GROUP = 5;
@@ -98,8 +98,8 @@ public class FitnessFunction {
     }
 
     private void updateTotalWeights() {
-        W_TOTAL = W_CONNECTED + W_GEOMETRY + W_REPEATS + W_SPAWNING + W_CONSISTENCY
-                + W_SIZE + W_GROUP + W_HEALTH + W_COMPLEXITY + W_RULES + W_HEALTH + W_WIDTH;
+        W_TOTAL = W_CONNECTED + W_GEOMETRY + W_REPEATS + W_SPAWNING + W_CONSISTENCY +
+                W_SIZE + W_GROUP + W_HEALTH + W_HEIGHT + W_WIDTH + W_COMPLEXITY + W_RULES;
     }
 
     private float fitness(HashMap<String, Float> scores) {
