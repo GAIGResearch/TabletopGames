@@ -1,0 +1,10 @@
+{
+  "class": "players.mcts.MCTSParams",
+  "information": "Information_Set",
+  "budgetType": "BUDGET_ITERATIONS",
+  "budget": 32,
+  "rolloutLength": 30,
+  "maxTreeDepth": 12,
+  "rolloutType": "RANDOM",
+  "reuseTree": false
+}

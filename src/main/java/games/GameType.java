@@ -75,6 +75,9 @@ import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.gui.LoveLetterGUIManager;
+import games.loyalist.LoyalistForwardModel;
+import games.loyalist.LoyalistGameState;
+import games.loyalist.LoyalistParameters;
 import games.mastermind.MMForwardModel;
 import games.mastermind.MMGameState;
 import games.mastermind.MMParameters;
@@ -218,6 +221,10 @@ public enum GameType {
             GoFishForwardModel.class,
             GoFishParameters.class,
             GoFishGUIManager.class),
+    Loyalist(5, 5,
+            Arrays.asList(Strategy, Bluffing, Deduction, Cards, Economic),
+            Arrays.asList(HandManagement, VariablePlayerPowers, Negotiation),
+            LoyalistGameState.class, LoyalistForwardModel.class, LoyalistParameters.class, null),
     LoveLetter(2, 4,
             Arrays.asList(Cards, Deduction, Renaissance),
             Arrays.asList(HandManagement, PlayerElimination),
