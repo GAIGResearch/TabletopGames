@@ -75,6 +75,20 @@ public class TMCard extends Card {
         return pointsResource != null || pointsTag != null || pointsTile != null || resourceOnCard != null || persistingEffects.length > 0 || actions.length > 0 || discountEffects.size() > 0 || resourceMappings.size() > 0;
     }
 
+    /**
+     * Each card action uses up one of the player's actions (which also marks it as used for the generation), while the
+     * parts of a compound or choice action do not use up further actions. The card data does not reliably encode this.
+     */
+    public void setCardActionCosts() {
+        for (TMAction a : actions) {
+            a.freeActionPoint = false;
+            TMAction[] parts = a instanceof CompoundAction ca ? ca.actions : a instanceof ChoiceAction ch ? ch.actions : new TMAction[0];
+            for (TMAction part : parts) {
+                part.freeActionPoint = true;
+            }
+        }
+    }
+
     public static TMCard loadCorporation(JSONObject cardDef) {
         TMCard card = new TMCard();
         card.cardType = TMTypes.CardType.Corporation;

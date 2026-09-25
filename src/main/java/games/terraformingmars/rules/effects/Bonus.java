@@ -29,7 +29,9 @@ public class Bonus {
             if (c.getValueIdx() >= threshold-1) {  // -1 because this is checked right before the increase
                 effect.player = gs.getCurrentPlayer();
                 claimed = effect.player;
-                effect.execute(gs);
+                // e.g. the temperature bonus on the oxygen track is lost if temperature is already at maximum
+                if (effect.canBePlayed(gs))
+                    effect.execute(gs);
             }
         }
     }

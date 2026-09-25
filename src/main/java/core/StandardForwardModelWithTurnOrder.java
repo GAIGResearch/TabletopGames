@@ -17,26 +17,19 @@ public abstract class StandardForwardModelWithTurnOrder extends AbstractForwardM
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
-        if (action != null) {
-            action.execute(currentState);
-        } else {
+        if (action == null) {
             throw new AssertionError("No action selected by current player");
         }
-        // We then register the action with the top of the stack ... unless the top of the stack is this action
-        // in which case go to the next action
+        // The sequence (if any) that this action is a decision for is the one at the top of the stack *before* execution.
         // We can't just register with all items in the Stack, as this may represent some complex dependency
         // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
-        if (currentState.actionsInProgress.size() > 0) {
-            IExtendedSequence topOfStack = currentState.actionsInProgress.pop();
-            if (topOfStack != action) {
-                topOfStack._afterAction(currentState, action);
-            } else {
-                if (currentState.actionsInProgress.size() > 0) {
-                    IExtendedSequence nextOnStack = currentState.actionsInProgress.peek();
-                    nextOnStack._afterAction(currentState, action);
-                }
-            }
-            currentState.actionsInProgress.push(topOfStack);
+        IExtendedSequence decisionOwner = currentState.isActionInProgress() ? currentState.actionsInProgress.peek() : null;
+        action.execute(currentState);
+        // We then register the action with that sequence only. Any sequence the action itself started (directly, or via
+        // nested actions it executed) must not be told about the action that created it.
+        // Anything the owner starts in response goes on top of it, and so is resolved before the owner is removed.
+        if (decisionOwner != null && decisionOwner != action) {
+            decisionOwner._afterAction(currentState, action);
         }
         _afterAction(currentState, action);
     }

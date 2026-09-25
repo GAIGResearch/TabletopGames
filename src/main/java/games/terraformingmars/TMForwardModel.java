@@ -320,6 +320,9 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                     for (TMCard c : gs.playerComplicatedPointCards[i].getComponents()) {
                         c.actionPlayed = false;
                     }
+                    if (gs.playerCorporations[i] != null) {
+                        gs.playerCorporations[i].actionPlayed = false;
+                    }
                     // Reset resource increase
                     for (TMTypes.Resource res : TMTypes.Resource.values()) {
                         gs.playerResourceIncreaseGen[i].put(res, false);
@@ -345,8 +348,9 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
 
         // Wrap actions that can actually be played and must be paid for
         for (AbstractAction aa : possibleActions) {
-            TMAction a = (TMAction) aa;
-            if (a != null && a.canBePlayed(gs)) {
+            if (aa != null && ((TMAction) aa).canBePlayed(gs)) {
+                // Copy, as some actions (e.g. card actions) are held in the game state, and executing them changes them
+                TMAction a = (TMAction) aa.copy();
                 if (a.getCost() != 0) {
                     actions.add(new PayForAction(player, a));
                 } else {

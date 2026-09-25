@@ -25,7 +25,9 @@ public class PlayCardEffect extends Effect {
                 /* Effect based on card played, e.g. add resource to that card */
                 effectAction.setCardID(action.getPlayCardID());
             }
-            this.effectAction.execute(gs);  // TODO execute multiple times
+            // Effects are optional, and simply do not apply if they cannot be played (e.g. discard a card with an empty hand)
+            if (effectAction.canBePlayed(gs))
+                this.effectAction.execute(gs);  // TODO execute multiple times
         }
     }
 

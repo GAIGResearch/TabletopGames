@@ -9,6 +9,7 @@ import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.AdjacencyRequirement;
+import games.terraformingmars.rules.requirements.CounterRequirement;
 import utilities.Group;
 import utilities.Vector2D;
 
@@ -101,6 +102,10 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         this.mapType = mapTile;
         this.mapTileID = -1;
         this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);
+        if (tile == TMTypes.Tile.Ocean) {
+            // Can't pay for an ocean that can no longer be placed
+            requirements.add(new CounterRequirement(TMTypes.GlobalParameter.OceanTiles.name(), -1, true));
+        }
     }
 
     public PlaceTile(TMTypes.BasicResourceAction basicResourceAction, int cost, int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile) {
@@ -170,6 +175,10 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                 }
             }
             return success && super._execute(gs);
+        }
+        if (tile == TMTypes.Tile.Ocean && onMars && gs.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles).isMaximum()) {
+            // All oceans have been placed, so any further ones (e.g. from a card) are simply not placed
+            return true;
         }
         gs.setActionInProgress(this);
         return true;
