@@ -46,6 +46,17 @@ public class KnownVoids {
     }
 
     /**
+     * As {@link #record(int, Trick, FrenchCard)}, for a game in which a follower may play a trump even when holding
+     * the suit led (Pitch): a trump then reveals nothing.
+     *
+     * @param trumps the trump suit, or null if there are no trumps
+     */
+    public void record(int player, Trick trick, FrenchCard card, FrenchCard.Suite trumps) {
+        if (trick.getOrder().suitOf(card) != trumps)
+            record(player, trick, card);
+    }
+
+    /**
      * Forgets all known voids (at a new deal).
      */
     public void clear() {

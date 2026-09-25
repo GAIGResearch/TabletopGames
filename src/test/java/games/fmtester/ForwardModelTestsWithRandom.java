@@ -14,6 +14,9 @@ import games.leducpoker.LeducPokerParameters;
 import games.toads.ToadParameters;
 import games.crazyeights.CZEParameters;
 import games.cribbage.CribbageParameters;
+import games.pitch.PitchParameters;
+import games.president.PresidentParameters;
+import games.rummy.RummyParameters;
 import org.junit.Test;
 
 public class ForwardModelTestsWithRandom {
@@ -28,6 +31,32 @@ public class ForwardModelTestsWithRandom {
     @Test
     public void testSpades() {
         new ForwardModelTester("game=Spades", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testPitch() {
+        new ForwardModelTester("game=Pitch", "nGames=2", "nPlayers=4");
+        PitchParameters params = new PitchParameters();
+        params.setParameterValue("targetScore", 11);
+        params.setParameterValue("countHighLowSeparately", true);
+        new ForwardModelTester(params, "game=Pitch", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testPresident() {
+        new ForwardModelTester("game=President", "nGames=2", "nPlayers=5");
+        PresidentParameters params = new PresidentParameters();
+        params.setParameterValue("targetScore", 11);
+        params.setParameterValue("exchangeCards", 2);
+        new ForwardModelTester(params, "game=President", "nGames=1", "nPlayers=4");
+    }
+
+    @Test
+    public void testRummy() {
+        new ForwardModelTester("game=Rummy", "nGames=2", "nPlayers=2");
+        RummyParameters params = new RummyParameters();
+        params.setParameterValue("targetScore", 100);
+        new ForwardModelTester(params, "game=Rummy", "nGames=1", "nPlayers=4");
     }
 
     @Test

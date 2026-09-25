@@ -152,6 +152,18 @@ import games.root.RootForwardModel;
 import games.root.RootGameState;
 import games.root.RootParameters;
 import games.root.gui.RootGUIManager;
+import games.pitch.PitchForwardModel;
+import games.pitch.PitchGameState;
+import games.pitch.PitchParameters;
+import games.pitch.gui.PitchGUIManager;
+import games.president.PresidentForwardModel;
+import games.president.PresidentGameState;
+import games.president.PresidentParameters;
+import games.president.gui.PresidentGUIManager;
+import games.rummy.RummyForwardModel;
+import games.rummy.RummyGameState;
+import games.rummy.RummyParameters;
+import games.rummy.gui.RummyGUIManager;
 import games.saboteur.SaboteurForwardModel;
 import games.saboteur.SaboteurGameParameters;
 import games.saboteur.SaboteurGameState;
@@ -363,7 +375,7 @@ public enum GameType {
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
             PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
     PowerGrid(3, 6,
-    		Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
+            Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, EngineBuilding),
             PowerGridGameState.class, PowerGridForwardModel.class, PowerGridParameters.class, PowerGridGUI.class),
     Wonders7(3, 7,
@@ -404,8 +416,8 @@ public enum GameType {
     PenteGrammai(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement, DiceRolling),
-            PenteGameState .class, PenteForwardModel.class, PenteParameters.class, PenteGUIManager.class),
-    Mastermind(1,1,
+            PenteGameState.class, PenteForwardModel.class, PenteParameters.class, PenteGUIManager.class),
+    Mastermind(1, 1,
             Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
             List.of(PatternBuilding),
             MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
@@ -427,7 +439,7 @@ public enum GameType {
     Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling),
             PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class,
             PickominoGUIManager.class),
-    Spades(4,4,Arrays.asList(Cards, Strategy),
+    Spades(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement, TakeThat),
             SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class),
     Whist(4, 4, Arrays.asList(Cards, Strategy),
@@ -438,7 +450,16 @@ public enum GameType {
             EuchreGameState.class, EuchreForwardModel.class, EuchreParameters.class, EuchreGUIManager.class),
     Klaverjassen(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking),
-            KlaverjassenGameState.class, KlaverjassenForwardModel.class, KlaverjassenParameters.class, KlaverjassenGUIManager.class);
+            KlaverjassenGameState.class, KlaverjassenForwardModel.class, KlaverjassenParameters.class, KlaverjassenGUIManager.class),
+    Pitch(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement),
+            PitchGameState.class, PitchForwardModel.class, PitchParameters.class, PitchGUIManager.class),
+    President(4, 7, Arrays.asList(Cards, Simple),
+            Arrays.asList(HandManagement),
+            PresidentGameState.class, PresidentForwardModel.class, PresidentParameters.class, PresidentGUIManager.class),
+    Rummy(2, 6, Arrays.asList(Cards, Simple),
+            Arrays.asList(SetCollection),
+            RummyGameState.class, RummyForwardModel.class, RummyParameters.class, RummyGUIManager.class);
 
 
     // Core classes where the game is defined

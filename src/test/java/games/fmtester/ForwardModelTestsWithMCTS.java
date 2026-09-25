@@ -16,6 +16,9 @@ import games.catan.CatanParameters;
 import games.crazyeights.CZEParameters;
 import games.cribbage.CribbageParameters;
 import games.descent2e.DescentParameters;
+import games.pitch.PitchParameters;
+import games.president.PresidentParameters;
+import games.rummy.RummyParameters;
 import games.dominion.DominionIParameters;
 import games.dominion.DominionParameters;
 import games.dominion.DominionSDParameters;
@@ -28,6 +31,32 @@ public class ForwardModelTestsWithMCTS {
     @Test
     public void testSaboteur() {
         new ForwardModelTester("game=Saboteur", "nGames=3", "nPlayers=5", "agent=json\\players\\gameSpecific\\Saboteur\\Saboteur.json", "budget=50");
+    }
+
+    @Test
+    public void testPitch() {
+        new ForwardModelTester("game=Pitch", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
+        PitchParameters params = new PitchParameters();
+        params.setParameterValue("targetScore", 11);
+        params.setParameterValue("countHighLowSeparately", true);
+        new ForwardModelTester(params, "game=Pitch", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testPresident() {
+        new ForwardModelTester("game=President", "nGames=2", "nPlayers=5", "agent=json\\players\\mcts.json");
+        PresidentParameters params = new PresidentParameters();
+        params.setParameterValue("targetScore", 5);
+        params.setParameterValue("exchangeCards", 2);
+        new ForwardModelTester(params, "game=President", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testRummy() {
+        new ForwardModelTester("game=Rummy", "nGames=2", "nPlayers=2", "agent=json\\players\\mcts.json");
+        RummyParameters params = new RummyParameters();
+        params.setParameterValue("targetScore", 50);
+        new ForwardModelTester(params, "game=Rummy", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
     }
 
     @Test
