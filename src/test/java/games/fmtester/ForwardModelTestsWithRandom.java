@@ -11,6 +11,7 @@ import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.goofspiel.GoofspielParameters;
 import games.leducpoker.LeducPokerParameters;
+import games.toads.ToadParameters;
 import games.crazyeights.CZEParameters;
 import games.cribbage.CribbageParameters;
 import org.junit.Test;
@@ -293,5 +294,17 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("highCardUsesBoard", true);
         params.setParameterValue("maxRaisesPerRound", 3);
         new ForwardModelTester(params, "game=LeducPoker", "nGames=2", "nPlayers=2");
+    }
+
+    @Test
+    public void testWarOfTheToads() {
+        new ForwardModelTester("game=WarOfTheToads", "nGames=10", "nPlayers=2");
+        // the legacy deck and flow
+        ToadParameters params = new ToadParameters();
+        params.setParameterValue("cardFile", "cards_005.json");
+        params.setParameterValue("openingReturn", false);
+        params.setParameterValue("discardOption", true);
+        params.setParameterValue("secondRoundStart", ToadParameters.SecondRoundStart.WINNER);
+        new ForwardModelTester(params, "game=WarOfTheToads", "nGames=10", "nPlayers=2");
     }
 }

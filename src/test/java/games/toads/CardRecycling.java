@@ -22,10 +22,13 @@ public class CardRecycling {
     @Before
     public void setUp() {
         params = new ToadParameters();
+        params.setParameterValue("cardFile", "cards_005.json"); // the legacy deck: these tests encode the legacy Tactics
         params.setRandomSeed(933);
         params.setParameterValue("discardOption", true);
         params.setParameterValue("useTactics", false);
-        state = new ToadGameState(params, 2);
+        params.setParameterValue("openingReturn", false); // 4-card deals, straight to DISCARD
+        params.setParameterValue("secondRoundStart", ToadParameters.SecondRoundStart.WINNER);
+        state =new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);
         rnd = new Random(933);

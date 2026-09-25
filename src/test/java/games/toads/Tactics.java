@@ -27,8 +27,11 @@ public class Tactics {
     @Before
     public void setUp() {
         params = new ToadParameters();
+        params.setParameterValue("cardFile", "cards_005.json"); // the legacy deck: these tests encode the legacy Tactics
         params.setRandomSeed(933);
-        params.discardOption = false;
+        params.setParameterValue("discardOption", false);
+        params.setParameterValue("openingReturn", false); // 4-card deals, straight to PLAY
+        params.setParameterValue("secondRoundStart", ToadParameters.SecondRoundStart.WINNER);
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);
@@ -38,10 +41,10 @@ public class Tactics {
     @Test
     public void tricksterI() {
         playCards(
-                new ToadCard("Five", 5, BERSERKER), // field
+                new ToadCard("Five", 5, BERSERKER, new Berserker()), // field
                 new ToadCard("Six", 6, ICON_BEARER), // Flank
                 new ToadCard("Six", 6, ICON_BEARER),  // Field
-                new ToadCard("Trickster", 3, TRICKSTER)// flank
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())// flank
         );
 
         // with no tactics this is a 1 : 1 draw
@@ -58,10 +61,10 @@ public class Tactics {
     public void tricksterII() {
 
         playCards(
-                new ToadCard("Five", 5, BERSERKER), // field
+                new ToadCard("Five", 5, BERSERKER, new Berserker()), // field
                 new ToadCard("Six", 6, ICON_BEARER),  // Flank
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
-                new ToadCard("Trickster", 3, TRICKSTER)// flank
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())// flank
         );
         // with no tactics this is 2 : 0
 
@@ -80,9 +83,9 @@ public class Tactics {
 
         playCards(
                 new ToadCard("Six", 6, ICON_BEARER),
-                new ToadCard("Five", 5, BERSERKER),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
-                new ToadCard("Trickster", 3, TRICKSTER)
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())
         );
 
         // with no tactics this is 2 : 0
@@ -105,7 +108,7 @@ public class Tactics {
         playCards(
                 new ToadCard("Five", 5, null), // field
                 new ToadCard("Seven", 7, null),
-                new ToadCard("Trickster", 3, TRICKSTER), // Flank
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster()), // Flank
                 new ToadCard("Six", 6, ICON_BEARER)
         );
 
@@ -125,7 +128,7 @@ public class Tactics {
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Six", 6, ICON_BEARER),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
-                new ToadCard("Trickster", 3, TRICKSTER)
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())
         );
 
         // with no tactics this is 1 : 0
@@ -142,10 +145,10 @@ public class Tactics {
     public void assassinVersusTricksterI() {
 
         playCards(
-                new ToadCard("Five", 5, BERSERKER),
-                new ToadCard("Assassin", 1, ASSASSIN),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
+                new ToadCard("Assassin", 1, ASSASSIN, new Assassin()),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
-                new ToadCard("Trickster", 3, TRICKSTER)
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())
         );
 
         // with no tactics this is 0 : 2
@@ -166,10 +169,10 @@ public class Tactics {
         // we adapt the previous test to check that the Assassin copies the tactics of the Berserker
 
         playCards(
-                new ToadCard("Five", 5, BERSERKER),
-                new ToadCard("Assassin", 1, ASSASSIN),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
+                new ToadCard("Assassin", 1, ASSASSIN, new Assassin()),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
-                new ToadCard("Trickster", 3, TRICKSTER)
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())
         );
 
         // with no tactics this is 0 : 2
@@ -190,7 +193,7 @@ public class Tactics {
 
         playCards(
                 new ToadCard("IconBearer", 6, ICON_BEARER),
-                new ToadCard("Assassin", 0, ASSASSIN),
+                new ToadCard("Assassin", 0, ASSASSIN, new Assassin()),
                 new ToadCard("IconBearer", 6, ICON_BEARER),
                 new ToadCard("Scout", 2, SCOUT)
         );
@@ -210,7 +213,7 @@ public class Tactics {
 
         playCards(
                 new ToadCard("IconBearer", 6, ICON_BEARER),
-                new ToadCard("Assassin", 1, ASSASSIN),
+                new ToadCard("Assassin", 1, ASSASSIN, new Assassin()),
                 new ToadCard("IconBearer", 6, ICON_BEARER),
                 new ToadCard("Scout", 2, SCOUT)
         );
@@ -231,9 +234,9 @@ public class Tactics {
         state.battlesWon[0][1] = 1;
 
         playCards(
-                new ToadCard("Five", 5, BERSERKER),
-                new ToadCard("General", 7, GENERAL_ONE),
-                new ToadCard("Five", 5, BERSERKER),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
+                new ToadCard("General", 7, GENERAL_ONE, new GeneralOne()),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
                 new ToadCard("Six", 6, ICON_BEARER)
         );
 
@@ -246,8 +249,8 @@ public class Tactics {
     @Test
     public void generalAbilityOneII() {
         playCards(
-                new ToadCard("Five", 5, BERSERKER),
-                new ToadCard("General", 7, GENERAL_ONE),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
+                new ToadCard("General", 7, GENERAL_ONE, new GeneralOne()),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Six", 6, null)
         );
@@ -261,9 +264,9 @@ public class Tactics {
     @Test
     public void generalAbilityTwoI() {
         playCards(
-                new ToadCard("Five", 5, BERSERKER),
-                new ToadCard("General", 7, GENERAL_TWO),
-                new ToadCard("Five", 5, BERSERKER),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
+                new ToadCard("General", 7, GENERAL_TWO, new GeneralTwo()),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
                 new ToadCard("Seven", 7, null)
         );
 
@@ -278,9 +281,9 @@ public class Tactics {
         state.battlesTied[0] = 2;
 
         playCards(
-                new ToadCard("Five", 5, BERSERKER),
-                new ToadCard("General", 7, GENERAL_TWO),
-                new ToadCard("Five", 5, BERSERKER),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
+                new ToadCard("General", 7, GENERAL_TWO, new GeneralTwo()),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
                 new ToadCard("Seven", 7, null)
         );
 
@@ -297,10 +300,10 @@ public class Tactics {
 
         // This is a test-only hack, so that the Assassin does not copy the tactics of the General
         playCards(
-                new ToadCard("Five", 5, BERSERKER), // field
+                new ToadCard("Five", 5, BERSERKER, new Berserker()), // field
                 new ToadCard("Assassin", 0, ASSASSIN, new Assassin(), null), // Flank
                 new ToadCard("Four", 4, null),  // Field
-                new ToadCard("Seven", 7, GENERAL_TWO)// flank
+                new ToadCard("Seven", 7, GENERAL_TWO, new GeneralTwo())// flank
         );
         // with no tactics this is 2 : 0
 
@@ -319,9 +322,9 @@ public class Tactics {
 
         playCards(
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
-                new ToadCard("Assassin", 1, ASSASSIN),
+                new ToadCard("Assassin", 1, ASSASSIN, new Assassin()),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
-                new ToadCard("Seven", 7, GENERAL_TWO)
+                new ToadCard("Seven", 7, GENERAL_TWO, new GeneralTwo())
         );
 
         // with no tactics this is 1 : 0
@@ -338,7 +341,7 @@ public class Tactics {
 
         playCards(
                 new ToadCard("One", 1, null),
-                new ToadCard("Berserker", 5, BERSERKER),
+                new ToadCard("Berserker", 5, BERSERKER, new Berserker()),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Six", 6, ICON_BEARER)
         );
@@ -359,7 +362,7 @@ public class Tactics {
 
         playCards(
                 new ToadCard("One", 1, null),
-                new ToadCard("Berserker", 5, BERSERKER),
+                new ToadCard("Berserker", 5, BERSERKER, new Berserker()),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Six", 6, ICON_BEARER)
         );
@@ -381,7 +384,7 @@ public class Tactics {
 
         playCards(
                 new ToadCard("Two", 2, SCOUT),
-                new ToadCard("Berserker", 5, BERSERKER),
+                new ToadCard("Berserker", 5, BERSERKER, new Berserker()),
                 new ToadCard("Two", 2, SCOUT),
                 new ToadCard("Seven", 7, null)
         );
@@ -422,7 +425,7 @@ public class Tactics {
                 new ToadCard("One", 1, null),
                 new ToadCard("IconBearer", 6, ICON_BEARER),
                 new ToadCard("Two", 2, SCOUT),
-                new ToadCard("Five", 5, BERSERKER)
+                new ToadCard("Five", 5, BERSERKER, new Berserker())
         );
 
         // without Tactics this is 1 : 1
@@ -438,7 +441,7 @@ public class Tactics {
         state.battlesWon[0][0] = 1;
         playCards(
                 new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII()),
-                new ToadCard("Three", 3, TRICKSTER),
+                new ToadCard("Three", 3, TRICKSTER, new Trickster()),
                 new ToadCard("IconBearer", 6, null),
                 new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII())
         );
@@ -454,7 +457,7 @@ public class Tactics {
         playCards(
                 new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII()),
                 new ToadCard("Three", 2, SCOUT),
-                new ToadCard("Five", 5, BERSERKER),
+                new ToadCard("Five", 5, BERSERKER, new Berserker()),
                 new ToadCard("IconBearer", 6, null)
         );
         // Scount increases the SaboteurII to 5, which ties with the Berserker
@@ -467,8 +470,8 @@ public class Tactics {
         playCards(
                 new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII()),
                 new ToadCard("IconBearer", 6, ICON_BEARER),
-                new ToadCard("Berserker", 5, BERSERKER),
-                new ToadCard("Gen", 7, GENERAL_ONE)
+                new ToadCard("Berserker", 5, BERSERKER, new Berserker()),
+                new ToadCard("Gen", 7, GENERAL_ONE, new GeneralOne())
 
         );
 
@@ -522,7 +525,7 @@ public class Tactics {
         checkVisibilityOfHands(0, false, false);
 
         playCards(
-                new ToadCard("Three", 3, TRICKSTER),
+                new ToadCard("Three", 3, TRICKSTER, new Trickster()),
                 new ToadCard("Two", 2, SCOUT),
                 new ToadCard("Scout", 2, SCOUT),
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur())
@@ -547,7 +550,7 @@ public class Tactics {
         }
 
         playCards(
-                new ToadCard("Three", 3, TRICKSTER),
+                new ToadCard("Three", 3, TRICKSTER, new Trickster()),
                 new ToadCard("Scout", 2, SCOUT),
                 new ToadCard("Scout", 2, SCOUT),
                 new ToadCard("Six", 6, ICON_BEARER)
@@ -562,7 +565,10 @@ public class Tactics {
         // we then have the follow-on action for a scout
         assertTrue(state.isActionInProgress());
         assertEquals(2, state.getActionsInProgress().size());  // one for each Scout
-        assertEquals(0, state.getCurrentPlayer());
+        // post-battle decisions run in the order they resolved. The attacker's (player 0's) hidden Scout resolved
+        // first (START), before the Field Scout activated by the Icon Bearer, so player 1 first shows player 0
+        // three cards
+        assertEquals(1, state.getCurrentPlayer());
         assertTrue(fm.computeAvailableActions(state).stream().allMatch(a -> a instanceof ShowCards));
 
         checkVisibilityOfNumberOfCards(0, 1);
@@ -570,10 +576,10 @@ public class Tactics {
 
         fm.next(state, fm.computeAvailableActions(state).get(0));
 
-        checkVisibilityOfNumberOfCards(3, 1);
-        checkVisibilityOfNumberOfCards(0, 0);
+        checkVisibilityOfNumberOfCards(0, 1);
+        checkVisibilityOfNumberOfCards(3, 0);
 
-        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(0, state.getCurrentPlayer());
         assertEquals(1, state.getActionsInProgress().size());
     }
 
@@ -589,10 +595,10 @@ public class Tactics {
         checkVisibilityOfHands(0, false, false);
 
         playCards(
-                new ToadCard("Three", 3, TRICKSTER),
+                new ToadCard("Three", 3, TRICKSTER, new Trickster()),
                 new ToadCard("Scout", 2, SCOUT),
                 new ToadCard("One", 1, null),
-                new ToadCard("Trickster", 3, TRICKSTER)
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())
         );
 
         // without tactics this is 1 : 1
@@ -646,10 +652,10 @@ public class Tactics {
         checkVisibilityOfHands(0, false, false);
 
         playCards(
-                new ToadCard("Three", 3, TRICKSTER),
+                new ToadCard("Three", 3, TRICKSTER, new Trickster()),
                 new ToadCard("Scout", 2, SCOUT),
                 new ToadCard("One", 1, null),
-                new ToadCard("Trickster", 3, TRICKSTER)
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())
         );
 
         // we then have the follow-on action for a scout
@@ -679,10 +685,10 @@ public class Tactics {
     @Test
     public void cardMovedWithTricksterDoesNotTriggerTacticsI() {
         playCards(
-                new ToadCard("Three", 3, TRICKSTER),
+                new ToadCard("Three", 3, TRICKSTER, new Trickster()),
                 new ToadCard("Scout", 2, SCOUT),
                 new ToadCard("Scout", 2, SCOUT),
-                new ToadCard("Trickster", 3, TRICKSTER)
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())
         );
 
         assertEquals(1, state.getActionsInProgress().size());
@@ -694,7 +700,7 @@ public class Tactics {
                 new ToadCard("Seven", 7, null),
                 new ToadCard("Scout", 2, SCOUT),
                 new ToadCard("IconBearer", 6, ICON_BEARER),
-                new ToadCard("Trickster", 3, TRICKSTER)
+                new ToadCard("Trickster", 3, TRICKSTER, new Trickster())
         );
 
         // Trickster swaps, giving:
@@ -728,8 +734,8 @@ public class Tactics {
 
     @Test
     public void assaultCannonExcludesDiscardsAndTiebreaker() {
-        state.tieBreakers[0] = new ToadCard("Five", 5, BERSERKER);
-        state.getDiscards(1).add(new ToadCard("Five", 5, GENERAL_ONE));
+        state.tieBreakers[0] = new ToadCard("Five", 5, BERSERKER, new Berserker());
+        state.getDiscards(1).add(new ToadCard("Five", 5, GENERAL_ONE, new GeneralOne()));
         playCards(
                 new ToadCard("Five", 5, null), // field
                 new ToadCard("AC", 0, ASSAULT_CANNON), // Flank

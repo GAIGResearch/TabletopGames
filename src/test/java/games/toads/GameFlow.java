@@ -2,8 +2,7 @@ package games.toads;
 
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import games.toads.abilities.Saboteur;
-import games.toads.abilities.SaboteurII;
+import games.toads.abilities.*;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
 import games.toads.components.ToadCard;
@@ -25,10 +24,13 @@ public class GameFlow {
     @Before
     public void setUp() {
         params = new ToadParameters();
+        params.setParameterValue("cardFile", "cards_005.json"); // the legacy deck: these tests encode the legacy Tactics
         params.setRandomSeed(933);
         params.setParameterValue("useTactics", false);
         params.setParameterValue("discardOption", false);
-        state = new ToadGameState(params, 2);
+        params.setParameterValue("openingReturn", false); // 4-card deals, straight to PLAY
+        params.setParameterValue("secondRoundStart", ToadParameters.SecondRoundStart.WINNER);
+        state =new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);
         rnd = new Random(933);
@@ -233,7 +235,7 @@ public class GameFlow {
     public void assassinAgainstSeven() {
         playCards(
                 new ToadCard("Three", 3), // field
-                new ToadCard("Assassin", 0, ASSASSIN),  // Flank
+                new ToadCard("Assassin", 0, ASSASSIN, new Assassin()),  // Flank
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Seven", 7) // flank
         );
@@ -245,7 +247,7 @@ public class GameFlow {
     public void assassinAgainstSix() {
         playCards(
                 new ToadCard("Five", 5), // field
-                new ToadCard("Assassin", 0, ASSASSIN),  // Flank
+                new ToadCard("Assassin", 0, ASSASSIN, new Assassin()),  // Flank
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6) // flank
         );
@@ -309,17 +311,17 @@ public class GameFlow {
     @Test
     public void assaultCannonInRound2() {
         playCards(
-                new ToadCard("Assassin", 0, ASSASSIN), // field
-                new ToadCard("G2", 7, GENERAL_TWO), // Flank
-                new ToadCard("Berserker", 5, BERSERKER),  // Field
-                new ToadCard("G1", 7, GENERAL_ONE) // flank
+                new ToadCard("Assassin", 0, ASSASSIN, new Assassin()), // field
+                new ToadCard("G2", 7, GENERAL_TWO, new GeneralTwo()), // Flank
+                new ToadCard("Berserker", 5, BERSERKER, new Berserker()),  // Field
+                new ToadCard("G1", 7, GENERAL_ONE, new GeneralOne()) // flank
         );
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
 
         assertEquals(1, state.getCurrentPlayer());
         playCards(
-                new ToadCard("G2", 7, GENERAL_TWO), // field
+                new ToadCard("G2", 7, GENERAL_TWO, new GeneralTwo()), // field
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("AC", 0, ASSAULT_CANNON),  // Field
                 new ToadCard("IconBearer", 6, ICON_BEARER) // flank
@@ -503,8 +505,9 @@ public class GameFlow {
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
         assertEquals(5.0, state.getGameScore(0), 0.001);
         assertEquals(5.0, state.getGameScore(1), 0.001);
-        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[0]);
-        assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[1]);
+        // both Wars Stalemated: the lowest Casualty wins - player 0's Five beats player 1's Six
+        assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[1]);
     }
 
 

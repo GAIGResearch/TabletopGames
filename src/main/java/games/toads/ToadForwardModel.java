@@ -26,6 +26,7 @@ public class ToadForwardModel extends StandardForwardModel {
         state.nextBattle = 0;
         state.battlesWon = new int[2][2];
         state.battlesTied = new int[2];
+        state.shrineFlags = new int[2][2];
         state.roundWinners = new int[8][2];
         state.battlesWon[0][0] = params.firstRoundHandicap;
         state.battlesWon[1][0] = params.firstRoundHandicap;
@@ -40,23 +41,45 @@ public class ToadForwardModel extends StandardForwardModel {
             state.playerHands.add(new PartialObservableDeck<>("Player " + i + " Hand", i, 2, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             state.playerDiscards.add(new Deck<>("Player " + i + " Discard", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             List<ToadCard> cards = params.getCardDeck();
-            state.cardTypesInPlay = cards.stream().map(c -> c.type).collect(Collectors.toSet());
+            state.cardTypesInPlay = cards.stream().map(c -> c.type).collect(Collectors.toUnmodifiableSet());
             state.playerDecks.get(i).add(cards);
             state.playerDecks.get(i).shuffle(state.getRnd());
-            for (int j = 0; j < params.handSize; j++) {
-                state.playerHands.get(i).add(state.playerDecks.get(i).draw());
+        }
+        drawHandsAndStartWar(state);
+    }
+
+    /**
+     * Draws each player's hand for a War, and sets the phase in which it starts.
+     */
+    private void drawHandsAndStartWar(ToadGameState state) {
+        ToadParameters params = (ToadParameters) state.getGameParameters();
+        // with openingReturn each player draws one extra card, and then returns one to the bottom of their deck
+        int cardsToDraw = params.openingReturn ? params.handSize + 1 : params.handSize;
+        for (int player = 0; player < state.getNPlayers(); player++) {
+            for (int i = 0; i < cardsToDraw; i++) {
+                state.playerHands.get(player).add(state.playerDecks.get(player).draw());
             }
         }
-        if (params.discardOption)
-            state.setGamePhase(DISCARD);
+        if (params.openingReturn)
+            state.setGamePhase(OPENING_RETURN);
         else
-            state.setGamePhase(PLAY);
+            startBattlePhase(state);
+    }
+
+    private void startBattlePhase(ToadGameState state) {
+        ToadParameters params = (ToadParameters) state.getGameParameters();
+        state.setGamePhase(params.discardOption ? DISCARD : PLAY);
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         ToadGameState state = (ToadGameState) gameState;
-        if (state.getGamePhase().equals(DISCARD)) {
+        if (state.getGamePhase().equals(OPENING_RETURN)) {
+            return state.getPlayerHand(state.getCurrentPlayer()).stream()
+                    .map(c -> (AbstractAction) new ReturnCardToDeck(c))
+                    .distinct()
+                    .toList();
+        } else if (state.getGamePhase().equals(DISCARD)) {
             return computeDiscardActions(state);
         } else if (state.getGamePhase().equals(PLAY)) {
             return computePlayActions(state);
@@ -101,6 +124,16 @@ public class ToadForwardModel extends StandardForwardModel {
         // then we reveal the hidden cards and resolve the two battles
         int currentPlayer = gameState.getCurrentPlayer();
         ToadGameState state = (ToadGameState) gameState;
+        if (state.getGamePhase() == OPENING_RETURN) {
+            // once both players have returned a card, the first Battle starts (the first to return attacks)
+            state.discardOptions++;
+            if (state.discardOptions == 2) {
+                state.discardOptions = 0;
+                startBattlePhase(state);
+            }
+            endPlayerTurn(state, 1 - currentPlayer);
+            return;
+        }
         if (state.getGamePhase() == DISCARD) {
             // in this case we check if both players have DISCARDED (or had the option to)
             if (action instanceof RecycleCard) {
@@ -140,12 +173,19 @@ public class ToadForwardModel extends StandardForwardModel {
 
             // convert back to scores for each player
             int round = state.getRoundCounter();
+            // each tied lane sends both cards to the Shrine, a Flag for each player
+            int flags = battlesTied;
             // Overcommit rule (only counts as one victory if you win by 2 and are currently ahead - or override is set)
+            // and this Calm double win sends the other Hostage stack to the Shrine, another Flag for each player
             if (scoreDiff[0] == 2 && !battle.getFrogOverride(0) && state.battlesWon[round][0] >= state.battlesWon[round][1]) {
                 scoreDiff[0]--;
+                flags++;
             } else if (scoreDiff[1] == 2 && !battle.getFrogOverride(1) && state.battlesWon[round][1] >= state.battlesWon[round][0]) {
                 scoreDiff[1]--;
+                flags++;
             }
+            state.shrineFlags[round][0] += flags;
+            state.shrineFlags[round][1] += flags;
             // and increment scores
             state.battlesWon[round][0] += scoreDiff[0];
             state.battlesWon[round][1] += scoreDiff[1];
@@ -177,8 +217,10 @@ public class ToadForwardModel extends StandardForwardModel {
                 afterBattle(state);
             } else {
                 state.setGamePhase(POST_BATTLE);
-                for (IExtendedSequence sequence : battle.getPostBattleActions()) {
-                    state.setActionInProgress(sequence);
+                // they are listed in the order they resolved, and the first must be on top of the stack
+                List<IExtendedSequence> postBattleActions = battle.getPostBattleActions();
+                for (int i = postBattleActions.size() - 1; i >= 0; i--) {
+                    state.setActionInProgress(postBattleActions.get(i));
                 }
             }
         }
@@ -188,11 +230,7 @@ public class ToadForwardModel extends StandardForwardModel {
         // if all cards played, then we keep the same player as the attacker for the next round
         // Then check for end of round
         ToadParameters params = (ToadParameters) state.getGameParameters();
-        if (params.discardOption) {
-            state.setGamePhase(DISCARD);
-        } else {
-            state.setGamePhase(PLAY);
-        }
+        startBattlePhase(state);
 
         if (state.playerHands.get(0).getSize() <= 1) {
             // one card left in hand each
@@ -207,6 +245,9 @@ public class ToadForwardModel extends StandardForwardModel {
                 // set tie breakers
                 state.tieBreakers[0] = state.playerHands.get(0).draw();
                 state.tieBreakers[1] = state.playerHands.get(1).draw();
+                // the Casualties go beside the Shrine, so each player starts War 2 with a Flag
+                state.shrineFlags[1][0] = 1;
+                state.shrineFlags[1][1] = 1;
                 // then discards become the other players decks
                 state.playerDecks.get(0).add(state.playerDiscards.get(1));
                 state.playerDecks.get(1).add(state.playerDiscards.get(0));
@@ -216,11 +257,7 @@ public class ToadForwardModel extends StandardForwardModel {
                 // shuffle
                 state.playerDecks.get(0).shuffle(state.getRnd());
                 state.playerDecks.get(1).shuffle(state.getRnd());
-                // and draw new hands
-                for (int i = 0; i < params.handSize; i++) {
-                    state.playerHands.get(0).add(state.playerDecks.get(0).draw());
-                    state.playerHands.get(1).add(state.playerDecks.get(1).draw());
-                }
+                drawHandsAndStartWar(state);
                 int firstPlayerOfSecondRound = switch (params.secondRoundStart) {
                     case ONE -> 0;
                     case TWO -> 1;

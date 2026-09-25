@@ -24,6 +24,7 @@ public class ToadGameState extends AbstractGameState {
     int discardOptions;
     int[][] battlesWon;
     int[] battlesTied;
+    int[][] shrineFlags;
     int nextBattle = 0;
     protected int[][] roundWinners;
     List<Deck<ToadCard>> playerDiscards;
@@ -63,8 +64,7 @@ public class ToadGameState extends AbstractGameState {
 
     @Override
     protected ToadGameState _copy(int playerId) {
-        ToadParameters params = (ToadParameters) this.gameParameters;
-        ToadGameState copy = new ToadGameState(params.shallowCopy(), getNPlayers());
+        ToadGameState copy = new ToadGameState(gameParameters, getNPlayers());
         copy.playerDecks = new ArrayList<>();
         for (PartialObservableDeck<ToadCard> deck : playerDecks) {
             copy.playerDecks.add(deck.copy());
@@ -82,8 +82,12 @@ public class ToadGameState extends AbstractGameState {
             copy.battlesWon[i] = Arrays.copyOf(battlesWon[i], 2);
         }
         copy.battlesTied = Arrays.copyOf(battlesTied, 2);
+        copy.shrineFlags = new int[2][];
+        for (int i = 0; i < 2; i++) {
+            copy.shrineFlags[i] = Arrays.copyOf(shrineFlags[i], 2);
+        }
         copy.discardOptions = discardOptions;
-        copy.cardTypesInPlay = cardTypesInPlay; // this is immutable
+        copy.cardTypesInPlay = cardTypesInPlay; // from the card file, and unmodifiable
         copy.nextBattle = nextBattle;
 
         // battlesWon tracks the win/loss rates over all 8 Battles
@@ -106,9 +110,9 @@ public class ToadGameState extends AbstractGameState {
             if (fieldCards[i] != null)
                 copy.fieldCards[i] = fieldCards[i].copy();
         }
-        if (tieBreakers[0] != null) {
-            copy.tieBreakers[0] = tieBreakers[0].copy();
-            copy.tieBreakers[1] = tieBreakers[1].copy();
+        for (int i = 0; i < tieBreakers.length; i++) {
+            if (tieBreakers[i] != null)
+                copy.tieBreakers[i] = tieBreakers[i].copy();
         }
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
             // shuffle the other player's deck and hand, including the hidden flank card
@@ -130,7 +134,8 @@ public class ToadGameState extends AbstractGameState {
             // and their tiebreaker is shuffled with *our* as yet undrawn deck
             if (tieBreakers[playerToShuffle] != null)
                 copy.playerDecks.get(playerId).add(tieBreakers[playerToShuffle]);
-            copy.playerDecks.get(playerId).shuffle(redeterminisationRnd);
+            // cards the player knows, such as one they returned to the bottom, stay in place
+            copy.playerDecks.get(playerId).redeterminiseUnknown(redeterminisationRnd, playerId);
             if (tieBreakers[playerToShuffle] != null)
                 copy.tieBreakers[playerToShuffle] = copy.playerDecks.get(playerId).draw();
         }
@@ -175,8 +180,20 @@ public class ToadGameState extends AbstractGameState {
     public int getBattlesTied(int round) {
         return battlesTied[round];
     }
+    /**
+     * The Flags a player has in the Shrine in the given War (round).
+     */
+    public int getShrineFlags(int round, int playerId) {
+        return shrineFlags[round][playerId];
+    }
     public int getScoreInBattle(int battle, int playerId) {
         return roundWinners[battle][playerId];
+    }
+    /**
+     * The number of Battles fought so far in the game (both Wars).
+     */
+    public int getBattlesFought() {
+        return nextBattle;
     }
 
     public Deck<ToadCard> getDiscards(int playerId) {
@@ -249,7 +266,8 @@ public class ToadGameState extends AbstractGameState {
     public double getTiebreak(int playerId, int tier) {
         if (tieBreakers[playerId] == null)
             return 0;
-        return tieBreakers[playerId].value;
+        // the lowest Casualty wins
+        return -tieBreakers[playerId].value;
     }
 
     @Override
@@ -270,6 +288,8 @@ public class ToadGameState extends AbstractGameState {
                     Arrays.equals(hiddenFlankCards, toadGameState.hiddenFlankCards) &&
                     Arrays.equals(tieBreakers, toadGameState.tieBreakers) &&
                     Arrays.equals(battlesTied, toadGameState.battlesTied) &&
+                    Arrays.deepEquals(shrineFlags, toadGameState.shrineFlags) &&
+                    Arrays.deepEquals(roundWinners, toadGameState.roundWinners) &&
                     Arrays.equals(fieldCards, toadGameState.fieldCards);
         }
         return false;
@@ -277,8 +297,10 @@ public class ToadGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerDecks, playerHands, playerDiscards, discardOptions, nextBattle) + Arrays.deepHashCode(battlesWon) +
-                Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers) + Arrays.hashCode(battlesTied);
+        return 31 * super.hashCode() + Objects.hash(playerDecks, playerHands, playerDiscards, discardOptions, nextBattle) +
+                Arrays.deepHashCode(battlesWon) + 17 * Arrays.deepHashCode(roundWinners) +
+                Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers) + Arrays.hashCode(battlesTied) +
+                31 * Arrays.deepHashCode(shrineFlags);
     }
 
     @Override
@@ -290,6 +312,8 @@ public class ToadGameState extends AbstractGameState {
                 discardOptions + nextBattle * 31 + "|" +
                 Arrays.deepHashCode(battlesWon) + "|" +
                 Arrays.hashCode(battlesTied) + "|" +
+                Arrays.deepHashCode(shrineFlags) + "|" +
+                Arrays.deepHashCode(roundWinners) + "|" +
                 Arrays.hashCode(hiddenFlankCards) + "|" +
                 Arrays.hashCode(fieldCards) + "|" +
                 Arrays.hashCode(tieBreakers) + "|";

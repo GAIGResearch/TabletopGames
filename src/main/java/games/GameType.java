@@ -177,7 +177,7 @@ import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.gui.TicTacToeGUIManager;
 import games.toads.ToadForwardModel;
-import games.toads.ToadGUIManager;
+import games.toads.gui.ToadGUIManager;
 import games.toads.ToadGameState;
 import games.toads.ToadParameters;
 import games.uno.UnoForwardModel;
