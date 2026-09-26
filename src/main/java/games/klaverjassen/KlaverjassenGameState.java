@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.GameType;
+import games.tricktaking.CardOrder;
 import games.tricktaking.ITrickTakingState;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.Trick;
@@ -32,17 +33,17 @@ import java.util.Objects;
  *     <li>knownVoids - the suits each player is publicly known not to hold this hand</li>
  * </ul>
  */
-public class KlaverjassenGameState extends AbstractGameState implements ITrickTakingState {
+public class KlaverjassenGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite> {
 
     List<Deck<FrenchCard>> playerHands;
-    Trick currentTrick;
+    Trick<FrenchCard, FrenchCard.Suite> currentTrick;
     Deck<FrenchCard> discardPile;
     FrenchCard.Suite trumpSuit;
     int[] handPoints;
     int[] handRoem;
     int[] tricksWon;
     int[] teamScores;
-    KnownVoids knownVoids;
+    KnownVoids<FrenchCard.Suite> knownVoids;
 
     public KlaverjassenGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -77,12 +78,12 @@ public class KlaverjassenGameState extends AbstractGameState implements ITrickTa
     }
 
     @Override
-    public Trick getCurrentTrick() {
+    public Trick<FrenchCard, FrenchCard.Suite> getCurrentTrick() {
         return currentTrick;
     }
 
     @Override
-    public KnownVoids getKnownVoids() {
+    public KnownVoids<FrenchCard.Suite> getKnownVoids() {
         return knownVoids;
     }
 
@@ -111,7 +112,7 @@ public class KlaverjassenGameState extends AbstractGameState implements ITrickTa
      */
     public void setTrumpSuit(FrenchCard.Suite suit) {
         trumpSuit = suit;
-        currentTrick = new Trick("CurrentTrick", getNPlayers(), getTrumpChooser(), new KlaverjassenCardOrder(suit));
+        currentTrick = new Trick<>("CurrentTrick", getNPlayers(), getTrumpChooser(), new KlaverjassenCardOrder(suit));
     }
 
     public int getHandPoints(int team) {
@@ -149,7 +150,7 @@ public class KlaverjassenGameState extends AbstractGameState implements ITrickTa
             // the other players' hands are shuffled together, never giving a player a card of a suit they are known
             // to be void in
             DeterminisationUtilities.reshuffle(playerId, copy.playerHands, c -> true, redeterminisationRnd,
-                    knownVoids::permits);
+                    knownVoids.permits(CardOrder.STANDARD));
         }
         return copy;
     }

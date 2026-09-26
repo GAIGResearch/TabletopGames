@@ -47,7 +47,7 @@ public class AgramCopyTest {
         assertEquals(state.hashCode(), copy.hashCode());
 
         int originalHash = state.hashCode();
-        fm.next(copy, new PlayCard(copy.getPlayerHands().get(0).get(0)));   // player 0 leads any card
+        fm.next(copy, new PlayCard<>(copy.getPlayerHands().get(0).get(0)));   // player 0 leads any card
         assertEquals(originalHash, state.hashCode());
         assertEquals(0, state.getCurrentTrick().getSize());
         assertEquals(6, state.getPlayerHands().get(0).getSize());

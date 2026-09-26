@@ -101,8 +101,8 @@ public class KlaverjassenGameFlowTest {
                 assertEquals(s + "duplicate actions", actions.size(), new HashSet<>(actions).size());
                 List<FrenchCard> offered = new ArrayList<>();
                 for (AbstractAction a : actions) {
-                    assertTrue(s + "not a PlayCard: " + a, a instanceof PlayCard);
-                    offered.add(((PlayCard) a).card);
+                    assertTrue(s + "not a PlayCard: " + a, a instanceof PlayCard<?>);
+                    offered.add((FrenchCard) ((PlayCard<?>) a).card);
                 }
                 assertTrue(s + "offered a card not in hand", hand.containsAll(offered));
                 List<FrenchCard> expected = expectedLegalPlays(hand, trick, leader, trumps, rule);
@@ -116,8 +116,8 @@ public class KlaverjassenGameFlowTest {
                         && expected.size() < hand.size())
                     restrictedWhileVoid++;
 
-                PlayCard chosen = (PlayCard) actions.get(rnd.nextInt(actions.size()));
-                trick.add(chosen.card);
+                PlayCard<?> chosen = (PlayCard<?>) actions.get(rnd.nextInt(actions.size()));
+                trick.add((FrenchCard) chosen.card);
                 fm.next(state, chosen);
                 steps++;
                 if (trick.size() == 4) {

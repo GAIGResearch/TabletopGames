@@ -193,7 +193,7 @@ final class EuchreTestUtils {
             state.passes = 4 + offset;
         }
         int leader = (dealer + 1) % 4;
-        state.currentTrick = new Trick("CurrentTrick", 4, leader, state.getCardOrder());
+        state.currentTrick = new Trick<>("CurrentTrick", 4, leader, state.getCardOrder());
         state.setTurnOwner(leader);
     }
 
@@ -206,7 +206,7 @@ final class EuchreTestUtils {
         startPlay(state, trumps, maker, discardCode);
         state.alone = true;
         int leader = (maker + 1) % 4;
-        state.currentTrick = new Trick("CurrentTrick", 4, leader, state.getCardOrder(), state.getSittingOut());
+        state.currentTrick = new Trick<>("CurrentTrick", 4, leader, state.getCardOrder(), state.getSittingOut());
         state.setTurnOwner(leader);
     }
 
@@ -253,7 +253,7 @@ final class EuchreTestUtils {
                 codes.length == 0 || state.getSittingOut() < 0);
         state.discardPile.add(state.currentTrick);
         state.currentTrick.clear();
-        state.currentTrick = new Trick("CurrentTrick", 4, leader, state.getCardOrder(), state.getSittingOut());
+        state.currentTrick = new Trick<>("CurrentTrick", 4, leader, state.getCardOrder(), state.getSittingOut());
         for (String code : codes) {
             FrenchCard c = card(code);
             takeFromPlay(state, c);
@@ -333,7 +333,7 @@ final class EuchreTestUtils {
             int player = state.getCurrentPlayer();
             assertTrue("player " + player + " is to play but does not hold " + code,
                     state.getPlayerHand(player).contains(card(code)));
-            fm.next(state, new PlayCard(card(code)));
+            fm.next(state, new PlayCard<>(card(code)));
         }
     }
 
@@ -352,7 +352,7 @@ final class EuchreTestUtils {
     static Set<AbstractAction> plays(String... codes) {
         Set<AbstractAction> s = new HashSet<>();
         for (String c : codes)
-            s.add(new PlayCard(card(c)));
+            s.add(new PlayCard<>(card(c)));
         return s;
     }
 

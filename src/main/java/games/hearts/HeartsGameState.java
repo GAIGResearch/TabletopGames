@@ -9,6 +9,7 @@ import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.hearts.heuristics.HeartsHeuristic;
+import games.tricktaking.CardOrder;
 import games.tricktaking.ITrickTakingState;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.Trick;
@@ -29,7 +30,7 @@ import java.util.stream.IntStream;
  * <p>Computation may be included in functions here for ease of access, but only if this is querying the game state information.
  * Functions on the game state should never <b>change</b> the state of the game.</p>
  */
-public class HeartsGameState extends AbstractGameState implements ITrickTakingState {
+public class HeartsGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite> {
     List<Deck<FrenchCard>> playerDecks;
     Deck<FrenchCard> drawDeck;
     public List<Deck<FrenchCard>> trickDecks;
@@ -37,16 +38,16 @@ public class HeartsGameState extends AbstractGameState implements ITrickTakingSt
     public int[] playerTricksTaken;
     public List<List<FrenchCard>> pendingPasses;
     public Map<Integer, Integer> playerPoints;
-    public Trick currentTrick;
+    public Trick<FrenchCard, FrenchCard.Suite> currentTrick;
     /**
      * For each player, the suits that they are publicly known to be void in; i.e. the suits that
      * were led in a trick this round to which they did not follow suit.
      */
-    public KnownVoids knownVoids;
+    public KnownVoids<FrenchCard.Suite> knownVoids;
 
     public HeartsGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        currentTrick = new Trick("CurrentTrick", nPlayers, 0);
+        currentTrick = new Trick<>("CurrentTrick", nPlayers, 0, CardOrder.STANDARD);
     }
 
     @Override
@@ -130,7 +131,7 @@ public class HeartsGameState extends AbstractGameState implements ITrickTakingSt
     }
 
     @Override
-    public Trick getCurrentTrick() {
+    public Trick<FrenchCard, FrenchCard.Suite> getCurrentTrick() {
         return currentTrick;
     }
 
@@ -139,7 +140,7 @@ public class HeartsGameState extends AbstractGameState implements ITrickTakingSt
      * follow suit earlier in the current round. This is information available to all players.
      */
     @Override
-    public KnownVoids getKnownVoids() {
+    public KnownVoids<FrenchCard.Suite> getKnownVoids() {
         return knownVoids;
     }
 
@@ -249,7 +250,8 @@ public class HeartsGameState extends AbstractGameState implements ITrickTakingSt
         // must not deal them any (none are recorded if HeartsParameters.rememberVoids is off).
         List<Deck<FrenchCard>> decksToShuffle = new ArrayList<>(playerDecks);
         decksToShuffle.add(drawDeck);
-        DeterminisationUtilities.reshuffle(playerId, decksToShuffle, c -> true, redeterminisationRnd, knownVoids::permits);
+        DeterminisationUtilities.reshuffle(playerId, decksToShuffle, c -> true, redeterminisationRnd,
+                knownVoids.permits(CardOrder.STANDARD));
 
         for (int i = 0; i < getNPlayers(); i++) {
             for (int k = 0; k < pendingCounts[i]; k++) {

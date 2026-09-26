@@ -1,8 +1,8 @@
 package games.tricktaking;
 
 import core.CoreConstants.VisibilityMode;
+import core.components.Component;
 import core.components.Deck;
-import core.components.FrenchCard;
 
 import java.util.Objects;
 
@@ -16,22 +16,21 @@ import java.util.Objects;
  * <p>A game starts each trick with a new Trick, so two states in the same position hold Tricks with different
  * componentIDs. Equality is therefore by value: the cards, the leader, the number of players, the card order and
  * any player sitting out.</p>
+ *
+ * @param <C> the type of card
+ * @param <S> the type of suit
  */
-public class Trick extends Deck<FrenchCard> {
+public class Trick<C extends Component, S> extends Deck<C> {
 
     private final int nPlayers;
     private final int leader;
-    private final CardOrder order;
+    private final CardOrder<C, S> order;
     private final int sittingOut;
-
-    public Trick(String name, int nPlayers, int leader) {
-        this(name, nPlayers, leader, CardOrder.STANDARD);
-    }
 
     /**
      * A trick whose cards belong to suits, and rank within them, as the order says.
      */
-    public Trick(String name, int nPlayers, int leader, CardOrder order) {
+    public Trick(String name, int nPlayers, int leader, CardOrder<C, S> order) {
         this(name, nPlayers, leader, order, -1);
     }
 
@@ -41,7 +40,7 @@ public class Trick extends Deck<FrenchCard> {
      *
      * @param sittingOut the player who plays no card to the trick, or -1 if everyone plays
      */
-    public Trick(String name, int nPlayers, int leader, CardOrder order, int sittingOut) {
+    public Trick(String name, int nPlayers, int leader, CardOrder<C, S> order, int sittingOut) {
         super(name, VisibilityMode.VISIBLE_TO_ALL);
         this.nPlayers = nPlayers;
         this.leader = leader;
@@ -49,7 +48,7 @@ public class Trick extends Deck<FrenchCard> {
         this.sittingOut = sittingOut;
     }
 
-    private Trick(String name, int ID, int nPlayers, int leader, CardOrder order, int sittingOut) {
+    private Trick(String name, int ID, int nPlayers, int leader, CardOrder<C, S> order, int sittingOut) {
         super(name, -1, ID, VisibilityMode.VISIBLE_TO_ALL);
         this.nPlayers = nPlayers;
         this.leader = leader;
@@ -67,7 +66,7 @@ public class Trick extends Deck<FrenchCard> {
     /**
      * How the cards in this trick belong to suits and rank.
      */
-    public CardOrder getOrder() {
+    public CardOrder<C, S> getOrder() {
         return order;
     }
 
@@ -85,15 +84,21 @@ public class Trick extends Deck<FrenchCard> {
     /**
      * Adds the card to the trick as the next card played.
      */
-    public void play(FrenchCard card) {
+    public void play(C card) {
         addToBottom(card);  // index 0 stays the lead card
     }
 
     /**
-     * The suit the lead card belongs to, or null if no card has been played.
+     * The suit to follow: that of the first card played that belongs to a suit (a card such as Scarto's Fool belongs
+     * to none), or null if no such card has been played.
      */
-    public FrenchCard.Suite getLeadSuit() {
-        return getSize() == 0 ? null : order.suitOf(get(0));
+    public S getLeadSuit() {
+        for (C card : components) {
+            S suit = order.suitOf(card);
+            if (suit != null)
+                return suit;
+        }
+        return null;
     }
 
     /**
@@ -118,32 +123,33 @@ public class Trick extends Deck<FrenchCard> {
 
     /**
      * The player winning the trick so far: whoever played the highest trump, or if no trump has been played, the
-     * highest card of the suit led. Aces are high. The trick must not be empty.
+     * highest card of the suit led. A card that belongs to no suit never wins; if only such cards have been played,
+     * the leader is winning. The trick must not be empty.
      *
      * @param trumps the trump suit, or null if there are no trumps
      */
-    public int winner(FrenchCard.Suite trumps) {
-        int best = 0;
-        for (int i = 1; i < getSize(); i++) {
-            if (beats(get(i), get(best), trumps))
+    public int winner(S trumps) {
+        int best = -1;
+        for (int i = 0; i < getSize(); i++) {
+            if (order.suitOf(get(i)) != null && (best < 0 || beats(get(i), get(best), trumps)))
                 best = i;
         }
-        return playerOf(best);
+        return playerOf(Math.max(best, 0));
     }
 
     /**
-     * Whether the card beats the card currently winning the trick.
+     * Whether the card beats the card currently winning the trick. Both belong to a suit.
      */
-    private boolean beats(FrenchCard card, FrenchCard winning, FrenchCard.Suite trumps) {
-        FrenchCard.Suite suit = order.suitOf(card);
+    private boolean beats(C card, C winning, S trumps) {
+        S suit = order.suitOf(card);
         if (suit == order.suitOf(winning))
             return order.rank(card) > order.rank(winning);
         return suit == trumps;
     }
 
     @Override
-    public Trick copy() {
-        Trick copy = new Trick(componentName, componentID, nPlayers, leader, order, sittingOut);
+    public Trick<C, S> copy() {
+        Trick<C, S> copy = new Trick<>(componentName, componentID, nPlayers, leader, order, sittingOut);
         copyTo(copy);
         return copy;
     }
@@ -151,7 +157,7 @@ public class Trick extends Deck<FrenchCard> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Trick trick)) return false;
+        if (!(o instanceof Trick<?, ?> trick)) return false;
         return nPlayers == trick.nPlayers && leader == trick.leader && sittingOut == trick.sittingOut &&
                 order.equals(trick.order) &&
                 components.equals(trick.components);

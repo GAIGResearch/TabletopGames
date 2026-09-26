@@ -7,6 +7,7 @@ import core.components.Deck;
 
 import java.util.List;
 
+import games.tricktaking.CardOrder;
 import games.tricktaking.PlayCard;
 import games.tricktaking.Trick;
 import games.hearts.actions.Pass;
@@ -125,9 +126,10 @@ public class TestHearts {
         List<AbstractAction> actions = forwardModel._computeAvailableActions(gameState);
         // Only one action should be available: playing 2 of Clubs
         assertEquals(1, actions.size());
-        assertTrue(actions.get(0) instanceof PlayCard);
-        assertEquals(FrenchCard.Suite.Clubs, ((PlayCard)actions.get(0)).card.suite);
-        assertEquals(2, ((PlayCard)actions.get(0)).card.number);
+        assertTrue(actions.get(0) instanceof PlayCard<?>);
+        FrenchCard played = (FrenchCard) ((PlayCard<?>) actions.get(0)).card;
+        assertEquals(FrenchCard.Suite.Clubs, played.suite);
+        assertEquals(2, played.number);
     }
 
     @Test
@@ -152,8 +154,8 @@ public class TestHearts {
         // Check that all cards in the player's deck are among the available actions
         assertEquals(playerDeck.getSize(), actions.size());
         for (AbstractAction action : actions) {
-            assertTrue(action instanceof PlayCard);
-            FrenchCard card = ((PlayCard) action).card;
+            assertTrue(action instanceof PlayCard<?>);
+            FrenchCard card = (FrenchCard) ((PlayCard<?>) action).card;
             assertTrue(playerDeck.contains(card));
         }
     }
@@ -203,7 +205,7 @@ public class TestHearts {
     public void testEndTurnWithRoundWinner() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
-        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
+        gameState.currentTrick = new Trick<>("CurrentTrick", gameState.getNPlayers(), 0, CardOrder.STANDARD);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:
@@ -240,7 +242,7 @@ public class TestHearts {
     public void testEndTurnTrickDeck() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
-        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
+        gameState.currentTrick = new Trick<>("CurrentTrick", gameState.getNPlayers(), 0, CardOrder.STANDARD);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:
@@ -280,7 +282,7 @@ public class TestHearts {
     public void testEndTurnNewRound() {
         // Set the game phase to PLAYING
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
-        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
+        gameState.currentTrick = new Trick<>("CurrentTrick", gameState.getNPlayers(), 0, CardOrder.STANDARD);
 
         // Let's set up the game state to a hypothetical end-turn scenario.
         // Assume that three players have played the following cards:

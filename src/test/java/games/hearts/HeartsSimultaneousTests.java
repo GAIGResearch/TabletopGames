@@ -113,7 +113,7 @@ public class HeartsSimultaneousTests {
         }
         List<AbstractAction> actions = fm.computeAvailableActions(s);
         assertEquals(1, actions.size());
-        assertEquals(new PlayCard(((HeartsParameters) s.getGameParameters()).startingCard), actions.get(0));
+        assertEquals(new PlayCard<>(((HeartsParameters) s.getGameParameters()).startingCard), actions.get(0));
         assertTrue(fm.computeAvailableActions(s, null, (holder + 1) % 4).isEmpty());
     }
 

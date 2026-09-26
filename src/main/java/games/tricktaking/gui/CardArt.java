@@ -5,6 +5,8 @@ import gui.views.CardView;
 import utilities.ImageIO;
 
 import java.awt.*;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * The card images in data/FrenchCards, and the sizes the trick-taking GUIs draw them at.
@@ -20,6 +22,46 @@ public class CardArt {
 
     private CardArt() {
     }
+
+    /**
+     * French cards drawn from their images, with hands in FrenchCard.HAND_DISPLAY_ORDER.
+     */
+    public static final CardFace<FrenchCard, FrenchCard.Suite> FRENCH = new CardFace<>() {
+        @Override
+        public int cardWidth() {
+            return cardWidth;
+        }
+
+        @Override
+        public int cardHeight() {
+            return cardHeight;
+        }
+
+        @Override
+        public void drawFront(Graphics2D g, FrenchCard card, Rectangle rect) {
+            drawCardAt(g, card, rect);
+        }
+
+        @Override
+        public void drawBack(Graphics2D g, Rectangle rect) {
+            CardView.drawCard(g, rect, null, null, backOfCard(), false);
+        }
+
+        @Override
+        public String suitSymbol(FrenchCard.Suite suit) {
+            return SUIT_SYMBOLS[suit.ordinal()];
+        }
+
+        @Override
+        public List<FrenchCard.Suite> suits() {
+            return List.of(FrenchCard.Suite.values());
+        }
+
+        @Override
+        public Comparator<? super FrenchCard> handOrder() {
+            return FrenchCard.HAND_DISPLAY_ORDER;
+        }
+    };
 
     /**
      * Image file names are &lt;number&gt;&lt;suit&gt;.png for spot cards and &lt;type&gt;&lt;suit&gt;.png for the

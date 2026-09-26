@@ -2,6 +2,7 @@ package games.tricktaking;
 
 import core.components.Deck;
 import core.components.FrenchCard;
+import core.components.TarotCard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,9 +47,64 @@ public final class TrickTakingTestUtils {
      * A 4-player trick led by the given player holding these cards in play order (index 0 the lead). Built with
      * Deck.addToBottom, not Trick.play, so tests of winner etc. do not depend on play.
      */
-    public static Trick trick(int leader, String... codes) {
-        Trick t = new Trick("Trick", 4, leader);
+    public static Trick<FrenchCard, FrenchCard.Suite> trick(int leader, String... codes) {
+        Trick<FrenchCard, FrenchCard.Suite> t = new Trick<>("Trick", 4, leader, CardOrder.STANDARD);
         for (FrenchCard c : cards(codes))
+            t.addToBottom(c);
+        return t;
+    }
+
+    /**
+     * A tarot card order for testing suitless cards without depending on any tarot game. Not Scarto's order, whose
+     * round suits rank differently.
+     */
+    public static final CardOrder<TarotCard, TarotCard.Suit> TAROT_ORDER = new CardOrder<>() {
+        @Override
+        public TarotCard.Suit suitOf(TarotCard card) {
+            return card.isFool() ? null : card.suit;
+        }
+
+        @Override
+        public int rank(TarotCard card) {
+            return card.number;
+        }
+
+        @Override
+        public String toString() {
+            return "TAROT_ORDER";
+        }
+    };
+
+    public static TarotCard cup(int n) {
+        return new TarotCard(TarotCard.Suit.Cups, n);
+    }
+
+    public static TarotCard coin(int n) {
+        return new TarotCard(TarotCard.Suit.Coins, n);
+    }
+
+    public static TarotCard sword(int n) {
+        return new TarotCard(TarotCard.Suit.Swords, n);
+    }
+
+    public static TarotCard trump(int n) {
+        return new TarotCard(TarotCard.Suit.Trumps, n);
+    }
+
+    /**
+     * A new Fool (equal to TarotCard.FOOL).
+     */
+    public static TarotCard fool() {
+        return new TarotCard(TarotCard.Suit.None, 0);
+    }
+
+    /**
+     * A 3-player tarot trick with {@link #TAROT_ORDER}, led by the given player, holding these cards in play order
+     * (index 0 the lead). Built with Deck.addToBottom, not Trick.play.
+     */
+    public static Trick<TarotCard, TarotCard.Suit> tarotTrick(int leader, TarotCard... cards) {
+        Trick<TarotCard, TarotCard.Suit> t = new Trick<>("Trick", 3, leader, TAROT_ORDER);
+        for (TarotCard c : cards)
             t.addToBottom(c);
         return t;
     }

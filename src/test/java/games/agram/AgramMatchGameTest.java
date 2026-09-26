@@ -119,9 +119,9 @@ public class AgramMatchGameTest {
                     int player = state.getCurrentPlayer();
                     List<AbstractAction> actions = fm.computeAvailableActions(state);
                     assertFalse(label + ": no actions offered", actions.isEmpty());
-                    PlayCard chosen = (PlayCard) actions.get(rnd.nextInt(actions.size()));
+                    PlayCard<?> chosen = (PlayCard<?>) actions.get(rnd.nextInt(actions.size()));
                     fm.next(state, chosen);
-                    trickCards.add(chosen.card);
+                    trickCards.add((FrenchCard) chosen.card);
                     trickPlayers.add(player);
                     cardsThisDeal++;
                     String at = label + ", step " + steps;

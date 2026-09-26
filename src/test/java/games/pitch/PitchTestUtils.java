@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import games.GameType;
 import players.simple.RandomPlayer;
+import games.tricktaking.CardOrder;
 import games.tricktaking.Trick;
 
 import java.util.ArrayList;
@@ -190,7 +191,7 @@ class PitchTestUtils {
         state.trumpSuit = trumps;
         state.setGamePhase(PitchGameState.Phase.PLAYING);
         // toAct leads a new trick (arrangeTrick replaces it when cards have already been played)
-        state.currentTrick = new Trick("CurrentTrick", 4, toAct);
+        state.currentTrick = new Trick<>("CurrentTrick", 4, toAct, CardOrder.STANDARD);
         state.setTurnOwner(toAct);
     }
 
@@ -201,7 +202,7 @@ class PitchTestUtils {
     static void arrangeTrick(PitchGameState state, int leader, String... codes) {
         for (FrenchCard played : state.currentTrick.getComponents())
             state.undealtDeck.addToBottom(played);
-        state.currentTrick = new Trick("CurrentTrick", 4, leader);
+        state.currentTrick = new Trick<>("CurrentTrick", 4, leader, CardOrder.STANDARD);
         List<FrenchCard> trick = cards(codes);
         for (FrenchCard c : trick) {
             take(state, c);

@@ -56,6 +56,14 @@ import games.whist.WhistForwardModel;
 import games.whist.WhistGameState;
 import games.whist.WhistParameters;
 import games.whist.gui.WhistGUIManager;
+import games.scarto.ScartoForwardModel;
+import games.scarto.ScartoGameState;
+import games.scarto.ScartoParameters;
+import games.scarto.gui.ScartoGUIManager;
+import games.schwimmen.SchwimmenForwardModel;
+import games.schwimmen.SchwimmenGameState;
+import games.schwimmen.gui.SchwimmenGUIManager;
+import games.schwimmen.SchwimmenParameters;
 import games.klaverjassen.KlaverjassenForwardModel;
 import games.klaverjassen.KlaverjassenGameState;
 import games.klaverjassen.KlaverjassenParameters;
@@ -89,6 +97,10 @@ import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
 import games.diamant.gui.DiamantGUIManager;
+import games.lawnandorder.LawnAndOrderForwardModel;
+import games.lawnandorder.LawnAndOrderGameState;
+import games.lawnandorder.gui.LawnAndOrderGUIManager;
+import games.lawnandorder.LawnAndOrderParameters;
 import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
@@ -319,6 +331,10 @@ public enum GameType {
             Arrays.asList(Adventure, Bluffing, Exploration),
             Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
             DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, DiamantGUIManager.class),
+    LawnAndOrder(2, 6,
+            Arrays.asList(Cards, Humour),
+            Arrays.asList(PushYourLuck, SetCollection, SimultaneousActionSelection),
+            LawnAndOrderGameState.class, LawnAndOrderForwardModel.class, LawnAndOrderParameters.class, LawnAndOrderGUIManager.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
@@ -398,6 +414,9 @@ public enum GameType {
     GolfSix(2, 4, Arrays.asList(Cards, Simple),
             Arrays.asList(Memory, SetCollection),
             GolfSixGameState.class, GolfSixForwardModel.class, GolfSixParameters.class, GolfSixGUIManager.class),
+    Schwimmen(2, 8, List.of(Cards),
+            Arrays.asList(SetCollection, PlayerElimination),
+            SchwimmenGameState.class, SchwimmenForwardModel.class, SchwimmenParameters.class, SchwimmenGUIManager.class),
     Cribbage(2, 2, Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, PatternBuilding, SetCollection),
             CribbageGameState.class, CribbageForwardModel.class, CribbageParameters.class, CribbageGUIManager.class),
@@ -454,6 +473,9 @@ public enum GameType {
     Pitch(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement),
             PitchGameState.class, PitchForwardModel.class, PitchParameters.class, PitchGUIManager.class),
+    Scarto(3, 3, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement),
+            ScartoGameState.class, ScartoForwardModel.class, ScartoParameters.class, ScartoGUIManager.class),
     President(4, 7, Arrays.asList(Cards, Simple),
             Arrays.asList(HandManagement),
             PresidentGameState.class, PresidentForwardModel.class, PresidentParameters.class, PresidentGUIManager.class),

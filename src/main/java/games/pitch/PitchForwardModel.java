@@ -9,6 +9,7 @@ import core.components.FrenchCard;
 import games.pitch.actions.Bid;
 import games.pitch.actions.Pass;
 import games.pitch.actions.PlayCard;
+import games.tricktaking.CardOrder;
 import games.tricktaking.Trick;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class PitchForwardModel extends StandardForwardModel {
             for (int p = 0; p < nPlayers; p++)
                 state.playerHands.get((firstBidder + p) % nPlayers).add(state.undealtDeck.draw());
 
-        state.currentTrick = new Trick("CurrentTrick", nPlayers, firstBidder);
+        state.currentTrick = new Trick<>("CurrentTrick", nPlayers, firstBidder, CardOrder.STANDARD);
         state.setGamePhase(PitchGameState.Phase.BIDDING);
         state.setFirstPlayer(firstBidder);
     }
@@ -96,7 +97,7 @@ public class PitchForwardModel extends StandardForwardModel {
         } else if (state.getCurrentPlayer() == state.getDealer()) {
             // the dealer bids last; the pitcher leads the first trick
             state.setGamePhase(PitchGameState.Phase.PLAYING);
-            state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), state.getPitcher());
+            state.currentTrick = new Trick<>("CurrentTrick", state.getNPlayers(), state.getPitcher(), CardOrder.STANDARD);
             endPlayerTurn(state, state.getPitcher());
         } else {
             endPlayerTurn(state);
@@ -104,7 +105,7 @@ public class PitchForwardModel extends StandardForwardModel {
     }
 
     private void afterPlay(PitchGameState state) {
-        Trick trick = state.getCurrentTrick();
+        Trick<FrenchCard, FrenchCard.Suite> trick = state.getCurrentTrick();
         if (!trick.isComplete()) {
             endPlayerTurn(state);
             return;
@@ -113,7 +114,7 @@ public class PitchForwardModel extends StandardForwardModel {
         Deck<FrenchCard> won = state.getTeamTricks(state.getTeam(winner));
         for (FrenchCard card : trick.getComponents())
             won.add(card);
-        state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), winner);
+        state.currentTrick = new Trick<>("CurrentTrick", state.getNPlayers(), winner, CardOrder.STANDARD);
         if (state.getPlayerHand(winner).getSize() > 0)
             endPlayerTurn(state, winner);
         else

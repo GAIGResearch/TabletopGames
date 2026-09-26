@@ -56,7 +56,7 @@ public class PlayCardTest {
         moveToHand(0, card("5H"));
         assertEquals(0, state.getCurrentPlayer());
 
-        new PlayCard(card("5H")).execute(state);
+        new PlayCard<>(card("5H")).execute(state);
 
         assertFalse(state.getPlayerHand(0).contains(card("5H")));
         assertEquals(12, state.getPlayerHand(0).getSize());
@@ -69,17 +69,17 @@ public class PlayCardTest {
         moveToHand(0, card("5H"));
         moveToHand(1, card("2C"));
         moveToHand(2, card("KH"));
-        new PlayCard(card("5H")).execute(state);
+        new PlayCard<>(card("5H")).execute(state);
 
         state.setTurnOwner(1);
-        new PlayCard(card("2C")).execute(state);
+        new PlayCard<>(card("2C")).execute(state);
         assertFalse(state.getPlayerHand(1).contains(card("2C")));
         assertEquals(12, state.getPlayerHand(1).getSize());
         assertEquals(12, state.getPlayerHand(0).getSize());   // player 0's hand unchanged since leading
         assertEquals(Set.of(Hearts), state.getKnownVoids().get(1));
 
         state.setTurnOwner(2);
-        new PlayCard(card("KH")).execute(state);
+        new PlayCard<>(card("KH")).execute(state);
         assertEquals(Set.of(), state.getKnownVoids().get(2));
         assertEquals(cards("5H", "2C", "KH"), cardsOf(state.getCurrentTrick()));
     }
@@ -87,7 +87,7 @@ public class PlayCardTest {
     @Test
     public void playingACardNotInTheHandThrowsAndLeavesTheTrickEmpty() {
         moveToHand(1, card("AS"));   // so player 0 does not hold it
-        assertThrows(IllegalArgumentException.class, () -> new PlayCard(card("AS")).execute(state));
+        assertThrows(IllegalArgumentException.class, () -> new PlayCard<>(card("AS")).execute(state));
         assertEquals(0, state.getCurrentTrick().getSize());
         assertEquals(13, state.getPlayerHand(0).getSize());
     }
@@ -101,11 +101,11 @@ public class PlayCardTest {
         moveToHand(0, card("5H"));
         moveToHand(1, card("2C"));
         moveToHand(2, card("KH"));
-        new PlayCard(card("5H")).execute(state);
+        new PlayCard<>(card("5H")).execute(state);
         state.setTurnOwner(1);
-        new PlayCard(card("2C")).execute(state);
+        new PlayCard<>(card("2C")).execute(state);
         state.setTurnOwner(2);
-        new PlayCard(card("KH")).execute(state);
+        new PlayCard<>(card("KH")).execute(state);
     }
 
     @Test
@@ -147,9 +147,9 @@ public class PlayCardTest {
             h2.add(heart);
         }
         FrenchCard discard = h1.get(0);   // not a heart
-        new PlayCard(card("5H")).execute(state);
+        new PlayCard<>(card("5H")).execute(state);
         state.setTurnOwner(1);
-        new PlayCard(discard).execute(state);
+        new PlayCard<>(discard).execute(state);
         assertEquals(Set.of(), state.getKnownVoids().get(1));
         long heartsHiddenFrom0 = state.getPlayerHand(2).getComponents().stream().filter(c -> c.suite == Hearts).count()
                 + state.getPlayerHand(3).getComponents().stream().filter(c -> c.suite == Hearts).count();
@@ -167,8 +167,8 @@ public class PlayCardTest {
 
     @Test
     public void equalityIsByCard() {
-        assertEquals(new PlayCard(card("5H")), new PlayCard(card("5H")));
-        assertEquals(new PlayCard(card("5H")).hashCode(), new PlayCard(card("5H")).hashCode());
-        assertNotEquals(new PlayCard(card("5H")), new PlayCard(card("5D")));
+        assertEquals(new PlayCard<>(card("5H")), new PlayCard<>(card("5H")));
+        assertEquals(new PlayCard<>(card("5H")).hashCode(), new PlayCard<>(card("5H")).hashCode());
+        assertNotEquals(new PlayCard<>(card("5H")), new PlayCard<>(card("5D")));
     }
 }

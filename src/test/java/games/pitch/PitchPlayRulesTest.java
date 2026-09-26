@@ -5,6 +5,7 @@ import core.components.FrenchCard;
 import games.pitch.actions.PlayCard;
 import org.junit.Before;
 import org.junit.Test;
+import games.tricktaking.CardOrder;
 import games.tricktaking.Trick;
 
 import java.util.HashSet;
@@ -175,8 +176,8 @@ public class PitchPlayRulesTest {
 
     // ---------------------------------------------------------------- Trick.winner with Pitch's trumps
 
-    private static Trick trick(int leader, String... codes) {
-        Trick trick = new Trick("Trick", 4, leader);
+    private static Trick<FrenchCard, FrenchCard.Suite> trick(int leader, String... codes) {
+        Trick<FrenchCard, FrenchCard.Suite> trick = new Trick<>("Trick", 4, leader, CardOrder.STANDARD);
         for (FrenchCard c : cards(codes))
             trick.play(c);
         return trick;

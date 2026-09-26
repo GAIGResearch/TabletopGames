@@ -82,7 +82,7 @@ final class KlaverjassenTestUtils {
         state.trumpSuit = trumps;
         state.discardPile.add(state.currentTrick);
         state.currentTrick.clear();
-        state.currentTrick = new Trick("CurrentTrick", 4, state.getTrumpChooser(), new KlaverjassenCardOrder(trumps));
+        state.currentTrick = new Trick<>("CurrentTrick", 4, state.getTrumpChooser(), new KlaverjassenCardOrder(trumps));
     }
 
     /**
@@ -90,8 +90,8 @@ final class KlaverjassenTestUtils {
      * holding these cards in play order (built with addToBottom, not Trick.play). The cards are new objects, so use
      * this only for tests that do not touch a state.
      */
-    static Trick trick(FrenchCard.Suite trumps, int leader, String... codes) {
-        Trick t = new Trick("Trick", 4, leader, new KlaverjassenCardOrder(trumps));
+    static Trick<FrenchCard, FrenchCard.Suite> trick(FrenchCard.Suite trumps, int leader, String... codes) {
+        Trick<FrenchCard, FrenchCard.Suite> t = new Trick<>("Trick", 4, leader, new KlaverjassenCardOrder(trumps));
         for (String code : codes)
             t.addToBottom(card(code));
         return t;
@@ -156,7 +156,7 @@ final class KlaverjassenTestUtils {
     static void arrangeTrick(KlaverjassenGameState state, int leader, String... codes) {
         state.discardPile.add(state.currentTrick);
         state.currentTrick.clear();
-        state.currentTrick = new Trick("CurrentTrick", 4, leader, new KlaverjassenCardOrder(state.trumpSuit));
+        state.currentTrick = new Trick<>("CurrentTrick", 4, leader, new KlaverjassenCardOrder(state.trumpSuit));
         for (String code : codes) {
             FrenchCard c = card(code);
             takeFromWherever(state, c);
@@ -185,7 +185,7 @@ final class KlaverjassenTestUtils {
 
     static void playCards(KlaverjassenGameState state, KlaverjassenForwardModel fm, String... codes) {
         for (String code : codes)
-            fm.next(state, new PlayCard(card(code)));
+            fm.next(state, new PlayCard<>(card(code)));
     }
 
     /**

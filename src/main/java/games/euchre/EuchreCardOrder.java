@@ -8,7 +8,7 @@ import games.tricktaking.CardOrder;
  * other Jack of the same colour (the left bower) belongs to the trump suit and is the next highest. All other cards
  * belong to their printed suit and rank by number, Aces high.
  */
-public record EuchreCardOrder(FrenchCard.Suite trumps) implements CardOrder {
+public record EuchreCardOrder(FrenchCard.Suite trumps) implements CardOrder<FrenchCard, FrenchCard.Suite> {
 
     @Override
     public FrenchCard.Suite suitOf(FrenchCard card) {

@@ -5,6 +5,7 @@ import core.Game;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.GameType;
+import games.tricktaking.CardOrder;
 import games.tricktaking.PlayCard;
 import games.tricktaking.Trick;
 import players.simple.RandomPlayer;
@@ -138,7 +139,7 @@ final class WhistTestUtils {
     static void arrangeTrick(WhistGameState state, int leader, String... codes) {
         state.discardPile.add(state.currentTrick);
         state.currentTrick.clear();
-        state.currentTrick = new Trick("CurrentTrick", 4, leader);
+        state.currentTrick = new Trick<>("CurrentTrick", 4, leader, CardOrder.STANDARD);
         for (String code : codes) {
             FrenchCard c = card(code);
             takeFromWherever(state, c);
@@ -190,7 +191,7 @@ final class WhistTestUtils {
 
     static void playCards(WhistGameState state, WhistForwardModel fm, String... codes) {
         for (String code : codes)
-            fm.next(state, new PlayCard(card(code)));
+            fm.next(state, new PlayCard<>(card(code)));
     }
 
     static void assertAllCardsPresent(WhistGameState state) {

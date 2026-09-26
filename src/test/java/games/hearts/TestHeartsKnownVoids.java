@@ -53,8 +53,8 @@ public class TestHeartsKnownVoids {
 
             int player = gameState.getCurrentPlayer();
             FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
-            boolean failsToFollow = chosen instanceof PlayCard && ledSuit != null
-                    && ((PlayCard) chosen).card.suite != ledSuit;
+            boolean failsToFollow = chosen instanceof PlayCard<?> && ledSuit != null
+                    && ((FrenchCard) ((PlayCard<?>) chosen).card).suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
 
@@ -80,8 +80,8 @@ public class TestHeartsKnownVoids {
 
             int player = gameState.getCurrentPlayer();
             FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
-            boolean followsSuit = chosen instanceof PlayCard && ledSuit != null
-                    && ((PlayCard) chosen).card.suite == ledSuit;
+            boolean followsSuit = chosen instanceof PlayCard<?> && ledSuit != null
+                    && ((FrenchCard) ((PlayCard<?>) chosen).card).suite == ledSuit;
 
             forwardModel.next(gameState, chosen);
 
@@ -104,8 +104,8 @@ public class TestHeartsKnownVoids {
 
             int player = gameState.getCurrentPlayer();
             FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
-            boolean failsToFollow = chosen instanceof PlayCard && ledSuit != null
-                    && ((PlayCard) chosen).card.suite != ledSuit;
+            boolean failsToFollow = chosen instanceof PlayCard<?> && ledSuit != null
+                    && ((FrenchCard) ((PlayCard<?>) chosen).card).suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
 
@@ -302,8 +302,8 @@ public class TestHeartsKnownVoids {
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
             int player = gameState.getCurrentPlayer();
             FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
-            boolean failsToFollow = chosen instanceof PlayCard && ledSuit != null
-                    && ((PlayCard) chosen).card.suite != ledSuit;
+            boolean failsToFollow = chosen instanceof PlayCard<?> && ledSuit != null
+                    && ((FrenchCard) ((PlayCard<?>) chosen).card).suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
             if (failsToFollow) observedVoids.get(player).add(ledSuit);

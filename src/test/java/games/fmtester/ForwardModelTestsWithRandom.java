@@ -7,6 +7,8 @@ import games.euchre.EuchreParameters;
 import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
+import games.lawnandorder.LawnAndOrderParameters;
+import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.goofspiel.GoofspielParameters;
@@ -17,6 +19,7 @@ import games.cribbage.CribbageParameters;
 import games.pitch.PitchParameters;
 import games.president.PresidentParameters;
 import games.rummy.RummyParameters;
+import games.scarto.ScartoParameters;
 import org.junit.Test;
 
 public class ForwardModelTestsWithRandom {
@@ -31,6 +34,39 @@ public class ForwardModelTestsWithRandom {
     @Test
     public void testSpades() {
         new ForwardModelTester("game=Spades", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testScarto() {
+        new ForwardModelTester("game=Scarto", "nGames=2", "nPlayers=3");
+        ScartoParameters params = new ScartoParameters();
+        params.setParameterValue("nDeals", 3);
+        params.setParameterValue("dealerExchange", true);
+        params.setParameterValue("rememberVoids", false);
+        new ForwardModelTester(params, "game=Scarto", "nGames=1", "nPlayers=3");
+    }
+
+    @Test
+    public void testLawnAndOrder() {
+        new ForwardModelTester("game=LawnAndOrder", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=LawnAndOrder", "nGames=1", "nPlayers=2");
+        LawnAndOrderParameters params = new LawnAndOrderParameters();
+        params.setParameterValue("targetScore", 5);
+        params.setParameterValue("maxRounds", 6);
+        params.setParameterValue("emergencySessionReveals", 1);
+        params.setParameterValue("goodwillBonus", 2);
+        new ForwardModelTester(params, "game=LawnAndOrder", "nGames=1", "nPlayers=6");
+    }
+
+    @Test
+    public void testSchwimmen() {
+        new ForwardModelTester("game=Schwimmen", "nGames=2", "nPlayers=5");
+        new ForwardModelTester("game=Schwimmen", "nGames=1", "nPlayers=2");
+        SchwimmenParameters params = new SchwimmenParameters();
+        params.setParameterValue("livesGame", true);
+        params.setParameterValue("startingChips", 1);
+        params.setParameterValue("maxCircuitsPerDeal", 3);
+        new ForwardModelTester(params, "game=Schwimmen", "nGames=1", "nPlayers=4");
     }
 
     @Test

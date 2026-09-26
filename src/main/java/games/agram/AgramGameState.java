@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.GameType;
+import games.tricktaking.CardOrder;
 import games.tricktaking.ITrickTakingState;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.Trick;
@@ -31,13 +32,13 @@ import java.util.Objects;
  *     <li>dealsWon - for each player, the deals of the match they have won (nDeals in AgramParameters)</li>
  * </ul>
  */
-public class AgramGameState extends AbstractGameState implements ITrickTakingState {
+public class AgramGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite> {
 
     List<Deck<FrenchCard>> playerHands;
     Deck<FrenchCard> drawDeck;
-    Trick currentTrick;
+    Trick<FrenchCard, FrenchCard.Suite> currentTrick;
     Deck<FrenchCard> discardPile;
-    KnownVoids knownVoids;
+    KnownVoids<FrenchCard.Suite> knownVoids;
     int[] dealsWon;
 
     public AgramGameState(AbstractParameters gameParameters, int nPlayers) {
@@ -72,7 +73,7 @@ public class AgramGameState extends AbstractGameState implements ITrickTakingSta
     }
 
     @Override
-    public Trick getCurrentTrick() {
+    public Trick<FrenchCard, FrenchCard.Suite> getCurrentTrick() {
         return currentTrick;
     }
 
@@ -88,7 +89,7 @@ public class AgramGameState extends AbstractGameState implements ITrickTakingSta
     }
 
     @Override
-    public KnownVoids getKnownVoids() {
+    public KnownVoids<FrenchCard.Suite> getKnownVoids() {
         return knownVoids;
     }
 
@@ -111,7 +112,8 @@ public class AgramGameState extends AbstractGameState implements ITrickTakingSta
             // and never giving a player a card of a suit they are known to be void in.
             List<Deck<FrenchCard>> decks = new ArrayList<>(copy.playerHands);
             decks.add(copy.drawDeck);
-            DeterminisationUtilities.reshuffle(playerId, decks, c -> true, redeterminisationRnd, knownVoids::permits);
+            DeterminisationUtilities.reshuffle(playerId, decks, c -> true, redeterminisationRnd,
+                    knownVoids.permits(CardOrder.STANDARD));
         }
         return copy;
     }

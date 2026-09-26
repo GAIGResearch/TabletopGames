@@ -108,12 +108,12 @@ public class WhistGameFlowTest {
                 assertEquals(d + "current player at step " + step, (leader + trick.size()) % 4, player);
                 List<AbstractAction> actions = fm.computeAvailableActions(state);
                 List<FrenchCard> hand = new ArrayList<>(state.getPlayerHand(player).getComponents());
-                List<AbstractAction> expected = expectedLegal(hand, trick).stream().map(c -> (AbstractAction) new PlayCard(c)).toList();
+                List<AbstractAction> expected = expectedLegal(hand, trick).stream().map(c -> (AbstractAction) new PlayCard<>(c)).toList();
                 assertEquals(d + "legal actions at step " + step, new HashSet<>(expected), new HashSet<>(actions));
                 assertEquals("no duplicate actions", expected.size(), actions.size());
 
-                PlayCard chosen = (PlayCard) actions.get(rnd.nextInt(actions.size()));
-                trick.add(chosen.card);
+                PlayCard<?> chosen = (PlayCard<?>) actions.get(rnd.nextInt(actions.size()));
+                trick.add((FrenchCard) chosen.card);
                 fm.next(state, chosen);
                 steps++;
                 if (trick.size() == 4) {

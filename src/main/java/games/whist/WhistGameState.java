@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.GameType;
+import games.tricktaking.CardOrder;
 import games.tricktaking.ITrickTakingState;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.Trick;
@@ -33,16 +34,16 @@ import java.util.Objects;
  *     <li>knownVoids - the suits each player is publicly known not to hold this deal</li>
  * </ul>
  */
-public class WhistGameState extends AbstractGameState implements ITrickTakingState {
+public class WhistGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite> {
 
     List<Deck<FrenchCard>> playerHands;
-    Trick currentTrick;
+    Trick<FrenchCard, FrenchCard.Suite> currentTrick;
     Deck<FrenchCard> discardPile;
     FrenchCard.Suite trumpSuit;
     FrenchCard trumpCard;
     int[] tricksTaken;
     int[] teamPoints;
-    KnownVoids knownVoids;
+    KnownVoids<FrenchCard.Suite> knownVoids;
 
     public WhistGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -77,12 +78,12 @@ public class WhistGameState extends AbstractGameState implements ITrickTakingSta
     }
 
     @Override
-    public Trick getCurrentTrick() {
+    public Trick<FrenchCard, FrenchCard.Suite> getCurrentTrick() {
         return currentTrick;
     }
 
     @Override
-    public KnownVoids getKnownVoids() {
+    public KnownVoids<FrenchCard.Suite> getKnownVoids() {
         return knownVoids;
     }
 
@@ -153,7 +154,7 @@ public class WhistGameState extends AbstractGameState implements ITrickTakingSta
             if (trumpCardHeld)
                 dealerHand.remove(trumpCard);
             DeterminisationUtilities.reshuffle(playerId, copy.playerHands, c -> true, redeterminisationRnd,
-                    knownVoids::permits);
+                    knownVoids.permits(CardOrder.STANDARD));
             if (trumpCardHeld)
                 dealerHand.add(trumpCard);
         }

@@ -30,7 +30,7 @@ public class WhistPlayRulesTest {
     private Set<AbstractAction> plays(String... codes) {
         Set<AbstractAction> s = new HashSet<>();
         for (String c : codes)
-            s.add(new PlayCard(card(c)));
+            s.add(new PlayCard<>(card(c)));
         return s;
     }
 

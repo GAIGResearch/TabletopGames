@@ -5,6 +5,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
+import games.tricktaking.CardOrder;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.PlayCard;
 import games.tricktaking.PlayRule;
@@ -33,10 +34,10 @@ public class WhistForwardModel extends StandardForwardModel {
         state.discardPile = FrenchCard.generateDeck("DiscardPile", VISIBLE_TO_ALL);
         state.tricksTaken = new int[nPlayers];
         state.teamPoints = new int[state.getNTeams()];
-        state.knownVoids = new KnownVoids(nPlayers);
+        state.knownVoids = new KnownVoids<>(nPlayers, FrenchCard.Suite.class);
 
         // the last player deals first, so player 0 (on the dealer's left) leads the first trick
-        state.currentTrick = new Trick("CurrentTrick", nPlayers, 0);
+        state.currentTrick = new Trick<>("CurrentTrick", nPlayers, 0, CardOrder.STANDARD);
         deal(state);
         state.setFirstPlayer(0);
     }
@@ -53,7 +54,7 @@ public class WhistForwardModel extends StandardForwardModel {
             hand.clear();
         }
         deck.add(state.currentTrick);
-        state.currentTrick = new Trick("CurrentTrick", nPlayers, (state.getDealer() + 1) % nPlayers);
+        state.currentTrick = new Trick<>("CurrentTrick", nPlayers, (state.getDealer() + 1) % nPlayers, CardOrder.STANDARD);
         deck.add(state.discardPile);
         state.discardPile.clear();
         deck.shuffle(state.getRnd());
@@ -98,14 +99,14 @@ public class WhistForwardModel extends StandardForwardModel {
         List<FrenchCard> hand = state.getPlayerHand(state.getCurrentPlayer()).getComponents();
         List<AbstractAction> actions = new ArrayList<>();
         for (FrenchCard card : PlayRule.FOLLOW_SUIT.legalPlays(hand, state.currentTrick))
-            actions.add(new PlayCard(card));
+            actions.add(new PlayCard<>(card));
         return actions;
     }
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         WhistGameState state = (WhistGameState) currentState;
-        Trick trick = state.currentTrick;
+        Trick<FrenchCard, FrenchCard.Suite> trick = state.currentTrick;
         if (!trick.isComplete()) {
             endPlayerTurn(state);
             return;
@@ -114,7 +115,7 @@ public class WhistForwardModel extends StandardForwardModel {
         int winner = trick.winner(state.trumpSuit);
         state.tricksTaken[winner]++;
         state.discardPile.add(trick);
-        state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), winner);
+        state.currentTrick = new Trick<>("CurrentTrick", state.getNPlayers(), winner, CardOrder.STANDARD);
         if (state.playerHands.stream().anyMatch(h -> h.getSize() > 0)) {
             endPlayerTurn(state, winner);
             return;

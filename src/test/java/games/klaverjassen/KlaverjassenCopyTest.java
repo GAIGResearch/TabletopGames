@@ -57,7 +57,7 @@ public class KlaverjassenCopyTest {
         assertEquals(state.hashCode(), copy.hashCode());
 
         int originalHash = state.hashCode();
-        fm.next(copy, new PlayCard(card("8D")));    // in the copy player 1, holding no spades, discards a diamond
+        fm.next(copy, new PlayCard<>(card("8D")));    // in the copy player 1, holding no spades, discards a diamond
         copy.handPoints[0] = 99;
         copy.teamScores[1] = 99;
         assertEquals(originalHash, state.hashCode());

@@ -66,7 +66,7 @@ public class WhistCopyTest {
         assertEquals(state.hashCode(), copy.hashCode());
 
         int originalHash = state.hashCode();
-        fm.next(copy, new PlayCard(card("3D")));    // in the copy player 1, holding no clubs, discards a diamond
+        fm.next(copy, new PlayCard<>(card("3D")));    // in the copy player 1, holding no clubs, discards a diamond
         assertEquals(originalHash, state.hashCode());
         assertEquals(cards("2C"), cardsOf(state.getCurrentTrick()));
         assertEquals(12, state.getPlayerHand(1).getSize());

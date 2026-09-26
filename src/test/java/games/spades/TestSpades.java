@@ -221,9 +221,9 @@ public class TestSpades {
 
         // 验证不能首攻黑桃（黑桃未破门且有其他花色）
         boolean canLeadSpades = actions.stream()
-                .filter(a -> a instanceof PlayCard)
-                .map(a -> (PlayCard) a)
-                .anyMatch(a -> a.card.suite == FrenchCard.Suite.Spades);
+                .filter(a -> a instanceof PlayCard<?>)
+                .map(a -> (FrenchCard) ((PlayCard<?>) a).card)
+                .anyMatch(c -> c.suite == FrenchCard.Suite.Spades);
 
         assertFalse("黑桃未破门时，有其他花色时不能首攻黑桃", canLeadSpades);
     }
@@ -247,9 +247,9 @@ public class TestSpades {
 
         // 验证可以出黑桃
         boolean canLeadSpades = actions.stream()
-                .filter(a -> a instanceof PlayCard)
-                .map(a -> (PlayCard) a)
-                .anyMatch(a -> a.card.suite == FrenchCard.Suite.Spades);
+                .filter(a -> a instanceof PlayCard<?>)
+                .map(a -> (FrenchCard) ((PlayCard<?>) a).card)
+                .anyMatch(c -> c.suite == FrenchCard.Suite.Spades);
 
         assertTrue("手中只有黑桃时应该可以首攻黑桃", canLeadSpades);
     }
@@ -269,7 +269,7 @@ public class TestSpades {
         FrenchCard heartAce = new FrenchCard(FrenchCard.FrenchCardType.Ace, FrenchCard.Suite.Hearts);
         player0Hand.add(heartAce);
 
-        forwardModel.next(gameState, new PlayCard(heartAce)); // P0
+        forwardModel.next(gameState, new PlayCard<>(heartAce)); // P0
         forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));  // P1
 
         // 现在轮到玩家2，设置玩家2的手牌（有红心和其他花色）
@@ -283,8 +283,8 @@ public class TestSpades {
 
         // 验证只能出红心
         for (AbstractAction action : actions) {
-            PlayCard playAction = (PlayCard) action;
-            assertEquals("必须跟首攻花色（红心）", FrenchCard.Suite.Hearts, playAction.card.suite);
+            FrenchCard played = (FrenchCard) ((PlayCard<?>) action).card;
+            assertEquals("必须跟首攻花色（红心）", FrenchCard.Suite.Hearts, played.suite);
         }
     }
 
@@ -302,7 +302,7 @@ public class TestSpades {
         FrenchCard heartAce = new FrenchCard(FrenchCard.FrenchCardType.Ace, FrenchCard.Suite.Hearts);
         player0Hand.add(heartAce);
 
-        forwardModel.next(gameState, new PlayCard(heartAce));
+        forwardModel.next(gameState, new PlayCard<>(heartAce));
         forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
 
         // 设置玩家2没有红心
@@ -315,8 +315,10 @@ public class TestSpades {
         assertEquals("没有跟牌花色时应该可以出所有手牌", 2, actions.size());
 
         // 验证可以出任意花色
-        boolean hasClubs = actions.stream().anyMatch(a -> ((PlayCard) a).card.suite == FrenchCard.Suite.Clubs);
-        boolean hasSpades = actions.stream().anyMatch(a -> ((PlayCard) a).card.suite == FrenchCard.Suite.Spades);
+        boolean hasClubs = actions.stream()
+                .anyMatch(a -> ((FrenchCard) ((PlayCard<?>) a).card).suite == FrenchCard.Suite.Clubs);
+        boolean hasSpades = actions.stream()
+                .anyMatch(a -> ((FrenchCard) ((PlayCard<?>) a).card).suite == FrenchCard.Suite.Spades);
 
         assertTrue("应该可以出梅花", hasClubs);
         assertTrue("应该可以出黑桃", hasSpades);
@@ -505,15 +507,15 @@ public class TestSpades {
         // 添加牌到对应玩家手中并出牌
         int player =  gameState.getCurrentPlayer();
         gameState.getPlayerHands().get(player).add(card1);
-        forwardModel.next(gameState, new PlayCard(card1));
+        forwardModel.next(gameState, new PlayCard<>(card1));
 
         gameState.getPlayerHands().get((player + 1) % 4).add(card2);
-        forwardModel.next(gameState, new PlayCard(card2));
+        forwardModel.next(gameState, new PlayCard<>(card2));
 
         gameState.getPlayerHands().get((player + 2) % 4).add(card3);
-        forwardModel.next(gameState, new PlayCard(card3));
+        forwardModel.next(gameState, new PlayCard<>(card3));
 
         gameState.getPlayerHands().get((player + 3) % 4).add(card4);
-        forwardModel.next(gameState, new PlayCard(card4));
+        forwardModel.next(gameState, new PlayCard<>(card4));
     }
 }

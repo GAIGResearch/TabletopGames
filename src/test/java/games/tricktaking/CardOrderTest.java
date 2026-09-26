@@ -22,7 +22,7 @@ public class CardOrderTest {
     /**
      * 2C is a Heart ranked 20 (above the Ace's 14); all other cards keep their printed suit and number.
      */
-    static final CardOrder TWO_OF_CLUBS_TOP_HEART = new CardOrder() {
+    static final CardOrder<FrenchCard, FrenchCard.Suite> TWO_OF_CLUBS_TOP_HEART = new CardOrder<>() {
         @Override
         public FrenchCard.Suite suitOf(FrenchCard card) {
             return card.equals(card("2C")) ? Hearts : card.suite;
@@ -34,14 +34,15 @@ public class CardOrderTest {
         }
     };
 
-    static Trick trickWith(CardOrder order, int leader, String... codes) {
-        Trick t = new Trick("Trick", 4, leader, order);
+    static Trick<FrenchCard, FrenchCard.Suite> trickWith(CardOrder<FrenchCard, FrenchCard.Suite> order, int leader,
+                                                        String... codes) {
+        Trick<FrenchCard, FrenchCard.Suite> t = new Trick<>("Trick", 4, leader, order);
         for (FrenchCard c : cards(codes))
             t.addToBottom(c);
         return t;
     }
 
-    static Trick ordered(int leader, String... codes) {
+    static Trick<FrenchCard, FrenchCard.Suite> ordered(int leader, String... codes) {
         return trickWith(TWO_OF_CLUBS_TOP_HEART, leader, codes);
     }
 
@@ -89,7 +90,7 @@ public class CardOrderTest {
 
     @Test
     public void leadRestrictedUsesTheOrdersSuit() {
-        PlayRule rule = PlayRule.leadRestricted(Hearts);
+        PlayRule<FrenchCard, FrenchCard.Suite> rule = PlayRule.leadRestricted(Hearts);
         // hearts may not be led while the hand holds anything else, and the 2C is a heart
         assertEquals(cards("4S"), rule.legalPlays(cards("2C", "4S"), ordered(0)));
         // a hand of hearts only (5H and the 2C) may lead either
@@ -100,7 +101,7 @@ public class CardOrderTest {
 
     @Test
     public void voidsAreRecordedByTheOrdersSuit() {
-        KnownVoids kv = new KnownVoids(4);
+        KnownVoids<FrenchCard.Suite> kv = new KnownVoids<>(4, FrenchCard.Suite.class);
         kv.record(1, ordered(0, "5H"), card("2C"));      // the 2C follows hearts: nothing learnt
         assertEquals(Set.of(), kv.get(1));
         kv.record(2, ordered(0, "5H"), card("3C"));      // fails to follow hearts
@@ -113,7 +114,7 @@ public class CardOrderTest {
 
     @Test
     public void permitsWithAnOrderUsesTheOrdersSuit() {
-        KnownVoids kv = new KnownVoids(4);
+        KnownVoids<FrenchCard.Suite> kv = new KnownVoids<>(4, FrenchCard.Suite.class);
         kv.get(1).add(Hearts);
         kv.get(2).add(Clubs);
         Deck<FrenchCard> hand1 = new Deck<>("Hand 1", 1, VISIBLE_TO_OWNER);
@@ -136,13 +137,13 @@ public class CardOrderTest {
 
     @Test
     public void theOrderCountsForEqualityAndIsKeptByCopy() {
-        Trick standard = trick(0, "5H", "2C");
-        Trick ordered = ordered(0, "5H", "2C");
+        Trick<FrenchCard, FrenchCard.Suite> standard = trick(0, "5H", "2C");
+        Trick<FrenchCard, FrenchCard.Suite> ordered = ordered(0, "5H", "2C");
         assertSame(CardOrder.STANDARD, standard.getOrder());
         assertNotEquals(standard, ordered);
         assertEquals(ordered, ordered(0, "5H", "2C"));
 
-        Trick copy = ordered.copy();
+        Trick<FrenchCard, FrenchCard.Suite> copy = ordered.copy();
         assertSame(TWO_OF_CLUBS_TOP_HEART, copy.getOrder());
         assertEquals(ordered, copy);
         assertEquals(ordered.hashCode(), copy.hashCode());

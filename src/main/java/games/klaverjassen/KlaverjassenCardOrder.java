@@ -8,7 +8,7 @@ import games.tricktaking.CardOrder;
  *
  * @param trumps the trump suit, or null before trumps are chosen
  */
-public record KlaverjassenCardOrder(FrenchCard.Suite trumps) implements CardOrder {
+public record KlaverjassenCardOrder(FrenchCard.Suite trumps) implements CardOrder<FrenchCard, FrenchCard.Suite> {
 
     @Override
     public FrenchCard.Suite suitOf(FrenchCard card) {

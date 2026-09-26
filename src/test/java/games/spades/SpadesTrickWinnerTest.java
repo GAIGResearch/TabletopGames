@@ -71,7 +71,7 @@ public class SpadesTrickWinnerTest {
                 firstPlayOfRound = false;
             }
             players.add(player);
-            cards.add(((PlayCard) action).card);
+            cards.add((FrenchCard) ((PlayCard<?>) action).card);
             int[] before = tricksTaken(state);
 
             fm.next(state, action);

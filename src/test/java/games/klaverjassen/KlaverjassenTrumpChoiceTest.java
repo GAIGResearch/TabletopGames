@@ -38,7 +38,7 @@ public class KlaverjassenTrumpChoiceTest {
     private Set<AbstractAction> playsOfWholeHand(int player) {
         Set<AbstractAction> s = new HashSet<>();
         for (FrenchCard c : state.getPlayerHand(player).getComponents())
-            s.add(new PlayCard(c));
+            s.add(new PlayCard<>(c));
         return s;
     }
 

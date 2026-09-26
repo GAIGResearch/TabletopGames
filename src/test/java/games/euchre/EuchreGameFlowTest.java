@@ -233,7 +233,8 @@ public class EuchreGameFlowTest {
                 }
                 for (AbstractAction a : actions)
                     assertTrue(d + a + " is a card in hand",
-                            a instanceof PlayCard pc && state.getPlayerHand(player).contains(pc.card));
+                            a instanceof PlayCard<?> pc && pc.card instanceof FrenchCard c
+                                    && state.getPlayerHand(player).contains(c));
             }
 
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
@@ -250,7 +251,7 @@ public class EuchreGameFlowTest {
                 deals++;
                 dealStart = true;
                 assertEquals(d + "the deal ended on the 5th trick's last card", 4, tricksSoFar);
-                assertTrue(d, chosen instanceof PlayCard);
+                assertTrue(d, chosen instanceof PlayCard<?>);
                 if (alone) aloneDeals++;
                 int[] ifLost = dealPoints(makersTeam, makersTricks, alone);
                 int[] ifWon = dealPoints(makersTeam, makersTricks + 1, alone);

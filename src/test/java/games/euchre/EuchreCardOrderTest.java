@@ -92,8 +92,8 @@ public class EuchreCardOrderTest {
         assertEquals(0, trick(order, 0, "9S", "JC", "AC", "QC").winner(Hearts));
     }
 
-    static Trick trick(EuchreCardOrder order, int leader, String... codes) {
-        Trick t = new Trick("Trick", 4, leader, order);
+    static Trick<FrenchCard, FrenchCard.Suite> trick(EuchreCardOrder order, int leader, String... codes) {
+        Trick<FrenchCard, FrenchCard.Suite> t = new Trick<>("Trick", 4, leader, order);
         for (String c : codes)
             t.addToBottom(card(c));
         return t;

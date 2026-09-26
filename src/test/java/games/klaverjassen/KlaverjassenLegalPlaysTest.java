@@ -24,15 +24,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class KlaverjassenLegalPlaysTest {
 
-    private static List<FrenchCard> legal(PartnerTrumpRule rule, FrenchCard.Suite trumps, Trick trick,
-                                          String... hand) {
+    private static List<FrenchCard> legal(PartnerTrumpRule rule, FrenchCard.Suite trumps,
+                                          Trick<FrenchCard, FrenchCard.Suite> trick, String... hand) {
         return KlaverjassenUtils.legalPlays(new ArrayList<>(cards(hand)), trick, trumps, rule);
     }
 
     /**
      * Both partnerTrumpRule values allow exactly the expected cards, in hand order.
      */
-    private static void assertBoth(List<FrenchCard> expected, FrenchCard.Suite trumps, Trick trick, String... hand) {
+    private static void assertBoth(List<FrenchCard> expected, FrenchCard.Suite trumps,
+                                   Trick<FrenchCard, FrenchCard.Suite> trick, String... hand) {
         for (PartnerTrumpRule rule : PartnerTrumpRule.values())
             assertEquals(rule.name(), expected, legal(rule, trumps, trick, hand));
     }
@@ -170,7 +171,7 @@ public class KlaverjassenLegalPlaysTest {
      * 1 led AS, partner 2 trumped with 10H, 3 followed with 7S; player 0 (void in spades) is to play, partner winning
      * with the 10 of trumps.
      */
-    private static Trick partnerWinsWithTenOfTrumps() {
+    private static Trick<FrenchCard, FrenchCard.Suite> partnerWinsWithTenOfTrumps() {
         return trick(Hearts, 1, "AS", "10H", "7S");
     }
 
@@ -223,7 +224,7 @@ public class KlaverjassenLegalPlaysTest {
      * 3 led AD (opponent winning), partner 0 trumped with 8H (partner now winning), 1 discarded 7C; player 2 to play,
      * with no diamond.
      */
-    private static Trick partnerTrumpsAnOpponentsAce() {
+    private static Trick<FrenchCard, FrenchCard.Suite> partnerTrumpsAnOpponentsAce() {
         return trick(Hearts, 3, "AD", "8H", "7C");
     }
 

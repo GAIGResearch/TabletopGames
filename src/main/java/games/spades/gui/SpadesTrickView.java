@@ -148,7 +148,7 @@ public class SpadesTrickView extends JPanel {
         if (gameState != null) {
             try {
                 // a snapshot of the trick: who played each card, in the order played
-                Trick trick = gameState.getCurrentTrick();
+                Trick<FrenchCard, FrenchCard.Suite> trick = gameState.getCurrentTrick();
                 List<Pair<Integer, FrenchCard>> plays = new ArrayList<>();
                 for (int i = 0; i < trick.getSize(); i++)
                     plays.add(new Pair<>(trick.playerOf(i), trick.get(i)));

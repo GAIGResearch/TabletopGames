@@ -19,7 +19,7 @@ import java.util.List;
 public class PitchTableView extends JComponent {
 
     private final Dimension size;
-    private Trick trick;
+    private Trick<FrenchCard, FrenchCard.Suite> trick;
     private final List<String> lines = new ArrayList<>();
 
     public PitchTableView(int width, int height) {

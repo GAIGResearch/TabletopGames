@@ -31,8 +31,8 @@ public class KlaverjassenForwardModel extends StandardForwardModel {
         state.discardPile = FrenchCard.generateDeck("DiscardPile", VISIBLE_TO_ALL);
         state.discardPile.getComponents().removeIf(c -> c.number < 7);
         state.teamScores = new int[state.getNTeams()];
-        state.knownVoids = new KnownVoids(nPlayers);
-        state.currentTrick = new Trick("CurrentTrick", nPlayers, 0, new KlaverjassenCardOrder(null));
+        state.knownVoids = new KnownVoids<>(nPlayers, FrenchCard.Suite.class);
+        state.currentTrick = new Trick<>("CurrentTrick", nPlayers, 0, new KlaverjassenCardOrder(null));
 
         // the last player deals first, so player 0 (on the dealer's left) chooses trumps and leads
         deal(state);
@@ -62,7 +62,7 @@ public class KlaverjassenForwardModel extends StandardForwardModel {
         state.discardPile.add(deck);
 
         state.trumpSuit = null;
-        state.currentTrick = new Trick("CurrentTrick", nPlayers, state.getTrumpChooser(), new KlaverjassenCardOrder(null));
+        state.currentTrick = new Trick<>("CurrentTrick", nPlayers, state.getTrumpChooser(), new KlaverjassenCardOrder(null));
         state.handPoints = new int[state.getNTeams()];
         state.handRoem = new int[state.getNTeams()];
         state.tricksWon = new int[state.getNTeams()];
@@ -84,14 +84,14 @@ public class KlaverjassenForwardModel extends StandardForwardModel {
         KlaverjassenParameters params = (KlaverjassenParameters) state.getGameParameters();
         for (FrenchCard card : KlaverjassenUtils.legalPlays(hand, state.currentTrick, state.trumpSuit,
                 params.partnerTrumpRule))
-            actions.add(new PlayCard(card));
+            actions.add(new PlayCard<>(card));
         return actions;
     }
 
     @Override
     protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
-        if (actionChosen instanceof PlayCard play)
-            inferTrumpVoid((KlaverjassenGameState) currentState, play.card);
+        if (actionChosen instanceof PlayCard<?> play)
+            inferTrumpVoid((KlaverjassenGameState) currentState, (FrenchCard) play.card);
     }
 
     /**
@@ -100,7 +100,7 @@ public class KlaverjassenForwardModel extends StandardForwardModel {
     void inferTrumpVoid(KlaverjassenGameState state, FrenchCard card) {
         // they hold none if they cannot follow suit, an opponent is winning with a card that is not a trump, and the
         // card is not a trump either (they would have had to trump)
-        Trick trick = state.currentTrick;
+        Trick<FrenchCard, FrenchCard.Suite> trick = state.currentTrick;
         if (!((KlaverjassenParameters) state.getGameParameters()).rememberVoids || trick.getSize() == 0
                 || card.suite == trick.getLeadSuit() || card.suite == state.trumpSuit)
             return;
@@ -117,7 +117,7 @@ public class KlaverjassenForwardModel extends StandardForwardModel {
         if (actionTaken instanceof ChooseTrump)
             return;  // the trump chooser leads the first trick
         KlaverjassenGameState state = (KlaverjassenGameState) currentState;
-        Trick trick = state.currentTrick;
+        Trick<FrenchCard, FrenchCard.Suite> trick = state.currentTrick;
         if (!trick.isComplete()) {
             endPlayerTurn(state);
             return;
@@ -126,7 +126,7 @@ public class KlaverjassenForwardModel extends StandardForwardModel {
         int winner = trick.winner(state.trumpSuit);
         scoreTrick(state, trick, winner);
         state.discardPile.add(trick);
-        state.currentTrick = new Trick("CurrentTrick", state.getNPlayers(), winner, trick.getOrder());
+        state.currentTrick = new Trick<>("CurrentTrick", state.getNPlayers(), winner, trick.getOrder());
         if (!handOver(state)) {
             endPlayerTurn(state, winner);
             return;
@@ -150,7 +150,7 @@ public class KlaverjassenForwardModel extends StandardForwardModel {
     /**
      * Credits the completed trick's card points, roem and the trick itself to the winner's team.
      */
-    void scoreTrick(KlaverjassenGameState state, Trick trick, int winner) {
+    void scoreTrick(KlaverjassenGameState state, Trick<FrenchCard, FrenchCard.Suite> trick, int winner) {
         KlaverjassenParameters params = (KlaverjassenParameters) state.getGameParameters();
         int team = state.getTeam(winner);
         for (FrenchCard card : trick.getComponents())

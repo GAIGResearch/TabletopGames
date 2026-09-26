@@ -78,8 +78,8 @@ final class AgramTestUtils {
         return rank.equals("A") ? new FrenchCard(Ace, suit) : new FrenchCard(Number, suit, Integer.parseInt(rank));
     }
 
-    static PlayCard play(String code) {
-        return new PlayCard(card(code));
+    static PlayCard<FrenchCard> play(String code) {
+        return new PlayCard<>(card(code));
     }
 
     /**

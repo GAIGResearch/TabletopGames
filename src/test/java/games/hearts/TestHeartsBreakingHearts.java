@@ -3,6 +3,7 @@ package games.hearts;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
+import games.tricktaking.CardOrder;
 import games.tricktaking.PlayCard;
 import games.tricktaking.Trick;
 import org.junit.Before;
@@ -57,14 +58,14 @@ public class TestHeartsBreakingHearts {
      * An empty trick for this player to lead, with the turn theirs.
      */
     private void toLead(int player) {
-        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), player);
+        gameState.currentTrick = new Trick<>("CurrentTrick", gameState.getNPlayers(), player, CardOrder.STANDARD);
         gameState.setFirstPlayer(player);
     }
 
     private Set<AbstractAction> playsOf(String... codes) {
         Set<AbstractAction> expected = new HashSet<>();
         for (FrenchCard c : cards(codes))
-            expected.add(new PlayCard(c));
+            expected.add(new PlayCard<>(c));
         return expected;
     }
 
@@ -93,7 +94,7 @@ public class TestHeartsBreakingHearts {
     @Test
     public void aPlayerUnableToFollowSuitMayDiscardAHeartWhileUnbroken() {
         giveHand(1, "4H", "QH", "6C");
-        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
+        gameState.currentTrick = new Trick<>("CurrentTrick", gameState.getNPlayers(), 0, CardOrder.STANDARD);
         gameState.currentTrick.play(card("KS"));  // player 0 has led spades
         gameState.setTurnOwner(1);
         // player 1 holds no spade, so the whole hand is legal - the lead restriction applies only to leading
@@ -103,11 +104,11 @@ public class TestHeartsBreakingHearts {
     @Test
     public void discardingAHeartBreaksHearts() {
         giveHand(1, "4H", "QH", "6C");
-        gameState.currentTrick = new Trick("CurrentTrick", gameState.getNPlayers(), 0);
+        gameState.currentTrick = new Trick<>("CurrentTrick", gameState.getNPlayers(), 0, CardOrder.STANDARD);
         gameState.currentTrick.play(card("KS"));  // player 0 has led spades
         gameState.setTurnOwner(1);
 
-        forwardModel.next(gameState, new PlayCard(card("4H")));
+        forwardModel.next(gameState, new PlayCard<>(card("4H")));
 
         assertTrue(gameState.heartsBroken);
     }
@@ -118,7 +119,7 @@ public class TestHeartsBreakingHearts {
         giveHand(0, "9H", "8C");
         toLead(0);
 
-        forwardModel.next(gameState, new PlayCard(card("9H")));
+        forwardModel.next(gameState, new PlayCard<>(card("9H")));
 
         assertTrue(gameState.heartsBroken);
     }
@@ -136,17 +137,17 @@ public class TestHeartsBreakingHearts {
 
         // player 0 leads: the two hearts are withheld
         assertActionsAre(playsOf("KC", "5C"));
-        forwardModel.next(gameState, new PlayCard(card("KC")));
+        forwardModel.next(gameState, new PlayCard<>(card("KC")));
 
         // player 1 cannot follow clubs and discards a heart, breaking hearts
         assertEquals(1, gameState.getCurrentPlayer());
         assertActionsAre(playsOf("9H", "4H", "8D"));
-        forwardModel.next(gameState, new PlayCard(card("9H")));
+        forwardModel.next(gameState, new PlayCard<>(card("9H")));
         assertTrue(gameState.heartsBroken);
 
         // player 2 follows suit; KC beats 7C so player 0 wins the trick and leads the next one
         assertEquals(2, gameState.getCurrentPlayer());
-        forwardModel.next(gameState, new PlayCard(card("7C")));
+        forwardModel.next(gameState, new PlayCard<>(card("7C")));
         assertEquals(0, gameState.getCurrentPlayer());
         assertEquals(0, gameState.currentTrick.getLeader());
         assertEquals(0, gameState.currentTrick.getSize());

@@ -1,5 +1,6 @@
 package games.tricktaking;
 
+import core.components.FrenchCard;
 import org.junit.Test;
 
 import static core.components.FrenchCard.Suite.*;
@@ -10,7 +11,7 @@ public class TrickTest {
 
     @Test
     public void playAppendsCardsInPlayOrderAndTheFirstCardSetsTheLeadSuit() {
-        Trick t = new Trick("Trick", 4, 0);
+        Trick<FrenchCard, FrenchCard.Suite> t = new Trick<>("Trick", 4, 0, CardOrder.STANDARD);
         assertNull(t.getLeadSuit());
         t.play(card("5H"));
         assertEquals(Hearts, t.getLeadSuit());
@@ -24,7 +25,7 @@ public class TrickTest {
     @Test
     public void playerOfWrapsRoundFromTheLeader() {
         // leader 3 of 4: index i was played by (3 + i) % 4
-        Trick t = trick(3, "5H", "6H", "7H", "8H");
+        Trick<FrenchCard, FrenchCard.Suite> t = trick(3, "5H", "6H", "7H", "8H");
         assertEquals(3, t.playerOf(0));
         assertEquals(0, t.playerOf(1));
         assertEquals(1, t.playerOf(2));
@@ -35,7 +36,7 @@ public class TrickTest {
 
     @Test
     public void isCompleteOnlyOnceEveryPlayerHasPlayed() {
-        Trick t = new Trick("Trick", 4, 2);
+        Trick<FrenchCard, FrenchCard.Suite> t = new Trick<>("Trick", 4, 2, CardOrder.STANDARD);
         assertFalse(t.isComplete());
         String[] codes = {"5H", "6H", "7H"};
         for (String c : codes) {
@@ -46,7 +47,7 @@ public class TrickTest {
         assertTrue(t.isComplete());
 
         // with 3 players, 3 cards complete the trick
-        Trick three = new Trick("Trick", 3, 0);
+        Trick<FrenchCard, FrenchCard.Suite> three = new Trick<>("Trick", 3, 0, CardOrder.STANDARD);
         three.addToBottom(card("5H"));
         three.addToBottom(card("6H"));
         assertFalse(three.isComplete());
@@ -102,8 +103,8 @@ public class TrickTest {
 
     @Test
     public void copyIsEqualAndIndependentAndEqualityDependsOnTheLeader() {
-        Trick t = trick(1, "5H", "KH");
-        Trick copy = t.copy();
+        Trick<FrenchCard, FrenchCard.Suite> t = trick(1, "5H", "KH");
+        Trick<FrenchCard, FrenchCard.Suite> copy = t.copy();
         assertEquals(t, copy);
         assertEquals(t.hashCode(), copy.hashCode());
 
@@ -118,8 +119,8 @@ public class TrickTest {
 
     @Test
     public void tricksWithTheSameCardsAndLeaderAreEqualWhateverTheirComponentID() {
-        Trick a = trick(1, "5H", "KH");
-        Trick b = trick(1, "5H", "KH");
+        Trick<FrenchCard, FrenchCard.Suite> a = trick(1, "5H", "KH");
+        Trick<FrenchCard, FrenchCard.Suite> b = trick(1, "5H", "KH");
         assertNotEquals(a.getComponentID(), b.getComponentID());
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
@@ -128,8 +129,8 @@ public class TrickTest {
     /**
      * A 4-player trick in which the given player sits out, with the cards added in play order.
      */
-    private static Trick trickWithout(int sittingOut, int leader, String... codes) {
-        Trick t = new Trick("Trick", 4, leader, CardOrder.STANDARD, sittingOut);
+    private static Trick<FrenchCard, FrenchCard.Suite> trickWithout(int sittingOut, int leader, String... codes) {
+        Trick<FrenchCard, FrenchCard.Suite> t = new Trick<>("Trick", 4, leader, CardOrder.STANDARD, sittingOut);
         for (String c : codes)
             t.addToBottom(card(c));
         return t;
@@ -138,17 +139,17 @@ public class TrickTest {
     @Test
     public void playerOfSkipsThePlayerSittingOut() {
         // leader 3, player 1 sits out: 3, 0, then 2 (1 skipped)
-        Trick t = trickWithout(1, 3, "5H", "6H", "7H");
+        Trick<FrenchCard, FrenchCard.Suite> t = trickWithout(1, 3, "5H", "6H", "7H");
         assertEquals(3, t.playerOf(0));
         assertEquals(0, t.playerOf(1));
         assertEquals(2, t.playerOf(2));
         // leader 0, player 1 sits out: 0, then 2 (1 skipped), 3
-        Trick u = trickWithout(1, 0, "5H", "6H", "7H");
+        Trick<FrenchCard, FrenchCard.Suite> u = trickWithout(1, 0, "5H", "6H", "7H");
         assertEquals(0, u.playerOf(0));
         assertEquals(2, u.playerOf(1));
         assertEquals(3, u.playerOf(2));
         // leader 2, player 3 sits out: 2, then 0 (3 skipped), 1
-        Trick v = trickWithout(3, 2);
+        Trick<FrenchCard, FrenchCard.Suite> v = trickWithout(3, 2);
         assertEquals(2, v.playerOf(0));
         assertEquals(0, v.playerOf(1));
         assertEquals(1, v.playerOf(2));
@@ -157,7 +158,7 @@ public class TrickTest {
 
     @Test
     public void withAPlayerSittingOutThreeCardsCompleteTheTrick() {
-        Trick t = trickWithout(2, 1);
+        Trick<FrenchCard, FrenchCard.Suite> t = trickWithout(2, 1);
         t.addToBottom(card("5H"));
         t.addToBottom(card("6H"));
         assertFalse(t.isComplete());
@@ -176,10 +177,9 @@ public class TrickTest {
 
     @Test
     public void byDefaultNobodySitsOutAndEveryPlayerPlays() {
-        assertEquals(-1, new Trick("Trick", 4, 0).getSittingOut());
-        assertEquals(-1, new Trick("Trick", 4, 0, CardOrder.STANDARD).getSittingOut());
+        assertEquals(-1, new Trick<>("Trick", 4, 0, CardOrder.STANDARD).getSittingOut());
         // with -1, index 1 of leader 0 is player 1 and the trick needs all 4 cards
-        Trick t = trickWithout(-1, 0, "5H", "6H", "7H");
+        Trick<FrenchCard, FrenchCard.Suite> t = trickWithout(-1, 0, "5H", "6H", "7H");
         assertEquals(1, t.playerOf(1));
         assertFalse(t.isComplete());
         assertEquals(trick(0, "5H", "6H", "7H"), t);
@@ -187,8 +187,8 @@ public class TrickTest {
 
     @Test
     public void equalityAndCopyIncludeThePlayerSittingOut() {
-        Trick t = trickWithout(1, 0, "5H", "KH");
-        Trick copy = t.copy();
+        Trick<FrenchCard, FrenchCard.Suite> t = trickWithout(1, 0, "5H", "KH");
+        Trick<FrenchCard, FrenchCard.Suite> copy = t.copy();
         assertEquals(1, copy.getSittingOut());
         assertEquals(t, copy);
         assertEquals(t.hashCode(), copy.hashCode());

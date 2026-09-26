@@ -102,7 +102,7 @@ public class AgramGameFlowTest {
         boolean canFollow = !trickSoFar.isEmpty() && hand.stream().anyMatch(c -> c.suite == trickSoFar.get(0).suite);
         for (FrenchCard c : hand)
             if (!canFollow || c.suite == trickSoFar.get(0).suite)
-                actions.add(new PlayCard(c));
+                actions.add(new PlayCard<>(c));
         return actions;
     }
 
@@ -126,9 +126,9 @@ public class AgramGameFlowTest {
                     List<AbstractAction> actions = fm.computeAvailableActions(state);
                     assertEquals(label, expectedActions(state.getPlayerHands().get(player).getComponents(), trickCards),
                             new HashSet<>(actions));
-                    PlayCard chosen = (PlayCard) actions.get(rnd.nextInt(actions.size()));
+                    PlayCard<?> chosen = (PlayCard<?>) actions.get(rnd.nextInt(actions.size()));
                     fm.next(state, chosen);
-                    trickCards.add(chosen.card);
+                    trickCards.add((FrenchCard) chosen.card);
                     trickPlayers.add(player);
                     assertAllCardsPresent(state);
 

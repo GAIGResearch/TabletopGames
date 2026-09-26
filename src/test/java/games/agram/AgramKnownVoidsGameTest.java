@@ -77,9 +77,9 @@ public class AgramKnownVoidsGameTest {
                 while (state.isNotTerminal() && steps++ < 100) {
                     int player = state.getCurrentPlayer();
                     List<AbstractAction> actions = fm.computeAvailableActions(state);
-                    PlayCard chosen = (PlayCard) actions.get(rnd.nextInt(actions.size()));
+                    PlayCard<?> chosen = (PlayCard<?>) actions.get(rnd.nextInt(actions.size()));
                     FrenchCard.Suite lead = state.getCurrentTrick().getLeadSuit();
-                    if (lead != null && chosen.card.suite != lead && expected.get(player).add(lead))
+                    if (lead != null && ((FrenchCard) chosen.card).suite != lead && expected.get(player).add(lead))
                         voidsRecorded++;
                     fm.next(state, chosen);
 

@@ -48,7 +48,7 @@ public class TestHeartsFeatures {
         // Test Play action
         // Move to PLAYING phase
         state.setGamePhase(HeartsGameState.Phase.PLAYING);
-        PlayCard playAction = new PlayCard(card);
+        PlayCard<FrenchCard> playAction = new PlayCard<>(card);
         double[] playFeatures = actionFeatures.doubleVector(playAction, state, 0);
         
         assertEquals(0.0, playFeatures[0], 0.001); // isPass

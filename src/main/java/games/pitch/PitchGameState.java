@@ -7,6 +7,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import games.GameType;
+import games.tricktaking.CardOrder;
 import games.tricktaking.ITrickTakingState;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.Trick;
@@ -20,7 +21,7 @@ import java.util.Objects;
 /**
  * Pitch: four players in two partnerships, players 0 and 2 (team 0) against players 1 and 3 (team 1).
  */
-public class PitchGameState extends AbstractGameState implements ITrickTakingState {
+public class PitchGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite> {
 
     public enum Phase implements IGamePhase {
         BIDDING,
@@ -31,7 +32,7 @@ public class PitchGameState extends AbstractGameState implements ITrickTakingSta
     // the cards not dealt this deal (face down, never used)
     Deck<FrenchCard> undealtDeck;
     // the trick being played; before the first trick, an empty one led by the first bidder
-    Trick currentTrick;
+    Trick<FrenchCard, FrenchCard.Suite> currentTrick;
     // the cards of all the tricks each team has won this deal
     List<Deck<FrenchCard>> teamTricks;
     // each player's bid this deal: -1 not yet bid, 0 passed, otherwise the bid
@@ -42,7 +43,7 @@ public class PitchGameState extends AbstractGameState implements ITrickTakingSta
     FrenchCard.Suite trumpSuit;
     int[] teamScores;
     // the suits each player is publicly known to hold none of this deal
-    KnownVoids knownVoids;
+    KnownVoids<FrenchCard.Suite> knownVoids;
 
     public PitchGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -52,7 +53,7 @@ public class PitchGameState extends AbstractGameState implements ITrickTakingSta
         playerBids = new int[nPlayers];
         Arrays.fill(playerBids, -1);
         teamScores = new int[2];
-        knownVoids = new KnownVoids(nPlayers);
+        knownVoids = new KnownVoids<>(nPlayers, FrenchCard.Suite.class);
     }
 
     @Override
@@ -94,7 +95,8 @@ public class PitchGameState extends AbstractGameState implements ITrickTakingSta
                 if (p != playerId) hidden.add(copy.playerHands.get(p));
             hidden.add(copy.undealtDeck);
             DeterminisationUtilities.reshuffle(playerId, hidden, c -> true, redeterminisationRnd,
-                    ((PitchParameters) gameParameters).rememberVoids ? copy.knownVoids::permits : null);
+                    ((PitchParameters) gameParameters).rememberVoids
+                            ? copy.knownVoids.permits(CardOrder.STANDARD) : null);
         }
         return copy;
     }
@@ -130,7 +132,7 @@ public class PitchGameState extends AbstractGameState implements ITrickTakingSta
     }
 
     @Override
-    public Trick getCurrentTrick() {
+    public Trick<FrenchCard, FrenchCard.Suite> getCurrentTrick() {
         return currentTrick;
     }
 
@@ -185,7 +187,7 @@ public class PitchGameState extends AbstractGameState implements ITrickTakingSta
     }
 
     @Override
-    public KnownVoids getKnownVoids() {
+    public KnownVoids<FrenchCard.Suite> getKnownVoids() {
         return knownVoids;
     }
 

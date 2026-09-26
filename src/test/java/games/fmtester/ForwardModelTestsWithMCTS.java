@@ -7,6 +7,8 @@ import games.euchre.EuchreParameters;
 import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
+import games.lawnandorder.LawnAndOrderParameters;
+import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
 import games.blackjack.BlackjackParameters;
 import games.goofspiel.GoofspielParameters;
@@ -19,6 +21,7 @@ import games.descent2e.DescentParameters;
 import games.pitch.PitchParameters;
 import games.president.PresidentParameters;
 import games.rummy.RummyParameters;
+import games.scarto.ScartoParameters;
 import games.dominion.DominionIParameters;
 import games.dominion.DominionParameters;
 import games.dominion.DominionSDParameters;
@@ -31,6 +34,35 @@ public class ForwardModelTestsWithMCTS {
     @Test
     public void testSaboteur() {
         new ForwardModelTester("game=Saboteur", "nGames=3", "nPlayers=5", "agent=json\\players\\gameSpecific\\Saboteur\\Saboteur.json", "budget=50");
+    }
+
+    @Test
+    public void testScarto() {
+        new ForwardModelTester("game=Scarto", "nGames=2", "nPlayers=3", "agent=json\\players\\mcts.json");
+        ScartoParameters params = new ScartoParameters();
+        params.setParameterValue("nDeals", 3);
+        params.setParameterValue("dealerExchange", true);
+        new ForwardModelTester(params, "game=Scarto", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testLawnAndOrder() {
+        new ForwardModelTester("game=LawnAndOrder", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+        LawnAndOrderParameters params = new LawnAndOrderParameters();
+        params.setParameterValue("targetScore", 5);
+        params.setParameterValue("maxRounds", 4);
+        params.setParameterValue("zeroToleranceReduction", 2);
+        new ForwardModelTester(params, "game=LawnAndOrder", "nGames=1", "nPlayers=5", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testSchwimmen() {
+        new ForwardModelTester("game=Schwimmen", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+        SchwimmenParameters params = new SchwimmenParameters();
+        params.setParameterValue("livesGame", true);
+        params.setParameterValue("startingChips", 1);
+        params.setParameterValue("maxCircuitsPerDeal", 3);
+        new ForwardModelTester(params, "game=Schwimmen", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
     }
 
     @Test

@@ -17,12 +17,13 @@ public final class KlaverjassenUtils {
      *
      * @param rule what may be played when unable to follow suit while partner is winning with a trump
      */
-    public static List<FrenchCard> legalPlays(List<FrenchCard> hand, Trick trick, FrenchCard.Suite trumps,
+    public static List<FrenchCard> legalPlays(List<FrenchCard> hand, Trick<FrenchCard, FrenchCard.Suite> trick,
+                                              FrenchCard.Suite trumps,
                                               KlaverjassenParameters.PartnerTrumpRule rule) {
         // any card may be led
         if (trick.getSize() == 0)
             return new ArrayList<>(hand);
-        CardOrder order = trick.getOrder();
+        CardOrder<FrenchCard, FrenchCard.Suite> order = trick.getOrder();
         FrenchCard.Suite lead = trick.getLeadSuit();
         // the hand belongs to the next player to play; players p and p + 2 are partners
         int player = trick.playerOf(trick.getSize());
@@ -107,7 +108,7 @@ public final class KlaverjassenUtils {
         return roem;
     }
 
-    private static int indexOf(Trick trick, int player) {
+    private static int indexOf(Trick<FrenchCard, FrenchCard.Suite> trick, int player) {
         for (int i = 0; i < trick.getSize(); i++) {
             if (trick.playerOf(i) == player)
                 return i;

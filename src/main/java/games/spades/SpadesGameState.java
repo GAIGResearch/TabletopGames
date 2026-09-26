@@ -9,6 +9,7 @@ import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.tricktaking.CardOrder;
 import games.tricktaking.ITrickTakingState;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.Trick;
@@ -19,10 +20,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class SpadesGameState extends AbstractGameState implements IPrintable, ITrickTakingState {
+public class SpadesGameState extends AbstractGameState implements IPrintable,
+        ITrickTakingState<FrenchCard, FrenchCard.Suite> {
 
     List<Deck<FrenchCard>> playerHands;
-    public Trick currentTrick;
+    public Trick<FrenchCard, FrenchCard.Suite> currentTrick;
     public List<List<Deck<FrenchCard>>> tricksWon;
     public int[] playerBids;
     public int[] tricksTaken;
@@ -34,7 +36,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable, IT
      * For each player, the suits that they are publicly known to be void in; i.e. the suits that
      * were led in a trick this round to which they did not follow suit.
      */
-    public KnownVoids knownVoids;
+    public KnownVoids<FrenchCard.Suite> knownVoids;
 
     public enum Phase implements IGamePhase {
         BIDDING,
@@ -54,8 +56,8 @@ public class SpadesGameState extends AbstractGameState implements IPrintable, IT
         teamScores = new int[2];
         teamSandbags = new int[2];
         playerBlindNil = new boolean[nPlayers];
-        knownVoids = new KnownVoids(nPlayers);
-        currentTrick = new Trick("CurrentTrick", nPlayers, 0);
+        knownVoids = new KnownVoids<>(nPlayers, FrenchCard.Suite.class);
+        currentTrick = new Trick<>("CurrentTrick", nPlayers, 0, CardOrder.STANDARD);
     }
 
     @Override
@@ -123,7 +125,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable, IT
             // a player who has failed to follow suit is known to hold no cards of that suit,
             // so we must not deal them any (none are recorded if SpadesParameters.rememberVoids is off)
             DeterminisationUtilities.reshuffle(playerId, otherPlayerDecks, x -> true, redeterminisationRnd,
-                    copy.knownVoids::permits);
+                    copy.knownVoids.permits(CardOrder.STANDARD));
         }
 
         return copy;
@@ -167,7 +169,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable, IT
      * follow suit earlier in the current round. This is information available to all players.
      */
     @Override
-    public KnownVoids getKnownVoids() {
+    public KnownVoids<FrenchCard.Suite> getKnownVoids() {
         return knownVoids;
     }
 
@@ -219,7 +221,7 @@ public class SpadesGameState extends AbstractGameState implements IPrintable, IT
     }
 
     @Override
-    public Trick getCurrentTrick() {
+    public Trick<FrenchCard, FrenchCard.Suite> getCurrentTrick() {
         return currentTrick;
     }
 

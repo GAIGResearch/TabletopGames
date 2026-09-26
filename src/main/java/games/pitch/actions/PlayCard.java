@@ -20,7 +20,7 @@ public class PlayCard extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         PitchGameState state = (PitchGameState) gs;
         int player = state.getCurrentPlayer();
-        Trick trick = state.getCurrentTrick();
+        Trick<FrenchCard, FrenchCard.Suite> trick = state.getCurrentTrick();
         state.getPlayerHand(player).remove(card);
         // the pitcher's first lead sets trumps
         if (state.getTrumpSuit() == null)

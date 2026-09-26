@@ -52,8 +52,8 @@ public class TestSpadesKnownVoids {
 
             int player = gameState.getCurrentPlayer();
             FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
-            boolean failsToFollow = chosen instanceof PlayCard && !(gameState.getCurrentTrick().getSize() == 0)
-                    && ((PlayCard) chosen).card.suite != ledSuit;
+            boolean failsToFollow = chosen instanceof PlayCard<?> && !(gameState.getCurrentTrick().getSize() == 0)
+                    && ((FrenchCard) ((PlayCard<?>) chosen).card).suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
 
@@ -79,8 +79,8 @@ public class TestSpadesKnownVoids {
 
             int player = gameState.getCurrentPlayer();
             FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
-            boolean followsSuit = chosen instanceof PlayCard && !(gameState.getCurrentTrick().getSize() == 0)
-                    && ((PlayCard) chosen).card.suite == ledSuit;
+            boolean followsSuit = chosen instanceof PlayCard<?> && !(gameState.getCurrentTrick().getSize() == 0)
+                    && ((FrenchCard) ((PlayCard<?>) chosen).card).suite == ledSuit;
 
             forwardModel.next(gameState, chosen);
 
@@ -286,8 +286,8 @@ public class TestSpadesKnownVoids {
             AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
             int player = gameState.getCurrentPlayer();
             FrenchCard.Suite ledSuit = gameState.getCurrentTrick().getLeadSuit();
-            boolean failsToFollow = chosen instanceof PlayCard && !(gameState.getCurrentTrick().getSize() == 0)
-                    && ((PlayCard) chosen).card.suite != ledSuit;
+            boolean failsToFollow = chosen instanceof PlayCard<?> && !(gameState.getCurrentTrick().getSize() == 0)
+                    && ((FrenchCard) ((PlayCard<?>) chosen).card).suite != ledSuit;
 
             forwardModel.next(gameState, chosen);
             if (failsToFollow) observedVoids.get(player).add(ledSuit);

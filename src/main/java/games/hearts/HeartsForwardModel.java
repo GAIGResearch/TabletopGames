@@ -9,6 +9,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IComponentContainer;
 import games.hearts.actions.Pass;
+import games.tricktaking.CardOrder;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.PlayCard;
 import games.tricktaking.PlayRule;
@@ -59,7 +60,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         hgs.playerTricksTaken = new int[hgs.getNPlayers()];
 
         // known voids are only valid for the current round, as hands are re-dealt each round
-        hgs.knownVoids = new KnownVoids(hgs.getNPlayers());
+        hgs.knownVoids = new KnownVoids<>(hgs.getNPlayers(), FrenchCard.Suite.class);
 
         int numOfPlayers = hgs.getNPlayers();
 
@@ -129,7 +130,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             if (hgs.playerDecks.get(i).contains(params.startingCard)) {
                 hgs.setFirstPlayer(i);
-                hgs.currentTrick = new Trick("CurrentTrick", hgs.getNPlayers(), i);
+                hgs.currentTrick = new Trick<>("CurrentTrick", hgs.getNPlayers(), i, CardOrder.STANDARD);
                 return;
             }
         }
@@ -175,7 +176,8 @@ public class HeartsForwardModel extends StandardForwardModel {
             }
             endPlayerTurn(hgs, nextPlayerToPass(hgs));
         } else {
-            if (action instanceof PlayCard play && play.card.suite == FrenchCard.Suite.Hearts)
+            if (action instanceof PlayCard<?> play && play.card instanceof FrenchCard played
+                    && played.suite == FrenchCard.Suite.Hearts)
                 hgs.heartsBroken = true;
             if (hgs.currentTrick.isComplete()) {
                 endTrick(hgs);
@@ -217,16 +219,17 @@ public class HeartsForwardModel extends StandardForwardModel {
                 // First turn of the game, the player with 2 of clubs must play it
                 for (FrenchCard card : playerHand.getComponents()) {
                     if (card.suite == FrenchCard.Suite.Clubs && card.number == 2) {
-                        actions.add(new PlayCard(card));
+                        actions.add(new PlayCard<>(card));
                         return actions;  // Return immediately, no other actions available
                     }
                 }
             }
 
             // hearts may not be led until they are broken, unless the leader holds nothing else
-            PlayRule rule = hgs.heartsBroken ? PlayRule.FOLLOW_SUIT : PlayRule.leadRestricted(FrenchCard.Suite.Hearts);
+            PlayRule<FrenchCard, FrenchCard.Suite> rule = hgs.heartsBroken ? PlayRule.FOLLOW_SUIT
+                    : PlayRule.leadRestricted(FrenchCard.Suite.Hearts);
             for (FrenchCard card : rule.legalPlays(playerHand.getComponents(), hgs.currentTrick))
-                actions.add(new PlayCard(card));
+                actions.add(new PlayCard<>(card));
         }
 
 
@@ -236,12 +239,12 @@ public class HeartsForwardModel extends StandardForwardModel {
     public void endTrick(HeartsGameState hgs) {
         HeartsParameters params = (HeartsParameters) hgs.getGameParameters();
         // Hearts has no trumps: the highest card of the suit led wins, and its player takes the trick
-        Trick trick = hgs.currentTrick;
+        Trick<FrenchCard, FrenchCard.Suite> trick = hgs.currentTrick;
         int winningPlayerID = trick.winner(null);
         hgs.trickDecks.get(winningPlayerID).add(trick);
         hgs.playerTricksTaken[winningPlayerID]++;
         hgs.setFirstPlayer(winningPlayerID);
-        hgs.currentTrick = new Trick("CurrentTrick", hgs.getNPlayers(), winningPlayerID);
+        hgs.currentTrick = new Trick<>("CurrentTrick", hgs.getNPlayers(), winningPlayerID, CardOrder.STANDARD);
 
         // Check if all cards from player hands have been played
         if (hgs.playerDecks.stream().allMatch(deck -> deck.getSize() == 0)) {

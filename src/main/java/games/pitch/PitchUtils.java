@@ -19,7 +19,7 @@ public class PitchUtils {
      *
      * @param trumps the trump suit, or null before the first card of the deal sets it
      */
-    public static PlayRule playRule(FrenchCard.Suite trumps) {
+    public static PlayRule<FrenchCard, FrenchCard.Suite> playRule(FrenchCard.Suite trumps) {
         return (hand, trick) -> {
             List<FrenchCard> following = PlayRule.FOLLOW_SUIT.legalPlays(hand, trick);
             if (following.size() == hand.size())

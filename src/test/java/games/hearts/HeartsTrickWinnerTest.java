@@ -38,7 +38,7 @@ public class HeartsTrickWinnerTest {
 
     /** The card a trick-play action plays, or null for any other action (passing). The only place tied to the action class. */
     private static FrenchCard cardPlayed(AbstractAction action) {
-        return action instanceof PlayCard ? ((PlayCard) action).card : null;
+        return action instanceof PlayCard<?> play ? (FrenchCard) play.card : null;
     }
 
     private void playRandomGame(int nPlayers, long seed) {

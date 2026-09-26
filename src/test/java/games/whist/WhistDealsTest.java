@@ -60,7 +60,7 @@ public class WhistDealsTest {
 
         // player 1 leads: any of their 13 cards
         Set<AbstractAction> expected = state.getPlayerHand(1).getComponents().stream()
-                .map(c -> (AbstractAction) new PlayCard(c)).collect(Collectors.toSet());
+                .map(c -> (AbstractAction) new PlayCard<>(c)).collect(Collectors.toSet());
         assertEquals(expected, new HashSet<>(fm.computeAvailableActions(state)));
     }
 

@@ -43,8 +43,8 @@ public class HeartsActionFeatures implements IActionFeatureVector {
         FrenchCard card = null;
         boolean isPass = false;
 
-        if (action instanceof PlayCard play) {
-            card = play.card;
+        if (action instanceof PlayCard<?> play) {
+            card = (FrenchCard) play.card;
         } else if (action instanceof Pass pass) {
             card = pass.card1;
             isPass = true;

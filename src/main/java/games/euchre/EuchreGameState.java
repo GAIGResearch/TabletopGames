@@ -41,13 +41,13 @@ import java.util.Set;
  *     <li>knownVoids - the suits each player is publicly known not to hold this deal</li>
  * </ul>
  */
-public class EuchreGameState extends AbstractGameState implements ITrickTakingState {
+public class EuchreGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite> {
 
     List<Deck<FrenchCard>> playerHands;
     Deck<FrenchCard> kitty;
     FrenchCard upCard;
     FrenchCard dealerDiscard;
-    Trick currentTrick;
+    Trick<FrenchCard, FrenchCard.Suite> currentTrick;
     Deck<FrenchCard> discardPile;
     FrenchCard.Suite trumpSuit;
     int maker;
@@ -55,7 +55,7 @@ public class EuchreGameState extends AbstractGameState implements ITrickTakingSt
     int passes;
     int[] tricksTaken;
     int[] teamPoints;
-    KnownVoids knownVoids;
+    KnownVoids<FrenchCard.Suite> knownVoids;
 
     public EuchreGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -107,7 +107,7 @@ public class EuchreGameState extends AbstractGameState implements ITrickTakingSt
     }
 
     @Override
-    public Trick getCurrentTrick() {
+    public Trick<FrenchCard, FrenchCard.Suite> getCurrentTrick() {
         return currentTrick;
     }
 
@@ -116,7 +116,7 @@ public class EuchreGameState extends AbstractGameState implements ITrickTakingSt
     }
 
     @Override
-    public KnownVoids getKnownVoids() {
+    public KnownVoids<FrenchCard.Suite> getKnownVoids() {
         return knownVoids;
     }
 
@@ -138,7 +138,7 @@ public class EuchreGameState extends AbstractGameState implements ITrickTakingSt
      * How the cards belong to suits and rank in this deal's tricks: {@link EuchreCardOrder} for the trump suit once
      * trumps are chosen (the bowers), {@link CardOrder#STANDARD} while they are being chosen.
      */
-    public CardOrder getCardOrder() {
+    public CardOrder<FrenchCard, FrenchCard.Suite> getCardOrder() {
         return trumpSuit == null ? CardOrder.STANDARD : new EuchreCardOrder(trumpSuit);
     }
 

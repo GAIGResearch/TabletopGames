@@ -76,7 +76,7 @@ public class AgramMatchTest {
         // the new leader may lead any card of their new hand
         Set<AbstractAction> expected = new HashSet<>();
         for (FrenchCard c : state.getPlayerHands().get(2).getComponents())
-            expected.add(new PlayCard(c));
+            expected.add(new PlayCard<>(c));
         assertEquals(expected, new HashSet<>(fm.computeAvailableActions(state)));
     }
 

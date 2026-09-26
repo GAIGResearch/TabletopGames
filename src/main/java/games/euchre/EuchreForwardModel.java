@@ -8,6 +8,7 @@ import core.components.FrenchCard;
 import games.euchre.actions.CallTrump;
 import games.euchre.actions.Discard;
 import games.euchre.actions.Pass;
+import games.tricktaking.CardOrder;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.PlayCard;
 import games.tricktaking.PlayRule;
@@ -41,8 +42,8 @@ public class EuchreForwardModel extends StandardForwardModel {
             if (card.number >= params.lowestCard)
                 state.discardPile.add(card);
         state.teamPoints = new int[state.getNTeams()];
-        state.knownVoids = new KnownVoids(nPlayers);
-        state.currentTrick = new Trick("CurrentTrick", nPlayers, 0);
+        state.knownVoids = new KnownVoids<>(nPlayers, FrenchCard.Suite.class);
+        state.currentTrick = new Trick<>("CurrentTrick", nPlayers, 0, CardOrder.STANDARD);
 
         // the last player deals first, so player 0 (on the dealer's left) is the first to decide on trumps
         deal(state);
@@ -81,7 +82,7 @@ public class EuchreForwardModel extends StandardForwardModel {
         state.passes = 0;
         state.tricksTaken = new int[nPlayers];
         state.knownVoids.clear();
-        state.currentTrick = new Trick("CurrentTrick", nPlayers, (dealer + 1) % nPlayers);
+        state.currentTrick = new Trick<>("CurrentTrick", nPlayers, (dealer + 1) % nPlayers, CardOrder.STANDARD);
         state.setFirstPlayer((dealer + 1) % nPlayers);
     }
 
@@ -114,7 +115,7 @@ public class EuchreForwardModel extends StandardForwardModel {
             // play: any card the current player may legally play to the trick
             List<FrenchCard> hand = state.getPlayerHand(player).getComponents();
             for (FrenchCard card : PlayRule.FOLLOW_SUIT.legalPlays(hand, state.currentTrick))
-                actions.add(new PlayCard(card));
+                actions.add(new PlayCard<>(card));
         }
         return actions;
     }
@@ -159,7 +160,7 @@ public class EuchreForwardModel extends StandardForwardModel {
     private void afterPlay(EuchreGameState state) {
         EuchreParameters params = (EuchreParameters) state.getGameParameters();
         int nPlayers = state.getNPlayers();
-        Trick trick = state.currentTrick;
+        Trick<FrenchCard, FrenchCard.Suite> trick = state.currentTrick;
         if (!trick.isComplete()) {
             endPlayerTurn(state, trick.playerOf(trick.getSize()));
             return;
@@ -183,8 +184,8 @@ public class EuchreForwardModel extends StandardForwardModel {
         }
     }
 
-    private static Trick newTrick(EuchreGameState state, int leader) {
-        return new Trick("CurrentTrick", state.getNPlayers(), leader, state.getCardOrder(), state.getSittingOut());
+    private static Trick<FrenchCard, FrenchCard.Suite> newTrick(EuchreGameState state, int leader) {
+        return new Trick<>("CurrentTrick", state.getNPlayers(), leader, state.getCardOrder(), state.getSittingOut());
     }
 
     private void scoreDeal(EuchreGameState state) {
