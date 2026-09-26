@@ -102,7 +102,7 @@ public class SchwimmenGameState extends AbstractGameState {
      * False once the player has dropped out of the chips game.
      */
     public boolean isInGame(int player) {
-        return chips[player] > 0;
+        return chips[player] >= 0;
     }
 
     public int getNPlayersInGame() {
