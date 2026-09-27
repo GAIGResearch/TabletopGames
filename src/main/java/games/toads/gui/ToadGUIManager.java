@@ -103,9 +103,10 @@ public class ToadGUIManager extends AbstractGUIManager {
 
     @Override
     public int getMaxActionSpace() {
-        // the most is a legacy Assault Cannon's guess: one per card type in play (9 in the legacy decks), plus
-        // none of these. A Siege Cannon guess offers at most 8, returning or recycling a card at most 5.
-        return 10;
+        // the most is the Defender's choice of a face-up and a hidden card from a hand of 4: 4 x 3 = 12.
+        // A legacy Assault Cannon's guess offers one per card type in play (9 in the legacy decks), plus none of
+        // these; a Siege Cannon guess at most 8, and returning or recycling a card at most 5.
+        return 12;
     }
 
     @Override
@@ -225,9 +226,7 @@ public class ToadGUIManager extends AbstractGUIManager {
     }
 
     private static int attacker(ToadGameState state) {
-        // the Attacker plays both cards first
-        int current = state.getCurrentPlayer();
-        return state.getFieldCard(1 - current) != null && state.getHiddenFlankCard(1 - current) != null ? 1 - current : current;
+        return state.getAttacker();
     }
 
     private static String decisionText(ToadGameState state) {
@@ -235,8 +234,15 @@ public class ToadGUIManager extends AbstractGUIManager {
         return switch ((ToadGamePhase) state.getGamePhase()) {
             case OPENING_RETURN -> "Player " + current + " returns a card to the bottom of their deck";
             case DISCARD -> "Player " + current + " may recycle a card";
-            case PLAY -> "Player " + current + " plays a " + (state.getFieldCard(current) == null ? "face-up" : "hidden")
-                    + " card";
+            case PLAY -> {
+                int attacker = state.getAttacker();
+                if (state.getFieldCard(attacker) == null)
+                    yield "Player " + attacker + " plays a face-up card";
+                List<String> choosing = new ArrayList<>();
+                for (int p : state.getPlayersStillToPlay())
+                    choosing.add("Player " + p + (p == attacker ? " plays a hidden card" : " plays a face-up and a hidden card"));
+                yield String.join("; ", choosing);
+            }
             case POST_BATTLE -> {
                 IExtendedSequence sequence = state.currentActionInProgress();
                 if (sequence instanceof ScoutCards)

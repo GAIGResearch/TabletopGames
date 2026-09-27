@@ -18,7 +18,7 @@ public class KiddsTest {
     @Before
     public void setUp() {
         params = new PenteParameters();
-        // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
+        // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, slideToMiddleOnSacredLine = false
         params.setParameterValue("startOffBoard", true);
         params.setParameterValue("blotRuleActive", true);
         params.setParameterValue("onePieceLimitOffSacredLine", false);

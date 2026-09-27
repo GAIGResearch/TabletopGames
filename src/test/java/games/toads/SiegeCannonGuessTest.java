@@ -57,11 +57,10 @@ public class SiegeCannonGuessTest {
         new GuessCard(type).execute(state);
     }
 
-    /** The current player plays the cards of these types from hand, to the Field and then the Flank. */
+    /** The current player plays the cards of these types from hand, to the Field and the Flank. */
     private void play(ToadCardType field, ToadCardType flank) {
         int player = state.getCurrentPlayer();
-        fm.next(state, new PlayFieldCard(inHand(state, player, field)));
-        fm.next(state, new PlayFlankCard(inHand(state, player, flank)));
+        playFromHand(state, fm, inHand(state, player, field), inHand(state, player, flank));
     }
 
     // ---------------------------------------------------------------------------------------------------------

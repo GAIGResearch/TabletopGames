@@ -35,11 +35,7 @@ public class TestVisibility {
     }
 
     private void playCards(ToadCard... cardsInOrder) {
-        for (int i = 0; i < cardsInOrder.length; i++) {
-            //   state.getPlayerHand(state.getCurrentPlayer()).add(cardsInOrder[i]);
-            AbstractAction action = i % 2 == 0 ? new PlayFieldCard(cardsInOrder[i]) : new PlayFlankCard(cardsInOrder[i]);
-            fm.next(state, action);
-        }
+        ToadTestUtils.playFromHand(state, fm, cardsInOrder);
     }
 
 

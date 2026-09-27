@@ -818,15 +818,16 @@ public class Tactics {
             assertEquals(0, state.getCurrentPlayer());
             int nextPlayer = 0;
             do {
-                int startingTurn = state.getTurnCounter() + 8 * state.getRoundCounter();
+                // a turn is a Battle, and there are four Battles in a War
+                int startingTurn = state.getTurnCounter() + 4 * state.getRoundCounter();
                 nextPlayer = 1 - nextPlayer;
                 do {
                     // sub loop
                     AbstractAction action = fm.computeAvailableActions(state).get(rnd.nextInt(fm.computeAvailableActions(state).size()));
                     System.out.println(action + " " + state.getCurrentPlayer() + " Turn " + state.getTurnCounter());
                     fm.next(state, action);
-                } while (state.getTurnCounter() + 8 * state.getRoundCounter() <= startingTurn + 1 && state.isNotTerminal());
-                // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
+                } while (state.getTurnCounter() + 4 * state.getRoundCounter() == startingTurn && state.isNotTerminal());
+                // after they have defended, a player is the attacker in the next battle
                 if (state.getGameStatus() != CoreConstants.GameResult.GAME_END) {
                     System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + nextPlayer);
                     assertEquals(nextPlayer, state.getCurrentPlayer());
@@ -836,10 +837,6 @@ public class Tactics {
     }
 
     private void playCards(ToadCard... cardsInOrder) {
-        for (int i = 0; i < cardsInOrder.length; i++) {
-            state.getPlayerHand(state.getCurrentPlayer()).add(cardsInOrder[i]);
-            AbstractAction action = i % 2 == 0 ? new PlayFieldCard(cardsInOrder[i]) : new PlayFlankCard(cardsInOrder[i]);
-            fm.next(state, action);
-        }
+        ToadTestUtils.playCards(state, fm, cardsInOrder);
     }
 }
