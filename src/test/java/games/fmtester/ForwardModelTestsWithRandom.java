@@ -20,9 +20,31 @@ import games.pitch.PitchParameters;
 import games.president.PresidentParameters;
 import games.rummy.RummyParameters;
 import games.scarto.ScartoParameters;
+import games.scopa.ScopaParameters;
+import games.skitgubbe.SkitgubbeParameters;
+import games.sueca.SuecaParameters;
 import org.junit.Test;
 
 public class ForwardModelTestsWithRandom {
+
+    @Test
+    public void testSkitgubbe() {
+        new ForwardModelTester("game=Skitgubbe", "nGames=2", "nPlayers=3");
+        SkitgubbeParameters params = new SkitgubbeParameters();
+        params.setParameterValue("completerLeads", true);
+        params.setParameterValue("exitOrderTiebreak", true);
+        params.setParameterValue("handSize", 2);
+        new ForwardModelTester(params, "game=Skitgubbe", "nGames=1", "nPlayers=4");
+    }
+
+    @Test
+    public void testScopa() {
+        new ForwardModelTester("game=Scopa", "nGames=2", "nPlayers=2");
+        ScopaParameters params = new ScopaParameters();
+        params.setParameterValue("targetScore", 11);
+        params.setParameterValue("redealOnKings", true);
+        new ForwardModelTester(params, "game=Scopa", "nGames=1", "nPlayers=2");
+    }
 
 
     @Test
@@ -76,6 +98,16 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("targetScore", 11);
         params.setParameterValue("countHighLowSeparately", true);
         new ForwardModelTester(params, "game=Pitch", "nGames=2", "nPlayers=4");
+    }
+
+    @Test
+    public void testSueca() {
+        new ForwardModelTester("game=Sueca", "nGames=2", "nPlayers=4");
+        SuecaParameters params = new SuecaParameters();
+        params.setParameterValue("playRubber", true);
+        params.setParameterValue("targetGames", 2);
+        params.setParameterValue("rememberVoids", false);
+        new ForwardModelTester(params, "game=Sueca", "nGames=2", "nPlayers=4");
     }
 
     @Test

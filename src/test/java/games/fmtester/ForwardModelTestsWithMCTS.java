@@ -22,6 +22,9 @@ import games.pitch.PitchParameters;
 import games.president.PresidentParameters;
 import games.rummy.RummyParameters;
 import games.scarto.ScartoParameters;
+import games.scopa.ScopaParameters;
+import games.skitgubbe.SkitgubbeParameters;
+import games.sueca.SuecaParameters;
 import games.dominion.DominionIParameters;
 import games.dominion.DominionParameters;
 import games.dominion.DominionSDParameters;
@@ -34,6 +37,25 @@ public class ForwardModelTestsWithMCTS {
     @Test
     public void testSaboteur() {
         new ForwardModelTester("game=Saboteur", "nGames=3", "nPlayers=5", "agent=json\\players\\gameSpecific\\Saboteur\\Saboteur.json", "budget=50");
+    }
+
+    @Test
+    public void testSkitgubbe() {
+        new ForwardModelTester("game=Skitgubbe", "nGames=2", "nPlayers=3", "agent=json\\players\\mcts.json");
+        SkitgubbeParameters params = new SkitgubbeParameters();
+        params.setParameterValue("completerLeads", true);
+        params.setParameterValue("exitOrderTiebreak", true);
+        params.setParameterValue("handSize", 2);
+        new ForwardModelTester(params, "game=Skitgubbe", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testScopa() {
+        new ForwardModelTester("game=Scopa", "nGames=2", "nPlayers=2", "agent=json\\players\\mcts.json");
+        ScopaParameters params = new ScopaParameters();
+        params.setParameterValue("targetScore", 11);
+        params.setParameterValue("redealOnKings", true);
+        new ForwardModelTester(params, "game=Scopa", "nGames=1", "nPlayers=2", "agent=json\\players\\mcts.json");
     }
 
     @Test
@@ -72,6 +94,15 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("targetScore", 11);
         params.setParameterValue("countHighLowSeparately", true);
         new ForwardModelTester(params, "game=Pitch", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testSueca() {
+        new ForwardModelTester("game=Sueca", "nGames=2", "nPlayers=4", "agent=json\\players\\mcts.json");
+        SuecaParameters params = new SuecaParameters();
+        params.setParameterValue("playRubber", true);
+        params.setParameterValue("targetGames", 2);
+        new ForwardModelTester(params, "game=Sueca", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
     }
 
     @Test

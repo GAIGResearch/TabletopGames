@@ -60,6 +60,20 @@ public class TarotCard extends Card {
         return deck;
     }
 
+    /**
+     * The 40-card Italian pack (as used for Scopa): each suit from Ace to 7, then Knave, Cavalier and King.
+     */
+    public static Deck<TarotCard> generateItalianDeck(String name, CoreConstants.VisibilityMode visibilityMode) {
+        Deck<TarotCard> deck = new Deck<>(name, visibilityMode);
+        for (Suit suit : new Suit[]{Suit.Swords, Suit.Batons, Suit.Cups, Suit.Coins}) {
+            for (int n = 1; n <= 7; n++)
+                deck.addToBottom(new TarotCard(suit, n));
+            for (int n : new int[]{KNAVE, CAVALIER, KING})
+                deck.addToBottom(new TarotCard(suit, n));
+        }
+        return deck;
+    }
+
     public boolean isFool() {
         return suit == Suit.None;
     }

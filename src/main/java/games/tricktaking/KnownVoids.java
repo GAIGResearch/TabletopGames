@@ -107,6 +107,7 @@ public class KnownVoids<S extends Enum<S>> {
 
     @Override
     public boolean equals(Object o) {
+        // suitClass is fixed by the game, and only used to build the sets
         return o instanceof KnownVoids<?> that && voids.equals(that.voids);
     }
 

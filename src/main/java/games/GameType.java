@@ -60,10 +60,22 @@ import games.scarto.ScartoForwardModel;
 import games.scarto.ScartoGameState;
 import games.scarto.ScartoParameters;
 import games.scarto.gui.ScartoGUIManager;
+import games.scopa.ScopaForwardModel;
+import games.scopa.ScopaGameState;
+import games.scopa.ScopaParameters;
+import games.scopa.gui.ScopaGUIManager;
+import games.skitgubbe.SkitgubbeForwardModel;
+import games.skitgubbe.SkitgubbeGameState;
+import games.skitgubbe.SkitgubbeParameters;
+import games.skitgubbe.gui.SkitgubbeGUIManager;
 import games.schwimmen.SchwimmenForwardModel;
 import games.schwimmen.SchwimmenGameState;
 import games.schwimmen.gui.SchwimmenGUIManager;
 import games.schwimmen.SchwimmenParameters;
+import games.sueca.SuecaForwardModel;
+import games.sueca.SuecaGameState;
+import games.sueca.SuecaParameters;
+import games.sueca.gui.SuecaGUIManager;
 import games.klaverjassen.KlaverjassenForwardModel;
 import games.klaverjassen.KlaverjassenGameState;
 import games.klaverjassen.KlaverjassenParameters;
@@ -473,12 +485,21 @@ public enum GameType {
     Pitch(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement),
             PitchGameState.class, PitchForwardModel.class, PitchParameters.class, PitchGUIManager.class),
+    Sueca(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking),
+            SuecaGameState.class, SuecaForwardModel.class, SuecaParameters.class, SuecaGUIManager.class),
     Scarto(3, 3, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement),
             ScartoGameState.class, ScartoForwardModel.class, ScartoParameters.class, ScartoGUIManager.class),
+    Scopa(2, 2, Arrays.asList(Cards, Strategy),
+            Arrays.asList(HandManagement, SetCollection),
+            ScopaGameState.class, ScopaForwardModel.class, ScopaParameters.class, ScopaGUIManager.class),
     President(4, 7, Arrays.asList(Cards, Simple),
             Arrays.asList(HandManagement),
             PresidentGameState.class, PresidentForwardModel.class, PresidentParameters.class, PresidentGUIManager.class),
+    Skitgubbe(3, 4, Arrays.asList(Cards),
+            Arrays.asList(TrickTaking),
+            SkitgubbeGameState.class, SkitgubbeForwardModel.class, SkitgubbeParameters.class, SkitgubbeGUIManager.class),
     Rummy(2, 6, Arrays.asList(Cards, Simple),
             Arrays.asList(SetCollection),
             RummyGameState.class, RummyForwardModel.class, RummyParameters.class, RummyGUIManager.class);
