@@ -30,7 +30,7 @@ public class BlackjackNaturalsTest {
 
     @Before
     public void setup() {
-        params = new BlackjackParameters();
+        params = BlackjackTestUtils.valetParams();
         params.setRandomSeed(42);
         newState(2);
     }

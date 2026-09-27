@@ -18,7 +18,7 @@ public class SkitgubbeExitOrderTest {
     SkitgubbeForwardModel fm = new SkitgubbeForwardModel();
 
     private static SkitgubbeParameters params(boolean exitOrderTiebreak) {
-        SkitgubbeParameters params = new SkitgubbeParameters();
+        SkitgubbeParameters params = SkitgubbeTestUtils.valetParams();
         params.setParameterValue("exitOrderTiebreak", exitOrderTiebreak);
         return params;
     }

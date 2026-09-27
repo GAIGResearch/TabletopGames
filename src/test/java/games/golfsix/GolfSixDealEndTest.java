@@ -86,7 +86,7 @@ public class GolfSixDealEndTest {
      * A 2-player state before the reveal. Player 0 would score 25 and player 1 3 (see above).
      */
     private GolfSixGameState safeguardState(int maxTurnsPerPlayer) {
-        GolfSixParameters params = new GolfSixParameters();
+        GolfSixParameters params = GolfSixTestUtils.valetParams();
         params.setParameterValue("maxTurnsPerPlayer", maxTurnsPerPlayer);
         params.setRandomSeed(43);
         GolfSixGameState state = newState(params, 2);

@@ -6,7 +6,8 @@ import evaluation.optimisation.TunableParameters;
 import java.util.Arrays;
 
 /**
- * Parameters for Six-card Golf (as described at https://www.pagat.com/draw/golf.html).
+ * Parameters for Six-card Golf (as described at https://www.pagat.com/draw/golf.html), over nine deals.
+ * data/golfsix/GolfSix_Valet.json gives the RECYCLE version of the game, a single deal.
  */
 public class GolfSixParameters extends TunableParameters<GolfSixParameters> {
 
@@ -16,7 +17,7 @@ public class GolfSixParameters extends TunableParameters<GolfSixParameters> {
     public static final int GRID_SIZE = 2 * COLUMNS;
 
     // The number of deals in a game; scores are added up over all of them
-    public int nDeals = 1;
+    public int nDeals = 9;
     // Whether, once a player's last card is face-up, each other player has one more turn before the deal is scored
     public boolean finalTurns = false;
     // The cards each player turns face-up before play starts
@@ -29,7 +30,7 @@ public class GolfSixParameters extends TunableParameters<GolfSixParameters> {
     public int kingValue = 0;
 
     public GolfSixParameters() {
-        addTunableParameter("nDeals", 1, Arrays.asList(1, 3, 9, 18));
+        addTunableParameter("nDeals", 9, Arrays.asList(1, 3, 9, 18));
         addTunableParameter("finalTurns", false, Arrays.asList(false, true));
         addTunableParameter("initialFaceUp", 2, Arrays.asList(0, 1, 2, 3));
         addTunableParameter("maxTurnsPerPlayer", 50);

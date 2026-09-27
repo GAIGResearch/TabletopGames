@@ -32,7 +32,7 @@ public class SkitgubbePhaseOneEndTest {
 
     @Test
     public void phaseOneEndsWhenTheWinnerWhoShouldLeadHasNoCards() {
-        SkitgubbeGameState state = newState(3, 42, new SkitgubbeParameters());
+        SkitgubbeGameState state = newState(3, 42, SkitgubbeTestUtils.valetParams());
         moveTo(state, state.heldCards.get(2), "QC");  // player 2's only card, held from a bounce
         giveTrumpCard(state, 1, "JD");
         giveHand(state, 0, "KS");
@@ -65,7 +65,7 @@ public class SkitgubbePhaseOneEndTest {
 
     @Test
     public void phaseOneEndsWhenTheFollowerHasNoCardsAndTheLeadersCardGoesBack() {
-        SkitgubbeGameState state = newState(3, 42, new SkitgubbeParameters());
+        SkitgubbeGameState state = newState(3, 42, SkitgubbeTestUtils.valetParams());
         moveTo(state, state.heldCards.get(0), "10H"); // an earlier bounce between players 2 and 0
         moveTo(state, state.heldCards.get(2), "10S");
         giveTrumpCard(state, 0, "3S");
@@ -97,7 +97,7 @@ public class SkitgubbePhaseOneEndTest {
 
     @Test
     public void phaseOneEndsWhenTheLeaderHasNoCardsAfterABounceAndHeldCardsGoBack() {
-        SkitgubbeGameState state = newState(4, 42, new SkitgubbeParameters());
+        SkitgubbeGameState state = newState(4, 42, SkitgubbeTestUtils.valetParams());
         giveTrumpCard(state, 3, "KC");
         giveHand(state, 0);
         giveHand(state, 1);

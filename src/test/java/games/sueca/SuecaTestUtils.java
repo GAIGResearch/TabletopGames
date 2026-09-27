@@ -1,5 +1,6 @@
 package games.sueca;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Deck;
@@ -56,16 +57,16 @@ final class SuecaTestUtils {
      * A real 4-player game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(long seed) {
-        return newGame(seed, null);
+        return newGame(seed, valetParams());
     }
 
     /**
-     * As newGame(seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(long seed, SuecaParameters params) {
         // never pass null: GameType.createParameters(seed) ignores the seed for a Parameters class without a
         // Long constructor, and the game would not be reproducible
-        Game game = GameType.Sueca.createGameInstance(4, seed, params == null ? new SuecaParameters() : params);
+        Game game = GameType.Sueca.createGameInstance(4, seed, params);
         List<AbstractPlayer> players = new ArrayList<>();
         for (int p = 0; p < 4; p++)
             players.add(new RandomPlayer(new Random(seed + p)));
@@ -77,7 +78,7 @@ final class SuecaTestUtils {
      * A state from direct setup with default parameters and the given seed, for unit tests.
      */
     static SuecaGameState newState(long seed) {
-        return newState(seed, new SuecaParameters());
+        return newState(seed, valetParams());
     }
 
     /**
@@ -193,7 +194,7 @@ final class SuecaTestUtils {
      * Parameters for pagat's rubber (playRubber) with the given number of games to win.
      */
     static SuecaParameters rubberParams(int targetGames) {
-        SuecaParameters params = new SuecaParameters();
+        SuecaParameters params = valetParams();
         params.setParameterValue("playRubber", true);
         params.setParameterValue("targetGames", targetGames);
         return params;
@@ -280,5 +281,14 @@ final class SuecaTestUtils {
         // follow the suit led if possible, otherwise play any card
         List<FrenchCard> follow = hand.stream().filter(c -> c.suite == led).toList();
         return new ArrayList<>(follow.isEmpty() ? hand : follow);
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/sueca/Sueca_Valet.json), which the tests were written for.
+     */
+    public static SuecaParameters valetParams() {
+        SuecaParameters params = new SuecaParameters();
+        TunableParameters.loadFromJSONFile(params, "data/sueca/Sueca_Valet.json");
+        return params;
     }
 }

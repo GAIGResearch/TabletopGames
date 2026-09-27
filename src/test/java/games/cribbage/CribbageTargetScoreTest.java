@@ -31,7 +31,7 @@ public class CribbageTargetScoreTest {
 
     @Before
     public void setup() {
-        params = new CribbageParameters();
+        params = CribbageTestUtils.valetParams();
         params.setRandomSeed(42);
         state = new CribbageGameState(params, 2);
         fm = new CribbageForwardModel();
@@ -61,6 +61,8 @@ public class CribbageTargetScoreTest {
 
     @Test
     public void theDefaultTargetIs121() {
+        state = new CribbageGameState(new CribbageParameters(), 2);
+        fm.setup(state);
         state.scores[1] = 120;
         assertFalse(state.targetReached());
         state.scores[1] = 121;
@@ -205,7 +207,7 @@ public class CribbageTargetScoreTest {
     public void seededGamesWithALowTargetEndWhenTheTargetIsReached() {
         int endedEarly = 0;
         for (long seed = 1; seed <= 10; seed++) {
-            CribbageParameters p = new CribbageParameters();
+            CribbageParameters p = CribbageTestUtils.valetParams();
             p.setParameterValue("targetScore", 15);
             Game game = newGame(seed, p);
             CribbageGameState gs = (CribbageGameState) game.getGameState();

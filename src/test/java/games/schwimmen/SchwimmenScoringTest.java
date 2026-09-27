@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
  */
 public class SchwimmenScoringTest {
 
-    SchwimmenParameters params = new SchwimmenParameters();
+    SchwimmenParameters params = SchwimmenTestUtils.valetParams();
 
     private double value(String... codes) {
         return SchwimmenUtils.handValue(cards(codes), params);

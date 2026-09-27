@@ -39,7 +39,7 @@ public class CZEStarterNominationTest {
 
     /** Parameters with the dealer's nomination on, and a starter-Eight suit that is not the default. */
     private static CZEParameters nominationParams() {
-        CZEParameters params = new CZEParameters();
+        CZEParameters params = CZETestUtils.valetParams();
         params.setParameterValue("dealerNominatesStarterSuit", true);
         params.setParameterValue("starterEightSuit", Clubs);
         return params;

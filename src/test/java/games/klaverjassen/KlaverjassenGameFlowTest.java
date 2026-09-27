@@ -36,7 +36,7 @@ public class KlaverjassenGameFlowTest {
      * Plays a random game of nHands hands with the given partnerTrumpRule and tieIsFailure, checking every step.
      */
     private void playRandomGame(long seed, PartnerTrumpRule rule, int nHands, boolean tieIsFailure) {
-        KlaverjassenParameters params = new KlaverjassenParameters();
+        KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
         params.setParameterValue("partnerTrumpRule", rule);
         params.setParameterValue("nHands", nHands);
         params.setParameterValue("tieIsFailure", tieIsFailure);

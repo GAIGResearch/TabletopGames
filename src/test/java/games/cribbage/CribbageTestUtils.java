@@ -1,5 +1,6 @@
 package games.cribbage;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Deck;
@@ -40,11 +41,11 @@ final class CribbageTestUtils {
      * A real 2-player game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(long seed) {
-        return newGame(seed, null);
+        return newGame(seed, valetParams());
     }
 
     /**
-     * As newGame(seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(long seed, CribbageParameters params) {
         Game game = GameType.Cribbage.createGameInstance(2, seed, params);
@@ -221,5 +222,14 @@ final class CribbageTestUtils {
             if (state.crib.isComponentVisible(i, player))
                 visible.add(state.crib.get(i));
         return visible;
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/cribbage/Cribbage_Valet.json), which the tests were written for.
+     */
+    public static CribbageParameters valetParams() {
+        CribbageParameters params = new CribbageParameters();
+        TunableParameters.loadFromJSONFile(params, "data/cribbage/Cribbage_Valet.json");
+        return params;
     }
 }

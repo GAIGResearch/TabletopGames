@@ -1,5 +1,6 @@
 package games.president;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
@@ -37,7 +38,7 @@ class PresidentTestUtils {
 
     /** A factory game of nPlayers RandomPlayers, reset with the given seed. */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, new PresidentParameters());
+        return newGame(nPlayers, seed, valetParams());
     }
 
     /** A factory game of nPlayers RandomPlayers with the given parameters, reset with the given seed. */
@@ -57,7 +58,7 @@ class PresidentTestUtils {
 
     /** A state with default parameters, set up by the forward model. */
     static PresidentGameState newState(int nPlayers, long seed, PresidentForwardModel fm) {
-        return newState(new PresidentParameters(), nPlayers, seed, fm);
+        return newState(valetParams(), nPlayers, seed, fm);
     }
 
     /** A card from a code: rank 2-10, J, Q, K, A then suit H, D, C, S - e.g. "10H", "JS", "AD". */
@@ -179,7 +180,7 @@ class PresidentTestUtils {
     }
 
     static PresidentParameters multiDealParams(int targetScore, int exchangeCards) {
-        PresidentParameters params = new PresidentParameters();
+        PresidentParameters params = valetParams();
         params.setParameterValue("targetScore", targetScore);
         params.setParameterValue("exchangeCards", exchangeCards);
         return params;
@@ -231,5 +232,14 @@ class PresidentTestUtils {
     /** The FrenchCard numbers of the cards in a deck, in deck order (top first). */
     static List<Integer> numbers(Deck<FrenchCard> deck) {
         return deck.getComponents().stream().map(c -> c.number).toList();
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/president/President_Valet.json), which the tests were written for.
+     */
+    public static PresidentParameters valetParams() {
+        PresidentParameters params = new PresidentParameters();
+        TunableParameters.loadFromJSONFile(params, "data/president/President_Valet.json");
+        return params;
     }
 }

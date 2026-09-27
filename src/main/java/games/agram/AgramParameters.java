@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 /**
  * Parameters for Agram (as described at https://www.pagat.com/last/agram.html).
+ * data/agram/Agram_Valet.json gives the RECYCLE version of the game.
  * All rule constants should be read from here rather than hard-coded in the state or forward model.
  */
 public class AgramParameters extends TunableParameters<AgramParameters> implements ITrickTakingParameters {

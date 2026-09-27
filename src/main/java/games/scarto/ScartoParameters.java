@@ -8,9 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>Parameters for Scarto. The defaults follow the RECYCLE code on the Valet page
- * (https://mgoadric.github.io/valet/post/scarto.html); the Wikipedia rules (https://en.wikipedia.org/wiki/Scarto)
- * are available as options: several deals, and the dealer's exchange with the scarto.</p>
+ * <p>Parameters for Scarto. The defaults follow the Wikipedia rules (https://en.wikipedia.org/wiki/Scarto), as pagat
+ * has none: three deals, and the dealer's exchange with the scarto. data/scarto/Scarto_Valet.json gives the RECYCLE
+ * code on the Valet page (https://mgoadric.github.io/valet/post/scarto.html): one deal, with no exchange.</p>
  */
 public class ScartoParameters extends TunableParameters<ScartoParameters> implements ITrickTakingParameters {
 
@@ -26,10 +26,10 @@ public class ScartoParameters extends TunableParameters<ScartoParameters> implem
     public int knavePoints = 1;
 
     // Deals in the game (Wikipedia: each player deals once). Scores add up over the deals
-    public int nDeals = 1;
+    public int nDeals = 3;
 
     // Whether the dealer takes the scarto into their hand and discards the same number of cards (Wikipedia)
-    public boolean dealerExchange = false;
+    public boolean dealerExchange = true;
 
     // Whether players remember the suits others are known to be void in (used when redeterminising)
     public boolean rememberVoids = true;
@@ -42,8 +42,8 @@ public class ScartoParameters extends TunableParameters<ScartoParameters> implem
         addTunableParameter("foolPoints", 3);
         addTunableParameter("cavalierPoints", 2);
         addTunableParameter("knavePoints", 1);
-        addTunableParameter("nDeals", 1, Arrays.asList(1, 3));
-        addTunableParameter("dealerExchange", false, List.of(false, true));
+        addTunableParameter("nDeals", 3, Arrays.asList(1, 3));
+        addTunableParameter("dealerExchange", true, List.of(false, true));
         addTunableParameter("rememberVoids", true, List.of(false, true));
     }
 

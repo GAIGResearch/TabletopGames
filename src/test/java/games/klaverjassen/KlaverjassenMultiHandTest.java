@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
 public class KlaverjassenMultiHandTest {
 
     private static KlaverjassenParameters hands(int nHands) {
-        KlaverjassenParameters params = new KlaverjassenParameters();
+        KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
         params.setParameterValue("nHands", nHands);
         return params;
     }

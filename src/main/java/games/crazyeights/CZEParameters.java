@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Parameters for Crazy Eights (Basic Game, as described at https://www.pagat.com/eights/crazy8s.html).
+ * data/crazyeights/CrazyEights_Valet.json gives the RECYCLE version: five cards each, and Hearts for a starter Eight.
  * All rule constants should be read from here rather than hard-coded in the state or forward model.
  */
 public class CZEParameters extends TunableParameters<CZEParameters> {
@@ -27,7 +28,7 @@ public class CZEParameters extends TunableParameters<CZEParameters> {
     public FrenchCard.Suite starterEightSuit = FrenchCard.Suite.Hearts;
 
     // Pagat: if the starter card is an Eight, the dealer (the last player) nominates the suit before play begins
-    public boolean dealerNominatesStarterSuit = false;
+    public boolean dealerNominatesStarterSuit = true;
 
     public CZEParameters() {
         addTunableParameter("nCardsPerPlayer", 5, Arrays.asList(3, 4, 5, 6, 7));
@@ -36,7 +37,7 @@ public class CZEParameters extends TunableParameters<CZEParameters> {
         addTunableParameter("pictureCardPenalty", 10);
         addTunableParameter("acePenalty", 1);
         addTunableParameter("starterEightSuit", FrenchCard.Suite.Hearts, List.of(FrenchCard.Suite.values()));
-        addTunableParameter("dealerNominatesStarterSuit", false, Arrays.asList(false, true));
+        addTunableParameter("dealerNominatesStarterSuit", true, Arrays.asList(false, true));
     }
 
     @Override

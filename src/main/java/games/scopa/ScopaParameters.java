@@ -7,10 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * <p>Parameters for Scopa. The defaults follow the RECYCLE code on the Valet page
- * (https://mgoadric.github.io/valet/post/scopa.html): one deal. Pagat's rules (https://www.pagat.com/fishing/scopa.html)
- * are available as options: deals until a target score, and a redeal when the table starts with three or more
- * Kings.</p>
+ * <p>Parameters for Scopa. The defaults follow Pagat's rules (https://www.pagat.com/fishing/scopa.html): deals until a
+ * player reaches 11, and a redeal when the table starts with three or more Kings. data/scopa/Scopa_Valet.json gives
+ * the RECYCLE code on the Valet page (https://mgoadric.github.io/valet/post/scopa.html): one deal.</p>
  */
 public class ScopaParameters extends TunableParameters<ScopaParameters> {
 
@@ -19,16 +18,16 @@ public class ScopaParameters extends TunableParameters<ScopaParameters> {
     public int tableSize = 4;
 
     // The game ends after the deal in which a player's total reaches this; 0 plays a single deal (RECYCLE)
-    public int targetScore = 0;
+    public int targetScore = 11;
 
     // Whether a deal that puts three or more Kings on the table is thrown in and dealt again (pagat)
-    public boolean redealOnKings = false;
+    public boolean redealOnKings = true;
 
     public ScopaParameters() {
         addTunableParameter("handSize", 3);
         addTunableParameter("tableSize", 4);
-        addTunableParameter("targetScore", 0, Arrays.asList(0, 11, 21));
-        addTunableParameter("redealOnKings", false, List.of(false, true));
+        addTunableParameter("targetScore", 11, Arrays.asList(0, 11, 21));
+        addTunableParameter("redealOnKings", true, List.of(false, true));
         _reset();
     }
 

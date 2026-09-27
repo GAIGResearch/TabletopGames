@@ -29,10 +29,10 @@ class GoofspielTestUtils {
 
     /** A seeded game with random players, created through the GameType factory. */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, null);
+        return newGame(nPlayers, seed, new GoofspielParameters());
     }
 
-    /** As newGame(nPlayers, seed), with the given parameters (null for the defaults). */
+    /** As newGame(nPlayers, seed), with the given parameters. */
     static Game newGame(int nPlayers, long seed, GoofspielParameters params) {
         Game g = params == null ? GameType.Goofspiel.createGameInstance(nPlayers, seed)
                 : GameType.Goofspiel.createGameInstance(nPlayers, seed, params);

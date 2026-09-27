@@ -23,7 +23,7 @@ public class SkitgubbePhaseOneTest {
 
     @Before
     public void setup() {
-        state = newState(3, 42, new SkitgubbeParameters());
+        state = newState(3, 42, SkitgubbeTestUtils.valetParams());
         fm = new SkitgubbeForwardModel();
     }
 

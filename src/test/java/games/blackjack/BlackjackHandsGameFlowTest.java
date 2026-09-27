@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class BlackjackHandsGameFlowTest {
 
     private static BlackjackParameters hands(int nHands) {
-        BlackjackParameters params = new BlackjackParameters();
+        BlackjackParameters params = BlackjackTestUtils.valetParams();
         params.setParameterValue("nHands", nHands);
         return params;
     }

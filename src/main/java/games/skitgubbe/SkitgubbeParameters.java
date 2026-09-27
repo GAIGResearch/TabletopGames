@@ -6,8 +6,9 @@ import evaluation.optimisation.TunableParameters;
 import java.util.Arrays;
 
 /**
- * Rules of Skitgubbe. The defaults follow the RECYCLE code at https://mgoadric.github.io/valet/post/skittgube.html,
- * with the variants of https://www.pagat.com/beating/skitgubbe.html as options.
+ * Rules of Skitgubbe: the RECYCLE code at https://mgoadric.github.io/valet/post/skittgube.html, with pagat's rule
+ * (https://www.pagat.com/beating/skitgubbe.html) that the player who completes a phase-two trick leads the next.
+ * data/skitgubbe/Skitgubbe_Valet.json gives the RECYCLE rules.
  */
 public class SkitgubbeParameters extends TunableParameters<SkitgubbeParameters> {
 
@@ -18,7 +19,7 @@ public class SkitgubbeParameters extends TunableParameters<SkitgubbeParameters> 
     public int maxPhaseTwoActions = 1000;
     // false (RECYCLE): after a completed phase-two trick the next player leads. true (pagat): the player who
     // completed it leads, unless they are out of cards
-    public boolean completerLeads = false;
+    public boolean completerLeads = true;
     // false (RECYCLE): players on equal scores share a place. true: they are ranked by the order they went out
     public boolean exitOrderTiebreak = false;
 
@@ -26,7 +27,7 @@ public class SkitgubbeParameters extends TunableParameters<SkitgubbeParameters> 
         super();
         addTunableParameter("handSize", 3, Arrays.asList(2, 3, 4));
         addTunableParameter("maxPhaseTwoActions", 1000);
-        addTunableParameter("completerLeads", false, Arrays.asList(false, true));
+        addTunableParameter("completerLeads", true, Arrays.asList(false, true));
         addTunableParameter("exitOrderTiebreak", false, Arrays.asList(false, true));
         _reset();
     }

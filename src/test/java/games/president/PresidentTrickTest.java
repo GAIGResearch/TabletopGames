@@ -169,7 +169,7 @@ public class PresidentTrickTest {
 
     @Test
     public void theFirstOutScoresPresidentPointsAndTheSecondVicePresidentPoints() {
-        PresidentGameState state = twoPlayersGoOut(new PresidentParameters());
+        PresidentGameState state = twoPlayersGoOut(PresidentTestUtils.valetParams());
         // defaults: presidentPoints 2, vicePresidentPoints 1
         assertEquals(2, state.getPlayerScore(0));
         assertEquals(1, state.getPlayerScore(1));
@@ -179,7 +179,7 @@ public class PresidentTrickTest {
 
     @Test
     public void thePointsForGoingOutComeFromTheParameters() {
-        PresidentParameters params = new PresidentParameters();
+        PresidentParameters params = PresidentTestUtils.valetParams();
         params.setParameterValue("presidentPoints", 5);
         params.setParameterValue("vicePresidentPoints", 3);
         PresidentGameState state = twoPlayersGoOut(params);

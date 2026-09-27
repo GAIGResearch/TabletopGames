@@ -126,7 +126,7 @@ public class SkitgubbeGameFlowTest {
     }
 
     private void randomPhaseOne(int nPlayers, int handSize, long seed) {
-        SkitgubbeParameters params = new SkitgubbeParameters();
+        SkitgubbeParameters params = SkitgubbeTestUtils.valetParams();
         params.setParameterValue("handSize", handSize);
         Game game = newGame(nPlayers, seed, params);
         SkitgubbeGameState state = (SkitgubbeGameState) game.getGameState();

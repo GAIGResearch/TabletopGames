@@ -1,5 +1,6 @@
 package games.crazyeights;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Deck;
@@ -32,11 +33,11 @@ final class CZETestUtils {
      * A real game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, null);
+        return newGame(nPlayers, seed, valetParams());
     }
 
     /**
-     * As newGame(nPlayers, seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(nPlayers, seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(int nPlayers, long seed, CZEParameters params) {
         Game game = GameType.CrazyEights.createGameInstance(nPlayers, seed, params);
@@ -165,5 +166,14 @@ final class CZETestUtils {
         allDecks(state).forEach(d -> cards.addAll(d.getComponents()));
         assertEquals("number of cards", 52, cards.size());
         assertEquals(new HashSet<>(FULL_DECK), new HashSet<>(cards));
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/crazyeights/CrazyEights_Valet.json), which the tests were written for.
+     */
+    public static CZEParameters valetParams() {
+        CZEParameters params = new CZEParameters();
+        TunableParameters.loadFromJSONFile(params, "data/crazyeights/CrazyEights_Valet.json");
+        return params;
     }
 }

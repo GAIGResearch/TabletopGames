@@ -30,7 +30,7 @@ public class EuchreGoingAloneTest {
     EuchreForwardModel fm = new EuchreForwardModel();
 
     private EuchreGameState standardState() {
-        return standardState(new EuchreParameters());
+        return standardState(EuchreTestUtils.valetParams());
     }
 
     private EuchreGameState standardState(EuchreParameters params) {

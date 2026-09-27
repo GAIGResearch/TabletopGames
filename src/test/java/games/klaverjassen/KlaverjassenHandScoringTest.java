@@ -61,7 +61,7 @@ public class KlaverjassenHandScoringTest {
 
     @Test
     public void equalTotalsAreNatWhenTieIsFailure() {
-        KlaverjassenParameters params = new KlaverjassenParameters();
+        KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
         params.setParameterValue("tieIsFailure", true);
         state = newState(3, params);
         score(new int[]{81, 81}, new int[]{0, 0}, new int[]{0, 0});
@@ -79,7 +79,7 @@ public class KlaverjassenHandScoringTest {
 
     @Test
     public void withTieIsFailureTheTrumpTeamIsStillTheChoosersTeam() {
-        KlaverjassenParameters params = new KlaverjassenParameters();
+        KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
         params.setParameterValue("tieIsFailure", true);
         state = newState(3, params);
         fm.endRound(state, 1);
@@ -143,7 +143,7 @@ public class KlaverjassenHandScoringTest {
 
     @Test
     public void thePitBonusComesFromTheParameters() {
-        KlaverjassenParameters params = new KlaverjassenParameters();
+        KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
         params.setParameterValue("pitBonus", 50);
         state = newState(3, params);
         score(new int[]{162, 0}, new int[]{0, 0}, new int[]{8, 0}, new int[]{0, 0});

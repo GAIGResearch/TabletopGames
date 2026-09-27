@@ -93,7 +93,7 @@ public class KlaverjassenTrumpVoidTest {
 
     @Test
     public void withRememberVoidsOffNothingIsInferred() {
-        KlaverjassenParameters params = new KlaverjassenParameters();
+        KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
         params.setParameterValue("rememberVoids", false);
         state = newState(42, params);
         setTrumps(state, Hearts);

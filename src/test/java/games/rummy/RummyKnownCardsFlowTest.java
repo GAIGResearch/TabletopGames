@@ -99,7 +99,7 @@ public class RummyKnownCardsFlowTest {
 
     @Test
     public void takenCardsAreVisibleToAllOverSeveralDeals() {
-        RummyParameters params = new RummyParameters();
+        RummyParameters params = RummyTestUtils.valetParams();
         // a winner scores both other hands, often over 50 points, so the target is 100 to be sure of a second deal
         params.setParameterValue("targetScore", 100);
         params.setParameterValue("maxTurnsPerDeal", 10);

@@ -28,7 +28,7 @@ public class GolfSixRevealTest {
 
     @Before
     public void setup() {
-        params = new GolfSixParameters();
+        params = GolfSixTestUtils.valetParams();
         params.setRandomSeed(23);
         fm = new GolfSixForwardModel();
     }

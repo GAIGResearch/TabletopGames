@@ -1,5 +1,6 @@
 package games.skitgubbe;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Deck;
@@ -32,7 +33,7 @@ final class SkitgubbeTestUtils {
 
     /** A real game from the factory, reset with random players, for integration tests driven by fm.next. */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, new SkitgubbeParameters());
+        return newGame(nPlayers, seed, valetParams());
     }
 
     /** As newGame(nPlayers, seed), with the given parameters. The seed overrides any seed on params. */
@@ -208,5 +209,14 @@ final class SkitgubbeTestUtils {
 
     static HashSet<FrenchCard> setOf(String... codes) {
         return new HashSet<>(cards(codes));
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/skitgubbe/Skitgubbe_Valet.json), which the tests were written for.
+     */
+    public static SkitgubbeParameters valetParams() {
+        SkitgubbeParameters params = new SkitgubbeParameters();
+        TunableParameters.loadFromJSONFile(params, "data/skitgubbe/Skitgubbe_Valet.json");
+        return params;
     }
 }

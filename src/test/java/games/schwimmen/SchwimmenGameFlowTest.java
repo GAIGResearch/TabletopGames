@@ -90,7 +90,7 @@ public class SchwimmenGameFlowTest {
 
     /** 3 players; the dealer keeps; then 'turns' single exchanges (no passes). Returns the state. */
     private SchwimmenGameState exchangeTurns(int maxCircuits, int turns) {
-        SchwimmenParameters params = new SchwimmenParameters();
+        SchwimmenParameters params = SchwimmenTestUtils.valetParams();
         params.setParameterValue("maxCircuitsPerDeal", maxCircuits);
         Game game = newGame(3, ordinarySeed(3, 0), params);
         SchwimmenGameState state = (SchwimmenGameState) game.getGameState();
@@ -125,7 +125,7 @@ public class SchwimmenGameFlowTest {
     @Test
     public void theSafeguardCountsTurnsNotCloseDecisions() {
         // maxCircuitsPerDeal 2, 3 players: 6 turns, each an exchange then Close(false)
-        SchwimmenParameters params = new SchwimmenParameters();
+        SchwimmenParameters params = SchwimmenTestUtils.valetParams();
         params.setParameterValue("maxCircuitsPerDeal", 2);
         Game game = newGame(3, ordinarySeed(3, 0), params);
         SchwimmenGameState state = (SchwimmenGameState) game.getGameState();

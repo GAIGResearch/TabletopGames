@@ -208,7 +208,7 @@ public class RummyKnownCardsTest {
 
     @Test
     public void aNewDealStartsWithNoKnownCards() {
-        RummyParameters params = new RummyParameters();
+        RummyParameters params = RummyTestUtils.valetParams();
         params.setParameterValue("targetScore", 50);
         RummyGameState state = newState(params, 2, 46, fm);
         FrenchCard known = state.getDiscardPile().peek();

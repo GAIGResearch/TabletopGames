@@ -28,7 +28,7 @@ public class RummyMultiDealFlowTest {
     private static final int STEP_CAP = 20000;
 
     private static RummyParameters params(int targetScore, int maxTurnsPerDeal) {
-        RummyParameters params = new RummyParameters();
+        RummyParameters params = RummyTestUtils.valetParams();
         params.setParameterValue("targetScore", targetScore);
         params.setParameterValue("maxTurnsPerDeal", maxTurnsPerDeal);
         return params;

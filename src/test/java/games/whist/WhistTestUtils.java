@@ -1,5 +1,6 @@
 package games.whist;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Deck;
@@ -35,11 +36,11 @@ final class WhistTestUtils {
      * A real 4-player game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(long seed) {
-        return newGame(seed, null);
+        return newGame(seed, valetParams());
     }
 
     /**
-     * As newGame(seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(long seed, WhistParameters params) {
         Game game = GameType.Whist.createGameInstance(4, seed, params);
@@ -54,7 +55,7 @@ final class WhistTestUtils {
      * A state from direct setup with default parameters and the given seed, for unit tests.
      */
     static WhistGameState newState(long seed) {
-        WhistParameters params = new WhistParameters();
+        WhistParameters params = valetParams();
         params.setRandomSeed(seed);
         WhistGameState state = new WhistGameState(params, 4);
         new WhistForwardModel().setup(state);
@@ -65,7 +66,7 @@ final class WhistTestUtils {
      * Parameters with the given number of deals and trump settings (set through setParameterValue).
      */
     static WhistParameters params(int nDeals, WhistParameters.TrumpMode trumpMode, boolean noTrumpsInRotation) {
-        WhistParameters params = new WhistParameters();
+        WhistParameters params = valetParams();
         params.setParameterValue("nDeals", nDeals);
         params.setParameterValue("trumpMode", trumpMode);
         params.setParameterValue("noTrumpsInRotation", noTrumpsInRotation);
@@ -199,5 +200,14 @@ final class WhistTestUtils {
         allDecks(state).forEach(d -> cards.addAll(d.getComponents()));
         assertEquals("number of cards", 52, cards.size());
         assertEquals(new HashSet<>(FULL_DECK), new HashSet<>(cards));
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/whist/Whist_Valet.json), which the tests were written for.
+     */
+    public static WhistParameters valetParams() {
+        WhistParameters params = new WhistParameters();
+        TunableParameters.loadFromJSONFile(params, "data/whist/Whist_Valet.json");
+        return params;
     }
 }

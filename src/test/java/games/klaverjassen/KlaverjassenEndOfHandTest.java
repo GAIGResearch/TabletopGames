@@ -96,7 +96,7 @@ public class KlaverjassenEndOfHandTest {
 
     @Test
     public void equalTotalsAreNatWhenTieIsFailure() {
-        KlaverjassenParameters params = new KlaverjassenParameters();
+        KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
         params.setParameterValue("tieIsFailure", true);
         Game game = newGame(11, params);
         state = (KlaverjassenGameState) game.getGameState();

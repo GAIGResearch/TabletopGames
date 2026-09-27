@@ -34,11 +34,11 @@ final class LeducPokerTestUtils {
      * A real 2-player game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(long seed) {
-        return newGame(seed, null);
+        return newGame(seed, new LeducPokerParameters());
     }
 
     /**
-     * As newGame(seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(long seed, LeducPokerParameters params) {
         Game game = GameType.LeducPoker.createGameInstance(2, seed, params);

@@ -47,7 +47,7 @@ public class BlackjackSplitGameFlowTest {
 
     @Test
     public void aScriptedTwoHandGameWithAResplitAndSplitAces() {
-        BlackjackParameters params = new BlackjackParameters();
+        BlackjackParameters params = BlackjackTestUtils.valetParams();
         params.setParameterValue("splitting", true);
         params.setParameterValue("doubleDown", true);
         params.setParameterValue("nHands", 2);
@@ -191,7 +191,7 @@ public class BlackjackSplitGameFlowTest {
             for (long seed = 0; seed < 25; seed++) {
                 int nPlayers = 7;
                 String game0 = "mode " + naturalOnly + ", seed " + seed;
-                BlackjackParameters params = new BlackjackParameters();
+                BlackjackParameters params = BlackjackTestUtils.valetParams();
                 params.setParameterValue("splitting", true);
                 params.setParameterValue("doubleDown", true);
                 params.setParameterValue("dealerHitsSoft17", true);

@@ -65,7 +65,7 @@ public class SuecaSetupTest {
 
     @Test
     public void cardPointsAreAceElevenSevenTenKingFourJackThreeQueenTwo() {
-        SuecaParameters params = new SuecaParameters();
+        SuecaParameters params = SuecaTestUtils.valetParams();
         assertEquals(11, params.cardPoints(card("AH")));
         assertEquals(10, params.cardPoints(card("7S")));
         assertEquals(4, params.cardPoints(card("KD")));

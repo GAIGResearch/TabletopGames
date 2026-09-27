@@ -6,9 +6,9 @@ import evaluation.optimisation.TunableParameters;
 import java.util.Arrays;
 
 /**
- * Rules of Rummy. The defaults follow the RECYCLE code at https://mgoadric.github.io/valet/post/rummy.html (Block
- * Rummy, ending when the draw deck is empty), with the deal sizes for more than two players from
- * https://www.pagat.com/rummy/rummy.html.
+ * Rules of Rummy: the RECYCLE code at https://mgoadric.github.io/valet/post/rummy.html (Block Rummy, a deal ending
+ * when the draw deck is empty), with the deal sizes for more than two players and play to a target score of 100 from
+ * https://www.pagat.com/rummy/rummy.html. data/rummy/Rummy_Valet.json gives the RECYCLE game, a single deal.
  */
 public class RummyParameters extends TunableParameters<RummyParameters> {
 
@@ -20,7 +20,7 @@ public class RummyParameters extends TunableParameters<RummyParameters> {
     // discard back and forth for ever
     public int maxTurnsPerDeal = 200;
     // 0 = a single deal (RECYCLE). Otherwise deals continue until a player's score reaches this (pagat).
-    public int targetScore = 0;
+    public int targetScore = 100;
 
     public RummyParameters() {
         super();
@@ -28,7 +28,7 @@ public class RummyParameters extends TunableParameters<RummyParameters> {
         addTunableParameter("cardsFor3To4Players", 7);
         addTunableParameter("cardsFor5To6Players", 6);
         addTunableParameter("maxTurnsPerDeal", 200);
-        addTunableParameter("targetScore", 0, Arrays.asList(0, 50, 100));
+        addTunableParameter("targetScore", 100, Arrays.asList(0, 50, 100));
         // a safety limit on the number of deals when playing to a target score
         setMaxRounds(100);
     }

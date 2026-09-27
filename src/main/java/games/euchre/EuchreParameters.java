@@ -8,12 +8,13 @@ import java.util.List;
 
 /**
  * Parameters for Euchre (North American rules, as described at https://www.pagat.com/euchre/euchre.html).
+ * data/euchre/Euchre_Valet.json gives the RECYCLE version of the game, a single deal.
  */
 public class EuchreParameters extends TunableParameters<EuchreParameters> implements ITrickTakingParameters {
 
-    // The game ends after the deal in which a team reaches this score. At 1 the game is a single deal, since one team
-    // scores in every deal; pagat plays to 10
-    public int targetScore = 1;
+    // The game ends after the deal in which a team reaches this score (pagat: 10). At 1 the game is a single deal,
+    // since one team scores in every deal (RECYCLE)
+    public int targetScore = 10;
 
     // Cards dealt to each player; with 4 players, 4 of the 24 cards are left in the kitty
     public int handSize = 5;
@@ -37,7 +38,7 @@ public class EuchreParameters extends TunableParameters<EuchreParameters> implem
     public boolean rememberVoids = true;
 
     public EuchreParameters() {
-        addTunableParameter("targetScore", 1, Arrays.asList(1, 5, 10));
+        addTunableParameter("targetScore", 10, Arrays.asList(1, 5, 10));
         addTunableParameter("handSize", 5);
         addTunableParameter("lowestCard", 9);
         addTunableParameter("pointsMade", 1);

@@ -31,11 +31,11 @@ final class CuckooTestUtils {
      * A real game from the factory with default parameters, reset with random players, for tests driven by fm.next.
      */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, null);
+        return newGame(nPlayers, seed, new CuckooParameters());
     }
 
     /**
-     * As newGame(nPlayers, seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(nPlayers, seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(int nPlayers, long seed, CuckooParameters params) {
         Game game = GameType.Cuckoo.createGameInstance(nPlayers, seed, params);

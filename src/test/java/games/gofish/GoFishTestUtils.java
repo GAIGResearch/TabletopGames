@@ -25,7 +25,7 @@ final class GoFishTestUtils {
     }
 
     /**
-     * A real game from the factory with the given parameters (null for the defaults), reset with random players, for
+     * A real game from the factory with the given parameters, reset with random players, for
      * tests driven by fm.next. The seed overrides any seed on params.
      */
     static Game newGame(int nPlayers, long seed, GoFishParameters params) {
@@ -38,7 +38,7 @@ final class GoFishTestUtils {
     }
 
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, null);
+        return newGame(nPlayers, seed, new GoFishParameters());
     }
 
     /**

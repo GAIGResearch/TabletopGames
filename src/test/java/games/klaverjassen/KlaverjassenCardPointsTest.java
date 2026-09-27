@@ -18,7 +18,7 @@ public class KlaverjassenCardPointsTest {
 
     @Before
     public void setup() {
-        params = new KlaverjassenParameters();
+        params = KlaverjassenTestUtils.valetParams();
     }
 
     private int points(String code, FrenchCard.Suite trumps) {

@@ -15,7 +15,10 @@ public class CZESetupTest {
     @Test
     public void dealsSevenCardsEachToTwoPlayersAndFiveEachOtherwise() {
         for (int nPlayers = 2; nPlayers <= 8; nPlayers++) {
-            CZEGameState state = new CZEGameState(new CZEParameters(), nPlayers);
+            // the default hand sizes; with no nomination, so that player 0 is the current player whatever the starter
+            CZEParameters params = new CZEParameters();
+            params.setParameterValue("dealerNominatesStarterSuit", false);
+            CZEGameState state = new CZEGameState(params, nPlayers);
             fm.setup(state);
             int handSize = nPlayers == 2 ? 7 : 5;
             String label = nPlayers + " players";
@@ -31,7 +34,7 @@ public class CZESetupTest {
 
     @Test
     public void suitToMatchIsTheStarterCardsSuitOrTheParameterSuitIfItIsAnEight() {
-        CZEParameters params = new CZEParameters();
+        CZEParameters params = CZETestUtils.valetParams();
         params.setParameterValue("starterEightSuit", Clubs);   // not the default, so the parameter is seen to be used
         int eights = 0, others = 0;
         for (int seed = 0; seed < 500; seed++) {

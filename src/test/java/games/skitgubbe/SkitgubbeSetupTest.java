@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 public class SkitgubbeSetupTest {
 
     private void checkSetup(int nPlayers, int handSize) {
-        SkitgubbeParameters params = new SkitgubbeParameters();
+        SkitgubbeParameters params = SkitgubbeTestUtils.valetParams();
         params.setParameterValue("handSize", handSize);
         SkitgubbeGameState state = newState(nPlayers, 42, params);
 

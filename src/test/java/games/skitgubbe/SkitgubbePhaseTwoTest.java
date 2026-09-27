@@ -23,7 +23,7 @@ public class SkitgubbePhaseTwoTest {
     SkitgubbeForwardModel fm = new SkitgubbeForwardModel();
 
     private SkitgubbeGameState newThree() {
-        return newState(3, 42, new SkitgubbeParameters());
+        return newState(3, 42, SkitgubbeTestUtils.valetParams());
     }
 
     private void play(SkitgubbeGameState state, String code) {
@@ -282,7 +282,7 @@ public class SkitgubbePhaseTwoTest {
     }
 
     private SkitgubbeGameState capped(int maxPhaseTwoActions) {
-        SkitgubbeParameters params = new SkitgubbeParameters();
+        SkitgubbeParameters params = SkitgubbeTestUtils.valetParams();
         params.setParameterValue("maxPhaseTwoActions", maxPhaseTwoActions);
         SkitgubbeGameState state = newState(4, 42, params);
         // D (3) went out earlier with exitScore 4; A, B, C hold two cards each

@@ -32,7 +32,7 @@ public class CribbageDiscardTest {
 
     @Before
     public void setup() {
-        params = new CribbageParameters();
+        params = CribbageTestUtils.valetParams();
         params.setRandomSeed(42);
         state = new CribbageGameState(params, 2);
         fm = new CribbageForwardModel();
@@ -70,7 +70,7 @@ public class CribbageDiscardTest {
     public void setupShufflesTheDeckWithTheGameSeed() {
         List<List<FrenchCard>> hands = new ArrayList<>();
         for (long seed : new long[]{42, 43}) {
-            CribbageParameters p = new CribbageParameters();
+            CribbageParameters p = CribbageTestUtils.valetParams();
             p.setRandomSeed(seed);
             CribbageGameState fresh = new CribbageGameState(p, 2);
             fm.setup(fresh);

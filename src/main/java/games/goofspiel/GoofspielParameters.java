@@ -13,6 +13,7 @@ import static core.components.FrenchCard.Suite.*;
 
 /**
  * Parameters for Goofspiel (GOPS). The defaults are Pagat's rules; the alternatives are Pagat's variants.
+ * data/goofspiel/Goofspiel_Valet.json gives the RECYCLE version of the game, the same as the defaults.
  */
 public class GoofspielParameters extends TunableParameters<GoofspielParameters> {
 

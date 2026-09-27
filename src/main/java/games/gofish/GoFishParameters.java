@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * Parameters for Go Fish (as described at https://www.pagat.com/quartet/gofish.html).
+ * data/gofish/GoFish_Valet.json gives the RECYCLE version of the game, with five cards each for two players.
  */
 public class GoFishParameters extends TunableParameters<GoFishParameters> {
 

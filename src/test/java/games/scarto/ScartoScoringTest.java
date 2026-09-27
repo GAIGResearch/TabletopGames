@@ -19,7 +19,7 @@ public class ScartoScoringTest {
 
     @Before
     public void setup() {
-        params = new ScartoParameters();
+        params = ScartoTestUtils.valetParams();
     }
 
     // ---- card points ----

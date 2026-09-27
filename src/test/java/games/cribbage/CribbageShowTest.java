@@ -22,7 +22,7 @@ public class CribbageShowTest {
 
     @Before
     public void setUp() {
-        params = new CribbageParameters();
+        params = CribbageTestUtils.valetParams();
     }
 
     /** Hand (or crib) of four cards, then the starter. */

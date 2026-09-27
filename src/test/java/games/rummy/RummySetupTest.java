@@ -49,7 +49,7 @@ public class RummySetupTest {
 
     @Test
     public void theHandSizeParameterSetsTheDeal() {
-        RummyParameters params = new RummyParameters();
+        RummyParameters params = RummyTestUtils.valetParams();
         params.setParameterValue("cardsFor2Players", 7);
         RummyGameState state = newState(params, 2, 3, fm);
         assertEquals(7, state.getPlayerHand(0).getSize());

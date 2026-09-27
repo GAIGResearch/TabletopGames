@@ -48,11 +48,11 @@ final class AgramTestUtils {
      * A real game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, null);
+        return newGame(nPlayers, seed, new AgramParameters());
     }
 
     /**
-     * As newGame(nPlayers, seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(nPlayers, seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(int nPlayers, long seed, AgramParameters params) {
         Game game = GameType.Agram.createGameInstance(nPlayers, seed, params);

@@ -22,7 +22,7 @@ public class RummyDealScoringTest {
     private final RummyForwardModel fm = new RummyForwardModel();
 
     private RummyGameState newMultiDealState(int nPlayers, int targetScore, long seed) {
-        RummyParameters params = new RummyParameters();
+        RummyParameters params = RummyTestUtils.valetParams();
         params.setParameterValue("targetScore", targetScore);
         return newState(params, nPlayers, seed, fm);
     }

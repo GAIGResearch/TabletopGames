@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class KlaverjassenRoemTest {
 
-    private final KlaverjassenParameters params = new KlaverjassenParameters();
+    private final KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
 
     private int roem(FrenchCard.Suite trumps, String... codes) {
         return KlaverjassenUtils.roem(cards(codes), trumps, params);

@@ -80,7 +80,8 @@ public class CuckooForwardModel extends StandardForwardModel {
             return;
         }
         loseLives(state);
-        if (state.getNPlayersInGame() <= 1) {
+        int maxDeals = ((CuckooParameters) state.getGameParameters()).maxDeals;
+        if (state.getNPlayersInGame() <= 1 || (maxDeals > 0 && state.getRoundCounter() + 1 >= maxDeals)) {
             endGame(state);
             return;
         }
@@ -111,21 +112,17 @@ public class CuckooForwardModel extends StandardForwardModel {
 
     /**
      * The last player left in the game wins and everyone else loses. If nobody is left, the players who went out in
-     * the final round all win and everyone else loses.
+     * the final round all win and everyone else loses. If several players are left, those with the most lives win.
      */
     @Override
     protected void endGame(AbstractGameState gs) {
         CuckooGameState state = (CuckooGameState) gs;
-        int nLeft = state.getNPlayersInGame();
-        // more than one player is left only when the framework's maxRounds ends the game; they are ranked by lives
-        if (nLeft > 1) {
-            super.endGame(gs);
-            return;
-        }
         state.setGameStatus(GAME_END);
+        // more than one player is left only when CuckooParameters.maxDeals or the framework's maxRounds ends the game
+        int mostLives = Arrays.stream(state.lives).max().orElse(0);
         int finalRound = Arrays.stream(state.roundEliminated).max().orElse(-1);
         for (int p = 0; p < state.getNPlayers(); p++) {
-            boolean wins = nLeft == 1 ? state.isInGame(p) : state.roundEliminated[p] == finalRound;
+            boolean wins = mostLives > 0 ? state.lives[p] == mostLives : state.roundEliminated[p] == finalRound;
             state.setPlayerResult(wins ? WIN_GAME : LOSE_GAME, p);
         }
     }

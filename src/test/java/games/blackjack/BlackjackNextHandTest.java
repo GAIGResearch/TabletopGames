@@ -30,7 +30,7 @@ public class BlackjackNextHandTest {
 
     private BlackjackGameState newState(int nPlayers, int nHands) {
         if (params == null)
-            params = new BlackjackParameters();
+            params = BlackjackTestUtils.valetParams();
         params.setRandomSeed(42);
         params.setParameterValue("nHands", nHands);
         BlackjackGameState state = new BlackjackGameState(params, nPlayers);
@@ -235,7 +235,7 @@ public class BlackjackNextHandTest {
 
     @Test
     public void aHandEndedByANaturalPaidAtOnceIsFollowedByTheNextHand() {
-        params = new BlackjackParameters();
+        params = BlackjackTestUtils.valetParams();
         pagatNaturals(params);
         BlackjackGameState state = newState(1, 3);
         // natural on a bet of 4, paid 3:2 at the deal: 10 - 4 + 4 + 6 = 16

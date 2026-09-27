@@ -23,7 +23,7 @@ public class SkitgubbeCompleterLeadsTest {
     SkitgubbeForwardModel fm = new SkitgubbeForwardModel();
 
     private SkitgubbeGameState newThree() {
-        SkitgubbeParameters params = new SkitgubbeParameters();
+        SkitgubbeParameters params = SkitgubbeTestUtils.valetParams();
         params.setParameterValue("completerLeads", true);
         return newState(3, 42, params);
     }

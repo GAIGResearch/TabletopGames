@@ -295,7 +295,7 @@ public class RummyGameFlowTest {
 
     @Test
     public void aGameStopsAtTheTurnCap() {
-        RummyParameters params = new RummyParameters();
+        RummyParameters params = RummyTestUtils.valetParams();
         params.setParameterValue("maxTurnsPerDeal", 10);
         Game g = newGame(2, 14, params);
         // draws and discards only, so no hand empties before the cap

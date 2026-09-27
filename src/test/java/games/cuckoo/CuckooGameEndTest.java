@@ -1,6 +1,7 @@
 package games.cuckoo;
 
 import core.CoreConstants.GameResult;
+import evaluation.optimisation.TunableParameters;
 import games.cuckoo.actions.KeepCard;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +13,8 @@ import static org.junit.Assert.*;
 /**
  * The end of the game, the results and ordinal positions.
  * <p>
- * Each test arranges round 2 of a 4-player game in which player 1 went out in round 0 and player 2 in round 1, so
- * players 0 and 3 are left; player 3 deals and decides now.
+ * Except for the Valet game, each test arranges round 2 of a 4-player game in which player 1 went out in round 0 and
+ * player 2 in round 1, so players 0 and 3 are left; player 3 deals and decides now.
  */
 public class CuckooGameEndTest {
 
@@ -92,6 +93,48 @@ public class CuckooGameEndTest {
         assertEquals(3, state.getCurrentPlayer());
         assertEquals(3, state.getRoundCounter());
         assertOneCardPerPlayerInGame(state);
+    }
+
+    @Test
+    public void atMaxDealsThePlayersWithTheMostLivesWin() {
+        ((CuckooParameters) state.getGameParameters()).setParameterValue("maxDeals", 3);
+        state.lives[0] = 2;
+        state.lives[3] = 2;
+        dealCards(state, card("9H"), null, null, card("4S"));
+        fm.next(state, new KeepCard());
+        // round 2 is the third deal: player 3 loses a life, and player 0 is left with the most
+        assertArrayEquals(new int[]{2, 0, 0, 1}, state.lives);
+        assertEquals(GAME_END, state.getGameStatus());
+        assertArrayEquals(new GameResult[]{WIN_GAME, LOSE_GAME, LOSE_GAME, LOSE_GAME}, state.getPlayerResults());
+    }
+
+    @Test
+    public void atMaxDealsPlayersSharingTheMostLivesAreJointWinners() {
+        ((CuckooParameters) state.getGameParameters()).setParameterValue("maxDeals", 3);
+        state.lives[0] = 2;
+        state.lives[3] = 3;
+        dealCards(state, card("9H"), null, null, card("4S"));
+        fm.next(state, new KeepCard());
+        // player 3 drops to 2 lives, level with player 0
+        assertArrayEquals(new int[]{2, 0, 0, 2}, state.lives);
+        assertEquals(GAME_END, state.getGameStatus());
+        assertArrayEquals(new GameResult[]{WIN_GAME, LOSE_GAME, LOSE_GAME, WIN_GAME}, state.getPlayerResults());
+    }
+
+    @Test
+    public void theValetGameIsOneDealThatThePlayersWithTheLowestCardLose() {
+        CuckooParameters params = new CuckooParameters();
+        TunableParameters.loadFromJSONFile(params, "data/cuckoo/Cuckoo_Valet.json");
+        params.setRandomSeed(42);
+        state = new CuckooGameState(params, 4);
+        fm.setup(state);
+        setDealerAndTurn(state, 3, 3);
+        dealCards(state, card("9H"), card("2S"), card("2D"), card("KC"));
+        fm.next(state, new KeepCard());
+        // the two 2s are lowest: players 1 and 2 lose, and everyone else wins after the single deal
+        assertEquals(GAME_END, state.getGameStatus());
+        assertEquals(0, state.getRoundCounter());
+        assertArrayEquals(new GameResult[]{WIN_GAME, LOSE_GAME, LOSE_GAME, WIN_GAME}, state.getPlayerResults());
     }
 
     @Test

@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * Parameters for Sueca (as described at https://mgoadric.github.io/valet/post/sueca.html and
- * https://www.pagat.com/aceten/sueca.html). The defaults follow the RECYCLE description of the game, a single deal;
- * playRubber gives pagat's rubber of several deals.
+ * https://www.pagat.com/aceten/sueca.html). The defaults follow pagat, a rubber of several deals;
+ * data/sueca/Sueca_Valet.json gives the RECYCLE description of the game, a single deal.
  */
 public class SuecaParameters extends TunableParameters<SuecaParameters> implements ITrickTakingParameters {
 
@@ -19,7 +19,7 @@ public class SuecaParameters extends TunableParameters<SuecaParameters> implemen
 
     // If false, the game is a single deal, won by the team with more card points (RECYCLE). If true, deals are
     // played until a team has won targetGames games (pagat)
-    public boolean playRubber = false;
+    public boolean playRubber = true;
 
     // Games needed to win the rubber (used only with playRubber)
     public int targetGames = 4;
@@ -29,7 +29,7 @@ public class SuecaParameters extends TunableParameters<SuecaParameters> implemen
 
     public SuecaParameters() {
         addTunableParameter("handSize", 10);
-        addTunableParameter("playRubber", false, List.of(false, true));
+        addTunableParameter("playRubber", true, List.of(false, true));
         addTunableParameter("targetGames", 4, Arrays.asList(1, 2, 4, 8));
         addTunableParameter("rememberVoids", true, List.of(false, true));
         _reset();

@@ -1,0 +1,11 @@
+{
+  "class": "games.golfsix.GolfSixParameters",
+  "nDeals": 1,
+  "finalTurns": false,
+  "initialFaceUp": 2,
+  "maxTurnsPerPlayer": 50,
+  "aceValue": 1,
+  "twoValue": -2,
+  "courtValue": 10,
+  "kingValue": 0
+}

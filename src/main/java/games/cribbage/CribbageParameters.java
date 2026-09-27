@@ -8,22 +8,18 @@ import java.util.Arrays;
  * <p>Parameters for two-player six-card Cribbage (https://www.pagat.com/adders/crib6.html).
  * All rule constants are read from here rather than hard-coded in the state or forward model.</p>
  *
- * <p><b>The defaults follow the RECYCLE description of the game where it differs from pagat.</b>
- * The pagat rules are available by changing these parameters:</p>
- * <ul>
- *     <li>playFifteenPoints: a fifteen in the play scores 1 (pagat: 2)</li>
- *     <li>runsIncludeStarter: in the show, runs are counted without the starter card (pagat: true)</li>
- *     <li>cribFlushNeedsStarter: a four-card flush in the crib scores, as in a hand (pagat: true, the crib
- *     only scores a flush if the starter matches too)</li>
- * </ul>
+ * <p>The defaults follow pagat, a game to 121. data/cribbage/Cribbage_Valet.json gives the RECYCLE description of
+ * the game: two rounds with no target score, a fifteen in the play scoring 1, runs in the show counted without the
+ * starter card, and a four-card flush in the crib scoring as in a hand.</p>
  */
 public class CribbageParameters extends TunableParameters<CribbageParameters> {
 
     public int nCardsDealt = 6;
     public int nCardsToCrib = 2;
 
-    // The brief plays two rounds, so that each player has the crib once
-    public int nRounds = 2;
+    // The game ends after this many rounds (RECYCLE: 2, so that each player has the crib once). With a target
+    // score it is only a cap
+    public int nRounds = 100;
     // The game ends as soon as a player reaches this score (pagat: 121). 0 means no target score.
     public int targetScore = 121;
 
@@ -32,7 +28,7 @@ public class CribbageParameters extends TunableParameters<CribbageParameters> {
 
     // Fifteens: in the show, and in the play (RECYCLE: 1; pagat: 2)
     public int fifteenPoints = 2;
-    public int playFifteenPoints = 1;
+    public int playFifteenPoints = 2;
     // Points for pairs, in both the play and the show
     public int pairPoints = 2;
     public int pairRoyalPoints = 6;
@@ -47,18 +43,18 @@ public class CribbageParameters extends TunableParameters<CribbageParameters> {
     public int hisNobsPoints = 1;
     public int flushPoints = 4;   // four hand cards of one suit; +1 if the starter matches too
     // RECYCLE: false, a four-card crib flush counts; pagat: true, a crib flush needs the starter to match
-    public boolean cribFlushNeedsStarter = false;
+    public boolean cribFlushNeedsStarter = true;
     // RECYCLE: false, runs in the show are counted on the hand or crib alone; pagat: true
-    public boolean runsIncludeStarter = false;
+    public boolean runsIncludeStarter = true;
 
     public CribbageParameters() {
         addTunableParameter("nCardsDealt", 6);
         addTunableParameter("nCardsToCrib", 2);
-        addTunableParameter("nRounds", 2, Arrays.asList(2, 4, 6, 8));
+        addTunableParameter("nRounds", 100, Arrays.asList(2, 4, 6, 8, 100));
         addTunableParameter("targetScore", 121, Arrays.asList(0, 61, 121));
         addTunableParameter("maxCount", 31);
         addTunableParameter("fifteenPoints", 2);
-        addTunableParameter("playFifteenPoints", 1, Arrays.asList(1, 2));
+        addTunableParameter("playFifteenPoints", 2, Arrays.asList(1, 2));
         addTunableParameter("pairPoints", 2);
         addTunableParameter("pairRoyalPoints", 6);
         addTunableParameter("doublePairRoyalPoints", 12);
@@ -67,8 +63,8 @@ public class CribbageParameters extends TunableParameters<CribbageParameters> {
         addTunableParameter("hisHeelsPoints", 2);
         addTunableParameter("hisNobsPoints", 1);
         addTunableParameter("flushPoints", 4);
-        addTunableParameter("cribFlushNeedsStarter", false, Arrays.asList(false, true));
-        addTunableParameter("runsIncludeStarter", false, Arrays.asList(false, true));
+        addTunableParameter("cribFlushNeedsStarter", true, Arrays.asList(false, true));
+        addTunableParameter("runsIncludeStarter", true, Arrays.asList(false, true));
     }
 
     @Override

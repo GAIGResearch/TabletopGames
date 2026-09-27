@@ -1,5 +1,6 @@
 package games.rummy;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
@@ -39,7 +40,7 @@ class RummyTestUtils {
 
     /** A factory game of nPlayers RandomPlayers, reset with the given seed. */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, new RummyParameters());
+        return newGame(nPlayers, seed, valetParams());
     }
 
     /** A factory game of nPlayers RandomPlayers with the given parameters, reset with the given seed. */
@@ -59,7 +60,7 @@ class RummyTestUtils {
 
     /** A state with default parameters, set up by the forward model. */
     static RummyGameState newState(int nPlayers, long seed, RummyForwardModel fm) {
-        return newState(new RummyParameters(), nPlayers, seed, fm);
+        return newState(valetParams(), nPlayers, seed, fm);
     }
 
     /** A card from a code: rank 2-10, J, Q, K, A then suit H, D, C, S - e.g. "10H", "JS", "AD". */
@@ -290,5 +291,14 @@ class RummyTestUtils {
     /** The cards of a deck as a set (compare decks by content, never with Deck.equals). */
     static Set<FrenchCard> setOf(Deck<FrenchCard> deck) {
         return new HashSet<>(deck.getComponents());
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/rummy/Rummy_Valet.json), which the tests were written for.
+     */
+    public static RummyParameters valetParams() {
+        RummyParameters params = new RummyParameters();
+        TunableParameters.loadFromJSONFile(params, "data/rummy/Rummy_Valet.json");
+        return params;
     }
 }

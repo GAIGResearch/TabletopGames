@@ -102,7 +102,7 @@ public class KlaverjassenPlayRulesTest {
 
     @Test
     public void partnerWinningWithATrumpUnderNoUndertrumpAPlayerMayAlsoOvertrumpPartner() {
-        KlaverjassenParameters params = new KlaverjassenParameters();
+        KlaverjassenParameters params = KlaverjassenTestUtils.valetParams();
         params.setParameterValue("partnerTrumpRule", NO_UNDERTRUMP);
         state = newState(42, params);
         setTrumps(state, Hearts);

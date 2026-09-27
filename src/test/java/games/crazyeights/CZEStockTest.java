@@ -25,7 +25,7 @@ public class CZEStockTest {
 
     @Before
     public void setup() {
-        CZEParameters params = new CZEParameters();
+        CZEParameters params = CZETestUtils.valetParams();
         params.setRandomSeed(42);
         state = new CZEGameState(params, 3);
         fm = new CZEForwardModel();

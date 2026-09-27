@@ -43,7 +43,7 @@ public class GolfSixCopyTest {
 
     @Test
     public void aFaithfulCopyIsIndependentOfPlay() {
-        GolfSixParameters params = new GolfSixParameters();
+        GolfSixParameters params = GolfSixTestUtils.valetParams();
         params.setRandomSeed(57);
         GolfSixGameState fresh = newState(params, 3);
         GolfSixGameState copy = (GolfSixGameState) fresh.copy();

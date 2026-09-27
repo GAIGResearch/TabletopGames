@@ -25,7 +25,7 @@ public class SkitgubbeTurnUpTest {
 
     @Before
     public void setup() {
-        state = newState(3, 42, new SkitgubbeParameters());
+        state = newState(3, 42, SkitgubbeTestUtils.valetParams());
         fm = new SkitgubbeForwardModel();
     }
 
@@ -119,7 +119,7 @@ public class SkitgubbeTurnUpTest {
 
     @Test
     public void withHandSizeTwoATurnUpLeavesTheHandAtTwoWithNoDraw() {
-        SkitgubbeParameters params = new SkitgubbeParameters();
+        SkitgubbeParameters params = SkitgubbeTestUtils.valetParams();
         params.setParameterValue("handSize", 2);
         state = newState(3, 42, params);
         giveHand(state, 0, "5H", "KS");

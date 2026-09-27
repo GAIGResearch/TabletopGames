@@ -191,7 +191,7 @@ public class RummyGameEndTest {
 
     @Test
     public void theGameEndsAtTheEndOfTheLastTurnAllowed() {
-        RummyParameters params = new RummyParameters();
+        RummyParameters params = RummyTestUtils.valetParams();
         params.setParameterValue("maxTurnsPerDeal", 3);
         state = newState(params, 2, 21, fm);
         // 2 players: draw deck 52 - 20 - 1 = 31, so 3 turns do not empty it

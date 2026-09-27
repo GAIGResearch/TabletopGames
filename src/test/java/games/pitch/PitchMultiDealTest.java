@@ -232,12 +232,12 @@ public class PitchMultiDealTest {
 
     @Test
     public void randomGamesToATargetEndWhenTheLastPitchingTeamGoesOut() {
-        int maxDeals = new PitchParameters().getMaxRounds();
+        int maxDeals = PitchTestUtils.valetParams().getMaxRounds();
         assertEquals(100, maxDeals);
         for (int target : new int[]{7, 21}) {
             int wentOut = 0, totalDeals = 0;
             for (long seed = 1; seed <= 5; seed++) {
-                PitchParameters p = new PitchParameters();
+                PitchParameters p = PitchTestUtils.valetParams();
                 p.setParameterValue("targetScore", target);
                 Game game = newGame(seed, p);
                 PitchGameState state = (PitchGameState) game.getGameState();

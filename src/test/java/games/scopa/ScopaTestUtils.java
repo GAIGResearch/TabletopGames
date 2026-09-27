@@ -1,5 +1,6 @@
 package games.scopa;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
@@ -38,7 +39,7 @@ class ScopaTestUtils {
 
     /** A factory game (2 RandomPlayers), reset with the given seed. */
     static Game newGame(long seed) {
-        return newGame(seed, new ScopaParameters());
+        return newGame(seed, valetParams());
     }
 
     /** A factory game (2 RandomPlayers) with the given parameters, reset with the given seed. */
@@ -51,7 +52,7 @@ class ScopaTestUtils {
 
     /** A 2-player state with default parameters and the given seed, set up by the forward model. */
     static ScopaGameState newState(long seed, ScopaForwardModel fm) {
-        ScopaParameters params = new ScopaParameters();
+        ScopaParameters params = valetParams();
         params.setRandomSeed(seed);
         ScopaGameState state = new ScopaGameState(params, N_PLAYERS);
         fm.setup(state);
@@ -68,7 +69,7 @@ class ScopaTestUtils {
 
     /** Parameters with ScopaParameters.targetScore and redealOnKings set through setParameterValue. */
     static ScopaParameters params(int targetScore, boolean redealOnKings) {
-        ScopaParameters params = new ScopaParameters();
+        ScopaParameters params = valetParams();
         params.setParameterValue("targetScore", targetScore);
         params.setParameterValue("redealOnKings", redealOnKings);
         return params;
@@ -268,5 +269,14 @@ class ScopaTestUtils {
     static void emptyDrawDeck(ScopaGameState state, int p) {
         while (state.drawDeck.getSize() > 0)
             state.capturedCards.get(p).addToBottom(state.drawDeck.draw());
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/scopa/Scopa_Valet.json), which the tests were written for.
+     */
+    public static ScopaParameters valetParams() {
+        ScopaParameters params = new ScopaParameters();
+        TunableParameters.loadFromJSONFile(params, "data/scopa/Scopa_Valet.json");
+        return params;
     }
 }

@@ -60,7 +60,7 @@ public class SchwimmenSpecialHandsTest {
 
     @Test
     public void withThreeAcesValuedBelowThirtyOneTheSchnauzWins() {
-        SchwimmenParameters params = new SchwimmenParameters();
+        SchwimmenParameters params = SchwimmenTestUtils.valetParams();
         params.setParameterValue("threeAcesValue", 30.0);
         SchwimmenGameState state = newState(params, 3, ordinarySeed(3, 0), fm);
         arrangeDeal(state, h("7C", "8C", "9C"),

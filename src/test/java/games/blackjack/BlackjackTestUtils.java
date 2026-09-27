@@ -1,5 +1,6 @@
 package games.blackjack;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractForwardModel;
 import core.AbstractPlayer;
 import core.Game;
@@ -45,11 +46,11 @@ final class BlackjackTestUtils {
      * A real game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, null);
+        return newGame(nPlayers, seed, valetParams());
     }
 
     /**
-     * As newGame(nPlayers, seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(nPlayers, seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(int nPlayers, long seed, BlackjackParameters params) {
         Game game = GameType.Blackjack.createGameInstance(nPlayers, seed, params);
@@ -376,5 +377,14 @@ final class BlackjackTestUtils {
             if (i < before.size() && c.equals(before.get(i)))
                 i++;
         return i == before.size();
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/blackjack/Blackjack_Valet.json), which the tests were written for.
+     */
+    public static BlackjackParameters valetParams() {
+        BlackjackParameters params = new BlackjackParameters();
+        TunableParameters.loadFromJSONFile(params, "data/blackjack/Blackjack_Valet.json");
+        return params;
     }
 }

@@ -1,5 +1,6 @@
 package games.euchre;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
@@ -44,11 +45,11 @@ final class EuchreTestUtils {
      * A real 4-player game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(long seed) {
-        return newGame(seed, null);
+        return newGame(seed, valetParams());
     }
 
     /**
-     * As newGame(seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(long seed, EuchreParameters params) {
         Game game = GameType.Euchre.createGameInstance(4, seed, params);
@@ -63,7 +64,7 @@ final class EuchreTestUtils {
      * A state from direct setup with default parameters and the given seed, for unit tests.
      */
     static EuchreGameState newState(long seed) {
-        return newState(seed, new EuchreParameters());
+        return newState(seed, valetParams());
     }
 
     /**
@@ -80,7 +81,7 @@ final class EuchreTestUtils {
      * Parameters with the given target score (set through setParameterValue).
      */
     static EuchreParameters params(int targetScore) {
-        EuchreParameters params = new EuchreParameters();
+        EuchreParameters params = valetParams();
         params.setParameterValue("targetScore", targetScore);
         return params;
     }
@@ -386,5 +387,14 @@ final class EuchreTestUtils {
         allDecks(state).forEach(d -> cards.addAll(d.getComponents()));
         assertEquals("number of cards", 24, cards.size());
         assertEquals(new HashSet<>(ALL_CARDS), new HashSet<>(cards));
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/euchre/Euchre_Valet.json), which the tests were written for.
+     */
+    public static EuchreParameters valetParams() {
+        EuchreParameters params = new EuchreParameters();
+        TunableParameters.loadFromJSONFile(params, "data/euchre/Euchre_Valet.json");
+        return params;
     }
 }

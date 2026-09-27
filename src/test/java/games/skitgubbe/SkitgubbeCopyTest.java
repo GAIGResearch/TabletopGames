@@ -27,7 +27,7 @@ public class SkitgubbeCopyTest {
      */
     @Before
     public void setup() {
-        state = newState(3, 42, new SkitgubbeParameters());
+        state = newState(3, 42, SkitgubbeTestUtils.valetParams());
         fm = new SkitgubbeForwardModel();
         moveTo(state, state.collectedCards.get(1), "5H", "9C");
         moveTo(state, state.heldCards.get(0), "7S");
@@ -116,7 +116,7 @@ public class SkitgubbeCopyTest {
     @Test
     public void aTrumpCardDrawnInPlayIsKeptForItsDrawerAndHiddenFromOthers() {
         // a fresh position: player 0 draws the last draw-deck card, KD, as the trump card
-        SkitgubbeGameState s = newState(3, 42, new SkitgubbeParameters());
+        SkitgubbeGameState s = newState(3, 42, SkitgubbeTestUtils.valetParams());
         giveHand(s, 0, "5H", "KS", "2C");
         leaveDrawDeck(s, 2, "KD");
         fm.next(s, new PlayCard(card("5H")));
@@ -136,7 +136,7 @@ public class SkitgubbeCopyTest {
 
     @Test
     public void aFaithfulCopyAfterPlayEqualsTheOriginal() {
-        SkitgubbeGameState s = newState(3, 42, new SkitgubbeParameters());
+        SkitgubbeGameState s = newState(3, 42, SkitgubbeTestUtils.valetParams());
         giveHand(s, 0, "7S", "2S", "3S");
         giveHand(s, 1, "7H", "2D", "3D");
         fm.next(s, new PlayCard(card("7S")));

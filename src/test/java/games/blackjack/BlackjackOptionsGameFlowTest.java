@@ -42,7 +42,7 @@ public class BlackjackOptionsGameFlowTest {
 
     @Test
     public void aScriptedTwoHandGameWithDoubling() {
-        BlackjackParameters params = new BlackjackParameters();
+        BlackjackParameters params = BlackjackTestUtils.valetParams();
         params.setParameterValue("doubleDown", true);
         params.setParameterValue("nHands", 2);
         Game game = newGame(3, 11, params);
@@ -95,7 +95,7 @@ public class BlackjackOptionsGameFlowTest {
     @Test
     public void aScriptedGameAgainstASoftSeventeenWithEachSetting() {
         for (boolean hitsSoft17 : new boolean[]{false, true}) {
-            BlackjackParameters params = new BlackjackParameters();
+            BlackjackParameters params = BlackjackTestUtils.valetParams();
             params.setParameterValue("dealerHitsSoft17", hitsSoft17);
             Game game = newGame(2, 5, params);
             BlackjackGameState state = (BlackjackGameState) game.getGameState();
@@ -154,7 +154,7 @@ public class BlackjackOptionsGameFlowTest {
             for (int nPlayers : new int[]{1, 3, 7}) {
                 for (long seed = 0; seed < 30; seed++) {
                     String game0 = "mode " + naturalOnly + ", " + nPlayers + " players, seed " + seed;
-                    BlackjackParameters params = new BlackjackParameters();
+                    BlackjackParameters params = BlackjackTestUtils.valetParams();
                     params.setParameterValue("dealerHitsSoft17", true);
                     params.setParameterValue("doubleDown", true);
                     params.setParameterValue("nHands", 3);

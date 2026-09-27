@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class GolfSixScoringTest {
 
-    final GolfSixParameters params = new GolfSixParameters();
+    final GolfSixParameters params = GolfSixTestUtils.valetParams();
 
     private int score(String... codes) {
         return GolfSixUtils.gridScore(cards(codes), params);

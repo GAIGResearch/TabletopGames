@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Parameters for Whist (as described at https://www.pagat.com/whist/whist.html).
+ * Parameters for Whist (as described at https://www.pagat.com/whist/whist.html), over four deals so that each player
+ * deals once. data/whist/Whist_Valet.json gives the RECYCLE version of the game, a single deal.
  */
 public class WhistParameters extends TunableParameters<WhistParameters> implements ITrickTakingParameters {
 
@@ -25,7 +26,7 @@ public class WhistParameters extends TunableParameters<WhistParameters> implemen
             List.of(FrenchCard.Suite.Hearts, FrenchCard.Suite.Diamonds, FrenchCard.Suite.Spades, FrenchCard.Suite.Clubs);
 
     // Deals in the game. The side with more points after the last deal wins
-    public int nDeals = 1;
+    public int nDeals = 4;
 
     public TrumpMode trumpMode = TrumpMode.TURN_UP;
 
@@ -36,10 +37,11 @@ public class WhistParameters extends TunableParameters<WhistParameters> implemen
     public boolean rememberVoids = true;
 
     public WhistParameters() {
-        addTunableParameter("nDeals", 1, Arrays.asList(1, 2, 4, 8));
+        addTunableParameter("nDeals", 4, Arrays.asList(1, 2, 4, 8));
         addTunableParameter("trumpMode", TrumpMode.TURN_UP, List.of(TrumpMode.values()));
         addTunableParameter("noTrumpsInRotation", false, List.of(false, true));
         addTunableParameter("rememberVoids", true, List.of(false, true));
+        _reset();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package games.schwimmen;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractForwardModel;
 import core.AbstractPlayer;
 import core.CoreConstants;
@@ -43,7 +44,7 @@ final class SchwimmenTestUtils {
 
     /** A factory game of nPlayers RandomPlayers, reset with the given seed. */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, new SchwimmenParameters());
+        return newGame(nPlayers, seed, valetParams());
     }
 
     /** A factory game of nPlayers RandomPlayers with the given parameters, reset with the given seed. */
@@ -62,7 +63,7 @@ final class SchwimmenTestUtils {
     }
 
     static SchwimmenGameState newState(int nPlayers, long seed, SchwimmenForwardModel fm) {
-        return newState(new SchwimmenParameters(), nPlayers, seed, fm);
+        return newState(valetParams(), nPlayers, seed, fm);
     }
 
     /**
@@ -84,7 +85,7 @@ final class SchwimmenTestUtils {
 
     /** Parameters for pagat's chips game (livesGame = true) with the default 3 starting chips. */
     static SchwimmenParameters livesParams() {
-        SchwimmenParameters params = new SchwimmenParameters();
+        SchwimmenParameters params = valetParams();
         params.setParameterValue("livesGame", true);
         return params;
     }
@@ -427,5 +428,14 @@ final class SchwimmenTestUtils {
         int idx = deck.getComponents().indexOf(card(code));
         assertTrue(code + " is not in " + deck.getComponents(), idx >= 0);
         return idx;
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/schwimmen/Schwimmen_Valet.json), which the tests were written for.
+     */
+    public static SchwimmenParameters valetParams() {
+        SchwimmenParameters params = new SchwimmenParameters();
+        TunableParameters.loadFromJSONFile(params, "data/schwimmen/Schwimmen_Valet.json");
+        return params;
     }
 }

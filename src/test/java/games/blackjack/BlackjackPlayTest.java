@@ -23,7 +23,7 @@ public class BlackjackPlayTest {
 
     @Before
     public void setup() {
-        params = new BlackjackParameters();
+        params = BlackjackTestUtils.valetParams();
         params.setRandomSeed(42);
         state = new BlackjackGameState(params, 3);
         fm = new BlackjackForwardModel();

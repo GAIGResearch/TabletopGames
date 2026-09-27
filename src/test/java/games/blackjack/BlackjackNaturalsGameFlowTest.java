@@ -64,7 +64,7 @@ public class BlackjackNaturalsGameFlowTest {
 
     @Test
     public void aScriptedGameWithNaturalsPaidAtThreeToTwo() {
-        BlackjackParameters params = new BlackjackParameters();
+        BlackjackParameters params = BlackjackTestUtils.valetParams();
         pagatNaturals(params);
         Game game = newGame(3, 11, params);
         BlackjackGameState state = (BlackjackGameState) game.getGameState();
@@ -121,7 +121,7 @@ public class BlackjackNaturalsGameFlowTest {
             int dealerBlackjacks = 0, naturals = 0, naturalsPlaying = 0, twentyOneWins = 0, holeChecks = 0;
             for (int nPlayers : new int[]{1, 3, 7}) {
                 for (long seed = 0; seed < 30; seed++) {
-                    BlackjackParameters params = new BlackjackParameters();
+                    BlackjackParameters params = BlackjackTestUtils.valetParams();
                     if (naturalOnly)
                         pagatNaturals(params);
                     Game game = newGame(nPlayers, seed, params);

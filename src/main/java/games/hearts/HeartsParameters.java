@@ -11,14 +11,8 @@ import games.GameType;
 import java.util.*;
 
 /**
- * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
- * maximum number of rounds in the game etc.). These parameters should be used everywhere in the code instead of
- * local variables or hard-coded numbers, by accessing these parameters from the game state via {@link AbstractGameState#getGameParameters()}.</p>
- *
- * <p>It should then implement appropriate {@link #_copy()}, {@link #_equals(Object)} and {@link #hashCode()} functions.</p>
- *
- * <p>The class can optionally extend from {@link evaluation.optimisation.TunableParameters} instead, which allows to use
- * automatic game parameter optimisation tools in the framework.</p>
+ * Parameters for Hearts (https://www.pagat.com/reverse/hearts.html): a game to 100 points, with cards passed before
+ * each hand. data/hearts/Hearts_Valet.json gives the Valet version of the game, a single hand with no passing.
  */
 public class HeartsParameters extends TunableParameters<HeartsParameters> implements ITrickTakingParameters {
     public String dataPath = "data/FrenchCards/";
@@ -30,7 +24,7 @@ public class HeartsParameters extends TunableParameters<HeartsParameters> implem
     public final int queenOfSpades = 13;
     public final int cardsPassedPerRound = 3;
     // The game ends at the end of the first hand (round) in which any player has at least this many points
-    public int matchScore = 50;
+    public int matchScore = 100;
     // If true then a player who fails to follow suit is remembered as being void in it, and
     // redeterminisation will not deal them any cards of that suit
     public boolean rememberVoids = true;
@@ -52,7 +46,7 @@ public class HeartsParameters extends TunableParameters<HeartsParameters> implem
         addTunableParameter("rememberVoids", true, Arrays.asList(false, true));
         addTunableParameter("passCards", true, Arrays.asList(false, true));
         addTunableParameter("maxRounds", 100, Arrays.asList(1, 2, 3, 5, 10, 100));
-        addTunableParameter("matchScore", 50, Arrays.asList(25, 50, 75, 100));
+        addTunableParameter("matchScore", 100, Arrays.asList(25, 50, 75, 100));
         cardsToRemove.put(3, Collections.singletonList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
         cardsToRemove.put(4, Collections.emptyList());
         cardsToRemove.put(5, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),

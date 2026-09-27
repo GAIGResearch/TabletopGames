@@ -1,5 +1,6 @@
 package games.scarto;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Deck;
@@ -38,7 +39,7 @@ class ScartoTestUtils {
 
     /** A factory game (3 RandomPlayers), reset with the given seed. */
     static Game newGame(long seed) {
-        return newGame(seed, new ScartoParameters());
+        return newGame(seed, valetParams());
     }
 
     /** A factory game (3 RandomPlayers) with the given parameters, reset with the given seed. */
@@ -51,7 +52,7 @@ class ScartoTestUtils {
 
     /** A 3-player state with default parameters and the given seed, set up by the forward model. */
     static ScartoGameState newState(long seed, ScartoForwardModel fm) {
-        return newState(seed, fm, new ScartoParameters());
+        return newState(seed, fm, valetParams());
     }
 
     /** A 3-player state with the given parameters (seed set to the given one), set up by the forward model. */
@@ -64,14 +65,14 @@ class ScartoTestUtils {
 
     /** Parameters for the several-deals variant: nDeals = 3. */
     static ScartoParameters threeDeals() {
-        ScartoParameters params = new ScartoParameters();
+        ScartoParameters params = valetParams();
         params.setParameterValue("nDeals", 3);
         return params;
     }
 
     /** Parameters for the dealer's exchange: dealerExchange = true (one deal). */
     static ScartoParameters exchange() {
-        ScartoParameters params = new ScartoParameters();
+        ScartoParameters params = valetParams();
         params.setParameterValue("dealerExchange", true);
         return params;
     }
@@ -248,5 +249,14 @@ class ScartoTestUtils {
     /** The PlayCard actions for these cards, in this order. */
     static List<PlayCard<TarotCard>> playCards(TarotCard... cards) {
         return Arrays.stream(cards).map(PlayCard::new).toList();
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/scarto/Scarto_Valet.json), which the tests were written for.
+     */
+    public static ScartoParameters valetParams() {
+        ScartoParameters params = new ScartoParameters();
+        TunableParameters.loadFromJSONFile(params, "data/scarto/Scarto_Valet.json");
+        return params;
     }
 }

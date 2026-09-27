@@ -1,5 +1,6 @@
 package games.golfsix;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
@@ -36,11 +37,11 @@ final class GolfSixTestUtils {
      * A real game from the factory with default parameters, reset with random players, for tests driven by fm.next.
      */
     static Game newGame(int nPlayers, long seed) {
-        return newGame(nPlayers, seed, null);
+        return newGame(nPlayers, seed, valetParams());
     }
 
     /**
-     * As newGame(nPlayers, seed), with the given parameters (null for the defaults). The seed overrides any seed on
+     * As newGame(nPlayers, seed), with the given parameters. The seed overrides any seed on
      * params.
      */
     static Game newGame(int nPlayers, long seed, GolfSixParameters params) {
@@ -65,7 +66,7 @@ final class GolfSixTestUtils {
      * A directly set-up state with default parameters and the given seed.
      */
     static GolfSixGameState newState(int nPlayers, long seed) {
-        GolfSixParameters params = new GolfSixParameters();
+        GolfSixParameters params = valetParams();
         params.setRandomSeed(seed);
         return newState(params, nPlayers);
     }
@@ -189,7 +190,7 @@ final class GolfSixTestUtils {
      * Default parameters with the two variant parameters set. No seed is set.
      */
     static GolfSixParameters variant(boolean finalTurns, int nDeals) {
-        GolfSixParameters params = new GolfSixParameters();
+        GolfSixParameters params = valetParams();
         params.setParameterValue("finalTurns", finalTurns);
         params.setParameterValue("nDeals", nDeals);
         return params;
@@ -285,5 +286,14 @@ final class GolfSixTestUtils {
         if (c.type == King) return 0;
         if (c.type == Jack || c.type == Queen) return 10;
         return c.number == 2 ? -2 : c.number;
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/golfsix/GolfSix_Valet.json), which the tests were written for.
+     */
+    public static GolfSixParameters valetParams() {
+        GolfSixParameters params = new GolfSixParameters();
+        TunableParameters.loadFromJSONFile(params, "data/golfsix/GolfSix_Valet.json");
+        return params;
     }
 }

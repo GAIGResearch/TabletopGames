@@ -23,7 +23,7 @@ public class BlackjackSoft17Test {
 
     @Before
     public void setup() {
-        params = new BlackjackParameters();
+        params = BlackjackTestUtils.valetParams();
         params.setRandomSeed(42);
     }
 

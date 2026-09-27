@@ -8,15 +8,15 @@ import games.tricktaking.ITrickTakingParameters;
 import java.util.Arrays;
 
 /**
- * Rules of Pitch (Auction Pitch / Setback). The defaults follow the RECYCLE code at
- * https://mgoadric.github.io/valet/post/pitch.html; targetScore 21 and countHighLowSeparately give the rules of
- * https://www.pagat.com/allfours/pitch.html.
+ * Rules of Pitch (Auction Pitch / Setback), as described at https://www.pagat.com/allfours/pitch.html.
+ * data/pitch/Pitch_Valet.json gives the RECYCLE code at https://mgoadric.github.io/valet/post/pitch.html: a single
+ * deal, with each trump card counted once.
  */
 public class PitchParameters extends TunableParameters<PitchParameters> implements ITrickTakingParameters {
 
     // 1 = a single deal (RECYCLE). Otherwise deals continue until the pitching team makes its bid and has at
     // least this score (pagat: 21).
-    public int targetScore = 1;
+    public int targetScore = 21;
     public int handSize = 6;
     public int minBid = 2;
     // the highest bid; bidding it is a smudge (all six tricks and all four points)
@@ -24,7 +24,7 @@ public class PitchParameters extends TunableParameters<PitchParameters> implemen
     public int smudgePoints = 5;
     // RECYCLE counts each trump card once, so one card that is both High and Low (or also the Jack) scores 1.
     // Pagat scores High, Low and Jack as separate points.
-    public boolean countHighLowSeparately = false;
+    public boolean countHighLowSeparately = true;
     // values of the cards for the Game point
     public int gameValueAce = 4;
     public int gameValueKing = 3;
@@ -38,12 +38,12 @@ public class PitchParameters extends TunableParameters<PitchParameters> implemen
         super();
         // a safety limit on the number of deals when playing to a target score
         setMaxRounds(100);
-        addTunableParameter("targetScore", 1, Arrays.asList(1, 7, 11, 21));
+        addTunableParameter("targetScore", 21, Arrays.asList(1, 7, 11, 21));
         addTunableParameter("handSize", 6);
         addTunableParameter("minBid", 2);
         addTunableParameter("smudgeBid", 5);
         addTunableParameter("smudgePoints", 5);
-        addTunableParameter("countHighLowSeparately", false, Arrays.asList(false, true));
+        addTunableParameter("countHighLowSeparately", true, Arrays.asList(false, true));
         addTunableParameter("gameValueAce", 4);
         addTunableParameter("gameValueKing", 3);
         addTunableParameter("gameValueQueen", 2);

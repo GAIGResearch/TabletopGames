@@ -64,7 +64,7 @@ public class BlackjackInsuranceGameFlowTest {
 
     @Test
     public void aScriptedGameWithInsuranceBoughtAndLost() {
-        BlackjackParameters params = new BlackjackParameters();
+        BlackjackParameters params = BlackjackTestUtils.valetParams();
         pagatNaturals(params);
         Game game = newGame(3, 11, params);
         BlackjackGameState state = (BlackjackGameState) game.getGameState();
@@ -112,7 +112,7 @@ public class BlackjackInsuranceGameFlowTest {
             int paid = 0, lost = 0, declined = 0, skipped = 0, looseHoles = 0;
             for (int nPlayers : new int[]{1, 3, 7}) {
                 for (long seed = 0; seed < 40; seed++) {
-                    BlackjackParameters params = new BlackjackParameters();
+                    BlackjackParameters params = BlackjackTestUtils.valetParams();
                     if (naturalOnly)
                         pagatNaturals(params);
                     Game game = newGame(nPlayers, seed, params);

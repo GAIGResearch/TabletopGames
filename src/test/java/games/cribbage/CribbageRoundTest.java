@@ -27,7 +27,7 @@ public class CribbageRoundTest {
 
     @Before
     public void setup() {
-        params = new CribbageParameters();
+        params = CribbageTestUtils.valetParams();
         params.setRandomSeed(42);
         state = new CribbageGameState(params, 2);
         fm = new CribbageForwardModel();
@@ -72,7 +72,7 @@ public class CribbageRoundTest {
     public void drawDeckIsShuffledBeforeTheNextDeal() {
         List<List<FrenchCard>> newHands = new ArrayList<>();
         for (long seed : new long[]{1, 2}) {
-            CribbageParameters p = new CribbageParameters();
+            CribbageParameters p = CribbageTestUtils.valetParams();
             p.setRandomSeed(seed);
             state = new CribbageGameState(p, 2);
             fm.setup(state);

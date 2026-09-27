@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * Parameters for Klaverjassen (as described at https://www.pagat.com/jass/klaverjassen.html, Utrecht trump choice and
- * Amsterdam play rules). The defaults follow the RECYCLE description of the game; partnerTrumpRule and
- * tieIsFailure give pagat's versions of the rules where they differ.
+ * Amsterdam play rules), over 16 hands. data/klaverjassen/Klaverjassen_Valet.json gives the RECYCLE description of
+ * the game: a single hand, the DISCARD partner rule, and a trump-choosing team that fails only with fewer points.
  */
 public class KlaverjassenParameters extends TunableParameters<KlaverjassenParameters> implements ITrickTakingParameters {
 
@@ -26,13 +26,13 @@ public class KlaverjassenParameters extends TunableParameters<KlaverjassenParame
     public int handSize = 8;
 
     // Hands in the game. The team with more points after the last hand wins
-    public int nHands = 1;
+    public int nHands = 16;
 
-    public PartnerTrumpRule partnerTrumpRule = PartnerTrumpRule.DISCARD;
+    public PartnerTrumpRule partnerTrumpRule = PartnerTrumpRule.NO_UNDERTRUMP;
 
     // If true, the trump-choosing team fails when its points only equal the opponents' (pagat); if false, it fails
     // only with fewer points (RECYCLE)
-    public boolean tieIsFailure = false;
+    public boolean tieIsFailure = true;
 
     // Bonus points
     public int lastTrickBonus = 10;
@@ -48,9 +48,9 @@ public class KlaverjassenParameters extends TunableParameters<KlaverjassenParame
 
     public KlaverjassenParameters() {
         addTunableParameter("handSize", 8);
-        addTunableParameter("nHands", 1, Arrays.asList(1, 2, 4, 8, 16));
-        addTunableParameter("partnerTrumpRule", PartnerTrumpRule.DISCARD, List.of(PartnerTrumpRule.values()));
-        addTunableParameter("tieIsFailure", false, List.of(false, true));
+        addTunableParameter("nHands", 16, Arrays.asList(1, 2, 4, 8, 16));
+        addTunableParameter("partnerTrumpRule", PartnerTrumpRule.NO_UNDERTRUMP, List.of(PartnerTrumpRule.values()));
+        addTunableParameter("tieIsFailure", true, List.of(false, true));
         addTunableParameter("lastTrickBonus", 10);
         addTunableParameter("pitBonus", 100);
         addTunableParameter("runOfThreeBonus", 20);

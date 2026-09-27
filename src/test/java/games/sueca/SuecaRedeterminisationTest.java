@@ -48,7 +48,7 @@ public class SuecaRedeterminisationTest {
      * Player 0 is to lead the third trick; each player holds 8 cards.
      */
     private static SuecaGameState voidPosition(boolean rememberVoids) {
-        SuecaParameters params = new SuecaParameters();
+        SuecaParameters params = SuecaTestUtils.valetParams();
         params.setParameterValue("rememberVoids", rememberVoids);
         SuecaGameState state = newState(7, params);
         SuecaForwardModel fm = new SuecaForwardModel();

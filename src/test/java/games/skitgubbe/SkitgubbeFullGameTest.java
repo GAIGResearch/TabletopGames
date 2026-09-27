@@ -58,7 +58,7 @@ public class SkitgubbeFullGameTest {
 
     /** Plays a whole game with random legal actions, checking conservation and the phase-two invariants each step. */
     private void randomFullGame(int nPlayers, int handSize, long seed) {
-        SkitgubbeParameters params = new SkitgubbeParameters();
+        SkitgubbeParameters params = SkitgubbeTestUtils.valetParams();
         params.setParameterValue("handSize", handSize);
         Game game = newGame(nPlayers, seed, params);
         SkitgubbeGameState state = (SkitgubbeGameState) game.getGameState();
@@ -110,7 +110,7 @@ public class SkitgubbeFullGameTest {
 
     /** Plays a whole game with random legal actions, with completerLeads and exitOrderTiebreak on. */
     private void randomFullGameWithPagatOptions(int nPlayers, int handSize, long seed) {
-        SkitgubbeParameters params = new SkitgubbeParameters();
+        SkitgubbeParameters params = SkitgubbeTestUtils.valetParams();
         params.setParameterValue("handSize", handSize);
         params.setParameterValue("completerLeads", true);
         params.setParameterValue("exitOrderTiebreak", true);

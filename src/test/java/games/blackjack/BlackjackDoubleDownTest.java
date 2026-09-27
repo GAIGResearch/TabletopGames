@@ -33,7 +33,7 @@ public class BlackjackDoubleDownTest {
 
     @Before
     public void setup() {
-        params = new BlackjackParameters();
+        params = BlackjackTestUtils.valetParams();
         params.setRandomSeed(42);
         params.setParameterValue("doubleDown", true);
     }

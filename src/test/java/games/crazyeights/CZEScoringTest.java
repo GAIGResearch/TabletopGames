@@ -43,7 +43,7 @@ public class CZEScoringTest {
 
     @Test
     public void penaltyIsFaceValueForSpotCardsTenForPicturesOneForAnAceAndFiftyForAnEight() {
-        CZEGameState state = newState(new CZEParameters(), 3);
+        CZEGameState state = newState(CZETestUtils.valetParams(), 3);
 
         giveHand(state, 0);
         assertEquals(0, state.handPenalty(0));
@@ -73,7 +73,7 @@ public class CZEScoringTest {
 
     @Test
     public void penaltiesForEightsAndAcesAreReadFromTheParameters() {
-        CZEParameters params = new CZEParameters();
+        CZEParameters params = CZETestUtils.valetParams();
         CZEGameState state = newState(params, 3);
         giveHand(state, 0, card("8D"), card("AS"), card("5C"));
         assertEquals(50 + 1 + 5, state.handPenalty(0));
@@ -89,7 +89,7 @@ public class CZEScoringTest {
 
     @Test
     public void afterGoingOutPlayersAreRankedByLowestPenaltyWithEqualPenaltiesSharingAPosition() {
-        CZEGameState state = newState(new CZEParameters(), 4);
+        CZEGameState state = newState(CZETestUtils.valetParams(), 4);
         CZEForwardModel fm = new CZEForwardModel();
         setTopDiscard(state, card("5H"));
         giveHand(state, 0, card("9H"));                            // goes out
@@ -108,7 +108,7 @@ public class CZEScoringTest {
 
     @Test
     public void afterABlockedGamePlayersAreRankedByCardsInHandIgnoringPenalty() {
-        CZEGameState state = newState(new CZEParameters(), 4);
+        CZEGameState state = newState(CZETestUtils.valetParams(), 4);
         CZEForwardModel fm = new CZEForwardModel();
         setTopDiscard(state, card("5H"));
         giveHand(state, 0, card("2C"), card("3S"));   // 2 cards, 5

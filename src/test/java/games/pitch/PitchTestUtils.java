@@ -1,5 +1,6 @@
 package games.pitch;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Deck;
@@ -35,7 +36,7 @@ class PitchTestUtils {
 
     /** A factory game (4 RandomPlayers), reset with the given seed. */
     static Game newGame(long seed) {
-        return newGame(seed, new PitchParameters());
+        return newGame(seed, valetParams());
     }
 
     /** A factory game (4 RandomPlayers) with the given parameters, reset with the given seed. */
@@ -47,7 +48,7 @@ class PitchTestUtils {
 
     /** A 4-player state with default parameters and the given seed, set up by the forward model. */
     static PitchGameState newState(long seed, PitchForwardModel fm) {
-        PitchParameters params = new PitchParameters();
+        PitchParameters params = valetParams();
         params.setRandomSeed(seed);
         PitchGameState state = new PitchGameState(params, 4);
         fm.setup(state);
@@ -308,5 +309,14 @@ class PitchTestUtils {
             // set: the pitching team loses its bid
             change[pt] = -bid;
         return change;
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/pitch/Pitch_Valet.json), which the tests were written for.
+     */
+    public static PitchParameters valetParams() {
+        PitchParameters params = new PitchParameters();
+        TunableParameters.loadFromJSONFile(params, "data/pitch/Pitch_Valet.json");
+        return params;
     }
 }

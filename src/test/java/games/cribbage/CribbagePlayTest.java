@@ -26,7 +26,7 @@ public class CribbagePlayTest {
 
     @Before
     public void setup() {
-        params = new CribbageParameters();
+        params = CribbageTestUtils.valetParams();
         params.setRandomSeed(42);
         state = new CribbageGameState(params, 2);
         fm = new CribbageForwardModel();

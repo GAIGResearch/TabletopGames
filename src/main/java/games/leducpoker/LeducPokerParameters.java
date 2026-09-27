@@ -12,7 +12,8 @@ import static core.components.FrenchCard.FrenchCardType.*;
 
 /**
  * Parameters for Leduc Poker. The defaults are standard Leduc Hold'em (Southey et al. 2005);
- * highCardUsesBoard is the high-card rule of the Valet RECYCLE code.
+ * highCardUsesBoard is the high-card rule of the Valet RECYCLE code, which data/leducpoker/LeducPoker_Valet.json
+ * uses.
  */
 public class LeducPokerParameters extends TunableParameters<LeducPokerParameters> {
 

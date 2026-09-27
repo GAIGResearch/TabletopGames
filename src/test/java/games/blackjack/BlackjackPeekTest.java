@@ -33,7 +33,7 @@ public class BlackjackPeekTest {
 
     @Before
     public void setup() {
-        params = new BlackjackParameters();
+        params = BlackjackTestUtils.valetParams();
         params.setRandomSeed(42);
         newState(3);
     }
@@ -99,7 +99,7 @@ public class BlackjackPeekTest {
     @Test
     public void aNaturalPushesAgainstADealerBlackjackInEitherMode() {
         for (boolean naturalOnly : new boolean[]{false, true}) {
-            params = new BlackjackParameters();
+            params = BlackjackTestUtils.valetParams();
             params.setRandomSeed(42);
             if (naturalOnly)
                 pagatNaturals(params);

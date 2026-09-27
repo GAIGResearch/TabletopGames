@@ -1,5 +1,6 @@
 package games.klaverjassen;
 
+import evaluation.optimisation.TunableParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Deck;
@@ -41,11 +42,11 @@ final class KlaverjassenTestUtils {
      * A real 4-player game from the factory, reset with random players, for integration tests driven by fm.next.
      */
     static Game newGame(long seed) {
-        return newGame(seed, null);
+        return newGame(seed, valetParams());
     }
 
     /**
-     * As newGame(seed), with the given parameters (null for the defaults). The seed overrides any seed on params.
+     * As newGame(seed), with the given parameters. The seed overrides any seed on params.
      */
     static Game newGame(long seed, KlaverjassenParameters params) {
         Game game = GameType.Klaverjassen.createGameInstance(4, seed, params);
@@ -60,7 +61,7 @@ final class KlaverjassenTestUtils {
      * A state from direct setup with default parameters and the given seed, for unit tests.
      */
     static KlaverjassenGameState newState(long seed) {
-        return newState(seed, new KlaverjassenParameters());
+        return newState(seed, valetParams());
     }
 
     /**
@@ -311,5 +312,14 @@ final class KlaverjassenTestUtils {
             else if (n >= 10) roem += 100;       // 10, Q, K, A
         }
         return roem;
+    }
+
+    /**
+     * The parameters of the Valet version of the game (data/klaverjassen/Klaverjassen_Valet.json), which the tests were written for.
+     */
+    public static KlaverjassenParameters valetParams() {
+        KlaverjassenParameters params = new KlaverjassenParameters();
+        TunableParameters.loadFromJSONFile(params, "data/klaverjassen/Klaverjassen_Valet.json");
+        return params;
     }
 }
