@@ -2,7 +2,6 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DuplicateImmediateEffect extends TMAction implements IExtendedSequence {
+public class DuplicateImmediateEffect extends TMAction implements TMExtendedSequence {
     public TMTypes.Tag tagRequirement;  // tag card chosen must have
     public String actionClassName;  // what type of effect can be duplicated
     public boolean production;  // If modify player resource, must it be production?
@@ -104,6 +103,7 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (!(action instanceof DuplicateImmediateEffect)) throw unexpectedAction(action);
         setCardID(((TMAction)action).getCardID());
         TMGameState gs = (TMGameState) state;
         gs.getPlayerCardChoice()[player].clear();

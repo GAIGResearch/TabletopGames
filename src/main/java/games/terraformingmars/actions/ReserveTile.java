@@ -2,14 +2,13 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
 
 import java.util.*;
 
-public class ReserveTile extends TMAction implements IExtendedSequence {
+public class ReserveTile extends TMAction implements TMExtendedSequence {
     public int mapTileID;
     public TMTypes.MapTileType mapType;
 
@@ -87,6 +86,7 @@ public class ReserveTile extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (!(action instanceof ReserveTile) && !TMExtendedSequence.isPass(action)) throw unexpectedAction(action);
         placed = true;
     }
 

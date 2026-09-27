@@ -14,27 +14,41 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
 
     @Override
     protected final void _next(AbstractGameState currentState, AbstractAction action) {
-        _beforeAction(currentState, action);
-        if (action != null) {
-            action.execute(currentState);
-        } else {
+        if (action == null) {
             throw new AssertionError("No action selected by current player");
         }
-        // We then register the action with the top of the stack
-        if (!currentState.actionsInProgress.isEmpty()) {
-            IExtendedSequence topOfStack = currentState.actionsInProgress.peek();
-            // Then if this is the action that was just played, we don't notify *it*
-            // we are only interested in notifying an IES about later actions taken
-            boolean actionStartedSequence = topOfStack.equals(action)
-                    || (action instanceof SimultaneousAction simultaneousAction
-                    && simultaneousAction.getPlayerActions().values().contains(topOfStack));
-            if (!actionStartedSequence)
-                topOfStack._afterAction(currentState, action);
-        }
+        // The sequence (if any) that this action is a decision for is the one at the top of the stack *before* execution.
+        // We can't just register with all items in the Stack, as this may represent some complex dependency
+        // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
+        IExtendedSequence decisionOwner = currentState.isActionInProgress() ? currentState.actionsInProgress.peek() : null;
+        _beforeAction(currentState, action);
+
+        action.execute(currentState);
+        // If the action has itself been put on the stack (it continues as a sequence), then the decisionOwner is not
+        // told now; it is told once the action completes, via afterRemovalFromQueue().
+        // Any other sequence the action started (directly or via nested actions) must not be told about the action
+        // that created it.
+        if (decisionOwner != null && !continuesAsSequence(currentState, action))
+            decisionOwner._afterAction(currentState, action);
         // TODO: Currently we always inform the forward model of the action taken, even if it is not
         // currently controlling the game flow. All games check this independently; so would be good to remove this
         // if possible..but need to check if any games rely on this behaviour first.
         _afterAction(currentState, action);
+    }
+
+    private static boolean continuesAsSequence(AbstractGameState state, AbstractAction action) {
+        if (isOnStack(state, action)) return true;
+        // For a simultaneous action, it is the constituent actions that may have put themselves on the stack
+        return action instanceof SimultaneousAction simultaneousAction
+                && simultaneousAction.getPlayerActions().values().stream().anyMatch(a -> isOnStack(state, a));
+    }
+
+    private static boolean isOnStack(AbstractGameState state, AbstractAction action) {
+        // Identity, not equals(): an equal copy of the action on the stack is a different sequence
+        for (IExtendedSequence sequence : state.actionsInProgress) {
+            if (sequence == action) return true;
+        }
+        return false;
     }
 
     /**

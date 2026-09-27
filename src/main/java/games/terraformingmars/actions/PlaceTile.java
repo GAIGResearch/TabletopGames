@@ -2,7 +2,6 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -19,7 +18,7 @@ import static games.terraformingmars.TMTypes.Tile.City;
 import static games.terraformingmars.TMTypes.Tile.Greenery;
 import static games.terraformingmars.TMTypes.neighbor_directions;
 
-public class PlaceTile extends TMAction implements IExtendedSequence {
+public class PlaceTile extends TMAction implements TMExtendedSequence {
     public boolean respectingAdjacency = true;
     public boolean onMars = true;
     public String tileName;  // to be used with locations not on mars
@@ -284,6 +283,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (!(action instanceof PlaceTile) && !TMExtendedSequence.isPass(action)) throw unexpectedAction(action);
         placed = true;
     }
 

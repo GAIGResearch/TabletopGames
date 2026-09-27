@@ -25,12 +25,14 @@ public abstract class StandardForwardModelWithTurnOrder extends AbstractForwardM
         // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
         IExtendedSequence decisionOwner = currentState.isActionInProgress() ? currentState.actionsInProgress.peek() : null;
         action.execute(currentState);
-        // We then register the action with that sequence only. Any sequence the action itself started (directly, or via
-        // nested actions it executed) must not be told about the action that created it.
-        // Anything the owner starts in response goes on top of it, and so is resolved before the owner is removed.
-        if (decisionOwner != null && decisionOwner != action) {
+        // We then register the action with that sequence only, straight away, even if the action has itself been put
+        // on the stack. Any other sequence the action started (directly, or via nested actions it executed) must not
+        // be told about the action that created it.
+        // (Unlike StandardForwardModel, which tells the owner about an action that continues as a sequence only once it
+        // completes. That cannot distinguish the owner's decision from a sibling sequence pushed by the same action,
+        // so the only game using this class, Terraforming Mars, ignores child completions: see TMExtendedSequence.)
+        if (decisionOwner != null && decisionOwner != action)
             decisionOwner._afterAction(currentState, action);
-        }
         _afterAction(currentState, action);
     }
 

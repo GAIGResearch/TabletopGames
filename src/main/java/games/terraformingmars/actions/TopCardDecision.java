@@ -2,7 +2,6 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.components.TMCard;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TopCardDecision extends TMAction implements IExtendedSequence {
+public class TopCardDecision extends TMAction implements TMExtendedSequence {
     int nCardsKept;
 
     public int nCardsLook;
@@ -74,7 +73,11 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        if (action instanceof BuyCard) nCardsKept++;
+        if (action instanceof BuyCard || action instanceof PayForAction pay && pay.action instanceof BuyCard) {
+            nCardsKept++;
+        } else if (!(action instanceof DiscardCard)) {
+            throw unexpectedAction(action);
+        }
 
 //        if (nCardsKept == nCardsKeep && stage != nCardsLook) {
 //            TMGameState gs = (TMGameState) state;

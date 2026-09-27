@@ -44,6 +44,23 @@ import java.util.List;
  *
  * After every action is taken, the ForwardModel will check the top of the stack to see if it is finished (and will
  * continue until it finds one that is not). If it is finished, it will remove it from the stack.
+ *
+ * When an action is executed with an IExtendedSequence on the stack, then generally _afterAction() will be called
+ * on the top of the stack only. There are two exceptions to this to stop an action removing itself:
+ *      - Any sequence the action itself starts (directly or via nested actions it executes) is not told about it.
+ *      - If the action puts *itself* on the stack (pattern i above), then in StandardForwardModel the sequence that
+ *        offered it is not told immediately, but only once the action completes, via afterRemovalFromQueue().
+ *
+ * WARNING: One action must not currently put two (or more) IExtendedSequences on the stack at the same time.
+ * For example, a card that makes the player place a tile (TilePlacement) and then make a choice (Choice), each of which
+ * is an IExtendedSequence, and both pushed to the stack when the card is played.
+ * The stack is then [..., Choice, TilePlacement], and when TilePlacement completes and is removed, the default
+ * afterRemovalFromQueue() passes it to Choice._afterAction() - as if it were the decision Choice was waiting for.
+ * Choice cannot tell this sibling apart from its own decision.
+ * Instead, have a single sequence that runs the steps one after another (pushing the next only when the previous is
+ * complete), or override afterRemovalFromQueue() so that completed sequences are not treated as decisions.
+ * (Terraforming Mars does the latter: see TMExtendedSequence, used with StandardForwardModelWithTurnOrder, which tells
+ * the offering sequence about every action immediately.)
  */
 public interface IExtendedSequence {
 
@@ -123,6 +140,8 @@ public interface IExtendedSequence {
      *
      * The default behaviour is to call _afterAction() on the completed sequence if it is an AbstractAction.
      * If it is *not* an AbstractAction, then this will need to be overridden.
+     * Note that the completed sequence may not have been started by this one: see the WARNING in the class comment
+     * about putting two sequences on the stack from one action.
      * @param state
      * @param completedSequence
      */

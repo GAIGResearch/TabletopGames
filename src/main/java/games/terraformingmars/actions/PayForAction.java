@@ -3,7 +3,6 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -14,7 +13,7 @@ import games.terraformingmars.rules.requirements.Requirement;
 import java.util.*;
 
 // Wrapper class for actions that need to be paid with resources before execution
-public class PayForAction extends TMAction implements IExtendedSequence {
+public class PayForAction extends TMAction implements TMExtendedSequence {
     public TMAction action;
 
     int costPaid;
@@ -153,11 +152,9 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        if (executionComplete(state)) {
-            // Already paid; e.g. being told that a sequence started by the paid-for action has now completed
-            return;
-        }
+        if (executionComplete(state)) throw unexpectedAction(action);
         if (! (action instanceof ModifyPlayerResource)) {
+            if (action.getClass() != this.action.getClass()) throw unexpectedAction(action);
             // Shouldn't happen: the fallback in _computeAvailableActions offered the action itself, which the
             // forward model has now executed (so we must not execute it again)
             stage = resourcesToPayWith.length;
