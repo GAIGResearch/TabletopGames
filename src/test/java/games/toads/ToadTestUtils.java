@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import games.toads.ToadConstants.ToadCardType;
 import games.toads.abilities.*;
+import games.toads.actions.PlayDefenderCards;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
 import games.toads.components.ToadCard;
@@ -172,16 +173,46 @@ class ToadTestUtils {
     }
 
     /**
-     * Plays the cards through fm.next: the current player plays cards[0] to the Field and cards[1] to the Flank,
-     * then the next player cards[2] and cards[3]. Each card is added to the player's hand just before it is played
-     * (so this adds components rather than moving them - as the legacy Tactics.playCards does).
+     * Plays the cards through fm.next, one at a time: the Attacker (the current player) plays cards[0] to the
+     * Field and cards[1] to the Flank, then the Defender cards[2] to the Field and cards[3] to the Flank (as a single
+     * PlayDefenderCards). Fewer cards play just the start of that sequence; more carry on into the next Battle.
+     * Each card is added to the player's hand just before it is played (so this adds components rather than moving
+     * them - as the legacy Tactics.playCards does).
      * Returns the actions taken.
      */
     static List<AbstractAction> playCards(ToadGameState state, ToadForwardModel fm, ToadCard... cardsInOrder) {
+        return play(state, fm, true, cardsInOrder);
+    }
+
+    /** As playCards, but the cards are already in the players' hands. */
+    static List<AbstractAction> playFromHand(ToadGameState state, ToadForwardModel fm, ToadCard... cardsInOrder) {
+        return play(state, fm, false, cardsInOrder);
+    }
+
+    private static List<AbstractAction> play(ToadGameState state, ToadForwardModel fm, boolean addToHand, ToadCard... cards) {
         List<AbstractAction> taken = new ArrayList<>();
-        for (int i = 0; i < cardsInOrder.length; i++) {
-            state.getPlayerHand(state.getCurrentPlayer()).add(cardsInOrder[i]);
-            AbstractAction action = i % 2 == 0 ? new PlayFieldCard(cardsInOrder[i]) : new PlayFlankCard(cardsInOrder[i]);
+        int i = 0;
+        while (i < cards.length) {
+            int player = state.getCurrentPlayer();
+            AbstractAction action;
+            if (state.getFieldCard(0) == null && state.getFieldCard(1) == null) {
+                action = new PlayFieldCard(player, cards[i]);
+                i++;
+            } else if (player == state.getAttacker()) {
+                action = new PlayFlankCard(player, cards[i]);
+                i++;
+            } else {
+                action = new PlayDefenderCards(player, cards[i], cards[i + 1]);
+                i += 2;
+            }
+            if (addToHand) {
+                if (action instanceof PlayDefenderCards pdc) {
+                    state.getPlayerHand(player).add(pdc.fieldCard);
+                    state.getPlayerHand(player).add(pdc.flankCard);
+                } else {
+                    state.getPlayerHand(player).add(cards[i - 1]);
+                }
+            }
             fm.next(state, action);
             taken.add(action);
         }

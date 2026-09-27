@@ -3,12 +3,14 @@ package games.toads;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import games.toads.abilities.*;
+import games.toads.actions.PlayDefenderCards;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
 import games.toads.components.ToadCard;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Random;
 
 import static games.toads.ToadConstants.ToadCardType.*;
@@ -55,7 +57,7 @@ public class GameFlow {
         for (ToadCard card : state.getPlayerHand(0)) {
             assertTrue(fm.computeAvailableActions(state).stream().anyMatch(a -> ((PlayFieldCard) a).card == card));
         }
-        fm.computeAvailableActions(state).get(0).execute(state);
+        fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(3, fm.computeAvailableActions(state).size());
         for (ToadCard card : state.getPlayerHand(0)) {
@@ -63,19 +65,21 @@ public class GameFlow {
         }
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(1, state.getCurrentPlayer());
+        // the Defender plays both their cards at once: any two different cards from their hand, one to each lane
+        List<AbstractAction> defence = fm.computeAvailableActions(state);
+        assertEquals(4 * 3, defence.size());
+        assertTrue(defence.stream().allMatch(a -> a instanceof PlayDefenderCards pdc && pdc.playerId == 1 && pdc.fieldCard != pdc.flankCard));
 
         // at this point no cards have been drawn
         assertEquals(3, state.playerHands.get(0).getSize());
         assertEquals(4, state.playerHands.get(1).getSize());
         assertEquals(5, state.playerDecks.get(0).getSize());
         assertEquals(5, state.playerDecks.get(1).getSize());
-        // then they play two cards
-        fm.next(state, fm.computeAvailableActions(state).get(0));
+        // then they play their two cards, and the Battle is resolved: a turn is a whole Battle
+        assertEquals(0, state.getTurnCounter());
+        fm.next(state, defence.get(0));
         assertEquals(0, state.getRoundCounter());
         assertEquals(1, state.getTurnCounter());
-        fm.next(state, fm.computeAvailableActions(state).get(0));
-        assertEquals(0, state.getRoundCounter());
-        assertEquals(2, state.getTurnCounter());
         assertEquals(4, state.playerHands.get(0).getSize());
         assertEquals(4, state.playerHands.get(1).getSize());
         assertEquals(3, state.playerDecks.get(0).getSize());
@@ -83,19 +87,16 @@ public class GameFlow {
     }
 
     private void playCards(ToadCard... cardsInOrder) {
-        for (int i = 0; i < cardsInOrder.length; i++) {
-            state.getPlayerHand(state.getCurrentPlayer()).add(cardsInOrder[i]);
-            AbstractAction action = i % 2 == 0 ? new PlayFieldCard(cardsInOrder[i]) : new PlayFlankCard(cardsInOrder[i]);
-            fm.next(state, action);
-        }
+        ToadTestUtils.playCards(state, fm, cardsInOrder);
     }
 
     @Test
     public void playersAlternateAsAttackerStartingWithPlayerZero() {
         params.secondRoundStart = ToadParameters.SecondRoundStart.ONE;
-        for (int i = 0; i < 32; i++) {
-            // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
-            int expectedPlayer = ((i + 2) / 4) % 2;
+        for (int i = 0; i < 24; i++) {
+            // Each player effectively gets three consecutive actions (the Attacker's two, then the Defender's one), as after
+                // they have defended, they are the attacker in the next battle
+            int expectedPlayer = ((i + 1) / 3) % 2;
             System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + expectedPlayer);
             assertEquals(expectedPlayer, state.getCurrentPlayer());
             fm.next(state, fm.computeAvailableActions(state).get(0));
@@ -107,10 +108,11 @@ public class GameFlow {
     @Test
     public void playersAlternateAsAttackerStartingWithSecondPlayerOnSecondRound() {
         params.secondRoundStart = ToadParameters.SecondRoundStart.TWO;
-        for (int i = 0; i < 32; i++) {
-            // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
-            int expectedPlayer = ((i + 2) / 4) % 2;
-            if (i >= 16)
+        for (int i = 0; i < 24; i++) {
+            // Each player effectively gets three consecutive actions (the Attacker's two, then the Defender's one), as after
+                // they have defended, they are the attacker in the next battle
+            int expectedPlayer = ((i + 1) / 3) % 2;
+            if (i >= 12)
                 expectedPlayer = 1 - expectedPlayer;
             System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + expectedPlayer);
             assertEquals(expectedPlayer, state.getCurrentPlayer());
@@ -124,10 +126,11 @@ public class GameFlow {
         params.secondRoundStart = ToadParameters.SecondRoundStart.LOSER;
         for (int game = 0; game < 10; game++) {
             fm.setup(state);
-            for (int i = 0; i < 32; i++) {
-                // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
-                int expectedPlayer = ((i + 2) / 4) % 2;
-                if (i >= 16) {
+            for (int i = 0; i < 24; i++) {
+                // Each player effectively gets three consecutive actions (the Attacker's two, then the Defender's one), as after
+                // they have defended, they are the attacker in the next battle
+                int expectedPlayer = ((i + 1) / 3) % 2;
+                if (i >= 12) {
                     int startPlayer = state.battlesWon[0][0] < state.battlesWon[0][1] ? 0 : 1;
                     expectedPlayer = (expectedPlayer + startPlayer) % 2;
                 }
@@ -144,10 +147,11 @@ public class GameFlow {
         params.secondRoundStart = ToadParameters.SecondRoundStart.WINNER;
         for (int game = 0; game < 10; game++) {
             fm.setup(state);
-            for (int i = 0; i < 32; i++) {
-                // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
-                int expectedPlayer = ((i + 2) / 4) % 2;
-                if (i >= 16) {
+            for (int i = 0; i < 24; i++) {
+                // Each player effectively gets three consecutive actions (the Attacker's two, then the Defender's one), as after
+                // they have defended, they are the attacker in the next battle
+                int expectedPlayer = ((i + 1) / 3) % 2;
+                if (i >= 12) {
                     int startPlayer = state.battlesWon[0][0] > state.battlesWon[0][1] ? 0 : 1;
                     expectedPlayer = (expectedPlayer + startPlayer) % 2;
                 }
@@ -163,7 +167,7 @@ public class GameFlow {
     @Test
     public void winInRoundTwoIsCorrectlyAllocated() {
         params.secondRoundStart = ToadParameters.SecondRoundStart.ONE;
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 12; i++) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         }
         assertEquals(1, state.getRoundCounter());
@@ -194,13 +198,13 @@ public class GameFlow {
 
     @Test
     public void gameEndsAfterTwoRounds() {
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 12; i++) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         }
         assertEquals(1, state.getRoundCounter());
         assertEquals(0, state.getTurnCounter());
         assertEquals(CoreConstants.GameResult.GAME_ONGOING, state.getGameStatus());
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 12; i++) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         }
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
@@ -385,21 +389,6 @@ public class GameFlow {
     }
 
     @Test
-    public void redeterminisationShufflesFlankButNotFieldCards() {
-        playCards(
-                new ToadCard("Five", 5),  // Field
-                new ToadCard("Seven", 7), // flank
-                new ToadCard("Three", 3) // field
-        );
-        state.hiddenFlankCards[1] = new ToadCard("Six", 6);
-        ToadGameState copy = (ToadGameState) state.copy(0);
-        assertEquals(state.fieldCards[0], copy.fieldCards[0]);
-        assertEquals(state.fieldCards[1], copy.fieldCards[1]);
-        assertEquals(state.hiddenFlankCards[0], copy.hiddenFlankCards[0]);
-        assertNotEquals(state.hiddenFlankCards[1], copy.hiddenFlankCards[1]);
-    }
-
-    @Test
     public void redeterminisationShuffleOwnDeck() {
         ToadGameState copy = (ToadGameState) state.copy(1);
         assertEquals(state.getPlayerHand(1), copy.getPlayerHand(1));
@@ -468,6 +457,10 @@ public class GameFlow {
         state.playerHands.get(0).add(flank0);
         state.playerHands.get(1).add(flank1);
 
+        // the Defender played last, and holds the turn
+
+        state.attacker = 1 - state.getCurrentPlayer();
+
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
         assertEquals(0.0, state.getGameScore(0), 0.001);
@@ -501,6 +494,8 @@ public class GameFlow {
         state.hiddenFlankCards[0] = flank0;
         state.playerHands.get(0).add(flank0);
         state.playerHands.get(1).add(flank1);
+        // the Defender played last, and holds the turn
+        state.attacker = 1 - state.getCurrentPlayer();
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
         assertEquals(5.0, state.getGameScore(0), 0.001);
@@ -536,6 +531,10 @@ public class GameFlow {
         state.hiddenFlankCards[0] = flank0;
         state.playerHands.get(0).add(flank0);
         state.playerHands.get(1).add(flank1);
+
+        // the Defender played last, and holds the turn
+
+        state.attacker = 1 - state.getCurrentPlayer();
 
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());

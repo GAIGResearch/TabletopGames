@@ -34,11 +34,7 @@ public class CardRecycling {
         rnd = new Random(933);
     }
     private void playCards(ToadCard... cardsInOrder) {
-        for (int i = 0; i < cardsInOrder.length; i++) {
-            state.getPlayerHand(state.getCurrentPlayer()).add(cardsInOrder[i]);
-            AbstractAction action = i % 2 == 0 ? new PlayFieldCard(cardsInOrder[i]) : new PlayFlankCard(cardsInOrder[i]);
-            fm.next(state, action);
-        }
+        ToadTestUtils.playCards(state, fm, cardsInOrder);
     }
 
     @Test
@@ -68,8 +64,9 @@ public class CardRecycling {
             firstPlayer = 1 - firstPlayer;
 
             // now run battle - precise results are not important
-            // we have switched off tactics, so just need to trigger four actions
-            for (int i = 0; i < 4; i++) {
+            // we have switched off tactics, so just need to trigger three actions (the Attacker's face-up card, the
+            // Attacker's hidden card, and the Defender's two cards together)
+            for (int i = 0; i < 3; i++) {
                 List<AbstractAction> battleActions = fm.computeAvailableActions(state);
                 fm.next(state, battleActions.get(rnd.nextInt(battleActions.size())));
             }

@@ -595,6 +595,63 @@ public class TestResistance {
     }
 
     @Test
+    public void redeterminisationFindsSingleValidSpyAllocation() {
+        // With 10 players (4 spies) the failed missions below leave exactly one valid allocation of the 126 possible
+        // for player 0. Rejection sampling (200 attempts) failed to find it roughly 20% of the time.
+        Game game = GameType.Resistance.createGameInstance(10, 34, new ResParameters());
+        game.reset(IntStream.range(0, 10).mapToObj(p -> (AbstractPlayer) new RandomPlayer()).toList());
+        ResGameState state = (ResGameState) game.getGameState();
+        List<Integer> spies = List.of(1, 2, 3, 4);
+        for (int p = 0; p < 10; p++)
+            state.setPlayerIdentity(p, spies.contains(p) ? SPY : RESISTANCE);
+        state.setMissionData(Arrays.asList(0, 1, 2), 2);
+        state.setMissionData(Arrays.asList(0, 3, 4), 2);
+        for (int i = 0; i < 200; i++) {
+            ResGameState copyState = (ResGameState) state.copy(0);
+            for (int p = 0; p < 10; p++)
+                assertEquals("Player " + p, spies.contains(p) ? SPY : RESISTANCE,
+                        copyState.getPlayerHandCards().get(p).get(2).cardType);
+        }
+    }
+
+    @Test
+    public void identitiesAreOnlyShuffledUnderPartialObservability() {
+        ResGameState state = (ResGameState) resistance.getGameState();
+        List<Integer> spies = List.of(1, 3);
+        for (int p = 0; p < 5; p++)
+            state.setPlayerIdentity(p, spies.contains(p) ? SPY : RESISTANCE);
+        List<ResPlayerCards.CardType> truth = IntStream.range(0, 5)
+                .mapToObj(p -> state.getPlayerHandCards().get(p).get(2).cardType).toList();
+
+        // player 0 is in the resistance, so over many copies sees some other allocation of the spies
+        boolean shuffled = false;
+        for (int i = 0; i < 50; i++) {
+            ResGameState copy = (ResGameState) state.copy(0);
+            List<ResPlayerCards.CardType> seen = IntStream.range(0, 5)
+                    .mapToObj(p -> copy.getPlayerHandCards().get(p).get(2).cardType).toList();
+            assertEquals(RESISTANCE, seen.get(0));
+            assertEquals(2, Collections.frequency(seen, SPY));
+            shuffled |= !seen.equals(truth);
+        }
+        assertTrue(shuffled);
+        // and the master state's decks are never altered by that
+        assertEquals(truth, IntStream.range(0, 5)
+                .mapToObj(p -> state.getPlayerHandCards().get(p).get(2).cardType).toList());
+
+        // with full observability everyone sees the true identities
+        state.getCoreGameParameters().partialObservable = false;
+        try {
+            for (int i = 0; i < 20; i++) {
+                ResGameState copy = (ResGameState) state.copy(0);
+                assertEquals(truth, IntStream.range(0, 5)
+                        .mapToObj(p -> copy.getPlayerHandCards().get(p).get(2).cardType).toList());
+            }
+        } finally {
+            state.getCoreGameParameters().partialObservable = true;
+        }
+    }
+
+    @Test
     public void historyOfMissionSuccessesIsCorrect() {
         ResGameState state = (ResGameState) resistance.getGameState();
         progressGame(state, ResGameState.ResGamePhase.MissionVote);

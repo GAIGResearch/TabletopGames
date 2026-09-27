@@ -37,8 +37,7 @@ public class ToadQFeatures001 implements IActionFeatureVector {
         double[] retValue = new double[names().length];
         ToadGameState state = (ToadGameState) ags;
         ToadCard oppField = state.getFieldCard(1 - playerID);
-        // attacker goes first, so turn is even (starting with 0)
-        retValue[1] = ags.getTurnCounter() % 2 == 0 ? 1 : 0;
+        retValue[1] = state.getAttacker() == playerID ? 1 : 0;
 
         List<ToadCardType> allValues = List.of(ToadCardType.values());
         ToadCardType cardPlayed;
@@ -57,6 +56,16 @@ public class ToadQFeatures001 implements IActionFeatureVector {
             retValue[2 + indexOfCard] = 1;
             if (oppField != null) {
                 int indexOfOppField = allValues.indexOf(oppField.type);
+                retValue[2 + 2 * allValues.size() + indexOfOppField] = 1;
+            }
+        } else if (action instanceof PlayDefenderCards pdc) {
+            // the Defender plays both cards at once: record both, with the flank card as the diagonal
+            retValue[0] = 1;
+            retValue[2 + allValues.indexOf(pdc.fieldCard.type)] = 1;
+            retValue[2 + allValues.indexOf(pdc.flankCard.type)] = 1;
+            if (oppField != null) {
+                int indexOfOppField = allValues.indexOf(oppField.type);
+                retValue[2 + allValues.size() + indexOfOppField] = 1;
                 retValue[2 + 2 * allValues.size() + indexOfOppField] = 1;
             }
         } else if (action instanceof ForceOpponentDiscard fod) {

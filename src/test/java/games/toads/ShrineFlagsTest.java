@@ -139,6 +139,8 @@ public class ShrineFlagsTest {
         state.hiddenFlankCards[1] = flank1;
         state.playerHands.get(0).add(flank0);
         state.playerHands.get(1).add(flank1);
+        // the Defender played last, and holds the turn
+        state.attacker = 1 - state.getCurrentPlayer();
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
         // both Wars Stalemated: the game scores are unchanged (5 each)

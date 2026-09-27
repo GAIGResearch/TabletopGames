@@ -13,6 +13,7 @@ import org.junit.Test;
 import players.PlayerConstants;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 
 import java.util.*;
@@ -188,6 +189,8 @@ public class OpeningReturnTest {
         state.battlesWon[0][0] = 3;
         state.battlesWon[0][1] = 0;
         state.nextBattle = 3;
+        // the Defender played last, and holds the turn
+        state.attacker = 1 - state.getCurrentPlayer();
         fm._afterAction(state, null);
         assertEquals("War 1 did not end", 1, state.getRoundCounter());
         assertTrue(state.battlesWon[0][0] > state.battlesWon[0][1]);
@@ -347,7 +350,7 @@ public class OpeningReturnTest {
         mctsParams.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         mctsParams.budget = 200;
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
-        ToadMCTSPlayer mcts = new ToadMCTSPlayer(mctsParams);
+        MCTSPlayer mcts = new MCTSPlayer(mctsParams);
         game.reset(List.of(mcts, new RandomPlayer(new Random(933))), 933);
         game.run();
         ToadGameState finalState = (ToadGameState) game.getGameState();

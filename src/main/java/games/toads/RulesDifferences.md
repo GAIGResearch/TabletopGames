@@ -399,6 +399,39 @@ Keep every existing class unchanged so that the legacy card files still work (§
 
 ---
 
+### 3.7 Simultaneous play within a Battle (implemented)
+- **Rulebook order:** the Attacker plays a face-up and a face-down card, then the Defender does the same
+  (§1.2).
+- **Implementation:** a Battle has two steps.
+  1. The Attacker plays their face-up card (`PlayFieldCard`).
+  2. At the same time, the Attacker chooses their hidden card (`PlayFlankCard`) and the Defender chooses
+     both of theirs, as one `PlayDefenderCards(field, flank)` action (up to 4 x 3 = 12 choices).
+- **Why this is the same game:** the Attacker's hidden card is face-down, so the Defender learns nothing
+  from it. And the Attacker commits to it before the Defender's face-up card goes down. Neither player
+  therefore sees the other's step-2 choice before making their own.
+- **State (`ToadGameState`):**
+  - `attacker` records the current Battle's Attacker once their face-up card is down, and -1 before
+    that. `getAttacker()` also reports the player about to open the Battle.
+  - `getPlayersStillToPlay()` lists who still has to choose in step 2, and
+    `getCurrentSimultaneousPlayers()` returns it.
+  - `redeterminise()` undoes the opponent's step-2 choices: the Attacker's hidden card, or the
+    Defender's face-up card (back into their hand) and hidden card. It keeps the observer's own, and makes
+    them the turn owner if they still have to choose.
+- **Forward model:**
+  - Actions are computed for the player asked, who need not be the turn owner.
+  - Step-2 choices can arrive one at a time, in either order, or as a single `SimultaneousAction`; all
+    reach the same state.
+  - Actions carry their `playerId`, since inside a `SimultaneousAction` the turn owner is arbitrary.
+- **Turns and rounds:** a turn is a whole Battle and a round is a whole War. `endPlayerTurn` is called
+  only once a Battle has been fought and its post-battle actions are done, so the turn counter runs 0-3
+  in each War. Within a Battle, and in the `OPENING_RETURN` and `DISCARD` phases, the decision passes
+  between players by changing the turn owner.
+- **Not yet simultaneous:** the opening return and the recycle option are still taken one player after
+  the other. In the rules both players choose at once, and each choice is hidden from the opponent, so
+  the sequential version gives neither player any extra information.
+- **Tests:** `ToadSimultaneousTest`, and `players.mcts.ToadsDecoupledTests` for decoupled and
+  sequential MCTS.
+
 ## 4. Backwards compatibility
 
 - **Legacy decks:** `cards_001` to `cards_005` must still load and play. They reference only the old
@@ -429,15 +462,16 @@ Keep every existing class unchanged so that the legacy card files still work (§
   them.
 - **`ToadGUIManager`:** check that the card names and phases display properly, including the new
   `OPENING_RETURN` phase.
-- **`ToadMCTSPlayer`:** its `UndoOpponentFlank` logic is unaffected, but test it with the new
-  `OPENING_RETURN` phase.
+- **`ToadMCTSPlayer` and `UndoOpponentFlank`:** removed. They stopped a defending MCTS player from
+  exploiting the Attacker's already-committed hidden card. Battles are now simultaneous (§3.7), and the
+  Defender's observation no longer holds that card, so a plain `MCTSPlayer` is enough.
 - **Tests in `src/test/java/games/toads`:**
   - `Tactics.java` builds cards via `ToadCardType`, so it picks up the `defaultAbility` values. Most of
     its tests encode the old Tactics: Icon Bearer, Assassin copying, the Trickster bonus, and
     `SaboteurII` in its own lane.
     - Either point those tests explicitly at the legacy classes, via the 4-argument `ToadCard`
       constructor, or retire them.
-  - `CardRecycling`, `GameFlow`, `TestVisibility` and `TestUndoOpponentFlank` set `discardOption`
+  - `CardRecycling`, `GameFlow` and `TestVisibility` set `discardOption`
     explicitly. They will also need `openingReturn=false`, or updating for the extra phase.
 
 ## 6. Tests to add

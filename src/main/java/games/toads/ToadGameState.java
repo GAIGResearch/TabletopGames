@@ -11,6 +11,8 @@ import utilities.DeterminisationUtilities;
 
 import java.util.*;
 
+import static games.toads.ToadConstants.ToadGamePhase.PLAY;
+
 
 public class ToadGameState extends AbstractGameState {
 
@@ -32,6 +34,8 @@ public class ToadGameState extends AbstractGameState {
     ToadCard[] fieldCards;
     ToadCard[] tieBreakers;
     Set<ToadConstants.ToadCardType> cardTypesInPlay;
+    // the Attacker in the current Battle, set once they have played their face-up card; -1 before that
+    int attacker = -1;
 
     @Override
     protected GameType _getGameType() {
@@ -114,32 +118,91 @@ public class ToadGameState extends AbstractGameState {
             if (tieBreakers[i] != null)
                 copy.tieBreakers[i] = tieBreakers[i].copy();
         }
-        if (playerId != -1 && getCoreGameParameters().partialObservable) {
-            // shuffle the other player's deck and hand, including the hidden flank card
-            int playerToShuffle = 1 - playerId;
-//            if (hiddenFlankCards[playerToShuffle] != null)
-//                copy.playerDecks.get(playerToShuffle).add(hiddenFlankCards[playerToShuffle]);
-            DeterminisationUtilities.reshuffle(playerId,
-                    List.of(
-                            copy.playerDecks.get(playerToShuffle),
-                            copy.playerHands.get(playerToShuffle)
-                    ),
-                    i -> true,  // no special conditions
-                    redeterminisationRnd);
-            // then put hidden flank card back
-            if (hiddenFlankCards[playerToShuffle] != null) {
-                int deckSize = copy.playerHands.get(playerToShuffle).getSize();
-                copy.hiddenFlankCards[playerToShuffle] = copy.playerHands.get(playerToShuffle).peek(redeterminisationRnd.nextInt(deckSize));
-            }
-            // and their tiebreaker is shuffled with *our* as yet undrawn deck
-            if (tieBreakers[playerToShuffle] != null)
-                copy.playerDecks.get(playerId).add(tieBreakers[playerToShuffle]);
-            // cards the player knows, such as one they returned to the bottom, stay in place
-            copy.playerDecks.get(playerId).redeterminiseUnknown(redeterminisationRnd, playerId);
-            if (tieBreakers[playerToShuffle] != null)
-                copy.tieBreakers[playerToShuffle] = copy.playerDecks.get(playerId).draw();
-        }
+        copy.attacker = attacker;
+        // Hidden information (the opponent's deck, hand and choices this Battle) is dealt with in redeterminise(),
+        // which the superclass calls on the copy when appropriate.
         return copy;
+    }
+
+    @Override
+    public void redeterminise(int playerId) {
+        int opponent = 1 - playerId;
+        // The Attacker's hidden card and both the Defender's cards are chosen at once, so undo any of these choices
+        // the opponent has already made. Our own we keep: getPlayersStillToPlay() decides who still has to choose
+        // from them, so losing our own here would have us asked to choose a second time.
+        // Modelling what the opponent chose is the responsibility of the deciding agent.
+        if (getGamePhase() == PLAY && attacker != -1 && !isActionInProgress()) {
+            if (opponent == attacker) {
+                // a hidden card stays in the hand until it is revealed
+                hiddenFlankCards[opponent] = null;
+            } else if (fieldCards[opponent] != null) {
+                playerHands.get(opponent).add(fieldCards[opponent]);
+                fieldCards[opponent] = null;
+                hiddenFlankCards[opponent] = null;
+            }
+        }
+
+        // shuffle the other player's deck and hand
+        DeterminisationUtilities.reshuffle(playerId,
+                List.of(
+                        playerDecks.get(opponent),
+                        playerHands.get(opponent)
+                ),
+                i -> true,  // no special conditions
+                redeterminisationRnd);
+        // and their tiebreaker is shuffled with *our* as yet undrawn deck
+        if (tieBreakers[opponent] != null)
+            playerDecks.get(playerId).add(tieBreakers[opponent]);
+        // cards the player knows, such as one they returned to the bottom, stay in place
+        playerDecks.get(playerId).redeterminiseUnknown(redeterminisationRnd, playerId);
+        if (tieBreakers[opponent] != null)
+            tieBreakers[opponent] = playerDecks.get(playerId).draw();
+
+        // Both players still to choose do so at once, so each of them sees themselves as the current player.
+        // This is what the 2-argument computeAvailableActions() reads.
+        if (getPlayersStillToPlay().contains(playerId))
+            setTurnOwner(playerId);
+    }
+
+    /**
+     * A Battle has two steps. First the Attacker plays their face-up card. Then, at the same time, the Attacker
+     * chooses their hidden card and the Defender chooses both their face-up and their hidden card.
+     * This returns the players still to choose in that second step, and is empty at any other time.
+     */
+    public List<Integer> getPlayersStillToPlay() {
+        List<Integer> retValue = new ArrayList<>(2);
+        if (getGamePhase() == PLAY && attacker != -1 && !isActionInProgress()) {
+            for (int p = 0; p < getNPlayers(); p++) {
+                boolean done = p == attacker ? hiddenFlankCards[p] != null : fieldCards[p] != null;
+                if (!done)
+                    retValue.add(p);
+            }
+        }
+        return retValue;
+    }
+
+    @Override
+    public List<Integer> getCurrentSimultaneousPlayers() {
+        if (isActionInProgress() || !isNotTerminal() || getGamePhase() != PLAY || attacker == -1) {
+            return super.getCurrentSimultaneousPlayers();
+        }
+        List<Integer> toPlay = getPlayersStillToPlay();
+        if (toPlay.isEmpty()) {
+            // both players have chosen, so the forward model should already have resolved the Battle.
+            // Say so loudly rather than return nobody.
+            throw new AssertionError("Both players have played their cards but the Battle has not been resolved");
+        }
+        return toPlay;
+    }
+
+    /**
+     * The Attacker in the current Battle, or -1 outside the PLAY phase. Before any card is played this is the
+     * player about to play the face-up card that opens the Battle.
+     */
+    public int getAttacker() {
+        if (attacker != -1)
+            return attacker;
+        return getGamePhase() == PLAY && !isActionInProgress() ? getCurrentPlayer() : -1;
     }
 
     public PartialObservableDeck<ToadCard> getPlayerHand(int playerId) {
@@ -225,9 +288,6 @@ public class ToadGameState extends AbstractGameState {
             }
         }
     }
-    public void unsetHiddenFlankCard(int playerId) {
-        hiddenFlankCards[playerId] = null;
-    }
 
     @Override
     protected double _getHeuristicScore(int playerId) {
@@ -283,6 +343,7 @@ public class ToadGameState extends AbstractGameState {
                     playerHands.equals(toadGameState.playerHands) &&
                     discardOptions == toadGameState.discardOptions &&
                     nextBattle == toadGameState.nextBattle &&
+                    attacker == toadGameState.attacker &&
                     Arrays.deepEquals(battlesWon, toadGameState.battlesWon) &&
                     playerDiscards.equals(toadGameState.playerDiscards) &&
                     Arrays.equals(hiddenFlankCards, toadGameState.hiddenFlankCards) &&
@@ -297,7 +358,7 @@ public class ToadGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return 31 * super.hashCode() + Objects.hash(playerDecks, playerHands, playerDiscards, discardOptions, nextBattle) +
+        return 31 * super.hashCode() + Objects.hash(playerDecks, playerHands, playerDiscards, discardOptions, nextBattle, attacker) +
                 Arrays.deepHashCode(battlesWon) + 17 * Arrays.deepHashCode(roundWinners) +
                 Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers) + Arrays.hashCode(battlesTied) +
                 31 * Arrays.deepHashCode(shrineFlags);
