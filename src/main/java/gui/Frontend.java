@@ -672,8 +672,7 @@ public class Frontend extends GUI {
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
         AbstractGameState gameState = gameRunning.getGameState().copy();
-        int currentPlayer = gameState.getCurrentPlayer();
-        AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
+        AbstractPlayer player = gameRunning.getPlayers().get(gameRunning.getPlayerToMove());
         if (gui != null) {
             gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
             if (!gameRunning.isHumanToMove() && paused && showAll) {
