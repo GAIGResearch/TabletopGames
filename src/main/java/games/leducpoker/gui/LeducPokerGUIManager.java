@@ -11,6 +11,7 @@ import games.tricktaking.gui.CardArt;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -60,7 +61,7 @@ public class LeducPokerGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((LeducPokerParameters) gameState.getGameParameters()), height));
 
         // player 1 above the table, player 0 below it
         JPanel table = new JPanel(new GridBagLayout());
@@ -158,36 +159,50 @@ public class LeducPokerGUIManager extends AbstractGUIManager {
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        JLabel text = new JLabel("<html><center><h1>Leduc Poker</h1></center><hr>" +
-                "<p>A tiny two-player poker game: <b>win chips from your opponent</b>.</p><ul>" +
-                "<li>The deck has six cards: two Jacks, two Queens and two Kings. King is high.</li>" +
-                "<li>Each player antes 1 chip and is dealt one private card.</li>" +
-                "<li>There are two betting rounds. After the first, one board card is turned face up.</li>" +
-                "<li>On your turn you may <b>Check / Call</b> (match your opponent's chips in the pot), " +
-                "<b>Bet / Raise</b> (match and add 2 chips in the first round, 4 in the second), or " +
-                "<b>Fold</b> (only when facing a bet). At most two raises are allowed in each betting round.</li>" +
-                "<li>A betting round ends when a bet is called or both players check. The same player acts first " +
-                "in both rounds.</li>" +
-                "<li>If you fold, your opponent wins what you have put in the pot.</li>" +
-                "<li>Otherwise, at the showdown a card that pairs the board wins; if neither pairs, the higher " +
-                "private card wins; equal cards tie and nobody wins chips. The winner wins what the loser " +
-                "put in the pot.</li>" +
-                "<li>By default a game is one hand. In a match of several hands the first player alternates, and " +
-                "the player with the most net chips at the end wins.</li>" +
-                "</ul><p>Variants (game parameters): the number of hands, the ante, the raise sizes, the raise " +
-                "limit, and a rule (from the Valet RECYCLE code) that compares the higher of each player's card " +
-                "and the board card when neither pairs.</p>" +
-                "<hr><p><b>INTERFACE:</b> choose Fold, Call or Raise from the action buttons at the bottom of the " +
-                "screen. The middle of the table shows the draw deck, the board card, the pot and the betting " +
-                "round. Each player's area shows their card and their chips; the player to act is outlined in " +
-                "blue.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width - 40, height));
-        rules.add(scroll);
-        return rules;
+    private static String rulesHtml(LeducPokerParameters params) {
+        String highCard = params.highCardUsesBoard
+                ? "each player's card is the higher of their private card and the board card, and the higher " +
+                  "card wins"
+                : "the higher private card wins";
+        String length = params.nHands == 1 ? "The game is one hand."
+                : "The game lasts " + params.nHands + " hands, and the other player acts first in each new hand.";
+        return "<h2>Leduc Poker</h2>" +
+                "<p>A two-player poker game. Win chips from your opponent.</p>" +
+                "<p><b>Cards.</b> The deck has six cards, the Jack, Queen and King of Spades and of Hearts. The " +
+                "King is high, and cards of the same rank are equal.</p>" +
+                "<p><b>Each hand</b> starts with both players putting the ante in the pot. Each is then dealt one " +
+                "private card, face down.</p>" +
+                "<table border=1 cellpadding=4 cellspacing=0>" +
+                "<tr><td>Ante</td><td align=right>" + params.ante + "</td></tr>" +
+                "<tr><td>Raise in betting round 1</td><td align=right>" + params.firstRoundRaise + "</td></tr>" +
+                "<tr><td>Raise in betting round 2</td><td align=right>" + params.secondRoundRaise + "</td></tr>" +
+                "<tr><td>Raises allowed in each betting round</td><td align=right>" + params.maxRaisesPerRound +
+                "</td></tr></table>" +
+                "<p><b>Betting.</b> There are two betting rounds. After the first, the top card of the draw deck " +
+                "is turned face up as the board card. The same player acts first in both rounds. On your turn " +
+                "you choose one of these actions:</p><ul>" +
+                "<li><b>Check</b> if you owe nothing, or <b>Call</b> to put in the chips that match your " +
+                "opponent's.</li>" +
+                "<li><b>Bet</b> if you owe nothing, or <b>Raise</b>, to match your opponent and add the raise for " +
+                "the betting round. Once the raises allowed have been made, you can only call or fold.</li>" +
+                "<li><b>Fold</b>, when you owe chips. Your opponent wins the chips you have put in the pot, and " +
+                "the hand ends.</li></ul>" +
+                "<p>A betting round ends when both players check, or when a bet or raise is called.</p>" +
+                "<p><b>Showdown.</b> After the second betting round the private cards are compared. A private " +
+                "card of the same rank as the board card (a pair) wins. If neither player has a pair, " + highCard +
+                ". The winner wins the chips the loser put in the pot. If the cards are equal, no chips change " +
+                "hands.</p>" +
+                "<p><b>Winning.</b> " + length + " The player with more net chips wins. Players with the same net " +
+                "chips draw.</p>" +
+                "<h3>Interface</h3>" +
+                "<p>Choose Fold, Check or Call, and Bet or Raise from the action buttons at the bottom. The " +
+                "number on Call, Bet and Raise is the chips you will put in the pot. Player 1 is at the top and " +
+                "player 0 at the bottom.</p>" +
+                "<p>The middle of the table shows the Draw deck (with the number of cards in it), the Board card, " +
+                "the hand and betting round, the raise for the round, the Pot, the raises made this round, and " +
+                "how much the player to act must call.</p>" +
+                "<p>Each player's area shows their private card (face down to the opponent until the game " +
+                "ends), \"(acts first)\" for the player who acts first in this hand, their chips In the pot " +
+                "this hand, and their Net chips over the game. The player to act is outlined in blue.</p>";
     }
 }

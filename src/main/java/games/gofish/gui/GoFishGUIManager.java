@@ -11,6 +11,7 @@ import games.tricktaking.gui.PlayerHandView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -73,7 +74,7 @@ public class GoFishGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((GoFishParameters) state.getGameParameters()), height));
 
         playerViews = new PlayerHandView[nPlayers];
         playerViewBorders = new Border[nPlayers];
@@ -209,31 +210,40 @@ public class GoFishGUIManager extends AbstractGUIManager {
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        // a fixed body width, or the label is laid out as one long line per paragraph. Swing's CSS pixels are larger
-        // than screen pixels, so it is well inside the scroll pane's width
-        JLabel text = new JLabel("<html><body style='width: " + (width / 2) + "px'><center><h1>Go Fish</h1></center><hr>" +
-                "<p>Collect <b>books</b>: all four cards of a rank. The player with most books wins.</p><ul>" +
-                "<li>Each player is dealt 5 cards (7 each with 2 players). The rest form the draw deck.</li>" +
-                "<li>On your turn, ask another player for a rank you hold yourself. Asking shows everyone one of " +
-                "your cards of that rank.</li>" +
-                "<li>If they have any cards of that rank, they must give you all of them, face-up, " +
-                "and you ask again.</li>" +
-                "<li>If not, they say <b>Go fish!</b> and you draw the top card of the draw deck. If it is the rank " +
-                "you asked for, you show it and ask again; otherwise the turn passes to the next player.</li>" +
-                "<li>As soon as you hold all four cards of a rank, they are laid down as a book.</li>" +
-                "<li>The game ends as soon as any player's hand is empty or the draw deck is empty. " +
-                "Players tied for most books share a draw.</li>" +
-                "</ul><hr><p><b>INTERFACE:</b> choose an ask from the list of actions at the bottom of the screen. " +
-                "Cards shown to the table are face-up in a hidden hand. Under each hand are the player's books and " +
-                "the ranks they are known not to hold (they said Go fish, or gave those cards away, and have not " +
-                "drawn since).</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width * 2 / 3 + 60, height * 2 / 3 + 100));
-        rules.add(scroll);
-        return rules;
+    private static String rulesHtml(GoFishParameters params) {
+        String given = params.continueOnSuccess
+                ? "they must give you all of them, face up, and you ask again."
+                : "they must give you all of them, face up, and the turn passes to the next player.";
+        String drawn = params.continueOnDrawingSameRank
+                ? "If it is the rank you asked for, you show it and ask again. Otherwise the turn passes to the " +
+                "next player."
+                : "The turn then passes to the next player.";
+        String end = params.playUntilAllBooks
+                ? "<p><b>The end.</b> Play goes on after a hand or the draw deck is empty. A player whose turn " +
+                "starts with an empty hand draws a card, or is skipped if the draw deck is empty. You may ask " +
+                "only a player who holds cards. The game ends when the player to ask has nobody to ask.</p>"
+                : "<p><b>The end.</b> The game ends as soon as any player's hand or the draw deck is empty.</p>";
+        return "<h2>Go Fish</h2>" +
+                "<p>Collect books. A book is all four cards of a rank. The player with the most books wins, and " +
+                "players tied for the most books share first place.</p>" +
+                "<p><b>The deal.</b> Each player is dealt " + params.startingHandSize + " cards (" +
+                params.twoPlayerHandSize + " each with 2 players). The rest form the draw deck. Player 0 asks " +
+                "first.</p>" +
+                "<p><b>Each turn</b> you ask another player for a rank that you hold. Asking shows everyone one of " +
+                "your cards of that rank.</p><ul>" +
+                "<li>If they have any cards of that rank, " + given + "</li>" +
+                "<li>If they have none, they say Go fish, and you draw the top card of the draw deck. " + drawn +
+                "</li></ul>" +
+                "<p>As soon as you hold all four cards of a rank, they are laid down as a book.</p>" +
+                end +
+                "<h3>Interface</h3>" +
+                "<p>The players' hands are in two rows, each titled with the player's number and agent. The current " +
+                "player's hand has a blue border. In a hidden hand, the cards shown to the table are face up. The " +
+                "line under a hand shows the number of cards, the ranks of the player's books, and the ranks the " +
+                "player is known not to hold (\"has no\"). A player is known not to hold a rank after saying Go " +
+                "fish or giving those cards away, until they next draw. J, Q, K and A stand for Jack, Queen, King " +
+                "and Ace.</p>" +
+                "<p>The centre shows the draw deck with its number of cards, when the game will end, and the " +
+                "player to ask. Each action button is an ask, such as \"Ask P1 for Kings\".</p>";
     }
 }

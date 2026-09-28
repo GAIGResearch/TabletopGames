@@ -124,9 +124,6 @@ public class LawnAndOrderForwardModel extends StandardForwardModel {
             endPlayerTurn(state, state.getPlayersStillToChoose().get(0));
     }
 
-    /**
-     * The next player, cycling round from the current one, who is still to choose.
-     */
     private int nextPlayerToChoose(LawnAndOrderGameState state) {
         List<Integer> toChoose = state.getPlayersStillToChoose();
         int current = state.getCurrentPlayer();

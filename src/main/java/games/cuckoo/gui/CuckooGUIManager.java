@@ -4,11 +4,13 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.cuckoo.CuckooGameState;
+import games.cuckoo.CuckooParameters;
 import games.tricktaking.gui.CardArt;
 import games.tricktaking.gui.FrenchCardDeckView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -71,7 +73,7 @@ public class CuckooGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((CuckooParameters) state.getGameParameters()), height));
 
         // the seats are placed by hand round an ellipse, so the table has no layout manager
         JPanel table = new JPanel(null);
@@ -246,32 +248,35 @@ public class CuckooGUIManager extends AbstractGUIManager {
         return false;
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        JLabel text = new JLabel("<html><center><h1>Cuckoo</h1></center><hr>" +
-                "<p>An old card game of passing on a bad card. Each player starts with <b>three lives</b> (by default).</p><ul>" +
-                "<li>Each round every player still in the game is dealt one card, which only they see. " +
-                "Kings are high and Aces low; suits do not matter.</li>" +
-                "<li>Starting on the dealer's left and going clockwise, each player either <b>keeps</b> their card " +
-                "or <b>swaps</b> it with the next player on their left. That player must accept, unless they " +
-                "hold a King: they show it, and the swap is refused.</li>" +
-                "<li>The dealer decides last. A swap by the dealer takes the top card of the draw deck instead - " +
-                "unless it is a King, in which case the dealer keeps their own card.</li>" +
-                "<li>Then all cards are shown, and whoever has the lowest card loses a life. Every player tied " +
-                "for lowest loses one.</li>" +
-                "<li>A player with no lives left is out. The deal passes to the next player on the left who is " +
-                "still in.</li>" +
-                "<li>The last player left wins. If everyone left loses their last life in the same round, they " +
-                "are joint winners.</li>" +
-                "</ul><hr><p><b>INTERFACE:</b> choose Keep card or Swap card from the buttons at the bottom of the " +
-                "screen. Play goes clockwise from player 0 at the bottom. A player's seat shows their lives; a " +
-                "card you know - your own, one you gave away, or a King shown to refuse a swap - is face up. " +
-                "The centre shows the draw deck, the dealer and whose turn it is.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width * 2 / 3 + 60, height * 2 / 3));
-        rules.add(scroll);
-        return rules;
+    private static String rulesHtml(CuckooParameters params) {
+        String ending = params.maxDeals > 0
+                ? "<p><b>Winning.</b> The game ends after " + params.maxDeals
+                + (params.maxDeals == 1 ? " round" : " rounds")
+                + ", or earlier when only one player is left. The players with the most lives win.</p>"
+                : "<p><b>Winning.</b> The last player left wins. If all the players left lose their last life in " +
+                "the same round, they are joint winners.</p>";
+        return "<h2>Cuckoo</h2>" +
+                "<p>Each player starts with " + params.nLives + (params.nLives == 1 ? " life" : " lives") +
+                ". The aim is to avoid holding the lowest card.</p>" +
+                "<p><b>Each round</b> every player still in the game is dealt one card, which only they can see. " +
+                "Kings are high and Aces are low. Suits do not matter.</p><ol>" +
+                "<li>Players decide in turn, clockwise from the dealer's left. Each player chooses Keep card or " +
+                "Swap card.</li>" +
+                "<li>Swap card exchanges your card with the card of the next player on your left. They must " +
+                "accept, unless they hold a King. In that case they show the King, and the swap is refused.</li>" +
+                "<li>The dealer decides last. Swap card by the dealer exchanges their card for the top card of " +
+                "the draw deck. If that card is a King, the dealer keeps their own card.</li>" +
+                "<li>All the cards are then shown. Every player holding the lowest card loses a life.</li></ol>" +
+                "<p><b>Out.</b> A player with no lives left is out of the game. The deal passes to the next " +
+                "player on the left who is still in.</p>" +
+                ending +
+                "<h3>Interface</h3>" +
+                "<p>Choose Keep card or Swap card from the action buttons at the bottom. Player 0 sits at the " +
+                "bottom of the table, and play goes clockwise. Each seat shows the player's card and their lives " +
+                "(one ♥ for each life). The dealer's seat also shows \"Dealer\", and the seat of a player who is " +
+                "out shows the round they went out in. The current player's seat has a blue border.</p>" +
+                "<p>A card is face up when you know it (your own card, a card you gave away, or a King shown to " +
+                "refuse a swap). All the cards are face up when the game is over. The centre of the table shows " +
+                "the draw deck, the round, the dealer, whose turn it is, and who a swap would be with.</p>";
     }
 }

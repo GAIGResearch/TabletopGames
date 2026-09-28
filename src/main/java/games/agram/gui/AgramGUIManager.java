@@ -12,6 +12,7 @@ import games.tricktaking.gui.TrickView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -69,7 +70,7 @@ public class AgramGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((AgramParameters) state.getGameParameters()), height));
 
         // Player areas: player 0 at the bottom, then round the table
         playerViews = new PlayerHandView[nPlayers];
@@ -187,27 +188,36 @@ public class AgramGUIManager extends AbstractGUIManager {
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        JLabel text = new JLabel("<html><center><h1>Agram</h1></center><hr>" +
-                "<p>A trick-taking game from West Africa: <b>win the last trick</b>.</p><ul>" +
-                "<li>35 cards: A, 10, 9, 8, 7, 6, 5, 4, 3 in each suit, but no Ace of Spades. Aces are high.</li>" +
-                "<li>Each player is dealt 6 cards and there are 6 tricks. The rest of the cards are not used.</li>" +
+    private static String rulesHtml(AgramParameters params) {
+        int n = params.nCardsPerPlayer;
+        String match = params.nDeals > 1
+                ? "<p><b>Match.</b> A match is " + params.nDeals + " deals. The winner of each deal deals the next, " +
+                "so the player after them leads. The player who has won most deals wins the match, and players " +
+                "with the same number of deals share the place.</p>"
+                : "";
+        return "<h2>Agram</h2>" +
+                "<p>A trick-taking game from West Africa. The winner of the last trick wins the deal.</p>" +
+                "<p><b>Cards.</b> The deck has 35 cards: Ace and 10 down to 3 in each suit, without the Ace of " +
+                "Spades. Ace is high.</p>" +
+                "<p><b>Deal.</b> Each player is dealt " + n + " cards, so there are " + n + " tricks. The cards " +
+                "left over are not used.</p>" +
+                "<p><b>Play.</b></p><ul>" +
                 "<li>The player after the dealer leads the first trick with any card.</li>" +
-                "<li>Everyone else must follow suit if they can - but need not play higher. " +
-                "If you cannot follow suit you may play any card, and everyone then knows you have none of that suit.</li>" +
-                "<li>The highest card of the suit led wins the trick; there are no trumps. " +
-                "The winner leads the next trick.</li>" +
-                "<li>Whoever wins the last trick wins the deal. Earlier tricks count for nothing.</li>" +
-                "<li>In a match of several deals, the winner of each deal deals the next, and the player " +
-                "who has won most deals wins.</li>" +
-                "</ul><hr><p><b>INTERFACE:</b> choose a card from the action buttons at the bottom of the screen. " +
-                "The centre shows the trick so far, with the winning card outlined.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width * 2 / 3 + 60, height * 2 / 3 + 100));
-        rules.add(scroll);
-        return rules;
+                "<li>The other players must follow suit if they can, but need not play higher.</li>" +
+                "<li>A player who cannot follow suit may play any card. The others will then know that player has " +
+                "none of that suit.</li>" +
+                "<li>The highest card of the suit led wins the trick. There are no trumps.</li>" +
+                "<li>The winner of a trick leads the next.</li></ul>" +
+                "<p><b>Winning.</b> The winner of trick " + n + " wins the deal. The earlier tricks score " +
+                "nothing.</p>" + match +
+                "<h3>Interface</h3>" +
+                "<p>Choose a card from the action buttons at the bottom. Each player's area shows their hand, " +
+                "with a status line underneath: the number of cards, " +
+                (params.nDeals > 1 ? "the deals won, " : "") + "and the suits the player is known to be void in " +
+                "(\"void in\"). The name below the area is marked \"dealer\" for the dealer, and a blue outline " +
+                "shows whose turn it is.</p>" +
+                "<p>The centre shows the trick number, the suit led and the cards played so far, each labelled with " +
+                "the player who played it. The card winning the trick is outlined in orange. The bottom line counts " +
+                "the tricks played this deal and the cards not dealt.</p>";
     }
 }

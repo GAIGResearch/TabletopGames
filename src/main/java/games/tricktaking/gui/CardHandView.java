@@ -30,6 +30,7 @@ public class CardHandView<C extends Component, S> extends JComponent {
         this.handView = new CardDeckView<>(face, playerId, hand, false,
                 new Rectangle(border, border, playerAreaWidth, face.cardHeight()));
         this.handView.setDisplayOrder(face.handOrder());
+        this.handView.setRightmostOnTop(true);
     }
 
     @Override

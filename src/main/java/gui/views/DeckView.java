@@ -32,6 +32,9 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     protected Comparator<? super T> displayOrder;
     // Deck indices in the order last drawn, left to right
     protected int[] drawnOrder = new int[0];
+    // Overlapping cards: false puts the leftmost on top (a pile, whose top card is index 0); true puts the
+    // rightmost on top (a fanned hand, where each card's top-left corner index stays visible)
+    protected boolean rightmostOnTop;
 
     public DeckView(int humanPlayer, Deck<T> d, boolean visible, int componentWidth, int componentHeight) {
         this(humanPlayer, d, visible, componentWidth, componentHeight, new Rectangle(0, 0, componentWidth, componentHeight));
@@ -95,11 +98,12 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     public void drawDeck(Graphics2D g) {
         @SuppressWarnings("unchecked") Deck<T> deck = (Deck<T>) component;
         if (deck != null && deck.getSize() > 0) {
-            // Draw cards, the leftmost on top
+            // Draw cards, the leftmost on top unless rightmostOnTop
             int offset = Math.max((rect.width - itemWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
             drawnOrder = displayIndices(deck);
-            for (int pos = deck.getSize() - 1; pos >= 0; pos--) {
+            for (int n = 0; n < deck.getSize(); n++) {
+                int pos = rightmostOnTop ? n : deck.getSize() - 1 - n;
                 int i = drawnOrder[pos];
                 T card = deck.get(i);
                 Rectangle r = new Rectangle(rect.x + offset * pos, rect.y, itemWidth, itemHeight);
@@ -143,7 +147,8 @@ public abstract class DeckView<T extends Component> extends ComponentView {
      */
     private int cardAt(Point p, int otherwise) {
         if (rects == null) return otherwise;
-        for (int i : drawnOrder) {
+        for (int n = 0; n < drawnOrder.length; n++) {
+            int i = drawnOrder[rightmostOnTop ? drawnOrder.length - 1 - n : n];
             if (i < rects.length && rects[i] != null && rects[i].contains(p))
                 return i;
         }
@@ -156,6 +161,14 @@ public abstract class DeckView<T extends Component> extends ComponentView {
      */
     public void setDisplayOrder(Comparator<? super T> displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+    /**
+     * True for a fanned hand: each card overlaps the one to its left, so the index in every card's top-left corner
+     * stays visible. False (the default) for a pile, where the leftmost card (index 0, the top) is drawn on top.
+     */
+    public void setRightmostOnTop(boolean rightmostOnTop) {
+        this.rightmostOnTop = rightmostOnTop;
     }
 
     public boolean componentVisibility(Deck<T> deck, int index) {

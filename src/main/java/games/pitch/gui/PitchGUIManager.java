@@ -8,6 +8,7 @@ import games.pitch.PitchParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -83,18 +84,10 @@ public class PitchGUIManager extends AbstractGUIManager {
         main.add(tableArea, BorderLayout.CENTER);
         main.add(createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false), BorderLayout.SOUTH);
 
-        JLabel rules = new JLabel(rulesText((PitchParameters) state.getGameParameters()));
-        rules.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane rulesPane = new JScrollPane(rules);
-        rulesPane.setPreferredSize(new Dimension(width * 3 / 4, tableHeight));
-        JPanel rulesTab = new JPanel();
-        rulesTab.setBackground(new Color(43, 108, 25, 111));
-        rulesTab.add(rulesPane);
-
         JTabbedPane tabs = new JTabbedPane();
         tabs.setOpaque(false);
         tabs.add("Main", main);
-        tabs.add("Rules", rulesTab);
+        tabs.add("Rules", new RulesView(rulesHtml((PitchParameters) state.getGameParameters()), tableHeight));
 
         height = tableHeight + defaultInfoPanelHeight + defaultActionPanelHeight + 60;
         parent.setLayout(new BorderLayout());
@@ -136,36 +129,56 @@ public class PitchGUIManager extends AbstractGUIManager {
         return "Player " + p + agent + " (team " + state.getTeam(p) + role + ")" + bidText;
     }
 
-    private static String rulesText(PitchParameters params) {
-        String length = params.targetScore <= 1
-                ? "The game is a single deal: the team with the higher score wins (equal scores: a draw)."
-                : "Deals continue until the pitching team makes its bid and has at least " + params.targetScore
-                + " points; that team wins. The other team cannot win on a deal it did not pitch.";
+    private static String rulesHtml(PitchParameters params) {
         String hlj = params.countHighLowSeparately
-                ? "High, Low and Jack each score 1, even when one card is two or three of them."
-                : "Each trump card that is High, Low or the Jack scores 1 for the team that won it - one card that is"
-                + " both High and Low scores only 1.";
-        return "<html><body style='width:600px'><h1>Pitch</h1>"
-                + "<p>Four players in two partnerships: players 0 and 2 against players 1 and 3. Each player is dealt "
-                + params.handSize + " cards from a 52-card deck; Aces are high. The other cards are not used.</p>"
-                + "<h3>Bidding</h3><p>One round, starting on the dealer's left. Pass, or bid " + params.minBid
-                + " to " + params.smudgeBid + " points - higher than the highest bid so far. The dealer bids last,"
-                + " may take the bid by equalling it, and must bid if everyone else passed. The highest bidder is"
-                + " the pitcher.</p>"
-                + "<h3>Play</h3><p>The pitcher leads to the first trick, and the suit of that card is trumps for the"
-                + " deal. If you hold a card of the suit led you must play either that suit or a trump; otherwise"
-                + " play any card. The highest trump wins the trick, or if there is none the highest card of the"
-                + " suit led. The winner leads the next trick.</p>"
-                + "<h3>Scoring</h3><p>High: the highest trump played. Low: the lowest trump played. Jack: the Jack of"
-                + " trumps, if it was dealt. Game: the team whose won cards have the higher total (Ace "
-                + params.gameValueAce + ", King " + params.gameValueKing + ", Queen " + params.gameValueQueen
-                + ", Jack " + params.gameValueJack + ", Ten " + params.gameValueTen + "); nobody on a tie. " + hlj
-                + "</p><p>The other team scores its points. The pitching team scores its points if they reach its"
-                + " bid, and otherwise loses the bid. A bid of " + params.smudgeBid + " (smudge) needs every trick"
-                + " and all four points: it scores " + params.smudgePoints + ", or loses " + params.smudgePoints
-                + ".</p><p>" + length + "</p>"
-                + "<h3>Interface</h3><p>Your hand is at your seat; the current trick, trumps, the bid and the"
-                + " scores are in the middle. Choose a bid or a card with the action buttons below the table.</p>"
-                + "</body></html>";
+                ? "A card that is two or three of High, Low and Jack scores 1 for each of them."
+                : "A card that is two or three of High, Low and Jack scores only 1.";
+        String winning = params.targetScore <= 1
+                ? "The game is a single deal. The team with the higher score wins, and teams with the same score " +
+                  "draw."
+                : "Deals continue until the pitching team makes its bid and ends the deal with a score of " +
+                  params.targetScore + " or more. That team wins, whatever the other team's score.";
+        return "<h2>Pitch</h2>" +
+                "<p>Players 0 and 2 (team 0) play against players 1 and 3 (team 1). Each player is dealt " +
+                params.handSize + " cards from a 52-card deck, and the other cards are not used. Aces are high. " +
+                "The deal passes to the left after each deal.</p>" +
+                "<p><b>Bidding.</b> There is one round of bidding, starting on the dealer's left. Each player " +
+                "passes, or bids from " + params.minBid + " to " + params.smudgeBid + " points. A bid must be " +
+                "higher than the highest bid so far. The dealer bids last, and may take the bid by equalling the " +
+                "highest bid. If everyone else has passed, the dealer must bid. The highest bidder is the " +
+                "pitcher.</p>" +
+                "<p><b>Play.</b> The pitcher leads to the first trick, and the suit of that card is trumps for " +
+                "the deal. If you hold a card of the suit led, you must play a card of that suit or a trump. " +
+                "Otherwise you may play any card. The highest trump wins the trick. If the trick holds no trump, " +
+                "the highest card of the suit led wins. The winner leads the next trick.</p>" +
+                "<p><b>Points.</b> At the end of the deal each team takes these points from the cards in the " +
+                "tricks it won.</p>" +
+                "<table border=1 cellpadding=4 cellspacing=0>" +
+                "<tr><td>High</td><td>1 for the highest trump played</td></tr>" +
+                "<tr><td>Low</td><td>1 for the lowest trump played</td></tr>" +
+                "<tr><td>Jack</td><td>1 for the Jack of trumps, if it was dealt</td></tr>" +
+                "<tr><td>Game</td><td>1 for the higher total of card values below (nobody scores it when the " +
+                "totals are equal)</td></tr></table>" +
+                "<p>" + hlj + " The card values for Game are:</p>" +
+                "<table border=1 cellpadding=4 cellspacing=0>" +
+                "<tr><th align=left>Card</th><td align=center>Ace</td><td align=center>King</td>" +
+                "<td align=center>Queen</td><td align=center>Jack</td><td align=center>Ten</td></tr>" +
+                "<tr><th align=left>Value</th><td align=center>" + params.gameValueAce + "</td><td align=center>" +
+                params.gameValueKing + "</td><td align=center>" + params.gameValueQueen + "</td><td align=center>" +
+                params.gameValueJack + "</td><td align=center>" + params.gameValueTen + "</td></tr></table>" +
+                "<p><b>Scoring a deal.</b> The other team scores its points. The pitching team scores its points " +
+                "if they reach its bid, and otherwise loses the value of its bid. A bid of " + params.smudgeBid +
+                " is a smudge. The pitching team will then score " + params.smudgePoints + " if it wins every " +
+                "trick and all four points, and otherwise lose " + params.smudgePoints + ".</p>" +
+                "<p><b>Winning.</b> " + winning + "</p>" +
+                "<h3>Interface</h3>" +
+                "<p>Choose Pass, a Bid or a card to Play from the action buttons at the bottom. Player 0 sits at " +
+                "the bottom, with players 1, 2 and 3 to the left, top and right. Each seat's title gives the " +
+                "player's team, marks the dealer, and shows their bid or \"passed\". The player to act has a " +
+                "blue border.</p>" +
+                "<p>The middle of the table shows the current trick, each card on the side of the player who " +
+                "played it. Below the trick are the trump suit, the pitcher and their bid, and each team's score " +
+                "and tricks won in this deal. When the game ends it also shows the points each team took in the " +
+                "last deal.</p>";
     }
 }

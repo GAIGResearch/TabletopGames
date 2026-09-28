@@ -13,6 +13,7 @@ import games.tricktaking.gui.TrickView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -78,7 +79,7 @@ public class SuecaGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((SuecaParameters) state.getGameParameters()), height));
 
         // Player areas: player 0 at the bottom, then clockwise round the table, so partners face each other
         playerViews = new PlayerHandView[nPlayers];
@@ -214,35 +215,64 @@ public class SuecaGUIManager extends AbstractGUIManager {
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        JLabel text = new JLabel("<html><center><h1>Sueca</h1></center><hr>" +
-                "<p>The Portuguese partnership trick-taking game, for four players: <b>players 0 and 2 against " +
-                "players 1 and 3</b>, sitting opposite each other.</p><ul>" +
-                "<li>A 40-card pack (no Eights, Nines or Tens) is dealt, 10 cards each. The dealer's last card is " +
-                "turned face up and sets <b>trumps</b>; the dealer keeps it in their hand, and everyone knows they " +
-                "hold it until they play it.</li>" +
-                "<li>The player after the dealer leads the first trick. Every suit ranks <b>A 7 K J Q 6 5 4 3 2</b>.</li>" +
-                "<li>Follow the suit led if you can; otherwise play any card. There is no need to trump or to beat " +
-                "the cards already played.</li>" +
-                "<li>The highest trump wins the trick, or if no trump was played, the highest card of the suit led. " +
-                "The winner leads the next trick.</li>" +
-                "<li><b>Card points:</b> Ace 11, Seven 10, King 4, Jack 3, Queen 2, the rest nothing: 120 in all.</li>" +
-                "<li>By default a game is a <b>single deal</b>: the team with more card points wins, and 60-60 is " +
-                "a draw.</li>" +
-                "<li>Option - the <b>rubber</b>: after each deal the team with more than 60 card points scores 1 " +
-                "game, 2 with 91 or more, or 4 if it took every trick. After a 60-60 tie nobody scores, but the " +
-                "next deal is worth one more game (two ties, two more). The first team to 4 games wins; the deal " +
-                "passes to the next player.</li>" +
-                "</ul><hr><p><b>INTERFACE:</b> choose a card from the action buttons at the bottom of the screen. " +
-                "The centre shows the trick so far, with the winning card outlined, the trump card and whether the " +
-                "dealer still holds it, and each team's card points and tricks this deal. A player's area shows " +
-                "the suits they are known to be void in.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width * 2 / 3 + 60, height * 2 / 3 + 100));
-        rules.add(scroll);
-        return rules;
+    private static String rulesHtml(SuecaParameters params) {
+        FrenchCard.Suite spades = FrenchCard.Suite.Spades;
+        FrenchCard[] scoring = {new FrenchCard(FrenchCard.FrenchCardType.Ace, spades),
+                new FrenchCard(FrenchCard.FrenchCardType.Number, spades, 7),
+                new FrenchCard(FrenchCard.FrenchCardType.King, spades),
+                new FrenchCard(FrenchCard.FrenchCardType.Jack, spades),
+                new FrenchCard(FrenchCard.FrenchCardType.Queen, spades)};
+        String[] names = {"Ace", "Seven", "King", "Jack", "Queen"};
+        StringBuilder cards = new StringBuilder("<tr><th align=left>Card</th>");
+        StringBuilder points = new StringBuilder("<tr><th align=left>Card points</th>");
+        for (int i = 0; i < scoring.length; i++) {
+            cards.append("<td align=center>").append(names[i]).append("</td>");
+            points.append("<td align=center>").append(params.cardPoints(scoring[i])).append("</td>");
+        }
+        String winning = params.playRubber
+                ? "<p><b>Winning.</b> The game is a rubber of several deals. After each deal the team with more " +
+                "than 60 card points scores games:</p>" +
+                "<table border=1 cellpadding=4 cellspacing=0>" +
+                "<tr><th align=left>Deal won with</th><th>Games</th></tr>" +
+                "<tr><td>61 to 90 card points</td><td align=center>" + SuecaUtils.gamesForDeal(61, false) +
+                "</td></tr>" +
+                "<tr><td>91 or more card points</td><td align=center>" + SuecaUtils.gamesForDeal(91, false) +
+                "</td></tr>" +
+                "<tr><td>every trick</td><td align=center>" + SuecaUtils.gamesForDeal(120, true) + "</td></tr>" +
+                "</table>" +
+                "<p>After a deal tied at 60 card points each, nobody scores, and the next deal is worth one more " +
+                "game to the team that wins it. Each further tie adds another game. The deal passes to the next " +
+                "player. The first team to " + params.targetGames + " games wins.</p>"
+                : "<p><b>Winning.</b> The game is a single deal. The team with more card points wins, and 60 card " +
+                "points each is a draw.</p>";
+        return "<h2>Sueca</h2>" +
+                "<p>Four players play in two teams. Team 0 is players 0 and 2, and team 1 is players 1 and 3. " +
+                "Partners sit opposite each other.</p>" +
+                "<p><b>The deal.</b> The pack has 40 cards (a standard pack without the Eights, Nines and Tens). " +
+                "Each player is dealt " + params.handSize + " cards. The dealer's last card is turned face up and " +
+                "sets trumps. The dealer keeps it in their hand, and everyone knows they hold it until they play " +
+                "it. The player after the dealer leads the first trick.</p>" +
+                "<p><b>Tricks.</b> In every suit the cards rank A 7 K J Q 6 5 4 3 2.</p><ul>" +
+                "<li>Follow the suit led if you can. Otherwise play any card.</li>" +
+                "<li>The highest trump wins the trick. If no trump was played, the highest card of the suit led " +
+                "wins.</li>" +
+                "<li>The winner leads the next trick.</li></ul>" +
+                "<p><b>Card points.</b> The cards a team wins in tricks score card points, 120 in all. The other " +
+                "cards score nothing.</p>" +
+                "<table border=1 cellpadding=4 cellspacing=0>" + cards + "</tr>" + points + "</tr></table>" +
+                winning +
+                "<h3>Interface</h3>" +
+                "<p>Player 0 sits at the bottom, and the others follow clockwise. Each player's area is titled " +
+                "with the player's number and agent, and with \"dealer\" for the dealer. The current player's " +
+                "area has a blue border. The line under a player's cards shows their number of cards, their team, " +
+                "the trump card while the dealer holds it, and the suits the player is known to be void in (from " +
+                "failing to follow suit).</p>" +
+                "<p>The centre shows the trick so far. Each card is labelled with the player who played it, and " +
+                "\"(led)\" marks the first. The card winning the trick so far has an orange outline. Above the " +
+                "trick, one line shows " + (params.playRubber ? "the deal number, " : "") + "the trick number and " +
+                "the trump card, and the next shows the suit led (or the player to lead). The line below the trick shows each team's card points " +
+                "and tricks in this deal." +
+                (params.playRubber ? " The bottom line shows each team's games in the rubber." : "") + "</p>" +
+                "<p>Each action button plays one card from your hand.</p>";
     }
 }

@@ -12,6 +12,7 @@ import games.tricktaking.gui.TrickView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -69,7 +70,7 @@ public class KlaverjassenGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((KlaverjassenParameters) state.getGameParameters()), height));
 
         // Player areas: player 0 at the bottom, then clockwise round the table, so partners face each other
         playerViews = new PlayerHandView[nPlayers];
@@ -199,44 +200,90 @@ public class KlaverjassenGUIManager extends AbstractGUIManager {
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        JLabel text = new JLabel("<html><center><h1>Klaverjassen</h1></center><hr>" +
-                "<p>The Dutch partnership trick-taking game, for four players: <b>players 0 and 2 against players " +
-                "1 and 3</b>, sitting opposite each other. Rules as the Utrecht (compulsory trumps) and Amsterdam " +
-                "variants.</p><ul>" +
-                "<li>A 32-card pack (Seven to Ace in each suit) is dealt, 8 cards each.</li>" +
-                "<li>The player on the dealer's left <b>must choose trumps</b> after seeing their hand, and then " +
-                "leads the first trick. Their team must score more points than the other team (see below).</li>" +
-                "<li>Trumps rank <b>J 9 A 10 K Q 8 7</b>; other suits rank <b>A 10 K Q J 9 8 7</b>. The highest " +
-                "trump wins the trick, or the highest card of the suit led. The winner leads the next trick.</li>" +
-                "<li>Follow the suit led if you can. When trumps are led you must beat the highest trump played " +
-                "if you can.</li>" +
-                "<li>If you cannot follow suit and an opponent is winning the trick, you must trump (beating any " +
-                "trump already played) if you can; you may not play a lower trump unless you hold nothing else.</li>" +
-                "<li>If you cannot follow suit and your partner is winning, you may play anything - except that " +
-                "if partner is winning with a trump you must discard a non-trump if you hold one. (Option: you " +
-                "may also overtrump partner, but never undertrump.)</li>" +
-                "<li><b>Card points:</b> trumps J 20, 9 14, A 11, 10 10, K 4, Q 3; other suits A 11, 10 10, K 4, " +
-                "Q 3, J 2. The last trick scores 10 more: 162 in all.</li>" +
-                "<li><b>Roem</b> (bonus points), scored by the team winning the trick, for the cards in it: " +
-                "a run of three in one suit (in the order A K Q J 10 9 8 7) 20, a run of four 50; the King and " +
-                "Queen of trumps (stuk) 20 more; four Kings, Queens, Aces or Tens 100; four Jacks 200. A team " +
-                "taking all 8 tricks scores 100 roem more.</li>" +
-                "<li>If the team that chose trumps has fewer points (card points plus roem) than the other team, " +
-                "it scores nothing and the other team scores all the points of the hand. (Option: a tie also " +
-                "counts as failing.) Otherwise each team scores its own points.</li>" +
-                "<li>By default a game is a single hand (an option plays more, with the deal passing to the " +
-                "left). The team with more points wins; level points are a draw.</li>" +
-                "</ul><hr><p><b>INTERFACE:</b> choose trumps or a card from the action buttons at the bottom of " +
-                "the screen. The centre shows the trick so far, with the winning card outlined, what is trumps, " +
-                "and each team's card points, roem and tricks this hand. A player's area shows the suits they are " +
-                "known to be void in.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width * 2 / 3 + 60, height * 2 / 3 + 100));
-        rules.add(scroll);
-        return rules;
+    private static String rulesHtml(KlaverjassenParameters params) {
+        // the card numbers of each suit from high to low: Jack 11, Queen 12, King 13, Ace 14
+        int[] trumpOrder = {11, 9, 14, 10, 13, 12, 8, 7};
+        int[] otherOrder = {14, 10, 13, 12, 11, 9, 8, 7};
+        String cardTable = "<table border=1 cellpadding=4 cellspacing=0>"
+                + cardRows("Trumps", trumpOrder, FrenchCard.Suite.Hearts, params)
+                + cardRows("Other suits", otherOrder, FrenchCard.Suite.Spades, params) + "</table>";
+        int total = params.lastTrickBonus;
+        for (int n : trumpOrder)
+            total += points(n, FrenchCard.Suite.Hearts, params) + 3 * points(n, FrenchCard.Suite.Spades, params);
+        String partnerTrump = switch (params.partnerTrumpRule) {
+            case NO_UNDERTRUMP -> "you may play a card that is not a trump, or a trump higher than your " +
+                    "partner's. You may play a lower trump only if you hold nothing else.";
+            case DISCARD -> "you must play a card that is not a trump if you hold one.";
+        };
+        return "<h2>Klaverjassen</h2>" +
+                "<p>Players 0 and 2 (team 0) play against players 1 and 3 (team 1). Partners sit opposite each " +
+                "other. The game lasts " + params.nHands + (params.nHands == 1 ? " hand" : " hands") + ".</p>" +
+                "<p><b>The deal.</b> The 32-card pack (Seven to Ace in each suit) is shuffled, and each player is " +
+                "dealt " + params.handSize + " cards. The player on the dealer's left must choose trumps after " +
+                "seeing their hand, and then leads the first trick. The deal passes to the left after each " +
+                "hand.</p>" +
+                "<p><b>Cards.</b> The cards of each suit rank from high to low as below, with their points.</p>" +
+                cardTable +
+                "<p>The team that wins the last trick of a hand scores " + params.lastTrickBonus + " points more, " +
+                "so each hand has " + total + " points in all.</p>" +
+                "<p><b>Play.</b> Any card may be led. The highest trump in a trick wins it. If the trick holds no " +
+                "trump, the highest card of the suit led wins. The winner leads the next trick.</p><ul>" +
+                "<li>If a suit other than trumps is led, you must follow suit if you can.</li>" +
+                "<li>If trumps are led, you must play a trump higher than every trump in the trick if you can. " +
+                "If you hold only lower trumps, you must play one of them.</li>" +
+                "<li>If you cannot follow suit and an opponent is winning the trick, you must play a trump that " +
+                "beats the winning card if you can. If you cannot, you must play a card that is not a trump. You " +
+                "may play a lower trump only if you hold nothing else.</li>" +
+                "<li>If you cannot follow suit and your partner is winning the trick, you may play any card. If " +
+                "your partner is winning with a trump, " + partnerTrump + "</li></ul>" +
+                "<p><b>Roem.</b> The team that wins a trick scores roem (bonus points) for the cards in it.</p>" +
+                "<table border=1 cellpadding=4 cellspacing=0>" +
+                "<tr><td>A run of three in one suit, in the order 7 8 9 10 J Q K A</td><td align=right>" +
+                params.runOfThreeBonus + "</td></tr>" +
+                "<tr><td>A run of four</td><td align=right>" + params.runOfFourBonus + "</td></tr>" +
+                "<tr><td>The King and Queen of trumps (stuk), as well as any run</td><td align=right>" +
+                params.stukBonus + "</td></tr>" +
+                "<tr><td>Four Tens, Queens, Kings or Aces</td><td align=right>" + params.fourOfAKindBonus +
+                "</td></tr>" +
+                "<tr><td>Four Jacks</td><td align=right>" + params.fourJacksBonus + "</td></tr></table>" +
+                "<p>A team that wins every trick of a hand scores " + params.pitBonus + " roem more.</p>" +
+                "<p><b>Scoring a hand.</b> Each team's points for the hand are its card points plus its roem. If " +
+                "the team that chose trumps has " + (params.tieIsFailure ? "the same or fewer points" : "fewer " +
+                "points") + " than the other team, it scores nothing, and the other team scores the points of " +
+                "both teams. Otherwise each team scores its own points.</p>" +
+                "<p><b>Winning.</b> After the last hand the team with the higher score wins. Teams with the same " +
+                "score draw.</p>" +
+                "<h3>Interface</h3>" +
+                "<p>Choose trumps or a card to play from the action buttons at the bottom. Player 0 sits at the " +
+                "bottom, with players 1, 2 and 3 to the left, top and right. Below each player's cards are the " +
+                "number of cards they hold, their team, and the suits they are known to be void in. The player " +
+                "to act has a blue border. The title of the dealer shows \"dealer\", and the title of the player " +
+                "who chose trumps shows \"chose trumps\".</p>" +
+                "<p>The centre panel shows the hand and trick number, the trump suit and the team that chose it, " +
+                "and the suit led. Below them are the cards of the trick, each with the player who played it. " +
+                "The card winning the trick is outlined in orange. The bottom line gives each team's card " +
+                "points, roem and tricks in this hand. The score of each team is shown under the panel.</p>";
+    }
+
+    /**
+     * Two rows of the card table: the cards of one suit from high to low, and their points.
+     */
+    private static String cardRows(String title, int[] order, FrenchCard.Suite suit, KlaverjassenParameters params) {
+        StringBuilder cards = new StringBuilder("<tr><th align=left>" + title + "</th>");
+        StringBuilder pointRow = new StringBuilder("<tr><th align=left>Points</th>");
+        for (int n : order) {
+            cards.append("<td align=center>").append(n <= 10 ? String.valueOf(n) : "JQKA".substring(n - 11, n - 10))
+                    .append("</td>");
+            pointRow.append("<td align=center>").append(points(n, suit, params)).append("</td>");
+        }
+        return cards + "</tr>" + pointRow + "</tr>";
+    }
+
+    /**
+     * The points of the card of the given number and suit, when Hearts are trumps.
+     */
+    private static int points(int number, FrenchCard.Suite suit, KlaverjassenParameters params) {
+        return params.cardPoints(new FrenchCard(FrenchCard.FrenchCardType.Number, suit, number),
+                FrenchCard.Suite.Hearts);
     }
 }

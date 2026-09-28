@@ -8,6 +8,7 @@ import games.president.PresidentParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -79,18 +80,10 @@ public class PresidentGUIManager extends AbstractGUIManager {
         main.add(tableArea, BorderLayout.CENTER);
         main.add(createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true), BorderLayout.SOUTH);
 
-        JLabel rules = new JLabel(rulesText((PresidentParameters) state.getGameParameters()));
-        rules.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane rulesPane = new JScrollPane(rules);
-        rulesPane.setPreferredSize(new Dimension(width * 3 / 4, tableHeight));
-        JPanel rulesTab = new JPanel();
-        rulesTab.setBackground(new Color(43, 108, 25, 111));
-        rulesTab.add(rulesPane);
-
         JTabbedPane tabs = new JTabbedPane();
         tabs.setOpaque(false);
         tabs.add("Main", main);
-        tabs.add("Rules", rulesTab);
+        tabs.add("Rules", new RulesView(rulesHtml((PresidentParameters) state.getGameParameters()), tableHeight));
 
         height = tableHeight + defaultInfoPanelHeight + defaultActionPanelHeight + 60;
         parent.setLayout(new BorderLayout());
@@ -134,30 +127,52 @@ public class PresidentGUIManager extends AbstractGUIManager {
         return "Player " + p + agent + " (score " + state.getPlayerScore(p) + ")" + out;
     }
 
-    private static String rulesText(PresidentParameters params) {
+    private static String rulesHtml(PresidentParameters params) {
+        int n = params.exchangeCards;
+        String cards = n == 1 ? "card" : "cards";
         String length = params.targetScore <= 1
-                ? "The game is a single deal: the player who goes out first wins."
-                : "Deals continue until a player's score reaches " + params.targetScore + "; the highest score"
-                + " wins, and equal scores are ranked by the order of going out in the last deal.";
-        String exchange = params.targetScore <= 1 || params.exchangeCards == 0 ? ""
-                : "<h3>The exchange</h3><p>Each later deal is dealt starting with the President of the last deal."
-                + " The Scum then gives the President their " + params.exchangeCards + " highest card(s), and the"
-                + " President gives back any " + params.exchangeCards + " card(s). The President leads.</p>";
-        return "<html><body style='width:600px'><h1>President</h1>"
-                + "<p>The whole 52-card pack is dealt. Suits do not matter; the ranks from high to low are"
-                + " 2 A K Q J 10 9 8 7 6 5 4 3. The aim is to empty your hand first.</p>"
-                + "<h3>Play</h3><p>Player 0 leads first. The leader plays any set: one or more cards of the same rank."
-                + " Each following player either passes or plays a set of the same number of cards and a higher"
-                + " rank. A player who has passed may still play later in the same trick. When every other player"
-                + " still holding cards has passed in a row, the cards are discarded and the player who played last"
-                + " leads again (if they have gone out, the next player holding cards leads). Players who are out"
-                + " are skipped.</p>"
-                + "<h3>Scoring</h3><p>The first player out (the President) scores " + params.presidentPoints
-                + ", the second (the Vice-President) " + params.vicePresidentPoints + ", the others 0. The deal ends"
-                + " when only one player holds cards (the Scum). " + length + "</p>" + exchange
-                + "<h3>Interface</h3><p>Hands are listed in turn order, sorted from the lowest rank; the player to"
-                + " act has a blue border. The current trick is on the right: the set to beat is the brightest, the"
-                + " earlier sets are dimmed. 'Play 2 x 7' plays a pair of Sevens.</p>"
-                + "</body></html>";
+                ? "<p>The game is a single deal, and the player with the most points wins.</p>"
+                : "<p>Deals continue until a player has " + params.targetScore + " points or more. The highest "
+                + "score then wins. Players with equal scores are ranked by the order in which they went out in "
+                + "the last deal.</p>";
+        String exchange = params.targetScore <= 1 ? ""
+                : n == 0
+                ? "<h3>Later deals</h3><p>Each later deal is dealt starting with the President of the last deal, "
+                + "who leads the first trick.</p>"
+                : "<h3>The exchange</h3><p>Each later deal is dealt starting with the President of the last deal. "
+                + "The Scum of the last deal then gives the President their " + n + " highest " + cards + ". "
+                + "The President gives back any " + n + " " + cards + ", and leads the first trick.</p>";
+        return "<h2>President</h2>"
+                + "<p>The aim is to be the first to play all your cards. The whole 52-card pack is dealt. Suits "
+                + "do not matter. The ranks from high to low are 2 A K Q J 10 9 8 7 6 5 4 3.</p>"
+                + "<h3>Play</h3>"
+                + "<p>A set is one or more cards of the same rank. Player 0 leads the first trick.</p><ul>"
+                + "<li>The leader plays any set.</li>"
+                + "<li>Each following player either passes or plays a set of the same number of cards and a "
+                + "higher rank.</li>"
+                + "<li>A player who has passed may still play later in the same trick.</li>"
+                + "<li>Players who are out are skipped.</li>"
+                + "<li>When all the other players still holding cards have passed since the last set, the trick "
+                + "is discarded. The player who played that set leads the next trick. If they are out, the next "
+                + "player holding cards leads.</li></ul>"
+                + "<h3>Scoring</h3>"
+                + "<p>The deal ends when only one player holds cards, and that player is the Scum. Points go by "
+                + "the order in which the players went out:</p>"
+                + "<table border=1 cellpadding=4 cellspacing=0>"
+                + "<tr><th align=left>Place</th><th>Points</th></tr>"
+                + "<tr><td>1st (President)</td><td align=center>" + params.presidentPoints + "</td></tr>"
+                + "<tr><td>2nd (Vice-President)</td><td align=center>" + params.vicePresidentPoints + "</td></tr>"
+                + "<tr><td>Others</td><td align=center>0</td></tr></table>"
+                + length + exchange
+                + "<h3>Interface</h3>"
+                + "<p>The hands are on the left, in turn order from the top, with the lowest rank on the left. "
+                + "A hand you cannot see is face down, with its number of cards. The title of each hand gives "
+                + "the player's score, and their place once they are out. The player to act has a blue "
+                + "border.</p>"
+                + "<p>The current trick is on the right. The set to beat is the brightest, and the earlier sets "
+                + "are dimmed. The lines below the trick give the set to beat, the passes since it was played, "
+                + "the players out this deal and the scores.</p>"
+                + "<p>The action buttons are Play, Pass and (in the exchange) Give. For example, Play 2 x 7 "
+                + "plays a pair of Sevens.</p>";
     }
 }

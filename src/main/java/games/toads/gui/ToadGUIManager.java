@@ -9,6 +9,7 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import games.toads.ToadConstants.ToadGamePhase;
 import games.toads.ToadGameState;
+import games.toads.ToadParameters;
 import games.toads.actions.AssaultCannonInterrupt;
 import games.toads.actions.ScoutCards;
 import games.toads.actions.SiegeCannonGuess;
@@ -17,6 +18,7 @@ import games.tricktaking.gui.CardArt;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -25,6 +27,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -70,7 +73,7 @@ public class ToadGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((ToadParameters) gameState.getGameParameters()), height));
 
         // player 1 above the Battle, player 0 below it
         JPanel table = new JPanel(new GridBagLayout());
@@ -262,41 +265,125 @@ public class ToadGUIManager extends AbstractGUIManager {
         return "a draw";
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        JLabel text = new JLabel("<html><center><h1>War of the Toads</h1></center><hr>" +
-                "<p>Two players, each with a deck of nine toads, fight two Wars. <b>Capture more Hostages than your " +
-                "opponent.</b></p><ul>" +
-                "<li><b>Start of each War:</b> draw 5 cards, then put 1 of them on the bottom of your deck.</li>" +
-                "<li><b>Four Battles per War.</b> The Attacker plays a face-up card and a hidden card; the Defender " +
-                "then plays one opposite each. Both draw 2 cards, and the hidden cards are revealed. The roles swap " +
-                "every Battle.</li>" +
-                "<li><b>Tactics:</b> only the hidden card's Tactic acts, in the order Block, Start, During, After; " +
-                "Tactics in the same stage act at the same time. A card's <i>Ally</i> is your other card, and its " +
-                "<i>Foe</i> is the card opposite the Ally. Special Attributes always apply.</li>" +
-                "<li><b>Each lane:</b> a Siege Cannon loses in Defence and wins in Attack, except against a " +
-                "Saboteur; an Assassin beats a General; otherwise the higher Strength wins. A tie stands unless one " +
-                "side breaks ties (Saboteur).</li>" +
-                "<li><b>Hostages:</b> the winner of a lane captures the loser. A tied lane sends both cards to the " +
-                "Shrine: each player gains a Flag. If you win both lanes while <i>Calm</i> (not behind on Hostages) " +
-                "you keep one Hostage and the other goes to the Shrine (a Flag each); if <i>Angry</i> (behind, or " +
-                "made Angry by a Berserker) you keep both.</li>" +
-                "<li><b>Between the Wars:</b> the card left in your hand is your Casualty and gives you a Flag for " +
-                "War 2. The decks are rebuilt and swapped, and Player 1 attacks first in War 2.</li>" +
-                "<li><b>Winning:</b> the winner of War 2 wins, or the winner of War 1 if War 2 is a Stalemate. If " +
-                "both are Stalemates, the lower Casualty wins (a Siege Cannon is the lowest).</li>" +
-                "</ul><p>Variants (game parameters): the legacy decks and rules, recycling a card before each " +
-                "Battle, and who attacks first in War 2.</p>" +
-                "<hr><p><b>INTERFACE:</b> choose from the action list at the bottom of the screen. The middle of the " +
-                "table shows the two lanes (the last Battle's cards dimmed until the next is played) and the state " +
-                "of the War. Each player's area shows their hand, their deck (with its bottom card, if you know " +
-                "it), their Casualty, Hostages and Flags; the player to act is outlined in blue. Cards shown to you " +
-                "by a Scout or a Siege Cannon guess are face-up in your opponent's hand.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width - 40, height));
-        rules.add(scroll);
-        return rules;
+    // the Special Attribute and the Tactic of each Rulebook 3 card, by ability class; legacy abilities have none
+    private static final Map<String, String[]> cardText = Map.of(
+            "AssassinII", new String[]{"Beats a General.",
+                    "Adds 2.5 to the lower of your Ally and its Foe (not in a lane with a Siege Cannon)."},
+            "Scout", new String[]{"", "Adds 1 to your Ally. After the Battle your opponent will show you 3 cards "
+                    + "from their hand."},
+            "SaboteurIII", new String[]{"Beats a Siege Cannon.", "Your Ally breaks ties."},
+            "TricksterII", new String[]{"", "Switches lanes with your Ally. It cannot be blocked."},
+            "BerserkerII", new String[]{"", "Makes you Angry for this Battle."},
+            "Bodyguard", new String[]{"", "Blocks the Tactic of your opponent's hidden card."},
+            "GeneralHostages", new String[]{"Loses to an Assassin.",
+                    "Adds 1 to your Ally for each Hostage your opponent has this War."},
+            "GeneralFlags", new String[]{"Loses to an Assassin.",
+                    "Adds 1 to your Ally for each of your Flags this War."},
+            "SiegeCannon", new String[]{"Wins in Attack, except against a Saboteur. Loses in Defence.",
+                    "After the Battle you will guess a card in your opponent's hand."});
+
+    private static String rulesHtml(ToadParameters params) {
+        int handSize = (int) params.getParameterValue("handSize");
+        boolean openingReturn = (boolean) params.getParameterValue("openingReturn");
+        boolean recycle = (boolean) params.getParameterValue("discardOption");
+        boolean useTactics = (boolean) params.getParameterValue("useTactics");
+        ToadParameters.SecondRoundStart start =
+                (ToadParameters.SecondRoundStart) params.getParameterValue("secondRoundStart");
+        List<ToadCard> deck = params.getCardDeck();
+
+        StringBuilder cards = new StringBuilder("<table border=1 cellpadding=4 cellspacing=0><tr>"
+                + "<th align=left>Card</th><th>Strength</th><th align=left>Special Attribute</th>"
+                + "<th align=left>Tactic</th></tr>");
+        Set<String> listed = new HashSet<>();
+        for (ToadCard card : deck) {
+            if (!listed.add(card.getComponentName())) continue;
+            String ability = card.tactics == null ? "" : card.tactics.getClass().getSimpleName();
+            String[] text = cardText.getOrDefault(ability, new String[]{"", ""});
+            cards.append("<tr><td>").append(card.getComponentName()).append("</td><td align=center>")
+                    .append(card.value).append("</td><td>").append(text[0]).append("</td><td>")
+                    .append(useTactics ? text[1] : "").append("</td></tr>");
+        }
+        cards.append("</table>");
+        String oneOfEach = listed.size() == deck.size() ? "<p>Each deck holds one of each card.</p>" : "";
+
+        String draw = openingReturn
+                ? "Each player draws " + (handSize + 1) + " cards, and then puts one of them on the bottom of their "
+                + "deck."
+                : "Each player draws " + handSize + " cards.";
+        String secondAttacker = switch (start) {
+            case ONE -> "Player 0 attacks first in War 2.";
+            case TWO -> "Player 1 attacks first in War 2.";
+            case LOSER -> "The loser of War 1 attacks first in War 2 (Player 1 after a Stalemate).";
+            case WINNER -> "The winner of War 1 attacks first in War 2 (Player 1 after a Stalemate).";
+        };
+        String tactics = useTactics
+                ? "<p>Only the Tactic of each hidden card acts. A card's Ally is the other card on its side, and "
+                + "the Ally's Foe is the card opposite the Ally. The Tactics act in four stages, in the order "
+                + "Block, Start, During and After. Within a stage both Tactics act at the same time.</p>"
+                : "<p>In this game the cards' Tactics do not act.</p>";
+        String afterDraw = useTactics
+                ? "<li>A Scout's or a Siege Cannon's Tactic then takes effect (see <a href='#cards'>Cards</a>).</li>"
+                : "";
+
+        return "<h2>War of the Toads</h2>"
+                + "<p><a href='#battle'>A Battle</a> | <a href='#lanes'>Lanes</a> | "
+                + "<a href='#hostages'>Hostages and Flags</a> | <a href='#winning'>Winning</a> | "
+                + "<a href='#cards'>Cards</a> | <a href='#interface'>Interface</a></p>"
+                + "<p>Each of the two players has a deck of " + deck.size() + " toads, and they fight two Wars. "
+                + "The aim is to capture more Hostages than your opponent.</p>"
+                + "<p><b>Each War</b> starts with a new hand. " + draw + " Player 0 attacks first in War 1. The War "
+                + "has " + battlesPerWar + " Battles, and the Attacker and the Defender swap roles after each "
+                + "one.</p>"
+                + "<h3><a name='battle'>A Battle</a></h3><ol>"
+                + (recycle ? "<li>Each player may put one card from their hand on the bottom of their deck, and "
+                + "then draws the top card of the deck.</li>" : "")
+                + "<li>The Attacker plays a card face up.</li>"
+                + "<li>At the same time, the Attacker chooses a hidden card, and the Defender chooses a face-up "
+                + "card and a hidden card.</li>"
+                + "<li>The hidden cards are revealed" + (useTactics ? " and their Tactics act" : "") + ".</li>"
+                + "<li>Each lane is won by one card or tied (see <a href='#lanes'>Lanes</a>).</li>"
+                + "<li>Each player draws 2 cards, or the rest of their deck if it has fewer.</li>"
+                + afterDraw + "</ol>"
+                + tactics
+                + "<h3><a name='lanes'>Lanes</a></h3>"
+                + "<p>The face-up cards fight in the Face-up lane, and the hidden cards in the Hidden lane. The "
+                + "higher Strength wins the lane. A card's Special Attribute applies in either lane, and takes "
+                + "the place of the Strength comparison. A tied lane stays tied unless exactly one of its cards "
+                + "breaks ties.</p>"
+                + "<h3><a name='hostages'>Hostages and Flags</a></h3><ul>"
+                + "<li>The winner of a lane captures the losing card as a Hostage.</li>"
+                + "<li>In a tied lane both cards go to the Shrine, and each player gains a Flag.</li>"
+                + "<li>A player who wins both lanes while Calm keeps one Hostage. The other goes to the Shrine, "
+                + "and each player gains a Flag.</li>"
+                + "<li>A player who wins both lanes while Angry keeps both Hostages.</li></ul>"
+                + "<p>You are Angry when you have fewer Hostages than your opponent in this War, or when your "
+                + "Berserker makes you Angry. Otherwise you are Calm.</p>"
+                + "<p><b>Between the Wars</b> the card left in each hand becomes that player's Casualty. Each "
+                + "player's Casualty gives them one Flag at the start of War 2. The cards each player played in "
+                + "War 1 are shuffled to form their opponent's deck for War 2. " + secondAttacker + "</p>"
+                + "<h3><a name='winning'>Winning</a></h3>"
+                + "<p>The player with more Hostages wins a War. A War with equal Hostages is a Stalemate. The "
+                + "winner of War 2 wins the game. If War 2 is a Stalemate, the winner of War 1 wins. If both Wars "
+                + "are Stalemates, the lower Casualty wins (the Siege Cannon is the lowest). Equal Casualties "
+                + "draw.</p>"
+                + "<h3><a name='cards'>Cards</a></h3>" + oneOfEach + cards
+                + "<p>After a Scout's Battle, an opponent holding 4 cards chooses one of them to keep hidden. A "
+                + "Siege Cannon's owner names a card type, and sees one card of that type if the opponent holds "
+                + "it. The owner cannot name their own Casualty, or a card the opponent has already played in "
+                + "this War.</p>"
+                + "<h3><a name='interface'>Interface</a></h3>"
+                + "<p>Player 1's area is at the top and Player 0's at the bottom. Each area shows the player's "
+                + "role (Attacker or Defender), their Hostages, Flags and mood in this War, their Hand, their "
+                + "Deck with its size, and their Casualty. The bottom card of a deck is named on it when you "
+                + "know it. The player to act has a blue outline.</p>"
+                + "<p>The middle panel shows the Face-up lane and the Hidden lane, with Player 1's card on the "
+                + "left of each. The last Battle's cards stay there, dimmed, until the next Battle starts. The "
+                + "text beside the lanes gives the War and Battle number, who is to act, and the Hostages each "
+                + "player took in the last Battle.</p>"
+                + "<p>A card shows its Strength in the circle, its Special Attribute in italics and its Tactic "
+                + "in the box at the bottom. Cards shown to you by a Scout or a Siege Cannon are face up in your "
+                + "opponent's hand.</p>"
+                + "<p>Choose from the action list at the bottom of the screen. The action buttons call the "
+                + "Face-up lane the field, and the Hidden lane the flank.</p>";
     }
 }

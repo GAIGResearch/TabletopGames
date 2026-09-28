@@ -210,7 +210,7 @@ public abstract class AbstractGUIManager {
                 @Override
                 public void onEvent(Event event) {
                     if (event.type == Event.GameEvent.ACTION_CHOSEN) {
-                        history.add("Player " + event.state.getCurrentPlayer() + " : " + event.action.getString(game.getGameState(), perspectiveSet));
+                        history.add("Player " + event.playerID + " : " + event.action.getString(game.getGameState(), perspectiveSet));
                     } else if (event.type == Event.GameEvent.GAME_EVENT) {
                         history.add(event.action.toString());
                     } else if (event.type == Event.GameEvent.GAME_OVER) {

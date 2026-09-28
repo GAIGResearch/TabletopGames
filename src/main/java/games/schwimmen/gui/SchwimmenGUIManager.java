@@ -12,6 +12,7 @@ import games.tricktaking.gui.CardArt;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -97,7 +98,8 @@ public class SchwimmenGUIManager extends AbstractGUIManager {
         // at the end of the game the centre text lists every player, under two heading lines
         int centreHeight = Math.max(tableView.getPreferredSize().height, 16 * (nPlayers + 2) + 8);
         this.height = 2 * handSize.height + centreHeight + 30;
-        tabs.add("Rules", createRulesPanel(state));
+        SchwimmenParameters params = (SchwimmenParameters) state.getGameParameters();
+        tabs.add("Rules", new RulesView(rulesHtml(params), height));
 
         for (int i = nPlayers - 1; i >= bottomRow; i--)
             top.add(handViews[i]);
@@ -244,40 +246,55 @@ public class SchwimmenGUIManager extends AbstractGUIManager {
         return text.append("</html>").toString();
     }
 
-    private JPanel createRulesPanel(SchwimmenGameState state) {
-        SchwimmenParameters params = (SchwimmenParameters) state.getGameParameters();
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        // a fixed body width, or the label is laid out as one long line per paragraph
-        JLabel text = new JLabel("<html><body style='width: " + (width / 2) + "px'><center><h1>Schwimmen</h1>" +
-                "</center><hr><p>Collect three cards of one suit with the highest total you can.</p><ul>" +
-                "<li>32 cards, Seven to Ace. Ace 11, King, Queen, Jack and Ten 10, the others their number. A hand " +
-                "is worth its best single-suit total; three of a kind is worth " + formatValue(params.threeOfAKindValue) +
-                " and three Aces (Feuer) " + formatValue(params.threeAcesValue) + ".</li>" +
-                "<li>Each player is dealt three cards, and an extra hand of three is dealt face down. The dealer " +
-                "keeps their hand or takes the extra hand without looking at it; the three cards not chosen go face " +
-                "up on the table.</li>" +
-                "<li>Play starts on the dealer's left. On your turn, exchange one card with a table card, exchange " +
-                "your whole hand with the table, or pass. Then, if nobody has closed, you may close: each other " +
-                "player has one more turn, and the deal ends.</li>" +
-                "<li>When every player passes in a row, the table cards are discarded and three new ones dealt from " +
-                "the draw deck; if it has fewer than three cards, the deal ends.</li>" +
-                "<li>A player holding " + params.schnauzTotal + " in one suit (Schnauz) or three Aces (Feuer) ends " +
-                "the deal at once.</li>" +
-                (params.livesGame
-                        ? "<li>Each player starts with " + params.startingChips + " chips. At the end of a deal the " +
-                        "worst hand loses a chip (after Feuer, every other player does). A player with no chips is " +
-                        "swimming, and drops out if they lose again. The deal passes to the left, and the last " +
-                        "player in wins.</li>"
-                        : "<li>The best hand wins.</li>") +
-                "<li>Ties: a higher three of a kind wins; otherwise the higher suit (Clubs, Spades, Hearts, " +
-                "Diamonds).</li>" +
-                "</ul><hr><p><b>INTERFACE:</b> choose an action from the list at the bottom of the screen. A dot " +
-                "marks a hand card every player saw taken from the table.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width * 2 / 3 + 60, height * 2 / 3 + 100));
-        rules.add(scroll);
-        return rules;
+    private static String rulesHtml(SchwimmenParameters params) {
+        int n = params.handSize;
+        String chips = params.livesGame
+                ? "<p><b>Chips.</b> Each player starts with " + params.startingChips + " chips. At the end of a " +
+                "deal the player with the worst hand loses a chip. After Feuer every other player loses a chip " +
+                "instead. A player with no chips is swimming, and a swimming player who loses again is out. The " +
+                "deal passes to the left. The last player in wins. If more than one player is still in after " +
+                params.maxDeals + " deals, the most chips wins.</p>"
+                : "<p><b>Winning.</b> The game is a single deal, and the best hand wins.</p>";
+        return "<h2>Schwimmen</h2>" +
+                "<p>Collect " + n + " cards of one suit with the highest total you can.</p>" +
+                "<p><b>Cards.</b> The pack has 32 cards, Seven to Ace. An Ace counts 11, and a King, Queen or " +
+                "Jack counts 10. A hand is worth its best single-suit total, or one of these values:</p>" +
+                "<table border=1 cellpadding=4 cellspacing=0>" +
+                "<tr><td>Three of a kind</td><td align=center>" + formatValue(params.threeOfAKindValue) +
+                "</td></tr>" +
+                "<tr><td>Three Aces (Feuer)</td><td align=center>" + formatValue(params.threeAcesValue) +
+                "</td></tr></table>" +
+                "<p><b>The deal.</b> Each player is dealt " + n + " cards, and an extra hand of " + n + " is dealt " +
+                "face down. The dealer keeps their hand or takes the extra hand without looking at it. The " + n +
+                " cards not chosen go face up on the table.</p>" +
+                "<p><b>Each turn</b> goes to the next player on the left, starting on the dealer's left.</p><ol>" +
+                "<li>Exchange one hand card for one table card, exchange your whole hand with the table, or " +
+                "pass.</li>" +
+                "<li>If nobody has closed yet, you may close. Each other player will then have one more turn, and " +
+                "the deal will end.</li></ol>" +
+                "<p>When every player passes in a row, the table cards are discarded and " + n + " new ones are " +
+                "dealt from the draw deck. If the draw deck has fewer than " + n + " cards, the deal ends " +
+                "instead.</p>" +
+                "<p>A hand of " + params.schnauzTotal + " in one suit (Schnauz) or three Aces (Feuer) ends the " +
+                "deal at once. A deal also ends when each player has had " + params.maxCircuitsPerDeal +
+                " turns.</p>" +
+                chips +
+                "<p><b>Ties.</b> Of two hands with the same value, the higher three of a kind is better (Ace " +
+                "high). Otherwise the hand whose best total is in the higher suit is better. The suits from the " +
+                "highest are Clubs, Spades, Hearts and Diamonds. Hands that are still equal share the place" +
+                (params.livesGame ? ", and all of them lose a chip if they are the worst" : "") + ".</p>" +
+                "<h3>Interface</h3>" +
+                "<p>The hands are drawn round the table. Each is titled with the player's number and agent, and " +
+                "with \"dealer\" for the dealer. The current player's hand has a blue border. A gold dot marks a " +
+                "hand card that every player saw taken from the table. The line under a hand shows " +
+                (params.livesGame ? "the player's chips (\"swimming\" at none, \"out\" once out), " : "") +
+                "the hand's value once all its cards are face up, and \"closed\" for the player who closed.</p>" +
+                "<p>The centre shows the table (or the extra hand, face down, while the dealer chooses), the draw " +
+                "deck and the discard pile, each with its number of cards. Beside them are " +
+                (params.livesGame ? "the deal number, " : "") +
+                "the passes in a row and what the current player is to do.</p>" +
+                "<p>The dealer chooses with Keep hand or Take the extra hand. A turn is one of the Exchange " +
+                "buttons (a hand card for a table card), Exchange all or Pass. While nobody has closed, it is " +
+                "followed by Close or Do not close.</p>";
     }
 }

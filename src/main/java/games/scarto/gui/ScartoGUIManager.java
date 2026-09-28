@@ -14,6 +14,7 @@ import games.tricktaking.gui.TarotCardFace;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -81,7 +82,7 @@ public class ScartoGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((ScartoParameters) gameState.getGameParameters()), height));
 
         // player 0 at the bottom; players 1 and 2 across the top, in the order of play
         playerViews = new java.util.ArrayList<>();
@@ -239,38 +240,71 @@ public class ScartoGUIManager extends AbstractGUIManager {
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        JLabel text = new JLabel("<html><center><h1>Scarto</h1></center><hr>" +
-                "<p>A tarot trick-taking game from Piedmont for three players, with a 78-card pack: four suits " +
-                "(Swords and Batons, the <i>long</i> suits; Cups and Coins, the <i>round</i> suits) of King, Queen, " +
-                "Cavalier (C), Knave (J) and 10 pips, 21 trumps, and the Fool.</p><ul>" +
-                "<li>25 cards are dealt to each player. The last 3 (the <b>scarto</b>) go face down to the dealer's " +
-                "pile and score for the dealer. (With the exchange option, the dealer first takes them into their " +
-                "hand and discards 3 - not a King, the Angel, the Pagat (unless it is their only trump, the Fool " +
-                "counting as a trump) or the Fool.)</li>" +
-                "<li>The player after the dealer leads to the first trick; the winner of each trick leads the next.</li>" +
-                "<li>You must <b>follow the suit led</b> if you can; if not, you must <b>play a trump</b> if you " +
-                "can; otherwise play any card. The <b>Fool</b> may be played at any time instead. If the Fool is " +
-                "led, the next card played sets the suit.</li>" +
-                "<li>Card order: long suits K Q C J 10 ... 1; round suits K Q C J 1 2 ... 10 (the Ace is the " +
-                "highest pip); trumps: the <b>Angel (20)</b> is highest, then the World (21), then 19 down to the " +
-                "Pagat (1).</li>" +
-                "<li>The highest trump wins the trick, or if none, the highest card of the suit led. The Fool never " +
-                "wins: it goes back to its player's pile, and the winner takes the other two cards.</li>" +
-                "<li>Scoring: Kings, the Pagat and the Angel 4 points; Queens and the Fool 3; Cavaliers 2; Knaves 1; " +
-                "other cards 0; plus one point for every three cards in your pile ((cards + 1) / 3, rounded down). " +
-                "There are 77 points in a deal. The highest score wins.</li>" +
-                "<li>By default a game is one deal. With more deals the next player deals, and scores add up.</li>" +
-                "</ul><hr><p><b>INTERFACE:</b> choose a card from the action buttons at the bottom of the screen. " +
-                "The centre shows the trick so far, with the winning card outlined, and the scarto. A player's " +
-                "area shows the cards they have won, their points this deal, and the suits they are known to be " +
-                "void in (Sw, Ba, Cu, Co, Tr). The scores below the trick include earlier deals.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width * 2 / 3 + 60, height * 2 / 3 + 100));
-        rules.add(scroll);
-        return rules;
+    private static String rulesHtml(ScartoParameters params) {
+        // three players share the 78-card pack
+        int scartoSize = 78 - 3 * params.handSize;
+        String exchange = params.dealerExchange
+                ? "<p><b>The exchange.</b> The dealer takes the scarto into their hand, and then discards "
+                + scartoSize + " cards face down to form a new scarto. The dealer may not discard a King, the "
+                + "Angel or the Fool. The Pagat may be discarded only if it is the dealer's only trump, with the "
+                + "Fool counted as a trump.</p>"
+                : "";
+        String deals = params.nDeals == 1
+                ? "<p>The game is a single deal. The highest score wins, and players with equal scores share the "
+                + "win.</p>"
+                : "<p>The game has " + params.nDeals + " deals. The deal passes to the next player each time, and "
+                + "the scores are added up. The highest total wins, and players with equal totals share the "
+                + "win.</p>";
+        return "<h2>Scarto</h2>"
+                + "<p>Scarto is a trick-taking game for three players with a 78-card tarot pack. The aim is to "
+                + "capture the cards that score points.</p>"
+                + "<p><b>The pack.</b> Each of the four suits has a King, a Queen, a Cavalier (C), a Knave (J) and "
+                + "the pips 1 to 10. Swords and Batons are the long suits, and Cups and Coins the round suits. "
+                + "There are also 21 trumps and the Fool.</p>"
+                + "<table border=1 cellpadding=4 cellspacing=0>"
+                + "<tr><th align=left>Cards</th><th align=left>High to low</th></tr>"
+                + "<tr><td>Long suits</td><td>K Q C J 10 9 ... 1</td></tr>"
+                + "<tr><td>Round suits</td><td>K Q C J 1 2 ... 10</td></tr>"
+                + "<tr><td>Trumps</td><td>Angel (20), World (21), 19 18 ... Pagat (1)</td></tr></table>"
+                + "<p><b>The deal.</b> Each player is dealt " + params.handSize + " cards. The last " + scartoSize
+                + " cards form the scarto, which will score for the dealer.</p>"
+                + exchange
+                + "<h3>Play</h3><ul>"
+                + "<li>The player after the dealer leads the first trick. The winner of each trick leads the "
+                + "next.</li>"
+                + "<li>You must follow the suit led if you can. If you cannot, you must play a trump if you can. "
+                + "Otherwise you may play any card.</li>"
+                + "<li>The Fool may be played at any time instead. If the Fool is led, the next card played sets "
+                + "the suit.</li>"
+                + "<li>The highest trump wins the trick. If no trump was played, the highest card of the suit led "
+                + "wins.</li>"
+                + "<li>The Fool cannot win a trick. It goes back to the pile of the player who played it, and the "
+                + "winner takes the other two cards.</li></ul>"
+                + "<h3>Scoring</h3>"
+                + "<p>At the end of a deal each player scores the points of the cards in their pile:</p>"
+                + "<table border=1 cellpadding=4 cellspacing=0>"
+                + "<tr><th align=left>Card</th><th>Points</th></tr>"
+                + "<tr><td>King</td><td align=center>" + params.kingPoints + "</td></tr>"
+                + "<tr><td>Pagat, Angel</td><td align=center>" + params.honourTrumpPoints + "</td></tr>"
+                + "<tr><td>Queen</td><td align=center>" + params.queenPoints + "</td></tr>"
+                + "<tr><td>Fool</td><td align=center>" + params.foolPoints + "</td></tr>"
+                + "<tr><td>Cavalier</td><td align=center>" + params.cavalierPoints + "</td></tr>"
+                + "<tr><td>Knave</td><td align=center>" + params.knavePoints + "</td></tr></table>"
+                + "<p>Each pile also scores 1 point for every 3 cards in it, counted as (cards + 1) / 3 rounded "
+                + "down. The dealer's pile includes the scarto. There are " + params.pointsPerDeal()
+                + " points in a deal.</p>"
+                + deals
+                + "<h3>Interface</h3>"
+                + "<p>Player 0 is at the bottom, and players 1 and 2 are across the top. A hand is sorted with the "
+                + "trumps first, then the Fool, then Swords, Batons, Cups and Coins, highest first. The player to "
+                + "act has a blue border. The title under each hand marks the dealer and the player who leads.</p>"
+                + "<p>The line under each hand gives the number of cards held, the cards won and the points this "
+                + "deal. It also lists the suits the player is known to be void in (Sw, Ba, Cu, Co, Tr).</p>"
+                + "<p>The centre shows the deal and trick number, the trick so far with the winning card outlined, "
+                + "and what must be played. The line below the trick gives the size of the scarto. After the "
+                + "exchange the dealer also sees the cards in it. The scores under the centre include earlier "
+                + "deals.</p>"
+                + "<p>Choose a card from the action buttons at the bottom of the screen. In the exchange the "
+                + "buttons are Discard, and in play they are Play.</p>";
     }
 }

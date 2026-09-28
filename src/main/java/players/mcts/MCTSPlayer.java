@@ -314,10 +314,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
     /**
      * Sanity check on the tree after a search. The root player's own actions at the root are fixed,
-     * so a fresh tree cannot have more children than that action count at a sequential root, or
+     * so a fresh tree should have more children than that action count at a sequential root, or
      * than the product of the acting players' action counts at a multi-actor root, where the
-     * children are joint actions. Three times that is the tolerance. Not applied under MCGS
-     * (transpositions) or tree reuse (the root was not built from this state).
+     * children are joint actions. We add a tolerance of 3x to account for differences between open loop states.
+     * Not applied under MCGS (transpositions) or tree reuse (the root was not built from this state).
      */
     protected void checkRootChildCount(SingleTreeNode root, List<AbstractAction> actions, AbstractGameState gameState) {
         if (root instanceof MCGSNode || getParameters().reuseTree)

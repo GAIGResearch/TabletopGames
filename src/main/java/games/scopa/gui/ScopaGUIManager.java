@@ -13,6 +13,7 @@ import games.tricktaking.gui.TarotCardFace;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -119,7 +120,7 @@ public class ScopaGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", createRulesPanel());
+        tabs.add("Rules", new RulesView(rulesHtml((ScopaParameters) state.getGameParameters()), height));
 
         JPanel infoPanel = createGameStateInfoPanel("Scopa", gameState, width, defaultInfoPanelHeight);
         // a card may capture in several ways, so there can be more actions than fit on one row
@@ -205,38 +206,67 @@ public class ScopaGUIManager extends AbstractGUIManager {
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
     }
 
-    private JPanel createRulesPanel() {
-        JPanel rules = new JPanel();
-        rules.setBackground(new Color(43, 108, 25, 111));
-        JLabel text = new JLabel("<html><center><h1>Scopa</h1></center><hr>" +
-                "<p>An Italian fishing game for two players, with a 40-card pack: four suits (Swords, Batons, Cups, " +
-                "Coins) of Ace to 7, Knave (J), Cavalier (C) and King (K).</p><ul>" +
-                "<li>Four cards are dealt face up to the table and three to each player. When both hands are " +
-                "empty, three more are dealt to each (none to the table), until the draw deck runs out.</li>" +
-                "<li>Players take turns to play one card. <b>Capture values</b>: Ace 1, 2-7 their number, " +
-                "Knave 8, Cavalier 9, King 10.</li>" +
-                "<li>If a table card has the same rank as the card played, you capture it (one of them, your " +
-                "choice, if there are several). Otherwise you capture a set of two or more table cards whose " +
-                "values add up to your card's value (your choice, if there are several). A card that can capture " +
-                "must capture; a card that cannot is added to the table.</li>" +
-                "<li>A capture that clears the table is a <b>scopa</b>, worth 1 point - except with the last card " +
-                "of the deal.</li>" +
-                "<li>At the end of the deal, the cards left on the table go to the last player to capture.</li>" +
-                "<li>Scoring, 1 point each (a tie scores nothing): each scopa; most cards; most Coins; the " +
-                "<b>7 of Coins</b> (settebello); the higher <b>primiera</b> - the sum of your best card in each " +
-                "suit, counting 7 as 21, 6 as 18, Ace 16, 5 15, 4 14, 3 13, 2 12 and court cards 10. Without a " +
-                "card of every suit, your primiera is 0.</li>" +
-                "<li>By default a game is one deal, and the higher score wins. With a target score (pagat's rules, " +
-                "11), deals continue, the deal alternating, until one player has reached the target and is ahead; " +
-                "with the Kings option, a deal putting three or four Kings on the table is dealt again.</li>" +
-                "</ul><hr><p><b>INTERFACE:</b> choose a play from the action buttons at the bottom of the screen: " +
-                "the card, and the cards it captures. The table's cards are in the middle; beside each hand are " +
-                "the cards that player has captured, with their Coins, primiera and scopas. The scores update as " +
-                "the deal goes on.</p></html>");
-        text.setVerticalAlignment(SwingConstants.TOP);
-        JScrollPane scroll = new JScrollPane(text);
-        scroll.setPreferredSize(new Dimension(width * 2 / 3 + 60, height * 2 / 3 + 100));
-        rules.add(scroll);
-        return rules;
+    private static String rulesHtml(ScopaParameters params) {
+        String[] names = {"Ace", "2", "3", "4", "5", "6", "7", "Knave", "Cavalier", "King"};
+        int[] numbers = {1, 2, 3, 4, 5, 6, 7, TarotCard.KNAVE, TarotCard.CAVALIER, TarotCard.KING};
+        StringBuilder cards = new StringBuilder("<tr><th align=left>Card</th>");
+        StringBuilder capture = new StringBuilder("<tr><th align=left>Capture value</th>");
+        StringBuilder primiera = new StringBuilder("<tr><th align=left>Primiera value</th>");
+        for (int i = 0; i < names.length; i++) {
+            TarotCard card = new TarotCard(TarotCard.Suit.Coins, numbers[i]);
+            cards.append("<td align=center>").append(names[i]).append("</td>");
+            capture.append("<td align=center>").append(ScopaParameters.captureValue(card)).append("</td>");
+            primiera.append("<td align=center>").append(ScopaParameters.primieraValue(card)).append("</td>");
+        }
+        int n = params.handSize;
+        String winning = params.targetScore > 0
+                ? "<p><b>Winning.</b> Each deal's points are added to the players' totals, and the deal passes to " +
+                "the other player. The game ends after a deal when one player has " + params.targetScore +
+                " or more points and more than the other. That player wins.</p>"
+                : "<p><b>Winning.</b> The game is a single deal, and the higher score wins. Equal scores are a " +
+                "draw.</p>";
+        return "<h2>Scopa</h2>" +
+                "<p>Two players capture cards from the table.</p>" +
+                "<p><b>Cards.</b> The pack has 40 cards in four suits (Swords, Batons, Cups and Coins). Each suit " +
+                "has Ace to 7, Knave, Cavalier and King.</p>" +
+                "<table border=1 cellpadding=4 cellspacing=0>" + cards + "</tr>" + capture + "</tr>" + primiera +
+                "</tr></table>" +
+                "<p><b>The deal.</b> " + params.tableSize + " cards are dealt face up to the table and " + n +
+                " to each player." +
+                (params.redealOnKings ? " If three or more Kings are on the table, the cards are dealt again." : "") +
+                " When both hands are empty, " + n + " more cards are dealt to each player (none to the table), " +
+                "until the draw deck is empty. The player who did not deal plays first.</p>" +
+                "<p><b>Each turn</b> you play one card from your hand.</p><ul>" +
+                "<li>If a table card has the same rank, your card captures it (one of them, if there are " +
+                "several).</li>" +
+                "<li>Otherwise your card captures a set of two or more table cards whose capture values add up to " +
+                "its own.</li>" +
+                "<li>A card that can capture must capture. A card that cannot is added to the table.</li>" +
+                "<li>A capture that clears the table is a scopa, unless it is made with the last card of the " +
+                "deal.</li></ul>" +
+                "<p>At the end of the deal the cards left on the table go to the last player to capture.</p>" +
+                "<p><b>Scoring.</b> At the end of each deal a player scores 1 point for each of these:</p><ul>" +
+                "<li>each scopa</li>" +
+                "<li>more captured cards than the other player</li>" +
+                "<li>more Coins than the other player</li>" +
+                "<li>the 7 of Coins</li>" +
+                "<li>a higher primiera than the other player</li></ul>" +
+                "<p>The primiera is the total of the primiera values of your best card in each suit. It is 0 unless " +
+                "you have captured a card of every suit. Equal counts score nothing.</p>" +
+                winning +
+                "<h3>Interface</h3>" +
+                "<p>Player 1 sits at the top and player 0 at the bottom. Each player's hand is on the left, titled " +
+                "with the player's number and agent, and with \"dealer\" for the dealer. The current player's " +
+                "hand has a blue border. Beside it are the cards the player has captured, with a line showing " +
+                "their number of cards, their Coins, whether they include the 7 of Coins, their primiera and the " +
+                "player's scopas.</p>" +
+                "<p>The table cards are in the middle. On a card, J is the Knave, C the Cavalier and K the King, " +
+                "and the suits are Sw, Ba, Cu and Co. The line above the table shows " +
+                (params.targetScore > 0 ? "the deal number and target, and " : "") +
+                "the player to play. The line below it shows the number of cards in the draw deck, the last " +
+                "player to capture and the scores. A score counts the deal so far" +
+                (params.targetScore > 0 ? ", and the points banked from earlier deals are shown beside it" : "") +
+                ".</p>" +
+                "<p>Each action button plays a card, either to the table or capturing the cards it names.</p>";
     }
 }
