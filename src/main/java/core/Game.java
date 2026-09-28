@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
+import core.interfaces.IToJSON;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
@@ -17,12 +18,14 @@ import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
+import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.Utils;
 
 import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -449,8 +452,16 @@ public class Game {
         }
         // fire ACTION_CHOSEN per player, only after all simultaneous players have chosen an action
         for (int p : activePlayers) {
+            AbstractAction action = actionsChosen.get(p);
             listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN,
                     gameState, actionsChosen.get(p), availableActions.get(p), p)));
+            // save game state if requested
+            if (action.saveGame() && gameState instanceof IToJSON serialisableGameState) {
+                String directory = String.format("%s%s%s%sG%d", savedStateDirectory, File.separator, gameType.name(), File.separator, gameState.getGameID());
+                Utils.createDirectory(directory);
+                String filename = String.format("%sP%d_Tick%d.json", directory + File.separator, p, gameState.getGameTick());
+                JSONUtils.writeJSON(serialisableGameState.toJSON(), filename);
+            }
         }
 
         AbstractAction finalAction = actionsChosen.size() == 1
@@ -558,6 +569,7 @@ public class Game {
 
     /**
      * May be called by a third party observer (i.e. a listener) if it interjects an action to override a player
+     *
      * @param overrideAction
      */
     public void setOverrideAction(AbstractAction overrideAction) {
@@ -629,6 +641,7 @@ public class Game {
     public void setSavedStatesDirectory(String dir) {
         savedStateDirectory = dir;
     }
+
     public String getSavedStatesDirectory() {
         return savedStateDirectory;
     }

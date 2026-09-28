@@ -31,6 +31,7 @@ public class HeartsDecoupledTests {
         p.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         p.budget = 200;
         p.rolloutLength = 30;
+        p.decoupled = true;
         p.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         p.information = MCTSEnums.Information.Information_Set;
         tweak.accept(p);
