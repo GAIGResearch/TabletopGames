@@ -53,6 +53,18 @@ public class TestPartialObservabilityCopy {
         state.addCard(CardType.MARKET, 2, DeckType.TABLE);
     }
 
+    /**
+     * Checks that the deck in player 0's copy has been shuffled. With few cards a shuffle can by chance leave the
+     * order unchanged, so if it does we take a second copy (the redeterminisation random seed moves on with each
+     * copy) and only fail if that is also unchanged.
+     */
+    private void assertShuffled(DominionGameState myCopy, DeckType deckType, int playerId) {
+        if (myCopy.getDeck(deckType, playerId).equals(state.getDeck(deckType, playerId))) {
+            DominionGameState secondCopy = (DominionGameState) state.copy(0);
+            assertNotEquals(state.getDeck(deckType, playerId), secondCopy.getDeck(deckType, playerId));
+        }
+    }
+
     @Test
     public void ownHandIsUnchanged() {
         DominionGameState myCopy = (DominionGameState) state.copy(0);
@@ -65,9 +77,9 @@ public class TestPartialObservabilityCopy {
     public void handsOfOtherPlayersAreChanged() {
         DominionGameState myCopy = (DominionGameState) state.copy(0);
         DominionGameState fullCopy = (DominionGameState) state.copy();
-        assertFalse(myCopy.getDeck(DeckType.HAND, 1).equals(state.getDeck(DeckType.HAND, 1)));
-        assertFalse(myCopy.getDeck(DeckType.HAND, 2).equals(state.getDeck(DeckType.HAND, 2)));
-        assertFalse(myCopy.getDeck(DeckType.HAND, 3).equals(state.getDeck(DeckType.HAND, 3)));
+        assertShuffled(myCopy, DeckType.HAND, 1);
+        assertShuffled(myCopy, DeckType.HAND, 2);
+        assertShuffled(myCopy, DeckType.HAND, 3);
 
         assertEquals(fullCopy.getDeck(DeckType.HAND, 1), state.getDeck(DeckType.HAND, 1));
         assertEquals(fullCopy.getDeck(DeckType.HAND, 2), state.getDeck(DeckType.HAND, 2));
@@ -101,7 +113,7 @@ public class TestPartialObservabilityCopy {
     public void ownDrawPileIsShuffled() {
         DominionGameState myCopy = (DominionGameState) state.copy(0);
         DominionGameState fullCopy = (DominionGameState) state.copy();
-        assertFalse(myCopy.getDeck(DeckType.DRAW, 0).equals(state.getDeck(DeckType.DRAW, 0)));
+        assertShuffled(myCopy, DeckType.DRAW, 0);
         assertEquals(fullCopy.getDeck(DeckType.DRAW, 0), state.getDeck(DeckType.DRAW, 0));
 
         assertEquals(myCopy.getDeck(DeckType.DRAW, 0).getSize(), state.getDeck(DeckType.DRAW, 0).getSize());
@@ -117,7 +129,7 @@ public class TestPartialObservabilityCopy {
         DominionGameState myCopy = (DominionGameState) state.copy(0);
         DominionGameState fullCopy = (DominionGameState) state.copy();
         for (int playerId = 1; playerId < 4; playerId++) {
-            assertFalse(myCopy.getDeck(DeckType.DRAW, playerId).equals(state.getDeck(DeckType.DRAW, playerId)));
+            assertShuffled(myCopy, DeckType.DRAW, playerId);
             assertEquals(fullCopy.getDeck(DeckType.DRAW, playerId), state.getDeck(DeckType.DRAW, playerId));
             assertEquals(myCopy.getDeck(DeckType.DRAW, playerId).getSize(), state.getDeck(DeckType.DRAW, playerId).getSize());
             assertEquals(state.getDeck(DeckType.HAND, playerId).getSize(), myCopy.getDeck(DeckType.HAND, playerId).getSize());

@@ -14,9 +14,11 @@ import games.terraformingmars.rules.requirements.ResourceRequirement;
 import utilities.Pair;
 import utilities.Utils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class TMAction extends AbstractAction {
     public boolean freeActionPoint;
@@ -118,9 +120,18 @@ public class TMAction extends AbstractAction {
         this.requirements.add(costRequirement);
     }
 
+    /**
+     * @return true if this is the action of card cardID (so it is limited to once per generation). Card actions cost an
+     * action; free actions with a cardID are effects, or refer to a card being bought, discarded, sold or targeted.
+     * PlayCard also costs an action, but its cardID is the card being played.
+     */
+    private boolean isActionOfCard() {
+        return !freeActionPoint && !(this instanceof PlayCard);
+    }
+
     public boolean canBePlayed(TMGameState gs) {
         boolean played = false;
-        if (getCardID() != -1) {
+        if (getCardID() != -1 && isActionOfCard()) {
             TMCard c = (TMCard) gs.getComponentById(getCardID());
             if (c != null && c.actionPlayed) played = true;
         }
@@ -141,7 +152,13 @@ public class TMAction extends AbstractAction {
         gs.getAllComponents();  // Force recalculate components
         if (player == -1) player = gameState.getCurrentPlayer();
         if (!canBePlayed(gs)) {
-            throw new AssertionError("Card cannot be played " + this);
+            StringBuilder failed = new StringBuilder();
+            if (requirements != null) {
+                for (Requirement<TMGameState> r : requirements) {
+                    if (!r.testCondition(gs)) failed.append(" [").append(r.getReasonForFailure(gs)).append("]");
+                }
+            }
+            throw new AssertionError("Card cannot be played " + this + (failed.length() > 0 ? ", failed:" + failed : ""));
         }
         boolean s = _execute(gs);
         postExecute(gs);
@@ -155,7 +172,7 @@ public class TMAction extends AbstractAction {
         if (!freeActionPoint) {
             ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken(gs, this, player);
         }
-        if (getCardID() != -1 && !(this instanceof BuyCard) && !(this instanceof PlayCard) && !(this instanceof DiscardCard)) {
+        if (getCardID() != -1 && isActionOfCard()) {
             TMCard c = (TMCard) gs.getComponentById(getCardID());
             if (c != null) {
                 if (!c.firstActionExecuted && c.firstAction != null) {
@@ -254,14 +271,19 @@ public class TMAction extends AbstractAction {
         return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass &&
                 cost == tmAction.cost && playCardID == tmAction.playCardID && cardID == tmAction.cardID &&
                 Objects.equals(costRequirement, tmAction.costRequirement) &&
-                Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType &&
+                Objects.equals(requirementsOrEmpty(), tmAction.requirementsOrEmpty()) && actionType == tmAction.actionType &&
                 standardProject == tmAction.standardProject && basicResourceAction == tmAction.basicResourceAction &&
                 costResource == tmAction.costResource;
     }
 
+    // Actions loaded from card data have null requirements, but their copies have an empty set
+    private Set<Requirement<TMGameState>> requirementsOrEmpty() {
+        return requirements == null ? Collections.emptySet() : requirements;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(freeActionPoint, player, pass, costRequirement, requirements, actionType, standardProject, basicResourceAction, cost, costResource, playCardID, cardID);
+        return Objects.hash(freeActionPoint, player, pass, costRequirement, requirementsOrEmpty(), actionType, standardProject, basicResourceAction, cost, costResource, playCardID, cardID);
     }
 
     @Override

@@ -3,7 +3,6 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DiscardCard extends TMAction implements IExtendedSequence {
+public class DiscardCard extends TMAction implements TMExtendedSequence {
     boolean cardChoice;
 
     public DiscardCard() { super(); } // This is needed for JSON Deserializer
@@ -73,7 +72,13 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        setCardID(((DiscardCard)action).getCardID());
+        if (action instanceof DiscardCard discard) {
+            setCardID(discard.getCardID());
+        } else if (TMExtendedSequence.isPass(action)) {
+            setCardID(-2);  // Nothing to discard
+        } else {
+            throw unexpectedAction(action);
+        }
     }
 
     @Override

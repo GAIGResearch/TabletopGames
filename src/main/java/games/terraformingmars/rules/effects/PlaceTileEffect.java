@@ -32,6 +32,10 @@ public class PlaceTileEffect extends Effect {
         if (actionTaken instanceof PayForAction) action = (PlaceTile) ((PayForAction) actionTaken).action;
         else action = (PlaceTile) actionTaken;
 
+        // Only triggered by the actual placement, not by the action requesting that a tile be placed (whose location
+        // is then chosen in a separate decision)
+        if (action.mapTileID == -1) return false;
+
         boolean marsCondition = !onMars || action.onMars;
         boolean tileCondition = tile == null || action.tile == tile;
 

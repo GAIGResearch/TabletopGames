@@ -2,7 +2,6 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.requirements.PlayableActionRequirement;
@@ -13,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-public class ChoiceAction extends TMAction implements IExtendedSequence {
+public class ChoiceAction extends TMAction implements TMExtendedSequence {
     public TMAction[] actions;
     boolean finished;
 
@@ -71,6 +70,9 @@ public class ChoiceAction extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        // The chosen option has been executed, so may no longer be equal to the one offered; check its type
+        if (Arrays.stream(actions).noneMatch(a -> a != null && a.getClass() == action.getClass()))
+            throw unexpectedAction(action);
         finished = true;
     }
 

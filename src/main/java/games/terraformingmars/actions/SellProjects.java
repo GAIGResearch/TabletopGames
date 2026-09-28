@@ -3,7 +3,6 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -14,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-public class SellProjects extends TMAction implements IExtendedSequence {
+public class SellProjects extends TMAction implements TMExtendedSequence {
     HashSet<Integer> cardIDsSold;
     boolean complete;
 
@@ -71,8 +70,9 @@ public class SellProjects extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        if (((TMAction)action).pass) complete = true;
-        else cardIDsSold.add(((SellProjects)action).getCardID());
+        if (TMExtendedSequence.isPass(action)) complete = true;
+        else if (action instanceof SellProjects sell) cardIDsSold.add(sell.getCardID());
+        else throw unexpectedAction(action);
     }
 
     @Override

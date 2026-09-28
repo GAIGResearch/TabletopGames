@@ -3,7 +3,6 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
@@ -14,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSequence {
+public class ModifyPlayerResource extends TMModifyCounter implements TMExtendedSequence {
     public TMTypes.Resource resource;
     public boolean production;
     public int targetPlayer;
@@ -318,6 +317,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (!(action instanceof ModifyPlayerResource) && !TMExtendedSequence.isPass(action)) throw unexpectedAction(action);
         complete = true;  // Only 1 step
     }
 

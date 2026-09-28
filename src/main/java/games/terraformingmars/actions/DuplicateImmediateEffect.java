@@ -2,7 +2,6 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DuplicateImmediateEffect extends TMAction implements IExtendedSequence {
+public class DuplicateImmediateEffect extends TMAction implements TMExtendedSequence {
     public TMTypes.Tag tagRequirement;  // tag card chosen must have
     public String actionClassName;  // what type of effect can be duplicated
     public boolean production;  // If modify player resource, must it be production?
@@ -40,37 +39,50 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
     @Override
     public boolean _execute(TMGameState gameState) {
         if (getCardID() == -1) {
-            // Put viable cards in card choice deck
-            boolean found = false;
+            // Put all viable cards in card choice deck
             for (TMCard card : gameState.getPlayedCards()[player].getComponents()) {
-                for (TMTypes.Tag t : card.tags) {
-                    if (t == tagRequirement) {
-                        for (TMAction action : card.immediateEffects) {
-                            if (action.getClass().getSimpleName().equalsIgnoreCase(actionClassName) && (!actionClassName.equalsIgnoreCase("ModifyPlayerResource") || ((ModifyPlayerResource) action).production == production)) {
-                                gameState.getPlayerCardChoice()[player].add(card);
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found) {
-                            gameState.setActionInProgress(this);
-                            break;
-                        }
-                    }
+                if (hasTag(card) && canDuplicate(card, gameState)) {
+                    gameState.getPlayerCardChoice()[player].add(card);
                 }
-                if (found) break;
+            }
+            if (gameState.getPlayerCardChoice()[player].getSize() > 0) {
+                gameState.setActionInProgress(this);
             }
         } else {
             // Execute all effects that match this on the card
             TMCard card = (TMCard) gameState.getComponentById(getCardID());
             for (TMAction action : card.immediateEffects) {
-                if (action.getClass().getSimpleName().equalsIgnoreCase(actionClassName) && (!actionClassName.equalsIgnoreCase("ModifyPlayerResource") || ((ModifyPlayerResource) action).production == production)) {
+                if (matches(action)) {
                     action.player = player;
                     action.execute(gameState);
                 }
             }
         }
         return true;
+    }
+
+    private boolean hasTag(TMCard card) {
+        for (TMTypes.Tag t : card.tags) {
+            if (t == tagRequirement) return true;
+        }
+        return false;
+    }
+
+    private boolean canDuplicate(TMCard card, TMGameState gs) {
+        // Card must have at least one matching effect, and the player must be able to execute all of them
+        boolean found = false;
+        for (TMAction action : card.immediateEffects) {
+            if (matches(action)) {
+                action.player = player;
+                if (!action.canBePlayed(gs)) return false;
+                found = true;
+            }
+        }
+        return found;
+    }
+
+    private boolean matches(TMAction action) {
+        return action.getClass().getSimpleName().equalsIgnoreCase(actionClassName) && (!actionClassName.equalsIgnoreCase("ModifyPlayerResource") || ((ModifyPlayerResource) action).production == production);
     }
 
     @Override
@@ -91,6 +103,7 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (!(action instanceof DuplicateImmediateEffect)) throw unexpectedAction(action);
         setCardID(((TMAction)action).getCardID());
         TMGameState gs = (TMGameState) state;
         gs.getPlayerCardChoice()[player].clear();

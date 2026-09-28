@@ -1120,8 +1120,8 @@ public class BaseActionCardsTest {
         assertEquals(1, nextActions.size());
         fm.next(state, nextActions.get(0)); // EnthroneMarket - I
         fm.next(state, fm.computeAvailableActions(state).get(0)); // EnthroneMarket - II
-        fm.next(state, fm.computeAvailableActions(state).get(0)); // ThroneRoom for a second time
-        // we now have no actions for second ThroneRoom - so we should move to buy phase immediately
+        // playing the second ThroneRoom again would do nothing (no action cards in hand), so the first one is complete
+        assertFalse(state.isActionInProgress());
         assertEquals(Play, state.getGamePhase());
         nextActions = fm.computeAvailableActions(state);
         assertEquals(1, nextActions.size());
@@ -1150,11 +1150,8 @@ public class BaseActionCardsTest {
         fm.next(state, nextActions.get(0));
         assertEquals(0, state.getDeck(DeckType.HAND, 0).stream().filter(c -> c.cardType() == CardType.THRONE_ROOM).count());
         assertEquals(2, state.getDeck(DeckType.TABLE, 0).stream().filter(c -> c.cardType() == CardType.THRONE_ROOM).count());
-        // playing the second throne room - with no actions left should give us a single Pass action
-        nextActions = fm.computeAvailableActions(state);
-        assertEquals(1, nextActions.size());
-        assertEquals(new EndPhase(Play), nextActions.get(0));
-        fm.next(state, nextActions.get(0)); // EndPhase
+        // playing the second throne room again would do nothing (no action cards in hand), so the first one is complete
+        // and, with no actions left, we move to the buy phase
         assertFalse(state.isActionInProgress());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }

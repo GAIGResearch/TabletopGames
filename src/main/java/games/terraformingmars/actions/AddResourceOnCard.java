@@ -2,14 +2,13 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 
 import java.util.*;
 
-public class AddResourceOnCard extends TMAction implements IExtendedSequence {
+public class AddResourceOnCard extends TMAction implements TMExtendedSequence {
     public TMTypes.Resource resource;
     public int amount;  // Can be negative for removing resources
 
@@ -19,6 +18,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
 
     public TMTypes.Tag tagTopCardDrawDeck;  // tag top card of the draw deck must have for this to be played; top card discarded either way
     public TMTypes.Tag lastTopCardDrawDeckTag;  // tag of the last drawn card from the top of the deck
+    boolean complete;  // true once the card to add resources to has been chosen
 
 
     public AddResourceOnCard()   // This is needed for JSON Deserializer
@@ -65,6 +65,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
             }
             return false;
         }
+        complete = false;
         gs.setActionInProgress(this);
         return true;
     }
@@ -118,17 +119,13 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        if (action instanceof AddResourceOnCard) {
-            setCardID(((AddResourceOnCard) action).getCardID());
-        } else {
-            setCardID(-2);
-        }
+        if (!(action instanceof AddResourceOnCard) && !TMExtendedSequence.isPass(action)) throw unexpectedAction(action);
+        // Our own cardID stays at -1: this object may be held by a card's effects and executed again later
+        complete = true;
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        boolean complete = getCardID() != -1;
-        setCardID(-1);
         return complete;
     }
 
@@ -140,6 +137,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         copy.minResRequirement = minResRequirement;
         copy.tagTopCardDrawDeck = tagTopCardDrawDeck;
         copy.lastTopCardDrawDeckTag = lastTopCardDrawDeckTag;
+        copy.complete = complete;
         return copy;
     }
 
@@ -154,12 +152,12 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         if (!(o instanceof AddResourceOnCard)) return false;
         if (!super.equals(o)) return false;
         AddResourceOnCard that = (AddResourceOnCard) o;
-        return amount == that.amount && chooseAny == that.chooseAny && minResRequirement == that.minResRequirement && resource == that.resource && tagRequirement == that.tagRequirement && tagTopCardDrawDeck == that.tagTopCardDrawDeck;
+        return amount == that.amount && chooseAny == that.chooseAny && minResRequirement == that.minResRequirement && resource == that.resource && tagRequirement == that.tagRequirement && tagTopCardDrawDeck == that.tagTopCardDrawDeck && complete == that.complete;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), resource, amount, chooseAny, tagRequirement, minResRequirement, tagTopCardDrawDeck);
+        return Objects.hash(super.hashCode(), resource, amount, chooseAny, tagRequirement, minResRequirement, tagTopCardDrawDeck, complete);
     }
 
     @Override

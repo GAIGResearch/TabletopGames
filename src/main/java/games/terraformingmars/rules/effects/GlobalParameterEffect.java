@@ -22,7 +22,7 @@ public class GlobalParameterEffect extends Effect {
         if (canExecute(gs, actionTaken, player)) {
             ModifyGlobalParameter action = (ModifyGlobalParameter) actionTaken;
             effectAction.player = player;
-            if (action.param == globalParameter) {
+            if (action.param == globalParameter && effectAction.canBePlayed(gs)) {
                 this.effectAction.execute(gs);
             }
         }
