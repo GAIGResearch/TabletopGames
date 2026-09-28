@@ -100,8 +100,8 @@ public class DominionForwardModel extends StandardForwardModel {
             endGame(state);
         } else {
 
-            switch (state.getGamePhase().toString()) {
-                case "Play":
+            switch (state.getGamePhase()) {
+                case DominionGameState.DominionGamePhase.Play:
                     if (state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
                         // change phase
                         // no change to current player
@@ -111,7 +111,7 @@ public class DominionForwardModel extends StandardForwardModel {
                         // in the forward model for the moment.
                     }
                     break;
-                case "Buy":
+                case DominionGameState.DominionGamePhase.Buy:
                     if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
                         // change phase
                         // 1) put hand and cards played into discard
@@ -148,7 +148,6 @@ public class DominionForwardModel extends StandardForwardModel {
             }
         }
     }
-
 
     private void processDelayedActions(TriggerType trigger, DominionGameState state) {
         Map<Boolean, List<IDelayedAction>> partition = state.delayedActions.stream()

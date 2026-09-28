@@ -47,7 +47,7 @@ public class PIMCTSMetrics implements  IMetricsCollection {
                 OptionalInt maxVisits = Arrays.stream(root.actionVisits()).max();
                 records.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) visits);
                 records.put("Action", e.action.getString(e.state));
-                records.put("ActionsAtRoot", root.actionValues.size());
+                records.put("ActionsAtRoot", root.getActionValues().size());
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
                 records.put("time", mctsPlayer.root.timeTaken);
@@ -118,7 +118,7 @@ public class PIMCTSMetrics implements  IMetricsCollection {
                 records.put("OneActionNodes", treeStats.stream().mapToInt(ts -> ts.oneActionNodes).average().orElse(0.0));
                 records.put("MeanActionsAtNode", treeStats.stream().mapToDouble(ts -> ts.meanActionsAtNode).average().orElse(0.0));
                 records.put("MeanActionsExpanded", treeStats.stream().mapToDouble(ts -> ts.meanActionsExpanded).average().orElse(0.0));
-                records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.actionValues.size()).average().orElse(0.0));
+                records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.getActionValues().size()).average().orElse(0.0));
                 return true;
             }
             return false;

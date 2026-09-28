@@ -118,7 +118,7 @@ public class ForestNode extends SingleTreeNode {
     AbstractAction bestAction_AccumulatedResults(MCTSEnums.PerfectInformationPolicy policy) {
         accumulatedActionStats = new HashMap<>();
         for (int i = 0; i < params.numDeterminizations; i++) {
-            Map<AbstractAction, ActionStats> currentActionStats = roots[i].actionValues;
+            Map<AbstractAction, ActionStats> currentActionStats = roots[i].getActionValues();
             for (Map.Entry<AbstractAction, ActionStats> entry : currentActionStats.entrySet()) {
                 AbstractAction action = entry.getKey();
                 ActionStats stats = entry.getValue();

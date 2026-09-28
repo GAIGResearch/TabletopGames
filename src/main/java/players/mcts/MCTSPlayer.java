@@ -28,7 +28,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
     protected Map<Object, Integer> oldGraphKeys = new HashMap<>();
     protected List<Object> recentlyRemovedKeys = new ArrayList<>();
-
     public MCTSPlayer() {
         this(new MCTSParams());
     }
@@ -108,7 +107,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
                 System.out.println("\tBacktracking for player " + mtRoot.roots[p].decisionPlayer);
             newRoots[p] = backtrack(mtRoot.roots[p], state);
             if (newRoots[p] != null) {
-                // here we do not do a full rootification as that would set the turnOwner and currentPlayer
+                // here we do not fully rootify as that would set the turnOwner and currentPlayer
                 // to the decision player, which we want to avoid
                 newRoots[p].rootify(oldRoot, null);
                 newRoots[p].resetDepth(newRoots[p]);
@@ -164,6 +163,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
         // Now for standard open loop processing
         SingleTreeNode newRoot = null;
+        if (params.reuseTree && root != null && params.decoupled && gameState.getCurrentSimultaneousPlayers().size() > 1) {
+            // Tree reuse across a simultaneous turn is not yet supported with decoupled search
+            root = null;
+        }
         if (params.reuseTree && root != null) {
             // we see if we can reuse the tree
             // We need to look at all actions taken since our last action
@@ -304,10 +307,29 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         }
         MASTStats = root.MASTStatistics;
 
-        if (root.children.size() > 3 * actions.size() && !(root instanceof MCGSNode) && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
-            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
+        checkRootChildCount(root, actions, gameState);
         lastAction = Pair.of(gameState.getCurrentPlayer(), root.bestAction());
         return lastAction.b.copy();
+    }
+
+    /**
+     * Sanity check on the tree after a search. The root player's own actions at the root are fixed,
+     * so a fresh tree cannot have more children than that action count at a sequential root, or
+     * than the product of the acting players' action counts at a multi-actor root, where the
+     * children are joint actions. Three times that is the tolerance. Not applied under MCGS
+     * (transpositions) or tree reuse (the root was not built from this state).
+     */
+    protected void checkRootChildCount(SingleTreeNode root, List<AbstractAction> actions, AbstractGameState gameState) {
+        if (root instanceof MCGSNode || getParameters().reuseTree)
+            return;
+        // Long-standing guard: the check runs only when this player's action space differs from the game's.
+        if (getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+            return;
+        int expected = root.isMultiActor() ? root.jointActionSpaceSize() : actions.size();
+        if (root.children.size() > 3 * expected)
+            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d%s",
+                    root.children.size(), expected,
+                    root.isMultiActor() ? " (joint actions over players " + root.getActingPlayers() + ")" : ""));
     }
 
     @Override
@@ -373,8 +395,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
         int players = root.state.getNPlayers();
         if (root != null && root.getVisits() > 1) {
-            for (AbstractAction action : root.actionValues.keySet()) {
-                ActionStats stats = root.actionValues.get(action);
+            for (AbstractAction action : root.getActionValues().keySet()) {
+                ActionStats stats = root.getActionValues().get(action);
                 int visits = stats == null ? 0 : stats.nVisits;
                 double visitProportion = visits / (double) root.getVisits();
                 double[] meanValues = new double[players];
@@ -385,7 +407,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
                         heuristicValues[p] = getStateHeuristic().evaluateState(root.getState(), p);
                     }
                 }
-                double actionValue = getParameters().actionHeuristic.evaluateAction(action, root.state, root.actionsFromOpenLoopState);
+                double actionValue = getParameters().actionHeuristic.evaluateAction(action, root.state, root.getActionsFromOpenLoopState());
 
                 Map<String, Object> actionValues = new HashMap<>();
                 actionValues.put("visits", visits);

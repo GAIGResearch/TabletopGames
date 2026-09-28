@@ -443,7 +443,7 @@ public class JSONUtils {
                 sb.append(prettyPrintArray(array, tabDepth + 1));
             } else if (value instanceof IToJSON toJSON) {
                 JSONObject subJSON = toJSON.toJSON();
-                sb.append("\n").append(prettyPrint(subJSON, tabDepth + 1));
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
             } else if (value instanceof String) {
                 sb.append("\"").append(value).append("\"");
             } else if (value instanceof Long || value instanceof Integer ||
@@ -455,7 +455,9 @@ public class JSONUtils {
                 // In this case we just output the full class name
                 System.out.println("Unexpected value type in prettyPrint : " + value);
                 System.out.println("Using raw class name : " + value.getClass().getName());
-                sb.append(value.getClass().getName());
+                JSONObject subJSON = new JSONObject();
+                subJSON.put("class", value.getClass().getName());
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
             }
             if (keyIndex < keys.length - 1)
                 sb.append(",");

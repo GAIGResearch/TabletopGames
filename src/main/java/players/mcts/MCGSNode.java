@@ -67,7 +67,7 @@ public class MCGSNode extends SingleTreeNode {
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
         if (nextNode != null) {
-            if (actionValues.get(actionChosen).nVisits == 0) {
+            if (getActionValues().get(actionChosen).nVisits == 0) {
                 root.nodeClash++;
                 if (!params.MCGSExpandAfterClash) {
                     // we then return null so we rollout from this point

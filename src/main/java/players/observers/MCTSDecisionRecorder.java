@@ -146,7 +146,7 @@ public class MCTSDecisionRecorder implements IGameListener {
         AbstractGameState rootState = root.getState();
         List<AbstractAction> openLoop = root.getActionsFromOpenLoopState();
         List<AbstractAction> actions = root.getChildren().keySet().stream()
-                .sorted(Comparator.comparingInt(root::actionVisits).reversed())
+                .sorted(Comparator.comparingInt((AbstractAction a) -> root.actionVisits(a)).reversed())
                 .toList();
         try (FileWriter writer = new FileWriter(fileName)) {
             writer.write("Visits\tnValidVisits\tInOpenLoop\tAction\tValue\tHeuristicValue\n");
@@ -169,7 +169,7 @@ public class MCTSDecisionRecorder implements IGameListener {
     protected List<String> topActionLines(SingleTreeNode root, int playerID, int n) {
         AbstractGameState rootState = root.getState();
         List<AbstractAction> top = root.getChildren().keySet().stream()
-                .sorted(Comparator.comparingInt(root::actionVisits).reversed())
+                .sorted(Comparator.comparingInt((AbstractAction a) -> root.actionVisits(a)).reversed())
                 .limit(n)
                 .toList();
         List<String> lines = new ArrayList<>();

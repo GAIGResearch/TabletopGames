@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 
@@ -24,7 +25,10 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
             IExtendedSequence topOfStack = currentState.actionsInProgress.peek();
             // Then if this is the action that was just played, we don't notify *it*
             // we are only interested in notifying an IES about later actions taken
-            if (!topOfStack.equals(action))
+            boolean actionStartedSequence = topOfStack.equals(action)
+                    || (action instanceof SimultaneousAction simultaneousAction
+                    && simultaneousAction.getPlayerActions().values().contains(topOfStack));
+            if (!actionStartedSequence)
                 topOfStack._afterAction(currentState, action);
         }
         // TODO: Currently we always inform the forward model of the action taken, even if it is not

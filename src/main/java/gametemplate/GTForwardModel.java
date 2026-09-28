@@ -47,6 +47,10 @@ public class GTForwardModel extends StandardForwardModel {
         return actions;
     }
 
+    // TODO: If, and only if, you implement getSimultaneousPlayers in game state, then you must also implement this version of
+    // TODO: computeAvailableActions (as it might be called for any one of the possible players)
+    // protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int activePlayer) {
+
     /**
      * This is a method hook for any game-specific functionality that should run before an Action is executed
      * by the forward model

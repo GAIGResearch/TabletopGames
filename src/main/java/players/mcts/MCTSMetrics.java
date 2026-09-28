@@ -29,7 +29,7 @@ public class MCTSMetrics implements IMetricsCollection {
             if (root == null) return false;
             // if this is a single action, then we skip
             boolean skipMCTSMetrics = e.actions != null && e.actions.size() == 1;
-            List<AbstractAction> actionsConsidered = root.actionsToConsider(root.actionsFromOpenLoopState);
+            List<AbstractAction> actionsConsidered = root.actionsToConsider(root.getActionsFromOpenLoopState());
             if (skipMCTSMetrics) {
                 // to make sure, we also check the root stats, because there may have been actions added via a Decorator
                 if (e.state.getGameTick() == root.state.getGameTick() && actionsConsidered.size() > 1 && actionsConsidered.contains(e.action))
@@ -39,7 +39,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 TreeStatistics treeStats = new TreeStatistics(root);
                 int visits = root.getVisits();
                 if (visits == 0) visits = 1;
-                Map<AbstractAction, ActionStats> actionValueEstimates = root.actionValues;
+                Map<AbstractAction, ActionStats> actionValueEstimates = root.getActionValues();
                 List<AbstractAction> sortedActions = actionValueEstimates.keySet().stream()
                         .filter(a -> actionValueEstimates.get(a) != null) // exclude those never tried (through pruning)
                         .filter(actionsConsidered::contains)  // exclude impossible actions (from reused parts of the tree)
@@ -86,7 +86,7 @@ public class MCTSMetrics implements IMetricsCollection {
                     System.out.println("Warning: action has no value");
                     throw new AssertionError("as above");
                 }
-                records.put("ActionsAtRoot", root.actionValues.size());
+                records.put("ActionsAtRoot", root.getActionValues().size());
                 records.put("ActionsConsidered", actionsConsidered.size());
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
@@ -166,8 +166,8 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("OneActionNodes", treeStats.stream().mapToInt(ts -> ts.oneActionNodes).average().orElse(0.0));
                 records.put("MeanActionsAtNode", treeStats.stream().mapToDouble(ts -> ts.meanActionsAtNode).average().orElse(0.0));
                 records.put("MeanActionsExpanded", treeStats.stream().mapToDouble(ts -> ts.meanActionsExpanded).average().orElse(0.0));
-                records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.actionValues.size()).average().orElse(0.0));
-                records.put("ActionsConsidered", otherRoots.stream().mapToInt(node -> node.actionsToConsider(node.actionsFromOpenLoopState).size()).average().orElse(0.0));
+                records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.getActionValues().size()).average().orElse(0.0));
+                records.put("ActionsConsidered", otherRoots.stream().mapToInt(node -> node.actionsToConsider(node.getActionsFromOpenLoopState()).size()).average().orElse(0.0));
                 return true;
             }
             return false;
