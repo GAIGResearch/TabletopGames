@@ -46,7 +46,13 @@ public class PlayEKCard extends AbstractAction implements IToJSON {
             state.setInPlay(cardType, state.getCurrentPlayer());  // add an extra one
 
         if (cardType.nopeable) {
-            state.setActionInProgress(new NopeableAction(state.getCurrentPlayer(), this, state));
+            NopeableAction nopeable = new NopeableAction(state.getCurrentPlayer(), this, state);
+            // If no one else holds a Nope, there is nothing to wait for. We must resolve it now, as a sequence is
+            // never told about the action that created it (so would otherwise just be removed from the stack unresolved)
+            if (nopeable.executionComplete(state))
+                nopeable.resolve(state);
+            else
+                state.setActionInProgress(nopeable);
         } else {
             // if not Nopeable, execute the card
             cardType.execute(state, target);

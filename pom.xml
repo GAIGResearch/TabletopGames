@@ -185,6 +185,15 @@
                 <version>2.22.2</version>
                 <configuration>
                     <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+                    <!-- Run every test class, not just those whose names match the default Test*/*Test/*Tests/*TestCase.
+                         (Classes with no tests are ignored.) The long-running forward model tester suites are excluded. -->
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>games/fmtester/**</exclude>
+                        <exclude>**/*$*</exclude> <!-- inner classes: the surefire default, which is replaced by this list -->
+                    </excludes>
                 </configuration>
                 <dependencies>
                     <dependency>

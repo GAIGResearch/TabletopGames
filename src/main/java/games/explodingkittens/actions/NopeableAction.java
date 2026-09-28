@@ -107,13 +107,22 @@ public class NopeableAction implements IExtendedSequence, IToJSON {
         }
         if (executionComplete(state)) {
             // we have gone round the table
-            if (nopes % 2 == 0) {
-                // no one noped the action; execute the action
-                originalAction.cardType.execute(state, originalAction.target);
-            }
-            state.getInPlay().forEach(c -> state.getDiscardPile().add(c));
-            state.getInPlay().clear();
+            resolve(state);
         }
+    }
+
+    /**
+     * Once everyone has had the chance to Nope, execute the original action (unless Noped) and discard the cards in play.
+     * This is called from _afterAction() when the last interrupter passes or Nopes, and by PlayEKCard directly if no
+     * one could Nope in the first place (in which case this sequence is never put on the stack).
+     */
+    public void resolve(ExplodingKittensGameState state) {
+        if (nopes % 2 == 0) {
+            // no one noped the action; execute the action
+            originalAction.cardType.execute(state, originalAction.target);
+        }
+        state.getInPlay().forEach(c -> state.getDiscardPile().add(c));
+        state.getInPlay().clear();
     }
 
     @Override
