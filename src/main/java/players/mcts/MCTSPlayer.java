@@ -322,13 +322,14 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     protected void checkRootChildCount(SingleTreeNode root, List<AbstractAction> actions, AbstractGameState gameState) {
         if (root instanceof MCGSNode || getParameters().reuseTree)
             return;
-        // Long-standing guard: the check runs only when this player's action space differs from the game's.
+        // The check on action space size runs only when this player's action space differs from the game's.
         if (getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             return;
-        int expected = root.isMultiActor() ? root.jointActionSpaceSize() : actions.size();
-        if (root.children.size() > 3 * expected)
+        int expectedBound = 3 * (root.isMultiActor() ? root.jointActionSpaceSize() : actions.size());
+        if (expectedBound < 0) expectedBound = Integer.MAX_VALUE;  // to catch the rare case of overflow
+        if (root.children.size() > expectedBound)
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d%s",
-                    root.children.size(), expected,
+                    root.children.size(), expectedBound,
                     root.isMultiActor() ? " (joint actions over players " + root.getActingPlayers() + ")" : ""));
     }
 

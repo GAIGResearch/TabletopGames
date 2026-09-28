@@ -96,7 +96,7 @@ public class LawnAndOrderForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int player) {
         LawnAndOrderGameState state = (LawnAndOrderGameState) gameState;
         List<AbstractAction> actions = new ArrayList<>();
-        // nothing for a player who is not active, or has already chosen
+        // nothing for a player who is not active or has already chosen
         if (!state.getPlayersStillToChoose().contains(player))
             return actions;
         if (state.getGamePhase() == Phase.PLAY_OBJECT) {

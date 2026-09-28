@@ -6,18 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * A Lawn card: one object with one attribute from each of the three categories. The 64 cards are the 64 combinations.
- */
 public class LawnCard extends Card {
 
     /**
-     * The three categories of attribute, each scored on its own track.
+     * The three categories of attribute
      */
     public enum Category {
         TYPE("Improvements"), COLOUR("Colour"), FEATURE("Character");
 
-        /** The name of the HOA subcommittee that polices the category. */
         public final String subcommittee;
 
         Category(String subcommittee) {
@@ -71,9 +67,6 @@ public class LawnCard extends Card {
         this.feature = feature;
     }
 
-    /**
-     * The card's attribute in the category.
-     */
     public Attribute get(Category category) {
         return switch (category) {
             case TYPE -> type;
@@ -86,9 +79,6 @@ public class LawnCard extends Card {
         return get(attribute.category) == attribute;
     }
 
-    /**
-     * All 64 Lawn cards.
-     */
     public static List<LawnCard> allCards() {
         List<LawnCard> retValue = new ArrayList<>();
         for (Attribute t : Attribute.of(Category.TYPE))
