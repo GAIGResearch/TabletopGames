@@ -5,7 +5,6 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameState;
-import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.PlaceTile;
@@ -60,7 +59,7 @@ public class TMGUI extends AbstractGUIManager {
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
 
     TMAction lastAction;
-    TMTurnOrder turnOrder;
+    int lastTick = -1;
 
     public TMGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
@@ -534,11 +533,10 @@ public class TMGUI extends AbstractGUIManager {
 
             if (player instanceof HumanGUIPlayer) {
                 TMAction action = (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1).b;
-                TMTurnOrder turnOrder = (TMTurnOrder) gs.getTurnOrder();
-                if (!action.equals(lastAction) || !turnOrder.equals(this.turnOrder)) {
+                if (!action.equals(lastAction) || gs.getGameTick() != lastTick) {
                     createActionMenu(player, (TMGameState) gameState);
                     this.lastAction = action.copy();
-                    this.turnOrder = (TMTurnOrder) turnOrder.copy();
+                    this.lastTick = gs.getGameTick();
                 }
             } else {
                 resetActionButtons();

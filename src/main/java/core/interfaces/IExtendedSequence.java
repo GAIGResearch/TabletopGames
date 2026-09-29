@@ -45,22 +45,17 @@ import java.util.List;
  * After every action is taken, the ForwardModel will check the top of the stack to see if it is finished (and will
  * continue until it finds one that is not). If it is finished, it will remove it from the stack.
  *
- * When an action is executed with an IExtendedSequence on the stack, then generally _afterAction() will be called
- * on the top of the stack only. There are two exceptions to this to stop an action removing itself:
- *      - Any sequence the action itself starts (directly or via nested actions it executes) is not told about it.
- *      - If the action puts *itself* on the stack (pattern i above), then in StandardForwardModel the sequence that
- *        offered it is not told immediately, but only once the action completes, via afterRemovalFromQueue().
+ * When an action is executed with an IExtendedSequence on the stack, then _afterAction() will be called
+ * on the top of the stack (as it was before the action was executed) only, straight after the action is executed.
+ * This applies even if the action has put *itself* on the stack (pattern i above) to continue as a sequence: the
+ * sequence that offered it is told about the decision immediately, not when the action later completes.
+ * Any other sequence the action starts (directly or via nested actions it executes) is not told about it.
  *
- * WARNING: One action must not currently put two (or more) IExtendedSequences on the stack at the same time.
- * For example, a card that makes the player place a tile (TilePlacement) and then make a choice (Choice), each of which
- * is an IExtendedSequence, and both pushed to the stack when the card is played.
- * The stack is then [..., Choice, TilePlacement], and when TilePlacement completes and is removed, the default
- * afterRemovalFromQueue() passes it to Choice._afterAction() - as if it were the decision Choice was waiting for.
- * Choice cannot tell this sibling apart from its own decision.
- * Instead, have a single sequence that runs the steps one after another (pushing the next only when the previous is
- * complete), or override afterRemovalFromQueue() so that completed sequences are not treated as decisions.
- * (Terraforming Mars does the latter: see TMExtendedSequence, used with StandardForwardModelWithTurnOrder, which tells
- * the offering sequence about every action immediately.)
+ * A sequence may therefore be complete while another sequence is still above it on the stack (for example, the second
+ * play of a card that is itself an extended sequence). It will be removed from the stack once everything above it has
+ * completed.
+ * If a sequence needs to know when a sequence above it has completed (e.g. to decide what to offer next based on the
+ * resulting state), then it should override afterRemovalFromQueue().
  */
 public interface IExtendedSequence {
 
@@ -135,20 +130,17 @@ public interface IExtendedSequence {
 
     /**
      * This is called whenever the IExtendedSequence is moved to the top of the queue.
-     * It provides the extended sequence that was just removed (likely to be a child created by this sequence)
-     * so that any clean up can take place.
+     * It provides the extended sequence that was just removed (often a child created by one of this sequence's
+     * decisions) so that any clean up can take place.
      *
-     * The default behaviour is to call _afterAction() on the completed sequence if it is an AbstractAction.
-     * If it is *not* an AbstractAction, then this will need to be overridden.
-     * Note that the completed sequence may not have been started by this one: see the WARNING in the class comment
-     * about putting two sequences on the stack from one action.
+     * This is not a decision: _afterAction() has already been called with the action taken for this sequence when it was
+     * executed. The default is therefore to do nothing.
+     * Note that the completed sequence may not have been started by this one, or may be one of several started by the
+     * same action.
      * @param state
      * @param completedSequence
      */
     default void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
-        if (completedSequence instanceof AbstractAction action) {
-            this._afterAction(state, action);
-        }
     }
 
     /**

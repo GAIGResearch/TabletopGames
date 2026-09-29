@@ -1,10 +1,9 @@
 package games.terraformingmars;
 
-import core.AbstractGameStateWithTurnOrder;
+import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
@@ -23,7 +22,7 @@ import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.CorporationSelect;
 
-public class TMGameState extends AbstractGameStateWithTurnOrder {
+public class TMGameState extends AbstractGameState {
 
     enum TMPhase implements IGamePhase {
         CorporationSelect,
@@ -34,6 +33,9 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     // General state info
     int generation;
+    // Turn state: players take up to nActionsPerPlayer actions per turn, until all have passed
+    int nActionsTaken, nPassed;
+    boolean[] passed;
     GridBoard board;
     HashSet<TMMapTile> extraTiles;
     HashMap<TMTypes.GlobalParameter, GlobalParameter> globalParameters;
@@ -77,11 +79,6 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         super(gameParameters, nPlayers);
     }
     @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new TMTurnOrder(nPlayers, ((TMGameParameters) gameParameters).nActionsPerPlayer);
-    }
-
-    @Override
     protected GameType _getGameType() {
         return GameType.TerraformingMars;
     }
@@ -118,11 +115,14 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected TMGameState _copy(int playerId) {
         TMGameState copy = new TMGameState(gameParameters.copy(), getNPlayers());
 
         // General public info
         copy.generation = generation;
+        copy.nActionsTaken = nActionsTaken;
+        copy.nPassed = nPassed;
+        copy.passed = passed.clone();
         copy.board = board.emptyCopy();  // Deep copy of board
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
@@ -263,6 +263,36 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         return copy;
     }
 
+    /**
+     * Records that the player has taken an action that uses one of their action points.
+     * Only the turn owner's actions count, and none once their turn is complete (the forward model moves play on
+     * to the next player after the action).
+     */
+    public void registerActionTaken(TMAction action, int player) {
+        if (player != turnOwner || isTurnComplete()) return;
+        nActionsTaken++;
+        if (action.pass && nActionsTaken == 1) {
+            // First action is pass, player is out for the rest of the generation
+            passed[player] = true;
+            nPassed++;
+        }
+    }
+
+    /**
+     * @return true if the turn owner has used all their actions, or has passed
+     */
+    public boolean isTurnComplete() {
+        return nActionsTaken == ((TMGameParameters) gameParameters).nActionsPerPlayer || passed[turnOwner];
+    }
+
+    public int getNPassed() {
+        return nPassed;
+    }
+
+    public boolean hasPassed(int player) {
+        return passed[player];
+    }
+
     public TMCard drawCard() {
         // Reshuffle discards into draw pile if empty
         if (projectCards.getSize() == 0) {
@@ -292,6 +322,9 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         if (!(o instanceof TMGameState)) return false;
         TMGameState that = (TMGameState) o;
         return generation == that.generation
+                && nActionsTaken == that.nActionsTaken
+                && nPassed == that.nPassed
+                && Arrays.equals(passed, that.passed)
                 && Objects.equals(board, that.board)
                 && Objects.equals(extraTiles, that.extraTiles)
                 && Objects.equals(globalParameters, that.globalParameters)
@@ -322,8 +355,9 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), generation, board, extraTiles, globalParameters, bonuses,
+        int result = Objects.hash(super.hashCode(), generation, nActionsTaken, nPassed, board, extraTiles, globalParameters, bonuses,
                 projectCards, corpCards, discardCards, milestones, awards, nMilestonesClaimed, nAwardsFunded);
+        result = 31 * result + Arrays.hashCode(passed);
         result = 31 * result + Arrays.hashCode(playerExtraActions);
         result = 31 * result + Arrays.hashCode(playerResourceMap);
         result = 31 * result + Arrays.hashCode(playerDiscountEffects);
@@ -347,7 +381,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         StringBuilder sb = new StringBuilder();
         int result = Objects.hash(gameParameters);
         sb.append(result).append("|");
-        result = Objects.hash(turnOrder);
+        result = Objects.hash(turnOwner, turnCounter, roundCounter, firstPlayer, nActionsTaken, nPassed, Arrays.hashCode(passed));
         sb.append(result).append("|");
         result = Objects.hash(getAllComponents());
         sb.append(result).append("|");

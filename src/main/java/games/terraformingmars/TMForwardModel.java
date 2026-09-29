@@ -2,7 +2,7 @@ package games.terraformingmars;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -23,7 +23,7 @@ import static games.terraformingmars.TMTypes.Resource.TR;
 import static games.terraformingmars.TMTypes.StandardProject.*;
 import static games.terraformingmars.TMTypes.ActionType.*;
 
-public class TMForwardModel extends StandardForwardModelWithTurnOrder {
+public class TMForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -177,6 +177,10 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
             gs.playerPersistingEffects[i] = new HashSet<>();
         }
 
+        gs.nActionsTaken = 0;
+        gs.nPassed = 0;
+        gs.passed = new boolean[gs.getNPlayers()];
+
         gs.nAwardsFunded = new Counter(0, 0, params.nCostAwards.length, "Awards funded");
         gs.nMilestonesClaimed = new Counter(0, 0, params.nCostMilestone.length, "Milestones claimed");
 
@@ -198,7 +202,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
         if (gs.getNPlayers() == 1) {
             int boardH = gs.board.getHeight();
             int boardW = gs.board.getWidth();
-            gs.getTurnOrder().setTurnOwner(1);
+            gs.setTurnOwner(1);
             for (int i = 0; i < params.soloCities; i++) {
                 // Place city + greenery adjacent
                 PlaceTile pt = new PlaceTile(1, TMTypes.Tile.City, TMTypes.MapTileType.Ground, true);
@@ -217,7 +221,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                     }
                 }
             }
-            gs.getTurnOrder().setTurnOwner(0);
+            gs.setTurnOwner(0);
             gs.globalParameters.get(TMTypes.GlobalParameter.Oxygen).setValue(0);
         }
 
@@ -229,6 +233,12 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
         TMGameState gs = (TMGameState) currentState;
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
 
+        // The turn passes to the next player once the turn owner has used all their actions, or passed
+        if (gs.isTurnComplete()) {
+            gs.nActionsTaken = 0;
+            endPlayerTurn(gs, nextPlayer(gs));
+        }
+
         if (gs.getGamePhase() == CorporationSelect) {
             boolean allChosen = true;
             for (TMCard card : gs.getPlayerCorporations()) {
@@ -239,7 +249,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
             }
             if (allChosen) {
                 gs.setGamePhase(Research);
-                gs.getTurnOrder().endRound(gs);
+                endRoundAndResetPasses(gs);
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     for (int j = 0; j < params.nProjectsStart; j++) {
                         gs.playerCardChoice[i].add(gs.drawCard());
@@ -263,11 +273,11 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
             }
             if (allDone) {
                 gs.setGamePhase(Actions);
-                gs.getTurnOrder().endRound(gs);
+                endRoundAndResetPasses(gs);
             }
         } else if (gs.getGamePhase() == Actions) {
             // Check if finished: all players passed
-            if (((TMTurnOrder) gs.getTurnOrder()).nPassed == gs.getNPlayers()) {
+            if (gs.nPassed == gs.getNPlayers()) {
                 // Production
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     // First, energy turns to heat
@@ -303,7 +313,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                 }
 
                 // Move to research phase
-                gs.getTurnOrder().endRound(gs);
+                endRoundAndResetPasses(gs);
                 gs.setGamePhase(Research);
                 for (int j = 0; j < params.nProjectsResearch; j++) {
                     for (int i = 0; i < gs.getNPlayers(); i++) {
@@ -333,6 +343,28 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                 gs.generation++;
             }
         }
+    }
+
+    /**
+     * @return the next player in turn order who has not yet passed (or simply the next player, once all have passed)
+     */
+    private int nextPlayer(TMGameState gs) {
+        int next = (gs.getTurnOwner() + 1) % gs.getNPlayers();
+        if (gs.nPassed < gs.getNPlayers()) {
+            while (gs.passed[next]) {
+                next = (next + 1) % gs.getNPlayers();
+            }
+        }
+        return next;
+    }
+
+    /**
+     * Ends the round (i.e. the current phase of the generation), and resets which players have passed
+     */
+    private void endRoundAndResetPasses(TMGameState gs) {
+        super.endRound(gs);
+        Arrays.fill(gs.passed, false);
+        gs.nPassed = 0;
     }
 
     @Override

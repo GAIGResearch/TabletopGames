@@ -1,7 +1,6 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 
@@ -24,31 +23,16 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         _beforeAction(currentState, action);
 
         action.execute(currentState);
-        // If the action has itself been put on the stack (it continues as a sequence), then the decisionOwner is not
-        // told now; it is told once the action completes, via afterRemovalFromQueue().
-        // Any other sequence the action started (directly or via nested actions) must not be told about the action
-        // that created it.
-        if (decisionOwner != null && !continuesAsSequence(currentState, action))
+        // We then tell that sequence about the action straight away, even if the action has itself been put on the
+        // stack to continue as a sequence. Any other sequence the action started (directly, or via nested actions it
+        // executed) must not be told about the action that created it.
+        // A sequence is not told again when a sequence above it completes (see IExtendedSequence.afterRemovalFromQueue)
+        if (decisionOwner != null && decisionOwner != action)
             decisionOwner._afterAction(currentState, action);
         // TODO: Currently we always inform the forward model of the action taken, even if it is not
         // currently controlling the game flow. All games check this independently; so would be good to remove this
         // if possible..but need to check if any games rely on this behaviour first.
         _afterAction(currentState, action);
-    }
-
-    private static boolean continuesAsSequence(AbstractGameState state, AbstractAction action) {
-        if (isOnStack(state, action)) return true;
-        // For a simultaneous action, it is the constituent actions that may have put themselves on the stack
-        return action instanceof SimultaneousAction simultaneousAction
-                && simultaneousAction.getPlayerActions().values().stream().anyMatch(a -> isOnStack(state, a));
-    }
-
-    private static boolean isOnStack(AbstractGameState state, AbstractAction action) {
-        // Identity, not equals(): an equal copy of the action on the stack is a different sequence
-        for (IExtendedSequence sequence : state.actionsInProgress) {
-            if (sequence == action) return true;
-        }
-        return false;
     }
 
     /**

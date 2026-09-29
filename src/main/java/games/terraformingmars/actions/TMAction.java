@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
-import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.effects.Effect;
@@ -170,7 +169,7 @@ public class TMAction extends AbstractAction {
         if (player == -1) player = gs.getCurrentPlayer();
         if (player < 0 || player >= gs.getNPlayers()) return;
         if (!freeActionPoint) {
-            ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken(gs, this, player);
+            gs.registerActionTaken(this, player);
         }
         if (getCardID() != -1 && isActionOfCard()) {
             TMCard c = (TMCard) gs.getComponentById(getCardID());

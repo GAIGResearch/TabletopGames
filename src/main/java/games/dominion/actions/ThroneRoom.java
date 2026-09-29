@@ -75,15 +75,28 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
         }
         if (enthronedCard == da.type) {
             executionCount++;
-            // Playing an enthroned Throne Room again with no action cards in hand does nothing, so skip that decision
-            if (executionCount == 1 && enthronedCard == CardType.THRONE_ROOM &&
-                    ((DominionGameState) state).getDeck(DeckType.HAND, player).stream().noneMatch(DominionCard::isActionCard))
-                executionCount = 2;
+            // If the enthroned card continues as a sequence (e.g. Militia, or another Throne Room), then we are told
+            // about it now, before it has completed. We offer the second play once it has, as we are then back on top
+            // of the stack.
+            skipPointlessSecondThroneRoom(state);
         } else
             throw new AssertionError("Enthrone action should be the same as the one selected");
         if (executionCount > 2) {
             throw new AssertionError("Enthronement count should stop at 2");
         }
+    }
+
+    @Override
+    public void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
+        // An enthroned Throne Room has now finished, so we know what is left in hand
+        skipPointlessSecondThroneRoom(state);
+    }
+
+    private void skipPointlessSecondThroneRoom(AbstractGameState state) {
+        // Playing an enthroned Throne Room again with no action cards in hand does nothing, so skip that decision
+        if (executionCount == 1 && enthronedCard == CardType.THRONE_ROOM &&
+                ((DominionGameState) state).getDeck(DeckType.HAND, player).stream().noneMatch(DominionCard::isActionCard))
+            executionCount = 2;
     }
 
     @Override

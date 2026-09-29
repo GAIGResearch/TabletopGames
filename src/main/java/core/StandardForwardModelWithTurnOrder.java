@@ -27,10 +27,7 @@ public abstract class StandardForwardModelWithTurnOrder extends AbstractForwardM
         action.execute(currentState);
         // We then register the action with that sequence only, straight away, even if the action has itself been put
         // on the stack. Any other sequence the action started (directly, or via nested actions it executed) must not
-        // be told about the action that created it.
-        // (Unlike StandardForwardModel, which tells the owner about an action that continues as a sequence only once it
-        // completes. That cannot distinguish the owner's decision from a sibling sequence pushed by the same action,
-        // so the only game using this class, Terraforming Mars, ignores child completions: see TMExtendedSequence.)
+        // be told about the action that created it. (As in StandardForwardModel.)
         if (decisionOwner != null && decisionOwner != action)
             decisionOwner._afterAction(currentState, action);
         _afterAction(currentState, action);
