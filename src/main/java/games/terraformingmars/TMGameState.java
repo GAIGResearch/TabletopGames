@@ -133,23 +133,23 @@ public class TMGameState extends AbstractGameState {
                 }
             }
         }
-        copy.extraTiles = new HashSet<>();
+        copy.extraTiles = new LinkedHashSet<>();
         for (TMMapTile mt : extraTiles) {
             copy.extraTiles.add(mt.copy());
         }
-        copy.globalParameters = new HashMap<>();
+        copy.globalParameters = new LinkedHashMap<>();
         for (TMTypes.GlobalParameter p : globalParameters.keySet()) {
             copy.globalParameters.put(p, globalParameters.get(p).copy());
         }
-        copy.bonuses = new HashSet<>();
+        copy.bonuses = new LinkedHashSet<>();
         for (Bonus b : bonuses) {
             copy.bonuses.add(b.copy());
         }
-        copy.milestones = new HashSet<>();
+        copy.milestones = new LinkedHashSet<>();
         for (Milestone m : milestones) {
             copy.milestones.add(m.copy());
         }
-        copy.awards = new HashSet<>();
+        copy.awards = new LinkedHashSet<>();
         for (Award a : awards) {
             copy.awards.add(a.copy());
         }
@@ -177,16 +177,16 @@ public class TMGameState extends AbstractGameState {
         copy.playedCards = new Deck[getNPlayers()];
         copy.playerCorporations = new TMCard[getNPlayers()];
         for (int i = 0; i < getNPlayers(); i++) {
-            copy.playerExtraActions[i] = new HashSet<>();
-            copy.playerResourceMap[i] = new HashSet<>();
-            copy.playerPersistingEffects[i] = new HashSet<>();
-            copy.playerDiscountEffects[i] = new HashMap<>();
-            copy.playerResources[i] = new HashMap<>();
-            copy.playerResourceIncreaseGen[i] = new HashMap<>();
-            copy.playerProduction[i] = new HashMap<>();
-            copy.playerCardsPlayedTags[i] = new HashMap<>();
-            copy.playerCardsPlayedTypes[i] = new HashMap<>();
-            copy.playerTilesPlaced[i] = new HashMap<>();
+            copy.playerExtraActions[i] = new LinkedHashSet<>();
+            copy.playerResourceMap[i] = new LinkedHashSet<>();
+            copy.playerPersistingEffects[i] = new LinkedHashSet<>();
+            copy.playerDiscountEffects[i] = new LinkedHashMap<>();
+            copy.playerResources[i] = new LinkedHashMap<>();
+            copy.playerResourceIncreaseGen[i] = new LinkedHashMap<>();
+            copy.playerProduction[i] = new LinkedHashMap<>();
+            copy.playerCardsPlayedTags[i] = new LinkedHashMap<>();
+            copy.playerCardsPlayedTypes[i] = new LinkedHashMap<>();
+            copy.playerTilesPlaced[i] = new LinkedHashMap<>();
             copy.playerCardPoints[i] = playerCardPoints[i].copy();
             copy.playerComplicatedPointCards[i] = playerComplicatedPointCards[i].copy();
             copy.playedCards[i] = playedCards[i].copy();
@@ -686,7 +686,7 @@ public class TMGameState extends AbstractGameState {
      * @return all resources that can be transformed into given res
      */
     public HashSet<TMTypes.Resource> canPlayerTransform(int player, TMCard card, TMTypes.Resource from, TMTypes.Resource to) {
-        HashSet<TMTypes.Resource> resources = new HashSet<>();
+        HashSet<TMTypes.Resource> resources = new LinkedHashSet<>();
         for (ResourceMapping resMap : playerResourceMap[player]) {
             if ((from == null || resMap.from == from) && resMap.to == to && (resMap.requirement == null || resMap.requirement.testCondition(card))) {
                 if (playerResources[player].get(resMap.from).getValue() > 0) {
@@ -733,8 +733,8 @@ public class TMGameState extends AbstractGameState {
     // if add is false, replace instead
     public void addResourceMappings(HashSet<ResourceMapping> maps, boolean add) {
         int player = getCurrentPlayer();
-        HashSet<ResourceMapping> toRemove = new HashSet<>();
-        HashSet<ResourceMapping> toAdd = new HashSet<>();
+        HashSet<ResourceMapping> toRemove = new LinkedHashSet<>();
+        HashSet<ResourceMapping> toAdd = new LinkedHashSet<>();
         for (ResourceMapping resMapNew : maps) {
             boolean added = false;
             for (ResourceMapping resMap : playerResourceMap[player]) {
@@ -822,13 +822,13 @@ public class TMGameState extends AbstractGameState {
         if (a.isClaimed()) {
             int best = -1;
             int secondBest = -1;
-            HashSet<Integer> bestPlayer = new HashSet<>();
-            HashSet<Integer> secondBestPlayer = new HashSet<>();
+            HashSet<Integer> bestPlayer = new LinkedHashSet<>();
+            HashSet<Integer> secondBestPlayer = new LinkedHashSet<>();
             for (int i = 0; i < getNPlayers(); i++) {
                 int playerPoints = a.checkProgress(this, i);
                 if (playerPoints >= best) {
                     if (playerPoints > best) {
-                        secondBestPlayer = new HashSet<>(bestPlayer);
+                        secondBestPlayer = new LinkedHashSet<>(bestPlayer);
                         secondBest = best;
                         bestPlayer.clear();
                         bestPlayer.add(i);

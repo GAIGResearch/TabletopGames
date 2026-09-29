@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.LinkedHashSet;
 
 public class ModifyPlayerResource extends TMModifyCounter implements TMExtendedSequence {
     public TMTypes.Resource resource;
@@ -223,7 +224,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements TMExtendedS
         ModifyPlayerResource copy = new ModifyPlayerResource(player, targetPlayer, change, resource, production, tagToCount, tileToCount, any, opponents, onMars, counterResource, counterResourceProduction, freeActionPoint);
         copy.counterID = counterID;
         if (targetPlayerOptions != null) {
-            copy.targetPlayerOptions = new HashSet<>(targetPlayerOptions);
+            copy.targetPlayerOptions = new LinkedHashSet<>(targetPlayerOptions);
         }
         copy.complete = complete;
         return copy;

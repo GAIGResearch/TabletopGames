@@ -37,9 +37,9 @@ public class TMForwardModel extends StandardForwardModel {
         gs.playerResourceIncreaseGen = new HashMap[gs.getNPlayers()];
 
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            gs.playerResources[i] = new HashMap<>();
-            gs.playerProduction[i] = new HashMap<>();
-            gs.playerResourceIncreaseGen[i] = new HashMap<>();
+            gs.playerResources[i] = new LinkedHashMap<>();
+            gs.playerProduction[i] = new LinkedHashMap<>();
+            gs.playerResourceIncreaseGen[i] = new LinkedHashMap<>();
             for (TMTypes.Resource res : TMTypes.Resource.values()) {
                 int startingRes = params.startingResources.get(res);
                 if (res == TR && gs.getNPlayers() == 1) {
@@ -54,13 +54,13 @@ public class TMForwardModel extends StandardForwardModel {
                 }
                 gs.playerResourceIncreaseGen[i].put(res, false);
             }
-            gs.playerResourceMap[i] = new HashSet<>();
+            gs.playerResourceMap[i] = new LinkedHashSet<>();
             // By default, players can exchange steel for X MC and titanium for X MC. More may be added
             gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Steel, TMTypes.Resource.MegaCredit, params.nSteelMC, new TagOnCardRequirement(new TMTypes.Tag[]{TMTypes.Tag.Building})));
             gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Titanium, TMTypes.Resource.MegaCredit, params.nTitaniumMC, new TagOnCardRequirement(new TMTypes.Tag[]{TMTypes.Tag.Space})));
 
             // Set up player discount maps
-            gs.playerDiscountEffects[i] = new HashMap<>();
+            gs.playerDiscountEffects[i] = new LinkedHashMap<>();
         }
 
         gs.projectCards = new Deck<>("Projects", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -69,11 +69,11 @@ public class TMForwardModel extends StandardForwardModel {
 
         // Load info from expansions (includes base)
         gs.board = new GridBoard(params.boardSize, params.boardSize);
-        gs.extraTiles = new HashSet<>();
-        gs.bonuses = new HashSet<>();
-        gs.milestones = new HashSet<>();
-        gs.awards = new HashSet<>();
-        gs.globalParameters = new HashMap<>();
+        gs.extraTiles = new LinkedHashSet<>();
+        gs.bonuses = new LinkedHashSet<>();
+        gs.milestones = new LinkedHashSet<>();
+        gs.awards = new LinkedHashSet<>();
+        gs.globalParameters = new LinkedHashMap<>();
 
         // Load base
         TMTypes.Expansion.Base.loadProjectCards(gs.projectCards);
@@ -127,8 +127,8 @@ public class TMForwardModel extends StandardForwardModel {
 
         if (gs.getNPlayers() == 1) {
             // Disable milestones and awards for solo play
-            gs.milestones = new HashSet<>();
-            gs.awards = new HashSet<>();
+            gs.milestones = new LinkedHashSet<>();
+            gs.awards = new LinkedHashSet<>();
         }
 
         // Shuffle dekcs
@@ -161,20 +161,20 @@ public class TMForwardModel extends StandardForwardModel {
         gs.playerExtraActions = new HashSet[gs.getNPlayers()];
         gs.playerPersistingEffects = new HashSet[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            gs.playerTilesPlaced[i] = new HashMap<>();
+            gs.playerTilesPlaced[i] = new LinkedHashMap<>();
             for (TMTypes.Tile t : TMTypes.Tile.values()) {
                 gs.playerTilesPlaced[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " tiles placed player " + i));
             }
-            gs.playerCardsPlayedTypes[i] = new HashMap<>();
+            gs.playerCardsPlayedTypes[i] = new LinkedHashMap<>();
             for (TMTypes.CardType t : TMTypes.CardType.values()) {
                 gs.playerCardsPlayedTypes[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " cards played player " + i));
             }
-            gs.playerCardsPlayedTags[i] = new HashMap<>();
+            gs.playerCardsPlayedTags[i] = new LinkedHashMap<>();
             for (TMTypes.Tag t : TMTypes.Tag.values()) {
                 gs.playerCardsPlayedTags[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " cards played player " + i));
             }
-            gs.playerExtraActions[i] = new HashSet<>();
-            gs.playerPersistingEffects[i] = new HashSet<>();
+            gs.playerExtraActions[i] = new LinkedHashSet<>();
+            gs.playerPersistingEffects[i] = new LinkedHashSet<>();
         }
 
         gs.nActionsTaken = 0;

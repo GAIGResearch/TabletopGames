@@ -8,6 +8,7 @@ import utilities.Group;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.LinkedHashMap;
 
 import static games.terraformingmars.actions.PlaceTile.*;
 
@@ -70,7 +71,7 @@ public class AdjacencyRequirement implements Requirement<Group<TMGameState, TMMa
     public AdjacencyRequirement copy() {
         AdjacencyRequirement copy = new AdjacencyRequirement();
         if (tileTypes != null) {
-            copy.tileTypes = new HashMap<>(tileTypes);
+            copy.tileTypes = new LinkedHashMap<>(tileTypes);
         }
         copy.noneAdjacent = noneAdjacent;
         copy.owned = owned;
@@ -82,7 +83,7 @@ public class AdjacencyRequirement implements Requirement<Group<TMGameState, TMMa
     public Requirement<Group<TMGameState, TMMapTile, Integer>> copySerializable() {
         AdjacencyRequirement copy = new AdjacencyRequirement();
         if (tileTypes != null && tileTypes.size() > 0) {
-            copy.tileTypes = new HashMap<>(tileTypes);
+            copy.tileTypes = new LinkedHashMap<>(tileTypes);
         }
         copy.noneAdjacent = noneAdjacent;
         copy.owned = owned;

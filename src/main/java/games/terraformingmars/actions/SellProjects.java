@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.LinkedHashSet;
 
 public class SellProjects extends TMAction implements TMExtendedSequence {
     HashSet<Integer> cardIDsSold;
@@ -22,7 +23,7 @@ public class SellProjects extends TMAction implements TMExtendedSequence {
     public SellProjects(int player) {
         super(player, false);
         actionType = TMTypes.ActionType.StandardProject;
-        cardIDsSold = new HashSet<>();
+        cardIDsSold = new LinkedHashSet<>();
     }
     public SellProjects(int player, int cardID) {
         super(player, true);
@@ -85,7 +86,7 @@ public class SellProjects extends TMAction implements TMExtendedSequence {
         SellProjects copy = new SellProjects(player, getCardID());
         copy.complete = complete;
         if (cardIDsSold != null) {
-            copy.cardIDsSold = new HashSet<>(cardIDsSold);
+            copy.cardIDsSold = new LinkedHashSet<>(cardIDsSold);
         }
         return copy;
     }

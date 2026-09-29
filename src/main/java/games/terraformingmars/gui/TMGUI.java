@@ -85,7 +85,7 @@ public class TMGUI extends AbstractGUIManager {
             }
         });
 
-        actionMenus = new HashMap<>();
+        actionMenus = new LinkedHashMap<>();
         JMenuBar menuBar = new JMenuBar();
         menuBar.setBackground(bgColor);
         int mnemonicStart = KeyEvent.VK_A;
@@ -110,7 +110,7 @@ public class TMGUI extends AbstractGUIManager {
             //Handle exception
         }
 
-        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2, new HashSet<>());
+        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2, new LinkedHashSet<>());
         historyInfo.setFont(defaultFont);
         historyInfo.setForeground(fontColor);
         JPanel historyWrapper = new JPanel();

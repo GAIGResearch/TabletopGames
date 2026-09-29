@@ -4,31 +4,33 @@ import core.AbstractParameters;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 import static games.terraformingmars.TMTypes.Expansion.*;
 
 public class TMGameParameters extends AbstractParameters {
 
     int boardSize = 9;
-    HashSet<TMTypes.Expansion> expansions = new HashSet<TMTypes.Expansion>() {{ add(CorporateEra); }};  // Elysium, Hellas and Venus compiling, but not fully parsed yet
+    HashSet<TMTypes.Expansion> expansions = new LinkedHashSet<TMTypes.Expansion>() {{ add(CorporateEra); }};  // Elysium, Hellas and Venus compiling, but not fully parsed yet
     int soloTR = 14;
     int soloMaxGen = 14;
     int soloCities = 2;
 
-    HashMap<TMTypes.Resource, Integer> minimumProduction = new HashMap<TMTypes.Resource, Integer>() {{
+    HashMap<TMTypes.Resource, Integer> minimumProduction = new LinkedHashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {
             if (res == TMTypes.Resource.MegaCredit) put(res, -5);
             else put(res, 0);
         }
     }};
-    HashMap<TMTypes.Resource, Integer> startingResources = new HashMap<TMTypes.Resource, Integer>() {{
+    HashMap<TMTypes.Resource, Integer> startingResources = new LinkedHashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {
             put(res, 0);
         }
         put(TMTypes.Resource.TR, 20);
 //        put(TMTypes.Resource.MegaCredit, 500);  // TODO Test
     }};
-    HashMap<TMTypes.Resource, Integer> startingProduction = new HashMap<TMTypes.Resource, Integer>() {{
+    HashMap<TMTypes.Resource, Integer> startingProduction = new LinkedHashMap<TMTypes.Resource, Integer>() {{
         for (TMTypes.Resource res: TMTypes.Resource.values()) {
             if (res.isPlayerBoardRes()) {
                 put(res, 1);

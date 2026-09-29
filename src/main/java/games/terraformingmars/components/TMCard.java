@@ -56,8 +56,8 @@ public class TMCard extends Card {
         immediateEffects = new TMAction[0];
         persistingEffects = new Effect[0];
         discountEffects = new LinkedList<>();
-        resourceMappings = new HashSet<>();
-        requirements = new HashSet<>();
+        resourceMappings = new LinkedHashSet<>();
+        requirements = new LinkedHashSet<>();
     }
 
     private TMCard(String name, int componentID) {
@@ -292,7 +292,7 @@ public class TMCard extends Card {
                                     // Tag requirement
                                     s = s.replace("tags","").trim();
                                     String[] split = s.split(" ");
-                                    HashMap<TMTypes.Tag, Integer> tagCount = new HashMap<>();
+                                    HashMap<TMTypes.Tag, Integer> tagCount = new LinkedHashMap<>();
                                     for (String s2: split) {
                                         TMTypes.Tag t = TMTypes.Tag.valueOf(s2);
                                         if (tagCount.containsKey(t)) {
@@ -333,7 +333,7 @@ public class TMCard extends Card {
                                     // Resources on cards requirement
                                     s = s.replace("resources","").trim();
                                     String[] split = s.split(" ");
-                                    HashMap<TMTypes.Resource, Integer> resourceCount = new HashMap<>();
+                                    HashMap<TMTypes.Resource, Integer> resourceCount = new LinkedHashMap<>();
                                     for (String s2: split) {
                                         TMTypes.Resource t = TMTypes.Resource.valueOf(s2);
                                         if (resourceCount.containsKey(t)) {
@@ -468,7 +468,7 @@ public class TMCard extends Card {
     }
 
     private static HashSet<Requirement> parseDiscount(String[] split2) {
-        HashSet<Requirement> reqs = new HashSet<>();
+        HashSet<Requirement> reqs = new LinkedHashSet<>();
         if (split2.length > 2) {
             if (split2[2].equalsIgnoreCase("global")) {
                 // global parameter effect
@@ -524,7 +524,7 @@ public class TMCard extends Card {
         } else if (actionTypeCondition.equalsIgnoreCase("playcard")) {
             // Play card effect
             String[] tagDef = content.split("-")[1].split(",");
-            HashSet<TMTypes.Tag> tags = new HashSet<>();
+            HashSet<TMTypes.Tag> tags = new LinkedHashSet<>();
             for (String s: tagDef) {
                 tags.add(TMTypes.Tag.valueOf(s));
             }
@@ -579,7 +579,7 @@ public class TMCard extends Card {
         copy.annotation = annotation;
         copy.cost = cost;
         if (requirements != null) {
-            copy.requirements = new HashSet<>();
+            copy.requirements = new LinkedHashSet<>();
             for (Requirement r: requirements) {
                 copy.requirements.add(r.copy());
             }
@@ -592,7 +592,7 @@ public class TMCard extends Card {
             }
         }
         if (resourceMappings != null) {
-            copy.resourceMappings = new HashSet<>();
+            copy.resourceMappings = new LinkedHashSet<>();
             for (TMGameState.ResourceMapping rm: resourceMappings) {
                 copy.resourceMappings.add(rm.copy());
             }
@@ -641,7 +641,7 @@ public class TMCard extends Card {
         copy.annotation = annotation;
         copy.cost = cost;
         if (requirements != null && requirements.size() > 0) {
-            copy.requirements = new HashSet<>();
+            copy.requirements = new LinkedHashSet<>();
             for (Requirement r: requirements) {
                 copy.requirements.add(r.copySerializable());
             }
@@ -656,7 +656,7 @@ public class TMCard extends Card {
             }
         } else copy.discountEffects = null;
         if (resourceMappings != null && resourceMappings.size() > 0) {
-            copy.resourceMappings = new HashSet<>();
+            copy.resourceMappings = new LinkedHashSet<>();
             for (TMGameState.ResourceMapping rm: resourceMappings) {
                 copy.resourceMappings.add(rm.copy());
             }
