@@ -78,8 +78,8 @@ public class ColtExpressRoundView extends JComponent {
         if (deck != null && deck.getSize() > 0) {
             String text = "<html>";
             for (int i = 0; i < deck.getSize(); i++) {
-                boolean visible = roundView.cegs.getTurnOrder().getRoundCounter() >= i;
-                boolean current = roundView.cegs.getTurnOrder().getRoundCounter() == i;
+                boolean visible = roundView.cegs.getRoundCounter() >= i;
+                boolean current = roundView.cegs.getRoundCounter() == i;
                 if (visible) {
                     if (current) text += "[CURRENT] ";
                     RoundEvent re = roundView.cegs.getRounds().get(i).getEndRoundCardEvent();

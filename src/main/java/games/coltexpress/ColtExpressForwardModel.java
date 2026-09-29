@@ -1,7 +1,7 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.actions.DrawCard;
@@ -20,9 +20,11 @@ import utilities.Group;
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
-import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.*;
+import static games.coltexpress.cards.RoundCard.TurnType.DoubleTurn;
 
-public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
+public class ColtExpressForwardModel extends StandardForwardModel {
 
     @Override
     public void _setup(AbstractGameState firstState) {
@@ -38,6 +40,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers(), VisibilityMode.TOP_VISIBLE_TO_ALL);
 
         setupRounds(cegs, cep);
+        initTurn(cegs, cegs.rounds.get(0), 0);
         setupTrain(cegs);
         cegs.playerCharacters = new LinkedHashMap<>();
 
@@ -119,14 +122,137 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
-        ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) cegs.getTurnOrder();
 
         IGamePhase gamePhase = cegs.getGamePhase();
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
             System.out.println("character drafting is not implemented yet");
             throw new UnsupportedOperationException("not implemented yet");
         }
-        ceto.endPlayerTurn(gameState);
+        endTurn(cegs);
+    }
+
+    /**
+     * Every action ends the current turn. We then move on to the next player: when planning, this depends on the
+     * type of the current turn on the round card; when executing, it is the player who planned the next action.
+     * Once all the planned actions have been executed, the round is over.
+     */
+    private void endTurn(ColtExpressGameState cegs) {
+        if (cegs.getGameStatus() != GAME_ONGOING) return;
+        // This publishes the end of the current turn; who plays next is decided below
+        endPlayerTurn(cegs, cegs.getTurnOwner());
+
+        if (cegs.getGamePhase() == ExecuteActions) {
+            if (cegs.plannedActions.getSize() == 0) {
+                endRoundCard(cegs);
+                endRound(cegs);
+                ColtExpressParameters cep = (ColtExpressParameters) cegs.getGameParameters();
+                if (cegs.getRoundCounter() == cep.nMaxRounds)
+                    endGame(cegs);
+                cegs.distributeCards();
+                return;
+            }
+        } else {
+            // Planning Actions
+            cegs.subTurnCounter++;
+            int turnsInRound = cegs.currentTurnType == DoubleTurn ? cegs.getNPlayers() * 2 : cegs.getNPlayers();
+            if (cegs.subTurnCounter % turnsInRound == 0) {
+                cegs.fullPlayerTurnCounter++;
+                cegs.subTurnCounter = 0;
+                RoundCard currentRoundCard = cegs.getRounds().get(cegs.getRoundCounter());
+                if (cegs.fullPlayerTurnCounter < currentRoundCard.getTurnTypes().length) {
+                    initTurn(cegs, currentRoundCard, cegs.fullPlayerTurnCounter);
+                    return;
+                } else {
+                    // All turns in this round played, execute the actions
+                    cegs.setGamePhase(ExecuteActions);
+                }
+            }
+        }
+        cegs.setTurnOwner(nextPlayer(cegs));
+    }
+
+    /**
+     * Initializes current turn type and direction of play.
+     *
+     * @param round - round card.
+     * @param turn  - turn index (of turn type array in round card).
+     */
+    private void initTurn(ColtExpressGameState cegs, RoundCard round, int turn) {
+        cegs.currentTurnType = round.getTurnTypes()[turn];
+        cegs.setFirstPlayer(cegs.firstPlayerOfRound);
+        cegs.firstAction = true;
+        switch (cegs.currentTurnType) {
+            case NormalTurn:
+            case DoubleTurn:
+            case HiddenTurn:
+                cegs.direction = 1;
+                break;
+            case ReverseTurn:
+                cegs.direction = -1;
+                break;
+            default:
+                throw new IllegalArgumentException("unknown turn type " + cegs.currentTurnType);
+        }
+    }
+
+    private int nextPlayer(ColtExpressGameState cegs) {
+        int nPlayers = cegs.getNPlayers();
+        int turnOwner = cegs.getTurnOwner();
+        if (cegs.getGamePhase() == DraftCharacter) {
+            // Return next player
+            return (nPlayers + turnOwner + cegs.direction) % nPlayers;
+        } else if (cegs.getGamePhase() == ExecuteActions) {
+            // Return ID of player on the next card in the planned actions deck
+            if (cegs.plannedActions.getSize() > 0) {
+                int idx = cegs.plannedActions.getSize() - 1;
+                int id = cegs.plannedActions.get(idx).playerID;
+
+                // ID could be -1 if bullets introduced in the deck (e.g. by GS copy with PO), try to find the next one
+                // and remove the illegal card from the deck
+                while (id == -1 && idx > 0) {
+                    cegs.plannedActions.remove(idx);
+                    idx--;
+                    id = cegs.plannedActions.get(idx).playerID;
+                    if (id != -1) return id;
+                }
+                return id;
+            }
+            // Return next player if no cards in deck
+            return (nPlayers + turnOwner + cegs.direction) % nPlayers;
+        } else {
+            // Return next player in the round, double up if a double turn
+            if (cegs.currentTurnType == DoubleTurn) {
+                if (cegs.firstAction) {
+                    cegs.firstAction = false;
+                    return turnOwner;
+                }
+            }
+
+            cegs.firstAction = true;
+            return (nPlayers + turnOwner + cegs.direction) % nPlayers;
+        }
+    }
+
+    /**
+     * Ends the round card with the corresponding end event, and sets up for the next round (if there is one; if not,
+     * the game ends once the round is over).
+     */
+    private void endRoundCard(ColtExpressGameState cegs) {
+        int roundCounter = cegs.getRoundCounter();
+        // End card event
+        cegs.getRounds().get(roundCounter).endRoundCardEvent(cegs);
+        // Move to next round
+        int nextRound = roundCounter + 1;
+        if (nextRound < cegs.getRounds().getSize()) {
+            cegs.firstPlayerOfRound = (cegs.firstPlayerOfRound + 1) % cegs.getNPlayers();
+            cegs.subTurnCounter = 0;
+            cegs.fullPlayerTurnCounter = 0;
+            initTurn(cegs, cegs.getRounds().get(nextRound), 0);
+            cegs.setGamePhase(PlanActions);
+            boolean[] allTrue = new boolean[cegs.getNPlayers()];
+            Arrays.fill(allTrue, true);
+            cegs.rounds.setVisibilityOfComponent(nextRound, allTrue);
+        }
     }
 
     @Override
@@ -169,7 +295,6 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
         ColtExpressParameters cep = (ColtExpressParameters) cegs.getGameParameters();
-        ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) cegs.getTurnOrder();
         int player = cegs.getCurrentPlayer();
 
         HashSet<ColtExpressCard.CardType> types = new LinkedHashSet<>();
@@ -185,8 +310,8 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
                 continue;
 
             // Ghost can play a card hidden during the first turn of a round, otherwise hidden if turn is hidden
-            boolean hidden = ceto.isHiddenTurn() ||
-                    (cegs.playerCharacters.get(player) == CharacterType.Ghost && ceto.getFullPlayerTurnCounter() == 0);
+            boolean hidden = cegs.isHiddenTurn() ||
+                    (cegs.playerCharacters.get(player) == CharacterType.Ghost && cegs.getFullPlayerTurnCounter() == 0);
 
             // Add action
             actions.add(new SchemeAction(fromID, toID, i, hidden));

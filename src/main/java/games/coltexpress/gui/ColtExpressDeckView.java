@@ -5,7 +5,6 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressTurnOrder;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.actions.roundcardevents.*;
 import games.coltexpress.cards.ColtExpressCard;
@@ -163,8 +162,8 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     int offset = (rect.width-(int)(roundCardWidth*scale)) / deck.getSize();
                     Rectangle r = new Rectangle(rect.x + offset * i, rect.y, (int)(roundCardWidth*scale), (int)(roundCardHeight*scale));
                     rects[i] = r;
-                    boolean visible = cegs.getTurnOrder().getRoundCounter() >= i;
-                    boolean current = cegs.getTurnOrder().getRoundCounter() == i;
+                    boolean visible = cegs.getRoundCounter() >= i;
+                    boolean current = cegs.getRoundCounter() == i;
                     drawRoundCard(g, (RoundCard) deck.get(i), r, visible, current);
                 }
 
@@ -191,8 +190,8 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     // Round card
                     int offset = (rect.width-(int)(roundCardWidth*scale)) / deck.getSize();
                     Rectangle r = new Rectangle(rect.x + offset * cardHighlight, rect.y, (int)(roundCardWidth*scale), (int)(roundCardHeight*scale));
-                    boolean visible = cegs.getTurnOrder().getRoundCounter() >= cardHighlight;
-                    boolean current = cegs.getTurnOrder().getRoundCounter() == cardHighlight;
+                    boolean visible = cegs.getRoundCounter() >= cardHighlight;
+                    boolean current = cegs.getRoundCounter() == cardHighlight;
                     drawRoundCard(g, (RoundCard) deck.get(cardHighlight), r, visible, current);
                 }
             }
@@ -293,7 +292,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                 int roundWidth = (int) (roundImg.getWidth(null) * scaleW * 1.2);
                 g.drawImage(roundImg, x, r.y + r.height / 3, roundWidth, roundHeight, null);
                 // Highlight current turn in current round
-                if (currentRound && ((ColtExpressTurnOrder)cegs.getTurnOrder()).getFullPlayerTurnCounter() == i) {
+                if (currentRound && cegs.getFullPlayerTurnCounter() == i) {
                     g.setColor(Color.green);
                     Stroke s = g.getStroke();
                     g.setStroke(new BasicStroke(3));
