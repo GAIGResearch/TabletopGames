@@ -217,14 +217,13 @@ public class ShowMap {
         if (quest.monsterTraits.contains("All")) {
             openGroups.add(new JLabel("All Monsters Legal"));
         }
-        for (String monster : GenerateBoards.monsters.keySet()) {
-            String[] monsterTraits = ((PropertyStringArray) GenerateBoards.monsters.get(monster).get("super").getProperty("traits")).getValues();
-            for (String mTrait : monsterTraits) {
-                if (quest.monsterTraits.contains(mTrait)) {
-                    JLabel m = new JLabel(monster);
-                    openGroups.add(m);
-                    break;
-                }
+        else if (co.openGroups.isEmpty()) {
+            openGroups.add(new JLabel("No Legal Open Groups"));
+        }
+        else {
+            for (String monster : co.openGroups.get(id)) {
+                JLabel m = new JLabel(monster);
+                openGroups.add(m);
             }
         }
 

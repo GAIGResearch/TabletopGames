@@ -46,6 +46,7 @@ public class CreateOffspring {
     public HashMap<Integer, Map<Integer, GridBoard>> boardTiles = new HashMap<>();
     public HashMap<Integer, int[][]> tileRefs = new HashMap<>();
     public HashMap<Integer, Map<String, Map<Vector2D, Vector2D>>> gridRefs = new HashMap<>();
+    public HashMap<Integer, Set<String>> openGroups = new HashMap<>();
 
     public List<PCGBoard> feasible = new ArrayList<>();
     public List<PCGBoard> infeasible = new ArrayList<>();
@@ -427,6 +428,16 @@ public class CreateOffspring {
         mutateXP(offspring);
         mutateTraits(offspring);
 
+        Set<String> openGroupOptions = new HashSet<>();
+        if (offspring.monsterTraits.contains("All")) {
+            openGroupOptions.add("All");
+        }
+        else {
+            for (String monster : GenerateBoards.monsters.keySet()) {
+                addMonsterWithTrait(monster, openGroupOptions, offspring.monsterTraits);
+            }
+        }
+
         // --- BOARD MUTATIONS ---
 
         List<PCGNode> finalNodes = new ArrayList<>();
@@ -541,13 +552,29 @@ public class CreateOffspring {
 
         // Force a mutation if the group sizes are now too big or too small
         boolean forceMutate = (finalMonsters.size() < GROUP_MIN) || (finalMonsters.size() > GROUP_MAX);
+        // Or if we're trying to ask for more Open Groups than we can legally spawn
+        if(!forceMutate) {
+            if (!openGroupOptions.contains("All")) {
+                int openGroups = 0;
+                for (String[] monster : finalMonsters) {
+                    if (monster[0].contains("Open"))
+                        openGroups++;
+                    else
+                        openGroupOptions.remove(monster[0].split(":")[0]);
+                }
+                if (openGroups > openGroupOptions.size()) {
+                    forceMutate = true;
+                }
+            }
+        }
+
         // Or if we roll for it
         if (!forceMutate)
             if (mutate() < MONSTER_MUTATE)
                 forceMutate = true;
 
         while (forceMutate) {
-            forceMutate = mutateMonsters(finalMonsters);
+            forceMutate = mutateMonsters(finalMonsters, openGroupOptions, offspring.monsterTraits);
         }
 
         offspring.monsters = finalMonsters;
@@ -564,7 +591,8 @@ public class CreateOffspring {
             }
         }
 
-        HashMap<String, Float> scores = fitfunc.getFitness(this, offspring);
+        HashMap<String, Float> scores = fitfunc.getFitness(this, offspring, openGroupOptions);
+        openGroups.put(nowServing, openGroupOptions);
 
         boolean feasible = scores.get("Feasible") > 0f;
 
@@ -748,7 +776,7 @@ public class CreateOffspring {
         return "Open:group";
     }
 
-    boolean mutateMonsters(HashSet<String[]> monsters) {
+    boolean mutateMonsters(HashSet<String[]> monsters, Set<String> openGroups, HashSet<String> traits) {
         int mutate = mutate();
 
         int size = monsters.size();
@@ -775,11 +803,15 @@ public class CreateOffspring {
             }
             String[] newMonster = {getRandomMonster(currentMonsters), null};
             monsters.add(newMonster);
+            openGroups.remove(newMonster[0].split(":")[0]);
         }
         // Remove a Monster from the groups
         else if (remove) {
             String[] result = (String[]) monsters.toArray()[Random.randInt(monsters.size())];
             monsters.remove(result);
+            String name = result[0].split(":")[0];
+            if (!name.contains("Open"))
+                addMonsterWithTrait(name, openGroups, traits);
         }
         // Replace a Monster from the groups
         else {
@@ -789,12 +821,31 @@ public class CreateOffspring {
             }
             String[] result = (String[]) monsters.toArray()[Random.randInt(monsters.size())];
             monsters.remove(result);
+            String name = result[0].split(":")[0];
+            if (!name.contains("Open"))
+                addMonsterWithTrait(name, openGroups, traits);
             result[0] = getRandomMonster(currentMonsters);
             monsters.add(result);
+            openGroups.remove(result[0].split(":")[0]);
         }
 
         // We want to be within the boundaries - if we fall outside of it, return true - and redo the mutations
-        return monsters.size() < GROUP_MIN || monsters.size() > GROUP_MAX;
+        if (monsters.size() < GROUP_MIN || monsters.size() > GROUP_MAX)
+            return true;
+
+       if (openGroups.contains("All"))
+           return false;
+
+       // And make sure we're not spawning too many Open Groups
+       int openCount = 0;
+       for (String[] monster : monsters) {
+           if (monster[0].contains("Open"))
+               openCount++;
+           else
+               openGroups.remove(monster[0].split(":")[0]);
+       }
+
+        return openCount > openGroups.size();
     }
 
     boolean mutatePositions(PCGBoard quest, HashSet<String> nodes) {
@@ -1089,6 +1140,17 @@ public class CreateOffspring {
 
     public boolean isBoardSaved(int id) {
         return savedBoards.contains(id);
+    }
+
+    void addMonsterWithTrait(String monster, Set<String> openGroupOptions, HashSet<String> traits) {
+        if (!GenerateBoards.monsters.containsKey(monster))
+            return;
+        for (String mTrait : ((PropertyStringArray) GenerateBoards.monsters.get(monster).get("super").getProperty("traits")).getValues()) {
+            if (traits.contains(mTrait)) {
+                openGroupOptions.add(monster);
+                return;
+            }
+        }
     }
 
     List<BoardNode> crossoverMutate(List<BoardNode> crossoverNodes, List<BoardNode> baseNodes) {

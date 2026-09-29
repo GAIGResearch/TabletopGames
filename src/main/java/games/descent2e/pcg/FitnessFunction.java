@@ -2,16 +2,13 @@ package games.descent2e.pcg;
 
 import core.components.BoardNode;
 import core.components.Component;
-import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.properties.PropertyInt;
 import core.properties.PropertyIntArray;
 import core.properties.PropertyString;
-import core.properties.PropertyStringArray;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
-import games.descent2e.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -21,7 +18,6 @@ import java.util.*;
 import java.util.List;
 
 import static core.CoreConstants.*;
-import static games.descent2e.DescentConstants.connectionHash;
 import static games.descent2e.pcg.ControlVariables.*;
 import static utilities.Utils.getNeighbourhood;
 
@@ -217,9 +213,11 @@ public class FitnessFunction {
             if (monsterTile == null || !allNodes.contains(monsterTile))
                 return false;
 
+            boolean isOpen = monsterName.contains("Open");
+
             // Lieutenants can be placed anywhere that Heroes can
-            boolean dragon = monsterName.contains("Open") && !monsterName.contains("OpenSmall") && dragonOpen;
-            boolean barghest = monsterName.contains("Open") && barghestOpen;
+            boolean dragon = isOpen && !monsterName.contains("OpenSmall") && dragonOpen;
+            boolean barghest = isOpen && barghestOpen;
 
             if (!monsterName.contains("lieutenant")) {
                 if(illegalMonsterSpawns.contains(monsterTile.split("-")[0]))
@@ -249,7 +247,7 @@ public class FitnessFunction {
                         mon = GenerateBoards.monsters.get("Barghest").get("super");
                     else if (monsterName.contains("OpenSmall"))
                         mon = GenerateBoards.monsters.get("Goblin Archer").get("super");
-                    else if (monsterName.contains("Open"))
+                    else if (isOpen)
                         mon = GenerateBoards.monsters.get("Ettin").get("super");
                     else
                         mon = GenerateBoards.monsters.get(monsterName.split(":")[0]).get("super");
@@ -286,11 +284,19 @@ public class FitnessFunction {
         return size;
     }
 
-    private boolean noRepeats(PCGBoard quest) {
+    private boolean noRepeats(PCGBoard quest, Set<String> openGroups) {
+        // Make sure we're not trying to include more Open Groups than we have capacity for
+        int allowedOpenGroups = openGroups.isEmpty() ? 0 : openGroups.contains("All") ? Integer.MAX_VALUE : openGroups.size();
+
         List<String> monsters = new ArrayList<>();
         for (String[] monster : quest.monsters) {
             String name = monster[0].split(":")[0];
-            if (name.contains("Open")) continue;
+            if (name.contains("Open")) {
+                if (allowedOpenGroups <= 0)
+                    return true;
+                allowedOpenGroups--;
+                continue;
+            }
             if (monsters.contains(name)) return true;
             monsters.add(name);
         }
@@ -390,7 +396,7 @@ public class FitnessFunction {
         return new Pair<>(monsterHealth, totalMonsters);
     }
 
-    HashMap<String, Float> getFitness(CreateOffspring co, PCGBoard quest) throws InterruptedException, InvocationTargetException {
+    HashMap<String, Float> getFitness(CreateOffspring co, PCGBoard quest, Set<String> openGroups) throws InterruptedException, InvocationTargetException {
         HashMap<String, Float> scores = new HashMap<>();
 
         List<PCGNode> board = quest.board;
@@ -432,7 +438,7 @@ public class FitnessFunction {
         }
         // Monster Group Repeats
         // Inverse Boolean = Score 1 if no repeats, 0 if repeats found
-        float repeats = noRepeats(quest) ? 0f : 1f;
+        float repeats = noRepeats(quest, openGroups) ? 0f : 1f;
 
         // Legal Spawning
         // Boolean = Score 1 if all legal, 0 if conflict
