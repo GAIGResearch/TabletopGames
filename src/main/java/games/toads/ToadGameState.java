@@ -120,7 +120,6 @@ public class ToadGameState extends AbstractGameState {
         }
         copy.attacker = attacker;
         // Hidden information (the opponent's deck, hand and choices this Battle) is dealt with in redeterminise(),
-        // which the superclass calls on the copy when appropriate.
         return copy;
     }
 
@@ -128,9 +127,8 @@ public class ToadGameState extends AbstractGameState {
     public void redeterminise(int playerId) {
         int opponent = 1 - playerId;
         // The Attacker's hidden card and both the Defender's cards are chosen at once, so undo any of these choices
-        // the opponent has already made. Our own we keep: getPlayersStillToPlay() decides who still has to choose
-        // from them, so losing our own here would have us asked to choose a second time.
-        // Modelling what the opponent chose is the responsibility of the deciding agent.
+        // the opponent has already made.  We do not change the cards we played.
+        // It is the responsibility of the deciding agent to model the opponent's simukltaneous choice.
         if (getGamePhase() == PLAY && attacker != -1 && !isActionInProgress()) {
             if (opponent == attacker) {
                 // a hidden card stays in the hand until it is revealed
@@ -160,25 +158,8 @@ public class ToadGameState extends AbstractGameState {
 
         // Both players still to choose do so at once, so each of them sees themselves as the current player.
         // This is what the 2-argument computeAvailableActions() reads.
-        if (getPlayersStillToPlay().contains(playerId))
+        if (getCurrentSimultaneousPlayers().contains(playerId))
             setTurnOwner(playerId);
-    }
-
-    /**
-     * A Battle has two steps. First the Attacker plays their face-up card. Then, at the same time, the Attacker
-     * chooses their hidden card and the Defender chooses both their face-up and their hidden card.
-     * This returns the players still to choose in that second step, and is empty at any other time.
-     */
-    public List<Integer> getPlayersStillToPlay() {
-        List<Integer> retValue = new ArrayList<>(2);
-        if (getGamePhase() == PLAY && attacker != -1 && !isActionInProgress()) {
-            for (int p = 0; p < getNPlayers(); p++) {
-                boolean done = p == attacker ? hiddenFlankCards[p] != null : fieldCards[p] != null;
-                if (!done)
-                    retValue.add(p);
-            }
-        }
-        return retValue;
     }
 
     @Override
@@ -186,13 +167,13 @@ public class ToadGameState extends AbstractGameState {
         if (isActionInProgress() || !isNotTerminal() || getGamePhase() != PLAY || attacker == -1) {
             return super.getCurrentSimultaneousPlayers();
         }
-        List<Integer> toPlay = getPlayersStillToPlay();
-        if (toPlay.isEmpty()) {
-            // both players have chosen, so the forward model should already have resolved the Battle.
-            // Say so loudly rather than return nobody.
-            throw new AssertionError("Both players have played their cards but the Battle has not been resolved");
+        List<Integer> retValue = new ArrayList<>(2);
+        for (int p = 0; p < getNPlayers(); p++) {
+            boolean done = p == attacker ? hiddenFlankCards[p] != null : fieldCards[p] != null;
+            if (!done)
+                retValue.add(p);
         }
-        return toPlay;
+        return retValue;
     }
 
     /**
@@ -237,21 +218,26 @@ public class ToadGameState extends AbstractGameState {
     public ToadCard getTieBreaker(int playerId) {
         return tieBreakers[playerId];
     }
+
     public int getBattlesWon(int round, int playerId) {
         return battlesWon[round][playerId];
     }
+
     public int getBattlesTied(int round) {
         return battlesTied[round];
     }
+
     /**
      * The Flags a player has in the Shrine in the given War (round).
      */
     public int getShrineFlags(int round, int playerId) {
         return shrineFlags[round][playerId];
     }
+
     public int getScoreInBattle(int battle, int playerId) {
         return roundWinners[battle][playerId];
     }
+
     /**
      * The number of Battles fought so far in the game (both Wars).
      */

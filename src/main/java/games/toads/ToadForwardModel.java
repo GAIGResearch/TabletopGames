@@ -77,10 +77,6 @@ public class ToadForwardModel extends StandardForwardModel {
         return _computeAvailableActions(gameState, gameState.getCurrentPlayer());
     }
 
-    /**
-     * Gets the possible actions for the given player, who need not be the turn owner: in the second step of a
-     * Battle both players choose at once (see ToadGameState.getPlayersStillToPlay).
-     */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int player) {
         ToadGameState state = (ToadGameState) gameState;
@@ -180,11 +176,11 @@ public class ToadForwardModel extends StandardForwardModel {
         // SimultaneousAction, and both reach the same state.
         if (action instanceof PlayFieldCard pfc)
             state.attacker = pfc.playerId;
-        List<Integer> stillToPlay = state.getPlayersStillToPlay();
+        List<Integer> stillToPlay = state.getCurrentSimultaneousPlayers();
         if (!stillToPlay.isEmpty()) {
             // the Attacker keeps the turn after their face-up card; otherwise it passes to whoever is still to choose
             if (!stillToPlay.contains(currentPlayer))
-                state.setTurnOwner(stillToPlay.get(0));
+                state.setTurnOwner(stillToPlay.getFirst());
             return;
         }
         resolveBattle(state);
@@ -250,7 +246,7 @@ public class ToadForwardModel extends StandardForwardModel {
             afterBattle(state);
         } else {
             state.setGamePhase(POST_BATTLE);
-            // they are listed in the order they resolved, and the first must be on top of the stack
+            // they are listed in the order they resolved. The first must be on top of the stack
             List<IExtendedSequence> postBattleActions = battle.getPostBattleActions();
             for (int i = postBattleActions.size() - 1; i >= 0; i--) {
                 state.setActionInProgress(postBattleActions.get(i));

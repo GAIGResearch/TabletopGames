@@ -242,7 +242,7 @@ public class ToadGUIManager extends AbstractGUIManager {
                 if (state.getFieldCard(attacker) == null)
                     yield "Player " + attacker + " plays a face-up card";
                 List<String> choosing = new ArrayList<>();
-                for (int p : state.getPlayersStillToPlay())
+                for (int p : state.getCurrentSimultaneousPlayers())
                     choosing.add("Player " + p + (p == attacker ? " plays a hidden card" : " plays a face-up and a hidden card"));
                 yield String.join("; ", choosing);
             }
