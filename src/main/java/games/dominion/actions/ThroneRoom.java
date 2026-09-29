@@ -75,9 +75,6 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
         }
         if (enthronedCard == da.type) {
             executionCount++;
-            // An enthroned card that continues as a sequence (e.g. Militia, or another Throne Room) is still in
-            // progress here. The second play is offered once it has completed, as this is then back on top of the stack.
-            skipPointlessSecondThroneRoom(state);
         } else
             throw new AssertionError("Enthrone action should be the same as the one selected");
         if (executionCount > 2) {
@@ -86,21 +83,12 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
-        // An enthroned Throne Room has finished, so the cards left in hand are known
-        skipPointlessSecondThroneRoom(state);
-    }
-
-    private void skipPointlessSecondThroneRoom(AbstractGameState state) {
-        // Playing an enthroned Throne Room again with no action cards in hand does nothing, so skip that decision
-        if (executionCount == 1 && enthronedCard == CardType.THRONE_ROOM &&
-                ((DominionGameState) state).getDeck(DeckType.HAND, player).stream().noneMatch(DominionCard::isActionCard))
-            executionCount = 2;
-    }
-
-    @Override
     public boolean executionComplete(AbstractGameState state) {
-        return executionCount == 2;
+        if (executionCount == 2) return true;
+        // Playing an enthroned Throne Room again with no action cards in hand does nothing, so we are done.
+        // This is only checked once we are back on top of the stack, i.e. once an enthroned sequence has completed.
+        return executionCount == 1 && enthronedCard == CardType.THRONE_ROOM &&
+                ((DominionGameState) state).getDeck(DeckType.HAND, player).stream().noneMatch(DominionCard::isActionCard);
     }
 
     @Override

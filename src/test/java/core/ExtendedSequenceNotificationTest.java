@@ -56,7 +56,6 @@ public class ExtendedSequenceNotificationTest {
 
         assertEquals(List.of(childDecision), child.told);
         assertEquals(List.of(child), owner.told);
-        assertEquals(List.of(child), owner.removedAbove);
         assertSame(owner, state.currentActionInProgress());
     }
 
@@ -95,7 +94,6 @@ public class ExtendedSequenceNotificationTest {
         fm.next(state, decision);  // completes second, which is removed; first is then on top
         assertEquals(List.of(decision), second.told);
         assertTrue(first.told.isEmpty());
-        assertEquals(List.of(second), first.removedAbove);
         assertSame(first, state.currentActionInProgress());
 
         fm.next(state, new DoNothing());  // completes first
@@ -109,7 +107,6 @@ public class ExtendedSequenceNotificationTest {
     static class Owner implements IExtendedSequence {
         final int decisions;
         final List<AbstractAction> told = new ArrayList<>();
-        final List<IExtendedSequence> removedAbove = new ArrayList<>();
 
         Owner(int decisions) {
             this.decisions = decisions;
@@ -128,11 +125,6 @@ public class ExtendedSequenceNotificationTest {
         @Override
         public void _afterAction(AbstractGameState state, AbstractAction action) {
             told.add(action);
-        }
-
-        @Override
-        public void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
-            removedAbove.add(completedSequence);
         }
 
         @Override

@@ -15,7 +15,7 @@ import java.util.List;
  * These are the three normal responsibilities of ForwardModel.
  *
  * IExtendedSequence is also responsible for tracking all local state necessary for its set of actions, and marking
- * itself as complete. (ForwardModel will then detect this, and remove it from the Stack of open actions.)
+ * itself as complete. (ForwardModel will then detect this and remove it from the Stack of open actions.)
  * This means that - unlike ForwardModel - IExtendedSequence is not stateless, and hence must implement a copy() method.
  * Effectively an IExtendedSequence also incorporates a mini-GameState that tracks game progress within the sequence.
  *
@@ -52,8 +52,8 @@ import java.util.List;
  *
  * A sequence may therefore be complete while another sequence is still above it on the stack (for example, when the
  * second play of a card is itself an extended sequence). It is removed from the stack once everything above it has
- * completed. A sequence that needs to know when a sequence above it has completed (e.g. to decide what to offer next)
- * should override afterRemovalFromQueue().
+ * completed. Only the top of the stack is checked, so a sequence that needs to wait for those above it (e.g. to decide
+ * what to offer next) can check the state in executionComplete().
  */
 public interface IExtendedSequence {
 
@@ -125,19 +125,6 @@ public interface IExtendedSequence {
      * @param action The action that has just been taken
      */
     void _afterAction(AbstractGameState state, AbstractAction action);
-
-    /**
-     * This is called whenever the IExtendedSequence is moved to the top of the queue.
-     * It is given the sequence that was just removed, so that any clean up can take place. This is often a sequence
-     * started by one of this sequence's decisions, but it may have been started elsewhere, or be one of several started
-     * by the same action.
-     *
-     * It is not a decision: _afterAction() was called for the decision when it was executed.
-     * @param state
-     * @param completedSequence
-     */
-    default void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
-    }
 
     /**
      * Return true if this extended sequence has now completed and there is nothing left to do.
