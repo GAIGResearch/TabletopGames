@@ -31,7 +31,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         //       System.out.println("Game " + cegs.getGameID() + ", seed: " + cep.getRandomSeed() + ", rnd: " + cegs.getRnd().nextInt(10000));
 
         cegs.bulletsLeft = new int[cegs.getNPlayers()];
-        cegs.playerCharacters = new HashMap<>();
+        cegs.playerCharacters = new LinkedHashMap<>();
         cegs.playerPlayingBelle = -1;
         cegs.plannedActions = null;
         cegs.trainCompartments = new LinkedList<>();
@@ -39,9 +39,9 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
         setupRounds(cegs, cep);
         setupTrain(cegs);
-        cegs.playerCharacters = new HashMap<>();
+        cegs.playerCharacters = new LinkedHashMap<>();
 
-        HashSet<CharacterType> characters = new HashSet<>();
+        HashSet<CharacterType> characters = new LinkedHashSet<>();
         Collections.addAll(characters, CharacterType.values());
 
         cegs.playerDecks = new ArrayList<>(cegs.getNPlayers());
@@ -172,7 +172,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) cegs.getTurnOrder();
         int player = cegs.getCurrentPlayer();
 
-        HashSet<ColtExpressCard.CardType> types = new HashSet<>();
+        HashSet<ColtExpressCard.CardType> types = new LinkedHashSet<>();
 
         Deck<ColtExpressCard> playerHand = cegs.playerHandCards.get(player);
         int fromID = playerHand.getComponentID();
@@ -266,7 +266,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
                         else if (compartment.playersInsideCompartment.contains(player))
                             availableLoot = compartment.lootInside;
                         if (availableLoot != null && availableLoot.getSize() > 0) {
-                            HashSet<LootType> lootTypes = new HashSet<>();
+                            HashSet<LootType> lootTypes = new LinkedHashSet<>();
                             for (Loot loot : availableLoot.getComponents()) {
                                 lootTypes.add(loot.getLootType());
                             }
@@ -334,7 +334,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
-        Set<Integer> availableTargets = new HashSet<>();
+        Set<Integer> availableTargets = new LinkedHashSet<>();
 
         for (int i = 0; i < cegs.trainCompartments.size(); i++) {
             Compartment compartment = cegs.trainCompartments.get(i);
@@ -379,7 +379,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
                     if (availableLoot.getSize() > 0) {
                         // Punch and make them drop random loot of type
-                        HashSet<LootType> lootTypes = new HashSet<>();
+                        HashSet<LootType> lootTypes = new LinkedHashSet<>();
                         for (Loot loot : availableLoot.getComponents()) {
                             lootTypes.add(loot.getLootType());
                         }
@@ -428,7 +428,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         if (playerCompartment != null) {
 
             int sourceCompID = playerCompartment.getComponentID();
-            HashMap<Integer, Compartment> targets = new HashMap<>();
+            HashMap<Integer, Compartment> targets = new LinkedHashMap<>();
 
             if (playerOnTop) {
                 //shots in rear direction

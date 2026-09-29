@@ -90,7 +90,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
         // These are always visible
         copy.bulletsLeft = bulletsLeft.clone();
-        copy.playerCharacters = new HashMap<>(playerCharacters);
+        copy.playerCharacters = new LinkedHashMap<>(playerCharacters);
         copy.playerPlayingBelle = playerPlayingBelle;
 
         // These are modified in PO
@@ -169,7 +169,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
 
             // First we add in the actions that are visible at the right index position
             // cardReplacements stores the cards that we have used so far, to avoid inserting the same card twice
-            HashMap<Integer, ArrayList<Integer>> cardReplacements = new HashMap<>();
+            HashMap<Integer, ArrayList<Integer>> cardReplacements = new LinkedHashMap<>();
             for (int i = 0; i < plannedActions.getSize(); i++) {
                 if (!plannedActions.isComponentVisible(i, playerId)) {
                     int p = plannedActions.get(i).playerID;
