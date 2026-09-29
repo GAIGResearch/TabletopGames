@@ -423,6 +423,10 @@ public class CreateOffspring {
             tilesUsed.add(tile.name);
         }
 
+        mutateAct(offspring);
+        mutateXP(offspring);
+        mutateTraits(offspring);
+
         // --- BOARD MUTATIONS ---
 
         List<PCGNode> finalNodes = new ArrayList<>();
@@ -559,10 +563,6 @@ public class CreateOffspring {
                 break; // If we can't get a valid spawn set after 20 attempts, give up; this board is infeasible anyway
             }
         }
-
-        mutateAct(offspring);
-        mutateXP(offspring);
-        mutateTraits(offspring);
 
         HashMap<String, Float> scores = fitfunc.getFitness(this, offspring);
 
@@ -1771,7 +1771,7 @@ public class CreateOffspring {
                 if (node.name.equals(first[0])) {
                     for (Connection connection : node.connects) {
                         if (connection.toString().equals(first[1])) {
-                            node.neighbours.put(connection, second[0]);
+                            node.addNeighbour(connection, second[0]);
                             break;
                         }
                     }
@@ -1779,7 +1779,7 @@ public class CreateOffspring {
                 if (node.name.equals(second[0])) {
                     for (Connection connection : node.connects) {
                         if (connection.toString().equals(second[1])) {
-                            node.neighbours.put(connection, first[0]);
+                            node.addNeighbour(connection, first[0]);
                             break;
                         }
                     }
@@ -1961,7 +1961,6 @@ public class CreateOffspring {
                 nodeCount++;
 
                 List<Connection> connections = node.connects;
-                HashMap<Connection, String> neighbours = node.neighbours;
 
                 outputB.append("{ \"name\": [\"String\", \"").append(node.name).append("\"],");
                 outputB.append("\"orientation\": [\"Integer\", ").append(node.orientation).append("],");
@@ -1980,7 +1979,7 @@ public class CreateOffspring {
                     neighbourCount++;
                     neighbourString.append("\"").append(node.neighbours.get(c)).append("\"");
                     connectionString.append("\"").append(connect).append("\"");
-                    if (neighbourCount < node.neighbours.size()) {
+                    if (neighbourCount < connections.size()) {
                         neighbourString.append(", ");
                         connectionString.append(", ");
                     }

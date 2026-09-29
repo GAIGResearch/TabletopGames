@@ -417,6 +417,18 @@ public class FitnessFunction {
             // Remove the top/bottom and left/right buffer in our calculations
             height = result.a.length - 2;
             width = result.a[0].length - 2;
+
+            // Now we check to make sure that all the tiles can connect properly, for looking for any exposed Open tiles from earlier
+            // This is not a Pac-Man maze - pieces cannot warp between tiles that claim they're connected but are physically impossible to be next to each other
+            for(int[] row : result.a) {
+                if (geometry == 0f) break;
+                for (int column : row) {
+                    if (column < 0) {
+                        geometry = 0f;
+                        break;
+                    }
+                }
+            }
         }
         // Monster Group Repeats
         // Inverse Boolean = Score 1 if no repeats, 0 if repeats found
@@ -617,15 +629,17 @@ public class FitnessFunction {
                 System.arraycopy(tileReferences[i + bounds.y], bounds.x, trimTileRef[i], 0, bounds.width);
             }
             int sizeCounter = 0;
-            for (int i = 0; i < trimTileRef.length; i++) {
-                for (int j = 0; j < trimTileRef[i].length; j++) {
-                    if (trimTileRef[i][j] != 0)
+
+            GridBoard finalBoard = new GridBoard(trimBoard);
+            tileReferences = trimTileRef;
+
+            for (int[] i : tileReferences) {
+                for (int j : i) {
+                    if (j > 0)
                         sizeCounter++;
                 }
             }
 
-            GridBoard finalBoard = new GridBoard(trimBoard);
-            tileReferences = trimTileRef;
             for (Map.Entry<String, Map<Vector2D, Vector2D>> e : gridReferences.entrySet()) {
                 for (Vector2D v : e.getValue().keySet()) {
                     v.subtract(bounds.x, bounds.y);
@@ -671,7 +685,16 @@ public class FitnessFunction {
                     if (tileGrid[i - y][j - x] == null) continue;
                     if (tileGrid[i - y][j - x].getComponentName().equalsIgnoreCase("null")) continue;
                     if (board[i][j] != null && !board[i][j].getComponentName().equalsIgnoreCase("null")) continue;
-                    if (!DescentTypes.TerrainType.isInsideTerrain(tileGrid[i - y][j - x].getComponentName())) continue;
+
+                    // Sometimes, the assembly process will create a board where a tile's neighbours are on the opposite side of the layout
+                    // We mark any Open spaces here, so later, if there are any remaining that weren't covered up, we fail the Geometry check
+                    if (!DescentTypes.TerrainType.isInsideTerrain(tileGrid[i - y][j - x].getComponentName())) {
+                        if(tileGrid[i - y][j - x].getComponentName().equals("open")) {
+                            if(tileReferences[i][j] == 0)
+                                tileReferences[i][j] = -1;
+                        }
+                        continue;
+                    }
 
                     // Set
                     board[i][j] = tileGrid[i - y][j - x].copy();

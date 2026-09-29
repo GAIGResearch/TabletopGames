@@ -105,17 +105,17 @@ public class ShowMap {
         JLabel consistencyWeight = new JLabel(Float.toString(consistency * totalWeightsModifier));
 
         JLabel sizeLabel = new JLabel("Board Size: " + (int) size);
-        JLabel sizeWeight = new JLabel(Float.toString(co.W_SIZE * (1f - (Math.abs(co.IDEAL_SIZE - size) / co.IDEAL_SIZE)) * totalWeightsModifier));
+        JLabel sizeWeight = new JLabel(Float.toString(co.W_SIZE * Math.abs(1f - (Math.abs(co.IDEAL_SIZE - size) / co.IDEAL_SIZE)) * totalWeightsModifier));
         float groups = scores.get("Groups");
         JLabel groupsLabel = new JLabel("Monster Groups: " + (int) groups);
-        JLabel groupsWeight = new JLabel(Float.toString(co.W_GROUPS * (1f - (Math.abs(co.IDEAL_GROUP - groups) / co.IDEAL_GROUP)) * totalWeightsModifier));
+        JLabel groupsWeight = new JLabel(Float.toString(co.W_GROUPS * Math.abs(1f - (Math.abs(co.IDEAL_GROUP - groups) / co.IDEAL_GROUP)) * totalWeightsModifier));
         float health = scores.get("Health");
         JLabel healthLabel = new JLabel("Average Health: " + health + " HP");
-        JLabel healthWeight = new JLabel(Float.toString(co.W_HEALTH * (1f - (Math.abs(co.IDEAL_HEALTH - health) / co.IDEAL_HEALTH)) * totalWeightsModifier));
+        JLabel healthWeight = new JLabel(Float.toString(co.W_HEALTH * Math.abs(1f - (Math.abs(co.IDEAL_HEALTH - health) / co.IDEAL_HEALTH)) * totalWeightsModifier));
         JLabel heightLabel = new JLabel("Board Height: " + (int) height);
-        JLabel heightWeight = new JLabel(Float.toString(co.W_HEIGHT * (1f - (Math.abs(co.IDEAL_HEIGHT - height) / co.IDEAL_HEIGHT)) * totalWeightsModifier));
+        JLabel heightWeight = new JLabel(Float.toString(co.W_HEIGHT * Math.abs(1f - (Math.abs(co.IDEAL_HEIGHT - height) / co.IDEAL_HEIGHT)) * totalWeightsModifier));
         JLabel widthLabel = new JLabel("Board Width: " + (int) width);
-        JLabel widthWeight = new JLabel(Float.toString(co.W_WIDTH * (1f - (Math.abs(co.IDEAL_WIDTH - width) / co.IDEAL_WIDTH)) * totalWeightsModifier));
+        JLabel widthWeight = new JLabel(Float.toString(co.W_WIDTH * Math.abs(1f - (Math.abs(co.IDEAL_WIDTH - width) / co.IDEAL_WIDTH)) * totalWeightsModifier));
 
         fitness.add(connectedLabel);
         fitness.add(connectedWeight);
