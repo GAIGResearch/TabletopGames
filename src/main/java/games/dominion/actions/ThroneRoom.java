@@ -75,9 +75,8 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
         }
         if (enthronedCard == da.type) {
             executionCount++;
-            // If the enthroned card continues as a sequence (e.g. Militia, or another Throne Room), then we are told
-            // about it now, before it has completed. We offer the second play once it has, as we are then back on top
-            // of the stack.
+            // An enthroned card that continues as a sequence (e.g. Militia, or another Throne Room) is still in
+            // progress here. The second play is offered once it has completed, as this is then back on top of the stack.
             skipPointlessSecondThroneRoom(state);
         } else
             throw new AssertionError("Enthrone action should be the same as the one selected");
@@ -88,7 +87,7 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
 
     @Override
     public void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
-        // An enthroned Throne Room has now finished, so we know what is left in hand
+        // An enthroned Throne Room has finished, so the cards left in hand are known
         skipPointlessSecondThroneRoom(state);
     }
 

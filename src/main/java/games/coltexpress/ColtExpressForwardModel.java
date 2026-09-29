@@ -131,17 +131,13 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         endTurn(cegs);
     }
 
-    /**
-     * Every action ends the current turn. We then move on to the next player: when planning, this depends on the
-     * type of the current turn on the round card; when executing, it is the player who planned the next action.
-     * Once all the planned actions have been executed, the round is over.
-     */
     private void endTurn(ColtExpressGameState cegs) {
         if (cegs.getGameStatus() != GAME_ONGOING) return;
-        // This publishes the end of the current turn; who plays next is decided below
+        // The turn owner is set below, once the end of round processing has been done
         endPlayerTurn(cegs, cegs.getTurnOwner());
 
         if (cegs.getGamePhase() == ExecuteActions) {
+            // The round is over once all the planned actions have been executed
             if (cegs.plannedActions.getSize() == 0) {
                 endRoundCard(cegs);
                 endRound(cegs);
@@ -152,7 +148,7 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                 return;
             }
         } else {
-            // Planning Actions
+            // When planning, each turn on the round card is played by every player (twice each in a double turn)
             cegs.subTurnCounter++;
             int turnsInRound = cegs.currentTurnType == DoubleTurn ? cegs.getNPlayers() * 2 : cegs.getNPlayers();
             if (cegs.subTurnCounter % turnsInRound == 0) {
@@ -163,7 +159,7 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                     initTurn(cegs, currentRoundCard, cegs.fullPlayerTurnCounter);
                     return;
                 } else {
-                    // All turns in this round played, execute the actions
+                    // All the turns on the round card have been played, so the planned actions are executed
                     cegs.setGamePhase(ExecuteActions);
                 }
             }
@@ -172,10 +168,7 @@ public class ColtExpressForwardModel extends StandardForwardModel {
     }
 
     /**
-     * Initializes current turn type and direction of play.
-     *
-     * @param round - round card.
-     * @param turn  - turn index (of turn type array in round card).
+     * Sets up the given turn of the round card, starting with the first player of the round.
      */
     private void initTurn(ColtExpressGameState cegs, RoundCard round, int turn) {
         cegs.currentTurnType = round.getTurnTypes()[turn];
@@ -199,16 +192,15 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         int nPlayers = cegs.getNPlayers();
         int turnOwner = cegs.getTurnOwner();
         if (cegs.getGamePhase() == DraftCharacter) {
-            // Return next player
             return (nPlayers + turnOwner + cegs.direction) % nPlayers;
         } else if (cegs.getGamePhase() == ExecuteActions) {
-            // Return ID of player on the next card in the planned actions deck
+            // The player who planned the next action
             if (cegs.plannedActions.getSize() > 0) {
                 int idx = cegs.plannedActions.getSize() - 1;
                 int id = cegs.plannedActions.get(idx).playerID;
 
-                // ID could be -1 if bullets introduced in the deck (e.g. by GS copy with PO), try to find the next one
-                // and remove the illegal card from the deck
+                // A card with player ID -1 is a bullet, which redeterminisation of a copy can put in the deck.
+                // These are removed.
                 while (id == -1 && idx > 0) {
                     cegs.plannedActions.remove(idx);
                     idx--;
@@ -217,10 +209,9 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                 }
                 return id;
             }
-            // Return next player if no cards in deck
             return (nPlayers + turnOwner + cegs.direction) % nPlayers;
         } else {
-            // Return next player in the round, double up if a double turn
+            // In a double turn each player plays twice in a row
             if (cegs.currentTurnType == DoubleTurn) {
                 if (cegs.firstAction) {
                     cegs.firstAction = false;
@@ -234,14 +225,11 @@ public class ColtExpressForwardModel extends StandardForwardModel {
     }
 
     /**
-     * Ends the round card with the corresponding end event, and sets up for the next round (if there is one; if not,
-     * the game ends once the round is over).
+     * Applies the end of round event of the round card, and sets up the next round if there is one.
      */
     private void endRoundCard(ColtExpressGameState cegs) {
         int roundCounter = cegs.getRoundCounter();
-        // End card event
         cegs.getRounds().get(roundCounter).endRoundCardEvent(cegs);
-        // Move to next round
         int nextRound = roundCounter + 1;
         if (nextRound < cegs.getRounds().getSize()) {
             cegs.firstPlayerOfRound = (cegs.firstPlayerOfRound + 1) % cegs.getNPlayers();

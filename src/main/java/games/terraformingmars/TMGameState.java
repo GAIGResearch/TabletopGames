@@ -33,7 +33,7 @@ public class TMGameState extends AbstractGameState {
 
     // General state info
     int generation;
-    // Turn state: players take up to nActionsPerPlayer actions per turn, until all have passed
+    // Each turn a player takes up to TMGameParameters.nActionsPerPlayer actions, until all players have passed
     int nActionsTaken, nPassed;
     boolean[] passed;
     GridBoard board;
@@ -264,23 +264,19 @@ public class TMGameState extends AbstractGameState {
     }
 
     /**
-     * Records that the player has taken an action that uses one of their action points.
-     * Only the turn owner's actions count, and none once their turn is complete (the forward model moves play on
-     * to the next player after the action).
+     * Records an action that uses one of the player's action points.
      */
     public void registerActionTaken(TMAction action, int player) {
+        // Only the turn owner's actions count, and none once their turn is complete (play moves on after this action)
         if (player != turnOwner || isTurnComplete()) return;
         nActionsTaken++;
         if (action.pass && nActionsTaken == 1) {
-            // First action is pass, player is out for the rest of the generation
+            // Passing as the first action of a turn takes the player out for the rest of the generation
             passed[player] = true;
             nPassed++;
         }
     }
 
-    /**
-     * @return true if the turn owner has used all their actions, or has passed
-     */
     public boolean isTurnComplete() {
         return nActionsTaken == ((TMGameParameters) gameParameters).nActionsPerPlayer || passed[turnOwner];
     }

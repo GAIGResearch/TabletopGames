@@ -45,17 +45,15 @@ import java.util.List;
  * After every action is taken, the ForwardModel will check the top of the stack to see if it is finished (and will
  * continue until it finds one that is not). If it is finished, it will remove it from the stack.
  *
- * When an action is executed with an IExtendedSequence on the stack, then _afterAction() will be called
- * on the top of the stack (as it was before the action was executed) only, straight after the action is executed.
- * This applies even if the action has put *itself* on the stack (pattern i above) to continue as a sequence: the
- * sequence that offered it is told about the decision immediately, not when the action later completes.
- * Any other sequence the action starts (directly or via nested actions it executes) is not told about it.
+ * When an action is executed with an IExtendedSequence on the stack, _afterAction() is called straight afterwards on
+ * the sequence that was at the top of the stack before the action was executed, and on no other. This is the case even
+ * if the action has put itself on the stack to continue as a sequence (pattern i above). Any sequence the action starts
+ * (directly or via nested actions it executes) is not told about it.
  *
- * A sequence may therefore be complete while another sequence is still above it on the stack (for example, the second
- * play of a card that is itself an extended sequence). It will be removed from the stack once everything above it has
- * completed.
- * If a sequence needs to know when a sequence above it has completed (e.g. to decide what to offer next based on the
- * resulting state), then it should override afterRemovalFromQueue().
+ * A sequence may therefore be complete while another sequence is still above it on the stack (for example, when the
+ * second play of a card is itself an extended sequence). It is removed from the stack once everything above it has
+ * completed. A sequence that needs to know when a sequence above it has completed (e.g. to decide what to offer next)
+ * should override afterRemovalFromQueue().
  */
 public interface IExtendedSequence {
 
@@ -130,13 +128,11 @@ public interface IExtendedSequence {
 
     /**
      * This is called whenever the IExtendedSequence is moved to the top of the queue.
-     * It provides the extended sequence that was just removed (often a child created by one of this sequence's
-     * decisions) so that any clean up can take place.
+     * It is given the sequence that was just removed, so that any clean up can take place. This is often a sequence
+     * started by one of this sequence's decisions, but it may have been started elsewhere, or be one of several started
+     * by the same action.
      *
-     * This is not a decision: _afterAction() has already been called with the action taken for this sequence when it was
-     * executed. The default is therefore to do nothing.
-     * Note that the completed sequence may not have been started by this one, or may be one of several started by the
-     * same action.
+     * It is not a decision: _afterAction() was called for the decision when it was executed.
      * @param state
      * @param completedSequence
      */

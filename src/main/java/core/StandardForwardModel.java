@@ -23,10 +23,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         _beforeAction(currentState, action);
 
         action.execute(currentState);
-        // We then tell that sequence about the action straight away, even if the action has itself been put on the
-        // stack to continue as a sequence. Any other sequence the action started (directly, or via nested actions it
-        // executed) must not be told about the action that created it.
-        // A sequence is not told again when a sequence above it completes (see IExtendedSequence.afterRemovalFromQueue)
+        // Only that sequence is told, even if the action has put itself on the stack (see IExtendedSequence)
         if (decisionOwner != null && decisionOwner != action)
             decisionOwner._afterAction(currentState, action);
         // TODO: Currently we always inform the forward model of the action taken, even if it is not

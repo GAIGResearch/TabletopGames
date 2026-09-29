@@ -345,11 +345,9 @@ public class TMForwardModel extends StandardForwardModel {
         }
     }
 
-    /**
-     * @return the next player in turn order who has not yet passed (or simply the next player, once all have passed)
-     */
     private int nextPlayer(TMGameState gs) {
         int next = (gs.getTurnOwner() + 1) % gs.getNPlayers();
+        // Players who have passed are skipped, until all have passed
         if (gs.nPassed < gs.getNPlayers()) {
             while (gs.passed[next]) {
                 next = (next + 1) % gs.getNPlayers();
@@ -359,7 +357,7 @@ public class TMForwardModel extends StandardForwardModel {
     }
 
     /**
-     * Ends the round (i.e. the current phase of the generation), and resets which players have passed
+     * A round is one phase of a generation (corporation selection, research or actions).
      */
     private void endRoundAndResetPasses(TMGameState gs) {
         super.endRound(gs);

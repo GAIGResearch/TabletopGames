@@ -56,7 +56,7 @@ public class TestRoundCardVisibilityAndShuffling {
                 ColtExpressGameState state = (ColtExpressGameState) event.state;
                 long visibleRoundCards = state.getRounds().getVisibleComponents(0).stream().filter(Objects::nonNull).count();
                 System.out.printf("End of Round: %d, Turn %d, Visible Cards: %d%n", state.getRoundCounter(), state.getTurnCounter(), visibleRoundCards);
-                // ROUND_OVER is published before the round counter is incremented; by then the card for the next
+                // ROUND_OVER is published before the round counter is incremented, and after the card for the next
                 // round (if any) has been revealed. So 2 cards are visible at the end of Round 0, and so on.
                 int expectedVisible = Math.min(state.getRoundCounter() + 2, state.getRounds().getSize());
                 for (int i = 0; i < expectedVisible; i++)

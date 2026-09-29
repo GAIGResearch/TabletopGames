@@ -47,12 +47,12 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     Random playerHandRnd;
 
     // Turn state within a round
-    int firstPlayerOfRound;  // First player of round moves clockwise for each round in the game
-    RoundCard.TurnType currentTurnType;  // Current type of turn
-    int direction = 1;  // Direction of play, 1 is clockwise, -1 is anticlockwise
-    boolean firstAction = true;  // In double turns, allows players to take two turns before changing turn owner
-    int fullPlayerTurnCounter;  // Extra counter for how many turns in a round were played (full turn by all players)
-    int subTurnCounter;
+    int firstPlayerOfRound;
+    RoundCard.TurnType currentTurnType;
+    int direction = 1;  // 1 is clockwise, -1 is anticlockwise
+    boolean firstAction = true;  // in a double turn, true until the turn owner has taken the first of their two
+    int fullPlayerTurnCounter;  // the number of turns on the round card that have been completed
+    int subTurnCounter;  // the number of player turns taken in the current turn on the round card
 
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {

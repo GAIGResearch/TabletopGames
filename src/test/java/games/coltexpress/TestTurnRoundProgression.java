@@ -30,7 +30,7 @@ public class TestTurnRoundProgression {
         state.getRounds().add(state.getRoundCard(ColtExpressTypes.RegularRoundCard.Bridge, 3));
 
         RoundCard card = state.getRounds().peek();
-        // setup initialised the first turn from the card we have just replaced
+        // setup initialised the first turn from the card replaced above
         state.currentTurnType = card.getTurnTypes()[0];
         assertEquals(NormalTurn, card.getTurnTypes()[0]);
         assertEquals(DoubleTurn, card.getTurnTypes()[1]);
