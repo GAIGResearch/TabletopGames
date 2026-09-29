@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.GameType;
+import games.tictactoe.TicTacToeForwardModel;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
@@ -101,12 +102,78 @@ public class ExtendedSequenceNotificationTest {
         assertSame(owner, state.currentActionInProgress());
     }
 
+    @Test
+    public void forwardModelIsNotToldWhileASequenceIsInControl() {
+        RecordingForwardModel rfm = new RecordingForwardModel();
+        Owner owner = new Owner(2);
+        state.setActionInProgress(owner);
+
+        DoNothing first = new DoNothing();
+        rfm.next(state, first);
+        assertEquals(List.of(first), owner.toldBefore);
+        assertEquals(List.of(first), owner.told);
+        assertTrue(rfm.toldBefore.isEmpty());
+        assertTrue(rfm.told.isEmpty());
+
+        DoNothing last = new DoNothing();
+        rfm.next(state, last);  // completes the sequence, so the stack is now empty
+        assertFalse(state.isActionInProgress());
+        assertTrue(rfm.toldBefore.isEmpty());
+        assertEquals(List.of(last), rfm.told);
+    }
+
+    @Test
+    public void forwardModelIsToldOnlyBeforeAnActionThatStartsASequence() {
+        RecordingForwardModel rfm = new RecordingForwardModel();
+        SelfPushingChild child = new SelfPushingChild(1);
+
+        rfm.next(state, child);
+        assertEquals(List.of(child), rfm.toldBefore);
+        assertTrue(rfm.told.isEmpty());
+
+        DoNothing decision = new DoNothing();
+        rfm.next(state, decision);
+        assertEquals(List.of(child), rfm.toldBefore);
+        assertEquals(List.of(decision), rfm.told);
+    }
+
+    @Test
+    public void forwardModelIsNotToldWhenASequenceCompletesWithAnotherBelowIt() {
+        RecordingForwardModel rfm = new RecordingForwardModel();
+        Owner owner = new Owner(2);
+        state.setActionInProgress(owner);
+        rfm.next(state, new SelfPushingChild(1));
+        rfm.next(state, new DoNothing());  // completes the child, but not the owner
+
+        assertSame(owner, state.currentActionInProgress());
+        assertTrue(rfm.told.isEmpty());
+    }
+
+    /**
+     * Records what the forward model itself is told, around TicTacToe's own behaviour.
+     */
+    static class RecordingForwardModel extends TicTacToeForwardModel {
+        final List<AbstractAction> toldBefore = new ArrayList<>();
+        final List<AbstractAction> told = new ArrayList<>();
+
+        @Override
+        protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
+            toldBefore.add(actionChosen);
+        }
+
+        @Override
+        protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
+            told.add(action);
+        }
+    }
+
     /**
      * A sequence (not an action) that completes after a fixed number of decisions, and records what it is told.
      */
     static class Owner implements IExtendedSequence {
         final int decisions;
         final List<AbstractAction> told = new ArrayList<>();
+        final List<AbstractAction> toldBefore = new ArrayList<>();
 
         Owner(int decisions) {
             this.decisions = decisions;
@@ -120,6 +187,11 @@ public class ExtendedSequenceNotificationTest {
         @Override
         public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
             return Collections.singletonList(new DoNothing());
+        }
+
+        @Override
+        public void _beforeAction(AbstractGameState state, AbstractAction action) {
+            toldBefore.add(action);
         }
 
         @Override

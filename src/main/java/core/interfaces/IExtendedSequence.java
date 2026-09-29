@@ -107,14 +107,22 @@ public interface IExtendedSequence {
     }
 
     /**
+     * This is called by ForwardModel just before an action is executed while this sequence is on top of the stack.
+     * It is called instead of the ForwardModel's own _beforeAction().
+     *
+     * @param state The current game state
+     * @param action The action about to be taken
+     */
+    default void _beforeAction(AbstractGameState state, AbstractAction action) {
+    }
+
+    /**
      * This is called by ForwardModel whenever an action has just been taken. It enables the IExtendedSequence
      * to maintain local state in whichever way is most suitable.
      *
-     * It is called as well as (and before) the _afterAction method on the ForwardModel.
-     * This means that ForwardModel._afterAction() may need check to see if an action is in progress and skip
-     * its own logic in this case:
-     *          if (state.isActionInProgress()) continue;
-     * This line of code has not yet been incorporated into the framework due to a couple of older games.
+     * The ForwardModel's own _afterAction() is only called if no sequence is left on the stack after this one has
+     * been told (and any completed sequences removed). So a decision that completes the last sequence on the stack is
+     * passed to the ForwardModel as well; otherwise it is not.
      *
      * After this call, the state of IExtendedSequence should be correct ahead of the next decision to be made.
      * In some cases there is no need to implement anything in this method - if for example you can tell if all

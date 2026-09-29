@@ -214,8 +214,6 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
-        if (gameState.isActionInProgress()) return;
-
 //        System.out.println("ACTIONS EXECUTED XD!!");
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gameState;
         if (action instanceof Stop) {
