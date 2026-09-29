@@ -70,11 +70,11 @@ public class ReserveTile extends TMAction implements TMExtendedSequence {
             }
             if (actions.size() == 0) {
                 impossible = true;
-                actions.add(new TMAction(player));
+                actions.add(TMAction.passInSequence(player));
             }
         } else {
             impossible = true;
-            actions.add(new TMAction(player));
+            actions.add(TMAction.passInSequence(player));
         }
         return actions;
     }

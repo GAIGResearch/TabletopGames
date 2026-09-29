@@ -247,7 +247,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements TMExtendedS
             if (targetPlayerOptions != null) {
                 for (int i: targetPlayerOptions) {
                     if (i == -1) {
-                        actions.add(new TMAction(player));  // Pass
+                        actions.add(TMAction.passInSequence(player));  // Pass
                         continue;
                     }
                     if (!production && change < 0) {
@@ -296,7 +296,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements TMExtendedS
         }
 
         if (actions.size() == 0) {
-            actions.add(new TMAction(player)); // Should not happen
+            actions.add(TMAction.passInSequence(player)); // Should not happen
         }
 
         return actions;

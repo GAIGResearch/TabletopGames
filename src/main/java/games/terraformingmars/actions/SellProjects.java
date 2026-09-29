@@ -59,7 +59,7 @@ public class SellProjects extends TMAction implements TMExtendedSequence {
             }
         }
         if (!cardIDsSold.isEmpty()) {
-            actions.add(new TMAction(player));  // Pass to stop the action, unless you haven't picked any card yet
+            actions.add(TMAction.passInSequence(player));  // Pass to stop the action, unless you haven't picked any card yet
         }
         return actions;
     }

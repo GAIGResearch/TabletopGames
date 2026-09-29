@@ -73,6 +73,16 @@ public class TMAction extends AbstractAction {
         this.requirements = new LinkedHashSet<>();
     }
 
+    /**
+     * A pass offered within a sequence (to stop, or when there is no legal choice). Like the sequence's other decisions
+     * it does not use an action point, so it does not count as the player passing for the generation.
+     */
+    public static TMAction passInSequence(int player) {
+        TMAction pass = new TMAction(player);
+        pass.freeActionPoint = true;
+        return pass;
+    }
+
     public TMAction(int player, boolean free) {
         this.player = player;
         this.freeActionPoint = free;
