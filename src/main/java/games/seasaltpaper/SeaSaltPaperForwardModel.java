@@ -220,7 +220,10 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
             processEndRound(sspgs);
             return;
         }
-        if (!(action instanceof PlayDuo)) {
+        // The Duo phase lasts until the player chooses to end it. We are not told about a duo that needs further
+        // decisions (e.g. Crab) until the last of these, so the phase must not end on those either.
+        boolean endsPhase = sspgs.currentPhase != TurnPhase.DUO || action instanceof DoNothing || action instanceof LastChance;
+        if (endsPhase) {
             sspgs.currentPhase = sspgs.currentPhase.next();
         }
         if (sspgs.currentPhase == TurnPhase.FINISH) // Current player's turn is finished, end the turn
