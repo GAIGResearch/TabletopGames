@@ -18,7 +18,9 @@ public class ResVoting extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((ResGameState) gs).addVoteChoice(this, gs.getCurrentPlayer());
+        // the vote is recorded against playerId, not the turn owner: inside a SimultaneousAction the turn owner is
+        // whoever happened to hold the turn when the joint action was applied
+        ((ResGameState) gs).addVoteChoice(this, playerId);
         return true;
     }
 

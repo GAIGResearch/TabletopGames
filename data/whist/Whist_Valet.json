@@ -1,0 +1,7 @@
+{
+  "class": "games.whist.WhistParameters",
+  "nDeals": 1,
+  "trumpMode": "TURN_UP",
+  "noTrumpsInRotation": false,
+  "rememberVoids": true
+}

@@ -12,12 +12,26 @@ import utilities.DeterminisationUtilities;
 
 import java.util.*;
 
+/**
+ * <p>Game state for Go Fish. Data-only: all initialisation and rule logic lives in {@link GoFishForwardModel}.</p>
+ *
+ * <p>Components tracked:</p>
+ * <ul>
+ *     <li>playerHands - one PartialObservableDeck per player, VISIBLE_TO_OWNER. A card the owner has shown to the
+ *     table is visible to all.</li>
+ *     <li>drawDeck - face down, HIDDEN_TO_ALL</li>
+ *     <li>playerBooks - the books each player has laid down, as their cards, VISIBLE_TO_ALL</li>
+ *     <li>extraTurn - whether the current player takes another turn after their ask</li>
+ *     <li>knownVoids - the ranks each player is publicly known not to hold</li>
+ * </ul>
+ */
 public class GoFishGameState extends AbstractGameState implements IPrintable {
 
-    // --- Components ---
-    List<PartialObservableDeck<FrenchCard>> playerHands;   // each player's hand
-    Deck<FrenchCard> drawDeck;            // central draw pile
-    List<Deck<FrenchCard>> playerBooks;   // completed books per player (public)
+    List<PartialObservableDeck<FrenchCard>> playerHands;
+    Deck<FrenchCard> drawDeck;
+    List<Deck<FrenchCard>> playerBooks;
+    boolean extraTurn;
+    GoFishKnownVoids knownVoids;
 
     public GoFishGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -39,64 +53,56 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected GoFishGameState _copy(int playerId) {
-        GoFishGameState copy = new GoFishGameState(gameParameters.copy(), getNPlayers());
-
-        // Core status
-        copy.gameStatus = this.gameStatus;
-        copy.playerResults = this.playerResults.clone();
-
-        // Components
-        copy.drawDeck =  this.drawDeck.copy();
-
+        GoFishGameState copy = new GoFishGameState(gameParameters, getNPlayers());
+        copy.drawDeck = drawDeck.copy();
         copy.playerHands = new ArrayList<>();
-        for (PartialObservableDeck<FrenchCard> hand : this.playerHands) {
+        for (PartialObservableDeck<FrenchCard> hand : playerHands)
             copy.playerHands.add(hand.copy());
-        }
-
         copy.playerBooks = new ArrayList<>();
-        for (Deck<FrenchCard> books : this.playerBooks) {
+        for (Deck<FrenchCard> books : playerBooks)
             copy.playerBooks.add(books.copy());
-        }
+        copy.extraTurn = extraTurn;
+        copy.knownVoids = knownVoids.copy();
 
-        // Redeterminisation (hide others’ hands if partial observable)
         if (getCoreGameParameters().partialObservable && playerId != -1) {
-            List<Deck<FrenchCard>> copyDecks = new ArrayList<>();
-            copyDecks.add(copy.drawDeck);
-            copyDecks.addAll(copy.playerHands);
-            DeterminisationUtilities.reshuffle(playerId, copyDecks, c -> true, redeterminisationRnd);
+            List<Deck<FrenchCard>> decks = new ArrayList<>();
+            decks.add(copy.drawDeck);
+            decks.addAll(copy.playerHands);
+            // cards shown to the table stay where they are, and no player is given a rank they are known not to hold
+            DeterminisationUtilities.reshuffle(playerId, decks, c -> true, redeterminisationRnd, copy.knownVoids::permits);
         }
         return copy;
     }
 
-
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (isNotTerminal()) {
-            int books = getPlayerBooks().get(playerId).getSize() / 4;
-            int cardsInHand = getPlayerHands().get(playerId).getSize();
-            return (books - 0.1 * cardsInHand) / 13.0; // 13 books possible
-        }
+        if (isNotTerminal())
+            return getBooks(playerId) / 13.0;
         return getPlayerResults()[playerId].value;
     }
 
     @Override
     public double getGameScore(int playerId) {
-        return getPlayerBooks().get(playerId).getSize() / 4.0;
+        return getBooks(playerId);
+    }
+
+    public int getBooks(int playerId) {
+        return playerBooks.get(playerId).getSize() / 4;
     }
 
     @Override
     protected boolean _equals(Object o) {
-        if (this == o) return true;
         if (!(o instanceof GoFishGameState that)) return false;
-        if (!super.equals(o)) return false;
-        return Objects.equals(playerHands, that.playerHands)
+        return extraTurn == that.extraTurn
+                && Objects.equals(knownVoids, that.knownVoids)
+                && Objects.equals(playerHands, that.playerHands)
                 && Objects.equals(drawDeck, that.drawDeck)
                 && Objects.equals(playerBooks, that.playerBooks);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerHands, drawDeck, playerBooks);
+        return Objects.hash(super.hashCode(), playerHands, drawDeck, playerBooks, extraTurn, knownVoids);
     }
 
     @Override
@@ -107,12 +113,11 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
         System.out.println("Draw Deck: " + (drawDeck == null ? 0 : drawDeck.getSize()));
         for (int i = 0; i < getNPlayers(); i++) {
             int handSz = playerHands == null ? 0 : playerHands.get(i).getSize();
-            int books = playerBooks == null ? 0 : playerBooks.get(i).getSize() / 4;
+            int books = playerBooks == null ? 0 : getBooks(i);
             System.out.println("P" + i + " Hand=" + handSz + " Books=" + books);
         }
     }
 
-    // Getters
     public List<PartialObservableDeck<FrenchCard>> getPlayerHands() {
         return playerHands;
     }
@@ -125,33 +130,21 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
         return playerBooks;
     }
 
-    // Helpers
+    public GoFishKnownVoids getKnownVoids() {
+        return knownVoids;
+    }
+
+    public boolean isExtraTurn() {
+        return extraTurn;
+    }
+
+    public void setExtraTurn(boolean extraTurn) {
+        this.extraTurn = extraTurn;
+    }
+
     public boolean playerHasRank(int playerId, int rank) {
         for (FrenchCard c : playerHands.get(playerId).getComponents())
             if (c.number == rank) return true;
         return false;
-    }
-
-    public List<FrenchCard> removeCardsOfRank(int playerId, int rank) {
-        List<FrenchCard> removed = new ArrayList<>();
-        Deck<FrenchCard> hand = playerHands.get(playerId);
-        for (int i = hand.getSize() - 1; i >= 0; i--) {
-            if (hand.get(i).number == rank) removed.add(hand.pick(i));
-        }
-        return removed;
-    }
-
-    public void checkAndCollectBooks(int playerId) {
-        Map<Integer, Integer> counts = new HashMap<>();
-        Deck<FrenchCard> hand = playerHands.get(playerId);
-        for (FrenchCard c : hand.getComponents()) counts.merge(c.number, 1, Integer::sum);
-
-        for (Map.Entry<Integer, Integer> e : counts.entrySet()) {
-            if (e.getValue() >= 4) {
-                List<FrenchCard> book = removeCardsOfRank(playerId, e.getKey());
-                for (int i = 0; i < Math.min(4, book.size()); i++) playerBooks.get(playerId).add(book.get(i));
-                for (int i = 4; i < book.size(); i++) hand.add(book.get(i));
-            }
-        }
     }
 }

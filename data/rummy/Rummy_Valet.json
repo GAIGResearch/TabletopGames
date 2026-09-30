@@ -1,0 +1,8 @@
+{
+  "class": "games.rummy.RummyParameters",
+  "cardsFor2Players": 10,
+  "cardsFor3To4Players": 7,
+  "cardsFor5To6Players": 6,
+  "maxTurnsPerDeal": 200,
+  "targetScore": 0
+}

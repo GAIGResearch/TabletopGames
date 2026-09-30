@@ -45,6 +45,21 @@ public class RunGames implements IGameRunner {
     private List<File> agentFiles;
     private String timeDir;
 
+    public RunGames() {
+    }
+
+    /**
+     * For programmatic use: runs the given agents over the games/player counts in config.
+     * Player counts are not capped to the number of default agents (self-play fills any extra seats).
+     */
+    public RunGames(Map<RunArg, Object> config, List<AbstractPlayer> agents) {
+        this.config = config;
+        this.agents = new LinkedList<>(agents);
+        this.agentFiles = new ArrayList<>();
+        this.timeDir = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+        initialiseGamesAndPlayerCount(false);
+    }
+
     /**
      * Main function, creates and runs the tournament with the given settings and players.
      */
@@ -60,7 +75,7 @@ public class RunGames implements IGameRunner {
         RunGames runGames = new RunGames();
         runGames.config = parseConfig(args, Collections.singletonList(Usage.RunGames));
 
-        runGames.initialiseGamesAndPlayerCount();
+        runGames.initialiseGamesAndPlayerCount(runGames.config.get(playerDirectory).equals(""));
         if (!runGames.config.get(RunArg.gameParams).equals("") && runGames.gamesAndPlayerCounts.keySet().size() > 1)
             throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
 
@@ -134,14 +149,7 @@ public class RunGames implements IGameRunner {
                 RoundRobinTournament tournament = new RoundRobinTournament(agents, gameType, playerCount, params, config);
 
                 // Add listeners
-                String outputDir = (String) config.get(destDir);
-                List<String> directories = new ArrayList<>(Arrays.asList(outputDir.split(Pattern.quote(File.separator))));
-                if (gamesAndPlayerCounts.size() > 1)
-                    directories.add(gameName);
-                if (gamesAndPlayerCounts.get(gameType).length > 1)
-                    directories.add(playersDir);
-                if ((boolean) config.get(addTimeStamp))
-                    directories.add(timeDir);
+                List<String> directories = outputDirectories(gameType, playerCount);
 
                 //noinspection unchecked
                 for (String listenerClass : ((List<String>) config.get(listener))) {
@@ -166,7 +174,22 @@ public class RunGames implements IGameRunner {
         }
     }
 
-    private void initialiseGamesAndPlayerCount() {
+    /**
+     * The directory path (as a list of components) to which listeners write results for this game and player count.
+     */
+    protected List<String> outputDirectories(GameType gameType, int playerCount) {
+        String outputDir = (String) config.get(destDir);
+        List<String> directories = new ArrayList<>(Arrays.asList(outputDir.split(Pattern.quote(File.separator))));
+        if (gamesAndPlayerCounts.size() > 1)
+            directories.add(gameType.name());
+        if (gamesAndPlayerCounts.get(gameType).length > 1)
+            directories.add(playerCount + "-players");
+        if ((boolean) config.get(addTimeStamp))
+            directories.add(timeDir);
+        return directories;
+    }
+
+    private void initialiseGamesAndPlayerCount(boolean capToDefaultAgents) {
         String gameArg = config.get(RunArg.game).toString();
         String playerRange = config.get(RunArg.playerRange).toString();
         int np = (int) config.get(RunArg.nPlayers);
@@ -208,7 +231,7 @@ public class RunGames implements IGameRunner {
 
             // Cap max number of players to those available in the framework if no player directory specified
             // (in which case the framework will use 1 of each default players)
-            if (config.get(playerDirectory).equals("") && max > PlayerType.values().length - 2) {
+            if (capToDefaultAgents && max > PlayerType.values().length - 2) {
                 max = PlayerType.values().length - 2;  // Ignore the 2 human players (console, GUI)
             }
 

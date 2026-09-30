@@ -7,7 +7,7 @@ import core.actions.AbstractAction;
 import games.spades.SpadesGameState;
 import games.spades.SpadesParameters;
 import games.spades.actions.Bid;
-import games.spades.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -283,8 +283,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
                 } else {
                     button.setText("Bid " + bidAction.bidAmount);
                 }
-            } else if (action instanceof PlayCard) {
-                PlayCard playAction = (PlayCard) action;
+            } else if (action instanceof PlayCard<?> playAction) {
                 button.setText("Play " + playAction.card.toString());
             } else {
                 button.setText(action.toString());

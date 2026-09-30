@@ -56,7 +56,7 @@ public class AssaultCannonInterrupt implements IExtendedSequence {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof AssaultCannonInterrupt && ((AssaultCannonInterrupt) obj).player == player;
+        return obj instanceof AssaultCannonInterrupt other && other.player == player && other.complete == complete;
     }
 
     @Override

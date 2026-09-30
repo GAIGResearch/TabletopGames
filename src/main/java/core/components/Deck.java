@@ -23,6 +23,11 @@ import static core.CoreConstants.VisibilityMode;
  * * A deck to draw from
  * * Components played on the player's area
  * * Discard pile
+ * <p>
+ * Index 0 is the <b>top</b> of the deck: {@link #draw()}, {@link #peek()} and {@link #add(Component)} all work on
+ * index 0, and {@link #addToBottom(Component)} / {@link #pickLast()} on the last index. So when cards are added one
+ * by one with add(), the first card added ends up at the <b>last</b> index, and get(0) is the most recent - read a
+ * first-dealt card (an up card, a starter) with get(getSize() - 1), not peek() or get(0).
  */
 public class Deck<T extends Component> extends Component implements IComponentContainer<T>, Iterable<T>, IToJSON {
 
@@ -182,9 +187,10 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     /**
-     * Draws the first component of the deck
+     * Draws (removes and returns) the top component of the deck, at index 0: the one most recently added with
+     * {@link #add(Component)}.
      *
-     * @return the first component of the deck
+     * @return the top component of the deck, or null if the deck is empty
      */
     public T draw() {
         return pick(0);
@@ -225,7 +231,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     /**
-     * Peeks (without drawing) the first component of the deck
+     * Peeks (without drawing) the top component of the deck, at index 0
      *
      * @return The component peeked.
      */
@@ -264,7 +270,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     /**
-     * Adds a component to a deck.
+     * Adds a component to the top of a deck (index 0), so it is the next one drawn.
      *
      * @param c component to add
      * @return true if within capacity, false otherwise.
@@ -545,18 +551,24 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         return sb.toString();
     }
 
+    /**
+     * Equal decks hold equal components in the same order, with the same visibility and owner. Who can see the cards
+     * is part of the game state, so decks that differ only in visibility are not equal. A subclass that adds state
+     * (see PartialObservableDeck) is never equal to a plain Deck.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Deck<?> deck)) return false;
+        if (!(o instanceof Deck<?> deck) || o.getClass() != getClass()) return false;
         if (!super.equals(o)) return false;
-        return capacity == deck.capacity &&
+        return capacity == deck.capacity && ownerId == deck.ownerId && visibility == deck.visibility &&
                 Objects.equals(components, deck.components);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(capacity, ownerId, componentID, components);
+        // the ordinal rather than the enum's identity hash, so the hash is the same from one run to the next
+        return Objects.hash(capacity, ownerId, componentID, visibility == null ? -1 : visibility.ordinal(), components);
     }
 
 }

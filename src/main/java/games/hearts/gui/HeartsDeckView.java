@@ -11,6 +11,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import static games.hearts.gui.HeartsGUIManager.*;
 
@@ -24,8 +27,10 @@ public class HeartsDeckView extends ComponentView {
     protected boolean isVisible;
     int minimumCardOffset = 5;
     Rectangle[] rects;
-    int cardHighlight = -1;
+    int cardHighlight = -1;   // position in the cards as drawn, left to right
     boolean highlighting;
+    // order in which to lay out the cards when face-up (null: deck order); display only
+    Comparator<FrenchCard> displayOrder;
 
     public HeartsDeckView(Deck<FrenchCard> d, String dataPath, boolean visible){
         super(d, playerWidth, cardHeight);
@@ -98,16 +103,17 @@ public class HeartsDeckView extends ComponentView {
         if (deck != null){
             int offset = deck.getSize() > 0 ? Math.max((rect.width-cardWidth) / deck.getSize(), minimumCardOffset) : minimumCardOffset;
             rects = new Rectangle[deck.getSize()];
-            for (int i = 0; i < deck.getSize(); i++){
-                FrenchCard card = deck.get(i);
+            List<FrenchCard> cards = inDisplayOrder(deck);
+            for (int i = 0; i < cards.size(); i++){
+                FrenchCard card = cards.get(i);
                 Image cardFace = getCardImage(card);
                 Rectangle r = new Rectangle(rect.x + offset * i, rect.y, cardWidth, cardHeight);
                 rects[i] = r;
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, isVisible);
                 g.drawRoundRect(r.x, r.y, r.width, r.height, 15, 15);
             }
-            if (cardHighlight != -1){
-                FrenchCard card = deck.get(cardHighlight);
+            if (cardHighlight != -1 && cardHighlight < cards.size()){
+                FrenchCard card = cards.get(cardHighlight);
                 Image cardFace = getCardImage(card);
                 Rectangle r = rects[cardHighlight];
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, isVisible);
@@ -115,6 +121,19 @@ public class HeartsDeckView extends ComponentView {
             }
 
         }
+    }
+
+    /** The cards in the order they are laid out: sorted by displayOrder only when face-up. */
+    private List<FrenchCard> inDisplayOrder(Deck<FrenchCard> deck) {
+        List<FrenchCard> cards = new ArrayList<>(deck.getComponents());
+        if (displayOrder != null && isVisible)
+            cards.sort(displayOrder);
+        return cards;
+    }
+
+    /** Lay out the cards in this order when face-up (e.g. FrenchCard.HAND_DISPLAY_ORDER for a hand). */
+    public void setDisplayOrder(Comparator<FrenchCard> displayOrder) {
+        this.displayOrder = displayOrder;
     }
 
     @Override
