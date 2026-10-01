@@ -96,7 +96,7 @@ public class ForwardModelTestsWithRandom {
         HareAndTortoiseParameters params = new HareAndTortoiseParameters();
         params.setParameterValue("startCarrots", 95);
         params.setParameterValue("startLettuces", 1);
-        params.setParameterValue("nDrawOrDiscard10", 3);
+        params.setParameterValue("nDrawOrDiscard", 3);
         params.setParameterValue("nMissATurn", 2);
         params.setParameterValue("maxRounds", 40);
         new ForwardModelTester(params, "game=HareAndTortoise", "nGames=1", "nPlayers=4");

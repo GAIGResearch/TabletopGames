@@ -25,7 +25,18 @@ public enum SquareType {
         return false;
     }
 
-    public boolean isNumber() {
-        return racePositions.length > 0;
+    /**
+     * Carries out what happens when the player's runner moves onto a square of this type, having paid the given
+     * number of carrots for the move.
+     */
+    public void landOn(HareAndTortoiseGameState state, int player, int carrotsPaid) {
+        switch (this) {
+            case HOME -> state.setFinishPosition(player, state.getNPlayersHome() + 1);
+            // the next turn is spent chewing a lettuce
+            case LETTUCE -> state.setLettuceToChew(player, true);
+            case HARE -> state.drawHareCard().type.apply(state, player, carrotsPaid);
+            default -> {
+            }
+        }
     }
 }

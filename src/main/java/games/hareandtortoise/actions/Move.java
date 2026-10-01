@@ -4,17 +4,12 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.hareandtortoise.HareAndTortoiseGameState;
 import games.hareandtortoise.HareAndTortoiseParameters;
-import games.hareandtortoise.SquareType;
 
 import java.util.Objects;
 
 import static games.hareandtortoise.HareAndTortoiseParameters.BOARD;
 import static games.hareandtortoise.HareAndTortoiseParameters.HOME_SQUARE;
 
-/**
- * Moves the current player's runner from one square to another: forwards (paying the Race Card cost), to HOME
- * (HareAndTortoiseParameters.HOME_SQUARE), or back to a tortoise square (drawing carrots).
- */
 public class Move extends AbstractAction {
 
     public final int from;
@@ -30,14 +25,12 @@ public class Move extends AbstractAction {
         HareAndTortoiseGameState state = (HareAndTortoiseGameState) gs;
         HareAndTortoiseParameters params = (HareAndTortoiseParameters) state.getGameParameters();
         int player = state.getCurrentPlayer();
+        int paid = to > from ? params.moveCost(to - from) : 0;
         if (to > from)
-            state.moveRunner(player, to, -params.moveCost(to - from));
+            state.moveRunner(player, to, -paid);
         else
             state.moveRunner(player, to, params.carrotsPerTortoiseStep * (from - to));
-        if (to == HOME_SQUARE)
-            state.setFinishPosition(player, state.getNPlayersHome() + 1);
-        else if (BOARD[to] == SquareType.LETTUCE)
-            state.setLettuceToChew(player, true);
+        BOARD[to].landOn(state, player, paid);
         return true;
     }
 

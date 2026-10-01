@@ -7,7 +7,6 @@ import games.hareandtortoise.HareAndTortoiseParameters;
 
 /**
  * The current player chews a carrot: draws HareAndTortoiseParameters.carrotsPerChew carrots, or pays them in.
- * This is how a runner stays on a carrot square, and the choice offered by the "draw or discard 10" hare card.
  */
 public class ChewCarrot extends AbstractAction {
 
@@ -48,6 +47,6 @@ public class ChewCarrot extends AbstractAction {
 
     @Override
     public String toString() {
-        return draw ? "Chew a carrot: draw 10" : "Chew a carrot: pay 10";
+        return draw ? "Chew a carrot: draw" : "Chew a carrot: pay";
     }
 }

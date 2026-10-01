@@ -5,8 +5,8 @@ import core.actions.AbstractAction;
 import games.hareandtortoise.HareAndTortoiseGameState;
 
 /**
- * The current player, whose runner has just reached a lettuce square, discards a lettuce and draws carrots for
- * their race position. The runner stays where it is.
+ * The current player discards a lettuce and draws carrots for
+ * their race position.
  */
 public class ChewLettuce extends AbstractAction {
 

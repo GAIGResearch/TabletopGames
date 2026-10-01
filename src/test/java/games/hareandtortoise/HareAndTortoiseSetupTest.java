@@ -42,7 +42,7 @@ public class HareAndTortoiseSetupTest {
         Map<HareCard.Type, Integer> expected = new EnumMap<>(HareCard.Type.class);
         expected.put(FALL_BACK_ONE_POSITION, 2);
         expected.put(LAST_TURN_FREE, 2);
-        expected.put(DRAW_OR_DISCARD_10, 2);
+        expected.put(DRAW_OR_DISCARD, 2);
         expected.put(LEAP_AHEAD_ONE_POSITION, 1);
         expected.put(NEXT_CARROT_SQUARE, 1);
         expected.put(PREVIOUS_CARROT_SQUARE, 1);

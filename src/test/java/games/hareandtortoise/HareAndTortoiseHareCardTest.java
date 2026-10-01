@@ -84,13 +84,13 @@ public class HareAndTortoiseHareCardTest {
 
     @Test
     public void drawOrDiscardLetsTheSamePlayerChooseAndDiscardingPays10() {
-        stackHareDeck(state, DRAW_OR_DISCARD_10);
+        stackHareDeck(state, DRAW_OR_DISCARD);
         play(fm, state, new Move(0, 1));
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(65 - 1, state.getCarrots(0));
         assertEquals(Set.<AbstractAction>of(new ChewCarrot(true), new ChewCarrot(false)), actions(fm, state));
         List<HareCard.Type> afterDraw = hareTypes(state);
-        assertEquals(DRAW_OR_DISCARD_10, afterDraw.get(11));
+        assertEquals(DRAW_OR_DISCARD, afterDraw.get(11));
         assertEquals(11, state.getNUnseenHareCards());
 
         play(fm, state, new ChewCarrot(false));
@@ -104,7 +104,7 @@ public class HareAndTortoiseHareCardTest {
 
     @Test
     public void drawOrDiscardDrawing10AlsoPassesTheTurn() {
-        stackHareDeck(state, DRAW_OR_DISCARD_10);
+        stackHareDeck(state, DRAW_OR_DISCARD);
         play(fm, state, new Move(0, 1));
         play(fm, state, new ChewCarrot(true));
         assertEquals(64 + 10, state.getCarrots(0));
@@ -113,7 +113,7 @@ public class HareAndTortoiseHareCardTest {
 
     @Test
     public void drawOrDiscardWithFewerThan10CarrotsOffersOnlyTheDraw() {
-        stackHareDeck(state, DRAW_OR_DISCARD_10);
+        stackHareDeck(state, DRAW_OR_DISCARD);
         place(state, 0, 0, 5, 3);
         play(fm, state, new Move(0, 1));
         assertEquals(5 - 1, state.getCarrots(0));
@@ -125,7 +125,7 @@ public class HareAndTortoiseHareCardTest {
 
     @Test
     public void drawOrDiscardByTheLastPlayerEndsTheRoundOnlyAfterTheChoice() {
-        stackHareDeck(state, DRAW_OR_DISCARD_10);
+        stackHareDeck(state, DRAW_OR_DISCARD);
         state.setTurnOwner(3);
         play(fm, state, new Move(0, 1));
         assertEquals(3, state.getCurrentPlayer());
@@ -199,13 +199,13 @@ public class HareAndTortoiseHareCardTest {
 
     @Test
     public void aCardMoveOntoAHareSquareDrawsNoFurtherCard() {
-        stackHareDeck(state, LEAP_AHEAD_ONE_POSITION, DRAW_OR_DISCARD_10);
+        stackHareDeck(state, LEAP_AHEAD_ONE_POSITION, DRAW_OR_DISCARD);
         List<HareCard.Type> before = hareTypes(state);
         place(state, 0, 13, 30, 3);
         place(state, 1, 24, 30, 3);
         play(fm, state, new Move(13, 14));
         assertEquals(25, state.getSquare(0));        // hare square beyond the runner on 24
-        assertEquals(1, state.getCurrentPlayer());   // no DRAW_OR_DISCARD_10 choice
+        assertEquals(1, state.getCurrentPlayer());   // no DRAW_OR_DISCARD choice
         assertEquals(topToBottom(before, 1), hareTypes(state));
         assertEquals(11, state.getNUnseenHareCards());
         assertEquals(30 - 1, state.getCarrots(0));
@@ -315,7 +315,7 @@ public class HareAndTortoiseHareCardTest {
 
     @Test
     public void fallBackOntoAHareSquareDrawsNoFurtherCard() {
-        stackHareDeck(state, FALL_BACK_ONE_POSITION, DRAW_OR_DISCARD_10);
+        stackHareDeck(state, FALL_BACK_ONE_POSITION, DRAW_OR_DISCARD);
         place(state, 1, 4, 65, 3);
         play(fm, state, new Move(0, 6));
         assertEquals(3, state.getSquare(0));         // runner behind on 4; 3 is a free hare square

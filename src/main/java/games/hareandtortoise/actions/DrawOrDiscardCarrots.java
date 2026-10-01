@@ -10,13 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The choice given by the "Either draw or discard 10 carrots" hare card: ChewCarrot(true) to draw, or
- * ChewCarrot(false) to discard.
+ * Player chooses to either draw or discard carrots.
  */
 public class DrawOrDiscardCarrots extends OneShotExtendedAction {
 
     public DrawOrDiscardCarrots(int player) {
-        super("Draw or discard 10 carrots", player, DrawOrDiscardCarrots::choices);
+        super("Draw or discard carrots", player, DrawOrDiscardCarrots::choices);
     }
 
     private static List<AbstractAction> choices(AbstractGameState gs) {
@@ -28,6 +27,13 @@ public class DrawOrDiscardCarrots extends OneShotExtendedAction {
                 >= ((HareAndTortoiseParameters) state.getGameParameters()).carrotsPerChew)
             actions.add(new ChewCarrot(false));
         return actions;
+    }
+
+    @Override
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
+        // the Move that drew the hare card pushed this sequence, and the framework reports that Move to it too
+        if (action instanceof ChewCarrot)
+            super._afterAction(state, action);
     }
 
     @Override

@@ -23,13 +23,13 @@ public class HareAndTortoiseHareCardFlowTest {
         Game game = newGame(3, 31);
         HareAndTortoiseGameState state = stateOf(game);
         HareAndTortoiseForwardModel fm = fmOf(game);
-        stackHareDeck(state, ANOTHER_TURN, DRAW_OR_DISCARD_10, MISS_A_TURN, PREVIOUS_CARROT_SQUARE);
+        stackHareDeck(state, ANOTHER_TURN, DRAW_OR_DISCARD, MISS_A_TURN, PREVIOUS_CARROT_SQUARE);
         List<HareCard.Type> start = hareTypes(state);
 
         play(fm, state, new Move(0, 1));             // p0: hare, ANOTHER_TURN
         assertEquals(65 - 1, state.getCarrots(0));
         assertEquals(0, state.getCurrentPlayer());
-        play(fm, state, new Move(1, 3));             // p0 again: hare, DRAW_OR_DISCARD_10
+        play(fm, state, new Move(1, 3));             // p0 again: hare, DRAW_OR_DISCARD
         assertEquals(64 - 3, state.getCarrots(0));   // 1+2
         assertEquals(0, state.getCurrentPlayer());
         play(fm, state, new ChewCarrot(true));

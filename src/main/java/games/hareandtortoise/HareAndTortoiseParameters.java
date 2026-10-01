@@ -39,7 +39,7 @@ public class HareAndTortoiseParameters extends TunableParameters<HareAndTortoise
     public int homeCarrotsPerRacePosition = 10;
     public int nFallBackOnePosition = 2;
     public int nLastTurnFree = 2;
-    public int nDrawOrDiscard10 = 2;
+    public int nDrawOrDiscard = 2;
     public int nLeapAheadOnePosition = 1;
     public int nNextCarrotSquare = 1;
     public int nPreviousCarrotSquare = 1;
@@ -56,7 +56,7 @@ public class HareAndTortoiseParameters extends TunableParameters<HareAndTortoise
         addTunableParameter("homeCarrotsPerRacePosition", 10, Arrays.asList(5, 10, 15, 20));
         addTunableParameter("nFallBackOnePosition", 2, Arrays.asList(0, 1, 2, 3));
         addTunableParameter("nLastTurnFree", 2, Arrays.asList(0, 1, 2, 3));
-        addTunableParameter("nDrawOrDiscard10", 2, Arrays.asList(0, 1, 2, 3));
+        addTunableParameter("nDrawOrDiscard", 2, Arrays.asList(0, 1, 2, 3));
         addTunableParameter("nLeapAheadOnePosition", 1, Arrays.asList(0, 1, 2));
         addTunableParameter("nNextCarrotSquare", 1, Arrays.asList(0, 1, 2));
         addTunableParameter("nPreviousCarrotSquare", 1, Arrays.asList(0, 1, 2));
@@ -77,7 +77,7 @@ public class HareAndTortoiseParameters extends TunableParameters<HareAndTortoise
         homeCarrotsPerRacePosition = (int) getParameterValue("homeCarrotsPerRacePosition");
         nFallBackOnePosition = (int) getParameterValue("nFallBackOnePosition");
         nLastTurnFree = (int) getParameterValue("nLastTurnFree");
-        nDrawOrDiscard10 = (int) getParameterValue("nDrawOrDiscard10");
+        nDrawOrDiscard = (int) getParameterValue("nDrawOrDiscard");
         nLeapAheadOnePosition = (int) getParameterValue("nLeapAheadOnePosition");
         nNextCarrotSquare = (int) getParameterValue("nNextCarrotSquare");
         nPreviousCarrotSquare = (int) getParameterValue("nPreviousCarrotSquare");
@@ -102,7 +102,7 @@ public class HareAndTortoiseParameters extends TunableParameters<HareAndTortoise
         List<HareCard> cards = new ArrayList<>();
         addCards(cards, HareCard.Type.FALL_BACK_ONE_POSITION, nFallBackOnePosition);
         addCards(cards, HareCard.Type.LAST_TURN_FREE, nLastTurnFree);
-        addCards(cards, HareCard.Type.DRAW_OR_DISCARD_10, nDrawOrDiscard10);
+        addCards(cards, HareCard.Type.DRAW_OR_DISCARD, nDrawOrDiscard);
         addCards(cards, HareCard.Type.LEAP_AHEAD_ONE_POSITION, nLeapAheadOnePosition);
         addCards(cards, HareCard.Type.NEXT_CARROT_SQUARE, nNextCarrotSquare);
         addCards(cards, HareCard.Type.PREVIOUS_CARROT_SQUARE, nPreviousCarrotSquare);

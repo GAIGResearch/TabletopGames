@@ -138,7 +138,7 @@ public class HareAndTortoiseGUIManager extends AbstractGUIManager {
                 "the first free square behind the runner behind you.</td></tr>" +
                 "<tr><td>Your last turn costs nothing (" + params.nLastTurnFree + ")</td><td>Take back the " +
                 "carrots you paid for the move.</td></tr>" +
-                "<tr><td>Either draw or discard 10 carrots (" + params.nDrawOrDiscard10 + ")</td><td>Choose " +
+                "<tr><td>Either draw or discard " + chew + " carrots (" + params.nDrawOrDiscard + ")</td><td>Choose " +
                 "which.</td></tr>" +
                 "<tr><td>Leap ahead by one position (" + params.nLeapAheadOnePosition + ")</td><td>Move, free, " +
                 "to the first free square beyond the runner ahead of you (not a tortoise square).</td></tr>" +

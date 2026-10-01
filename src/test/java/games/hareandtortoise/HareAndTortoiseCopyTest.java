@@ -97,7 +97,7 @@ public class HareAndTortoiseCopyTest {
 
     @Test
     public void aPlayersCopyShufflesOnlyTheUnseenTopCardsAmongThemselves() {
-        stackHareDeck(state, FALL_BACK_ONE_POSITION, LAST_TURN_FREE, DRAW_OR_DISCARD_10, LEAP_AHEAD_ONE_POSITION,
+        stackHareDeck(state, FALL_BACK_ONE_POSITION, LAST_TURN_FREE, DRAW_OR_DISCARD, LEAP_AHEAD_ONE_POSITION,
                 NEXT_CARROT_SQUARE, PREVIOUS_CARROT_SQUARE);
         state.nUnseenHareCards = 6;
         List<HareCard.Type> original = hareTypes(state);

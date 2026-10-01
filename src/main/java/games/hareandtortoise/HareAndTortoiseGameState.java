@@ -24,6 +24,7 @@ import static games.hareandtortoise.HareAndTortoiseParameters.HOME_SQUARE;
  *     <li>lettuces - the lettuce cards each player still holds</li>
  *     <li>lettuceToChew - whether each runner has reached a lettuce square and has yet to chew a lettuce there</li>
  *     <li>missNextTurn - whether each player's next turn will be skipped</li>
+ *     <li>anotherTurn - whether the current player will have another turn when this one ends</li>
  *     <li>finishPositions - the place in which each player got HOME (1 for the first), or 0 if not home yet</li>
  *     <li>hareDeck - the hare cards, top first</li>
  *     <li>nUnseenHareCards - how many cards at the top of the hareDeck have never been drawn</li>
@@ -37,6 +38,7 @@ public class HareAndTortoiseGameState extends AbstractGameState {
     int[] lettuces;
     boolean[] lettuceToChew;
     boolean[] missNextTurn;
+    boolean anotherTurn;
     int[] finishPositions;
     Deck<HareCard> hareDeck;
     int nUnseenHareCards;
@@ -122,6 +124,25 @@ public class HareAndTortoiseGameState extends AbstractGameState {
         lettuceToChew[player] = value;
     }
 
+    public void setMissNextTurn(int player, boolean value) {
+        missNextTurn[player] = value;
+    }
+
+    public void setAnotherTurn(boolean value) {
+        anotherTurn = value;
+    }
+
+    /**
+     * Draws the top hare card and puts it at the bottom of the hareDeck.
+     */
+    public HareCard drawHareCard() {
+        HareCard card = hareDeck.draw();
+        hareDeck.addToBottom(card);
+        if (nUnseenHareCards > 0)
+            nUnseenHareCards--;
+        return card;
+    }
+
     public void setFinishPosition(int player, int position) {
         finishPositions[player] = position;
     }
@@ -146,6 +167,14 @@ public class HareAndTortoiseGameState extends AbstractGameState {
     }
 
     /**
+     * Whether the player's runner may end a move on the square.
+     */
+    public boolean canLandOn(int player, int square) {
+        if (isOccupied(square)) return false;
+        return BOARD[square] != SquareType.LETTUCE || lettuces[player] > 0;
+    }
+
+    /**
      * The player's position in the race, 1 for the leader.
      */
     public int getRacePosition(int player) {
@@ -167,6 +196,7 @@ public class HareAndTortoiseGameState extends AbstractGameState {
         copy.lettuces = lettuces.clone();
         copy.lettuceToChew = lettuceToChew.clone();
         copy.missNextTurn = missNextTurn.clone();
+        copy.anotherTurn = anotherTurn;
         copy.finishPositions = finishPositions.clone();
         copy.hareDeck = hareDeck.copy();
         copy.nUnseenHareCards = nUnseenHareCards;
@@ -202,7 +232,7 @@ public class HareAndTortoiseGameState extends AbstractGameState {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof HareAndTortoiseGameState that)) return false;
-        return nUnseenHareCards == that.nUnseenHareCards &&
+        return nUnseenHareCards == that.nUnseenHareCards && anotherTurn == that.anotherTurn &&
                 Arrays.equals(squares, that.squares) &&
                 Arrays.equals(carrots, that.carrots) &&
                 Arrays.equals(lettuces, that.lettuces) &&
@@ -214,7 +244,7 @@ public class HareAndTortoiseGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), hareDeck, nUnseenHareCards);
+        int result = Objects.hash(super.hashCode(), hareDeck, nUnseenHareCards, anotherTurn);
         result = 31 * result + Arrays.hashCode(squares);
         result = 31 * result + Arrays.hashCode(carrots);
         result = 31 * result + Arrays.hashCode(lettuces);
