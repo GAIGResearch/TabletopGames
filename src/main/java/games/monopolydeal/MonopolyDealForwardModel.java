@@ -112,7 +112,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
         else {
             switch (state.getGamePhase().toString()) {
                 case "Play":
-                    if ((state.actionsLeft < 1 || actionTaken instanceof EndPhase) && !state.isActionInProgress()) {
+                    if (state.actionsLeft < 1 || actionTaken instanceof EndPhase) {
                         if (state.playerHands.get(playerID).getSize() > params.HAND_SIZE) {
                             state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Discard);
                         } else {

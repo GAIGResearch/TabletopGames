@@ -3,7 +3,6 @@ package games.catan.actions.dev;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
-import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanActionFactory;
 import games.catan.CatanGameState;
@@ -40,8 +39,8 @@ public class PlayDevCard extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
         List<AbstractAction> actions = CatanActionFactory.getDevCardActions((CatanGameState) state, actionSpace, playerID, type);
         if (actions.size() == 0) {
-            // Can't actually do anything useful, just do nothing
-            actions.add(new DoNothing());
+            // Can't actually do anything useful. This is not DoNothing, which the forward model treats as ending the turn
+            actions.add(new NoOption(playerID));
         }
         return actions;
     }
@@ -53,7 +52,7 @@ public class PlayDevCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        if (action instanceof DoNothing) nStepsTaken = nSteps;
+        if (action instanceof NoOption) nStepsTaken = nSteps;
         else nStepsTaken++;
     }
 
@@ -90,5 +89,46 @@ public class PlayDevCard extends AbstractAction implements IExtendedSequence {
     @Override
     public String toString() {
         return "p" + playerID + " plays Dev:" + type;
+    }
+
+    /**
+     * Offered when the card has no legal option (left). It finishes playing the card, and the turn continues.
+     */
+    public static class NoOption extends AbstractAction {
+        public final int playerID;
+
+        public NoOption(int playerID) {
+            this.playerID = playerID;
+        }
+
+        @Override
+        public boolean execute(AbstractGameState gs) {
+            return true;
+        }
+
+        @Override
+        public NoOption copy() {
+            return this;  // immutable
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof NoOption other && other.playerID == playerID;
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * playerID + 7;
+        }
+
+        @Override
+        public String getString(AbstractGameState gameState) {
+            return toString();
+        }
+
+        @Override
+        public String toString() {
+            return "p" + playerID + " has no option for Dev card";
+        }
     }
 }
