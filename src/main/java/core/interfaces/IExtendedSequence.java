@@ -46,7 +46,7 @@ import java.util.List;
  * continue until it finds one that is not). If it is finished, it will remove it from the stack.
  *
  * When an action is executed with an IExtendedSequence on the stack, _afterAction() is called straight afterwards on
- * the sequence that was at the top of the stack before the action was executed, and on no other. This is the case even
+ * the sequence that was at the top of the stack before the action was executed. This is the case even
  * if the action has put itself on the stack to continue as a sequence (pattern i above). Any sequence the action starts
  * (directly or via nested actions it executes) is not told about it.
  *
