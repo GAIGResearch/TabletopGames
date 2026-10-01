@@ -4,9 +4,12 @@ import core.Game;
 import core.actions.AbstractAction;
 import games.hareandtortoise.actions.ChewLettuce;
 import games.hareandtortoise.actions.Move;
+import games.hareandtortoise.components.HareCard;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.Random;
 import java.util.Set;
 
@@ -17,18 +20,10 @@ import static org.junit.Assert.*;
 
 /**
  * Integration tests: real games from the factory, driven only by fm.next. No executed Move ends on a hare square, and
- * no runner starts a turn on a number square that matches its race position, so the later phases' square effects do
- * not touch these scripts.
+ * no runner starts a turn on a number square that matches its race position, so neither hare cards nor number-square
+ * payouts affect these scripts.
  */
 public class HareAndTortoiseGameFlowTest {
-
-    private static HareAndTortoiseGameState stateOf(Game game) {
-        return (HareAndTortoiseGameState) game.getGameState();
-    }
-
-    private static HareAndTortoiseForwardModel fmOf(Game game) {
-        return (HareAndTortoiseForwardModel) game.getForwardModel();
-    }
 
     @Test
     public void lettuceIsChewedOnTheNextTurnAndThenTheRunnerMustMoveOn() {
@@ -50,7 +45,7 @@ public class HareAndTortoiseGameFlowTest {
         assertEquals(0, state.getCurrentPlayer());
 
         assertEquals(Set.<AbstractAction>of(new ChewLettuce()), actions(fm, state));
-        fm.next(state, new ChewLettuce());          // p0 on 7 leads p2 on 5 and p1 on 2: 1st
+        fm.next(state, new ChewLettuce());          // p0 on 7 is ahead of p2 on 5 and p1 on 2, so 1st
         assertEquals(37 + 10, state.getCarrots(0));
         assertEquals(2, state.getLettuces(0));
         assertEquals(7, state.getSquare(0));
@@ -213,6 +208,8 @@ public class HareAndTortoiseGameFlowTest {
             HareAndTortoiseGameState state = stateOf(game);
             HareAndTortoiseForwardModel fm = fmOf(game);
             Random rnd = new Random(seed);
+            Map<HareCard.Type, Long> cardCounts = countTypes(state);
+            int lastUnseen = state.getNUnseenHareCards();
             int steps = 0;
             while (state.isNotTerminal() && steps++ < 20000) {
                 int player = state.getCurrentPlayer();
@@ -228,7 +225,12 @@ public class HareAndTortoiseGameFlowTest {
                             assertNotEquals("two runners on one square", state.getSquare(p), state.getSquare(q));
                 }
                 assertEquals(12, state.getHareDeck().getSize());
+                // hare cards are only ever moved from the top to the bottom: the same cards, and fewer unseen
+                assertEquals(cardCounts, countTypes(state));
+                assertTrue(state.getNUnseenHareCards() >= 0 && state.getNUnseenHareCards() <= lastUnseen);
+                lastUnseen = state.getNUnseenHareCards();
             }
+            assertTrue("no hare card was drawn", lastUnseen < 12);
             assertFalse("game did not end within 20000 actions", state.isNotTerminal());
             assertTrue(steps > 1);
 
@@ -246,5 +248,9 @@ public class HareAndTortoiseGameFlowTest {
             for (int p = 0; p < nPlayers; p++)
                 assertEquals(state.getOrdinalPosition(p) == 1 ? WIN_GAME : LOSE_GAME, state.getPlayerResults()[p]);
         }
+    }
+
+    private static Map<HareCard.Type, Long> countTypes(HareAndTortoiseGameState state) {
+        return hareTypes(state).stream().collect(Collectors.groupingBy(t -> t, Collectors.counting()));
     }
 }

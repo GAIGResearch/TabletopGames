@@ -9,6 +9,7 @@ import games.hareandtortoise.components.HareCard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,17 +20,15 @@ import static games.hareandtortoise.HareAndTortoiseParameters.HOME_SQUARE;
  * <p>State tracked (the board layout itself is fixed, in HareAndTortoiseParameters.BOARD):</p>
  * <ul>
  *     <li>squares - the square of each player's runner: 0 is START, 1-63 the board, HOME_SQUARE (64) HOME</li>
- *     <li>carrots - the carrots each player holds. Every payment is made openly, so this is public information</li>
+ *     <li>carrots - the carrots each player holds</li>
  *     <li>lettuces - the lettuce cards each player still holds</li>
- *     <li>lettuceToChew - whether the player's runner has just arrived on a lettuce square (the runner turned upside
- *     down), so that their next turn is spent chewing a lettuce</li>
- *     <li>missNextTurn - whether the player's next turn is to be skipped (a hare card)</li>
+ *     <li>lettuceToChew - whether each runner has reached a lettuce square and has yet to chew a lettuce there</li>
+ *     <li>missNextTurn - whether each player's next turn will be skipped</li>
  *     <li>finishPositions - the place in which each player got HOME (1 for the first), or 0 if not home yet</li>
- *     <li>hareDeck - the hare cards; drawn from the top and returned to the bottom, never reshuffled</li>
- *     <li>nUnseenHareCards - how many cards at the top of the hareDeck have never been drawn. Their order is hidden;
- *     every card below them has been seen, so its place in the pile is known to all</li>
+ *     <li>hareDeck - the hare cards, top first</li>
+ *     <li>nUnseenHareCards - how many cards at the top of the hareDeck have never been drawn</li>
  * </ul>
- * The carrot patch is unlimited: the 1978 rules have no limit on carrots drawn from it.
+ * The carrot patch has no limit in the 1978 rules, so it is not modelled.
  */
 public class HareAndTortoiseGameState extends AbstractGameState {
 
@@ -147,13 +146,12 @@ public class HareAndTortoiseGameState extends AbstractGameState {
     }
 
     /**
-     * The player's position in the race (1 for the leader). A player who has got home keeps the place they finished
-     * in; every player home counts as ahead of every runner still in the race. Runners still at START share a
-     * position.
+     * The player's position in the race, 1 for the leader.
      */
     public int getRacePosition(int player) {
         if (isHome(player))
             return finishPositions[player];
+        // every player home is ahead of every runner still racing; runners on the same square (START) share a place
         int position = getNPlayersHome() + 1;
         for (int p = 0; p < getNPlayers(); p++)
             if (p != player && !isHome(p) && squares[p] > squares[player])
@@ -172,7 +170,10 @@ public class HareAndTortoiseGameState extends AbstractGameState {
         copy.finishPositions = finishPositions.clone();
         copy.hareDeck = hareDeck.copy();
         copy.nUnseenHareCards = nUnseenHareCards;
-        // TODO Phase C: redeterminise the order of the unseen hare cards (see HareAndTortoise_plan.txt)
+        // Every payment is made openly, so only the order of the hare cards never yet drawn is hidden. A drawn card
+        // goes to the bottom, where its place is known to all.
+        if (playerId != -1 && getCoreGameParameters().partialObservable)
+            Collections.shuffle(copy.hareDeck.getComponents().subList(0, nUnseenHareCards), redeterminisationRnd);
         return copy;
     }
 
@@ -180,11 +181,12 @@ public class HareAndTortoiseGameState extends AbstractGameState {
     protected double _getHeuristicScore(int playerId) {
         if (!isNotTerminal())
             return getPlayerResults()[playerId].value;
+        // the share of the course covered
         return (double) squares[playerId] / HOME_SQUARE;
     }
 
     /**
-     * Higher is better: the number of players the player is ahead of in the race, plus one.
+     * One more than the number of players behind the player in the race.
      */
     @Override
     public double getGameScore(int playerId) {

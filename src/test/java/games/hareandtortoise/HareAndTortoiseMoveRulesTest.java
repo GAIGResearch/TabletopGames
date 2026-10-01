@@ -12,7 +12,7 @@ import static games.hareandtortoise.HareAndTortoiseTestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Forward moves (cost and legality) and lettuce squares. Positions are chosen so that the later rules (carrot squares,
+ * Forward moves (cost and legality) and lettuce squares. Positions are chosen so that the other rules (carrot squares,
  * moves back to a tortoise, number-square payouts, hare cards) cannot change the outcome: the runner under test
  * stands on START or squares 1-7 (no tortoise behind, not a carrot square), and no Move executed ends on a hare square.
  */

@@ -89,7 +89,7 @@ public class HareAndTortoiseParameters extends TunableParameters<HareAndTortoise
     }
 
     /**
-     * The carrots it costs to move the given number of squares forwards: 1 + 2 + ... + distance (the Race Card).
+     * The carrots it costs to move the given number of squares forwards, as on the Race Card.
      */
     public int moveCost(int distance) {
         return distance * (distance + 1) / 2;

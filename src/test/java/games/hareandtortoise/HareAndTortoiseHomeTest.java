@@ -10,8 +10,7 @@ import static org.junit.Assert.*;
 
 /**
  * Reaching HOME. Player 0 stands on square 60 (a "2" square); square 62 is a lettuce and 61 and 63 are hare squares.
- * Another runner is parked on 56, the tortoise square behind 60, so the later rule allowing a move back to an
- * unoccupied tortoise square adds nothing to these action sets.
+ * Another runner is parked on 56, the tortoise square behind 60, so no move back to a tortoise is offered.
  * HOME from 60 is 4 squares: 1+2+3+4 = 10 carrots. 61 costs 1, 63 costs 1+2+3 = 6.
  */
 public class HareAndTortoiseHomeTest {

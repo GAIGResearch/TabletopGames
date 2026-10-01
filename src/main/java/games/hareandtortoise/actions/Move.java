@@ -30,7 +30,10 @@ public class Move extends AbstractAction {
         HareAndTortoiseGameState state = (HareAndTortoiseGameState) gs;
         HareAndTortoiseParameters params = (HareAndTortoiseParameters) state.getGameParameters();
         int player = state.getCurrentPlayer();
-        state.moveRunner(player, to, -params.moveCost(to - from));
+        if (to > from)
+            state.moveRunner(player, to, -params.moveCost(to - from));
+        else
+            state.moveRunner(player, to, params.carrotsPerTortoiseStep * (from - to));
         if (to == HOME_SQUARE)
             state.setFinishPosition(player, state.getNPlayersHome() + 1);
         else if (BOARD[to] == SquareType.LETTUCE)
@@ -55,7 +58,11 @@ public class Move extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        HareAndTortoiseParameters params = (HareAndTortoiseParameters) gameState.getGameParameters();
+        if (to < from)
+            return "Back to tortoise square " + to + " (draw " + params.carrotsPerTortoiseStep * (from - to) + ")";
+        String target = to == HOME_SQUARE ? "HOME" : to + " (" + BOARD[to].name().toLowerCase() + ")";
+        return "Move to " + target + " (pay " + params.moveCost(to - from) + ")";
     }
 
     @Override
