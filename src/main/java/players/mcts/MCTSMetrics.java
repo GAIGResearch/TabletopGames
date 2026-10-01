@@ -18,12 +18,12 @@ public class MCTSMetrics implements IMetricsCollection {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            AbstractPlayer player = listener.getGame().getPlayers().get(e.state.getCurrentPlayer());
+            AbstractPlayer player = listener.getGame().getPlayers().get(e.playerID);
             if (!(player instanceof MCTSPlayer mctsPlayer)) return false;
             SingleTreeNode root = mctsPlayer.root;
             if (root instanceof MultiTreeNode) {
                 root = Arrays.stream(((MultiTreeNode) root).roots).filter(Objects::nonNull)
-                        .filter(node -> node.decisionPlayer == e.state.getCurrentPlayer())
+                        .filter(node -> node.decisionPlayer == e.playerID)
                         .findFirst().orElse(null);
             }
             if (root == null) return false;
@@ -47,7 +47,7 @@ public class MCTSMetrics implements IMetricsCollection {
                         .toList(); // in descending order of value
 
                 records.put("PlayerType", mctsPlayer.toString());
-                records.put("PlayerID", e.state.getCurrentPlayer());
+                records.put("PlayerID", e.playerID);
                 records.put("Iterations", root.getVisits());
                 records.put("ReusedVisits", mctsPlayer.root.inheritedVisits);
                 records.put("MaxDepth", treeStats.depthReached);
@@ -143,12 +143,12 @@ public class MCTSMetrics implements IMetricsCollection {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            AbstractPlayer player = listener.getGame().getPlayers().get(e.state.getCurrentPlayer());
+            AbstractPlayer player = listener.getGame().getPlayers().get(e.playerID);
             if (player instanceof MCTSPlayer mctsPlayer) {
                 List<SingleTreeNode> otherRoots;
                 if (mctsPlayer.root instanceof MultiTreeNode) {
                     otherRoots = Arrays.stream(((MultiTreeNode) mctsPlayer.root).roots).filter(Objects::nonNull)
-                            .filter(node -> node.decisionPlayer != e.state.getCurrentPlayer())
+                            .filter(node -> node.decisionPlayer != e.playerID)
                             .toList();
                     if (otherRoots.isEmpty())
                         return false; // can happen at end of game if other players have no moves
@@ -157,7 +157,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 }
                 List<TreeStatistics> treeStats = otherRoots.stream().map(TreeStatistics::new).toList();
                 records.put("PlayerType", mctsPlayer.toString());
-                records.put("PlayerID", e.state.getCurrentPlayer());
+                records.put("PlayerID", e.playerID);
                 records.put("MaxDepth", treeStats.stream().mapToInt(ts -> ts.depthReached).average().orElse(0.0));
                 records.put("MeanLeafDepth", treeStats.stream().mapToDouble(ts -> ts.meanLeafDepth).average().orElse(0.0));
                 records.put("MeanNodeDepth", treeStats.stream().mapToDouble(ts -> ts.meanNodeDepth).average().orElse(0.0));

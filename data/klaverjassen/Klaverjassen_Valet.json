@@ -1,0 +1,15 @@
+{
+  "class": "games.klaverjassen.KlaverjassenParameters",
+  "handSize": 8,
+  "nHands": 1,
+  "partnerTrumpRule": "DISCARD",
+  "tieIsFailure": false,
+  "lastTrickBonus": 10,
+  "pitBonus": 100,
+  "runOfThreeBonus": 20,
+  "runOfFourBonus": 50,
+  "stukBonus": 20,
+  "fourOfAKindBonus": 100,
+  "fourJacksBonus": 200,
+  "rememberVoids": true
+}

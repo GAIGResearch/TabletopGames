@@ -1,0 +1,9 @@
+{
+  "class": "games.leducpoker.LeducPokerParameters",
+  "nHands": 1,
+  "ante": 1,
+  "firstRoundRaise": 2,
+  "secondRoundRaise": 4,
+  "maxRaisesPerRound": 2,
+  "highCardUsesBoard": true
+}

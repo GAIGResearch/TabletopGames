@@ -1,0 +1,10 @@
+{
+  "class": "games.crazyeights.CZEParameters",
+  "nCardsPerPlayer": 5,
+  "nCardsPerPlayerTwoPlayers": 5,
+  "eightPenalty": 50,
+  "pictureCardPenalty": 10,
+  "acePenalty": 1,
+  "starterEightSuit": "Hearts",
+  "dealerNominatesStarterSuit": false
+}
