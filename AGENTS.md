@@ -204,14 +204,14 @@ Remove any throwaway render harness files and output PNGs before committing.
 a specific class or method.
 
 ```bash
-# 1. Build the classpath once (output to cp.txt, committed to .gitignore)
-mvn dependency:build-classpath -Dmdep.outputFile=cp.txt
+# 1. Copy the dependency jars once (into target/dependency; repeat after mvn clean or a pom.xml change)
+mvn dependency:copy-dependencies
 
 # 2. Compile tests
 mvn test-compile -Dmaven.test.skip=false
 
-# 3. Run a single test class
-java -cp "target/classes;target/test-classes;$(cat cp.txt)" \
+# 3. Run a single test class (quote the classpath: java expands the * itself)
+java -cp "target/classes;target/test-classes;target/dependency/*" \
      org.junit.runner.JUnitCore games.cantstop.TestCantStop
 ```
 

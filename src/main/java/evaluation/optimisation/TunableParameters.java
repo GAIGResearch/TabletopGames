@@ -187,6 +187,12 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                 tunable.setParameterValue(name, value);
             }
         }
+        // static parameters (e.g. a card list loaded from JSON) are not tunable, but must still be copied
+        for (String name : staticParameters) {
+            if (!tunable.staticParameters.contains(name))
+                tunable.staticParameters.add(name);
+            tunable.currentValues.put(name, currentValues.get(name));
+        }
         tunable.resetOn = true;
         tunable._reset();
         return tunable;

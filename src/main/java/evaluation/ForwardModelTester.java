@@ -70,6 +70,9 @@ public class ForwardModelTester {
             seed = rnd.nextInt();
             System.out.printf("Running Game %d of %s with seed %d at %tc%n", loop, gameToRun, seed, System.currentTimeMillis());
             game.reset(allPlayers, seed);
+            // some games can end during setup (e.g. Schwimmen when a special hand is dealt)
+            if (!game.getGameState().isNotTerminal())
+                continue;
 
             decision = 0;
             boolean allFine;

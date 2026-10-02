@@ -1,0 +1,20 @@
+{
+  "class": "games.cribbage.CribbageParameters",
+  "nCardsDealt": 6,
+  "nCardsToCrib": 2,
+  "nRounds": 2,
+  "targetScore": 0,
+  "maxCount": 31,
+  "fifteenPoints": 2,
+  "playFifteenPoints": 1,
+  "pairPoints": 2,
+  "pairRoyalPoints": 6,
+  "doublePairRoyalPoints": 12,
+  "thirtyOnePoints": 2,
+  "lastCardPoints": 1,
+  "hisHeelsPoints": 2,
+  "hisNobsPoints": 1,
+  "flushPoints": 4,
+  "cribFlushNeedsStarter": false,
+  "runsIncludeStarter": false
+}

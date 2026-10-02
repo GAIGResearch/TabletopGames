@@ -8,60 +8,55 @@ import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import games.gofish.actions.GoFishAsk;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.*;
 
+/**
+ * <p>The rules of Go Fish, as described at https://www.pagat.com/quartet/gofish.html.</p>
+ */
 public class GoFishForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
         GoFishGameState state = (GoFishGameState) firstState;
         GoFishParameters params = (GoFishParameters) state.getGameParameters();
+        int nPlayers = state.getNPlayers();
 
-        // Create and shuffle deck
         state.drawDeck = FrenchCard.generateDeck("DrawDeck", HIDDEN_TO_ALL);
         state.drawDeck.shuffle(state.getRnd());
 
-        // Init hands and books
         state.playerHands = new ArrayList<>();
         state.playerBooks = new ArrayList<>();
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            state.playerHands.add(new PartialObservableDeck<>("hand_" + i, i, state.getNPlayers(), VISIBLE_TO_OWNER));
+        for (int i = 0; i < nPlayers; i++) {
+            state.playerHands.add(new PartialObservableDeck<>("hand_" + i, i, nPlayers, VISIBLE_TO_OWNER));
             state.playerBooks.add(new Deck<>("books_" + i, i, VISIBLE_TO_ALL));
         }
 
-        // Deal
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            for (int j = 0; j < params.startingHandSize && state.drawDeck.getSize() > 0; j++) {
+        for (int j = 0; j < params.handSize(nPlayers); j++)
+            for (int i = 0; i < nPlayers; i++)
                 state.playerHands.get(i).add(state.drawDeck.draw());
-            }
-            state.checkAndCollectBooks(i);
-        }
+        for (int i = 0; i < nPlayers; i++)
+            layDownBooks(state, i);
+        state.extraTurn = false;
+        state.knownVoids = new GoFishKnownVoids(nPlayers);
         state.setFirstPlayer(0);
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         GoFishGameState state = (GoFishGameState) gameState;
-
         int currentPlayer = state.getCurrentPlayer();
         List<AbstractAction> actions = new ArrayList<>();
 
-        Deck<FrenchCard> hand = state.getPlayerHands().get(currentPlayer);
-
-        // Ask actions: each unique rank in hand × each opponent with at least 1 card
-        Set<Integer> ranks = new HashSet<>();
-        for (FrenchCard c : hand.getComponents()) ranks.add(c.number);
+        Set<Integer> ranks = new TreeSet<>();
+        for (FrenchCard c : state.getPlayerHands().get(currentPlayer).getComponents())
+            ranks.add(c.number);
 
         for (int target = 0; target < state.getNPlayers(); target++) {
-            if (target == currentPlayer) continue;
-            if (state.getPlayerHands().get(target).getSize() > 0) {
-                for (int r : ranks) actions.add(new GoFishAsk(target, r));
-            }
+            if (target == currentPlayer || state.getPlayerHands().get(target).getSize() == 0) continue;
+            for (int r : ranks)
+                actions.add(new GoFishAsk(target, r));
         }
         return actions;
     }
@@ -69,75 +64,69 @@ public class GoFishForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         GoFishGameState state = (GoFishGameState) gameState;
-        GoFishParameters  params = (GoFishParameters) state.getGameParameters();
-        int current = state.getCurrentPlayer();
+        GoFishParameters params = (GoFishParameters) state.getGameParameters();
+        layDownBooks(state, state.getCurrentPlayer());
 
-        // Interpret action outcome
-        boolean continuePlayerTurn = false;
-        if (action instanceof GoFishAsk ask) {
-            if (!ask.receivedCards) {
-                // Failed ask -> must draw if deck not empty
-                if (state.drawDeck.getSize() > 0) {
-                    FrenchCard card = state.drawDeck.draw();
-                    state.getPlayerHands().get(current).add(card);
-                    if (params.continueOnDrawingSameRank && card.number == ask.rankAsked) {
-                        continuePlayerTurn = true;
-                    }
-                }
+        if (!params.playUntilAllBooks) {
+            // the game ends as soon as a hand or the draw deck is empty
+            if (state.drawDeck.getSize() == 0 || holders(state) < state.getNPlayers())
+                endGame(state);
+            else if (!state.extraTurn)
+                passTurn(state);
+            return;
+        }
+
+        if (!state.extraTurn)
+            passTurn(state);
+        // a player about to take a turn with an empty hand draws a card, or is skipped if there is none to draw
+        while (state.isNotTerminal() && state.playerHands.get(state.getCurrentPlayer()).getSize() == 0) {
+            int player = state.getCurrentPlayer();
+            if (state.drawDeck.getSize() > 0) {
+                state.playerHands.get(player).add(state.drawDeck.draw());
+                state.knownVoids.drew(player);
+            } else if (holders(state) <= 1) {
+                break;
             } else {
-                if (params.continueFishingOnSuccess) {
-                    continuePlayerTurn = true;
-                }
+                passTurn(state);
             }
         }
-
-        // Books after any action
-        state.checkAndCollectBooks(current);
-
-        if (state.playerHands.get(current).getSize() == 0) {
-            continuePlayerTurn = false;  // special case
-        }
-
-        // End if terminal
-        if (isGameEnd(state)) {
+        // the game ends when the player to act has nobody to ask; once all 13 books are laid down nobody holds cards
+        if (state.isNotTerminal() && holders(state) <= 1)
             endGame(state);
-        } else {
-            if (!continuePlayerTurn) {
-                boolean nextPlayerFound = false;
-                do {
-                    endPlayerTurn(state);
-                    // then end round if we are back to the first player
-                    if (state.getCurrentPlayer() == state.getFirstPlayer()) {
-                        endRound(state);
-                    }
-                    current =  state.getCurrentPlayer();
-                    if (state.playerHands.get(current).getSize() == 0) {
-                        // draw card
-                        if (state.drawDeck.getSize() > 0) {
-                            state.playerHands.get(current).add(state.drawDeck.draw());
-                        } else {
-                            // we skip this player, they are now out of the game
-                        }
-                    } else {
-                        nextPlayerFound = true;
-                    }
-                } while (!nextPlayerFound);
-            }
-        }
     }
 
-    private boolean isGameEnd(GoFishGameState state) {
-        // All 13 ranks booked?
-        int totalBooks = 0;
-        for (Deck<FrenchCard> b : state.getPlayerBooks())
-            totalBooks += b.getSize() / 4;
-        if (totalBooks >= 13) return true;
-
-        // Only one player left with cards?
-        int count = 0;
-        for (int i = 0; i < state.getNPlayers(); i++)
-            if (state.getPlayerHands().get(i).getSize() > 0) count++;
-        return count <= 1;
+    private void passTurn(GoFishGameState state) {
+        endPlayerTurn(state);
+        if (state.getCurrentPlayer() == state.getFirstPlayer())
+            endRound(state);
     }
 
+    /**
+     * Moves any book (all four cards of a rank) in the player's hand to their books.
+     */
+    static void layDownBooks(GoFishGameState state, int playerId) {
+        Deck<FrenchCard> hand = state.playerHands.get(playerId);
+        Map<Integer, Integer> counts = new HashMap<>();
+        for (FrenchCard c : hand.getComponents())
+            counts.merge(c.number, 1, Integer::sum);
+        for (Map.Entry<Integer, Integer> e : counts.entrySet())
+            if (e.getValue() == 4)
+                state.playerBooks.get(playerId).add(removeCardsOfRank(hand, e.getKey()));
+    }
+
+    public static Deck<FrenchCard> removeCardsOfRank(Deck<FrenchCard> hand, int rank) {
+        Deck<FrenchCard> removed = new Deck<>("removed", HIDDEN_TO_ALL);
+        for (int i = hand.getSize() - 1; i >= 0; i--)
+            if (hand.get(i).number == rank)
+                removed.add(hand.pick(i));
+        return removed;
+    }
+
+    private static int holders(GoFishGameState state) {
+        int holders = 0;
+        for (Deck<FrenchCard> hand : state.playerHands)
+            if (hand.getSize() > 0)
+                holders++;
+        return holders;
+    }
 }

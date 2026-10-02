@@ -17,8 +17,8 @@ public class PenteParameters extends TunableParameters<PenteParameters> {
     public boolean canMovePiecesBackOnToBoardAfterRemoval = true;
     public boolean blotRuleActive = false;
     public boolean slideToMiddleOnSacredLine = false;
-    // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
-    // Schaedler's variant is startOffBoard=false, blotRuleActive = false, onePieceLimitOffSacredLine = true, mustMoveFromSacredLine = true, bearOffFromSacredLine = false
+    // Kidds variant is then to have startOffBoard=true, blotRuleActive = true, onePieceLimitOffSacredLine = false, mustMoveFromSacredLine = true, slideToMiddleOnSacredLine = false
+    // Schaedler's variant is startOffBoard=false, blotRuleActive = false, onePieceLimitOffSacredLine = true, mustMoveFromSacredLine = true, slideToMiddleOnSacredLine = false
     public String diceJSON = "";
     public Dice customDie = null;
 

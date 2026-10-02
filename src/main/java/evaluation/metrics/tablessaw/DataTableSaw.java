@@ -250,29 +250,35 @@ public class DataTableSaw implements IDataLogger {
      * @param idx - Index to filter by. If -1, then we don't filter by this index
      */
     private void filterAndRecordData(Map<AbstractMetric, Table> metricGroup, Set<String> allColumnNames, int gameID, String indexingColumnName, int idx) {
-        Map<String, String> rowData = new HashMap<>();
-        for (String colName : allColumnNames) {
-            rowData.put(colName, null);
-        }
-        boolean record = false;
-
-        // Find the row matching game ID and index in all the metric tables. If we don't find it, we add missing for the columns that metric is responsible for
+        // Filter each metric's table by game ID, then by index if needed
+        Map<AbstractMetric, Table> filteredGroup = new HashMap<>();
+        int nRows = 0;
         for (Map.Entry<AbstractMetric, Table> metricTableEntry : metricGroup.entrySet()) {
-            AbstractMetric m = metricTableEntry.getKey();
             Table metricData = metricTableEntry.getValue();
-            // Filter the table first by game ID
             Table filteredData = metricData.where(metricData.stringColumn("GameID").isEqualTo(String.valueOf(gameID)));
-            // Then find the indexing column, if needed
             if (indexingColumnName != null && idx > -1) {
                 filteredData = filteredData.where(filteredData.intColumn(indexingColumnName).isEqualTo(idx));
             }
-            if (filteredData.rowCount() == 1) {
-                // We only record if we find a row
-                record = true;
+            filteredGroup.put(metricTableEntry.getKey(), filteredData);
+            nRows = Math.max(nRows, filteredData.rowCount());
+        }
+
+        // There may be several rows for one index (e.g. one ACTION_CHOSEN per player on a simultaneous-move tick).
+        // We output one row for each; the k-th row of each metric is combined, as metrics record events in the same order.
+        // If a metric has no k-th row, we add missing for the columns that metric is responsible for
+        for (int k = 0; k < nRows; k++) {
+            Map<String, String> rowData = new HashMap<>();
+            for (String colName : allColumnNames) {
+                rowData.put(colName, null);
+            }
+            for (Map.Entry<AbstractMetric, Table> metricTableEntry : filteredGroup.entrySet()) {
+                AbstractMetric m = metricTableEntry.getKey();
+                Table filteredData = metricTableEntry.getValue();
+                if (filteredData.rowCount() <= k) continue;
 
                 // Add the data from the row
-                for (Column<?> c : metricData.columns()) {
-                    Object o = filteredData.column(c.name()).get(0);
+                for (Column<?> c : filteredData.columns()) {
+                    Object o = filteredData.column(c.name()).get(k);
                     if (o != null) {
                         String dataPoint = o.toString();
                         if (m.getColumnNames().contains(c.name())) {
@@ -285,10 +291,8 @@ public class DataTableSaw implements IDataLogger {
                     }
                 }
             }
-        }
 
-        // Here we should have one complete row, with or without missing values, but same size for all columns in the big table
-        if (record) {
+            // Here we should have one complete row, with or without missing values, but same size for all columns in the big table
             for (Map.Entry<String, String> entry : rowData.entrySet()) {
                 if (data.containsColumn(entry.getKey())) {
                     if (entry.getValue() == null) {
@@ -302,5 +306,4 @@ public class DataTableSaw implements IDataLogger {
             }
         }
     }
-
 }

@@ -351,9 +351,33 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     /**
+     * As Deck.equals, and each component must be visible to the same players, as must the next component added
+     * (deckVisibility).
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        PartialObservableDeck<?> that = (PartialObservableDeck<?>) o;
+        if (!Arrays.equals(deckVisibility, that.deckVisibility)) return false;
+        if (elementVisibility.size() != that.elementVisibility.size()) return false;
+        Iterator<boolean[]> other = that.elementVisibility.iterator();
+        // the arrays are compared by value: each deck holds its own copies
+        for (boolean[] visibility : elementVisibility)
+            if (!Arrays.equals(visibility, other.next())) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 31 * super.hashCode() + Arrays.hashCode(deckVisibility);
+        for (boolean[] visibility : elementVisibility)
+            result = 31 * result + Arrays.hashCode(visibility);
+        return result;
+    }
+
+    /**
      * Serializes the runtime state of this deck, including the per-deck and per-component visibility
-     * (which {@link Deck#equals} does not compare, but which is essential to preserve hidden
-     * information across a save/load). As for {@link Deck#toJSON}, every component must implement
+     * (which is essential to preserve hidden information across a save/load). As for {@link Deck#toJSON}, every component must implement
      * {@link core.interfaces.IToJSON}. Reconstruct with {@link #loadDeck}.
      */
     @Override
@@ -409,6 +433,8 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     @NotNull
     private PartialObservableDeck<T> commonCopy(PartialObservableDeck<T> dp) {
+        // the copy constructor sets MIXED_VISIBILITY, whatever this deck's mode is
+        dp.visibility = visibility;
         dp.deckVisibility = deckVisibility.clone();
 
         ArrayList<boolean[]> newVisibility = new ArrayList<>();

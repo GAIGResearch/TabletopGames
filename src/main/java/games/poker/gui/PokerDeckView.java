@@ -11,6 +11,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import static games.poker.gui.PokerGUIManager.*;
 
@@ -27,10 +30,12 @@ public class PokerDeckView extends ComponentView {
 
     // Rectangles where cards are drawn, used for highlighting
     Rectangle[] rects;
-    // Index of card highlighted
+    // Position (in the cards as drawn, left to right) of card highlighted
     int cardHighlight = -1;  // left click (or ALT+hover) show card, right click back in deck
     // If currently highlighting (ALT)
     boolean highlighting;
+    // Order in which to lay out the cards when face-up (null: deck order); display only
+    Comparator<FrenchCard> displayOrder;
 
     /**
      * Constructor initialising information and adding key/mouse listener for card highlight (left click or ALT + hover
@@ -113,23 +118,37 @@ public class PokerDeckView extends ComponentView {
             // Draw cards, 0 index on top
             int offset = Math.max((rect.width-pokerCardWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
-            for (int i = 0; i < deck.getSize(); i++) {
-                FrenchCard card = deck.get(i);
+            List<FrenchCard> cards = inDisplayOrder(deck);
+            for (int i = 0; i < cards.size(); i++) {
+                FrenchCard card = cards.get(i);
                 Image cardFace = getCardImage(card);
                 Rectangle r = new Rectangle(rect.x + offset * i, rect.y, pokerCardWidth, pokerCardHeight);
                 rects[i] = r;
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
                 g.drawRoundRect(r.x, r.y, r.width, r.height, 15, 15);
             }
-            if (cardHighlight != -1) {
+            if (cardHighlight != -1 && cardHighlight < cards.size()) {
                 // Draw this one on top
-                FrenchCard card = deck.get(cardHighlight);
+                FrenchCard card = cards.get(cardHighlight);
                 Image cardFace = getCardImage(card);
                 Rectangle r = rects[cardHighlight];
                 CardView.drawCard(g, r.x, r.y, r.width, r.height, card, cardFace, backOfCard, front);
                 g.drawRoundRect(r.x, r.y, r.width, r.height, 15, 15);
             }
         }
+    }
+
+    /** The cards in the order they are laid out: sorted by displayOrder only when face-up. */
+    private List<FrenchCard> inDisplayOrder(Deck<FrenchCard> deck) {
+        List<FrenchCard> cards = new ArrayList<>(deck.getComponents());
+        if (displayOrder != null && front)
+            cards.sort(displayOrder);
+        return cards;
+    }
+
+    /** Lay out the cards in this order when face-up (e.g. FrenchCard.HAND_DISPLAY_ORDER for a hand). */
+    public void setDisplayOrder(Comparator<FrenchCard> displayOrder) {
+        this.displayOrder = displayOrder;
     }
 
     @Override
