@@ -9,6 +9,7 @@ import games.euchre.EuchreParameters;
 import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
+import games.hareandtortoise.HareAndTortoiseParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
@@ -83,6 +84,16 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("maxRounds", 4);
         params.setParameterValue("zeroToleranceReduction", 2);
         new ForwardModelTester(params, "game=LawnAndOrder", "nGames=1", "nPlayers=5", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testHareAndTortoise() {
+        new ForwardModelTester("game=HareAndTortoise", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+        HareAndTortoiseParameters params = new HareAndTortoiseParameters();
+        params.setParameterValue("startLettuces", 1);
+        params.setParameterValue("nAnotherTurn", 2);
+        params.setParameterValue("maxRounds", 30);
+        new ForwardModelTester(params, "game=HareAndTortoise", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
     }
 
     @Test
