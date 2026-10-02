@@ -30,13 +30,6 @@ public class DrawOrDiscardCarrots extends OneShotExtendedAction {
     }
 
     @Override
-    public void _afterAction(AbstractGameState state, AbstractAction action) {
-        // the Move that drew the hare card pushed this sequence, and the framework reports that Move to it too
-        if (action instanceof ChewCarrot)
-            super._afterAction(state, action);
-    }
-
-    @Override
     public DrawOrDiscardCarrots copy() {
         DrawOrDiscardCarrots retValue = new DrawOrDiscardCarrots(player);
         retValue.executed = executed;

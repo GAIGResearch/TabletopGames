@@ -94,9 +94,6 @@ public class HareAndTortoiseForwardModel extends StandardForwardModel {
             return;
         }
 
-        if (state.isActionInProgress())
-            return;
-
         int current = state.getCurrentPlayer();
         if (state.anotherTurn) {
             state.anotherTurn = false;
