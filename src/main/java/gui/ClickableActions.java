@@ -32,12 +32,15 @@ public class ClickableActions {
     }
 
     /**
-     * Offers the actions for clicking, if a human player is to act in the state; otherwise withdraws them.
+     * Offers the actions for clicking, if the player they were computed for is a human; otherwise withdraws them.
+     *
+     * @param playerId the player being asked for an action (the player passed to update). With simultaneous moves
+     *                 this need not be the state's current player, so it is never taken from the state.
      */
-    public void offer(AbstractGameState state, List<AbstractAction> actions) {
-        if (state.isNotTerminal() && humanPlayers.contains(state.getCurrentPlayer())) {
+    public void offer(AbstractGameState state, List<AbstractAction> actions, int playerId) {
+        if (state.isNotTerminal() && humanPlayers.contains(playerId)) {
             offered = List.copyOf(actions);
-            player = state.getCurrentPlayer();
+            player = playerId;
         } else {
             withdraw();
         }

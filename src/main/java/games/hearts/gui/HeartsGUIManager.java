@@ -276,13 +276,16 @@ public class HeartsGUIManager extends AbstractGUIManager {
         if (state.getGamePhase() == HeartsGameState.Phase.PASSING)
             return "Passing " + passDirectionName(state) + ": each player passes "
                     + ((HeartsParameters) state.getGameParameters()).cardsPassedPerRound + " cards";
+        // the hold hand: say so for the whole hand, or the missing pass looks like a bug
+        String noPass = ((HeartsParameters) state.getGameParameters()).passCards && state.getPassDirection() == 0
+                ? "No passing this hand (every 4th hand is played as dealt).   " : "";
         Trick<FrenchCard, FrenchCard.Suite> trick = state.currentTrick;
         if (trick.getSize() == 0)
-            return "Player " + state.getCurrentPlayer() + " to lead" + (state.heartsBroken ? "" : " (hearts not broken)");
+            return noPass + "Player " + state.getCurrentPlayer() + " to lead" + (state.heartsBroken ? "" : " (hearts not broken)");
         StringJoiner plays = new StringJoiner(",  ");
         for (int i = 0; i < trick.getSize(); i++)
             plays.add("P" + trick.playerOf(i) + " " + cardName(trick.get(i)));
-        return "Trick: " + plays + "   (" + trick.getLeadSuit() + " led)";
+        return noPass + "Trick: " + plays + "   (" + trick.getLeadSuit() + " led)";
     }
 
     /**
@@ -395,11 +398,14 @@ public class HeartsGUIManager extends AbstractGUIManager {
             }
 
 
+            // passing is simultaneous: everyone still to pass is to act, not just the current player
+            Collection<Integer> toAct = hgs.getGamePhase() == HeartsGameState.Phase.PASSING && !hgs.isActionInProgress()
+                    ? hgs.getPlayersStillToPass() : List.of(gameState.getCurrentPlayer());
             for(int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(this.gameState);
 
 
-                if (i == gameState.getCurrentPlayer()) {
+                if (toAct.contains(i)) {
                     Border compound = BorderFactory.createCompoundBorder(
                             highlightActive, playerViewBorders[i]);
                     playerHands[i].setBorder(compound);
