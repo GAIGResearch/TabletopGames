@@ -341,7 +341,7 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         resourcePool = new JLabel("Resource pool: " + resourcePrint(gs.getResourcePool(), (CatanParameters) gs.getGameParameters()));
 
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            playerPanels[i]._update((CatanGameState) gameState);
+            playerPanels[i]._update((CatanGameState) gameState, showHiddenInfo(gameState, i) || !gameState.isNotTerminal());
         }
 
         String s = "<html><h3>Filtering actions? " + filterActions + "." + (filterActions? " Filters available:" : "") +"</h3><hr>";

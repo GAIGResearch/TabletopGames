@@ -34,6 +34,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
     final static int boardSize = 400;
 
     SaboteurGameState gs;
+    SaboteurBoardView boardView;
     SaboteurForwardModel fm;
     SaboteurGameParameters params;
 
@@ -134,7 +135,8 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 }
 
                 mainGameArea.add(top);
-                mainGameArea.add(new SaboteurBoardView(this, gs));
+                boardView = new SaboteurBoardView(this, gs);
+                mainGameArea.add(boardView);
                 mainGameArea.add(bottom);
 
                 // Add GUI listener
@@ -246,11 +248,10 @@ public class SaboteurGUIManager extends AbstractGUIManager {
             }
 
             // Update decks and visibility
+            boardView.viewer = viewingPlayer(gameState);
+            boardView.showAll = gameState.getCoreGameParameters().alwaysDisplayFullObservable;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || humanPlayerIds.contains(i)
-                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
-                playerHands[i].update(front);
+                playerHands[i].update(showHiddenInfo(gameState, i));
 
                 // Highlight active player
                 if (i == gameState.getCurrentPlayer()) {

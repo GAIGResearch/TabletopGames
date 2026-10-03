@@ -34,6 +34,8 @@ public abstract class AbstractGUIManager {
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;
+    // the actions a human player may choose by clicking on the game's views (see ClickableActions)
+    protected final ClickableActions clickable;
     protected JLabel gameStatus, playerStatus, turn, currentPlayer, gamePhase, playerScores;
     protected JTextPane historyInfo;
     protected JScrollPane historyContainer;
@@ -49,7 +51,8 @@ public abstract class AbstractGUIManager {
         this.maxActionSpace = getMaxActionSpace();
         this.parent = parent;
         this.game = game;
-        this.humanPlayerIds = human;
+        this.humanPlayerIds = human == null ? Set.of() : human;
+        this.clickable = new ClickableActions(ac, humanPlayerIds);
 
         gameStatus = new JLabel();
         playerStatus = new JLabel();
@@ -88,6 +91,7 @@ public abstract class AbstractGUIManager {
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace, player.getPlayerID());
+            clickable.offer(gameState, actions);
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
@@ -134,6 +138,8 @@ public abstract class AbstractGUIManager {
         actionButtons = new ActionButton[maxActionSpace];
         for (int i = 0; i < maxActionSpace; i++) {
             ActionButton ab = new ActionButton(ac, highlights, onActionSelected, onMouseEnter, onMouseExit);
+            // once an action is chosen with a button, a click on the views cannot choose another
+            ab.addActionListener(e -> clickable.withdraw());
             actionButtons[i] = ab;
             actionButtons[i].setVisible(false);
             actionPanel.add(actionButtons[i]);
@@ -163,6 +169,31 @@ public abstract class AbstractGUIManager {
 
     public Set<Integer> getHumanPlayerIds() {
         return humanPlayerIds;
+    }
+
+    /**
+     * Whether a player's hidden information (their hand, role, planned cards) is drawn face up: for a human player;
+     * for the player to move if the core parameters say so, or when no player is human (so an AI-only game can be
+     * watched); or for everyone in full-observability mode. Note that the player passed to _update is the player to
+     * move, not the viewer, so it must not be used to decide this.
+     */
+    public boolean showHiddenInfo(AbstractGameState state, int playerId) {
+        return humanPlayerIds.contains(playerId)
+                || state.getCoreGameParameters().alwaysDisplayFullObservable
+                || (playerId == state.getCurrentPlayer()
+                    && (humanPlayerIds.isEmpty() || state.getCoreGameParameters().alwaysDisplayCurrentPlayer));
+    }
+
+    /**
+     * The player whose view of hidden information is drawn when only one can be (Hanabi's hints, Colt Express's
+     * planned actions): the human player to move, else the first human player, else the player to move.
+     */
+    public int viewingPlayer(AbstractGameState state) {
+        int current = state.getCurrentPlayer();
+        if (humanPlayerIds.isEmpty() || humanPlayerIds.contains(current)
+                || state.getCoreGameParameters().alwaysDisplayCurrentPlayer)
+            return current;
+        return humanPlayerIds.stream().min(Integer::compare).orElse(current);
     }
 
     /**
@@ -279,8 +310,10 @@ public abstract class AbstractGUIManager {
         _update(player, gameState);
         if (showActions)
             updateActionButtons(player, gameState);
-        else
+        else {
             resetActionButtons();
+            clickable.withdraw();
+        }
         //      parent.revalidate();
         //      parent.repaint();
     }

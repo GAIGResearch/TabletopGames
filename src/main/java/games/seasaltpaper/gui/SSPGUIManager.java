@@ -90,5 +90,9 @@ public class SSPGUIManager extends AbstractGUIManager {
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+        for (int i = 0; i < playerViews.length; i++) {
+            playerViews[i].playerHandView.setFront(showHiddenInfo(gameState, i));
+            playerViews[i].repaint();
+        }
     }
 }

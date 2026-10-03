@@ -3,11 +3,17 @@ package games.hearts.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.actions.AbstractAction;
+import core.components.FrenchCard;
 import games.hearts.HeartsGameState;
 import games.hearts.HeartsParameters;
+import games.hearts.actions.Pass;
+import games.tricktaking.PlayCard;
+import games.tricktaking.Trick;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -16,9 +22,15 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Set;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
+import java.util.List;
 
+/**
+ * GUI for Hearts. A human player passes or plays a card by clicking it in their hand (see
+ * {@link gui.ClickableActions}); the action buttons stay as well.
+ */
 public class HeartsGUIManager extends AbstractGUIManager {
     final static int playerWidth = 300;
     final static int playerHeight = 130;
@@ -38,6 +50,11 @@ public class HeartsGUIManager extends AbstractGUIManager {
 
     Border highlightActive = BorderFactory.createLineBorder(new Color(47,132,220), 3);
     Border[] playerViewBorders;
+
+    static final Color playable = new Color(255, 210, 0);
+    // the state last shown, and the trick in progress
+    HeartsGameState shown;
+    JLabel trickText;
 
     public HeartsGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
@@ -113,6 +130,15 @@ public class HeartsGUIManager extends AbstractGUIManager {
                     playerHand.setBorder(title);
                     playerTrick.setBorder(title);
 
+                    int seat = i;
+                    playerHand.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            clicked(seat, e);
+                        }
+                    });
+                    playerHand.setToolTips(e -> toolTip(seat, e));
+
                     sides[i] = new JPanel();
                     sides[i].add(playerHand);
                     sides[i].add(playerTrick);
@@ -130,12 +156,22 @@ public class HeartsGUIManager extends AbstractGUIManager {
                 JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
 
+                trickText = new JLabel(" ");
+                trickText.setForeground(Color.white);
+                trickText.setFont(trickText.getFont().deriveFont(Font.BOLD, 14f));
+                trickText.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+                JPanel south = new JPanel(new BorderLayout());
+                south.setOpaque(false);
+                south.add(trickText, BorderLayout.NORTH);
+                south.add(actionPanel, BorderLayout.CENTER);
+
                 main.add(mainGameArea, BorderLayout.CENTER);
                 main.add(infoPanel, BorderLayout.NORTH);
-                main.add(actionPanel, BorderLayout.SOUTH);
+                main.add(south, BorderLayout.SOUTH);
 
                 pane.add("Main", main);
                 pane.add("Rules", rules);
+                pane.add("How to Play", new RulesView(howToPlayHtml(), height));
 
                 parent.setLayout(new BorderLayout());
                 parent.add(pane, BorderLayout.CENTER);
@@ -192,6 +228,147 @@ public class HeartsGUIManager extends AbstractGUIManager {
     }
 
     @Override
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions) {
+        super.update(player, gameState, showActions);
+        // after the actions are offered (or withdrawn) for this state
+        showClickable();
+    }
+
+    /**
+     * A left click on a card in the hand of the human player to act passes or plays it, if they may.
+     */
+    private void clicked(int seat, MouseEvent e) {
+        if (e.getButton() != MouseEvent.BUTTON1 || seat != clickable.player()) return;
+        AbstractAction action = actionFor(playerHands[seat].cardAt(e.getPoint()));
+        if (clickable.submit(action))
+            showClickable();
+    }
+
+    /**
+     * The pass or play of the card offered to the human player to act, or null.
+     */
+    private AbstractAction actionFor(FrenchCard card) {
+        if (card == null) return null;
+        List<AbstractAction> actions = clickable.matching(a ->
+                a instanceof Pass pass && pass.card1.equals(card) && pass.playerID == clickable.player()
+                        || a instanceof PlayCard<?> play && card.equals(play.card));
+        return actions.isEmpty() ? null : actions.get(0);
+    }
+
+    /**
+     * Outlines the cards the human player to act may pass or play, and shows the trick in progress.
+     */
+    private void showClickable() {
+        if (shown == null || playerHands == null) return;
+        int me = clickable.player();
+        for (int i = 0; i < playerHands.length; i++) {
+            Map<FrenchCard, Color> outlines = new HashMap<>();
+            if (i == me)
+                for (FrenchCard card : shown.getPlayerDecks().get(i).getComponents())
+                    if (actionFor(card) != null)
+                        outlines.put(card, playable);
+            playerHands[i].setOutlines(outlines);
+        }
+        trickText.setText(trickText(shown));
+    }
+
+    private String trickText(HeartsGameState state) {
+        if (state.getGamePhase() == HeartsGameState.Phase.PASSING)
+            return "Passing " + passDirectionName(state) + ": each player passes "
+                    + ((HeartsParameters) state.getGameParameters()).cardsPassedPerRound + " cards";
+        Trick<FrenchCard, FrenchCard.Suite> trick = state.currentTrick;
+        if (trick.getSize() == 0)
+            return "Player " + state.getCurrentPlayer() + " to lead" + (state.heartsBroken ? "" : " (hearts not broken)");
+        StringJoiner plays = new StringJoiner(",  ");
+        for (int i = 0; i < trick.getSize(); i++)
+            plays.add("P" + trick.playerOf(i) + " " + cardName(trick.get(i)));
+        return "Trick: " + plays + "   (" + trick.getLeadSuit() + " led)";
+    }
+
+    /**
+     * What clicking the card under the mouse would do, and what would follow.
+     */
+    private String toolTip(int seat, MouseEvent e) {
+        if (shown == null) return null;
+        FrenchCard card = playerHands[seat].cardAt(e.getPoint());
+        if (card == null || seat != clickable.player()) return null;
+        AbstractAction action = actionFor(card);
+        HeartsParameters params = (HeartsParameters) shown.getGameParameters();
+        if (action instanceof Pass) {
+            int to = (seat + shown.getPassDirection()) % shown.getNPlayers();
+            int passed = shown.pendingPasses.get(seat).size();
+            return html("Click to pass the " + cardName(card) + " to Player " + to + " (" + passDirectionName(shown) + ")",
+                    "Card " + (passed + 1) + " of the " + params.cardsPassedPerRound + " you pass",
+                    params.cardPoints(card) > 0 ? "It scores " + params.cardPoints(card) + " for whoever takes it" : "");
+        }
+        Trick<FrenchCard, FrenchCard.Suite> trick = shown.currentTrick;
+        if (action == null) {
+            FrenchCard.Suite lead = trick.getSize() == 0 ? null : trick.getLeadSuit();
+            return html("You cannot play the " + cardName(card) + " now",
+                    lead != null && card.suite != lead ? "You must follow " + lead + " if you can" : "");
+        }
+        List<String> lines = new ArrayList<>();
+        lines.add("Click to play the " + cardName(card));
+        Trick<FrenchCard, FrenchCard.Suite> after = trick.copy();
+        after.play(card);
+        if (trick.getSize() == 0)
+            lines.add("You lead the trick: the others must follow " + card.suite + " if they can");
+        else if (card.suite == trick.getLeadSuit())
+            lines.add("Follows " + card.suite);
+        else
+            lines.add("A discard: you have no " + trick.getLeadSuit());
+        if (trick.getSize() > 0) {
+            int winner = after.winner(null);
+            String who = winner == seat ? "You" : "Player " + winner;
+            lines.add(after.isComplete() ? who + " take" + (winner == seat ? "" : "s") + " the trick"
+                    : who + (winner == seat ? " would be winning" : " would still be winning") + " the trick so far");
+        }
+        int points = 0;
+        for (FrenchCard c : after.getComponents())
+            points += params.cardPoints(c);
+        lines.add("The trick would hold " + points + (points == 1 ? " point" : " points"));
+        if (card.suite == FrenchCard.Suite.Hearts && !shown.heartsBroken)
+            lines.add("This breaks hearts");
+        return html(lines.toArray(new String[0]));
+    }
+
+    private static String passDirectionName(HeartsGameState state) {
+        int direction = state.getPassDirection();
+        if (direction == 1) return "to the left";
+        if (direction == state.getNPlayers() - 1) return "to the right";
+        return "across";
+    }
+
+    private static String cardName(FrenchCard card) {
+        String rank = card.type == FrenchCard.FrenchCardType.Number ? String.valueOf(card.number) : card.type.name();
+        return rank + " of " + card.suite;
+    }
+
+    private static String html(String... lines) {
+        StringJoiner text = new StringJoiner("<br>", "<html>", "</html>");
+        for (String line : lines)
+            if (!line.isEmpty()) text.add(line);
+        return text.toString();
+    }
+
+    private static String howToPlayHtml() {
+        return "<h2>How to Play</h2>" +
+                "<p>Your hand is shown face up when it is your turn. Instead of using the action buttons below the " +
+                "table you can click on your cards.</p>" +
+                "<ul><li><b>Passing.</b> At the start of a round, click a card to pass it. Pass three cards, one " +
+                "click each. The line above the action buttons says which way the cards go.</li>" +
+                "<li><b>Playing.</b> Click a card to play it to the trick. The line above the action buttons shows " +
+                "the trick so far: who played what, and the suit led.</li></ul>" +
+                "<p>The cards you may pass or play have a yellow outline. A card without one cannot be played now, " +
+                "for example because you must follow the suit led.</p>" +
+                "<p><b>Tooltips.</b> Rest the mouse on a card to see what clicking it would do: who you would pass it " +
+                "to, or whether it follows suit, who would be winning the trick, how many points the trick would " +
+                "hold, and whether it breaks hearts. On a card you cannot play it says why.</p>" +
+                "<p>A left click on any card in a hand still raises it to the front so you can see it whole, as " +
+                "before.</p>";
+    }
+
+    @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
 
         if (gameState == null) {
@@ -199,21 +376,20 @@ public class HeartsGUIManager extends AbstractGUIManager {
         } else {
 
 
-            playerHands[gameState.getCurrentPlayer()].setFront(true);
             playerTricks[gameState.getCurrentPlayer()].setFront(true);
             playerStatus.setText(Arrays.toString(gameState.getPlayerResults()));
 
-
+            for (int i = 0; i < gameState.getNPlayers(); i++)
+                playerHands[i].setFront(showHiddenInfo(gameState, i));
 
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerHands[activePlayer].setCardHighlight(-1);
-                playerHands[activePlayer].setFront(false);
                 activePlayer = gameState.getCurrentPlayer();
-
             }
 
 
             HeartsGameState hgs = (HeartsGameState) gameState;
+            shown = hgs;
             if (hgs.isNotTerminal()) {
                 this.gameState = hgs;
             }

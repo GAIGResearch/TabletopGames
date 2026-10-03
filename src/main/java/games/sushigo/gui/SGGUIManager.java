@@ -173,8 +173,7 @@ public class SGGUIManager extends AbstractGUIManager {
                 SGGameState parsedGameState = (SGGameState) gameState;
                 for (int i = 0; i < gameState.getNPlayers(); i++) {
                     playerHands[i].update(parsedGameState);
-                    if (i == gameState.getCurrentPlayer()
-                            || humanPlayerIds.contains(i)) {
+                    if (showHiddenInfo(gameState, i)) {
                         playerHands[i].playerHandView.setFront(true);
                         playerHands[i].setFocusable(true);
                     } else {

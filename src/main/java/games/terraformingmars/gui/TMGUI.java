@@ -63,6 +63,8 @@ public class TMGUI extends AbstractGUIManager {
 
     public TMGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
+        // start on a human player's own cards
+        focusPlayer = humanPlayerIds.stream().min(Integer::compare).orElse(0);
         if (game == null) return;
 
         // Make backgroundImage the content pane.
@@ -551,10 +553,17 @@ public class TMGUI extends AbstractGUIManager {
 
             view.update(gs);
             playerView.update(gs);
-            playerHand.update(gs.getPlayerHands()[focusPlayer], false);
+            // another player's hand and card choice are hidden (shown as a count) unless allowed
+            boolean showHand = showHiddenInfo(gs, focusPlayer);
+            Deck<TMCard> hand = gs.getPlayerHands()[focusPlayer];
             Deck<TMCard> deck = gs.getPlayerCardChoice()[focusPlayer];
+            playerHand.update(showHand ? hand : hiddenDeck(), false);
+            paneHand.setToolTipText(showHand ? null : "Player " + focusPlayer + "'s hand is hidden: " + hand.getSize() + " cards");
             playerCardChoice.clearHighlights();
-            playerCardChoice.update(deck, gs.allCorpChosen() && deck.getSize() > 0);
+            playerCardChoice.update(showHand ? deck : hiddenDeck(), showHand && gs.allCorpChosen() && deck.getSize() > 0);
+            paneCardChoice.setToolTipText(showHand ? null : "Player " + focusPlayer + "'s card choice is hidden: " + deck.getSize() + " cards");
+            focusPlayerButton.setText("Current player: " + currentPlayerIdx
+                    + (showHand ? "" : "  (p" + focusPlayer + " hand hidden: " + hand.getSize() + " cards)"));
 
             // Display points and resource cards, + most recent card played
             if (gs.getPlayedCards()[focusPlayer].getSize() > 0) {
@@ -569,6 +578,10 @@ public class TMGUI extends AbstractGUIManager {
 
         }
         parent.repaint();
+    }
+
+    private static Deck<TMCard> hiddenDeck() {
+        return new Deck<>("Hidden", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
     }
 
     private Image getScaledImage(Image srcImg, int w, int h){

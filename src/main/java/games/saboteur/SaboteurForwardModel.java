@@ -142,7 +142,11 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
         for (SaboteurCard goalCard : sgs.goalDeck.getComponents()) {
             PathCard currentCard = (PathCard) goalCard;
-            sgs.gridBoard.setElement(sgp.goalSpacingX + sgs.startingSquare.getX(), startingY, currentCard);
+            int goalX = sgp.goalSpacingX + sgs.startingSquare.getX();
+            sgs.gridBoard.setElement(goalX, startingY, currentCard);
+            // goal cards start face down: seen only by a Map card or when a path reaches them
+            for (int p = 0; p < sgs.getNPlayers(); p++)
+                sgs.gridBoard.setElementVisibility(goalX, startingY, p, false);
             startingY += (sgp.goalSpacingY + 1);
         }
     }
@@ -205,7 +209,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
         //Check Each card in players deck
         //Switch Case for each type of card you would find in hand
-        boolean consideredRockfall = false;
+        boolean consideredRockfall = false, consideredMap = false;
         for (int i = 0; i < currentPlayersDeck.getSize(); i++) {
             SaboteurCard card = currentPlayersDeck.peek(i);
             switch (card.type) {
@@ -226,6 +230,13 @@ public class SaboteurForwardModel extends StandardForwardModel {
                             break;
                         else
                             consideredRockfall = true;
+                    }
+                    // likewise two Map cards are interchangeable (PlayMapCard names only the goal to look at)
+                    if (actionCard.actionType == Map) {
+                        if (consideredMap)
+                            break;
+                        else
+                            consideredMap = true;
                     }
                     actions.addAll(computeActionAction((ActionCard) card, i, sgs));
                     break;

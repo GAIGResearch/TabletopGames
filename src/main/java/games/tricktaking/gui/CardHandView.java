@@ -5,7 +5,11 @@ import core.components.Deck;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * One player's area: their hand, and a status line with the number of cards, whatever the game adds (tricks won,
@@ -23,6 +27,9 @@ public class CardHandView<C extends Component, S> extends JComponent {
 
     int nCards;
     String status = "";
+    // for a clickable GUI: the cards to outline (deck index to colour), and the tooltip for a mouse position
+    Map<Integer, Color> outlines = new HashMap<>();
+    Function<MouseEvent, String> toolTips;
 
     public CardHandView(CardFace<C, S> face, Deck<C> hand, int playerId, int playerAreaWidth) {
         this.face = face;
@@ -42,6 +49,15 @@ public class CardHandView<C extends Component, S> extends JComponent {
         g2.setColor(new Color(0, 0, 0, 120));
         g2.fillRoundRect(1, 1, getWidth() - 3, getHeight() - borderBottom + 22, 12, 12);
         handView.drawDeck(g2);
+        g2.setStroke(new BasicStroke(3));
+        for (Map.Entry<Integer, Color> outline : outlines.entrySet()) {
+            Shape shape = handView.visibleCardShape(outline.getKey());
+            if (shape != null) {
+                g2.setColor(outline.getValue());
+                g2.draw(shape);
+            }
+        }
+        g2.setStroke(new BasicStroke(1));
         g2.setColor(Color.white);
         g2.drawString(status, border, border + face.cardHeight() + 16);
     }
@@ -84,5 +100,33 @@ public class CardHandView<C extends Component, S> extends JComponent {
 
     public CardDeckView<C> getHandView() {
         return handView;
+    }
+
+    /**
+     * The deck index of the card shown at point p (in this view's coordinates), or -1 for none.
+     */
+    public int cardIndexAt(Point p) {
+        return handView.cardIndexAt(p);
+    }
+
+    /**
+     * Outlines the showing part of each card with the deck index given, in its colour; the rest are not outlined.
+     */
+    public void setOutlines(Map<Integer, Color> outlines) {
+        this.outlines = new HashMap<>(outlines);
+        repaint();
+    }
+
+    /**
+     * Shows a tooltip computed from the mouse position (null for none).
+     */
+    public void setToolTips(Function<MouseEvent, String> toolTips) {
+        this.toolTips = toolTips;
+        ToolTipManager.sharedInstance().registerComponent(this);
+    }
+
+    @Override
+    public String getToolTipText(MouseEvent e) {
+        return toolTips == null ? null : toolTips.apply(e);
     }
 }

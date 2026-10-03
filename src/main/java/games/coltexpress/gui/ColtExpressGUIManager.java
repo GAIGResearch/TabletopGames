@@ -220,10 +220,9 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 }
             }
             plannedActions.updateComponent(cegs.getPlannedActions());
-            int activePlayer = player != null? (gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer ||
-                    gameState.getCoreGameParameters().alwaysDisplayFullObservable? player.getPlayerID():
-                    humanPlayerIds.contains(player.getPlayerID())? player.getPlayerID():-1) : -1;
-            plannedActions.informActivePlayer(activePlayer);
+            // planned cards are drawn as the viewing (human) player sees them, or all in full-observability mode
+            plannedActions.informActivePlayer(viewingPlayer(gameState));
+            plannedActions.setFront(gameState.getCoreGameParameters().alwaysDisplayFullObservable);
 
             // Show planned actions from the first played
             plannedActions.setFirstOnTop(gameState.getGamePhase() == ExecuteActions);

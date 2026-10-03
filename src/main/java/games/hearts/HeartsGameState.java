@@ -114,6 +114,28 @@ public class HeartsGameState extends AbstractGameState implements ITrickTakingSt
         return toDecide;
     }
 
+    /**
+     * How many seats to the left the passed cards travel this round: left, right, across, and then
+     * a round with no passing at all. If passing is switched off in the parameters, there is never
+     * any passing.
+     */
+    public int getPassDirection() {
+        if (!((HeartsParameters) gameParameters).passCards)
+            return 0;
+        switch (getRoundCounter() % 4) {
+            case 0:
+                return 1;
+            case 1:
+                return getNPlayers() - 1;
+            case 2:
+                return getNPlayers() / 2;
+            case 3:
+                return 0;
+            default:
+                throw new IllegalStateException("Unexpected value: " + getRoundCounter());
+        }
+    }
+
     public Deck<FrenchCard> getDrawDeck() {
         return drawDeck;
     }
@@ -154,15 +176,8 @@ public class HeartsGameState extends AbstractGameState implements ITrickTakingSt
                 int points = 0;
 
                 // Iterate over all cards in the trick deck
-                for (FrenchCard card : trickDeck.getComponents()) {
-                    if (card.suite == FrenchCard.Suite.Hearts) {
-                        points += params.heartCard;
-                    }
-                    // The queen of spades is worth 13 points
-                    else if (card.equals(params.qosCard)) {
-                        points += params.queenOfSpades;
-                    }
-                }
+                for (FrenchCard card : trickDeck.getComponents())
+                    points += params.cardPoints(card);
 
                 if (points == params.shootTheMoon) {
                     // all other players get the points instead

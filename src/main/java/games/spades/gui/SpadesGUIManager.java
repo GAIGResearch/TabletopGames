@@ -233,7 +233,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
                 if (playerViews[i] != null) {
                     playerViews[i].setDeck(this.gameState.getPlayerHands().get(i));
                     // Show cards for human players
-                    playerViews[i].setVisible(humanPlayerIds.contains(i) || i == 0); // Always show player 0 for demo
+                    playerViews[i].setVisible(showHiddenInfo(this.gameState, i));
                 }
             }
         }
