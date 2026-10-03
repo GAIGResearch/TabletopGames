@@ -175,16 +175,15 @@ public class RiskTurnTest {
     private static final int PLAYER_1_REINFORCEMENTS = 32;
 
     @Test
-    public void fortifyingMovesAllOrHalfOfTheArmiesThatMayMoveAndEndsTheTurn() {
+    public void fortifyingMovesOneOrMoreArmiesAndEndsTheTurn() {
         give(state, 0, 1, AUSTRALIA);
         give(state, 0, 4, NEW_GUINEA);
         startPlay(state, 0, RiskGamePhase.FORTIFY, 0);
         fm.next(state, new Fortify(NEW_GUINEA, EASTERN_AUSTRALIA));
         assertTrue(state.currentActionInProgress() instanceof MoveArmiesChoice);
         assertEquals(0, state.getCurrentPlayer());
-        // all that may move (4 - 1) or half of it, rounded down
-        assertEquals(Set.of(new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1), new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 3)),
-                actionSet(fm, state));
+        assertEquals(Set.of(new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1), new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 2),
+                new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 3)), actionSet(fm, state)); // 1 .. 4 - 1
 
         fm.next(state, new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1));
         assertEquals(3, state.getArmies(NEW_GUINEA));
@@ -202,8 +201,34 @@ public class RiskTurnTest {
         give(state, 0, 2, NEW_GUINEA);
         startPlay(state, 0, RiskGamePhase.FORTIFY, 0);
         fm.next(state, new Fortify(NEW_GUINEA, EASTERN_AUSTRALIA));
-        // half of 1 rounds down to 0, so it is not offered
         assertEquals(Set.of(new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1)), actionSet(fm, state));
+    }
+
+    @Test
+    public void fortifyingWithManyArmiesOffersFiveEvenlySpacedNumbers() {
+        give(state, 0, 1, AUSTRALIA);
+        give(state, 0, 91, NEW_GUINEA);
+        startPlay(state, 0, RiskGamePhase.FORTIFY, 0);
+        fm.next(state, new Fortify(NEW_GUINEA, EASTERN_AUSTRALIA));
+        // 1 .. 90: 1, 1 + 89 / 4 = 23.25, 45.5, 67.75, 90, rounded
+        Set<AbstractAction> expected = new HashSet<>();
+        for (int n : List.of(1, 23, 46, 68, 90))
+            expected.add(new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, n));
+        assertEquals(expected, actionSet(fm, state));
+    }
+
+    @Test
+    public void maxMoveChoicesSetsHowManyNumbersAreOffered() {
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("maxMoveChoices", 3);
+        state = newState(3, 7, params);
+        arrangeBase(state);
+        give(state, 0, 1, AUSTRALIA);
+        give(state, 0, 11, NEW_GUINEA);
+        startPlay(state, 0, RiskGamePhase.FORTIFY, 0);
+        fm.next(state, new Fortify(NEW_GUINEA, EASTERN_AUSTRALIA));
+        assertEquals(Set.of(new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1), new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 6),
+                new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 10)), actionSet(fm, state)); // 1 .. 10
     }
 
     @Test

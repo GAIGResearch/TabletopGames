@@ -118,7 +118,7 @@ public class KlaverjassenGUIManager extends AbstractGUIManager {
         JPanel infoPanel = createGameStateInfoPanel("Klaverjassen", gameState, width, defaultInfoPanelHeight);
         // up to 8 cards can be legal at once, so the action panel is the vertical, scrolling list
         int actionPanelHeight = defaultActionPanelHeight * 2;
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

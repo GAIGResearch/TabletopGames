@@ -148,7 +148,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
         JPanel infoPanel = createGameStateInfoPanel("Spades", gameState, WINDOW_WIDTH, defaultInfoPanelHeight);
         
         // Action panel at bottom
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], WINDOW_WIDTH, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], WINDOW_WIDTH, defaultActionPanelHeight);
         
         mainPanel.add(infoPanel, BorderLayout.NORTH);
         mainPanel.add(gameArea, BorderLayout.CENTER);

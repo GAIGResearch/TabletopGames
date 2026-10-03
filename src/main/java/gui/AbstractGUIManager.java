@@ -111,28 +111,25 @@ public abstract class AbstractGUIManager {
      * @return - JComponent containing all action buttons.
      */
     protected JComponent createActionPanelOpaque(IScreenHighlight[] highlights, int width, int height, boolean opaque) {
-        return createActionPanel(highlights, width, height, true, opaque, null, null, null);
+        return createActionPanel(highlights, width, height, opaque, null, null, null);
     }
 
     protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height) {
-        return createActionPanel(highlights, width, height, true, true, null, null, null);
+        return createActionPanel(highlights, width, height, true, null, null, null);
     }
 
     protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, Consumer<ActionButton> onActionSelected) {
-        return createActionPanel(highlights, width, height, true, true, onActionSelected, null, null);
+        return createActionPanel(highlights, width, height, true, onActionSelected, null, null);
     }
 
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        return createActionPanel(highlights, width, height, boxLayout, true, null, null, null);
-    }
-
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout, boolean opaque, Consumer<ActionButton> onActionSelected,
+    /**
+     * The action buttons, as a grid of equal cells that fills each row across the panel and then wraps to the next,
+     * scrolling vertically when there are more than fit (see FlowGridLayout).
+     */
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean opaque, Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
-        JPanel actionPanel = new JPanel();
-        if (boxLayout) {
-            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
-        }
+        JPanel actionPanel = new ActionGridPanel(width);
 
         actionButtons = new ActionButton[maxActionSpace];
         for (int i = 0; i < maxActionSpace; i++) {
@@ -151,9 +148,7 @@ public abstract class AbstractGUIManager {
         pane.setMinimumSize(new Dimension(width, height));
         pane.setPreferredSize(new Dimension(width, height));
 
-        if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
+        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         actionPanel.setOpaque(opaque);
         pane.setOpaque(opaque);

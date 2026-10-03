@@ -53,7 +53,7 @@ public class HareAndTortoiseGUIManager extends AbstractGUIManager {
         side.setOpaque(false);
         side.add(playersView);
         side.add(Box.createVerticalStrut(8));
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], sideWidth, actionHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], sideWidth, actionHeight);
         actionPanel.setPreferredSize(new Dimension(sideWidth, actionHeight));
         actionPanel.setMaximumSize(new Dimension(sideWidth, actionHeight));
         side.add(actionPanel);

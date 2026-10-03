@@ -70,7 +70,7 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         boardView = new CatanBoardView(gs);
 
         // Bottom area will show actions available
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{boardView, this}, 800, defaultActionPanelHeight, false, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{boardView, this}, 800, defaultActionPanelHeight, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, null);
         actionFilterTooltips = new JLabel("Filtering: " + filterActions);
         JPanel bottomWrap = new JPanel();
         bottomWrap.setLayout(new BoxLayout(bottomWrap, BoxLayout.X_AXIS));
@@ -157,36 +157,15 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         javax.swing.SwingUtilities.invokeLater(() -> actionScrollPane.getVerticalScrollBar().setValue(0));
     }
 
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout,
-                                           boolean opaque,
+    @Override
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean opaque,
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setPreferredSize(new Dimension(width, height*10));
-        actionPanel.setOpaque(false);
-
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights, onActionSelected, onMouseEnter, onMouseExit);
-            actionButtons[i] = ab;
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.informAllActionButtons(actionButtons);
-        }
-
-        actionScrollPane = new JScrollPane(actionPanel);
-        actionScrollPane.setOpaque(false);
-        actionScrollPane.getViewport().setOpaque(false);
-        actionScrollPane.setPreferredSize(new Dimension(width, height));
+        // kept to scroll back to the top when the actions change
+        actionScrollPane = (JScrollPane) super.createActionPanel(highlights, width, height, opaque, onActionSelected,
+                onMouseEnter, onMouseExit);
         actionScrollPane.setMaximumSize(new Dimension(width, height));
-        actionScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        actionScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
-        if (boxLayout) {
-            actionScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
         return actionScrollPane;
     }
 

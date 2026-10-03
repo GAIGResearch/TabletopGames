@@ -121,7 +121,7 @@ public class WhistGUIManager extends AbstractGUIManager {
         JPanel infoPanel = createGameStateInfoPanel("Whist", gameState, width, defaultInfoPanelHeight);
         // 13 cards can be legal at once, so the action panel is the vertical, scrolling list, and taller than usual
         int actionPanelHeight = defaultActionPanelHeight * 2;
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

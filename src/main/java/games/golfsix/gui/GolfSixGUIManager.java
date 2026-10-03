@@ -115,7 +115,7 @@ public class GolfSixGUIManager extends AbstractGUIManager {
         mainGameArea.add(bottom, BorderLayout.SOUTH);
 
         JPanel infoPanel = createGameStateInfoPanel("Six-card Golf", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

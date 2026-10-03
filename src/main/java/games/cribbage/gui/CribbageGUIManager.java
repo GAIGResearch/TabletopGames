@@ -99,7 +99,7 @@ public class CribbageGUIManager extends AbstractGUIManager {
 
         JPanel infoPanel = createGameStateInfoPanel("Cribbage", gameState, width, defaultInfoPanelHeight);
         // a vertical list: the 15 discard options do not fit side by side
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

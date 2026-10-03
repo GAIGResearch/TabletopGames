@@ -144,7 +144,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 JPanel infoPanel = createGameStateInfoPanel("Saboteur", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, false, this::onActionSelected, this::onMouseEnter, this::onMouseExit);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, this::onActionSelected, this::onMouseEnter, this::onMouseExit);
                 actionPanel.setOpaque(false);
 
                 main.add(infoPanel, BorderLayout.NORTH);

@@ -133,7 +133,7 @@ public class CZEGUIManager extends AbstractGUIManager {
         mainGameArea.add(centreWrapper, BorderLayout.CENTER);
 
         JPanel infoPanel = createGameStateInfoPanel("Crazy Eights", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight, false);
+        JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, actionPanelHeight, false);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);
@@ -145,32 +145,6 @@ public class CZEGUIManager extends AbstractGUIManager {
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
-    }
-
-    /**
-     * Up to 31 actions can be offered at once (see getMaxActionSpace), so the buttons are laid out in rows
-     * and scroll vertically - the default single row would run far off the side of the window.
-     */
-    @Override
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        // wide enough columns for the longest label ("Play {Diamonds 8} nominating Spades")
-        JPanel actionPanel = new JPanel(new GridLayout(0, Math.max(3, width / 250), 4, 2));
-        actionPanel.setOpaque(false);
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            actionButtons[i] = new ActionButton(ac, highlights);
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton button : actionButtons)
-            button.informAllActionButtons(actionButtons);
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return pane;
     }
 
     /** A deck view with a caption above it, at a fixed size so the surrounding BoxLayout cannot squash it. */

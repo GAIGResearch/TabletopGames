@@ -241,19 +241,29 @@ public class RiskGameplayTest {
             assertFalse(phase + " decision with nowhere to place " + state.getArmiesToPlace(player),
                     placeTargets.isEmpty());
 
-        // a move-in offers min .. min(armies(from) - 1, room); a fortify move only that most and half of it
+        // a move-in or fortify move offers numbers from min to min(armies(from) - 1, room): all of them, or with more
+        // than maxMoveChoices, that many including both ends, evenly spaced (gaps differing by at most 1)
         if (inProgress && state.currentActionInProgress() instanceof MoveArmiesChoice c) {
             int max = state.getArmies(c.from) - 1;
             if (limit > 0) max = Math.min(max, limit - state.getArmies(c.to));
-            Set<AbstractAction> expected = new HashSet<>();
-            if (c.halfOrAll) {
-                expected.add(new MoveArmies(c.from, c.to, max));
-                if (max / 2 >= 1) expected.add(new MoveArmies(c.from, c.to, max / 2));
-            } else {
-                for (int k = c.min; k <= max; k++)
-                    expected.add(new MoveArmies(c.from, c.to, k));
+            String move = "move " + c.from + " -> " + c.to;
+            List<Integer> offered = new ArrayList<>();
+            for (AbstractAction a : actions) {
+                MoveArmies m = (MoveArmies) a;
+                assertEquals(move, c.from, m.from);
+                assertEquals(move, c.to, m.to);
+                offered.add(m.n);
             }
-            assertEquals("move " + c.from + " -> " + c.to, expected, new HashSet<>(actions));
+            Collections.sort(offered);
+            assertEquals(move, Math.min(params.maxMoveChoices, max - c.min + 1), new HashSet<>(offered).size());
+            assertEquals(move, c.min, (int) offered.get(0));
+            assertEquals(move, max, (int) offered.get(offered.size() - 1));
+            int minGap = Integer.MAX_VALUE, maxGap = 0;
+            for (int i = 1; i < offered.size(); i++) {
+                minGap = Math.min(minGap, offered.get(i) - offered.get(i - 1));
+                maxGap = Math.max(maxGap, offered.get(i) - offered.get(i - 1));
+            }
+            assertTrue(move + " " + offered, offered.size() < 2 || maxGap - minGap <= 1);
         }
 
         // FORTIFY offers a Fortify from each territory with 2+ armies to each territory with room in its fortifyReach,

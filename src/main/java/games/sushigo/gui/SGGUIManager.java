@@ -108,7 +108,7 @@ public class SGGUIManager extends AbstractGUIManager {
 
                 // Bottom area will show actions available
                 if (!humanID.isEmpty()) {
-                    JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, false, null, null, null);
+                    JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, null, null, null);
                     parent.add(actionPanel, BorderLayout.SOUTH);
                 }
 

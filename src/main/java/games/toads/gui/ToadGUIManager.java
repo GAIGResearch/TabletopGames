@@ -90,7 +90,7 @@ public class ToadGUIManager extends AbstractGUIManager {
 
         JPanel infoPanel = createGameStateInfoPanel("War of the Toads", gameState, width, defaultInfoPanelHeight);
         // up to 10 actions at once, so a vertical list, tall enough for the 5 options of the opening return
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(table, BorderLayout.CENTER);

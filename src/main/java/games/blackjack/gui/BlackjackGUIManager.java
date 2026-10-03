@@ -107,7 +107,7 @@ public class BlackjackGUIManager extends AbstractGUIManager {
         tabs.add("Rules", new RulesView(rulesHtml(params), height));
 
         JPanel infoPanel = createGameStateInfoPanel("Blackjack", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(table, BorderLayout.CENTER);
         main.add(actionPanel, BorderLayout.SOUTH);

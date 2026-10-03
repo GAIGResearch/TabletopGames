@@ -53,7 +53,7 @@ public class MMGUIManager extends AbstractGUIManager {
         parent.add(resultPane, BorderLayout.LINE_END);
 
         JPanel infoPanel = createGameStateInfoPanel("Mastermind", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{guessView}, width, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{guessView}, width, defaultActionPanelHeight);
 
         parent.add(infoPanel, BorderLayout.PAGE_START);
         parent.add(actionPanel, BorderLayout.PAGE_END);

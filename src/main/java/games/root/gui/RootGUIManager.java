@@ -148,7 +148,7 @@ public class RootGUIManager extends AbstractGUIManager {
             parent.setLayout(new BorderLayout());
             parent.add(TopPanel, BorderLayout.NORTH);
             parent.add(CenterPanel, BorderLayout.CENTER);
-            Component actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+            Component actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true, null, null, null);
             parent.add(actionPanel, BorderLayout.SOUTH);
             parent.setBgColor(Color.white);
             parent.revalidate();

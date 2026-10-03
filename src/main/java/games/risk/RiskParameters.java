@@ -21,6 +21,9 @@ public class RiskParameters extends TunableParameters<RiskParameters> {
     public boolean randomTerritoryDeal = true;
     // armies are placed this many at a time while a player has more than this left to place, then one at a time
     public int placementBatch = 5;
+    // the most choices of how many armies to move (fortifying or moving in): the least, the most, and evenly spaced
+    // numbers between
+    public int maxMoveChoices = 5;
     public int territoriesPerArmy = 3;
     public int minReinforcements = 3;
     public int maxAttackDice = 3;
@@ -50,6 +53,7 @@ public class RiskParameters extends TunableParameters<RiskParameters> {
         addTunableParameter("startArmies6", 20, Arrays.asList(15, 20, 25));
         addTunableParameter("randomTerritoryDeal", true);
         addTunableParameter("placementBatch", 5, Arrays.asList(1, 3, 5));
+        addTunableParameter("maxMoveChoices", 5, Arrays.asList(2, 3, 5, 10));
         addTunableParameter("territoriesPerArmy", 3, Arrays.asList(2, 3, 4));
         addTunableParameter("minReinforcements", 3, Arrays.asList(1, 2, 3, 4));
         addTunableParameter("maxAttackDice", 3);
@@ -81,6 +85,7 @@ public class RiskParameters extends TunableParameters<RiskParameters> {
         startArmies6 = (int) getParameterValue("startArmies6");
         randomTerritoryDeal = (boolean) getParameterValue("randomTerritoryDeal");
         placementBatch = (int) getParameterValue("placementBatch");
+        maxMoveChoices = (int) getParameterValue("maxMoveChoices");
         territoriesPerArmy = (int) getParameterValue("territoriesPerArmy");
         minReinforcements = (int) getParameterValue("minReinforcements");
         maxAttackDice = (int) getParameterValue("maxAttackDice");

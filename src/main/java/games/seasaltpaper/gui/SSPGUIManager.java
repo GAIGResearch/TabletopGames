@@ -70,7 +70,7 @@ public class SSPGUIManager extends AbstractGUIManager {
         mainGameArea.add(drawDiscardPanel, BorderLayout.CENTER);
 
         JPanel infoPanel = createGameStateInfoPanel("Sea Salt and Paper", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true, null, null, null);
 
 //        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + 20));
         parent.setLayout(new BorderLayout());

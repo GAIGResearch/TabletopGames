@@ -116,7 +116,7 @@ public class HanabiGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Hanabi", gameState, width, defaultInfoPanelHeight+50);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true, null, null, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());

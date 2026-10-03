@@ -113,7 +113,7 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
             JPanel infoPanel = createGameStateInfoPanel("MonopolyDeal", gameState, width, defaultInfoPanelHeight);
 
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, false, null, null, null);
+            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, null, null, null);
 
             // Add all views to frame
             parent.setLayout(new BoxLayout(parent, BoxLayout.Y_AXIS));

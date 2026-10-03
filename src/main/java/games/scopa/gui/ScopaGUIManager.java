@@ -125,7 +125,7 @@ public class ScopaGUIManager extends AbstractGUIManager {
         JPanel infoPanel = createGameStateInfoPanel("Scopa", gameState, width, defaultInfoPanelHeight);
         // a card may capture in several ways, so there can be more actions than fit on one row
         int actionPanelHeight = defaultActionPanelHeight * 2;
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

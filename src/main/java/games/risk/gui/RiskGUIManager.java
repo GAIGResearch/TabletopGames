@@ -62,8 +62,8 @@ public class RiskGUIManager extends AbstractGUIManager {
         gameArea.add(playersView);
 
         JPanel infoPanel = createGameStateInfoPanel("Risk", gameState, width, defaultInfoPanelHeight);
-        // a vertical, scrolling list: a turn can offer hundreds of attacks or fortifying moves
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionHeight, true);
+        // a turn can offer hundreds of fortifying moves: the panel scrolls
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(gameArea, BorderLayout.CENTER);
@@ -153,8 +153,9 @@ public class RiskGUIManager extends AbstractGUIManager {
                         "or you are down to one army. " : "") +
                 "When you take a territory you move in at least as many armies as dice rolled.</li>" +
                 "<li><b>Fortify</b> (optional). Move armies once, from one territory " + fortify +
-                ": all the armies that may move (all but one) or half of them. Then your turn ends.</li></ol>" +
-                limit +
+                ", leaving at least one behind. Then your turn ends.</li></ol>" + limit +
+                "<p>When moving armies (fortifying or moving in), at most " + p.maxMoveChoices + " numbers are " +
+                "offered: the least, the most, and evenly spaced numbers between.</p>" +
                 "<h3><a name='cards'>Cards</a></h3>" +
                 "<p>If you took at least one territory in your turn, you draw one card when you end your " +
                 "attacks. A set is three cards with the same symbol, one of each symbol, or any two with a wild " +

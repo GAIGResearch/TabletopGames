@@ -128,7 +128,7 @@ public class EuchreGUIManager extends AbstractGUIManager {
         JPanel infoPanel = createGameStateInfoPanel("Euchre", gameState, width, defaultInfoPanelHeight);
         // up to 7 actions at once, so the action panel is the vertical, scrolling list, and taller than usual
         int actionPanelHeight = defaultActionPanelHeight * 2;
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

@@ -70,8 +70,10 @@ public class RiskExpertFlowTest {
         s.setNextRolls(6, 6, 6, 1);
         fm.next(s, new Attack(NORTH_AFRICA, EGYPT, 3));
         assertEquals(0, s.getOwner(EGYPT));
-        // 3 .. min(11 - 1, room 12 - 0) = 3 .. 10
-        assertEquals(8, actionSet(fm, s).size());
+        // 3 .. min(11 - 1, room 12 - 0) = 3 .. 10: 5 of them, evenly spaced (3 + 7 * i / 4, rounded)
+        assertEquals(Set.of(new MoveArmies(NORTH_AFRICA, EGYPT, 3), new MoveArmies(NORTH_AFRICA, EGYPT, 5),
+                new MoveArmies(NORTH_AFRICA, EGYPT, 7), new MoveArmies(NORTH_AFRICA, EGYPT, 8),
+                new MoveArmies(NORTH_AFRICA, EGYPT, 10)), actionSet(fm, s));
         fm.next(s, new MoveArmies(NORTH_AFRICA, EGYPT, 3));
         assertEquals(8, s.getArmies(NORTH_AFRICA));
         assertEquals(3, s.getArmies(EGYPT));
@@ -89,9 +91,10 @@ public class RiskExpertFlowTest {
                 new EndTurn());
         assertEquals(expected, actionSet(fm, s));
         fm.next(s, new Fortify(SOUTH_AFRICA, EGYPT));
-        // all that may move, min(12 - 1, room 12 - 3 = 9), or half of it
-        assertEquals(Set.of(new MoveArmies(SOUTH_AFRICA, EGYPT, 4), new MoveArmies(SOUTH_AFRICA, EGYPT, 9)),
-                actionSet(fm, s));
+        // 1 .. min(12 - 1, room 12 - 3 = 9): 5 of them, evenly spaced
+        assertEquals(Set.of(new MoveArmies(SOUTH_AFRICA, EGYPT, 1), new MoveArmies(SOUTH_AFRICA, EGYPT, 3),
+                new MoveArmies(SOUTH_AFRICA, EGYPT, 5), new MoveArmies(SOUTH_AFRICA, EGYPT, 7),
+                new MoveArmies(SOUTH_AFRICA, EGYPT, 9)), actionSet(fm, s));
         fm.next(s, new MoveArmies(SOUTH_AFRICA, EGYPT, 9));
         assertEquals(3, s.getArmies(SOUTH_AFRICA));
         assertEquals(12, s.getArmies(EGYPT));

@@ -96,7 +96,7 @@ public class LawnAndOrderGUIManager extends AbstractGUIManager {
         mainGameArea.add(players, BorderLayout.CENTER);
 
         JPanel infoPanel = createGameStateInfoPanel("Lawn and Order", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

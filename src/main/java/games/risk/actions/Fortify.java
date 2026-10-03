@@ -8,8 +8,8 @@ import games.risk.RiskTerritory;
 import java.util.Objects;
 
 /**
- * Starts the current player's fortifying move from one territory to another. The number of armies - all that may
- * move, or half of them - is a follow-on choice.
+ * Starts the current player's fortifying move from one territory to another. The number of armies is a follow-on
+ * choice.
  */
 public class Fortify extends AbstractAction {
 
@@ -24,7 +24,7 @@ public class Fortify extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         RiskGameState state = (RiskGameState) gs;
-        state.setActionInProgress(new MoveArmiesChoice(state.getCurrentPlayer(), from, to, 1, true));
+        state.setActionInProgress(new MoveArmiesChoice(state.getCurrentPlayer(), from, to, 1));
         return true;
     }
 

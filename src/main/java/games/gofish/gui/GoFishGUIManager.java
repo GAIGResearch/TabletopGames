@@ -125,7 +125,7 @@ public class GoFishGUIManager extends AbstractGUIManager {
 
         JPanel infoPanel = createGameStateInfoPanel("Go Fish", gameState, width, defaultInfoPanelHeight);
         // a vertical list, as there can be many asks (see getMaxActionSpace)
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

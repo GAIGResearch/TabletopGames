@@ -78,7 +78,7 @@ public class PresidentGUIManager extends AbstractGUIManager {
         main.setOpaque(false);
         main.add(createGameStateInfoPanel("President", state, width, defaultInfoPanelHeight), BorderLayout.NORTH);
         main.add(tableArea, BorderLayout.CENTER);
-        main.add(createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true), BorderLayout.SOUTH);
+        main.add(createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight), BorderLayout.SOUTH);
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.setOpaque(false);

@@ -82,4 +82,21 @@ public final class RiskUtils {
         }
         return sorted;
     }
+
+    /**
+     * The numbers from min to max, or with more than maxChoices of them, min, max and maxChoices - 2 numbers evenly
+     * spaced between (rounded). None when max < min.
+     */
+    public static List<Integer> spread(int min, int max, int maxChoices) {
+        List<Integer> numbers = new ArrayList<>();
+        if (max - min + 1 <= maxChoices) {
+            for (int n = min; n <= max; n++)
+                numbers.add(n);
+            return numbers;
+        }
+        int steps = Math.max(1, maxChoices - 1);
+        for (int i = 0; i <= steps; i++)
+            numbers.add(min + (int) Math.round((double) i * (max - min) / steps));
+        return numbers;
+    }
 }

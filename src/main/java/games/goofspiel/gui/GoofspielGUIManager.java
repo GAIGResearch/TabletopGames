@@ -116,7 +116,7 @@ public class GoofspielGUIManager extends AbstractGUIManager {
 
         JPanel infoPanel = createGameStateInfoPanel("Goofspiel", gameState, width, defaultInfoPanelHeight);
         // up to 13 bids at once: a vertical, scrolling list
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);

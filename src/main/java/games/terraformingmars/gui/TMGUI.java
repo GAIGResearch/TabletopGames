@@ -225,7 +225,7 @@ public class TMGUI extends AbstractGUIManager {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(fontColor);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null, null, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false, null, null, null);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
