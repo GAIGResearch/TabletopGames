@@ -113,6 +113,10 @@ import games.hareandtortoise.HareAndTortoiseForwardModel;
 import games.hareandtortoise.HareAndTortoiseGameState;
 import games.hareandtortoise.HareAndTortoiseParameters;
 import games.hareandtortoise.gui.HareAndTortoiseGUIManager;
+import games.risk.RiskForwardModel;
+import games.risk.RiskGameState;
+import games.risk.RiskParameters;
+import games.risk.gui.RiskGUIManager;
 import games.lawnandorder.LawnAndOrderForwardModel;
 import games.lawnandorder.LawnAndOrderGameState;
 import games.lawnandorder.gui.LawnAndOrderGUIManager;
@@ -355,6 +359,10 @@ public enum GameType {
             Arrays.asList(Animals, Strategy),
             Arrays.asList(Race, LoseATurn, MovementPoints),
             HareAndTortoiseGameState.class, HareAndTortoiseForwardModel.class, HareAndTortoiseParameters.class, HareAndTortoiseGUIManager.class),
+    Risk(3, 6,
+            Arrays.asList(Strategy, Wargame, TerritoryBuilding, Dice),
+            Arrays.asList(DiceRolling, AreaMovement, PlayerElimination, SetCollection, HandManagement, VariableSetup),
+            RiskGameState.class, RiskForwardModel.class, RiskParameters.class, RiskGUIManager.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),

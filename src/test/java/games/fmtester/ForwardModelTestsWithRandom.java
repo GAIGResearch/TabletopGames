@@ -10,6 +10,7 @@ import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
 import games.hareandtortoise.HareAndTortoiseParameters;
+import games.risk.RiskParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
@@ -100,6 +101,25 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("nMissATurn", 2);
         params.setParameterValue("maxRounds", 40);
         new ForwardModelTester(params, "game=HareAndTortoise", "nGames=1", "nPlayers=4");
+    }
+
+    @Test
+    public void testRisk() {
+        // the rounds are capped because the tester's checks grow with the square of the game's length, and random
+        // play rarely ends a game of Risk within the default 100 rounds
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("maxRounds", 30);
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=3");
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=6");
+        // Secret Mission with the expert rules and the defender choosing dice
+        params = new RiskParameters();
+        params.setParameterValue("secretMission", true);
+        params.setParameterValue("defenderChoosesDice", true);
+        params.setParameterValue("linearTradeValues", true);
+        params.setParameterValue("fortifyAlongPath", true);
+        params.setParameterValue("maxArmiesPerTerritory", 12);
+        params.setParameterValue("maxRounds", 30);
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=4");
     }
 
     @Test

@@ -10,6 +10,7 @@ import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
 import games.hareandtortoise.HareAndTortoiseParameters;
+import games.risk.RiskParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
@@ -94,6 +95,21 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("nAnotherTurn", 2);
         params.setParameterValue("maxRounds", 30);
         new ForwardModelTester(params, "game=HareAndTortoise", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testRisk() {
+        // a short round cap, because a full game of Risk with MCTS players takes thousands of decisions
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("maxRounds", 8);
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+        params = new RiskParameters();
+        params.setParameterValue("secretMission", true);
+        params.setParameterValue("defenderChoosesDice", true);
+        params.setParameterValue("maxArmiesPerTerritory", 12);
+        params.setParameterValue("fortifyAlongPath", true);
+        params.setParameterValue("maxRounds", 8);
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
     }
 
     @Test
