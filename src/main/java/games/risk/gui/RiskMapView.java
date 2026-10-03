@@ -6,6 +6,7 @@ import games.risk.RiskContinent;
 import games.risk.RiskGameState;
 import games.risk.RiskMap;
 import games.risk.RiskTerritory;
+import games.risk.actions.AttackDiceChoice;
 import games.risk.actions.DefenderDice;
 import games.risk.actions.MoveArmiesChoice;
 
@@ -86,6 +87,9 @@ public class RiskMapView extends JComponent {
         } else if (state.currentActionInProgress() instanceof DefenderDice d) {
             outlined.add(d.from);
             outlined.add(d.to);
+        } else if (state.currentActionInProgress() instanceof AttackDiceChoice a) {
+            outlined.add(a.from);
+            outlined.add(a.to);
         }
 
         Font armyFont = new Font("SansSerif", Font.BOLD, 13);

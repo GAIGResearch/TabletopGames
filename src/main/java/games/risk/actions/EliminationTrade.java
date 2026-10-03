@@ -5,9 +5,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.risk.RiskGameState;
 import games.risk.RiskParameters;
-import games.risk.RiskTerritory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,10 +31,7 @@ public class EliminationTrade implements IExtendedSequence {
         RiskGameState state = (RiskGameState) gs;
         if (mustTrade(state))
             return TradeCards.options(state, player);
-        List<AbstractAction> actions = new ArrayList<>();
-        for (RiskTerritory t : state.getPlaceableTerritories(player))
-            actions.add(new PlaceArmy(t));
-        return actions;
+        return PlaceArmy.options(state, player);
     }
 
     private boolean mustTrade(RiskGameState state) {

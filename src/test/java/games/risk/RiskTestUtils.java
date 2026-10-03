@@ -86,6 +86,24 @@ class RiskTestUtils {
         return set;
     }
 
+    /**
+     * The actions available, with each ChooseAttack replaced by the follow-on choices it leads to (the Attacks with
+     * each number of dice, and the Blitz).
+     */
+    static Set<AbstractAction> attackOptions(RiskForwardModel fm, RiskGameState state) {
+        Set<AbstractAction> set = new HashSet<>();
+        for (AbstractAction action : actionSet(fm, state)) {
+            if (action instanceof games.risk.actions.ChooseAttack) {
+                RiskGameState copy = (RiskGameState) state.copy();
+                fm.next(copy, action);
+                set.addAll(actionSet(fm, copy));
+            } else {
+                set.add(action);
+            }
+        }
+        return set;
+    }
+
     /** The RISK card of the territory (value-equal to the one in the deck). */
     static RiskCard card(RiskTerritory t) {
         return new RiskCard(t);

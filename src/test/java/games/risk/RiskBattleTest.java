@@ -135,6 +135,6 @@ public class RiskBattleTest {
                 new Blitz(INDONESIA, NEW_GUINEA), new Blitz(INDONESIA, WESTERN_AUSTRALIA),     // one Blitz per pair
                 new Blitz(SIAM, CHINA), new Blitz(SIAM, INDIA),
                 new EndAttack());
-        assertEquals(expected, actionSet(fm, state));
+        assertEquals(expected, attackOptions(fm, state));
     }
 }

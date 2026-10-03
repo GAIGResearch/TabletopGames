@@ -107,6 +107,7 @@ public class RiskMapTest {
     public void aGameOnAVariantMapUsesThatMap() {
         RiskParameters params = new RiskParameters();
         params.setParameterValue("mapFile", TEST_MAP);
+        params.setParameterValue("randomTerritoryDeal", false);
         RiskGameState state = newState(3, 7, params);
         RiskMap map = state.getMap();
         assertEquals(6, state.getTerritories(-1).size());

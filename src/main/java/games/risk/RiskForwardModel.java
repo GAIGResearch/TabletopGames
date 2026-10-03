@@ -95,28 +95,20 @@ public class RiskForwardModel extends StandardForwardModel {
                 for (RiskTerritory t : state.getTerritories(-1))
                     actions.add(new ClaimTerritory(t));
             }
-            case PLACE_INITIAL -> {
-                for (RiskTerritory t : state.getPlaceableTerritories(player))
-                    actions.add(new PlaceArmy(t));
-            }
+            case PLACE_INITIAL -> actions.addAll(PlaceArmy.options(state, player));
             case REINFORCE -> {
                 actions.addAll(TradeCards.options(state, player));
                 // with handLimit or more cards, the player must trade before placing
                 if (state.getHand(player).getSize() < params.handLimit)
-                    for (RiskTerritory t : state.getPlaceableTerritories(player))
-                        actions.add(new PlaceArmy(t));
+                    actions.addAll(PlaceArmy.options(state, player));
             }
             case ATTACK -> {
-                for (RiskTerritory from : state.getTerritories(player)) {
-                    int maxDice = Math.min(params.maxAttackDice, state.getArmies(from) - 1);
-                    for (RiskTerritory to : state.getMap().neighbours(from))
-                        if (state.getOwner(to) != player && maxDice > 0) {
-                            for (int n = 1; n <= maxDice; n++)
-                                actions.add(new Attack(from, to, n));
-                            if (params.allowBlitz)
-                                actions.add(new Blitz(from, to));
-                        }
-                }
+                // the dice (or a Blitz) are a follow-on choice (AttackDiceChoice)
+                for (RiskTerritory from : state.getTerritories(player))
+                    if (state.getArmies(from) >= 2)
+                        for (RiskTerritory to : state.getMap().neighbours(from))
+                            if (state.getOwner(to) != player)
+                                actions.add(new ChooseAttack(from, to));
                 actions.add(new EndAttack());
             }
             case FORTIFY -> {

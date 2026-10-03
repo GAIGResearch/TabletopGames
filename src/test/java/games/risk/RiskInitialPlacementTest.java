@@ -22,8 +22,15 @@ public class RiskInitialPlacementTest {
 
     @Before
     public void setup() {
-        state = newState(3, 7, null);
+        state = newState(3, 7, claimParams());
         f = state.getFirstPlayer();
+    }
+
+    /** The territories are claimed one at a time, not dealt. */
+    private static RiskParameters claimParams() {
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("randomTerritoryDeal", false);
+        return params;
     }
 
     private static Set<AbstractAction> claims(Collection<RiskTerritory> territories) {
@@ -32,9 +39,9 @@ public class RiskInitialPlacementTest {
         return set;
     }
 
-    private static Set<AbstractAction> placements(Collection<RiskTerritory> territories) {
+    private static Set<AbstractAction> placements(Collection<RiskTerritory> territories, int n) {
         Set<AbstractAction> set = new HashSet<>();
-        for (RiskTerritory t : territories) set.add(new PlaceArmy(t));
+        for (RiskTerritory t : territories) set.add(new PlaceArmy(t, n));
         return set;
     }
 
@@ -72,25 +79,62 @@ public class RiskInitialPlacementTest {
         state = randomDealState();
         List<RiskTerritory> held = state.getTerritories(f);
         assertEquals(14, held.size());
-        assertEquals(placements(held), actionSet(fm, state));
+        // 35 - 14 dealt = 21 left: initialPlacementBatch (5) at a time
+        assertEquals(placements(held, 5), actionSet(fm, state));
     }
 
     @Test
-    public void placingAnInitialArmyAddsItAndPassesTheTurn() {
+    public void placingAnInitialBatchAddsItAndPassesTheTurn() {
         state = randomDealState();
         RiskTerritory t = state.getTerritories(f).get(0);
-        fm.next(state, new PlaceArmy(t));
-        assertEquals(2, state.getArmies(t));
-        assertEquals(20, state.getArmiesToPlace(f)); // 35 - 14 dealt - 1
+        fm.next(state, new PlaceArmy(t, 5));
+        assertEquals(6, state.getArmies(t));
+        assertEquals(16, state.getArmiesToPlace(f)); // 35 - 14 dealt - 5
         assertEquals((f + 1) % 3, state.getCurrentPlayer());
         assertEquals(RiskGamePhase.PLACE_INITIAL, state.getGamePhase());
+    }
+
+    @Test
+    public void armiesArePlacedInBatchesWhileMoreThanABatchIsLeftThenOneAtATime() {
+        state = randomDealState();
+        List<RiskTerritory> held = state.getTerritories(f);
+        state.setArmiesToPlace(f, 6);
+        assertEquals(placements(held, 5), actionSet(fm, state));
+        state.setArmiesToPlace(f, 5);
+        assertEquals(placements(held, 1), actionSet(fm, state));
+        state.setArmiesToPlace(f, 1);
+        assertEquals(placements(held, 1), actionSet(fm, state));
+    }
+
+    @Test
+    public void withABatchOfOneArmiesArePlacedOneAtATime() {
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("placementBatch", 1);
+        state = newState(3, 7, params);
+        f = state.getFirstPlayer();
+        assertEquals(placements(state.getTerritories(f), 1), actionSet(fm, state));
+    }
+
+    @Test
+    public void aBatchIsCutToTheRoomLeftUnderMaxArmiesPerTerritory() {
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("maxArmiesPerTerritory", 8);
+        state = newState(3, 7, params);
+        f = state.getFirstPlayer();
+        List<RiskTerritory> held = state.getTerritories(f);
+        RiskTerritory crowded = held.get(0), full = held.get(1);
+        state.addArmies(crowded, 5); // 6: room for 2
+        state.addArmies(full, 7);    // 8: no room
+        Set<AbstractAction> expected = placements(held.subList(2, held.size()), 5);
+        expected.add(new PlaceArmy(crowded, 2));
+        assertEquals(expected, actionSet(fm, state));
     }
 
     @Test
     public void playersWithNoArmiesLeftToPlaceAreSkipped() {
         state = randomDealState();
         state.setArmiesToPlace((f + 1) % 3, 0);
-        fm.next(state, new PlaceArmy(state.getTerritories(f).get(0)));
+        fm.next(state, new PlaceArmy(state.getTerritories(f).get(0), 5));
         assertEquals((f + 2) % 3, state.getCurrentPlayer());
         assertEquals(RiskGamePhase.PLACE_INITIAL, state.getGamePhase());
     }
@@ -123,7 +167,7 @@ public class RiskInitialPlacementTest {
     @Test
     public void claimingContinuesTheRotationIntoPlaceInitial() {
         // 4 players: 42 claims in territory order; claim i is made by (first + i) % 4
-        Game game = newGame(4, 3);
+        Game game = newGame(4, 3, claimParams());
         RiskGameState s = (RiskGameState) game.getGameState();
         AbstractForwardModel gfm = game.getForwardModel();
         int first = s.getFirstPlayer();
@@ -150,21 +194,24 @@ public class RiskInitialPlacementTest {
 
     @Test
     public void wholeInitialPlacementLeadsToTheFirstPlayersFirstTurn() {
-        Game game = newGame(3, 9);
+        Game game = newGame(3, 9, claimParams());
         RiskGameState s = (RiskGameState) game.getGameState();
         AbstractForwardModel gfm = game.getForwardModel();
         int first = s.getFirstPlayer();
         List<RiskTerritory> all = WorldMap.ALL;
         for (int i = 0; i < 42; i++)
             gfm.next(s, new ClaimTerritory(all.get(i)));
-        // each holds 14 and has 35 - 14 = 21 to place; 42 claims is a whole number of rotations, so first goes next
-        for (int j = 0; j < 63; j++) {
+        // each holds 14 and has 35 - 14 = 21 to place; 42 claims is a whole number of rotations, so first goes next.
+        // 21 -> 16 -> 11 -> 6 -> 1 in batches of 5, then the last one alone: 5 placements each
+        int[] batches = {5, 5, 5, 5, 1};
+        for (int j = 0; j < 15; j++) {
             int p = (first + j) % 3;
             assertEquals("placement " + j, p, s.getCurrentPlayer());
             assertEquals(RiskGamePhase.PLACE_INITIAL, s.getGamePhase());
             RiskTerritory t = s.getTerritories(p).get(0);
-            assertTrue(gfm.computeAvailableActions(s).contains(new PlaceArmy(t)));
-            gfm.next(s, new PlaceArmy(t));
+            PlaceArmy place = new PlaceArmy(t, batches[j / 3]);
+            assertTrue(gfm.computeAvailableActions(s).contains(place));
+            gfm.next(s, place);
         }
         assertEquals(RiskGamePhase.REINFORCE, s.getGamePhase());
         assertEquals(first, s.getCurrentPlayer());

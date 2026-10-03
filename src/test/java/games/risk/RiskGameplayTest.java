@@ -177,7 +177,8 @@ public class RiskGameplayTest {
         int lost = 0;
         for (int p = 0; p < n; p++) {
             int expected = before[p];
-            if (p == actor && (action instanceof PlaceArmy || action instanceof ClaimTerritory)) expected--;
+            if (p == actor && action instanceof PlaceArmy pa) expected -= pa.n;
+            if (p == actor && action instanceof ClaimTerritory) expected--;
             if (p == actor && action instanceof TradeCards) {
                 // the trade adds the value of the set, unless maxArmiesPerTerritory leaves no room for any of them
                 assertEquals(setsBefore + 1, state.getNSetsTraded());
@@ -240,13 +241,18 @@ public class RiskGameplayTest {
             assertFalse(phase + " decision with nowhere to place " + state.getArmiesToPlace(player),
                     placeTargets.isEmpty());
 
-        // a move-in or fortify move offers min .. min(armies(from) - 1, room)
+        // a move-in offers min .. min(armies(from) - 1, room); a fortify move only that most and half of it
         if (inProgress && state.currentActionInProgress() instanceof MoveArmiesChoice c) {
             int max = state.getArmies(c.from) - 1;
             if (limit > 0) max = Math.min(max, limit - state.getArmies(c.to));
             Set<AbstractAction> expected = new HashSet<>();
-            for (int k = c.min; k <= max; k++)
-                expected.add(new MoveArmies(c.from, c.to, k));
+            if (c.halfOrAll) {
+                expected.add(new MoveArmies(c.from, c.to, max));
+                if (max / 2 >= 1) expected.add(new MoveArmies(c.from, c.to, max / 2));
+            } else {
+                for (int k = c.min; k <= max; k++)
+                    expected.add(new MoveArmies(c.from, c.to, k));
+            }
             assertEquals("move " + c.from + " -> " + c.to, expected, new HashSet<>(actions));
         }
 
@@ -535,7 +541,7 @@ public class RiskGameplayTest {
 
     @Test
     public void randomSecretMissionGamesRunToTheEndWithMissionWins() {
-        // secretMission, randomTerritoryDeal left false (forced on by secretMission); checkMissions at every
+        // secretMission, randomTerritoryDeal set false (forced on by secretMission); checkMissions at every
         // decision, the mission-win branch of checkResults at the end
         Map<String, Integer> taken = new HashMap<>();
         int missionWins = 0;

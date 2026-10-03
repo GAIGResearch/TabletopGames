@@ -190,7 +190,8 @@ public class RiskCardTradeTest {
         assertEquals(3, state.getArmies(ALASKA)); // 1 + 2
         assertEquals(7, state.getArmiesToPlace(0)); // 3 + 4
         // 3 cards left: placing is allowed again; the Cavalry set no longer earns a bonus
-        assertEquals(set(new PlaceArmy(ALASKA), new PlaceArmy(GREENLAND), new PlaceArmy(INDONESIA),
+        // 7 to place: placementBatch (5) at a time
+        assertEquals(set(new PlaceArmy(ALASKA, 5), new PlaceArmy(GREENLAND, 5), new PlaceArmy(INDONESIA, 5),
                 new TradeCards(CAVALRY_SET, null)), actionSet(fm, state));
         fm.next(state, new TradeCards(CAVALRY_SET, null));
         assertEquals(1, state.getArmies(GREENLAND));
@@ -211,8 +212,8 @@ public class RiskCardTradeTest {
                 new TradeCards(List.of(card(NORTHWEST_TERRITORY), card(ALBERTA), card(PERU)), null)),
                 actionSet(fm, state));
         fm.next(state, new TradeCards(agn, null));
-        // 2 cards left (Peru, Alberta): no set, and placing again
-        assertEquals(set(new PlaceArmy(INDONESIA)), actionSet(fm, state));
+        // 2 cards left (Peru, Alberta): no set, and placing again, 5 of the 7 at a time
+        assertEquals(set(new PlaceArmy(INDONESIA, 5)), actionSet(fm, state));
         assertEquals(7, state.getArmiesToPlace(0)); // 3 + 4
     }
 

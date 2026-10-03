@@ -55,8 +55,11 @@ public class RiskExpertFlowTest {
         // the fourth set, linear: 4 + (4 - 1) = 7 -> 3 + 7 = 10 to place; bonus min(2, 12 - 11) = 1
         assertEquals(10, s.getArmiesToPlace(0));
         assertEquals(12, s.getArmies(SOUTH_AFRICA));
+        // 10 -> 5 in a batch of 5, then the last 5 one at a time
+        assertEquals(Set.of(new PlaceArmy(CONGO, 5), new PlaceArmy(NORTH_AFRICA, 5)), actionSet(fm, s));
+        fm.next(s, new PlaceArmy(NORTH_AFRICA, 5));
         assertEquals(Set.of(new PlaceArmy(CONGO), new PlaceArmy(NORTH_AFRICA)), actionSet(fm, s));
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             assertEquals(RiskGamePhase.REINFORCE, s.getGamePhase());
             fm.next(s, new PlaceArmy(NORTH_AFRICA));
         }
@@ -86,9 +89,9 @@ public class RiskExpertFlowTest {
                 new EndTurn());
         assertEquals(expected, actionSet(fm, s));
         fm.next(s, new Fortify(SOUTH_AFRICA, EGYPT));
-        // 1 .. min(12 - 1, room 12 - 3 = 9)
-        assertEquals(9, actionSet(fm, s).size());
-        assertTrue(fm.computeAvailableActions(s).contains(new MoveArmies(SOUTH_AFRICA, EGYPT, 9)));
+        // all that may move, min(12 - 1, room 12 - 3 = 9), or half of it
+        assertEquals(Set.of(new MoveArmies(SOUTH_AFRICA, EGYPT, 4), new MoveArmies(SOUTH_AFRICA, EGYPT, 9)),
+                actionSet(fm, s));
         fm.next(s, new MoveArmies(SOUTH_AFRICA, EGYPT, 9));
         assertEquals(3, s.getArmies(SOUTH_AFRICA));
         assertEquals(12, s.getArmies(EGYPT));

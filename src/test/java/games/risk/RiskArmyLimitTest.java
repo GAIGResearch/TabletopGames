@@ -107,7 +107,7 @@ public class RiskArmyLimitTest {
                 new Attack(ARGENTINA, PERU, 1), new Attack(ARGENTINA, PERU, 2), new Attack(ARGENTINA, PERU, 3),
                 new Attack(ARGENTINA, BRAZIL, 1), new Attack(ARGENTINA, BRAZIL, 2), new Attack(ARGENTINA, BRAZIL, 3),
                 new Blitz(ARGENTINA, PERU), new Blitz(ARGENTINA, BRAZIL), new EndAttack());
-        assertEquals(expected, actionSet(fm, state));
+        assertEquals(expected, attackOptions(fm, state));
     }
 
     @Test
@@ -164,7 +164,8 @@ public class RiskArmyLimitTest {
         assertEquals(7, state.getArmiesToPlace(0));
         assertTrue(state.isTerritoryBonusTaken());
         assertEquals(RiskGamePhase.REINFORCE, state.getGamePhase());
-        assertEquals(Set.of(new PlaceArmy(INDONESIA)), actionSet(fm, state));
+        // 7 left: placementBatch (5) at a time
+        assertEquals(Set.of(new PlaceArmy(INDONESIA, 5)), actionSet(fm, state));
     }
 
     @Test
@@ -309,14 +310,12 @@ public class RiskArmyLimitTest {
                 actionSet(fm, state));
         fm.next(state, new TradeCards(INFANTRY_SET, null));
         assertEquals(8, state.getArmiesToPlace(0)); // the third set: 8
-        // room: Indonesia 4 - 1 = 3, Siam 4 - 3 = 1
-        assertEquals(Set.of(new PlaceArmy(INDONESIA), new PlaceArmy(SIAM)), actionSet(fm, state));
+        // a batch of 5, cut to the room: Indonesia 4 - 1 = 3, Siam 4 - 3 = 1
+        assertEquals(Set.of(new PlaceArmy(INDONESIA, 3), new PlaceArmy(SIAM)), actionSet(fm, state));
         fm.next(state, new PlaceArmy(SIAM));
-        assertEquals(Set.of(new PlaceArmy(INDONESIA)), actionSet(fm, state));
-        for (int i = 0; i < 3; i++) {
-            assertTrue(state.isActionInProgress());
-            fm.next(state, new PlaceArmy(INDONESIA));
-        }
+        assertEquals(Set.of(new PlaceArmy(INDONESIA, 3)), actionSet(fm, state));
+        assertTrue(state.isActionInProgress());
+        fm.next(state, new PlaceArmy(INDONESIA, 3));
         // 8 - 4 placed = 4 left with both territories at 4: lost, and attacking resumes
         assertEquals(4, state.getArmies(INDONESIA));
         assertEquals(4, state.getArmies(SIAM));

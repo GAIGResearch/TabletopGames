@@ -102,7 +102,7 @@ public class RiskEliminationCardsTest {
         assertEquals(5, state.getHand(0).getSize());
         fm.next(state, new MoveArmies(INDONESIA, SIAM, 3)); // Indonesia 3, Siam 3
         assertFalse(state.isActionInProgress());
-        assertEquals(attackActions(3), actionSet(fm, state));
+        assertEquals(attackActions(3), attackOptions(fm, state));
         assertEquals(0, state.getArmiesToPlace(0));
     }
 
@@ -155,7 +155,7 @@ public class RiskEliminationCardsTest {
         // attacking resumes
         assertFalse(state.isActionInProgress());
         assertEquals(RiskGamePhase.ATTACK, state.getGamePhase());
-        assertEquals(attackActions(7), actionSet(fm, state));
+        assertEquals(attackActions(7), attackOptions(fm, state));
         assertEquals(44, allCards(state).size());
 
         // and the capture still earns a card at the end of attacking: 3 + 1
@@ -192,8 +192,12 @@ public class RiskEliminationCardsTest {
         assertEquals(18, state.getArmiesToPlace(0)); // 8 + 10 (fourth set)
         assertEquals(4, state.getNSetsTraded());
 
+        // 18 -> 13 -> 8 -> 3 in batches of 5, then the last 3 one at a time
+        assertEquals(Set.of(new PlaceArmy(INDONESIA, 5), new PlaceArmy(SIAM, 5)), actionSet(fm, state));
+        for (int i = 0; i < 3; i++)
+            fm.next(state, new PlaceArmy(INDONESIA, 5));
         assertEquals(Set.of(new PlaceArmy(INDONESIA), new PlaceArmy(SIAM)), actionSet(fm, state));
-        for (int i = 0; i < 18; i++)
+        for (int i = 0; i < 3; i++)
             fm.next(state, new PlaceArmy(INDONESIA));
         assertEquals(21, state.getArmies(INDONESIA)); // 3 + 18
         assertFalse(state.isActionInProgress());

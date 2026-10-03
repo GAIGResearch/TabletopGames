@@ -8,15 +8,15 @@ import games.risk.RiskTerritory;
 import java.util.Objects;
 
 /**
- * Starts the current player's fortifying move from one territory to another. The number of armies - all that may
- * move, or half of them - is a follow-on choice.
+ * Starts the current player's attack from one territory on another. The number of dice (or a Blitz) is a follow-on
+ * choice.
  */
-public class Fortify extends AbstractAction {
+public class ChooseAttack extends AbstractAction {
 
     public final RiskTerritory from;
     public final RiskTerritory to;
 
-    public Fortify(RiskTerritory from, RiskTerritory to) {
+    public ChooseAttack(RiskTerritory from, RiskTerritory to) {
         this.from = from;
         this.to = to;
     }
@@ -24,23 +24,23 @@ public class Fortify extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         RiskGameState state = (RiskGameState) gs;
-        state.setActionInProgress(new MoveArmiesChoice(state.getCurrentPlayer(), from, to, 1, true));
+        state.setActionInProgress(new AttackDiceChoice(state.getCurrentPlayer(), from, to));
         return true;
     }
 
     @Override
-    public Fortify copy() {
+    public ChooseAttack copy() {
         return this;
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Fortify other && other.from.equals(from) && other.to.equals(to);
+        return o instanceof ChooseAttack other && other.from.equals(from) && other.to.equals(to);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(from, to) + 731211;
+        return Objects.hash(from, to) + 731229;
     }
 
     @Override
@@ -50,6 +50,6 @@ public class Fortify extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Fortify(" + from + ", " + to + ")";
+        return "ChooseAttack(" + from + ", " + to + ")";
     }
 }

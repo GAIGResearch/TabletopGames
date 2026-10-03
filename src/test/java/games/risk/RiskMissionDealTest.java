@@ -85,7 +85,9 @@ public class RiskMissionDealTest {
 
     @Test
     public void withoutSecretMissionNobodyHasAMission() {
-        RiskGameState state = newState(4, 7, null);
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("randomTerritoryDeal", false);
+        RiskGameState state = newState(4, 7, params);
         for (int p = 0; p < 4; p++)
             assertNull(state.getMission(p));
         assertEquals(RiskGamePhase.CLAIM, state.getGamePhase()); // the territories are claimed as usual

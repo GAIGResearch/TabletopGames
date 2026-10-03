@@ -147,7 +147,7 @@ public class RiskDefenderDiceTest {
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(RiskGamePhase.ATTACK, state.getGamePhase());
         assertFalse(state.hasCapturedThisTurn());
-        assertEquals(indonesiaAttacks(4), actionSet(fm, state)); // up to min(3, 4 - 1) dice
+        assertEquals(indonesiaAttacks(4), attackOptions(fm, state)); // up to min(3, 4 - 1) dice
     }
 
     @Test

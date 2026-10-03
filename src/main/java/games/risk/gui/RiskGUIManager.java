@@ -81,8 +81,8 @@ public class RiskGUIManager extends AbstractGUIManager {
     public int getMaxActionSpace() {
         // This is called before the game is known, so it cannot read the map. The most actions offered at once on the
         // world map is in FORTIFY with fortifyAlongPath, when one player holds all but one of the 42 territories, all
-        // connected: a Fortify from each to each of the others, 41 x 40 = 1640, and EndTurn. ATTACK offers at most 4
-        // for each of the 83 connections (3 dice counts and a Blitz), 332, and EndAttack.
+        // connected: a Fortify from each to each of the others, 41 x 40 = 1640, and EndTurn. ATTACK offers a ChooseAttack
+        // for each of the 83 connections, and EndAttack; the dice are then a choice of at most 4.
         return 1641;
     }
 
@@ -125,19 +125,23 @@ public class RiskGUIManager extends AbstractGUIManager {
                 "player who is not in the game or is already out, is to occupy " + p.getMap().backupTerritories() +
                 " territories instead.</p>"
                 : "<p><b>Winning.</b> The player who holds every territory wins.</p>";
+        String placing = p.placementBatch > 1
+                ? p.placementBatch + " armies at a time while more than " + p.placementBatch + " are left, then one " +
+                "at a time"
+                : "one army at a time";
         return "<h2>Risk</h2>" +
                 "<p><a href='#setup'>Setup</a> | <a href='#turn'>Turn</a> | <a href='#cards'>Cards</a> | " +
                 "<a href='#end'>End</a> | <a href='#screen'>Screen</a></p>" +
                 "<h3><a name='setup'>Setup</a></h3>" + setup +
-                "Then each player places one army at a time on a territory they hold, until all their starting " +
-                "armies are on the board.</p>" +
+                "Then each player in turn places " + placing + " on a territory they hold, until all their " +
+                "starting armies are on the board.</p>" +
                 "<table border=1 cellpadding=3 cellspacing=0><tr><th>Players</th><th>3</th><th>4</th><th>5</th>" +
                 "<th>6</th></tr><tr><td>Starting armies</td><td>" + p.startArmies3 + "</td><td>" + p.startArmies4 +
                 "</td><td>" + p.startArmies5 + "</td><td>" + p.startArmies6 + "</td></tr></table>" +
                 "<h3><a name='turn'>Turn</a></h3><ol>" +
                 "<li><b>Reinforce.</b> You receive the number of territories you hold divided by " +
                 p.territoriesPerArmy + " (at least " + p.minReinforcements + "), plus the bonus for each " +
-                "continent you hold entirely (shown on the map). Place them one at a time. You may trade in " +
+                "continent you hold entirely (shown on the map). Place them " + placing + ". You may trade in " +
                 "cards before placing the last.</li>" +
                 "<li><b>Attack</b> (optional). Attack from a territory with at least 2 armies to a neighbouring " +
                 "enemy territory, rolling up to " + p.maxAttackDice + " dice but fewer than your armies there. " +
@@ -149,7 +153,8 @@ public class RiskGUIManager extends AbstractGUIManager {
                         "or you are down to one army. " : "") +
                 "When you take a territory you move in at least as many armies as dice rolled.</li>" +
                 "<li><b>Fortify</b> (optional). Move armies once, from one territory " + fortify +
-                ", leaving at least one behind. Then your turn ends.</li></ol>" + limit +
+                ": all the armies that may move (all but one) or half of them. Then your turn ends.</li></ol>" +
+                limit +
                 "<h3><a name='cards'>Cards</a></h3>" +
                 "<p>If you took at least one territory in your turn, you draw one card when you end your " +
                 "attacks. A set is three cards with the same symbol, one of each symbol, or any two with a wild " +
@@ -165,9 +170,10 @@ public class RiskGUIManager extends AbstractGUIManager {
                 "<h3><a name='screen'>Screen</a></h3><ul>" +
                 "<li>Each disc is a territory, in its owner's colour with its armies, ringed in its continent's " +
                 "colour. Lines join neighbours. Alaska and Kamchatka are joined off the edges of the map.</li>" +
-                "<li>A black ring marks the two territories of a move-in or a defence waiting for a choice.</li>" +
+                "<li>A black ring marks the two territories of an attack, move-in or defence waiting for a choice.</li>" +
                 "<li>The panel on the right lists the players (the one to act is marked &gt;), their cards by " +
                 "symbol (I Infantry, C Cavalry, A Artillery, W wild) and their mission when you may see them.</li>" +
-                "<li>The actions are listed below the map. Attack(from, to, n) rolls n dice once.</li></ul>";
+                "<li>The actions are listed below the map. ChooseAttack(from, to) picks the attack, " +
+                "then Attack(from, to, n) rolls n dice once" + (p.allowBlitz ? " or Blitz attacks to the end" : "") + ".</li></ul>";
     }
 }

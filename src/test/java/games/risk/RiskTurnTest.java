@@ -123,7 +123,7 @@ public class RiskTurnTest {
                 new Attack(NEW_GUINEA, EASTERN_AUSTRALIA, 1), new Attack(NEW_GUINEA, EASTERN_AUSTRALIA, 2), // 3 - 1
                 new Blitz(INDONESIA, SIAM), new Blitz(NEW_GUINEA, EASTERN_AUSTRALIA), // allowBlitz (default): one per pair
                 new EndAttack());
-        assertEquals(expected, actionSet(fm, state));
+        assertEquals(expected, attackOptions(fm, state));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class RiskTurnTest {
                 new Attack(NEW_GUINEA, EASTERN_AUSTRALIA, 1), new Attack(NEW_GUINEA, EASTERN_AUSTRALIA, 2),
                 new Blitz(INDONESIA, SIAM), new Blitz(NEW_GUINEA, EASTERN_AUSTRALIA), // one per pair whatever the dice
                 new EndAttack());
-        assertEquals(expected, actionSet(fm, s));
+        assertEquals(expected, attackOptions(fm, s));
     }
 
     @Test
@@ -175,24 +175,35 @@ public class RiskTurnTest {
     private static final int PLAYER_1_REINFORCEMENTS = 32;
 
     @Test
-    public void fortifyingMovesOneOrMoreArmiesAndEndsTheTurn() {
+    public void fortifyingMovesAllOrHalfOfTheArmiesThatMayMoveAndEndsTheTurn() {
         give(state, 0, 1, AUSTRALIA);
         give(state, 0, 4, NEW_GUINEA);
         startPlay(state, 0, RiskGamePhase.FORTIFY, 0);
         fm.next(state, new Fortify(NEW_GUINEA, EASTERN_AUSTRALIA));
         assertTrue(state.currentActionInProgress() instanceof MoveArmiesChoice);
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(Set.of(new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1), new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 2),
-                new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 3)), actionSet(fm, state)); // 1 .. 4 - 1
+        // all that may move (4 - 1) or half of it, rounded down
+        assertEquals(Set.of(new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1), new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 3)),
+                actionSet(fm, state));
 
-        fm.next(state, new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 2));
-        assertEquals(2, state.getArmies(NEW_GUINEA));
-        assertEquals(3, state.getArmies(EASTERN_AUSTRALIA));
+        fm.next(state, new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1));
+        assertEquals(3, state.getArmies(NEW_GUINEA));
+        assertEquals(2, state.getArmies(EASTERN_AUSTRALIA));
         assertFalse(state.isActionInProgress());
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(RiskGamePhase.REINFORCE, state.getGamePhase());
         assertEquals(PLAYER_1_REINFORCEMENTS, state.getArmiesToPlace(1));
         assertEquals(0, state.getRoundCounter());
+    }
+
+    @Test
+    public void fortifyingWithOneArmyThatMayMoveOffersOnlyThatOne() {
+        give(state, 0, 1, AUSTRALIA);
+        give(state, 0, 2, NEW_GUINEA);
+        startPlay(state, 0, RiskGamePhase.FORTIFY, 0);
+        fm.next(state, new Fortify(NEW_GUINEA, EASTERN_AUSTRALIA));
+        // half of 1 rounds down to 0, so it is not offered
+        assertEquals(Set.of(new MoveArmies(NEW_GUINEA, EASTERN_AUSTRALIA, 1)), actionSet(fm, state));
     }
 
     @Test

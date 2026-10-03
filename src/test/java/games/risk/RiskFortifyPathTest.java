@@ -100,9 +100,8 @@ public class RiskFortifyPathTest {
         assertTrue(fm.computeAvailableActions(state).contains(new Fortify(SOUTH_AFRICA, BRAZIL)));
         fm.next(state, new Fortify(SOUTH_AFRICA, BRAZIL));
         assertEquals(0, state.getCurrentPlayer());
-        // 1 .. 5 - 1
-        assertEquals(Set.of(new MoveArmies(SOUTH_AFRICA, BRAZIL, 1), new MoveArmies(SOUTH_AFRICA, BRAZIL, 2),
-                new MoveArmies(SOUTH_AFRICA, BRAZIL, 3), new MoveArmies(SOUTH_AFRICA, BRAZIL, 4)),
+        // all that may move (5 - 1) or half of it
+        assertEquals(Set.of(new MoveArmies(SOUTH_AFRICA, BRAZIL, 2), new MoveArmies(SOUTH_AFRICA, BRAZIL, 4)),
                 actionSet(fm, state));
         fm.next(state, new MoveArmies(SOUTH_AFRICA, BRAZIL, 4));
         assertEquals(1, state.getArmies(SOUTH_AFRICA)); // 5 - 4

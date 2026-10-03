@@ -53,7 +53,7 @@ public class RiskBlitzTest {
             expected.add(new Blitz(INDONESIA, to));
         }
         expected.add(new EndAttack());
-        assertEquals(expected, actionSet(fm, state));
+        assertEquals(expected, attackOptions(fm, state));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class RiskBlitzTest {
             for (int n = 1; n <= 3; n++)
                 expected.add(new Attack(INDONESIA, to, n));
         expected.add(new EndAttack());
-        assertEquals(expected, actionSet(fm, state));
+        assertEquals(expected, attackOptions(fm, state));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class RiskBlitzTest {
         give(state, 0, 2, NEW_GUINEA);
         assertEquals(Set.of(new Attack(NEW_GUINEA, WESTERN_AUSTRALIA, 1), new Attack(NEW_GUINEA, EASTERN_AUSTRALIA, 1),
                         new Blitz(NEW_GUINEA, WESTERN_AUSTRALIA), new Blitz(NEW_GUINEA, EASTERN_AUSTRALIA), new EndAttack()),
-                actionSet(fm, state));
+                attackOptions(fm, state));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class RiskBlitzTest {
                 new Attack(NEW_GUINEA, WESTERN_AUSTRALIA, 1), new Attack(NEW_GUINEA, WESTERN_AUSTRALIA, 2),
                 new Attack(NEW_GUINEA, EASTERN_AUSTRALIA, 1), new Attack(NEW_GUINEA, EASTERN_AUSTRALIA, 2),
                 new Blitz(NEW_GUINEA, WESTERN_AUSTRALIA), new Blitz(NEW_GUINEA, EASTERN_AUSTRALIA),
-                new EndAttack()), actionSet(fm, state));
+                new EndAttack()), attackOptions(fm, state));
     }
 
     @Test

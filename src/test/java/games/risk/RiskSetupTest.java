@@ -11,8 +11,22 @@ import static org.junit.Assert.*;
 public class RiskSetupTest {
 
     @Test
-    public void allTerritoriesStartUnclaimedWithEmptyHandsInClaimPhase() {
+    public void territoriesAreDealtAtRandomByDefault() {
         RiskGameState state = newState(3, 11, null);
+        for (RiskTerritory t : WorldMap.ALL) {
+            assertTrue(t.name(), state.getOwner(t) >= 0);
+            assertEquals(t.name(), 1, state.getArmies(t));
+        }
+        for (int p = 0; p < 3; p++)
+            assertEquals(14, state.getNTerritories(p));
+        assertEquals(RiskGamePhase.PLACE_INITIAL, state.getGamePhase());
+    }
+
+    @Test
+    public void withoutTheRandomDealAllTerritoriesStartUnclaimedWithEmptyHandsInClaimPhase() {
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("randomTerritoryDeal", false);
+        RiskGameState state = newState(3, 11, params);
         for (RiskTerritory t : WorldMap.ALL) {
             assertEquals(t.name(), -1, state.getOwner(t));
             assertEquals(t.name(), 0, state.getArmies(t));
@@ -25,13 +39,17 @@ public class RiskSetupTest {
 
     @Test
     public void startingArmiesDependOnThePlayerCount() {
+        // the armies before any are placed: with the territories claimed, not dealt
         int[] expected = {35, 30, 25, 20}; // 3, 4, 5, 6 players
         for (int n = 3; n <= 6; n++) {
-            RiskGameState state = newState(n, 1, null);
+            RiskParameters params = new RiskParameters();
+            params.setParameterValue("randomTerritoryDeal", false);
+            RiskGameState state = newState(n, 1, params);
             for (int p = 0; p < n; p++)
                 assertEquals(n + " players", expected[n - 3], state.getArmiesToPlace(p));
         }
         RiskParameters params = new RiskParameters();
+        params.setParameterValue("randomTerritoryDeal", false);
         params.setParameterValue("startArmies4", 22);
         RiskGameState state = newState(4, 1, params);
         for (int p = 0; p < 4; p++)
