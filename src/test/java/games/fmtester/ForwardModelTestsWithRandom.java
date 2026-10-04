@@ -10,6 +10,7 @@ import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
 import games.hareandtortoise.HareAndTortoiseParameters;
+import games.monopoly.MonopolyParameters;
 import games.risk.RiskParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
@@ -88,6 +89,27 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("emergencySessionReveals", 1);
         params.setParameterValue("goodwillBonus", 2);
         new ForwardModelTester(params, "game=LawnAndOrder", "nGames=1", "nPlayers=6");
+    }
+
+    @Test
+    public void testMonopoly() {
+        // the rounds are capped because the tester's checks grow with the square of the game's length
+        MonopolyParameters params = new MonopolyParameters();
+        params.setParameterValue("maxRounds", 40);
+        new ForwardModelTester(params, "game=Monopoly", "nGames=1", "nPlayers=3");
+        // little cash, so that players mortgage, raise money and go bankrupt, with the percentage Income Tax and a
+        // harsher Jail
+        params = new MonopolyParameters();
+        params.setParameterValue("startingCash", 1000);
+        params.setParameterValue("incomeTaxPercent", 10);
+        params.setParameterValue("jailFine", 100);
+        params.setParameterValue("maxJailRolls", 1);
+        params.setParameterValue("maxDoubles", 2);
+        params.setParameterValue("mortgageInterestPercent", 20);
+        params.setParameterValue("buildingSalePercent", 100);
+        params.setParameterValue("minimumBid", 1);
+        params.setParameterValue("maxRounds", 40);
+        new ForwardModelTester(params, "game=Monopoly", "nGames=1", "nPlayers=4");
     }
 
     @Test

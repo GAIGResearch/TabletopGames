@@ -117,6 +117,10 @@ import games.risk.RiskForwardModel;
 import games.risk.RiskGameState;
 import games.risk.RiskParameters;
 import games.risk.gui.RiskGUIManager;
+import games.monopoly.MonopolyForwardModel;
+import games.monopoly.MonopolyGameState;
+import games.monopoly.MonopolyParameters;
+import games.monopoly.gui.MonopolyGUIManager;
 import games.lawnandorder.LawnAndOrderForwardModel;
 import games.lawnandorder.LawnAndOrderGameState;
 import games.lawnandorder.gui.LawnAndOrderGUIManager;
@@ -363,6 +367,10 @@ public enum GameType {
             Arrays.asList(Strategy, Wargame, TerritoryBuilding, Dice),
             Arrays.asList(DiceRolling, AreaMovement, PlayerElimination, SetCollection, HandManagement, VariableSetup),
             RiskGameState.class, RiskForwardModel.class, RiskParameters.class, RiskGUIManager.class),
+    Monopoly(2, 8,
+            Arrays.asList(Dice, Banking),
+            Arrays.asList(DiceRolling, RollAndMove, Auction, PlayerElimination, SetCollection, LoseATurn),
+            MonopolyGameState.class, MonopolyForwardModel.class, MonopolyParameters.class, MonopolyGUIManager.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
@@ -878,7 +886,7 @@ public enum GameType {
         CommandCards,
         MoveThroughDeck,
         TrickTaking,
-        RoleSelection, ClosedDrafting, NeighbourScope, ActionRetrieval, AreaMajority, AreaMovement, Race, SuddenDeathEnding, MultiUseCards, Negotiation, VariableSetup, NetworkAndRouteBuilding, RandomProduction;
+        RoleSelection, ClosedDrafting, NeighbourScope, ActionRetrieval, AreaMajority, AreaMovement, Race, SuddenDeathEnding, MultiUseCards, Negotiation, VariableSetup, NetworkAndRouteBuilding, RandomProduction, Auction, RollAndMove;
 
         /**
          * @return a list of all games using this mechanic.

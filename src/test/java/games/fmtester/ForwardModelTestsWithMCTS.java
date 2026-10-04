@@ -10,6 +10,7 @@ import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
 import games.hareandtortoise.HareAndTortoiseParameters;
+import games.monopoly.MonopolyParameters;
 import games.risk.RiskParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
@@ -85,6 +86,21 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("maxRounds", 4);
         params.setParameterValue("zeroToleranceReduction", 2);
         new ForwardModelTester(params, "game=LawnAndOrder", "nGames=1", "nPlayers=5", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testMonopoly() {
+        // a short round cap, because a full game of Monopoly with MCTS players takes thousands of decisions
+        MonopolyParameters params = new MonopolyParameters();
+        params.setParameterValue("maxRounds", 8);
+        new ForwardModelTester(params, "game=Monopoly", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+        params = new MonopolyParameters();
+        params.setParameterValue("startingCash", 1000);
+        params.setParameterValue("incomeTaxPercent", 10);
+        params.setParameterValue("maxJailRolls", 1);
+        params.setParameterValue("minimumBid", 1);
+        params.setParameterValue("maxRounds", 8);
+        new ForwardModelTester(params, "game=Monopoly", "nGames=1", "nPlayers=2", "agent=json\\players\\mcts.json");
     }
 
     @Test
