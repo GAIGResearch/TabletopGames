@@ -101,6 +101,12 @@ function onText(msg) {
         case 'message':
             showToast(msg.title, msg.text);
             break;
+        case 'insight':
+            showInsight(msg);
+            break;
+        case 'log':
+            downloadLog(msg);
+            break;
         case 'turn':
             if (msg.yourTurn) setStatus('Your turn', 'your-turn');
             else setStatus(`${playerName(msg.player)} is thinking`, 'thinking');
@@ -192,6 +198,64 @@ function addHistory(lines, reset) {
         history.append(li);
     }
     if (atBottom || reset) history.scrollTop = history.scrollHeight;
+}
+
+// ---- what the AI players weighed up for their last decisions (only sent if the setup asked for it)
+
+const insights = new Map();   // player -> their latest decision
+
+function showInsight(msg) {
+    insights.set(msg.player, msg);
+    $('insight-panel').hidden = false;
+    $('sidebar').hidden = false;
+    const container = $('insight');
+    container.replaceChildren();
+    for (const player of [...insights.keys()].sort((a, b) => a - b)) {
+        const decision = insights.get(player);
+        const section = document.createElement('li');
+        section.className = 'decision';
+        const head = document.createElement('p');
+        head.className = 'insight-head';
+        head.textContent = `${playerName(player)} chose ${decision.chosen}` +
+            (decision.considered > 1 ? `, of ${decision.considered} options:` : '.');
+        const list = document.createElement('ol');
+        list.className = 'candidates';
+        for (const c of decision.candidates) {
+            const li = document.createElement('li');
+            if (c.chosen) li.className = 'chosen';
+            const label = document.createElement('span');
+            label.className = 'label';
+            label.textContent = c.label;
+            const bar = document.createElement('span');
+            bar.className = 'bar';
+            bar.style.setProperty('--share', `${Math.round((c.share ?? 0) * 100)}%`);
+            const numbers = document.createElement('span');
+            numbers.className = 'numbers';
+            numbers.textContent = `${Math.round((c.share ?? 0) * 100)}% of search` +
+                (c.value !== undefined ? ` · value ${c.value.toFixed(2)}` : '');
+            li.append(label, bar, numbers);
+            list.append(li);
+        }
+        section.append(head, list);
+        container.append(section);
+    }
+}
+
+// ---- the game log
+
+$('log').addEventListener('click', () => send({type: 'log'}));
+
+function downloadLog(log) {
+    delete log.type;
+    log.link = location.href;
+    const blob = new Blob([JSON.stringify(log, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${log.game}-seed${log.seed}-${log.actions.length}-actions.json`;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 // ---- messages the game would show in a dialog

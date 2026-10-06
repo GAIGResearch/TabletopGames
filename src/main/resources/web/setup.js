@@ -67,6 +67,7 @@ async function selectGame(saved) {
     await renderOpponents(saved.opponents || []);
     renderParams(saved.params || {});
     $('seed').value = saved.seed ?? '';
+    $('insight').checked = !!saved.insight;
     if (saved.pause !== undefined) $('pause').value = saved.pause;
 }
 
@@ -167,9 +168,10 @@ function start(e) {
 
     const query = new URLSearchParams({game: game.name, players: n, seat, opponents: opponents.join(','), pause: $('pause').value});
     if (seed) query.set('seed', seed);
+    if ($('insight').checked) query.set('insight', '1');
     for (const [name, value] of Object.entries(params)) query.set(`p.${name}`, value);
 
-    save(game.name, {players: n, seat, opponents, seed, pause: $('pause').value, params});
+    save(game.name, {players: n, seat, opponents, seed, pause: $('pause').value, params, insight: $('insight').checked});
     location.href = `play.html?${query}`;
 }
 

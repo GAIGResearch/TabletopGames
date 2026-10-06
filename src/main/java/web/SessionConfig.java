@@ -14,14 +14,16 @@ import java.util.Map;
  * It is read from the query string of the play page (which the browser repeats on its WebSocket URL), so a game set up
  * on the start page can be bookmarked or shared as a link:
  * <pre>game=LawnAndOrder&amp;players=3&amp;seat=0&amp;opponents=you,mcts-1000,random&amp;seed=42&amp;pause=300&amp;p.handSize=6</pre>
+ * (and {@code insight=1} to see what the AI players weighed up, see {@link AIInsight}).
  *
  * @param opponents an {@link OpponentCatalog} id for every seat, in seat order; the browser player's entry is ignored
  * @param seed      the game seed, or -1 for a new seed for each game
  * @param turnPause ms the game waits after each action, so the browser player can see what the AIs did
  * @param params    game parameters (by name) to change from their defaults, as strings
+ * @param insight   whether to send the browser the AI players' decision statistics
  */
 public record SessionConfig(GameType game, int nPlayers, int seat, List<String> opponents, long seed, int turnPause,
-                            Map<String, String> params) {
+                            Map<String, String> params, boolean insight) {
 
     static final int DEFAULT_TURN_PAUSE = 300;
 
@@ -60,7 +62,8 @@ public record SessionConfig(GameType game, int nPlayers, int seat, List<String> 
         // check the parameters now, so a bad link fails before a game is started
         GameCatalog.apply(game.createParameters(0), params);
 
-        return new SessionConfig(game, nPlayers, seat, opponents, seed, turnPause, params);
+        boolean insight = query.containsKey("insight") && List.of("1", "true").contains(first(query, "insight"));
+        return new SessionConfig(game, nPlayers, seat, opponents, seed, turnPause, params, insight);
     }
 
     private static String first(Map<String, List<String>> query, String name) {

@@ -14,6 +14,7 @@
     <span class="spacer"></span>
     <span class="muted" id="seed"></span>
     <span class="actions">
+        <button id="log" title="Download a record of this game: its setup, seed and moves">Log</button>
         <button id="restart" title="Play this game again from the start, with the same seed">Restart</button>
         <button id="new-game" title="The same setup with a new seed">New game</button>
         <button id="setup" title="Back to the start page">Setup</button>
@@ -33,6 +34,10 @@
             </div>
             <input id="action-filter" type="search" placeholder="Filter actions" hidden>
             <div class="action-list" id="action-list"></div>
+        </section>
+        <section class="panel" id="insight-panel" hidden>
+            <div class="panel-head"><h2>AI reasoning</h2></div>
+            <ol class="insight" id="insight"></ol>
         </section>
         <section class="panel" id="info-panel" hidden>
             <div class="panel-head"><h2>Game</h2></div>

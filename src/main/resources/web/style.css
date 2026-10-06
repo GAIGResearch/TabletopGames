@@ -394,6 +394,77 @@ body.play {
     color: var(--muted);
 }
 
+#insight-panel {
+    max-height: 40%;
+    overflow-y: auto;
+}
+
+.insight-head {
+    margin: 0 0 6px;
+}
+
+.insight, .insight .candidates {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.insight {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.insight .candidates {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 13px;
+}
+
+.insight .candidates li {
+    display: grid;
+    gap: 2px;
+}
+
+.insight li.chosen .label {
+    font-weight: 600;
+}
+
+.insight li.chosen .label::after {
+    content: " (chosen)";
+    font-weight: 400;
+    color: var(--muted);
+}
+
+.insight .bar {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--accent) var(--share), var(--surface-2) var(--share));
+}
+
+.insight .numbers {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+label.check {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    margin-top: 14px;
+}
+
+label.check > span {
+    margin: 0;
+    font-size: 13px;
+}
+
+label.check input {
+    width: auto;
+    margin-top: 3px;
+}
+
 /* ---- toasts: messages the game would show in a dialog */
 
 .toasts {

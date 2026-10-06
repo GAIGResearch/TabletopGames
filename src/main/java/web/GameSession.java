@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,6 +62,8 @@ public class GameSession {
     // the image is drawn at dpr * the scale the browser shows the frame at (see fitFrame)
     private volatile double imageScale;
     private volatile long lastActivity = System.currentTimeMillis();
+    private final long startedAt = System.currentTimeMillis();
+    private long seed;
     // the last turn reported to the browser, and whether the results have been sent (Swing thread only)
     private String reportedTurn;
     private boolean reportedResults;
@@ -121,6 +124,8 @@ public class GameSession {
             int i = msg.get("i").getAsInt();
             String label = msg.get("label").getAsString();
             SwingUtilities.invokeLater(() -> chrome.choose(i, label));
+        } else if (type.equals("log")) {
+            out.sendText(gameLog().toString());
         } else if (type.equals("actionHover")) {
             int i = msg.get("i").getAsInt();
             boolean enter = msg.get("enter").getAsBoolean();
@@ -151,6 +156,8 @@ public class GameSession {
         game = gameType.createGameInstance(config.nPlayers(), seed, params);
         game.reset(players);
         game.setTurnPause(config.turnPause());
+        if (config.insight()) game.addListener(new AIInsight(game, out, config.seat()));
+        this.seed = seed;
 
         try {
             SwingUtilities.invokeAndWait(() -> {
@@ -264,6 +271,73 @@ public class GameSession {
         msg.addProperty("yourTurn", yourTurn);
         msg.addProperty("player", player);
         out.sendText(msg.toString());
+    }
+
+    /**
+     * A record of the game so far, for a bug report or to set the game up again: the setup (game, seed, players, every
+     * parameter's value) and the actions taken, described as the browser player saw them (so hiding what they could not
+     * see), and the results if the game is over.
+     */
+    private JsonObject gameLog() {
+        JsonObject log = new JsonObject();
+        log.addProperty("type", "log");
+        log.addProperty("game", config.game().name());
+        log.addProperty("seed", seed);
+        log.addProperty("started", java.time.Instant.ofEpochMilli(startedAt).toString());
+        log.addProperty("browserSeat", config.seat());
+        JsonArray players = new JsonArray();
+        for (int i = 0; i < config.nPlayers(); i++) {
+            JsonObject p = new JsonObject();
+            p.addProperty("seat", i);
+            p.addProperty("agent", config.opponents().get(i));
+            p.addProperty("name", game.getPlayers().get(i).toString());
+            players.add(p);
+        }
+        log.add("players", players);
+        JsonObject changed = new JsonObject();
+        config.params().forEach(changed::addProperty);
+        log.add("changedParameters", changed);
+        JsonObject all = new JsonObject();
+        if (game.getGameState().getGameParameters() instanceof evaluation.optimisation.TunableParameters<?> tp)
+            tp.getParameterNames().forEach(n -> all.addProperty(n, String.valueOf(tp.getParameterValue(n))));
+        log.add("parameters", all);
+
+        AbstractGameState state = game.getGameState();
+        JsonArray actions = new JsonArray();
+        Set<Integer> perspective = Set.of(config.seat());
+        for (var entry : history(state)) {
+            JsonObject a = new JsonObject();
+            a.addProperty("player", entry.a);
+            a.addProperty("action", entry.b.getString(state, perspective));
+            actions.add(a);
+        }
+        log.add("actions", actions);
+        log.addProperty("gameStatus", String.valueOf(state.getGameStatus()));
+        if (!state.isNotTerminal()) {
+            JsonArray results = new JsonArray();
+            for (int i = 0; i < state.getNPlayers(); i++) {
+                JsonObject r = new JsonObject();
+                r.addProperty("player", i);
+                r.addProperty("position", state.getOrdinalPosition(i));
+                r.addProperty("score", state.getGameScore(i));
+                results.add(r);
+            }
+            log.add("results", results);
+        }
+        return log;
+    }
+
+    /**
+     * The game's action history. The game thread adds to it, so copying it may meet a change; it is then copied again.
+     */
+    private static List<utilities.Pair<Integer, core.actions.AbstractAction>> history(AbstractGameState state) {
+        for (int attempt = 0; ; attempt++) {
+            try {
+                return state.getHistory();
+            } catch (java.util.ConcurrentModificationException e) {
+                if (attempt == 5) throw e;
+            }
+        }
     }
 
     private void sendError(String message) {

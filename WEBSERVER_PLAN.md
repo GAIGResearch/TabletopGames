@@ -204,11 +204,21 @@ every GUI in the JVM. Instead the web session, which already drives the update t
   Python check was run locally against the server; the workflow itself runs when pushed.
 - README section "Playing in a browser"; AGENTS.md notes on `WebServer` and `GUIMessages`.
 
-### Stage 6: later developer features
+### Stage 6: developer features
 
-- Download the game log: seed, parameters, players and action history as JSON, enough to reproduce a bug.
-- AI insight panel: MCTS top moves and visit counts after each AI decision.
-- Replay of a downloaded log.
+**Status:** implemented, except replay:
+
+- **Game log**: the Log button asks the server (`{type: "log"}` over the WebSocket) for a JSON record (game, seed, start
+  time, each seat's agent id and name, the changed parameters and every parameter's value, the actions so far described from the
+  browser player's perspective, status and results), which the page saves as a file with the page's link added.
+- **AI insight**: `insight=1` in the setup (a checkbox on the start page, with a warning) adds an `AIInsight` game listener,
+  which sends each AI decision's `getDecisionStats()` (top 8 actions by visits: share of the search, value to that player, which
+  was chosen). The sidebar keeps the latest decision of each AI player. Off by default, as it reveals the AI's knowledge,
+  including (in simultaneous-move games) the move it is about to reveal.
+- **Replay: not done.** A faithful replay needs the AI players to make the same decisions again, but the MCTS opponents seed
+  their randomness from the clock and search for a fixed time, so a game re-run from its seed and the browser player's moves
+  diverges. Doing it properly means seeding agents from the game seed and offering iteration (not time) budgets, or recording
+  and replaying every player's actions (with hidden information, the log only describes them as the browser player saw them).
 
 ## Testing
 

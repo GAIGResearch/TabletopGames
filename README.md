@@ -32,7 +32,8 @@ The `WebServer` entry point serves games to a web browser, so that someone can p
 link. The game, its AI players and its usual Swing GUI all run on the server; the GUI is streamed to the page, which
 sends the mouse and keyboard back, and shows the game's actions, information and history natively alongside it. A start
 page sets up a game (players, seat, an opponent per seat, seed and the game's parameters); the game page's address holds
-that setup, so it can be bookmarked or shared.
+that setup, so it can be bookmarked or shared. The game page can download a log of the game (its setup, seed and moves)
+and, if the setup asks for it, shows what the AI players weighed up for each decision (which reveals what they know).
 
 ```bash
 java -jar target/TAG.jar WebServer games=LawnAndOrder token=some-long-secret
