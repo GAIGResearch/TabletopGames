@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
  *     data/&lt;game&gt;/agents (none)</li>
  *     <li>maxSessions: the most games played at once (3)</li>
  *     <li>idleMinutes: a game with no input from its browser for this long is ended (30)</li>
+ *     <li>token: a secret that every visitor must have, given once in the link ({@code /?token=...}) and then kept in a
+ *     cookie; see {@link AccessToken} (none: the server is open)</li>
  *     <li>lookAndFeel: "flat" (FlatLaf) or "default" (Swing's own) for the GUIs' widgets (flat)</li>
  *     <li>showFrames: true to place the Swing frames on screen, for debugging (false)</li>
  * </ul>
@@ -45,6 +47,7 @@ public class WebServer {
         int idleMinutes = Utils.getArg(args, "idleMinutes", 30);
         boolean showFrames = Utils.getArg(args, "showFrames", false);
         String lookAndFeel = Utils.getArg(args, "lookAndFeel", "flat");
+        AccessToken access = new AccessToken(Utils.getArg(args, "token", ""));
 
         GameSession.configureSwing(lookAndFeel);
         Map<String, GameSession> sessions = new ConcurrentHashMap<>();
@@ -53,6 +56,8 @@ public class WebServer {
             cfg.showJavalinBanner = false;
             cfg.staticFiles.add("/web", Location.CLASSPATH);
         });
+
+        app.before(access::check);
 
         app.get("/api/games", ctx -> ctx.contentType("application/json").result(games.describe().toString()));
         app.get("/api/opponents", ctx -> {
@@ -69,6 +74,8 @@ public class WebServer {
                 ctx.enableAutomaticPings();
                 WsSender sender = new WsSender(ctx);
                 try {
+                    if (!access.allows(ctx))
+                        throw new IllegalStateException("This game server is private: open it with the link you were sent.");
                     if (sessions.size() >= maxSessions)
                         throw new IllegalStateException("The server is busy (" + maxSessions + " games in play). Try again later.");
                     SessionConfig config = SessionConfig.fromQuery(ctx.queryParamMap(), games, opponents);
@@ -106,7 +113,8 @@ public class WebServer {
         }, 1, 1, TimeUnit.MINUTES);
 
         app.start(port);
-        System.out.printf("Serving %s on http://localhost:%d%n",
-                games.games().size() == 1 ? games.games().get(0).name() : games.games().size() + " games", port);
+        System.out.printf("Serving %s on http://localhost:%d/%s%n",
+                games.games().size() == 1 ? games.games().get(0).name() : games.games().size() + " games", port,
+                access.isOpen() ? "" : "?token=" + Utils.getArg(args, "token", ""));
     }
 }

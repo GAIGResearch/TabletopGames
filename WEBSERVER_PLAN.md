@@ -190,6 +190,20 @@ every GUI in the JVM. Instead the web session, which already drives the update t
 - Faster redeploys: put dependencies and classes in separate Docker layers, and possibly a Maven profile for a slim web jar (no
   Spark/Hadoop/langchain4j).
 
+**Status:** implemented, except that the image itself is untested here (no Docker on this machine):
+
+- `token=`: `AccessToken`; the link `/?token=...` sets an HttpOnly cookie and redirects without the token; every page, file,
+  API call and WebSocket then needs it (401 page otherwise). Checked with curl and in Chrome.
+- `Dockerfile`: **Ubuntu** Temurin 21 JRE rather than Alpine (glibc and standard X11/font packages are the lower-risk choice
+  while it cannot be tested), with `xvfb`, `xauth`, `tini`, fontconfig/DejaVu and the X11 client libraries; every entry point
+  runs as `tini -- xvfb-run ... java -cp tag-classes.jar:lib/* core.TAG`. The build skips the fat jars; dependencies are a
+  layer of their own, so a code change pushes only the classes jar (a few MB) and anything in `data/` that changed.
+  The image no longer contains `/tag/TAG.jar`.
+- `.github/workflows/web-docker-smoke.yml`: builds the image, checks another entry point runs, starts `WebServer` with a token,
+  checks pages need it, plays a move over the WebSocket at DPR 2 (Python) and fails on any exception in the server log. Its
+  Python check was run locally against the server; the workflow itself runs when pushed.
+- README section "Playing in a browser"; AGENTS.md notes on `WebServer` and `GUIMessages`.
+
 ### Stage 6: later developer features
 
 - Download the game log: seed, parameters, players and action history as JSON, enough to reproduce a bug.

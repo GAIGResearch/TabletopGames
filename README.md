@@ -26,6 +26,38 @@ Alternatively, open the code directly in your IDE of choice, right click the pom
 To get started the [website](http://tabletopgames.ai) provides various guides and descriptions of the framework, plus links to key research papers that have used TAG.
 Another good resource is our paper ["Design and Implementation of TAG: A Tabletop Games Framework"](https://arxiv.org/abs/2009.12065).
 
+## Playing in a browser
+
+The `WebServer` entry point serves games to a web browser, so that someone can play against TAG's AI agents from a
+link. The game, its AI players and its usual Swing GUI all run on the server; the GUI is streamed to the page, which
+sends the mouse and keyboard back, and shows the game's actions, information and history natively alongside it. A start
+page sets up a game (players, seat, an opponent per seat, seed and the game's parameters); the game page's address holds
+that setup, so it can be bookmarked or shared.
+
+```bash
+java -jar target/TAG.jar WebServer games=LawnAndOrder token=some-long-secret
+# then open http://localhost:8080/?token=some-long-secret
+```
+
+Arguments (all optional): `port` (8080); `games`, a comma-separated list of the games to offer, or `all` for every game
+with a GUI; `agents`, a directory of agent JSON files to offer as opponents (any in `data/<game>/agents` are offered
+too, besides random, one-step look-ahead and MCTS at 0.1, 1 and 5 seconds per decision); `token`, a secret every
+visitor needs, given once in the link and then kept in a cookie (without it the server is open to anyone who can reach
+it); `maxSessions` (3), the most games played at once; `idleMinutes` (30), after which a game left alone is ended;
+`lookAndFeel` (`flat` or `default`).
+
+With Docker, the image runs every entry point under a virtual display, so the web server works without a screen:
+
+```bash
+docker build -t tag .
+docker run -p 8080:8080 --cpus=2 --memory=4g tag WebServer games=LawnAndOrder token=some-long-secret
+```
+
+Games are held in memory, so run a single instance that is not scaled to zero. Limit its CPU: MCTS opponents use all
+the time they are given, in every game being played. To share a server running on your own machine, a tunnel such as
+`cloudflared tunnel --url http://localhost:8080` gives a public address; Cloudflare Access can add a login in front of
+it.
+
 ## Citing Information
 
 To cite TAG in your work, please cite this paper:

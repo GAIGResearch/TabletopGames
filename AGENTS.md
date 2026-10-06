@@ -34,14 +34,21 @@ Running the framework — `core.TAG` dispatches on its first argument to a sub-m
 ```bash
 java -jar target/TAG.jar <EntryPoint> [args...]
 # EntryPoints: RunGames, ParameterSearch, FrontEnd, FrontEndSimple,
-#              ExpertIteration, OneStepDeviations, SkillLadder
+#              ExpertIteration, OneStepDeviations, SkillLadder, StateRenderer, MCTSBudgetSweep, WebServer
 java -jar target/TAG.jar RunGames --help    # each entry point has its own --help
 ```
 
 From an IDE, run `core.TAG`, or run `gui.Frontend` directly for the GUI. Most entry points are
 configured via JSON config files (see `--help` / `RunArg`) or command-line `key=value` args parsed
-by `evaluation/RunArg.java`. A `Dockerfile` builds and packages the same jar with the `data/`
-directory.
+by `evaluation/RunArg.java`. A `Dockerfile` builds an image with the project's classes, their
+dependencies and the `data/` directory, running every entry point under a virtual display (Xvfb).
+
+`WebServer` (package `web`) serves games to a browser: each connection's game runs server-side with
+its Swing GUI in an off-screen frame, streamed to the page as image tiles, with the browser's input
+posted back to the frame; the GUI's standard action/info/history panels are hidden and drawn in the
+page (via read-only accessors on `AbstractGUIManager`). See the README's "Playing in a browser". GUIs
+must not open modal dialogs directly: use `gui.GUIMessages`, which the web server turns into
+messages in the page.
 
 ## Core architecture
 

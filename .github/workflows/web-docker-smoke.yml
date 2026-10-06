@@ -1,0 +1,102 @@
+name: Web play Docker smoke test
+
+# Builds the Docker image and plays the first move of a game through the web server inside it: this checks what can
+# only be checked on Linux in the image (Xvfb, fonts, AWT), as well as the page, the access token and the WebSocket
+# protocol (see web.WebServer).
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Dockerfile'
+      - 'pom.xml'
+      - 'src/main/java/web/**'
+      - 'src/main/java/gui/**'
+      - 'src/main/resources/web/**'
+      - '.github/workflows/web-docker-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: smoke-test-token
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the image
+        run: docker build -t tag .
+
+      - name: Other entry points still run
+        run: docker run --rm tag RunGames --help | head -5
+
+      - name: Start the web server
+        run: docker run -d --name tag -p 8080:8080 tag WebServer games=LawnAndOrder token=$TOKEN
+
+      - name: Wait for it
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null "http://localhost:8080/api/games?token=$TOKEN" && exit 0
+            sleep 2
+          done
+          exit 1
+
+      - name: Pages need the token
+        run: |
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/)" = 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' -b tag_access=$TOKEN http://localhost:8080/)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' -b tag_access=$TOKEN http://localhost:8080/play.js)" = 200
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Play a move
+        run: |
+          pip install websockets==13.1
+          python - <<'EOF'
+          import asyncio, json, os, struct
+          import websockets
+
+          URL = ("ws://localhost:8080/ws?game=LawnAndOrder&players=3&seat=0&opponents=you,random,random"
+                 "&seed=1&pause=0&token=" + os.environ["TOKEN"])
+
+          async def main():
+              async with websockets.connect(URL, max_size=None) as ws:
+                  await ws.send(json.dumps({"type": "resize", "w": 1280, "h": 800, "dpr": 2}))
+                  seen, actions, frame = {}, None, None
+
+                  async def until(done):
+                      nonlocal actions, frame
+                      while not done():
+                          m = await ws.recv()
+                          if isinstance(m, bytes):
+                              n = struct.unpack(">i", m[:4])[0]
+                              frame = json.loads(m[4:4 + n])
+                              continue
+                          msg = json.loads(m)
+                          if msg["type"] == "error":
+                              raise SystemExit("Server error: " + msg["message"])
+                          seen[msg["type"]] = msg
+                          if msg["type"] == "actions" and msg["actions"]:
+                              actions = msg["actions"]
+
+                  await asyncio.wait_for(until(lambda: frame and actions and "started" in seen), 90)
+                  print("started:", seen["started"])
+                  print("first frame: %dx%d, %d tiles" % (frame["w"], frame["h"], len(frame["tiles"])))
+                  assert frame["w"] >= 2560 and len(frame["tiles"]) > 0, "no image drawn"
+
+                  a = actions[0]
+                  await ws.send(json.dumps({"type": "action", "i": a["i"], "label": a["label"]}))
+                  await asyncio.wait_for(until(lambda: "history" in seen), 60)
+                  print("after choosing", a["label"], "- history:", seen["history"]["lines"])
+
+          asyncio.run(main())
+          EOF
+
+      - name: The server logged no exceptions
+        run: |
+          docker logs tag 2>&1 | tee server.log
+          ! grep -q "Exception" server.log
+
+      - name: Server log
+        if: failure()
+        run: docker logs tag
