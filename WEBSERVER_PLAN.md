@@ -222,9 +222,12 @@ every GUI in the JVM. Instead the web session, which already drives the update t
 
 ## Testing
 
-- **Unit tests:** protocol and session logic (action validation, stale action rejection, lifecycle and stop). They run with
-  `-Dmaven.test.skip=false` and need a display: fine on Windows; under Xvfb in CI.
-- **End-to-end:** drive the real page with browser automation for each milestone.
+- **Unit tests** (`web.SessionConfigTest`, no display needed): reading a setup from a link, defaults, refusals with their
+  messages, setting parameters from strings, free-entry parameters. Run with
+  `mvn test -Dmaven.test.skip=false -Dtest=SessionConfigTest`. The existing tests of the packages touched (gui, LawnAndOrder,
+  Terraforming Mars, Colt Express, Love Letter, Pandemic, Poker): 141 tests including these, all passing.
+- **End to end**: a Java WebSocket client standing in for the page (tile reassembly, scripted mouse, wheel, actions, log),
+  Chrome for each stage's milestone, and the CI workflow for the Docker image.
 
 ## Risks
 
