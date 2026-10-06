@@ -12,6 +12,8 @@ import games.klaverjassen.KlaverjassenParameters;
 import games.hareandtortoise.HareAndTortoiseParameters;
 import games.monopoly.MonopolyParameters;
 import games.risk.RiskParameters;
+import games.diplomacy.DiplomacyParadoxRule;
+import games.diplomacy.DiplomacyParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
@@ -123,6 +125,19 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("nMissATurn", 2);
         params.setParameterValue("maxRounds", 40);
         new ForwardModelTester(params, "game=HareAndTortoise", "nGames=1", "nPlayers=4");
+    }
+
+    @Test
+    public void testDiplomacy() {
+        // a few years only: the tester's checks grow with the square of the game's length
+        DiplomacyParameters params = new DiplomacyParameters();
+        params.setParameterValue("lastYear", 1904);
+        new ForwardModelTester(params, "game=Diplomacy", "nGames=1", "nPlayers=7");
+        // the Szykman paradox rule
+        params = new DiplomacyParameters();
+        params.setParameterValue("lastYear", 1903);
+        params.setParameterValue("paradoxRule", DiplomacyParadoxRule.SZYKMAN);
+        new ForwardModelTester(params, "game=Diplomacy", "nGames=1", "nPlayers=7");
     }
 
     @Test

@@ -12,6 +12,8 @@ import games.klaverjassen.KlaverjassenParameters;
 import games.hareandtortoise.HareAndTortoiseParameters;
 import games.monopoly.MonopolyParameters;
 import games.risk.RiskParameters;
+import games.diplomacy.DiplomacyParadoxRule;
+import games.diplomacy.DiplomacyParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
@@ -111,6 +113,18 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("nAnotherTurn", 2);
         params.setParameterValue("maxRounds", 30);
         new ForwardModelTester(params, "game=HareAndTortoise", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testDiplomacy() {
+        // two years: seven MCTS players each order every unit, one decision at a time
+        DiplomacyParameters params = new DiplomacyParameters();
+        params.setParameterValue("lastYear", 1902);
+        new ForwardModelTester(params, "game=Diplomacy", "nGames=1", "nPlayers=7", "agent=json\\players\\mcts.json");
+        params = new DiplomacyParameters();
+        params.setParameterValue("lastYear", 1901);
+        params.setParameterValue("paradoxRule", DiplomacyParadoxRule.SZYKMAN);
+        new ForwardModelTester(params, "game=Diplomacy", "nGames=1", "nPlayers=7", "agent=json\\players\\mcts.json");
     }
 
     @Test

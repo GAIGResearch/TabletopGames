@@ -117,6 +117,10 @@ import games.risk.RiskForwardModel;
 import games.risk.RiskGameState;
 import games.risk.RiskParameters;
 import games.risk.gui.RiskGUIManager;
+import games.diplomacy.DiplomacyForwardModel;
+import games.diplomacy.DiplomacyGameState;
+import games.diplomacy.DiplomacyParameters;
+import games.diplomacy.gui.DiplomacyGUIManager;
 import games.monopoly.MonopolyForwardModel;
 import games.monopoly.MonopolyGameState;
 import games.monopoly.MonopolyParameters;
@@ -367,6 +371,10 @@ public enum GameType {
             Arrays.asList(Strategy, Wargame, TerritoryBuilding, Dice),
             Arrays.asList(DiceRolling, AreaMovement, PlayerElimination, SetCollection, HandManagement, VariableSetup),
             RiskGameState.class, RiskForwardModel.class, RiskParameters.class, RiskGUIManager.class),
+    Diplomacy(7, 7,
+            Arrays.asList(Strategy, Wargame, TerritoryBuilding),
+            Arrays.asList(SimultaneousActionSelection, AreaMovement, AreaMajority, PlayerElimination),
+            DiplomacyGameState.class, DiplomacyForwardModel.class, DiplomacyParameters.class, DiplomacyGUIManager.class),
     Monopoly(2, 8,
             Arrays.asList(Dice, Banking),
             Arrays.asList(DiceRolling, RollAndMove, Auction, PlayerElimination, SetCollection, LoseATurn),
