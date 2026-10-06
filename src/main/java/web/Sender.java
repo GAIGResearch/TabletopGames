@@ -12,4 +12,9 @@ public interface Sender {
     void sendBinary(ByteBuffer data);
 
     boolean isOpen();
+
+    /**
+     * Closes the connection (which ends the session).
+     */
+    void close();
 }

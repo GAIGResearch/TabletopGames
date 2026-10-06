@@ -1,26 +1,266 @@
 :root {
-    --bg: #f4f4f2;
+    --bg: #f3f3f0;
+    --surface: #ffffff;
+    --surface-2: #f7f7f4;
     --fg: #1d1d1b;
-    --panel: #ffffffee;
-    --border: #00000026;
+    --muted: #6b6b66;
+    --border: #00000021;
+    --accent: #2f6fd6;
+    --accent-fg: #ffffff;
+    --good: #1f8a4c;
+    --warn: #b26a00;
+    --bad: #c23a2b;
+    --shadow: 0 6px 24px #0000001f;
+    --radius: 10px;
+    --bar-height: 48px;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
-        --bg: #1b1c1e;
+    :root:not([data-theme="light"]) {
+        --bg: #18191b;
+        --surface: #232427;
+        --surface-2: #2b2c30;
         --fg: #ececea;
-        --panel: #2a2b2eee;
-        --border: #ffffff2e;
+        --muted: #a0a09a;
+        --border: #ffffff24;
+        --accent: #6b9ff0;
+        --accent-fg: #0f1115;
+        --good: #4cc27f;
+        --warn: #e0a24a;
+        --bad: #ef6a5b;
+        --shadow: 0 6px 24px #00000066;
     }
+}
+
+:root[data-theme="dark"] {
+    --bg: #18191b;
+    --surface: #232427;
+    --surface-2: #2b2c30;
+    --fg: #ececea;
+    --muted: #a0a09a;
+    --border: #ffffff24;
+    --accent: #6b9ff0;
+    --accent-fg: #0f1115;
+    --good: #4cc27f;
+    --warn: #e0a24a;
+    --bad: #ef6a5b;
+    --shadow: 0 6px 24px #00000066;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 html, body {
     margin: 0;
-    height: 100%;
-    overflow: hidden;
     background: var(--bg);
     color: var(--fg);
-    font: 14px/1.4 system-ui, sans-serif;
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+button, select, input {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--surface-2);
+}
+
+button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 600;
+}
+
+button.primary:hover {
+    filter: brightness(1.07);
+}
+
+select, input {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+/* ---- start page */
+
+.setup {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+}
+
+.setup h1 {
+    margin: 0 0 4px;
+    font-size: 26px;
+}
+
+.setup .subtitle {
+    margin: 0 0 24px;
+    color: var(--muted);
+}
+
+.card {
+    padding: 20px;
+    margin-bottom: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.card h2 {
+    margin: 0 0 14px;
+    font-size: 15px;
+}
+
+.fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+label {
+    display: block;
+}
+
+label > span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+label.changed > span::after {
+    content: " (changed)";
+    color: var(--accent);
+}
+
+details > summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+details[open] > summary {
+    margin-bottom: 14px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.link-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+}
+
+.link-button:hover {
+    background: none;
+    text-decoration: underline;
+}
+
+.error {
+    color: var(--bad);
+}
+
+/* ---- play page */
+
+body.play {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.bar {
+    flex: none;
+    height: var(--bar-height);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.bar .title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bar .spacer {
+    flex: 1;
+}
+
+.bar .actions {
+    display: flex;
+    gap: 6px;
+}
+
+.bar button {
+    padding: 5px 11px;
+}
+
+.status {
+    padding: 3px 11px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.status.your-turn {
+    background: var(--good);
+    border-color: var(--good);
+    color: #fff;
+    font-weight: 600;
+}
+
+.status.thinking::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: var(--warn);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: 0.25;
+    }
+}
+
+.stage {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
 }
 
 #screen {
@@ -32,27 +272,73 @@ html, body {
     position: fixed;
     max-width: 420px;
     padding: 6px 9px;
-    background: var(--panel);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 6px;
-    box-shadow: 0 4px 14px #0003;
+    box-shadow: var(--shadow);
     pointer-events: none;
     z-index: 2;
 }
 
 #notice {
-    position: fixed;
+    position: absolute;
     left: 50%;
     top: 16px;
     transform: translateX(-50%);
+    max-width: calc(100% - 32px);
     padding: 8px 14px;
-    background: var(--panel);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    box-shadow: 0 4px 14px #0003;
+    box-shadow: var(--shadow);
     z-index: 3;
 }
 
 #notice:empty {
     display: none;
+}
+
+dialog {
+    min-width: min(380px, calc(100vw - 32px));
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--fg);
+    box-shadow: var(--shadow);
+}
+
+dialog::backdrop {
+    background: #0005;
+}
+
+dialog h2 {
+    margin: 0 0 12px;
+}
+
+.results {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 18px;
+}
+
+.results th, .results td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.results td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.results tr.you td {
+    font-weight: 600;
+}
+
+@media (max-width: 640px) {
+    .bar .title {
+        display: none;
+    }
 }

@@ -110,16 +110,26 @@ checked in Stage 0), tooltips end to end, keyboard input.
 
 ### Stage 2: sessions and the start page
 
-- REST endpoints:
-  - `GET /api/games`: the whitelisted games with their parameter schema, built generically from `ITunableParameters` (names, types,
-    defaults, possible values).
-  - `GET /api/opponents`: built-ins (`random`, `osla`, MCTS at time budgets such as 0.1 s / 1 s / 5 s), plus agent JSON files in a
-    configured directory via `PlayerFactory.createPlayers(dir)`, so tuned agents can be offered to the client.
-  - `POST /api/sessions`: game, player count, human seat, opponents, seed, parameter overrides, turn pause.
-- Start page: game (or fixed to one), player count, seat, opponent per seat, seed, and the parameter form.
-- Lifecycle: maximum concurrent sessions, idle timeout, clean stop. New game, restart with same seed. A "Player 2 is thinking…"
-  indicator, and a game-over banner with results.
-- Server arguments: `port=`, `games=`, `agents=`, `maxSessions=`, `token=`, `showFrames=` (debugging on Windows).
+**Status:** implemented. As built (it differs from the first plan in a few places):
+
+- **The setup lives in the play page's URL**, not in a `POST /api/sessions`: `play.html?game=…&players=…&seat=…&opponents=you,mcts-1000,…
+  &seed=…&pause=…&p.<param>=…`, repeated on the WebSocket URL and parsed by `SessionConfig.fromQuery`. So a setup can be bookmarked
+  or shared, and Restart (same seed) and New game (seed removed) are just links; no server-side restart logic.
+- `GET /api/games`: the offered games with their parameter schema from `TunableParameters` (a parameter declared without a list of
+  settings is free entry). `GET /api/opponents?game=`: Random, one-step look-ahead, `MCTSPlayer` with a 0.1 s / 1 s / 5 s time budget
+  per decision, plus agent JSON files from `agents=` and `data/<game>/agents`.
+- Start page (`index.html`, `setup.js`): game, players, seat, an opponent per seat, seed, pause after AI moves, and the parameter form
+  (changed values flagged; only changes go in the URL). The last setup per game is remembered in `localStorage`.
+- Play page (`play.html`, `play.js`): a bar with the game, a status pill ("Your turn" / "Player 1 (…) is thinking"), the seed, and
+  Restart / New game / Setup; a results dialog at game over.
+- Server messages added: `started` (seed, players), `turn`, `gameOver` (position, score, result per player).
+- Server arguments: `port`, `games` (comma list or `all`: every game with a GUI, by name, less GameTemplate), `agents`,
+  `maxSessions` (3), `idleMinutes` (30), `showFrames`.
+
+Checked in Chrome: the start page for all 65 games and for LawnAndOrder (4 players, changed hand size, mixed opponents, seed 42)
+starts the game as set up; Restart deals the same hands; a 2-player game with `maxRounds=1` ends with the results dialog. Checked with
+the test client: errors for an unknown opponent, game or bad parameter value; "server busy" beyond `maxSessions`; an idle session is
+ended with a message after `idleMinutes`.
 
 ### Stage 3: generic chrome in HTML
 

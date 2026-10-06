@@ -27,6 +27,11 @@ class WsSender implements Sender {
     }
 
     @Override
+    public synchronized void close() {
+        if (isOpen()) ctx.closeSession();
+    }
+
+    @Override
     public boolean isOpen() {
         return ctx.session.isOpen();
     }

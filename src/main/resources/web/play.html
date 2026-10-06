@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TAG Play</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="play">
+<header class="bar">
+    <span class="title" id="title">Starting…</span>
+    <span class="status" id="status">Connecting</span>
+    <span class="spacer"></span>
+    <span class="muted" id="seed"></span>
+    <span class="actions">
+        <button id="restart" title="Play this game again from the start, with the same seed">Restart</button>
+        <button id="new-game" title="The same setup with a new seed">New game</button>
+        <button id="setup" title="Back to the start page">Setup</button>
+    </span>
+</header>
+<div class="stage" id="stage">
+    <canvas id="screen" tabindex="0"></canvas>
+    <div id="notice">Starting game…</div>
+</div>
+<div id="tooltip" hidden></div>
+
+<dialog id="results">
+    <h2 id="results-title">Game over</h2>
+    <table class="results">
+        <thead><tr><th>Place</th><th>Player</th><th class="num">Score</th></tr></thead>
+        <tbody id="results-body"></tbody>
+    </table>
+    <div class="row">
+        <button id="results-close">Look at the board</button>
+        <span class="actions">
+            <button id="results-restart">Restart</button>
+            <button id="results-new" class="primary">New game</button>
+        </span>
+    </div>
+</dialog>
+<script src="play.js"></script>
+</body>
+</html>

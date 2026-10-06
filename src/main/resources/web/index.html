@@ -3,13 +3,59 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TAG</title>
+    <title>TAG Play</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="screen" tabindex="0"></canvas>
-<div id="tooltip" hidden></div>
-<div id="notice">Starting game…</div>
-<script src="app.js"></script>
+<main class="setup">
+    <h1 id="heading">Play a game</h1>
+    <p class="subtitle">Set up a game against AI opponents. The game runs on the server; you play it here.</p>
+
+    <form id="setup">
+        <section class="card">
+            <h2>Game</h2>
+            <div class="fields">
+                <label id="game-field"><span>Game</span><select id="game"></select></label>
+                <label><span>Players</span><select id="players"></select></label>
+                <label><span>Your seat</span><select id="seat"></select></label>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Opponents</h2>
+            <div class="fields" id="opponents"></div>
+        </section>
+
+        <section class="card">
+            <div class="fields">
+                <label><span>Seed (blank for a new game each time)</span><input id="seed" inputmode="numeric" placeholder="Random"></label>
+                <label><span>Pause after each AI move</span>
+                    <select id="pause">
+                        <option value="0">None</option>
+                        <option value="300" selected>0.3 s</option>
+                        <option value="1000">1 s</option>
+                        <option value="2000">2 s</option>
+                    </select>
+                </label>
+            </div>
+        </section>
+
+        <section class="card" id="params-card">
+            <details>
+                <summary>Game parameters</summary>
+                <div class="fields" id="params"></div>
+                <p class="row"><span class="muted" id="params-summary"></span>
+                    <button type="button" class="link-button" id="params-reset">Reset to defaults</button></p>
+            </details>
+        </section>
+
+        <p class="error" id="error" hidden></p>
+        <div class="row">
+            <span class="muted">You can bookmark or share the game page's address to play this setup again.</span>
+            <button type="submit" class="primary">Start game</button>
+        </div>
+    </form>
+</main>
+<script src="setup.js"></script>
 </body>
 </html>

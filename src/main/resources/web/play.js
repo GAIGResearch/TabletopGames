@@ -1,43 +1,142 @@
-// Shows a game's Swing GUI, streamed from the server as tiles, and sends the mouse and keys back to it.
+// The play page: shows a game's Swing GUI, streamed from the server as tiles, and sends the mouse and keys back to
+// it. The page's query string is the game setup (see web.SessionConfig), and is repeated on the WebSocket URL.
 // See web.FrameStreamer for the frame format, and web.InputForwarder for the input messages.
 'use strict';
 
-const canvas = document.getElementById('screen');
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+const canvas = $('screen');
 const ctx = canvas.getContext('2d');
-const tooltip = document.getElementById('tooltip');
-const notice = document.getElementById('notice');
+const tooltip = $('tooltip');
 
 let ws;
 let lastMouse = {x: 0, y: 0};
+let game = null;   // from the server's 'started' message: {game, seed, seat, players}
+
+if (!location.search) location.replace('./');
+
+function displayName(name) {
+    return name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+}
 
 function connect() {
     const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-    ws = new WebSocket(`${protocol}://${location.host}/ws`);
+    ws = new WebSocket(`${protocol}://${location.host}/ws${location.search}`);
     ws.binaryType = 'arraybuffer';
     ws.onopen = sendResize;
     ws.onmessage = e => typeof e.data === 'string' ? onText(JSON.parse(e.data)) : onFrame(e.data);
-    ws.onclose = () => showNotice('Disconnected. Reload the page to start a new game.');
+    ws.onclose = () => {
+        if (!$('notice').dataset.error) showNotice('Disconnected. Use Restart or New game to play again.');
+        setStatus('Disconnected', '');
+    };
 }
 
 function send(msg) {
     if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
 }
 
-function showNotice(text) {
-    notice.textContent = text;
+function showNotice(text, isError = false) {
+    $('notice').textContent = text;
+    if (isError) $('notice').dataset.error = '1';
 }
+
+function setStatus(text, kind) {
+    const status = $('status');
+    status.textContent = text;
+    status.className = `status ${kind}`;
+}
+
+// ---- links to play again
+
+function playUrl(seed) {
+    const query = new URLSearchParams(location.search);
+    if (seed === null) query.delete('seed');
+    else query.set('seed', seed);
+    return `play.html?${query}`;
+}
+
+function restart() {
+    if (game) location.href = playUrl(game.seed);
+    else location.reload();
+}
+
+function newGame() {
+    location.href = playUrl(null);
+}
+
+function backToSetup() {
+    location.href = './';
+}
+
+$('restart').addEventListener('click', restart);
+$('new-game').addEventListener('click', newGame);
+$('setup').addEventListener('click', backToSetup);
+$('results-restart').addEventListener('click', restart);
+$('results-new').addEventListener('click', newGame);
+$('results-close').addEventListener('click', () => $('results').close());
 
 // ---- server to browser
 
 function onText(msg) {
     switch (msg.type) {
+        case 'started':
+            game = msg;
+            $('title').textContent = displayName(msg.game);
+            $('seed').textContent = `Seed ${msg.seed}`;
+            document.title = `${displayName(msg.game)} · TAG Play`;
+            break;
+        case 'turn':
+            if (msg.yourTurn) setStatus('Your turn', 'your-turn');
+            else setStatus(`${playerName(msg.player)} is thinking`, 'thinking');
+            break;
+        case 'gameOver':
+            showResults(msg.results);
+            break;
         case 'tooltip':
             showTooltip(msg.text);
             break;
         case 'error':
-            showNotice(msg.message);
+            showNotice(msg.message, true);
             break;
     }
+}
+
+function playerName(i) {
+    if (!game) return `Player ${i}`;
+    return i === game.seat ? 'You' : `Player ${i} (${game.players[i]})`;
+}
+
+function ordinal(n) {
+    const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function showResults(results) {
+    const sorted = [...results].sort((a, b) => a.position - b.position);
+    const body = $('results-body');
+    body.replaceChildren();
+    for (const r of sorted) {
+        const tr = document.createElement('tr');
+        if (game && r.player === game.seat) tr.className = 'you';
+        for (const [text, cls] of [[ordinal(r.position), ''], [playerName(r.player), ''], [formatScore(r.score), 'num']]) {
+            const td = document.createElement('td');
+            td.textContent = text;
+            if (cls) td.className = cls;
+            tr.append(td);
+        }
+        body.append(tr);
+    }
+    const you = game && results.find(r => r.player === game.seat);
+    const title = !you ? 'Game over'
+        : you.position === 1 ? (sorted.filter(r => r.position === 1).length > 1 ? 'A draw for first place' : 'You won!')
+            : `You finished ${ordinal(you.position)}`;
+    $('results-title').textContent = title;
+    setStatus(`Game over: ${title.replace(/!$/, '')}`, '');
+    $('results').showModal();
+}
+
+function formatScore(score) {
+    return Number.isInteger(score) ? String(score) : score.toFixed(1);
 }
 
 // Frames are drawn in arrival order, each once all of its tiles are decoded, so a frame never shows half-drawn.
@@ -69,7 +168,7 @@ async function drawFrame(buffer) {
         ctx.drawImage(bitmaps[i], p.t.x, p.t.y);
         bitmaps[i].close();
     });
-    showNotice('');
+    if (!$('notice').dataset.error) showNotice('');
 }
 
 function showTooltip(text) {
@@ -96,15 +195,16 @@ function placeTooltip() {
 
 // ---- browser to server
 
+// The GUI is laid out to the stage (the page below the bar).
 function sendResize() {
-    send({type: 'resize', w: window.innerWidth, h: window.innerHeight, dpr: window.devicePixelRatio || 1});
+    send({type: 'resize', w: stage.clientWidth, h: stage.clientHeight, dpr: window.devicePixelRatio || 1});
 }
 
 let resizeTimer;
-window.addEventListener('resize', () => {
+new ResizeObserver(() => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(sendResize, 200);
-});
+}).observe(stage);
 
 function modifiers(e) {
     return {shift: e.shiftKey, ctrl: e.ctrlKey, alt: e.altKey, meta: e.metaKey, buttons: e.buttons ?? 0};
