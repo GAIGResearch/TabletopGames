@@ -139,6 +139,8 @@ class InputForwarder {
                 Point local = SwingUtilities.convertPoint(frame, p, jc);
                 text = jc.getToolTipText(new MouseEvent(jc, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0,
                         local.x, local.y, 0, false));
+                // some components give an empty tooltip ("" or "<html></html>"), which is no tooltip
+                if (text != null && text.replaceAll("<[^>]*>", "").isBlank()) text = null;
             }
             sendTooltip(text);
         });

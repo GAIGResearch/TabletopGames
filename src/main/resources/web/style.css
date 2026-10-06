@@ -481,6 +481,30 @@ body.play {
     display: none;
 }
 
+.spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 9px;
+    vertical-align: -1px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner, .status.thinking::before {
+        animation: none;
+    }
+}
+
 dialog {
     min-width: min(380px, calc(100vw - 32px));
     padding: 20px 22px;

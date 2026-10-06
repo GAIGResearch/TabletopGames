@@ -1,5 +1,6 @@
 package web;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -54,8 +55,11 @@ public class GameSession {
     private InputForwarder input;
     private ChromeReader chrome;
     private volatile boolean started, stopped;
-    // the size of the browser's space for the GUI (Swing thread only)
+    // the size of the browser's space for the GUI, and its device pixel ratio (Swing thread only)
     private Dimension space;
+    private double dpr;
+    // the image is drawn at dpr * the scale the browser shows the frame at (see fitFrame)
+    private volatile double imageScale;
     private volatile long lastActivity = System.currentTimeMillis();
     // the last turn reported to the browser, and whether the results have been sent (Swing thread only)
     private String reportedTurn;
@@ -75,8 +79,14 @@ public class GameSession {
      * Swing settings for a JVM whose GUIs are all streamed. Swing's own tooltips are switched off, as Swing moves them
      * on to a real screen and so out of the frame; the InputForwarder sends their text to the browser instead. Messages
      * a GUI would show in a dialog are sent to its browser.
+     *
+     * @param lookAndFeel "flat" for FlatLaf's light look and feel, or "default" for Swing's own
      */
-    public static void configureSwing() {
+    public static void configureSwing(String lookAndFeel) {
+        if (lookAndFeel.equalsIgnoreCase("flat"))
+            FlatLightLaf.setup();
+        else if (!lookAndFeel.equalsIgnoreCase("default"))
+            throw new IllegalArgumentException("Unknown look and feel (flat or default): " + lookAndFeel);
         ToolTipManager.sharedInstance().setEnabled(false);
         JPopupMenu.setDefaultLightWeightPopupEnabled(true);
         GUIMessages.setHandler((parent, title, message) -> {
@@ -152,6 +162,7 @@ public class GameSession {
                 gui = gameType.createGUIManager(panel, game, ac);
                 frame.setSize(w, h);
                 space = new Dimension(w, h);
+                this.dpr = dpr;
                 // Off screen, unless debugging. Its events come from the browser, so where it is does not matter.
                 frame.setLocation(showFrames ? 0 : -10_000, 0);
                 frame.setVisible(true);
@@ -172,7 +183,7 @@ public class GameSession {
         }
 
         input = new InputForwarder(frame, out);
-        streamer = new FrameStreamer(frame, out, dpr);
+        streamer = new FrameStreamer(frame, out, imageScale);
         streamer.start();
 
         gameThread = new Thread(this::runGame, "web-game-" + id);
@@ -265,9 +276,9 @@ public class GameSession {
     private void resize(int w, int h, double dpr) {
         SwingUtilities.invokeLater(() -> {
             space = new Dimension(w, h);
+            this.dpr = dpr;
             fitFrame();
         });
-        streamer.setDpr(dpr);
     }
 
     /**
@@ -287,6 +298,9 @@ public class GameSession {
             frame.setSize(size);
             frame.validate();
         }
+        // the browser shows the frame scaled by s, so an image at dpr * s is as sharp as it can show
+        imageScale = dpr * s;
+        if (streamer != null) streamer.setScale(imageScale);
     }
 
     /**

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TAG Play</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect x=%224%22 y=%224%22 width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%232f6fd6%22/%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%222.6%22 fill=%22white%22/%3E%3Ccircle cx=%2221%22 cy=%2221%22 r=%222.6%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%222.6%22 fill=%22white%22/%3E%3C/svg%3E">
 </head>
 <body class="play">
 <header class="bar">
@@ -21,7 +22,7 @@
 <div class="main">
     <div class="stage" id="stage">
         <canvas id="screen" tabindex="0"></canvas>
-        <div id="notice">Starting game…</div>
+        <div id="notice"><span class="spinner"></span>Starting the game…</div>
         <div class="toasts" id="toasts"></div>
     </div>
     <aside class="sidebar" id="sidebar" hidden>

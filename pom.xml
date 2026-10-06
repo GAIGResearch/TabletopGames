@@ -170,6 +170,12 @@
             <artifactId>javalin</artifactId>
             <version>6.7.0</version>
         </dependency>
+        <!-- A modern Swing look and feel, for GUIs streamed to a browser -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.5.4</version>
+        </dependency>
     </dependencies>
 
     <build>

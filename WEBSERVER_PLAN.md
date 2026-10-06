@@ -170,6 +170,17 @@ every GUI in the JVM. Instead the web session, which already drives the update t
   loading/thinking state.
 - Optional: tooltips as HTML overlays rather than captured pixels.
 
+**Status:** implemented:
+
+- FlatLaf 3.5.4 (light) for the GUIs' widgets, the default (`lookAndFeel=flat`; `default` for Swing's own). Compared with the
+  default look on LawnAndOrder, Catan, Dominion, Chess, Hanabi, Poker, Diplomacy, Pandemic and Terraforming Mars: no broken layouts;
+  tabs, tables and fonts are cleaner. Grey-scale text antialiasing is switched on (it matters on Linux).
+- The image is drawn at the browser's device pixel ratio times the scale the browser shows the frame at, so a scaled-down GUI
+  costs no more pixels than the space it is shown in.
+- Tooltips checked end to end (Love Letter's card descriptions, Pandemic's cities and roles, as HTML overlays); empty tooltips
+  ("" or "<html></html>") are no tooltip.
+- The info lines leave out the list of player results; the page shows results itself. Favicon; a spinner while the game starts.
+
 ### Stage 5: Docker and sharing
 
 - `Dockerfile`: `fontconfig ttf-dejavu xvfb-run`, a fixed Xvfb screen size, `EXPOSE 8080`, and the entrypoint wrapped in `xvfb-run`.

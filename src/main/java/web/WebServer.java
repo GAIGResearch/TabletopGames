@@ -27,20 +27,26 @@ import java.util.concurrent.TimeUnit;
  *     data/&lt;game&gt;/agents (none)</li>
  *     <li>maxSessions: the most games played at once (3)</li>
  *     <li>idleMinutes: a game with no input from its browser for this long is ended (30)</li>
+ *     <li>lookAndFeel: "flat" (FlatLaf) or "default" (Swing's own) for the GUIs' widgets (flat)</li>
  *     <li>showFrames: true to place the Swing frames on screen, for debugging (false)</li>
  * </ul>
  */
 public class WebServer {
 
     public static void main(String[] args) {
+        // antialiased text in the streamed images (on Linux, Java otherwise draws text without it); grey-scale rather
+        // than sub-pixel, as the browser may scale the image
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
         int port = Utils.getArg(args, "port", 8080);
         GameCatalog games = new GameCatalog(Utils.getArg(args, "games", "all"));
         OpponentCatalog opponents = new OpponentCatalog(Utils.getArg(args, "agents", ""));
         int maxSessions = Utils.getArg(args, "maxSessions", 3);
         int idleMinutes = Utils.getArg(args, "idleMinutes", 30);
         boolean showFrames = Utils.getArg(args, "showFrames", false);
+        String lookAndFeel = Utils.getArg(args, "lookAndFeel", "flat");
 
-        GameSession.configureSwing();
+        GameSession.configureSwing(lookAndFeel);
         Map<String, GameSession> sessions = new ConcurrentHashMap<>();
 
         Javalin app = Javalin.create(cfg -> {

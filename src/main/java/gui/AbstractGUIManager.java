@@ -202,11 +202,12 @@ public abstract class AbstractGUIManager {
     }
 
     /**
-     * The lines of game state information shown in the info panel (status, scores, phase, turn, current player).
+     * The lines of game state information shown in the info panel: status, scores, phase, turn and current player
+     * (not the list of each player's result, which is mostly noise until the game ends).
      */
     public List<String> getGameStateInfo() {
         List<String> lines = new ArrayList<>();
-        for (JLabel label : new JLabel[]{gameStatus, playerStatus, playerScores, gamePhase, turn, currentPlayer})
+        for (JLabel label : new JLabel[]{gameStatus, playerScores, gamePhase, turn, currentPlayer})
             if (label.getText() != null && !label.getText().isEmpty())
                 lines.add(label.getText());
         return lines;

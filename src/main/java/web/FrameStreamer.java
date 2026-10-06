@@ -21,9 +21,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Sends what a frame shows to the browser. Every tick the frame's root pane is painted into an image at the browser's
- * device pixel ratio; the image is split into square tiles, and only the tiles that changed since the last tick are
- * sent, each as a PNG.
+ * Sends what a frame shows to the browser. Every tick the frame's root pane is painted into an image at a scale set by
+ * the session (the browser's device pixel ratio, times the scale it shows the frame at); the image is split into
+ * square tiles, and only the tiles that changed since the last tick are sent, each as a PNG.
  * <p>
  * Each frame is one binary message: a 4-byte big-endian length, a JSON header of that length
  * ({@code {seq, w, h, fw, fh, tiles: [{x, y, w, h, len}]}}), then the tiles' PNG bytes in header order. The image and
@@ -42,16 +42,16 @@ class FrameStreamer {
         t.setDaemon(true);
         return t;
     });
-    private volatile double dpr;
+    private volatile double scale;
     private int[] previous;
     private int previousW, previousH;
     private long seq;
     private Dimension frameSize;
 
-    FrameStreamer(JFrame frame, Sender out, double dpr) {
+    FrameStreamer(JFrame frame, Sender out, double scale) {
         this.frame = frame;
         this.out = out;
-        this.dpr = dpr;
+        this.scale = scale;
     }
 
     void start() {
@@ -62,8 +62,11 @@ class FrameStreamer {
         ticker.shutdownNow();
     }
 
-    void setDpr(double dpr) {
-        this.dpr = dpr;
+    /**
+     * Image pixels per frame pixel.
+     */
+    void setScale(double scale) {
+        this.scale = scale;
     }
 
     private void tick() {
@@ -82,7 +85,7 @@ class FrameStreamer {
     private BufferedImage paint() throws Exception {
         BufferedImage[] result = new BufferedImage[1];
         Dimension[] size = new Dimension[1];
-        double scale = dpr;
+        double scale = this.scale;
         SwingUtilities.invokeAndWait(() -> {
             JRootPane root = frame.getRootPane();
             size[0] = root.getSize();
