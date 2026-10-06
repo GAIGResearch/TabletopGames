@@ -164,6 +164,12 @@
             <artifactId>google-auth-library-oauth2-http</artifactId>
             <version>1.21.0</version>
         </dependency>
+        <!-- Web server for playing games in a browser (the web package) -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>6.7.0</version>
+        </dependency>
     </dependencies>
 
     <build>

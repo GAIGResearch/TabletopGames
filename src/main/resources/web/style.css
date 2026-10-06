@@ -1,0 +1,58 @@
+:root {
+    --bg: #f4f4f2;
+    --fg: #1d1d1b;
+    --panel: #ffffffee;
+    --border: #00000026;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #1b1c1e;
+        --fg: #ececea;
+        --panel: #2a2b2eee;
+        --border: #ffffff2e;
+    }
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    font: 14px/1.4 system-ui, sans-serif;
+}
+
+#screen {
+    display: block;
+    outline: none;
+}
+
+#tooltip {
+    position: fixed;
+    max-width: 420px;
+    padding: 6px 9px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 14px #0003;
+    pointer-events: none;
+    z-index: 2;
+}
+
+#notice {
+    position: fixed;
+    left: 50%;
+    top: 16px;
+    transform: translateX(-50%);
+    padding: 8px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 14px #0003;
+    z-index: 3;
+}
+
+#notice:empty {
+    display: none;
+}
