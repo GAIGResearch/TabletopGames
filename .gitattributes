@@ -1,0 +1,2 @@
+# Built and run on Linux: keep LF line endings even in Windows checkouts (a CR breaks the RUN line continuations)
+Dockerfile text eol=lf
