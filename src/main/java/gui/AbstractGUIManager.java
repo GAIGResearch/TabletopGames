@@ -44,6 +44,9 @@ public abstract class AbstractGUIManager {
 
     private int actionsAtLastUpdate;
 
+    // the panels made by createActionPanel and createGameStateInfoPanel, if the GUI uses them
+    private JComponent actionPanel, infoPanel;
+
     protected int width, height;
 
     public AbstractGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
@@ -160,6 +163,7 @@ public abstract class AbstractGUIManager {
         pane.setOpaque(opaque);
         pane.getViewport().setOpaque(opaque);
 
+        this.actionPanel = pane;
         return pane;
     }
 
@@ -169,6 +173,57 @@ public abstract class AbstractGUIManager {
 
     public Set<Integer> getHumanPlayerIds() {
         return humanPlayerIds;
+    }
+
+    /* Read-only access to the standard parts of the GUI, for showing them elsewhere: the web package streams a GUI to
+       a browser, hides these panels, and draws their contents natively in the page. Call on the Swing thread. */
+
+    /**
+     * The panel of action buttons made by createActionPanel, or null if this GUI does not use one.
+     */
+    public JComponent getActionPanel() {
+        return actionPanel;
+    }
+
+    /**
+     * The game state information and history panel made by createGameStateInfoPanel, or null if this GUI does not
+     * use one.
+     */
+    public JComponent getInfoPanel() {
+        return infoPanel;
+    }
+
+    /**
+     * The action buttons (empty if this GUI has none). A button offers an action when it is visible and has text;
+     * clicking it (doClick) chooses that action, as a click on the GUI would.
+     */
+    public JButton[] getActionButtons() {
+        return actionButtons == null ? new JButton[0] : actionButtons.clone();
+    }
+
+    /**
+     * The lines of game state information shown in the info panel (status, scores, phase, turn, current player).
+     */
+    public List<String> getGameStateInfo() {
+        List<String> lines = new ArrayList<>();
+        for (JLabel label : new JLabel[]{gameStatus, playerStatus, playerScores, gamePhase, turn, currentPlayer})
+            if (label.getText() != null && !label.getText().isEmpty())
+                lines.add(label.getText());
+        return lines;
+    }
+
+    /**
+     * The action history shown in the history panel.
+     */
+    public List<String> getHistory() {
+        // the history is added to by a game listener on the game's thread, so copying it may meet a change
+        for (int attempt = 0; ; attempt++) {
+            try {
+                return new ArrayList<>(history);
+            } catch (ConcurrentModificationException e) {
+                if (attempt == 5) throw e;
+            }
+        }
     }
 
     /**
@@ -225,6 +280,7 @@ public abstract class AbstractGUIManager {
 
         createActionHistoryPanel(width / 2 - 10, height, humanPlayerIds);
         wrapper.add(historyContainer);
+        this.infoPanel = wrapper;
         return wrapper;
     }
 

@@ -9,13 +9,17 @@ import core.AbstractPlayer;
 import core.Game;
 import games.GameType;
 import gui.AbstractGUIManager;
+import gui.GUIMessages;
 import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.awt.*;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -32,6 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameSession {
 
     private static final AtomicInteger ids = new AtomicInteger();
+    // to find the session a GUI's message (see GUIMessages) comes from
+    private static final Map<Window, GameSession> byFrame = new ConcurrentHashMap<>();
 
     private final int id = ids.incrementAndGet();
     private final SessionConfig config;
@@ -46,7 +52,10 @@ public class GameSession {
     private Thread gameThread;
     private FrameStreamer streamer;
     private InputForwarder input;
+    private ChromeReader chrome;
     private volatile boolean started, stopped;
+    // the size of the browser's space for the GUI (Swing thread only)
+    private Dimension space;
     private volatile long lastActivity = System.currentTimeMillis();
     // the last turn reported to the browser, and whether the results have been sent (Swing thread only)
     private String reportedTurn;
@@ -64,11 +73,17 @@ public class GameSession {
 
     /**
      * Swing settings for a JVM whose GUIs are all streamed. Swing's own tooltips are switched off, as Swing moves them
-     * on to a real screen and so out of the frame; the InputForwarder sends their text to the browser instead.
+     * on to a real screen and so out of the frame; the InputForwarder sends their text to the browser instead. Messages
+     * a GUI would show in a dialog are sent to its browser.
      */
     public static void configureSwing() {
         ToolTipManager.sharedInstance().setEnabled(false);
         JPopupMenu.setDefaultLightWeightPopupEnabled(true);
+        GUIMessages.setHandler((parent, title, message) -> {
+            GameSession session = byFrame.get(SwingUtilities.getWindowAncestor(parent));
+            if (session != null) session.sendMessage(title, message);
+            else System.out.println("GUI message with no session: " + message);
+        });
     }
 
     public synchronized void onMessage(String text) {
@@ -90,7 +105,17 @@ public class GameSession {
                 sendError("The game could not be started: " + e.getMessage());
                 out.close();
             }
-        } else if (started) {
+        } else if (!started) {
+            return;
+        } else if (type.equals("action")) {
+            int i = msg.get("i").getAsInt();
+            String label = msg.get("label").getAsString();
+            SwingUtilities.invokeLater(() -> chrome.choose(i, label));
+        } else if (type.equals("actionHover")) {
+            int i = msg.get("i").getAsInt();
+            boolean enter = msg.get("enter").getAsBoolean();
+            SwingUtilities.invokeLater(() -> chrome.hover(i, enter));
+        } else {
             input.handle(type, msg);
         }
     }
@@ -126,12 +151,18 @@ public class GameSession {
                 frame.setContentPane(panel);
                 gui = gameType.createGUIManager(panel, game, ac);
                 frame.setSize(w, h);
+                space = new Dimension(w, h);
                 // Off screen, unless debugging. Its events come from the browser, so where it is does not matter.
                 frame.setLocation(showFrames ? 0 : -10_000, 0);
                 frame.setVisible(true);
-                frame.validate();
+                chrome = new ChromeReader(gui, out);
+                fitFrame();
+                byFrame.put(frame, this);
+                sendStarted(seed, players);
                 guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, e -> {
                     game.updateGUI(gui, frame);
+                    fitFrame();
+                    chrome.update();
                     reportProgress();
                 });
                 guiUpdater.start();
@@ -143,7 +174,6 @@ public class GameSession {
         input = new InputForwarder(frame, out);
         streamer = new FrameStreamer(frame, out, dpr);
         streamer.start();
-        sendStarted(seed, players);
 
         gameThread = new Thread(this::runGame, "web-game-" + id);
         gameThread.setDaemon(true);
@@ -169,6 +199,16 @@ public class GameSession {
         msg.addProperty("seed", seed);
         msg.addProperty("seat", config.seat());
         msg.add("players", playerNames(players));
+        msg.addProperty("actionsInPage", chrome.hasActions());
+        msg.addProperty("infoInPage", chrome.hasInfo());
+        out.sendText(msg.toString());
+    }
+
+    private void sendMessage(String title, String message) {
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "message");
+        msg.addProperty("title", title);
+        msg.addProperty("text", message);
         out.sendText(msg.toString());
     }
 
@@ -224,10 +264,29 @@ public class GameSession {
 
     private void resize(int w, int h, double dpr) {
         SwingUtilities.invokeLater(() -> {
-            frame.setSize(w, h);
-            frame.validate();
+            space = new Dimension(w, h);
+            fitFrame();
         });
         streamer.setDpr(dpr);
+    }
+
+    /**
+     * Sizes the frame to the browser's space or, where the GUI's layout needs more (many GUIs are laid out at a fixed
+     * size), to a larger frame of the same proportions, which the browser scales down to fit. The layout's own preferred size is used, not the
+     * size the GUI may have set on its panel, as that counts the panels the ChromeReader hides. A GUI can grow as the
+     * game goes on, so this runs after every update. Swing thread only.
+     */
+    private void fitFrame() {
+        Container content = frame.getContentPane();
+        LayoutManager layout = content.getLayout();
+        Dimension needed = layout != null ? layout.preferredLayoutSize(content) : content.getPreferredSize();
+        // scaled down by s, a frame of the space's proportions fills the space exactly
+        double s = Math.min(1, Math.min((double) space.width / needed.width, (double) space.height / needed.height));
+        Dimension size = new Dimension((int) Math.ceil(space.width / s), (int) Math.ceil(space.height / s));
+        if (!size.equals(frame.getSize())) {
+            frame.setSize(size);
+            frame.validate();
+        }
     }
 
     /**
@@ -252,6 +311,7 @@ public class GameSession {
         streamer.stop();
         SwingUtilities.invokeLater(() -> {
             guiUpdater.stop();
+            byFrame.remove(frame);
             frame.dispose();
         });
         System.out.printf("Session %d: stopped%n", id);

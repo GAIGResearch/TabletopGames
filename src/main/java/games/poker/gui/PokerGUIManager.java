@@ -1,5 +1,6 @@
 package games.poker.gui;
 
+import gui.GUIMessages;
 import core.*;
 import gui.AbstractGUIManager;
 import games.poker.PokerForwardModel;
@@ -278,7 +279,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                     }
                 }
                 winnerString = winnerString.replace(",}", "}");
-                JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winnerString + ". Next round begins!");
+                GUIMessages.show(parent, "Round over! Winners: " + winnerString + ". Next round begins!");
             }
 
             // Update player

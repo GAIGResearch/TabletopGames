@@ -1,5 +1,6 @@
 package games.pandemic.gui;
 
+import gui.GUIMessages;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -398,7 +399,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                 PropertyString playerLocationProperty = (PropertyString) this.gameState.getComponent(playerCardHash, activePlayer)
                         .getProperty(playerLocationHash);
                 String playerLocationName = playerLocationProperty.value;
-                JOptionPane.showMessageDialog(parent, "It's your turn! You are in " + playerLocationName + ". Current game phase: " + this.gameState.getGamePhase());
+                GUIMessages.show(parent, "It's your turn! You are in " + playerLocationName + ". Current game phase: " + this.gameState.getGamePhase());
             }
         } else {
             // Clear all highlights if it's not human acting

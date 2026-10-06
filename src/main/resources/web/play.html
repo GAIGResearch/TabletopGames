@@ -18,9 +18,30 @@
         <button id="setup" title="Back to the start page">Setup</button>
     </span>
 </header>
-<div class="stage" id="stage">
-    <canvas id="screen" tabindex="0"></canvas>
-    <div id="notice">Starting game…</div>
+<div class="main">
+    <div class="stage" id="stage">
+        <canvas id="screen" tabindex="0"></canvas>
+        <div id="notice">Starting game…</div>
+        <div class="toasts" id="toasts"></div>
+    </div>
+    <aside class="sidebar" id="sidebar" hidden>
+        <section class="panel" id="actions-panel" hidden>
+            <div class="panel-head">
+                <h2>Your move</h2>
+                <span class="muted" id="action-count"></span>
+            </div>
+            <input id="action-filter" type="search" placeholder="Filter actions" hidden>
+            <div class="action-list" id="action-list"></div>
+        </section>
+        <section class="panel" id="info-panel" hidden>
+            <div class="panel-head"><h2>Game</h2></div>
+            <dl class="info" id="info"></dl>
+        </section>
+        <section class="panel grow" id="history-panel" hidden>
+            <div class="panel-head"><h2>History</h2></div>
+            <ol class="history" id="history"></ol>
+        </section>
+    </aside>
 </div>
 <div id="tooltip" hidden></div>
 

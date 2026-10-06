@@ -150,6 +150,19 @@ every GUI in the JVM. Instead the web session, which already drives the update t
 - Layout check: LawnAndOrder first (its GUI puts both panels in a `BorderLayout`, and its Rules tab tests ordinary Swing widgets),
   then a representative set.
 
+**Status:** implemented as above, plus:
+
+- **Scaling to fit.** Many GUIs are laid out at a fixed size, larger than the browser's space once the sidebar takes its
+  320 px. The frame is laid out at the larger of the space and the GUI layout's own preferred size (the layout manager's, not the
+  size the GUI set on its panel, which counts the hidden panels), keeping the space's proportions; the browser scales the image
+  down to fit and divides mouse positions by the same factor. Re-checked after every update, as GUIs grow during a game.
+- `GUIMessages` routes a message to its session by the frame the GUI is in; the page shows it as a toast.
+- Checked: all 65 games start and render at a 1600×807 space with Random opponents (contact sheets of the snapshots);
+  LawnAndOrder in Chrome with actions chosen from the sidebar, info and history; Colt Express's round message as a toast.
+  Games that build their own info panel (Chess, Catan, Colt Express, Dots and Boxes, ...) keep it in the image, as designed.
+- Found: Pickomino's GUI is an unimplemented template (draws nothing); Terraforming Mars failed on its first update when a human
+  moves first (read the last history entry of an empty history), a desktop bug too; fixed in `TMGUI`.
+
 ### Stage 4: appearance
 
 - FlatLaf for the remaining Swing widgets, plus antialiasing and text rendering hints.

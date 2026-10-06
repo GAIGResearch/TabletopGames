@@ -1,5 +1,6 @@
 package games.terraformingmars.gui;
 
+import gui.GUIMessages;
 import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -530,14 +531,16 @@ public class TMGUI extends AbstractGUIManager {
                             + "</td><td>" + board + "</td><td>" + cards + "</td><td>" + total + "</td></tr>";
                 }
                 displayText += "</table><hr>Winner(s): " + win + "</html>";
-                JOptionPane.showConfirmDialog(parent, displayText, "Terraforming Mars: Game Over", OK_CANCEL_OPTION, INFORMATION_MESSAGE);
+                GUIMessages.showConfirm(parent, displayText, "Terraforming Mars: Game Over", OK_CANCEL_OPTION, INFORMATION_MESSAGE);
             }
 
             if (player instanceof HumanGUIPlayer) {
-                TMAction action = (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1).b;
-                if (!action.equals(lastAction) || gs.getGameTick() != lastTick) {
+                // no action yet when a human player moves first
+                TMAction action = gameState.getHistory().isEmpty() ? null
+                        : (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1).b;
+                if (!Objects.equals(action, lastAction) || gs.getGameTick() != lastTick) {
                     createActionMenu(player, (TMGameState) gameState);
-                    this.lastAction = action.copy();
+                    this.lastAction = action == null ? null : action.copy();
                     this.lastTick = gs.getGameTick();
                 }
             } else {

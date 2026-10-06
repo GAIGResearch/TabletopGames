@@ -1,5 +1,6 @@
 package games.coltexpress.gui;
 
+import gui.GUIMessages;
 import gui.AbstractGUIManager;
 import core.AbstractGameState;
 import core.AbstractPlayer;
@@ -198,9 +199,9 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
             }
             if (currentGamePhase == null || currentGamePhase != gameState.getGamePhase()) {
                 if (gameState.getGamePhase() == ExecuteActions) {
-                    JOptionPane.showMessageDialog(parent, "Planning phase over, execute actions!");
+                    GUIMessages.show(parent, "Planning phase over, execute actions!");
                 } else {
-                    JOptionPane.showMessageDialog(parent, "New round! Time to plan actions!");
+                    GUIMessages.show(parent, "New round! Time to plan actions!");
                 }
             }
             currentGamePhase = gameState.getGamePhase();

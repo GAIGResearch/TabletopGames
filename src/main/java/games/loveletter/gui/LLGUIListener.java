@@ -1,5 +1,6 @@
 package games.loveletter.gui;
 
+import gui.GUIMessages;
 import core.CoreConstants;
 import core.Game;
 import evaluation.listeners.IGameListener;
@@ -41,7 +42,7 @@ public class LLGUIListener implements IGameListener {
             parent.repaint();
 
             // Message for pause and clarity
-            JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winners.toString() + ". Next round begins!");
+            GUIMessages.show(parent, "Round over! Winners: " + winners.toString() + ". Next round begins!");
         }
     }
 

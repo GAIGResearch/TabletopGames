@@ -257,10 +257,193 @@ body.play {
     }
 }
 
+.main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+
 .stage {
     flex: 1;
+    min-width: 0;
     position: relative;
     overflow: hidden;
+}
+
+/* ---- sidebar: the GUI's actions, game information and history, drawn natively */
+
+.sidebar {
+    flex: none;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.sidebar[hidden] {
+    display: none;
+}
+
+.panel {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.panel[hidden] {
+    display: none;
+}
+
+.panel.grow {
+    flex: 1;
+    border-bottom: 0;
+}
+
+#actions-panel {
+    max-height: 50%;
+}
+
+.panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.panel h2 {
+    margin: 0;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+}
+
+#action-filter {
+    margin-bottom: 8px;
+}
+
+.action-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.action-list button {
+    text-align: left;
+    padding: 8px 11px;
+    border-color: var(--accent);
+    color: var(--fg);
+}
+
+.action-list button:hover {
+    background: var(--accent);
+    color: var(--accent-fg);
+}
+
+.action-list button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.action-list .waiting {
+    color: var(--muted);
+}
+
+.info {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 12px;
+    margin: 0;
+}
+
+.info dt {
+    color: var(--muted);
+}
+
+.info dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.info .whole {
+    grid-column: 1 / -1;
+}
+
+.history {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 0 0 0 22px;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+.history li {
+    padding: 2px 0;
+    overflow-wrap: anywhere;
+}
+
+.history li::marker {
+    color: var(--muted);
+}
+
+/* ---- toasts: messages the game would show in a dialog */
+
+.toasts {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: min(420px, calc(100% - 32px));
+    z-index: 3;
+}
+
+.toast {
+    position: relative;
+    padding: 10px 34px 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.toast strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.toast .close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 0 7px;
+    border: 0;
+    background: none;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+@media (max-width: 800px) {
+    .main {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: auto;
+        height: 42vh;
+        border-left: 0;
+        border-top: 1px solid var(--border);
+    }
 }
 
 #screen {

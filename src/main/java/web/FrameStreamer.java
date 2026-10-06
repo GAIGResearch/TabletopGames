@@ -26,7 +26,9 @@ import java.util.concurrent.TimeUnit;
  * sent, each as a PNG.
  * <p>
  * Each frame is one binary message: a 4-byte big-endian length, a JSON header of that length
- * ({@code {seq, w, h, tiles: [{x, y, w, h, len}]}}, all in device pixels), then the tiles' PNG bytes in header order.
+ * ({@code {seq, w, h, fw, fh, tiles: [{x, y, w, h, len}]}}), then the tiles' PNG bytes in header order. The image and
+ * tiles are in device pixels; fw and fh are the frame's own size, in the frame's (CSS) pixels, which may be larger than
+ * the browser's space for it (the browser then scales it down).
  */
 class FrameStreamer {
 
@@ -44,6 +46,7 @@ class FrameStreamer {
     private int[] previous;
     private int previousW, previousH;
     private long seq;
+    private Dimension frameSize;
 
     FrameStreamer(JFrame frame, Sender out, double dpr) {
         this.frame = frame;
@@ -78,9 +81,11 @@ class FrameStreamer {
 
     private BufferedImage paint() throws Exception {
         BufferedImage[] result = new BufferedImage[1];
+        Dimension[] size = new Dimension[1];
         double scale = dpr;
         SwingUtilities.invokeAndWait(() -> {
             JRootPane root = frame.getRootPane();
+            size[0] = root.getSize();
             int w = (int) Math.ceil(root.getWidth() * scale), h = (int) Math.ceil(root.getHeight() * scale);
             if (w <= 0 || h <= 0) return;
             BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
@@ -92,6 +97,7 @@ class FrameStreamer {
             g.dispose();
             result[0] = image;
         });
+        frameSize = size[0];
         return result[0];
     }
 
@@ -120,6 +126,8 @@ class FrameStreamer {
         header.addProperty("seq", ++seq);
         header.addProperty("w", w);
         header.addProperty("h", h);
+        header.addProperty("fw", frameSize.width);
+        header.addProperty("fh", frameSize.height);
         JsonArray tiles = new JsonArray();
         int total = 0;
         for (int i = 0; i < changed.size(); i++) {
