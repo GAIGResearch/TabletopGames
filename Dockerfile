@@ -42,7 +42,7 @@ COPY --from=build /app/target/tag-classes.jar /tag/tag-classes.jar
 # For the WebServer entry point
 EXPOSE 8080
 
-# Every entry point runs under Xvfb, which the others simply do not use, e.g.
+# Every entry point runs under Xvfb, though only WebServer uses it, e.g.
 #   docker run tag RunGames config=...
 #   docker run -p 8080:8080 tag WebServer games=LawnAndOrder token=...
 ENTRYPOINT ["tini", "--", "xvfb-run", "-a", "-s", "-screen 0 2560x1600x24", \

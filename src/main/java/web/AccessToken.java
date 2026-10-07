@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * An optional shared secret for the whole server, so that only people sent the link can play. The link is
- * {@code http://host:port/?token=SECRET}: the token is then kept in a cookie (and taken out of the address), and every
- * page, API call and WebSocket must carry it. With no token configured, the server is open.
+ * An optional shared secret for the whole server, so that only people sent the link
+ * ({@code http://host:port/?token=SECRET}) can play. Every page, API call and WebSocket must carry the token, in the
+ * query or in the cookie it sets. With no token configured, the server is open.
  */
 class AccessToken {
 
@@ -39,12 +39,12 @@ class AccessToken {
     }
 
     /**
-     * Lets an HTTP request through if it carries the token (in the query, which also sets the cookie, or in the
-     * cookie); otherwise answers 401 and stops it.
+     * Lets an HTTP request through if it carries the token; otherwise answers 401 and stops it.
      */
     void check(Context ctx) {
         if (isOpen()) return;
         String fromQuery = ctx.queryParam("token");
+        // a token in the query sets the cookie, which then carries it
         if (fromQuery != null && matches(fromQuery)) {
             ctx.header("Set-Cookie", COOKIE + "=" + fromQuery + "; Path=/; Max-Age=" + COOKIE_DAYS * 24 * 3600
                     + "; HttpOnly; SameSite=Lax" + (ctx.scheme().equals("https") ? "; Secure" : ""));
@@ -67,7 +67,7 @@ class AccessToken {
     }
 
     /**
-     * Whether a WebSocket connection carries the token (in its cookie or query).
+     * Whether a WebSocket connection carries the token.
      */
     boolean allows(WsContext ctx) {
         return isOpen() || matches(ctx.cookie(COOKIE)) || matches(ctx.queryParam("token"));
@@ -75,6 +75,7 @@ class AccessToken {
 
     private boolean matches(String candidate) {
         if (candidate == null) return false;
+        // in constant time, so the time taken gives nothing of the token away
         return MessageDigest.isEqual(token, candidate.getBytes(StandardCharsets.UTF_8));
     }
 

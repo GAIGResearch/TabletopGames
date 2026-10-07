@@ -14,10 +14,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Serves TAG games to a browser. The game, its AI players and its Swing GUI all run here; the GUI is drawn into a
  * frame no one sees, streamed to the browser as images, and driven by the mouse and key events the browser sends back.
- * <p>
- * The start page (index.html) sets up a game and opens the play page (play.html) with the setup in its query string
- * (see {@link SessionConfig}). The play page's WebSocket carries the same query; each connection gets its own
- * {@link GameSession}, which ends when the connection closes.
+ * Each WebSocket connection plays one {@link GameSession}, set up from the connection's query string.
  * <p>
  * Arguments (key=value):
  * <ul>
@@ -36,8 +33,8 @@ import java.util.concurrent.TimeUnit;
 public class WebServer {
 
     public static void main(String[] args) {
-        // antialiased text in the streamed images (on Linux, Java otherwise draws text without it); grey-scale rather
-        // than sub-pixel, as the browser may scale the image
+        // Java on Linux draws text without antialiasing unless asked. Grey-scale, not sub-pixel, as the browser may
+        // scale the image.
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
         int port = Utils.getArg(args, "port", 8080);

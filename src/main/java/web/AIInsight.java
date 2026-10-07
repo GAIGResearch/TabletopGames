@@ -15,11 +15,10 @@ import java.util.Map;
 
 /**
  * Sends the browser what an AI player weighed up for each decision it makes: its most visited actions, with the share
- * of its search each took and their value to it, from {@link AbstractPlayer#getDecisionStats()} (MCTS reports these;
- * players that do not search report nothing, and nothing is sent).
+ * of its search each took and their value to it, from {@link AbstractPlayer#getDecisionStats()}.
  * <p>
- * This shows what the AI knows, including its own hidden information (in a game of simultaneous choices, the card it
- * is about to play), so a session sends it only when the browser player asked for it.
+ * This shows what the AI knows, including its own hidden information (in a game of simultaneous choices, the move it
+ * is about to make).
  */
 class AIInsight implements IGameListener {
 
@@ -41,6 +40,7 @@ class AIInsight implements IGameListener {
             return;
         AbstractPlayer player = game.getPlayers().get(event.playerID);
         Map<AbstractAction, Map<String, Object>> stats = player.getDecisionStats();
+        // players that do not search (random, say) report nothing
         if (stats == null || stats.isEmpty()) return;
 
         AbstractGameState state = event.state != null ? event.state : game.getGameState();

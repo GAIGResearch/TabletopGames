@@ -12,12 +12,7 @@ import java.util.Objects;
 /**
  * Moves a GUI's standard parts (its action buttons, game state information and history; see
  * {@link AbstractGUIManager#getActionPanel()}) from the streamed image into the page, where the browser draws them
- * natively.
- * <p>
- * The Swing panels are hidden, but stay in being: after every GUI update their contents are read and sent to the
- * browser when they change. An action chosen in the page clicks the same Swing button, and hovering over it sends the
- * button the same mouse events, so whatever a game does on a click or a hover (highlights on the board, say) still
- * happens. A GUI that does not use a standard panel keeps that part in the image.
+ * natively. A GUI that does not use a standard panel keeps that part in the image.
  * <p>
  * Everything here runs on the Swing thread.
  */
@@ -36,6 +31,7 @@ class ChromeReader {
         this.out = out;
         hasActions = gui.getActionPanel() != null && gui.getActionButtons().length > 0;
         hasInfo = gui.getInfoPanel() != null;
+        // hidden, not removed: update still reads them, and choose clicks their buttons
         if (hasActions) gui.getActionPanel().setVisible(false);
         if (hasInfo) gui.getInfoPanel().setVisible(false);
     }
@@ -110,11 +106,13 @@ class ChromeReader {
     void choose(int i, String label) {
         JButton[] buttons = gui.getActionButtons();
         if (i < 0 || i >= buttons.length || !offers(buttons[i]) || !buttons[i].getText().equals(label)) return;
+        // a click on the Swing button, rather than the action itself, so whatever the game does on a click happens
         buttons[i].doClick(0);
     }
 
     /**
-     * The mouse entering (or leaving) the page's button for action i, passed on to the Swing button.
+     * Passes the mouse entering or leaving the page's button for action i on to the Swing button, so a game's hover
+     * effects (highlights on the board, say) still happen.
      */
     void hover(int i, boolean enter) {
         JButton[] buttons = gui.getActionButtons();

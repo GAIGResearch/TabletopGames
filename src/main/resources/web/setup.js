@@ -1,5 +1,5 @@
-// The start page: choose a game, players, opponents, seed and game parameters, then open the play page with the
-// setup in its query string (read by web.SessionConfig).
+// The start page sets up a game (players, opponents, seed and game parameters) and opens the play page with the setup
+// in its query string (read by web.SessionConfig).
 'use strict';
 
 const $ = id => document.getElementById(id);
@@ -36,7 +36,7 @@ function save(gameName, setup) {
         all.lastGame = gameName;
         localStorage.setItem(STORE_KEY, JSON.stringify(all));
     } catch {
-        // storage unavailable: the page still works, it just will not remember
+        // Storage is unavailable. The page still works, but will not remember the setup.
     }
 }
 

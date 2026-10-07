@@ -13,8 +13,5 @@ public interface Sender {
 
     boolean isOpen();
 
-    /**
-     * Closes the connection (which ends the session).
-     */
     void close();
 }

@@ -13,16 +13,8 @@ import java.util.Objects;
 
 /**
  * Turns the browser's mouse and key events into AWT events on the frame, so the GUI sees what it would see on the
- * desktop.
- * <p>
- * Mouse events are posted to the frame itself, and Swing routes them to the component under the mouse, generating
- * enter and exit events as the mouse crosses components. A click is posted after a release that did not drag, as the
- * windowing system would. Key events go to the component last pressed, as the frame has no keyboard focus.
- * <p>
- * Swing's tooltips are switched off (see {@link GameSession#configureSwing}), so after each move the tooltip text of
- * the component under the mouse is sent to the browser to show.
- * <p>
- * Browser messages carry CSS pixel coordinates, which are the frame's coordinates, as the frame is sized to match.
+ * desktop, and sends the browser the tooltip of the component under the mouse. Browser messages carry the frame's
+ * coordinates.
  */
 class InputForwarder {
 
@@ -61,8 +53,8 @@ class InputForwarder {
             SwingUtilities.invokeLater(() -> sendTooltip(null));
             return;
         }
-        // Swing tracks which component the mouse is over only once the mouse has entered the frame. (A release may come
-        // from outside, ending a drag that left the canvas.)
+        // Swing tracks which component the mouse is over only once the mouse has entered the frame. A release may come
+        // from outside the canvas, at the end of a drag that left it.
         if (!inside && !kind.equals("up")) {
             post(MouseEvent.MOUSE_ENTERED, p, mods, 0, MouseEvent.NOBUTTON);
             inside = true;
@@ -85,6 +77,7 @@ class InputForwarder {
             }
             case "up" -> {
                 post(MouseEvent.MOUSE_RELEASED, p, mods, clicks, button);
+                // as the windowing system would, a release that did not drag is also a click
                 if (pressedAt != null && !dragged)
                     post(MouseEvent.MOUSE_CLICKED, p, mods, clicks, button);
                 pressedAt = null;
@@ -96,6 +89,10 @@ class InputForwarder {
         }
     }
 
+    /**
+     * Posts a mouse event to the frame itself. Swing routes it to the component under the mouse, and generates enter
+     * and exit events as the mouse crosses components.
+     */
     private void post(int id, Point p, int mods, int clicks, int button) {
         boolean popupTrigger = id == MouseEvent.MOUSE_PRESSED && button == MouseEvent.BUTTON3;
         Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(
@@ -119,6 +116,7 @@ class InputForwarder {
         int keyCode = keyCode(key);
         char keyChar = key.length() == 1 ? key.charAt(0) : KeyEvent.CHAR_UNDEFINED;
         SwingUtilities.invokeLater(() -> {
+            // the frame has no keyboard focus, so keys go to the component last pressed
             Component target = keyTarget != null ? keyTarget : frame.getContentPane();
             long when = System.currentTimeMillis();
             if (kind.equals("down")) {
@@ -132,6 +130,7 @@ class InputForwarder {
     }
 
     private void updateTooltip(Point p) {
+        // Swing's own tooltips are switched off (see GameSession.configureSwing), so the browser shows them
         SwingUtilities.invokeLater(() -> {
             Component c = componentAt(p);
             String text = null;
@@ -172,8 +171,7 @@ class InputForwarder {
     }
 
     /**
-     * The AWT modifier mask for the message's keys and mouse buttons. The browser's buttons mask has 1 for the primary
-     * button, 2 for the secondary and 4 for the middle one.
+     * The AWT modifier mask for the message's keys and mouse buttons.
      */
     private static int modifiers(JsonObject msg) {
         int mods = 0;
@@ -181,6 +179,7 @@ class InputForwarder {
         if (flag(msg, "ctrl")) mods |= InputEvent.CTRL_DOWN_MASK;
         if (flag(msg, "alt")) mods |= InputEvent.ALT_DOWN_MASK;
         if (flag(msg, "meta")) mods |= InputEvent.META_DOWN_MASK;
+        // the browser's buttons mask has 1 for the primary button, 2 for the secondary and 4 for the middle one
         int buttons = msg.has("buttons") ? msg.get("buttons").getAsInt() : 0;
         if ((buttons & 1) != 0) mods |= InputEvent.BUTTON1_DOWN_MASK;
         if ((buttons & 2) != 0) mods |= InputEvent.BUTTON3_DOWN_MASK;

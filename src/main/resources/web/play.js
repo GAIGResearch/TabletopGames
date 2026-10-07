@@ -1,4 +1,4 @@
-// The play page: shows a game's Swing GUI, streamed from the server as tiles, and sends the mouse and keys back to
+// The play page shows a game's Swing GUI, streamed from the server as tiles, and sends the mouse and keys back to
 // it. The page's query string is the game setup (see web.SessionConfig), and is repeated on the WebSocket URL.
 // See web.FrameStreamer for the frame format, and web.InputForwarder for the input messages.
 'use strict';
@@ -149,7 +149,7 @@ function showActions(actions) {
         setRichText(b, a.label);
         b.dataset.label = a.label.toLowerCase();
         b.addEventListener('click', () => {
-            // one choice per decision: the list is replaced when the server sends the next one
+            // Only one choice per decision. The list is replaced when the server sends the next one.
             for (const other of list.querySelectorAll('button')) other.disabled = true;
             send({type: 'action', i: a.i, label: a.label});
         });

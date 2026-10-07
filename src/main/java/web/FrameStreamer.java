@@ -21,9 +21,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Sends what a frame shows to the browser. Every tick the frame's root pane is painted into an image at a scale set by
- * the session (the browser's device pixel ratio, times the scale it shows the frame at); the image is split into
- * square tiles, and only the tiles that changed since the last tick are sent, each as a PNG.
+ * Sends what a frame shows to the browser. Every tick the frame's root pane is painted into an image, which is split
+ * into square tiles, and the tiles that changed since the last tick are sent, each as a PNG.
  * <p>
  * Each frame is one binary message: a 4-byte big-endian length, a JSON header of that length
  * ({@code {seq, w, h, fw, fh, tiles: [{x, y, w, h, len}]}}), then the tiles' PNG bytes in header order. The image and

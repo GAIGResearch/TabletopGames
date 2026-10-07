@@ -18,9 +18,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * The agents a browser player can play against: a few built in (random, one-step look-ahead, and MCTS at several
- * thinking times), and any agent JSON files in the server's agent directory or in the game's own
- * {@code data/<game>/agents} directory (as used by FrontendSimple).
+ * The agents a browser player can play against: the built-in ones, and any agent JSON files in the server's agent
+ * directory or in the game's {@code data/<game>/agents} directory.
  */
 class OpponentCatalog {
 
@@ -88,6 +87,7 @@ class OpponentCatalog {
         for (File f : files) {
             String name = f.getName().substring(0, f.getName().length() - ".json".length());
             String id = "agent:" + name;
+            // a file in the server's agent directory takes precedence over one of the same name in the game's
             if (into.stream().anyMatch(o -> o.id().equals(id))) continue;
             into.add(new Opponent(id, name + " (agent file)", () -> {
                 AbstractPlayer player = PlayerFactory.createPlayer(f.getPath());

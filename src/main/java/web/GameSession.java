@@ -16,8 +16,8 @@ import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
-import java.util.ArrayList;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,7 +59,7 @@ public class GameSession {
     // the size of the browser's space for the GUI, and its device pixel ratio (Swing thread only)
     private Dimension space;
     private double dpr;
-    // the image is drawn at dpr * the scale the browser shows the frame at (see fitFrame)
+    // image pixels per frame pixel (see fitFrame)
     private volatile double imageScale;
     private volatile long lastActivity = System.currentTimeMillis();
     private final long startedAt = System.currentTimeMillis();
@@ -79,9 +79,7 @@ public class GameSession {
     }
 
     /**
-     * Swing settings for a JVM whose GUIs are all streamed. Swing's own tooltips are switched off, as Swing moves them
-     * on to a real screen and so out of the frame; the InputForwarder sends their text to the browser instead. Messages
-     * a GUI would show in a dialog are sent to its browser.
+     * Swing settings for a JVM whose GUIs are all streamed.
      *
      * @param lookAndFeel "flat" for FlatLaf's light look and feel, or "default" for Swing's own
      */
@@ -90,8 +88,11 @@ public class GameSession {
             FlatLightLaf.setup();
         else if (!lookAndFeel.equalsIgnoreCase("default"))
             throw new IllegalArgumentException("Unknown look and feel (flat or default): " + lookAndFeel);
+        // Swing moves a tooltip on to a real screen, and so out of the frame; the InputForwarder sends their text to
+        // the browser instead
         ToolTipManager.sharedInstance().setEnabled(false);
         JPopupMenu.setDefaultLightWeightPopupEnabled(true);
+        // a message a GUI would show in a dialog goes to the browser of the session the GUI belongs to
         GUIMessages.setHandler((parent, title, message) -> {
             GameSession session = byFrame.get(SwingUtilities.getWindowAncestor(parent));
             if (session != null) session.sendMessage(title, message);
@@ -179,6 +180,7 @@ public class GameSession {
                 sendStarted(seed, players);
                 guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, e -> {
                     game.updateGUI(gui, frame);
+                    // a GUI can grow as the game goes on
                     fitFrame();
                     chrome.update();
                     reportProgress();
@@ -238,8 +240,7 @@ public class GameSession {
     }
 
     /**
-     * Tells the browser whose turn it is when that changes, and the results once the game is over. Runs on the Swing
-     * thread, after each GUI update.
+     * Tells the browser whose turn it is when that changes, and the results once the game is over.
      */
     private void reportProgress() {
         AbstractGameState state = game.getGameState();
@@ -274,9 +275,8 @@ public class GameSession {
     }
 
     /**
-     * A record of the game so far, for a bug report or to set the game up again: the setup (game, seed, players, every
-     * parameter's value) and the actions taken, described as the browser player saw them (so hiding what they could not
-     * see), and the results if the game is over.
+     * A record of the game so far, for a bug report or to set the game up again. The actions are described as the
+     * browser player saw them.
      */
     private JsonObject gameLog() {
         JsonObject log = new JsonObject();
@@ -327,10 +327,8 @@ public class GameSession {
         return log;
     }
 
-    /**
-     * The game's action history. The game thread adds to it, so copying it may meet a change; it is then copied again.
-     */
     private static List<utilities.Pair<Integer, core.actions.AbstractAction>> history(AbstractGameState state) {
+        // the game thread adds to the history, so copying it may meet a change; it is then copied again
         for (int attempt = 0; ; attempt++) {
             try {
                 return state.getHistory();
@@ -356,14 +354,14 @@ public class GameSession {
     }
 
     /**
-     * Sizes the frame to the browser's space or, where the GUI's layout needs more (many GUIs are laid out at a fixed
-     * size), to a larger frame of the same proportions, which the browser scales down to fit. The layout's own preferred size is used, not the
-     * size the GUI may have set on its panel, as that counts the panels the ChromeReader hides. A GUI can grow as the
-     * game goes on, so this runs after every update. Swing thread only.
+     * Sizes the frame to the browser's space or, where the GUI needs more, to a larger frame of the same proportions,
+     * which the browser scales down to fit. Swing thread only.
      */
     private void fitFrame() {
         Container content = frame.getContentPane();
         LayoutManager layout = content.getLayout();
+        // Many GUIs are laid out at a fixed size. The layout's own preferred size is used, not the size the GUI may have
+        // set on its panel, as that counts the panels the ChromeReader hides.
         Dimension needed = layout != null ? layout.preferredLayoutSize(content) : content.getPreferredSize();
         // scaled down by s, a frame of the space's proportions fills the space exactly
         double s = Math.min(1, Math.min((double) space.width / needed.width, (double) space.height / needed.height));
@@ -378,8 +376,7 @@ public class GameSession {
     }
 
     /**
-     * Ends the session because the browser player has been away too long: tells the browser, then closes the
-     * connection, which stops the session.
+     * Tells the browser the game was ended for want of activity, and closes the connection (which stops the session).
      */
     public void endIdle(int minutes) {
         sendError("This game was ended after " + minutes + (minutes == 1 ? " minute" : " minutes") + " without activity.");
@@ -387,14 +384,14 @@ public class GameSession {
     }
 
     /**
-     * Ends the game (the game thread is interrupted while it waits for the browser player's action) and disposes of
-     * the frame.
+     * Ends the game and disposes of the frame.
      */
     public synchronized void stop() {
         if (stopped) return;
         stopped = true;
         if (!started) return;
         game.setStopped(true);
+        // the game thread may be waiting for the browser player's action
         gameThread.interrupt();
         streamer.stop();
         SwingUtilities.invokeLater(() -> {

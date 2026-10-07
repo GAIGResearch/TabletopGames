@@ -11,16 +11,15 @@ import java.util.Map;
  * What a new {@link GameSession} plays: the game, the number of players, which seat the browser player takes, the
  * agent in every other seat, the seed and any game parameters changed from their defaults.
  * <p>
- * It is read from the query string of the play page (which the browser repeats on its WebSocket URL), so a game set up
- * on the start page can be bookmarked or shared as a link:
- * <pre>game=LawnAndOrder&amp;players=3&amp;seat=0&amp;opponents=you,mcts-1000,random&amp;seed=42&amp;pause=300&amp;p.handSize=6</pre>
- * (and {@code insight=1} to see what the AI players weighed up, see {@link AIInsight}).
+ * It is read from the query string of the play page, so a game set up on the start page can be bookmarked or shared
+ * as a link:
+ * <pre>game=LawnAndOrder&amp;players=3&amp;seat=0&amp;opponents=you,mcts-1000,random&amp;seed=42&amp;pause=300&amp;p.handSize=6&amp;insight=1</pre>
  *
  * @param opponents an {@link OpponentCatalog} id for every seat, in seat order; the browser player's entry is ignored
  * @param seed      the game seed, or -1 for a new seed for each game
  * @param turnPause ms the game waits after each action, so the browser player can see what the AIs did
  * @param params    game parameters (by name) to change from their defaults, as strings
- * @param insight   whether to send the browser the AI players' decision statistics
+ * @param insight   whether to send the browser the AI players' decision statistics (see {@link AIInsight})
  */
 public record SessionConfig(GameType game, int nPlayers, int seat, List<String> opponents, long seed, int turnPause,
                             Map<String, String> params, boolean insight) {

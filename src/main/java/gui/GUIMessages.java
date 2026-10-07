@@ -4,10 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Messages a GUI shows to the player (round over, your turn, ...). On the desktop these are modal dialogs, as
- * JOptionPane shows them. A GUI that is not on a desktop can have them shown another way by setting a handler: the web
- * package does, as a modal dialog would block the one Swing thread shared by every game it serves, and would never
- * reach the browser.
+ * Messages a GUI shows to the player (round over, your turn, ...). On the desktop these are modal dialogs; a GUI shown
+ * elsewhere, as by the web package, has a handler show them. GUIs use this rather than JOptionPane.
  */
 public final class GUIMessages {
 
@@ -44,8 +42,7 @@ public final class GUIMessages {
     }
 
     /**
-     * As JOptionPane.showConfirmDialog(parent, message, title, optionType, messageType), but with no answer, as the
-     * message is for information only.
+     * As JOptionPane.showConfirmDialog(parent, message, title, optionType, messageType), but with no answer.
      */
     public static void showConfirm(Component parent, String message, String title, int optionType, int messageType) {
         Handler h = handler;

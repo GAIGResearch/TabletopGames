@@ -175,8 +175,8 @@ public abstract class AbstractGUIManager {
         return humanPlayerIds;
     }
 
-    /* Read-only access to the standard parts of the GUI, for showing them elsewhere: the web package streams a GUI to
-       a browser, hides these panels, and draws their contents natively in the page. Call on the Swing thread. */
+    /* Read-only access to the standard parts of the GUI, so that they can be shown elsewhere (as the web package
+       does). Call on the Swing thread. */
 
     /**
      * The panel of action buttons made by createActionPanel, or null if this GUI does not use one.
@@ -194,19 +194,19 @@ public abstract class AbstractGUIManager {
     }
 
     /**
-     * The action buttons (empty if this GUI has none). A button offers an action when it is visible and has text;
-     * clicking it (doClick) chooses that action, as a click on the GUI would.
+     * The action buttons (empty if this GUI has none). A button offers an action when it is visible and has text, and
+     * doClick chooses it.
      */
     public JButton[] getActionButtons() {
         return actionButtons == null ? new JButton[0] : actionButtons.clone();
     }
 
     /**
-     * The lines of game state information shown in the info panel: status, scores, phase, turn and current player
-     * (not the list of each player's result, which is mostly noise until the game ends).
+     * The lines of game state information shown in the info panel: status, scores, phase, turn and current player.
      */
     public List<String> getGameStateInfo() {
         List<String> lines = new ArrayList<>();
+        // not playerStatus: each player's result is mostly noise until the game ends
         for (JLabel label : new JLabel[]{gameStatus, playerScores, gamePhase, turn, currentPlayer})
             if (label.getText() != null && !label.getText().isEmpty())
                 lines.add(label.getText());

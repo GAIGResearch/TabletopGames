@@ -15,18 +15,14 @@ import java.util.Objects;
 
 /**
  * The games the server offers, and their parameters as a form can show them.
- * <p>
- * A game's parameters are listed only if its parameter class is a {@link TunableParameters}, and then only those of a
- * simple type (numbers, booleans, strings and enums), each with its default and, where the game gives them, its
- * possible values.
  */
 class GameCatalog {
 
     private final List<GameType> games;
 
     /**
-     * @param spec a comma-separated list of game names, or "all" (or empty) for every game with a GUI, by name (less
-     *             the template for new games)
+     * @param spec a comma-separated list of game names, or "all" (or empty) for every game with a GUI except
+     *             GameTemplate, sorted by name
      */
     GameCatalog(String spec) {
         if (spec == null || spec.isBlank() || spec.equalsIgnoreCase("all")) {
@@ -69,12 +65,17 @@ class GameCatalog {
         return result;
     }
 
+    /**
+     * The game's parameters that a form can set, each with its default and any possible values the game lists.
+     */
     static JsonArray describeParameters(GameType game) {
         JsonArray result = new JsonArray();
+        // only a TunableParameters class lists its parameters
         if (!(game.createParameters(0) instanceof TunableParameters<?> params)) return result;
         for (String name : params.getParameterNames()) {
             Class<?> type = typeOf(params, name);
             String kind = kind(type);
+            // only numbers, booleans, strings and enums
             if (kind == null) continue;
             JsonObject p = new JsonObject();
             p.addProperty("name", name);

@@ -1,6 +1,6 @@
 name: Web play Docker smoke test
 
-# Builds the Docker image and plays the first move of a game through the web server inside it: this checks what can
+# Builds the Docker image and plays the first move of a game through the web server inside it. This checks what can
 # only be checked on Linux in the image (Xvfb, fonts, AWT), as well as the page, the access token and the WebSocket
 # protocol (see web.WebServer).
 on:
