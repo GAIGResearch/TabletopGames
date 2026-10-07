@@ -39,6 +39,11 @@ COPY data /tag/data
 
 COPY --from=build /app/target/tag-classes.jar /tag/tag-classes.jar
 
+# In a container Java's heap defaults to a quarter of its memory limit (docker run --memory); MCTS opponents need more.
+# On running out of memory, Java writes a heap dump to /tmp, to copy out with docker cp.
+# Override with docker run -e JAVA_TOOL_OPTIONS=...
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
+
 # For the WebServer entry point
 EXPOSE 8080
 
