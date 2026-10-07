@@ -24,7 +24,7 @@ public class DiplomacySupportTest {
 
     @Before
     public void setup() {
-        state = newState();
+        state = newState(helpingAnyUnit());
         fm = new DiplomacyForwardModel();
         clearBoard(state);
     }

@@ -33,7 +33,7 @@ public class DiplomacySampleGameTest {
 
     @Test
     public void wholeSampleGameFromSpring1901ToThe1902Adjustments() {
-        Game game = newGame(16);
+        Game game = newGame(16, helpingAnyUnit());
         state = (DiplomacyGameState) game.getGameState();
         fm = (DiplomacyForwardModel) game.getForwardModel();
 

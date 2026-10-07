@@ -139,8 +139,9 @@ public class DiplomacyGameState extends AbstractGameState {
     }
 
     /**
-     * The coastal provinces the army in the province could be convoyed to by the fleets now at sea, each with the sea
-     * provinces of the fleets that could take part. Empty for a fleet, or an army not on a coast.
+     * The coastal provinces the army in the province could be convoyed to by the fleets now at sea (only its own
+     * power's fleets if DiplomacyParameters.ownUnitsOnly), each with the sea provinces of the fleets that could take
+     * part. Empty for a fleet, or an army not on a coast.
      */
     public Map<DiplomacyProvince, Set<DiplomacyProvince>> convoyRoutes(DiplomacyProvince province) {
         Map<DiplomacyProvince, Set<DiplomacyProvince>> routes = new HashMap<>();
@@ -148,34 +149,37 @@ public class DiplomacyGameState extends AbstractGameState {
         if (unit == null || unit.isFleet() || province.type() != DiplomacyProvince.Type.COAST)
             return routes;
         // every chain of fleets in adjacent sea provinces that starts next to the army and uses no fleet twice
-        for (DiplomacyProvince sea : convoyingNeighbours(province, null))
-            extendRoute(province, new ArrayList<>(List.of(sea)), routes);
+        int fleetOwner = ((DiplomacyParameters) gameParameters).ownUnitsOnly ? unit.owner() : -1;
+        for (DiplomacyProvince sea : convoyingNeighbours(province, null, fleetOwner))
+            extendRoute(province, new ArrayList<>(List.of(sea)), routes, fleetOwner);
         return routes;
     }
 
     private void extendRoute(DiplomacyProvince from, List<DiplomacyProvince> chain,
-                             Map<DiplomacyProvince, Set<DiplomacyProvince>> routes) {
+                             Map<DiplomacyProvince, Set<DiplomacyProvince>> routes, int fleetOwner) {
         DiplomacyProvince last = chain.get(chain.size() - 1);
         for (DiplomacyLocation l : getMap().fleetMoves(new DiplomacyLocation(last))) {
             DiplomacyProvince p = l.province();
             if (p.type() == DiplomacyProvince.Type.COAST && !p.equals(from))
                 routes.computeIfAbsent(p, k -> new HashSet<>()).addAll(chain);
         }
-        for (DiplomacyProvince next : convoyingNeighbours(last, chain)) {
+        for (DiplomacyProvince next : convoyingNeighbours(last, chain, fleetOwner)) {
             chain.add(next);
-            extendRoute(from, chain, routes);
+            extendRoute(from, chain, routes, fleetOwner);
             chain.remove(chain.size() - 1);
         }
     }
 
     /**
-     * The sea provinces next to the province holding a fleet, other than those already in the chain (null for
-     * none).
+     * The sea provinces next to the province holding a fleet (of fleetOwner, or anyone's if -1), other than those
+     * already in the chain (null for none).
      */
-    private List<DiplomacyProvince> convoyingNeighbours(DiplomacyProvince province, List<DiplomacyProvince> chain) {
+    private List<DiplomacyProvince> convoyingNeighbours(DiplomacyProvince province, List<DiplomacyProvince> chain,
+                                                        int fleetOwner) {
         List<DiplomacyProvince> list = new ArrayList<>();
         for (DiplomacyProvince p : getMap().adjacent(province))
             if (p.type() == DiplomacyProvince.Type.SEA && units[p.index()] != null && units[p.index()].isFleet()
+                    && (fleetOwner == -1 || units[p.index()].owner() == fleetOwner)
                     && (chain == null || !chain.contains(p)))
                 list.add(p);
         return list;

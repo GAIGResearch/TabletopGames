@@ -57,6 +57,13 @@ class DiplomacyTestUtils {
         return newState(null);
     }
 
+    /** Default parameters, except that orders helping other powers' units are offered (ownUnitsOnly false). */
+    static DiplomacyParameters helpingAnyUnit() {
+        DiplomacyParameters params = new DiplomacyParameters();
+        params.setParameterValue("ownUnitsOnly", false);
+        return params;
+    }
+
     static DiplomacyProvince prov(DiplomacyGameState state, String name) {
         return state.getMap().province(name);
     }
@@ -182,9 +189,15 @@ class DiplomacyTestUtils {
         state.setTurnOwner(firstPower);
     }
 
+    /**
+     * An order written with this suffix is legal but not offered by computeAvailableActions (support for a foreign
+     * unit's attack on the supporter's own unit); play checks it is not offered, and gives it anyway.
+     */
+    static final String NOT_OFFERED = "(not offered)";
+
     /** The order written in the text (see the class Javadoc). Needs only the map, not the units. */
     static DiplomacyOrder order(DiplomacyGameState state, String text) {
-        String[] parts = text.trim().split(" +");
+        String[] parts = text.replace(NOT_OFFERED, "").trim().split(" +");
         switch (parts[0]) {
             case "Waive":
                 return new WaiveBuilds();
@@ -226,7 +239,7 @@ class DiplomacyTestUtils {
 
     /** The power giving the order written. */
     static int powerOf(DiplomacyGameState state, String text) {
-        String[] parts = text.trim().split(" +");
+        String[] parts = text.replace(NOT_OFFERED, "").trim().split(" +");
         switch (parts[0]) {
             case "Waive": {
                 int p = Arrays.asList(POWER_NAMES).indexOf(parts[1]);
@@ -253,7 +266,8 @@ class DiplomacyTestUtils {
     }
 
     /**
-     * Gives the orders through fm.next, each when its power has the turn, checking that each is a legal action.
+     * Gives the orders through fm.next, each when its power has the turn, checking that each is a legal action (or
+     * for one marked NOT_OFFERED, that it is not).
      * Fails if the power with the turn has no order left in the list, or if the game ends or the phase changes
      * before every order is given. The orders may be a whole phase (the last one then resolves it) or only part.
      */
@@ -284,8 +298,12 @@ class DiplomacyTestUtils {
                 fail(POWER_NAMES[current] + " has the turn in " + phase + " " + year
                         + " but the test gives it no more orders; left: " + left);
             List<AbstractAction> legal = fm.computeAvailableActions(state);
-            assertTrue(POWER_NAMES[current] + " may not give " + next.text() + "; legal: " + legal,
-                    legal.contains(next.order()));
+            if (next.text().contains(NOT_OFFERED))
+                assertFalse(POWER_NAMES[current] + " is offered " + next.text() + "; legal: " + legal,
+                        legal.contains(next.order()));
+            else
+                assertTrue(POWER_NAMES[current] + " may not give " + next.text() + "; legal: " + legal,
+                        legal.contains(next.order()));
             fm.next(state, next.order());
             remaining.remove(next);
         }

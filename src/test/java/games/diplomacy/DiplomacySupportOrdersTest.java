@@ -10,7 +10,8 @@ import static org.junit.Assert.*;
 /**
  * The support orders offered in an orders phase (rulebook p.7-8), including supports by and for fleets on split
  * coasts. Exact action sets are checked on boards with no fleet in a sea province next to a coastal army, where no
- * convoy order or move via convoy is offered.
+ * convoy order or move via convoy is offered. Supports for other powers' units are offered only when ownUnitsOnly is
+ * false (helpingAnyUnit), as in all but the first test.
  */
 public class DiplomacySupportOrdersTest {
 
@@ -19,8 +20,19 @@ public class DiplomacySupportOrdersTest {
 
     @Before
     public void setup() {
-        state = newState();
+        state = newState(helpingAnyUnit());
         fm = new DiplomacyForwardModel();
+    }
+
+    @Test
+    public void byDefaultStartingArmyInBerlinSupportsOnlyGermanUnits() {
+        // as below, without the supports for the Russian A War. A Mun-Kie is supported although F Kie is German:
+        // F Kie may be moving out
+        state = newState();
+        startPhase(state, DiplomacyPhase.SPRING_ORDERS, GERMANY);
+        assertEquals(orderSet(state, "A Ber H", "A Ber-Kie", "A Ber-Mun", "A Ber-Pru", "A Ber-Sil",
+                        "A Ber S F Kie", "A Ber S A Mun", "A Ber S A Mun-Kie", "A Ber S A Mun-Sil"),
+                legalSet(state, fm));
     }
 
     @Test
@@ -51,10 +63,10 @@ public class DiplomacySupportOrdersTest {
     }
 
     @Test
-    public void supportForAnAttackOnOnesOwnUnitIsOffered() {
+    public void supportForAnAttackOnOnesOwnUnitIsNotOffered() {
         // German A Ruh (A Mun already ordered): moves Bel, Bur, Hol, Kie, Mun.
         // Hold support for A Mun (own) and A Bur (French). Move support: A Mun to Bur or Kie; the French A Bur to
-        // Bel or Mun - the last is support for an attack on Germany's own unit, offered (it never helps dislodge it)
+        // Bel only - A Bur-Mun would be an attack on Germany's own unit, which support never helps
         clearBoard(state);
         place(state, GERMANY, "A Ruh", "A Mun");
         place(state, FRANCE, "A Bur");
@@ -62,7 +74,7 @@ public class DiplomacySupportOrdersTest {
         state.addOrder(GERMANY, new Hold(prov(state, "Mun")));
         assertEquals(orderSet(state, "A Ruh H", "A Ruh-Bel", "A Ruh-Bur", "A Ruh-Hol", "A Ruh-Kie", "A Ruh-Mun",
                         "A Ruh S A Mun", "A Ruh S A Bur", "A Ruh S A Mun-Bur", "A Ruh S A Mun-Kie",
-                        "A Ruh S A Bur-Bel", "A Ruh S A Bur-Mun"),
+                        "A Ruh S A Bur-Bel"),
                 legalSet(state, fm));
     }
 

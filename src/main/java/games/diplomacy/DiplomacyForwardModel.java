@@ -101,30 +101,49 @@ public class DiplomacyForwardModel extends StandardForwardModel {
 
     /**
      * The convoys the fleet in the (sea) province may make: each army on a coast to each destination it could be
-     * convoyed to along a chain of fleets that includes this one.
+     * convoyed to along a chain of fleets that includes this one (only the power's own armies if ownUnitsOnly).
      */
     private void addConvoys(DiplomacyGameState state, DiplomacyProvince fleet, List<AbstractAction> actions) {
+        int power = state.getUnit(fleet).owner();
         for (DiplomacyProvince from : state.getMap().provinces())
-            for (Map.Entry<DiplomacyProvince, Set<DiplomacyProvince>> route : state.convoyRoutes(from).entrySet())
-                if (route.getValue().contains(fleet))
-                    actions.add(new Convoy(fleet, from, route.getKey()));
+            if (state.getUnit(from) != null && mayHelp(state, power, from))
+                for (Map.Entry<DiplomacyProvince, Set<DiplomacyProvince>> route : state.convoyRoutes(from).entrySet())
+                    if (route.getValue().contains(fleet))
+                        actions.add(new Convoy(fleet, from, route.getKey()));
     }
 
     /**
      * The supports the unit in the province may give: to any other unit in a province it could move to (to hold),
-     * or able to move there itself (to move there).
+     * or able to move there itself (to move there); only to the power's own units if ownUnitsOnly. Support for a
+     * foreign unit's attack on one of the power's own units is legal but cannot dislodge it, so is not offered.
      */
     private void addSupports(DiplomacyGameState state, DiplomacyProvince unit, List<DiplomacyLocation> moves,
                              List<AbstractAction> actions) {
+        int power = state.getUnit(unit).owner();
         List<DiplomacyProvince> reach = moves.stream().map(DiplomacyLocation::province).distinct().toList();
         for (DiplomacyProvince target : reach)
-            if (state.getUnit(target) != null)
+            if (state.getUnit(target) != null && mayHelp(state, power, target))
                 actions.add(new SupportHold(unit, target));
         for (DiplomacyProvince from : state.getMap().provinces())
-            if (!from.equals(unit) && state.getUnit(from) != null)
+            if (!from.equals(unit) && state.getUnit(from) != null && mayHelp(state, power, from))
                 for (DiplomacyProvince target : reach)
-                    if (!target.equals(from) && state.canReach(from, target))
+                    if (!target.equals(from) && state.canReach(from, target)
+                            && !attacksOwnUnit(state, power, from, target))
                         actions.add(new SupportMove(unit, from, target));
+    }
+
+    /**
+     * Whether the power is offered orders that help the unit in the province.
+     */
+    private boolean mayHelp(DiplomacyGameState state, int power, DiplomacyProvince province) {
+        return !((DiplomacyParameters) state.getGameParameters()).ownUnitsOnly
+                || state.getUnit(province).owner() == power;
+    }
+
+    private boolean attacksOwnUnit(DiplomacyGameState state, int power, DiplomacyProvince from,
+                                   DiplomacyProvince target) {
+        DiplomacyUnit defender = state.getUnit(target);
+        return defender != null && defender.owner() == power && state.getUnit(from).owner() != power;
     }
 
     @Override

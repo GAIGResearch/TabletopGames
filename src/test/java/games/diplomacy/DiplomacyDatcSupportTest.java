@@ -20,7 +20,7 @@ public class DiplomacyDatcSupportTest {
 
     @Before
     public void setup() {
-        state = newState();
+        state = newState(helpingAnyUnit());
         fm = new DiplomacyForwardModel();
         clearBoard(state);
     }
@@ -135,7 +135,7 @@ public class DiplomacyDatcSupportTest {
         place(state, AUSTRIA, "F Tri", "A Vie");
         place(state, ITALY, "A Ven");
         start();
-        playExpecting(state, fm, "F Tri H: ok", "A Vie S A Ven-Tri: ok", "A Ven-Tri: fails");
+        playExpecting(state, fm, "F Tri H: ok", "A Vie S A Ven-Tri " + NOT_OFFERED + ": ok", "A Ven-Tri: fails");
         assertEquals(fleet(AUSTRIA), state.getUnit(prov(state, "Tri")));
     }
 
@@ -145,7 +145,7 @@ public class DiplomacyDatcSupportTest {
         place(state, AUSTRIA, "F Tri", "A Vie");
         place(state, ITALY, "A Ven", "F Apu");
         start();
-        playExpecting(state, fm, "F Tri-Adr: fails", "A Vie S A Ven-Tri: ok", "A Ven-Tri: fails", "F Apu-Adr: fails");
+        playExpecting(state, fm, "F Tri-Adr: fails", "A Vie S A Ven-Tri " + NOT_OFFERED + ": ok", "A Ven-Tri: fails", "F Apu-Adr: fails");
         assertEquals(fleet(AUSTRIA), state.getUnit(prov(state, "Tri")));
         assertEquals(0, totalDislodged(state));
     }
@@ -156,7 +156,7 @@ public class DiplomacyDatcSupportTest {
         place(state, AUSTRIA, "F Tri", "A Vie");
         place(state, ITALY, "A Ven", "A Tyr", "F Adr");
         start();
-        playExpecting(state, fm, "F Tri H: fails", "A Vie S A Ven-Tri: ok", "A Ven-Tri: ok", "A Tyr S A Ven-Tri: ok",
+        playExpecting(state, fm, "F Tri H: fails", "A Vie S A Ven-Tri " + NOT_OFFERED + ": ok", "A Ven-Tri: ok", "A Tyr S A Ven-Tri: ok",
                 "F Adr S A Ven-Tri: ok");
         assertEquals(fleet(AUSTRIA), state.getDislodged(prov(state, "Tri")));
         assertEquals(army(ITALY), state.getUnit(prov(state, "Tri")));
@@ -212,7 +212,7 @@ public class DiplomacyDatcSupportTest {
         place(state, RUSSIA, "F Con", "F Bla", "A Smy");
         place(state, TURKEY, "F Ank");
         start();
-        playExpecting(state, fm, "F Con S F Bla-Ank: ok", "F Bla-Ank: ok", "A Smy S F Ank-Con: ok", "F Ank-Con: fails");
+        playExpecting(state, fm, "F Con S F Bla-Ank: ok", "F Bla-Ank: ok", "A Smy S F Ank-Con " + NOT_OFFERED + ": ok", "F Ank-Con: fails");
         assertEquals(fleet(TURKEY), state.getDislodged(prov(state, "Ank")));
     }
 
@@ -303,7 +303,7 @@ public class DiplomacyDatcSupportTest {
         place(state, GERMANY, "A Ber", "A Mun");
         place(state, ENGLAND, "F Kie");
         start();
-        playExpecting(state, fm, "A Ber-Kie: fails", "A Mun S F Kie-Ber: ok", "F Kie-Ber: fails");
+        playExpecting(state, fm, "A Ber-Kie: fails", "A Mun S F Kie-Ber " + NOT_OFFERED + ": ok", "F Kie-Ber: fails");
         assertEquals(army(GERMANY), state.getUnit(prov(state, "Ber")));
         assertEquals(fleet(ENGLAND), state.getUnit(prov(state, "Kie")));
     }
@@ -352,7 +352,7 @@ public class DiplomacyDatcSupportTest {
         place(state, AUSTRIA, "A Kie", "A Ruh");
         start();
         playExpecting(state, fm, "F Hol-Nth: fails", "F Hel S F Hol-Nth: ok", "F Nth-Hol: fails",
-                "F Bel S F Nth-Hol: ok", "F Eng S F Hol-Nth: ok", "A Kie S A Ruh-Hol: ok", "A Ruh-Hol: fails");
+                "F Bel S F Nth-Hol: ok", "F Eng S F Hol-Nth " + NOT_OFFERED + ": ok", "A Kie S A Ruh-Hol: ok", "A Ruh-Hol: fails");
         assertEquals(0, totalDislodged(state));
     }
 
@@ -364,7 +364,7 @@ public class DiplomacyDatcSupportTest {
         place(state, GERMANY, "F Hol", "F Hel");
         place(state, RUSSIA, "F Ska", "F Nwy");
         start();
-        playExpecting(state, fm, "F Nth H: ok", "F Yor S F Nwy-Nth: ok", "F Hol S F Hel-Nth: ok", "F Hel-Nth: fails",
+        playExpecting(state, fm, "F Nth H: ok", "F Yor S F Nwy-Nth " + NOT_OFFERED + ": ok", "F Hol S F Hel-Nth: ok", "F Hel-Nth: fails",
                 "F Ska S F Nwy-Nth: ok", "F Nwy-Nth: fails");
         assertEquals(fleet(ENGLAND), state.getUnit(prov(state, "Nth")));
     }
@@ -377,7 +377,7 @@ public class DiplomacyDatcSupportTest {
         place(state, GERMANY, "F Hol", "F Hel");
         place(state, RUSSIA, "F Ska", "F Nwy");
         start();
-        playExpecting(state, fm, "F Nth-Nwy: fails", "F Yor S F Nwy-Nth: ok", "F Hol S F Hel-Nth: ok",
+        playExpecting(state, fm, "F Nth-Nwy: fails", "F Yor S F Nwy-Nth " + NOT_OFFERED + ": ok", "F Hol S F Hel-Nth: ok",
                 "F Hel-Nth: fails", "F Ska S F Nwy-Nth: ok", "F Nwy-Nth: fails");
         assertEquals(fleet(ENGLAND), state.getUnit(prov(state, "Nth")));
         assertEquals(fleet(RUSSIA), state.getUnit(prov(state, "Nwy")));
@@ -390,7 +390,7 @@ public class DiplomacyDatcSupportTest {
         place(state, GERMANY, "F Hol", "F Hel");
         place(state, RUSSIA, "F Ska", "F Nwy");
         start();
-        playExpecting(state, fm, "F Nth-Nrg: ok", "F Yor S F Nwy-Nth: ok", "F Hol S F Hel-Nth: ok",
+        playExpecting(state, fm, "F Nth-Nrg: ok", "F Yor S F Nwy-Nth " + NOT_OFFERED + ": ok", "F Hol S F Hel-Nth: ok",
                 "F Hel-Nth: fails", "F Ska S F Nwy-Nth: ok", "F Nwy-Nth: ok");
         assertEquals(fleet(ENGLAND), state.getUnit(prov(state, "Nrg")));
         assertEquals(fleet(RUSSIA), state.getUnit(prov(state, "Nth")));
@@ -405,7 +405,7 @@ public class DiplomacyDatcSupportTest {
         place(state, GERMANY, "F Hol", "F Hel", "F Den");
         place(state, RUSSIA, "F Ska", "F Nwy");
         start();
-        playExpecting(state, fm, "F Nth-Den: fails", "F Yor S F Nwy-Nth: ok", "F Hol S F Hel-Nth: ok",
+        playExpecting(state, fm, "F Nth-Den: fails", "F Yor S F Nwy-Nth " + NOT_OFFERED + ": ok", "F Hol S F Hel-Nth: ok",
                 "F Hel-Nth: fails", "F Den-Hel: fails", "F Ska S F Nwy-Nth: ok", "F Nwy-Nth: fails");
         assertEquals(fleet(ENGLAND), state.getUnit(prov(state, "Nth")));
         assertEquals(fleet(GERMANY), state.getUnit(prov(state, "Den")));
@@ -421,7 +421,7 @@ public class DiplomacyDatcSupportTest {
         place(state, ITALY, "A Vie");
         place(state, RUSSIA, "A Gal", "A Rum");
         start();
-        playExpecting(state, fm, "A Bud-Rum: fails", "A Ser S A Vie-Bud: ok", "A Vie-Bud: fails", "A Gal-Bud: fails",
+        playExpecting(state, fm, "A Bud-Rum: fails", "A Ser S A Vie-Bud " + NOT_OFFERED + ": ok", "A Vie-Bud: fails", "A Gal-Bud: fails",
                 "A Rum S A Gal-Bud: ok");
         assertEquals(army(AUSTRIA), state.getUnit(prov(state, "Bud")));
         assertEquals(0, totalDislodged(state));
