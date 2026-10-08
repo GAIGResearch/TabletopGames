@@ -29,13 +29,12 @@ public class DiplomacyForwardModel extends StandardForwardModel {
         state.units = new DiplomacyUnit[n];
         state.owner = new int[n];
         Arrays.fill(state.owner, -1);
-        for (int power = 0; power < map.nPowers(); power++) {
+        for (int power = 0; power < map.nPowers(); power++)
             for (Map.Entry<DiplomacyLocation, DiplomacyUnit.Type> e : map.startingUnits(power).entrySet())
                 state.units[e.getKey().province().index()] =
                         new DiplomacyUnit(e.getValue(), power, e.getKey().coast());
-            for (DiplomacyProvince home : map.homeCentres(power))
-                state.owner[home.index()] = power;
-        }
+        for (DiplomacyProvince p : map.provinces())
+            state.owner[p.index()] = p.home();
         state.year = map.startYear();
         state.orders = new ArrayList<>();
         for (int p = 0; p < state.getNPlayers(); p++)
@@ -300,12 +299,13 @@ public class DiplomacyForwardModel extends StandardForwardModel {
     }
 
     /**
-     * At the end of a Fall turn, each supply centre with a unit in it comes under the control of the unit's power.
+     * At the end of a Fall turn, each land or coastal province with a unit in it comes under the control of the unit's
+     * power (only the supply centres matter to the rules; the others are shown on the map).
      */
     private void updateOwnership(DiplomacyGameState state) {
-        for (DiplomacyProvince p : state.getMap().supplyCentres()) {
+        for (DiplomacyProvince p : state.getMap().provinces()) {
             DiplomacyUnit u = state.getUnit(p);
-            if (u != null)
+            if (u != null && p.type() != DiplomacyProvince.Type.SEA)
                 state.owner[p.index()] = u.owner();
         }
     }

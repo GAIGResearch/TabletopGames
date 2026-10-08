@@ -21,7 +21,11 @@ import static core.CoreConstants.nameHash;
  * (Land, Coast or Sea), optional "supplyCentre" and "home", and the fleet moves: a "fleet" list, or for a province
  * with separate coasts, its "coasts" and a "fleet/&lt;coast&gt;" list for each. A fleet move to such a province names
  * the coast ("Spa/nc"). The file also gives the "startYear", the "victoryCentres" needed to win, and the "powers"
- * in player order, each with its starting "units" ("A Vie", "F StP/sc"). See data/diplomacy/standardMap.json.
+ * in player order, each with its starting "units" ("A Vie", "F StP/sc"). A "home" on a province that is not a supply
+ * centre marks the rest of a power's home country, which it starts the game controlling. For the GUI, the file may give
+ * the map's "image", and its "regions" image, whose red channel is the index + 1 of the province at each pixel (0 for
+ * none); each node's "position" (and "position/&lt;coast&gt;") is then where a unit there is drawn on the image. See
+ * data/diplomacy/standardMap.json.
  * Immutable, and shared by all states.
  */
 public class DiplomacyMap {
@@ -36,6 +40,7 @@ public class DiplomacyMap {
     private final List<Map<DiplomacyLocation, DiplomacyUnit.Type>> startingUnits = new ArrayList<>();
     private final int startYear;
     private final int victoryCentres;
+    private final String imageFile, regionsFile;
 
     public DiplomacyMap(String fileName) {
         this.fileName = fileName;
@@ -44,6 +49,8 @@ public class DiplomacyMap {
         board.loadBoard(json);
         startYear = ((Long) json.get("startYear")).intValue();
         victoryCentres = ((Long) json.get("victoryCentres")).intValue();
+        imageFile = (String) json.get("image");
+        regionsFile = (String) json.get("regions");
 
         JSONArray powerList = (JSONArray) json.get("powers");
         for (Object o : powerList)
@@ -188,7 +195,7 @@ public class DiplomacyMap {
      * The home supply centres of the power, in index order.
      */
     public List<DiplomacyProvince> homeCentres(int power) {
-        return provinces.stream().filter(p -> p.home() == power).toList();
+        return provinces.stream().filter(p -> p.supplyCentre() && p.home() == power).toList();
     }
 
     public List<DiplomacyProvince> supplyCentres() {
@@ -204,6 +211,20 @@ public class DiplomacyMap {
      */
     public int victoryCentres() {
         return victoryCentres;
+    }
+
+    /**
+     * The file of the map's image, or null if it has none.
+     */
+    public String imageFile() {
+        return imageFile;
+    }
+
+    /**
+     * The file of the image locating each province on the map image (see the class comment), or null if none.
+     */
+    public String regionsFile() {
+        return regionsFile;
     }
 
     /**

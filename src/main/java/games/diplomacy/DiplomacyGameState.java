@@ -15,7 +15,8 @@ import java.util.*;
  * DiplomacyProvince.index():</p>
  * <ul>
  *     <li>units - the unit in each province, or null</li>
- *     <li>owner - the power controlling each supply centre, or -1 (always -1 for a province that is not one)</li>
+ *     <li>owner - the power controlling each land or coastal province, or -1 (always -1 for a sea); only the supply
+ *     centres count towards victory and builds</li>
  *     <li>year - the game year (the map's start year first)</li>
  *     <li>orders - the orders each power has given in the current phase, in the order given</li>
  *     <li>dislodged - each unit dislodged in the last orders phase, by the province it was dislodged from, until
@@ -90,8 +91,8 @@ public class DiplomacyGameState extends AbstractGameState {
 
     public int nCentres(int power) {
         int n = 0;
-        for (int o : owner)
-            if (o == power)
+        for (DiplomacyProvince p : getMap().supplyCentres())
+            if (owner[p.index()] == power)
                 n++;
         return n;
     }
@@ -288,7 +289,7 @@ public class DiplomacyGameState extends AbstractGameState {
     }
 
     /**
-     * For testing only: gives control of the supply centre to the power (-1 for nobody).
+     * For testing only: gives control of the province to the power (-1 for nobody).
      */
     public void setOwner(DiplomacyProvince province, int power) {
         owner[province.index()] = power;
