@@ -41,11 +41,12 @@ java -jar target/TAG.jar WebServer token=some-long-secret
 ```
 
 Arguments (all optional): `port` (8080); `games`, a comma-separated list of the games to offer (e.g.
-`games=LawnAndOrder`), or `all` (the default) for every game with a GUI; `agents`, the directory of agent JSON files to
-offer as opponents (`json/players/webserver`, which has random, one-step look-ahead and MCTS at 0.1, 1 and 5
-seconds per decision; any in `data/<game>/agents` are offered too); `token`, a secret every visitor needs, given once in the link and then kept in a cookie (without it the server is open to anyone who can reach
-it); `maxSessions` (3), the most games played at once; `idleMinutes` (30), after which a game left alone is ended;
-`lookAndFeel` (`flat` or `default`).
+`games=LawnAndOrder`), or `all` (the default) for every game with a GUI; `agents`, the directory of agent JSON files
+to offer as opponents (`json/players/webserver`, which has random, one-step look-ahead and MCTS at 0.1, 1 and 5
+seconds per decision; any in `data/<game>/agents` are offered too); `token`, a secret every visitor needs, given once
+in the link and then kept in a cookie (without it the server is open to anyone who can reach it); `maxSessions` (3),
+the most games played at once; `idleMinutes` (30), after which a game left alone is ended; `lookAndFeel` (`flat` or
+`default`).
 
 An agent file is any player definition `PlayerFactory` reads (`json/players` has examples). Its file name, less
 `.json`, is the agent's name on the start page and in the game. It may also have a `label`, a description shown after
