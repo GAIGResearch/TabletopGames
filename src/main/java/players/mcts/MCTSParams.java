@@ -6,6 +6,7 @@ import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
 import org.jetbrains.annotations.NotNull;
 import players.PlayerParameters;
+import players.heuristics.NullActionHeuristic;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
 
@@ -57,12 +58,12 @@ public class MCTSParams extends PlayerParameters {
     public boolean maintainMasterState = false;
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = EXACT;
-    public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    public IStateHeuristic heuristic = new players.heuristics.PureScoreHeuristic();
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
     public double firstPlayUrgency = 1e6;
-    @NotNull public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
+    @NotNull public IActionHeuristic actionHeuristic = new NullActionHeuristic();
     public boolean useActionHeuristicForMoveOrdering = true;
     public boolean useMASTAsActionHeuristic = false;
     public int actionHeuristicRecalculationThreshold = 20;

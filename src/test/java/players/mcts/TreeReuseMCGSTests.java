@@ -9,11 +9,12 @@ import games.GameType;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeStateVector;
 import games.toads.ToadForwardModel;
-import games.toads.metrics.ToadFeatures001;
+import games.toads.ToadGameState;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +59,28 @@ public class TreeReuseMCGSTests {
         state = game.getGameState();
     }
 
+    /**
+     * A key for War of the Toads that tells apart the states a player can tell apart (a feature vector summarises too
+     * much: states with different actions would share a node). The opponent's face-up card is taken from the
+     * player's own copy of the state, so is there only when the player can see it.
+     */
+    private static Object toadKey(AbstractGameState s, int player) {
+        ToadGameState state = (ToadGameState) s;
+        int opp = 1 - player;
+        List<Object> key = new ArrayList<>(List.of(state.getGameTick(), state.getCurrentPlayer(), state.getGamePhase(),
+                state.isActionInProgress(), state.getRoundCounter(),
+                state.getBattlesWon(state.getRoundCounter(), 0), state.getBattlesWon(state.getRoundCounter(), 1),
+                state.getPlayerHand(player).getComponents().stream().map(c -> c.type).sorted().toList(),
+                String.valueOf(state.getFieldCard(player)), String.valueOf(state.getHiddenFlankCard(player)),
+                String.valueOf(state.getFieldCard(opp)), String.valueOf(state.getTieBreaker(player)),
+                state.getDiscards(player).getComponents().stream().map(c -> c.type).toList(),
+                state.getDiscards(opp).getComponents().stream().map(c -> c.type).toList()));
+        return key.toString();
+    }
+
     public void initialiseToads() {
-        paramsOne.MCGSStateKey = new ToadFeatures001();
-        paramsTwo.MCGSStateKey = new ToadFeatures001();
+        paramsOne.MCGSStateKey = TreeReuseMCGSTests::toadKey;
+        paramsTwo.MCGSStateKey = TreeReuseMCGSTests::toadKey;
         playerOne = new TestMCTSPlayer(paramsOne, MCGSNode::new);
         playerOne.rolloutTest = false;
         playerTwo = new TestMCTSPlayer(paramsTwo, MCGSNode::new);
