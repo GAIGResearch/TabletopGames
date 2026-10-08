@@ -97,8 +97,13 @@ async function renderOpponents(previous) {
         span.textContent = `Player ${i}`;
         const select = document.createElement('select');
         select.dataset.seat = i;
-        const wanted = kept[i] && kept[i] !== 'you' ? kept[i] : 'mcts-1000';
-        for (const c of choices) select.append(option(c.id, c.label, c.id === wanted));
+        const fallback = (choices.find(c => c.default) || choices[0] || {}).id;
+        const wanted = kept[i] && kept[i] !== 'you' && choices.some(c => c.id === kept[i]) ? kept[i] : fallback;
+        for (const c of choices) {
+            const o = option(c.id, c.description ? `${c.id} - ${c.description}` : c.id, c.id === wanted);
+            if (c.description) o.title = c.description;
+            select.append(o);
+        }
         label.append(span, select);
         container.append(label);
     }

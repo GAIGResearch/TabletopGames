@@ -42,8 +42,13 @@ public record SessionConfig(GameType game, int nPlayers, int seat, List<String> 
 
         List<String> opponents = new ArrayList<>();
         String[] given = query.containsKey("opponents") ? first(query, "opponents").split(",") : new String[0];
+        String defaultOpponent = null;
         for (int i = 0; i < nPlayers; i++) {
-            String id = i < given.length && !given[i].isBlank() ? given[i].trim() : OpponentCatalog.DEFAULT;
+            String id = i < given.length && !given[i].isBlank() ? given[i].trim() : null;
+            if (id == null && i != seat) {
+                if (defaultOpponent == null) defaultOpponent = opponentCatalog.defaultFor(game);
+                id = defaultOpponent;
+            }
             if (i == seat) id = "you";
             else opponentCatalog.find(game, id);   // throws if unknown
             opponents.add(id);

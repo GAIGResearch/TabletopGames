@@ -3,54 +3,58 @@ package web;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import core.AbstractPlayer;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
-import players.PlayerConstants;
-import players.PlayerFactory;
-import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
-import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import utilities.JSONUtils;
 
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
- * The agents a browser player can play against: the built-in ones, and any agent JSON files in the server's agent
- * directory or in the game's {@code data/<game>/agents} directory.
+ * The agents a browser player can play against: the agent JSON files in the server's agent directory, and any in the
+ * game's {@code data/<game>/agents} directory (the game's name in lower case). An agent's id is its file name without ".json".
+ * <p>
+ * The id is also the agent's name, on the start page and in the game. Besides what
+ * {@link utilities.JSONUtils#loadClassFromJSON} reads, an agent file may have a {@code label}, a description shown
+ * after the name on the start page, and {@code "default": true} to be the opponent chosen when a setup names none
+ * (else the first agent is).
  */
 class OpponentCatalog {
 
-    record Opponent(String id, String label, Supplier<AbstractPlayer> factory) {
+    record Opponent(String id, String description, boolean isDefault, File file) {
         AbstractPlayer create() {
-            return factory.get();
+            JSONObject json = agentJson(file);
+            Object loaded = JSONUtils.loadClassFromJSON(json);
+            if (loaded instanceof TunableParameters<?> params) loaded = params.instantiate();
+            if (!(loaded instanceof AbstractPlayer player))
+                throw new IllegalArgumentException(file + " does not define an AbstractPlayer or TunableParameters class");
+            player.setName(id);
+            return player;
         }
     }
 
-    private static final List<Opponent> builtIn = List.of(
-            new Opponent("random", "Random", RandomPlayer::new),
-            new Opponent("osla", "One-step look-ahead", OSLAPlayer::new),
-            mcts(100, "MCTS, 0.1 s per decision"),
-            mcts(1000, "MCTS, 1 s per decision"),
-            mcts(5000, "MCTS, 5 s per decision"));
+    static final String DEFAULT_DIR = "json/players/webserver";
 
-    static final String DEFAULT = "mcts-1000";
-
-    private final String agentDir;
+    private final File agentDir;
 
     /**
-     * @param agentDir a directory of agent JSON files to offer for every game; may be empty
+     * @param agentDir the directory of agent JSON files to offer for every game
      */
     OpponentCatalog(String agentDir) {
-        this.agentDir = agentDir;
+        this.agentDir = new File(agentDir);
+        if (!this.agentDir.isDirectory())
+            System.out.println("Warning: no agent directory at " + this.agentDir.getAbsolutePath() + "; only game-specific agents will be offered");
     }
 
     List<Opponent> forGame(GameType game) {
-        List<Opponent> result = new ArrayList<>(builtIn);
-        if (agentDir != null && !agentDir.isBlank()) addAgentFiles(new File(agentDir), result);
-        addAgentFiles(new File("data/" + game.name() + "/agents"), result);
+        List<Opponent> result = new ArrayList<>();
+        addAgentFiles(agentDir, result);
+        addAgentFiles(new File("data/" + game.name().toLowerCase() + "/agents"), result);
         return result;
     }
 
@@ -60,24 +64,45 @@ class OpponentCatalog {
         throw new IllegalArgumentException("Unknown opponent: " + id);
     }
 
+    /**
+     * The opponent for a seat the setup does not fill.
+     */
+    String defaultFor(GameType game) {
+        List<Opponent> all = forGame(game);
+        if (all.isEmpty()) throw new IllegalArgumentException("There are no agents to play " + game.name() + " against");
+        return all.stream().filter(Opponent::isDefault).findFirst().orElse(all.get(0)).id();
+    }
+
     JsonArray describe(GameType game) {
         JsonArray result = new JsonArray();
+        String defaultId = forGame(game).isEmpty() ? null : defaultFor(game);
         for (Opponent o : forGame(game)) {
             JsonObject j = new JsonObject();
             j.addProperty("id", o.id());
-            j.addProperty("label", o.label());
+            if (!o.description().isEmpty()) j.addProperty("description", o.description());
+            if (o.id().equals(defaultId)) j.addProperty("default", true);
             result.add(j);
         }
         return result;
     }
 
-    private static Opponent mcts(int ms, String label) {
-        return new Opponent("mcts-" + ms, label, () -> {
-            MCTSParams params = new MCTSParams();
-            params.setParameterValue("budgetType", PlayerConstants.BUDGET_TIME);
-            params.setParameterValue("budget", ms);
-            return new MCTSPlayer(params, "MCTS " + ms + "ms");
-        });
+    /**
+     * The file's JSON, less the keys only the catalog reads.
+     */
+    private static JSONObject agentJson(File file) {
+        JSONObject json = readJson(file);
+        json.remove("label");
+        json.remove("default");
+        return json;
+    }
+
+    // not JSONUtils.loadJSONFile, which shares one parser and requests are read on several threads
+    private static JSONObject readJson(File file) {
+        try (FileReader reader = new FileReader(file)) {
+            return (JSONObject) new JSONParser().parse(reader);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Could not read agent file " + file + ": " + e.getMessage(), e);
+        }
     }
 
     private static void addAgentFiles(File dir, List<Opponent> into) {
@@ -85,15 +110,19 @@ class OpponentCatalog {
         if (files == null) return;
         Arrays.sort(files);
         for (File f : files) {
-            String name = f.getName().substring(0, f.getName().length() - ".json".length());
-            String id = "agent:" + name;
+            String id = f.getName().substring(0, f.getName().length() - ".json".length());
             // a file in the server's agent directory takes precedence over one of the same name in the game's
             if (into.stream().anyMatch(o -> o.id().equals(id))) continue;
-            into.add(new Opponent(id, name + " (agent file)", () -> {
-                AbstractPlayer player = PlayerFactory.createPlayer(f.getPath());
-                player.setName(name);
-                return player;
-            }));
+            JSONObject json;
+            try {
+                json = readJson(f);
+            } catch (Exception e) {
+                System.out.println("Skipping agent file " + f + ": " + e.getMessage());
+                continue;
+            }
+            Object label = json.get("label");
+            into.add(new Opponent(id, label instanceof String s ? s.trim() : "",
+                    Boolean.TRUE.equals(json.get("default")), f));
         }
     }
 }

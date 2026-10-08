@@ -36,22 +36,36 @@ that setup, so it can be bookmarked or shared. The game page can download a log 
 and, if the setup asks for it, shows what the AI players weighed up for each decision (which reveals what they know).
 
 ```bash
-java -jar target/TAG.jar WebServer games=LawnAndOrder token=some-long-secret
+java -jar target/TAG.jar WebServer token=some-long-secret
 # then open http://localhost:8080/?token=some-long-secret
 ```
 
-Arguments (all optional): `port` (8080); `games`, a comma-separated list of the games to offer, or `all` for every game
-with a GUI; `agents`, a directory of agent JSON files to offer as opponents (any in `data/<game>/agents` are offered
-too, besides random, one-step look-ahead and MCTS at 0.1, 1 and 5 seconds per decision); `token`, a secret every
-visitor needs, given once in the link and then kept in a cookie (without it the server is open to anyone who can reach
+Arguments (all optional): `port` (8080); `games`, a comma-separated list of the games to offer (e.g.
+`games=LawnAndOrder`), or `all` (the default) for every game with a GUI; `agents`, the directory of agent JSON files to
+offer as opponents (`json/players/webserver`, which has random, one-step look-ahead and MCTS at 0.1, 1 and 5
+seconds per decision; any in `data/<game>/agents` are offered too); `token`, a secret every visitor needs, given once in the link and then kept in a cookie (without it the server is open to anyone who can reach
 it); `maxSessions` (3), the most games played at once; `idleMinutes` (30), after which a game left alone is ended;
 `lookAndFeel` (`flat` or `default`).
+
+An agent file is any player definition `PlayerFactory` reads (`json/players` has examples). Its file name, less
+`.json`, is the agent's name on the start page and in the game. It may also have a `label`, a description shown after
+the name, and `"default": true` to make it the opponent chosen when a setup names none (otherwise the first is):
+
+```json
+{
+  "label": "MCTS, 1 s per decision",
+  "default": true,
+  "class": "players.mcts.MCTSParams",
+  "budgetType": "BUDGET_TIME",
+  "budget": 1000
+}
+```
 
 With Docker, the image runs every entry point under a virtual display, so the web server works without a screen:
 
 ```bash
 docker build -t tag .
-docker run -p 8080:8080 --cpus=2 --memory=4g tag WebServer games=LawnAndOrder token=some-long-secret
+docker run -p 8080:8080 --cpus=2 --memory=4g tag WebServer token=some-long-secret
 ```
 
 Games are held in memory, so run a single instance that is not scaled to zero. Limit its CPU: MCTS opponents use all

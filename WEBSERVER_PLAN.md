@@ -116,8 +116,8 @@ checked in Stage 0), tooltips end to end, keyboard input.
   &seed=…&pause=…&p.<param>=…`, repeated on the WebSocket URL and parsed by `SessionConfig.fromQuery`. So a setup can be bookmarked
   or shared, and Restart (same seed) and New game (seed removed) are just links; no server-side restart logic.
 - `GET /api/games`: the offered games with their parameter schema from `TunableParameters` (a parameter declared without a list of
-  settings is free entry). `GET /api/opponents?game=`: Random, one-step look-ahead, `MCTSPlayer` with a 0.1 s / 1 s / 5 s time budget
-  per decision, plus agent JSON files from `agents=` and `data/<game>/agents`.
+  settings is free entry). `GET /api/opponents?game=`: the agent JSON files in the agent directory
+  (`json/players/webserver`, or `agents=`; random, one-step look-ahead and MCTS at 0.1 s / 1 s / 5 s by default) and in `data/<game>/agents`.
 - Start page (`index.html`, `setup.js`): game, players, seat, an opponent per seat, seed, pause after AI moves, and the parameter form
   (changed values flagged; only changes go in the URL). The last setup per game is remembered in `localStorage`.
 - Play page (`play.html`, `play.js`): a bar with the game, a status pill ("Your turn" / "Player 1 (…) is thinking"), the seed, and

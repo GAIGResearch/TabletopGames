@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class SessionConfigTest {
 
     private final GameCatalog games = new GameCatalog("LawnAndOrder,TicTacToe");
-    private final OpponentCatalog opponents = new OpponentCatalog("");
+    private final OpponentCatalog opponents = new OpponentCatalog(OpponentCatalog.DEFAULT_DIR);
 
     private static Map<String, List<String>> query(String... keyValues) {
         Map<String, List<String>> q = new HashMap<>();
@@ -50,7 +50,7 @@ public class SessionConfigTest {
         assertEquals(GameType.LawnAndOrder, c.game());   // the first game offered
         assertEquals(3, c.nPlayers());
         assertEquals(0, c.seat());
-        assertEquals(List.of("you", OpponentCatalog.DEFAULT, OpponentCatalog.DEFAULT), c.opponents());
+        assertEquals(List.of("you", "mcts-1000", "mcts-1000"), c.opponents());   // the default in json/players/webserver
         assertEquals(-1, c.seed());
         assertEquals(SessionConfig.DEFAULT_TURN_PAUSE, c.turnPause());
         assertTrue(c.params().isEmpty());

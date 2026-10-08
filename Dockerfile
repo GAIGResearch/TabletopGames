@@ -37,6 +37,9 @@ COPY --from=build /app/target/lib /tag/lib
 # Copy data files required for some games
 COPY data /tag/data
 
+# Agent and run definitions, including the web server's opponents (json/players/webserver)
+COPY json /tag/json
+
 COPY --from=build /app/target/tag-classes.jar /tag/tag-classes.jar
 
 # In a container Java's heap defaults to a quarter of its memory limit (docker run --memory); MCTS opponents need more.
@@ -49,6 +52,6 @@ EXPOSE 8080
 
 # Every entry point runs under Xvfb, though only WebServer uses it, e.g.
 #   docker run tag RunGames config=...
-#   docker run -p 8080:8080 tag WebServer games=LawnAndOrder token=...
+#   docker run -p 8080:8080 tag WebServer token=...
 ENTRYPOINT ["tini", "--", "xvfb-run", "-a", "-s", "-screen 0 2560x1600x24", \
             "java", "-cp", "/tag/tag-classes.jar:/tag/lib/*", "core.TAG"]

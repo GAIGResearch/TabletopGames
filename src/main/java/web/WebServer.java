@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
  * <ul>
  *     <li>port (8080)</li>
  *     <li>games: the games offered, comma separated, or "all" for every game with a GUI (all)</li>
- *     <li>agents: a directory of agent JSON files to offer as opponents, besides the built-in ones and any in
- *     data/&lt;game&gt;/agents (none)</li>
+ *     <li>agents: the directory of agent JSON files to offer as opponents in every game, besides any in
+ *     data/&lt;game&gt;/agents; see {@link OpponentCatalog} (json/players/webserver)</li>
  *     <li>maxSessions: the most games played at once (3)</li>
  *     <li>idleMinutes: a game with no input from its browser for this long is ended (30)</li>
  *     <li>token: a secret that every visitor must have, given once in the link ({@code /?token=...}) and then kept in a
@@ -39,7 +39,7 @@ public class WebServer {
         System.setProperty("swing.aatext", "true");
         int port = Utils.getArg(args, "port", 8080);
         GameCatalog games = new GameCatalog(Utils.getArg(args, "games", "all"));
-        OpponentCatalog opponents = new OpponentCatalog(Utils.getArg(args, "agents", ""));
+        OpponentCatalog opponents = new OpponentCatalog(Utils.getArg(args, "agents", OpponentCatalog.DEFAULT_DIR));
         int maxSessions = Utils.getArg(args, "maxSessions", 3);
         int idleMinutes = Utils.getArg(args, "idleMinutes", 30);
         boolean showFrames = Utils.getArg(args, "showFrames", false);

@@ -262,8 +262,9 @@ public class GameSession {
             out.sendText(msg.toString());
             return;
         }
-        boolean yourTurn = game.isHumanToMove();
-        int player = state.getCurrentPlayer();
+        // the player being asked for an action, which with simultaneous moves need not be the current player
+        int player = game.getPlayerToMove();
+        boolean yourTurn = game.getPlayers().get(player) instanceof HumanGUIPlayer;
         String turn = yourTurn + ":" + player;
         if (turn.equals(reportedTurn)) return;
         reportedTurn = turn;
