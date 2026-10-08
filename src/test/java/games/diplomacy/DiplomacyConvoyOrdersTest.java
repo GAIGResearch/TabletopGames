@@ -11,7 +11,8 @@ import static org.junit.Assert.*;
 /**
  * Exact action sets with convoys: Convoy orders for fleets in sea provinces on a convoy chain, moves via convoy
  * for coastal armies (also where the destination is adjacent by land), supports for moves an army could make by
- * convoy. Spring 1901 orders on a cleared board.
+ * convoy. Spring 1901 orders on a cleared board. By default (ownUnitsOnly) a power convoys and is convoyed only by its
+ * own units; tests of help between powers use helpingAnyUnit.
  */
 public class DiplomacyConvoyOrdersTest {
 
@@ -58,9 +59,27 @@ public class DiplomacyConvoyOrdersTest {
     }
 
     @Test
+    public void armyIsOfferedMovesViaConvoyOnlyAlongItsOwnFleets() {
+        // Diagram 20's fleets: F Eng, F Mid (England), F Wes (France). From Lon (only Eng borders it; Nth empty):
+        // Eng -> Bel, Bre, Pic, Wal; Mid -> Bre, Gas, NAf, Por, Spa. Not Tun, which only the French F Wes reaches
+        place(state, ENGLAND, "A Lon", "F Eng", "F Mid");
+        place(state, FRANCE, "F Wes");
+        startOrders(state, DiplomacyPhase.SPRING_ORDERS);
+        fm.next(state, order(state, "F Eng H"));
+        assertEquals(orderSet(state, "A Lon H", "A Lon-Wal", "A Lon-Yor",
+                        "A Lon-Bel via convoy", "A Lon-Bre via convoy", "A Lon-Gas via convoy", "A Lon-NAf via convoy",
+                        "A Lon-Pic via convoy", "A Lon-Por via convoy", "A Lon-Spa via convoy",
+                        "A Lon-Wal via convoy",
+                        "A Lon S F Eng-Wal"),
+                legalSet(state, fm));
+    }
+
+    @Test
     public void chainOfOwnAndForeignFleetsGivesMovesViaConvoyAlongItsLength() {
         // Diagram 20's fleets: F Eng, F Mid (England), F Wes (France). From Lon (only Eng borders it; Nth empty):
         // Eng -> Bel, Bre, Pic, Wal; Mid -> Bre, Gas, NAf, Por, Spa; Wes -> NAf, Spa, Tun. Order: Eng, Lon, Mid
+        state = newState(helpingAnyUnit());
+        clearBoard(state);
         place(state, ENGLAND, "A Lon", "F Eng", "F Mid");
         place(state, FRANCE, "F Wes");
         startOrders(state, DiplomacyPhase.SPRING_ORDERS);
@@ -74,10 +93,26 @@ public class DiplomacyConvoyOrdersTest {
     }
 
     @Test
+    public void foreignFleetIsNotOfferedOrdersHelpingAnotherPowersUnits() {
+        // Same board; France's F Wes: moves GoL, Mid, NAf, Spa/sc, Tun, Tyn, and no support or convoy for the
+        // English units
+        place(state, ENGLAND, "A Lon", "F Eng", "F Mid");
+        place(state, FRANCE, "F Wes");
+        startOrders(state, DiplomacyPhase.SPRING_ORDERS);
+        play(state, fm, "F Eng H", "A Lon H", "F Mid H");
+        assertEquals(FRANCE, state.getCurrentPlayer());
+        assertEquals(orderSet(state, "F Wes H", "F Wes-GoL", "F Wes-Mid", "F Wes-NAf", "F Wes-Spa/sc", "F Wes-Tun",
+                        "F Wes-Tyn"),
+                legalSet(state, fm));
+    }
+
+    @Test
     public void foreignFleetMayConvoyAnotherPowersArmy() {
         // Same board; France's F Wes: moves GoL, Mid, NAf, Spa/sc, Tun, Tyn; hold support for F Mid; F Mid could
         // move to NAf and Spa, F Eng to Mid; A Lon could reach NAf, Spa, Tun by convoy (via Eng, Mid and, for Tun, Wes); the
         // chains through Wes are Lon-Eng-Mid-Wes to NAf, Spa, Tun
+        state = newState(helpingAnyUnit());
+        clearBoard(state);
         place(state, ENGLAND, "A Lon", "F Eng", "F Mid");
         place(state, FRANCE, "F Wes");
         startOrders(state, DiplomacyPhase.SPRING_ORDERS);

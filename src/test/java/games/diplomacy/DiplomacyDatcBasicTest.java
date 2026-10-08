@@ -29,7 +29,7 @@ public class DiplomacyDatcBasicTest {
 
     @Before
     public void setup() {
-        state = newState();
+        state = newState(helpingAnyUnit());
         fm = new DiplomacyForwardModel();
         clearBoard(state);
     }
@@ -285,7 +285,7 @@ public class DiplomacyDatcBasicTest {
         place(state, RUSSIA, "F Bla");
         place(state, AUSTRIA, "A Ser", "A Bul");
         start();
-        playExpecting(state, fm, "F Con-Bla: fails", "A Smy S A Bul-Con: ok", "F Bla-Bul/ec: fails",
+        playExpecting(state, fm, "F Con-Bla: fails", "A Smy S A Bul-Con " + NOT_OFFERED + ": ok", "F Bla-Bul/ec: fails",
                 "A Ser-Bul: fails", "A Bul-Con: fails");
         assertEquals(fleet(TURKEY), state.getUnit(prov(state, "Con")));
         assertEquals(army(AUSTRIA), state.getUnit(prov(state, "Bul")));

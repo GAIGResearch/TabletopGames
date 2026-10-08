@@ -92,6 +92,28 @@ public class DiplomacyYearTest {
         assertEquals(RUSSIA, state.getOwner(prov(state, "Rum")));
     }
 
+    @Test
+    public void otherLandProvincesChangeHandsAfterFallButAreNotCentres() {
+        clearBoard(state);
+        place(state, FRANCE, "A Bur", "F Bre");
+        place(state, GERMANY, "A Sil");
+        startPhase(state, DiplomacyPhase.SPRING_ORDERS, FRANCE);
+        play(state, fm, "A Bur-Ruh", "F Bre-Eng", "A Sil H");
+        // not after Spring
+        assertEquals(GERMANY, state.getOwner(prov(state, "Ruh")));
+        play(state, fm, "A Ruh H", "F Eng-Pic", "A Sil-Boh");
+        assertEquals(FRANCE, state.getOwner(prov(state, "Ruh")));
+        assertEquals(GERMANY, state.getOwner(prov(state, "Boh")));
+        // Picardy was France's already; vacated Burgundy and Silesia keep their controllers; seas have none
+        assertEquals(FRANCE, state.getOwner(prov(state, "Pic")));
+        assertEquals(FRANCE, state.getOwner(prov(state, "Bur")));
+        assertEquals(GERMANY, state.getOwner(prov(state, "Sil")));
+        assertEquals(-1, state.getOwner(prov(state, "Eng")));
+        assertEquals(3, state.nCentres(FRANCE));
+        assertEquals(3, state.nCentres(GERMANY));
+        assertEquals(3, state.nCentres(AUSTRIA));
+    }
+
     // ---------------------------------------------------------------- entering and skipping adjustments
 
     @Test

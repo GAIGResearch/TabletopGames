@@ -88,13 +88,25 @@ public class DiplomacySetupAndMapTest {
         // 34 centres - 22 home centres = 12 unowned
         Set<String> neutral = Set.of("Bel", "Bul", "Den", "Gre", "Hol", "Nwy", "Por", "Rum", "Ser", "Spa", "Swe", "Tun");
         assertEquals(12, neutral.size());
+        // the rest of each home country is controlled too, but is not a centre
+        Map<String, Integer> homeland = new HashMap<>();
+        for (String c : List.of("Boh", "Gal", "Tyr")) homeland.put(c, AUSTRIA);
+        for (String c : List.of("Cly", "Yor", "Wal")) homeland.put(c, ENGLAND);
+        for (String c : List.of("Pic", "Bur", "Gas")) homeland.put(c, FRANCE);
+        for (String c : List.of("Pru", "Sil", "Ruh")) homeland.put(c, GERMANY);
+        for (String c : List.of("Pie", "Tus", "Apu")) homeland.put(c, ITALY);
+        for (String c : List.of("Fin", "Lvn", "Ukr")) homeland.put(c, RUSSIA);
+        for (String c : List.of("Arm", "Syr")) homeland.put(c, TURKEY);
         for (DiplomacyProvince p : map.provinces()) {
-            assertEquals("owner of " + p, (int) homes.getOrDefault(p.name(), -1), state.getOwner(p));
-            assertEquals("home of " + p, (int) homes.getOrDefault(p.name(), -1), p.home());
+            int home = homes.getOrDefault(p.name(), homeland.getOrDefault(p.name(), -1));
+            assertEquals("owner of " + p, home, state.getOwner(p));
+            assertEquals("home of " + p, home, p.home());
             assertEquals("supply centre " + p, homes.containsKey(p.name()) || neutral.contains(p.name()), p.supplyCentre());
         }
-        for (int power = 0; power < N_POWERS; power++)
+        for (int power = 0; power < N_POWERS; power++) {
             assertEquals(power == RUSSIA ? 4 : 3, state.nCentres(power));
+            assertEquals(power == RUSSIA ? 4 : 3, map.homeCentres(power).size());
+        }
     }
 
     @Test

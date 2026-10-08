@@ -29,13 +29,12 @@ public class DiplomacyForwardModel extends StandardForwardModel {
         state.units = new DiplomacyUnit[n];
         state.owner = new int[n];
         Arrays.fill(state.owner, -1);
-        for (int power = 0; power < map.nPowers(); power++) {
+        for (int power = 0; power < map.nPowers(); power++)
             for (Map.Entry<DiplomacyLocation, DiplomacyUnit.Type> e : map.startingUnits(power).entrySet())
                 state.units[e.getKey().province().index()] =
                         new DiplomacyUnit(e.getValue(), power, e.getKey().coast());
-            for (DiplomacyProvince home : map.homeCentres(power))
-                state.owner[home.index()] = power;
-        }
+        for (DiplomacyProvince p : map.provinces())
+            state.owner[p.index()] = p.home();
         state.year = map.startYear();
         state.orders = new ArrayList<>();
         for (int p = 0; p < state.getNPlayers(); p++)
@@ -101,30 +100,49 @@ public class DiplomacyForwardModel extends StandardForwardModel {
 
     /**
      * The convoys the fleet in the (sea) province may make: each army on a coast to each destination it could be
-     * convoyed to along a chain of fleets that includes this one.
+     * convoyed to along a chain of fleets that includes this one (only the power's own armies if ownUnitsOnly).
      */
     private void addConvoys(DiplomacyGameState state, DiplomacyProvince fleet, List<AbstractAction> actions) {
+        int power = state.getUnit(fleet).owner();
         for (DiplomacyProvince from : state.getMap().provinces())
-            for (Map.Entry<DiplomacyProvince, Set<DiplomacyProvince>> route : state.convoyRoutes(from).entrySet())
-                if (route.getValue().contains(fleet))
-                    actions.add(new Convoy(fleet, from, route.getKey()));
+            if (state.getUnit(from) != null && mayHelp(state, power, from))
+                for (Map.Entry<DiplomacyProvince, Set<DiplomacyProvince>> route : state.convoyRoutes(from).entrySet())
+                    if (route.getValue().contains(fleet))
+                        actions.add(new Convoy(fleet, from, route.getKey()));
     }
 
     /**
      * The supports the unit in the province may give: to any other unit in a province it could move to (to hold),
-     * or able to move there itself (to move there).
+     * or able to move there itself (to move there); only to the power's own units if ownUnitsOnly. Support for a
+     * foreign unit's attack on one of the power's own units is legal but cannot dislodge it, so is not offered.
      */
     private void addSupports(DiplomacyGameState state, DiplomacyProvince unit, List<DiplomacyLocation> moves,
                              List<AbstractAction> actions) {
+        int power = state.getUnit(unit).owner();
         List<DiplomacyProvince> reach = moves.stream().map(DiplomacyLocation::province).distinct().toList();
         for (DiplomacyProvince target : reach)
-            if (state.getUnit(target) != null)
+            if (state.getUnit(target) != null && mayHelp(state, power, target))
                 actions.add(new SupportHold(unit, target));
         for (DiplomacyProvince from : state.getMap().provinces())
-            if (!from.equals(unit) && state.getUnit(from) != null)
+            if (!from.equals(unit) && state.getUnit(from) != null && mayHelp(state, power, from))
                 for (DiplomacyProvince target : reach)
-                    if (!target.equals(from) && state.canReach(from, target))
+                    if (!target.equals(from) && state.canReach(from, target)
+                            && !attacksOwnUnit(state, power, from, target))
                         actions.add(new SupportMove(unit, from, target));
+    }
+
+    /**
+     * Whether the power is offered orders that help the unit in the province.
+     */
+    private boolean mayHelp(DiplomacyGameState state, int power, DiplomacyProvince province) {
+        return !((DiplomacyParameters) state.getGameParameters()).ownUnitsOnly
+                || state.getUnit(province).owner() == power;
+    }
+
+    private boolean attacksOwnUnit(DiplomacyGameState state, int power, DiplomacyProvince from,
+                                   DiplomacyProvince target) {
+        DiplomacyUnit defender = state.getUnit(target);
+        return defender != null && defender.owner() == power && state.getUnit(from).owner() != power;
     }
 
     @Override
@@ -281,12 +299,13 @@ public class DiplomacyForwardModel extends StandardForwardModel {
     }
 
     /**
-     * At the end of a Fall turn, each supply centre with a unit in it comes under the control of the unit's power.
+     * At the end of a Fall turn, each land or coastal province with a unit in it comes under the control of the unit's
+     * power (only the supply centres matter to the rules; the others are shown on the map).
      */
     private void updateOwnership(DiplomacyGameState state) {
-        for (DiplomacyProvince p : state.getMap().supplyCentres()) {
+        for (DiplomacyProvince p : state.getMap().provinces()) {
             DiplomacyUnit u = state.getUnit(p);
-            if (u != null)
+            if (u != null && p.type() != DiplomacyProvince.Type.SEA)
                 state.owner[p.index()] = u.owner();
         }
     }

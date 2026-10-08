@@ -20,7 +20,7 @@ public class DiplomacySelfDislodgementTest {
 
     @Before
     public void setup() {
-        state = newState();
+        state = newState(helpingAnyUnit());
         fm = new DiplomacyForwardModel();
         clearBoard(state);
     }
@@ -66,12 +66,12 @@ public class DiplomacySelfDislodgementTest {
         place(state, GERMANY, "A Ruh", "A Mun");
         place(state, FRANCE, "A Par", "A Bur");
         startOrders(state, DiplomacyPhase.SPRING_ORDERS);
-        play(state, fm, "A Ruh-Bur", "A Mun H", "A Par S A Ruh-Bur", "A Bur H");
+        play(state, fm, "A Ruh-Bur", "A Mun H", "A Par S A Ruh-Bur " + NOT_OFFERED + "", "A Bur H");
         assertEquals(army(FRANCE), state.getUnit(prov(state, "Bur")));
         assertEquals(army(GERMANY), state.getUnit(prov(state, "Ruh")));
         assertEquals(0, totalDislodged(state));
         assertEquals(Set.of(result(state, GERMANY, "A Ruh-Bur", false), result(state, GERMANY, "A Mun H", true),
-                result(state, FRANCE, "A Par S A Ruh-Bur", true), result(state, FRANCE, "A Bur H", true)),
+                result(state, FRANCE, "A Par S A Ruh-Bur " + NOT_OFFERED + "", true), result(state, FRANCE, "A Bur H", true)),
                 lastResults(state));
     }
 
@@ -82,13 +82,13 @@ public class DiplomacySelfDislodgementTest {
         place(state, GERMANY, "A Ruh", "A Mun");
         place(state, FRANCE, "A Par", "A Bur");
         startOrders(state, DiplomacyPhase.SPRING_ORDERS);
-        play(state, fm, "A Ruh-Bur", "A Mun S A Ruh-Bur", "A Par S A Ruh-Bur", "A Bur H");
+        play(state, fm, "A Ruh-Bur", "A Mun S A Ruh-Bur", "A Par S A Ruh-Bur " + NOT_OFFERED + "", "A Bur H");
         assertEquals(army(GERMANY), state.getUnit(prov(state, "Bur")));
         assertNull(state.getUnit(prov(state, "Ruh")));
         assertEquals(army(FRANCE), state.getDislodged(prov(state, "Bur")));
         assertEquals(prov(state, "Ruh"), state.getDislodgedFrom(prov(state, "Bur")));
         assertEquals(Set.of(result(state, GERMANY, "A Ruh-Bur", true), result(state, GERMANY, "A Mun S A Ruh-Bur", true),
-                result(state, FRANCE, "A Par S A Ruh-Bur", true), result(state, FRANCE, "A Bur H", false)),
+                result(state, FRANCE, "A Par S A Ruh-Bur " + NOT_OFFERED + "", true), result(state, FRANCE, "A Bur H", false)),
                 lastResults(state));
         assertEquals(DiplomacyPhase.SPRING_RETREATS, state.getPhase());
         assertEquals(FRANCE, state.getCurrentPlayer());

@@ -231,9 +231,10 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
         DiplomacyProvince p = mapView.provinceAt(e.getPoint());
         if (p == null) return null;
         StringBuilder text = new StringBuilder("<html><b>").append(p.fullName()).append("</b> (").append(p.name()).append(")");
-        if (p.supplyCentre()) {
+        if (p.type() != DiplomacyProvince.Type.SEA) {
             int owner = shown.getOwner(p);
-            text.append("<br>Supply centre, ").append(owner < 0 ? "unowned" : shown.getMap().powers().get(owner));
+            text.append("<br>").append(p.supplyCentre() ? "Supply centre, " : "")
+                    .append(owner < 0 ? "uncontrolled" : "controlled by " + shown.getMap().powers().get(owner));
             if (p.home() >= 0) text.append(" (home of ").append(shown.getMap().powers().get(p.home())).append(")");
         }
         DiplomacyUnit u = shown.getUnit(p);
@@ -280,8 +281,8 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
     }
 
     static final String HOW_TO_PLAY = "<h2>How to play</h2>"
-            + "<p>In each phase you give one order at a time, for the unit whose province has a green ring. Every "
-            + "province where a click gives an order has a yellow ring.</p>"
+            + "<p>In each phase you give one order at a time, for the unit whose province is outlined in green. "
+            + "Every province where a click gives an order is outlined in yellow.</p>"
             + "<ul><li><b>Hold</b>: click the unit being ordered.</li>"
             + "<li><b>Move</b>: click the province to move to.</li>"
             + "<li><b>Support</b>: click the province the support goes into. For a support to hold, that is the "
@@ -294,7 +295,7 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
             + "<p>When one order is aimed at the province you click, it is given at once. When several are (a move "
             + "and supports into the same province, a choice of coasts, a move by land or via convoy), a menu lists "
             + "them: choose one, or click elsewhere to close it.</p>"
-            + "<p>Hover over any province for its name, its supply centre and owner, the unit in it, and the orders a "
+            + "<p>Hover over any province for its name, who controls it, the unit in it, and the orders a "
             + "click there would give, with who they would attack or help.</p>"
             + "<p>The action buttons below the map offer the same orders. <b>Waive builds</b> is only on the "
             + "buttons.</p>";
@@ -312,7 +313,8 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
                 + "<a name='year'></a><h3>The year</h3>"
                 + "<p>Each year has a Spring turn and a Fall turn. Each turn has an orders phase and, if any unit was "
                 + "dislodged, a retreat phase. After the Fall turn every supply centre with a unit in it comes under "
-                + "that unit's power, and the powers then build or disband units to match their supply centres.</p>"
+                + "that unit's power, and the powers then build or disband units to match their supply centres. (The "
+                + "other land provinces change hands at the same time, but only the supply centres count.)</p>"
                 + "<p>In each phase the powers give their orders one at a time, one order per unit. The orders stay "
                 + "hidden until every power has given them; then all are carried out together.</p>"
                 + "<a name='orders'></a><h3>Orders</h3>"
@@ -353,10 +355,10 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
                 + "only on a coast. <b>Waive builds</b> gives up the rest. A power with more units than supply "
                 + "centres disbands the units of its choice.</p>"
                 + "<a name='interface'></a><h3>Interface</h3>"
-                + "<ul><li>The map shows each province as a disc: blue for a sea, buff for land. A supply centre has "
-                + "a star, a black ring, and its owner's colour.</li>"
-                + "<li>A disc in a power's colour is an army, and a boat shape is a fleet. A red-bordered unit beside "
-                + "a province has been dislodged and must retreat.</li>"
+                + "<ul><li>Each land province is shaded in the colour of the power controlling it, and left buff if "
+                + "nobody does. A star marks a supply centre. The grey hatched land is impassable.</li>"
+                + "<li>A cannon in a power's colour is an army, and a ship is a fleet. A red-bordered unit beside "
+                + "its province has been dislodged and must retreat.</li>"
                 + "<li>The last orders carried out are drawn on the map: black arrows for moves that succeeded, red "
                 + "dashed arrows ending in a cross for moves that failed, green dotted lines for supports, blue for "
                 + "convoys and orange arrows for retreats. A dashed ring marks a unit built, and a red cross a unit "

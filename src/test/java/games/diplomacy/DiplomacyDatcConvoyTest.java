@@ -27,7 +27,7 @@ public class DiplomacyDatcConvoyTest {
 
     @Before
     public void setup() {
-        state = newState();
+        state = newState(helpingAnyUnit());
         fm = new DiplomacyForwardModel();
         clearBoard(state);
     }
@@ -100,7 +100,7 @@ public class DiplomacyDatcConvoyTest {
         place(state, GERMANY, "A Mar", "A Gas");
         place(state, ITALY, "F Por", "F Wes");
         start();
-        playExpecting(state, fm, "A Spa-Por via convoy: ok", "F Mid C A Spa-Por: ok", "F GoL S F Por-Spa/nc: ok",
+        playExpecting(state, fm, "A Spa-Por via convoy: ok", "F Mid C A Spa-Por: ok", "F GoL S F Por-Spa/nc " + NOT_OFFERED + ": ok",
                 "A Mar S A Gas-Spa: ok", "A Gas-Spa: fails", "F Por-Spa/nc: ok", "F Wes S F Por-Spa/nc: ok");
         assertEquals(army(FRANCE), state.getUnit(prov(state, "Por")));
         assertEquals(fleet(ITALY, "nc"), state.getUnit(prov(state, "Spa")));

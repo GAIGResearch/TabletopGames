@@ -23,7 +23,7 @@ public class DiplomacyParadoxTest {
     DiplomacyForwardModel fm = new DiplomacyForwardModel();
 
     private void board(DiplomacyParadoxRule rule) {
-        DiplomacyParameters params = new DiplomacyParameters();
+        DiplomacyParameters params = helpingAnyUnit();
         params.setParameterValue("paradoxRule", rule);
         state = newState(params);
         clearBoard(state);
