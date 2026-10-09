@@ -25,7 +25,8 @@ import java.util.concurrent.TimeUnit;
  *     <li>maxSessions: the most games played at once (3)</li>
  *     <li>idleMinutes: a game with no input from its browser for this long is ended (30)</li>
  *     <li>token: a secret that every visitor must have, given once in the link ({@code /?token=...}) and then kept in a
- *     cookie; see {@link AccessToken} (none: the server is open)</li>
+ *     cookie; see {@link AccessToken} (the TAG_TOKEN environment variable, if set, which keeps the secret off the
+ *     command line; otherwise none, and the server is open)</li>
  *     <li>lookAndFeel: "flat" (FlatLaf) or "default" (Swing's own) for the GUIs' widgets (flat)</li>
  *     <li>showFrames: true to place the Swing frames on screen, for debugging (false)</li>
  * </ul>
@@ -44,7 +45,8 @@ public class WebServer {
         int idleMinutes = Utils.getArg(args, "idleMinutes", 30);
         boolean showFrames = Utils.getArg(args, "showFrames", false);
         String lookAndFeel = Utils.getArg(args, "lookAndFeel", "flat");
-        AccessToken access = new AccessToken(Utils.getArg(args, "token", ""));
+        String token = Utils.getArg(args, "token", System.getenv().getOrDefault("TAG_TOKEN", ""));
+        AccessToken access = new AccessToken(token);
 
         GameSession.configureSwing(lookAndFeel);
         Map<String, GameSession> sessions = new ConcurrentHashMap<>();
@@ -117,7 +119,7 @@ public class WebServer {
         app.start(port);
         System.out.printf("Serving %s on http://localhost:%d/%s%n",
                 games.games().size() == 1 ? games.games().get(0).name() : games.games().size() + " games", port,
-                access.isOpen() ? "" : "?token=" + Utils.getArg(args, "token", ""));
+                access.isOpen() ? "" : "?token=" + token);
     }
 
     private static void sendError(Sender sender, String message) {
