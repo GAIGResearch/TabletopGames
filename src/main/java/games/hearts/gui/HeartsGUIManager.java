@@ -11,6 +11,7 @@ import games.hearts.actions.Pass;
 import games.tricktaking.PlayCard;
 import games.tricktaking.Trick;
 import gui.AbstractGUIManager;
+import gui.ClickRegion;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import gui.views.RulesView;
@@ -241,6 +242,21 @@ public class HeartsGUIManager extends AbstractGUIManager {
         AbstractAction action = actionFor(playerHands[seat].cardAt(e.getPoint()));
         if (clickable.submit(action))
             showClickable();
+    }
+
+    @Override
+    public List<ClickRegion> getClickRegions() {
+        int me = clickable.player();
+        if (shown == null || playerHands == null || me < 0 || me >= playerHands.length) return List.of();
+        // a region for each card in the hand of the human player to act that they may pass or play
+        List<ClickRegion> regions = new ArrayList<>();
+        for (FrenchCard card : shown.getPlayerDecks().get(me).getComponents()) {
+            AbstractAction action = actionFor(card);
+            Shape shape = playerHands[me].cardShape(card);
+            if (action != null && shape != null)
+                regions.add(new ClickRegion(playerHands[me], shape, List.of(action)));
+        }
+        return regions;
     }
 
     /**

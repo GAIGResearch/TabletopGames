@@ -6,6 +6,7 @@ import core.Game;
 import games.diplomacy.*;
 import games.diplomacy.actions.*;
 import gui.AbstractGUIManager;
+import gui.ClickRegion;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import gui.views.RulesView;
@@ -16,10 +17,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * GUI for Diplomacy: the map (DiplomacyMapView) beside the powers (DiplomacyPowersView) and a list of the orders of
@@ -174,6 +173,21 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
      */
     private List<DiplomacyOrder> ordersAt(DiplomacyProvince province) {
         return clickable.matching(DiplomacyOrder.class, o -> province.equals(target(o)));
+    }
+
+    @Override
+    public List<ClickRegion> getClickRegions() {
+        if (mapView == null) return List.of();
+        // a region for each province an offered order is aimed at
+        Map<DiplomacyProvince, List<DiplomacyOrder>> byProvince = new LinkedHashMap<>();
+        for (DiplomacyOrder o : clickable.matching(DiplomacyOrder.class, o -> true)) {
+            DiplomacyProvince target = target(o);
+            if (target != null)
+                byProvince.computeIfAbsent(target, p -> new ArrayList<>()).add(o);
+        }
+        List<ClickRegion> regions = new ArrayList<>();
+        byProvince.forEach((p, orders) -> regions.add(new ClickRegion(mapView, mapView.provinceShape(p), orders)));
+        return regions;
     }
 
     /**

@@ -48,7 +48,10 @@ its Swing GUI in an off-screen frame, streamed to the page as image tiles, with 
 posted back to the frame; the GUI's standard action/info/history panels are hidden and drawn in the
 page (via read-only accessors on `AbstractGUIManager`). See the README's "Playing in a browser". GUIs
 must not open modal dialogs directly: use `gui.GUIMessages`, which the web server turns into
-messages in the page.
+messages in the page. A GUI that lets a human click on its views to act (via `ClickableActions`) may also
+override `AbstractGUIManager.getClickRegions()`, so that the page outlines those regions and answers clicks itself.
+Rules for a game go in a `gui.views.RulesView` tab (taken out of the image and shown in the page as HTML) or, for a
+game without them, in Markdown files `rules.md` / `how-to-play.md` in its data directory (`gui.RulesPages`).
 
 ## Core architecture
 

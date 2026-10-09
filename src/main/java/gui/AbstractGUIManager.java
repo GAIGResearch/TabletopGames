@@ -202,6 +202,33 @@ public abstract class AbstractGUIManager {
     }
 
     /**
+     * Null if action button i has no action.
+     */
+    public AbstractAction getButtonAction(int i) {
+        return actionButtons == null || i < 0 || i >= actionButtons.length ? null : actionButtons[i].getButtonAction();
+    }
+
+    /**
+     * The parts of the views a human player may click now to choose an action, for a GUI shown elsewhere (the web
+     * server answers clicks on them in the page). None by default. A GUI that offers actions on its views with
+     * {@link ClickableActions} may override this, taking each region's actions from {@code clickable.matching}, so
+     * that there are none when nothing is offered.
+     */
+    public List<ClickRegion> getClickRegions() {
+        return List.of();
+    }
+
+    /**
+     * Chooses an action from one of the click regions, as a click on its action button would. Returns whether it was
+     * chosen, which it is only if it is still offered.
+     */
+    public boolean chooseClicked(AbstractAction action) {
+        if (!clickable.submit(action)) return false;
+        resetActionButtons();
+        return true;
+    }
+
+    /**
      * The lines of game state information shown in the info panel: status, scores, phase, turn and current player.
      */
     public List<String> getGameStateInfo() {

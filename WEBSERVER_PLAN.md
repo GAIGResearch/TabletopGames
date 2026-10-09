@@ -220,6 +220,71 @@ every GUI in the JVM. Instead the web session, which already drives the update t
   diverges. Doing it properly means seeding agents from the game seed and offering iteration (not time) budgets, or recording
   and replaying every player's actions (with hidden information, the log only describes them as the browser player saw them).
 
+### Stage 7: a nicer page, within the Swing GUIs
+
+Improvements that need no per-game work (Tier 1) and an optional per-game hook (Tier 2). The game loop is unchanged: every
+choice still reaches `HumanGUIPlayer` through the `ActionController`, and is one the forward model offered.
+
+**Status:** implemented:
+
+- **Reconnection.** A session outlives its WebSocket (`RelaySender`). The server gives the page a key, kept in
+  `sessionStorage`, with which it reconnects (`/ws?resume=...`) after a dropped connection or a reload, and is sent the
+  whole page again (full frame, actions, info, history, regions). A game waits `resumeMinutes` (10) for its page; the
+  one waiting longest makes way when `maxSessions` is reached. Restart, New game and Setup send `quit`, ending the game.
+  Opening the same game in a second window takes it over, and the first is told so rather than taking it back.
+- **Touch** through pointer events: a tap clicks, a long press is the right button, a drag drags; two fingers zoom.
+- **Turns.** When it becomes the player's turn, a "Since your last move" panel lists the other players' moves; in a
+  background tab the title says so and a short sound plays (switchable, remembered).
+- **Scoreboard and history.** The info panel's standard lines are read into fields (scores, current player, round,
+  turn, phase) where they have their standard form; others (Rummy's hidden scores, Poker's pot) are shown as before. The
+  scores are only ever what the GUI shows: `getGameScore` can reveal hidden information. History lines carry their
+  player, shown by name. Both still come only from the GUI (`getString(state, perspective)` defaults to the full text,
+  so a history built on the server could leak hidden moves, and Diplomacy leaves its history out on purpose).
+- **Actions** are grouped by class when there are more than 8 of several kinds (single ones first), with the first nine
+  numbered for the keys 1-9.
+- **Click regions** (Tier 2): `AbstractGUIManager.getClickRegions()` (default none) lists the parts of the views a click
+  may choose an action on, each with its offered actions; `chooseClicked` submits one through `ClickableActions`. The
+  page outlines a region under the pointer and answers a click itself: one action is chosen at once, several give a
+  menu. Presses on a region are not passed to the GUI unless they become drags. Implemented for Diplomacy (provinces,
+  traced from the map's region image), Go Fish and Hearts (cards).
+- **Server load.** The GUI is no longer repainted twice per tick (`game.updateGUI` repainted the off-screen window as
+  well as the streamer painting it); the GUI is updated only while the game is moving, after input, and every 2 s; and a
+  frame is painted only when Swing has been asked to repaint something in it (`DirtyTracker`), or every 2 s. An idle
+  Diplomacy session went from about 60% to 6% of a core. An extra frame is sent 15 ms after input, for hover effects.
+- Checked in Chrome: Hearts (regions, keys, reconnect, reload, quit), Diplomacy (regions with menus, CPU), Dominion
+  (scoreboard, history, summary, synthetic touch gestures), a stale key after a server restart; all 65 games started
+  over a WebSocket client with no server errors. Not checked: a real phone or tablet.
+
+**Zoom and rules** (added after the first review):
+
+- **Fit and zoom.** The page sends its zoom with its size (none to fit). `GameSession.fitFrame` lays the frame out at
+  the GUI's own (preferred layout) size and shows it at scale s, the zoom or the fit (enlarging up to 3x: small GUIs
+  were left at their own size in a large window); the page centres it, or scrolls it when larger than the stage. (Laying
+  the frame out larger, to fill the stage, left the content against the left edge: many views draw from their top left
+  corner and are stretched by a BorderLayout.) A GUI whose layout asks for under 100 pixels gives no real size and is
+  laid out to the space instead; ChineseCheckers' board view asked for 50x50, and now gives the size it draws at.
+  Swing draws at the new scale, so text stays sharp. Images are capped at 12 megapixels (drawn less sharply beyond
+  that). The frame header carries the zoom; the page stretches the image to a new zoom until the server's frame for it
+  comes, keeping the point under the pointer still.
+- **Controls.** − Fit + in the bar; the wheel zooms, except over the parts of the frame that take the wheel themselves
+  (scroll panes that can scroll, views with wheel listeners: Colt Express, Descent, Pandemic), which `ChromeReader`
+  sends as `wheelAreas`; Ctrl+wheel (and a touchpad pinch) always zooms, a sideways scroll pans. Dragging with the right
+  or middle button pans when the game is larger than the stage (a right press that does not move is still the game's
+  right click), as does a drag with any button or one finger on the stage around the game; on touch screens two fingers
+  pinch and pan anywhere on the stage (`touch-action: none` on it), and one finger on the game is still the game's (Chess
+  drags its pieces). The zoom is kept per game in `localStorage`. A Panel button hides the sidebar.
+- Checked: contact sheets of the first frames of all 65 games at a 1400x800 space, drawn as the page shows them
+  (centred); Ctrl+wheel zoom and pinch with synthetic events in Chrome. Not yet checked in a browser: the plain wheel
+  and wheel areas, dragging to pan, and pinching on the stage around the game.
+- **Rules.** `ChromeReader` takes a GUI's rules tabs out of the image (any `RulesView`, and tabs titled Rules or How
+  to Play holding HTML in an editor or label, or text) and sends their HTML; a tab strip left with one tab is replaced
+  by that tab where the layout is a `BorderLayout`. The page shows the pages in a panel beside the game, with the page's
+  fonts and theme, wrapping to the width; links to anchors scroll within it. 33 games have rules this way. A game may
+  also have Markdown files in its data directory (`rules.md`, `how-to-play.md`; `gui.RulesPages`, commonmark with GFM
+  tables and heading anchors), which a desktop `RulesView` can show too; none are written yet.
+- Found: at its own preferred height Hearts' GUI draws its "0 points" over the player titles (a layout bug of the GUI,
+  seen when zoomed in beyond the fit or in a small window).
+
 ## Testing
 
 - **Unit tests** (`web.SessionConfigTest`, no display needed): reading a setup from a link, defaults, refusals with their

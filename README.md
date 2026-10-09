@@ -35,6 +35,27 @@ page sets up a game (players, seat, an opponent per seat, seed and the game's pa
 that setup, so it can be bookmarked or shared. The game page can download a log of the game (its setup, seed and moves)
 and, if the setup asks for it, shows what the AI players weighed up for each decision (which reveals what they know).
 
+The page also:
+
+- groups a long list of actions by kind, and numbers the first nine for the keys 1 to 9;
+- shows a scoreboard (whose turn, and the scores where the GUI shows them) and the history with the players' names, and
+  when it becomes your turn, what the other players did since your last move (with a sound if the tab is in the
+  background; the bell button switches it off);
+- fits the game to the window, centred (enlarging a small GUI as well as shrinking a large one), or zooms it to the
+  player's choice (the − Fit + buttons, the mouse wheel, or a pinch), drawing it again at the new size rather than
+  magnifying the image. Zoomed in beyond the window, the view is moved by dragging with the right or middle button,
+  or on the space around the game, or with two fingers. Over a part of a game that scrolls with the wheel itself, the
+  wheel scrolls it (Ctrl and the wheel always zoom). The zoom is kept for each game, and the side panel can be hidden
+  to give the game the whole width;
+- shows the game's rules as a web page beside the game (the Rules button): the GUI's Rules and How to Play tabs are
+  taken out of the streamed image, and a game may also have its rules in Markdown, in `rules.md` and `how-to-play.md`
+  in its data directory (see `gui.RulesPages`);
+- works by touch: a tap clicks, a long press is the right button, a drag drags, and two fingers zoom and pan;
+- reconnects to the same game when the connection drops (a phone asleep, a network change) or the page is reloaded;
+- outlines and answers clicks on the parts of the board a GUI offers as click regions (see
+  `AbstractGUIManager.getClickRegions`; Diplomacy, Go Fish and Hearts do), without waiting for the image, with a menu
+  when a click there could mean several actions.
+
 ```bash
 java -jar target/TAG.jar WebServer token=some-long-secret
 # then open http://localhost:8080/?token=some-long-secret
@@ -45,8 +66,9 @@ Arguments (all optional): `port` (8080); `games`, a comma-separated list of the 
 to offer as opponents (`json/players/webserver`, which has random, one-step look-ahead and MCTS at 0.1, 1 and 5
 seconds per decision; any in `data/<game>/agents` are offered too); `token`, a secret every visitor needs, given once
 in the link and then kept in a cookie (without it the server is open to anyone who can reach it); `maxSessions` (3),
-the most games played at once; `idleMinutes` (30), after which a game left alone is ended; `lookAndFeel` (`flat` or
-`default`).
+the most games played at once; `idleMinutes` (30), after which a game left alone is ended; `resumeMinutes` (10), how
+long a game waits for its page to reconnect (a game waiting counts towards `maxSessions`, but the one waiting longest
+makes way for a new game); `lookAndFeel` (`flat` or `default`).
 
 An agent file is any player definition `PlayerFactory` reads (`json/players` has examples). Its file name, less
 `.json`, is the agent's name on the start page and in the game. It may also have a `label`, a description shown after

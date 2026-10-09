@@ -201,10 +201,45 @@ public class DiplomacyMapView extends JComponent {
         return null;
     }
 
+    // each province's pixels as a shape in the image's coordinates, by province index
+    private final Map<Integer, Shape> provinceShapes = new HashMap<>();
+    // the same scaled to the component, at shapeScale
+    private final Map<Integer, Shape> scaledShapes = new HashMap<>();
+    private double shapeScale;
+
+    /**
+     * The province's pixels as a shape in the component's coordinates.
+     */
+    public Shape provinceShape(DiplomacyProvince province) {
+        double s = scale();
+        if (s != shapeScale) {
+            scaledShapes.clear();
+            shapeScale = s;
+        }
+        int index = province.index();
+        return scaledShapes.computeIfAbsent(index, i -> AffineTransform.getScaleInstance(s, s)
+                .createTransformedShape(provinceShapes.computeIfAbsent(i, this::traceProvince)));
+    }
+
+    private Shape traceProvince(int index) {
+        // one rectangle for each run of the province's pixels in a row, joined into an area
+        Path2D.Double runs = new Path2D.Double(Path2D.WIND_NON_ZERO);
+        for (int y = 0; y < imageHeight; y++)
+            for (int x = 0; x < imageWidth; x++) {
+                if (region[y * imageWidth + x] != index) continue;
+                int start = x;
+                while (x < imageWidth && region[y * imageWidth + x] == index) x++;
+                runs.append(new Rectangle(start, y, x - start, 1), false);
+            }
+        return new Area(runs);
+    }
+
     /**
      * Provinces to outline, with the colour of each (replacing any outlines before).
      */
     public void setOutlines(Map<DiplomacyProvince, Color> outlines) {
+        // This is called on every GUI update, and the outline image is costly to remake.
+        if (outlines.equals(this.outlines)) return;
         this.outlines = outlines;
         outlineImage = null;
         repaint();

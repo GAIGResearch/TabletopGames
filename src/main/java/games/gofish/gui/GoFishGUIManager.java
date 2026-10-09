@@ -12,6 +12,7 @@ import games.tricktaking.gui.CardArt;
 import games.tricktaking.gui.FrenchCardDeckView;
 import games.tricktaking.gui.PlayerHandView;
 import gui.AbstractGUIManager;
+import gui.ClickRegion;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import gui.views.RulesView;
@@ -187,6 +188,24 @@ public class GoFishGUIManager extends AbstractGUIManager {
         drawDeckView.updateComponent(state.getDrawDeck());
         centreText.setText(centreText(state));
         parent.repaint();
+    }
+
+    @Override
+    public List<ClickRegion> getClickRegions() {
+        int asker = clickable.player();
+        if (shown == null || asker < 0 || asker >= playerViews.length) return List.of();
+        // a region for each card in the asker's hand of a rank they may ask for, offering an ask of each player who
+        // may be asked for it
+        PartialObservableDeck<FrenchCard> hand = shown.getPlayerHands().get(asker);
+        List<ClickRegion> regions = new ArrayList<>();
+        for (int c = 0; c < hand.getSize(); c++) {
+            int rank = hand.get(c).number;
+            List<GoFishAsk> asks = clickable.matching(GoFishAsk.class, a -> a.rank == rank);
+            Shape shape = playerViews[asker].cardShape(c);
+            if (!asks.isEmpty() && shape != null)
+                regions.add(new ClickRegion(playerViews[asker], shape, asks));
+        }
+        return regions;
     }
 
     /**

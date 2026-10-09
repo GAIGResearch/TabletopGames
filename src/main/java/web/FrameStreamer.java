@@ -17,22 +17,32 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Sends what a frame shows to the browser. Every tick the frame's root pane is painted into an image, which is split
- * into square tiles, and the tiles that changed since the last tick are sent, each as a PNG.
+ * Sends what a frame shows to the browser. On a tick when something in the frame has asked to be repainted (or every
+ * few seconds regardless), the frame's root pane is painted into an image, which is split into square tiles, and the
+ * tiles that changed since the last image are sent, each as a PNG.
  * <p>
  * Each frame is one binary message: a 4-byte big-endian length, a JSON header of that length
- * ({@code {seq, w, h, fw, fh, tiles: [{x, y, w, h, len}]}}), then the tiles' PNG bytes in header order. The image and
- * tiles are in device pixels; fw and fh are the frame's own size, in the frame's (CSS) pixels, which may be larger than
- * the browser's space for it (the browser then scales it down).
+ * ({@code {seq, w, h, fw, fh, zoom, tiles: [{x, y, w, h, len}]}}), then the tiles' PNG bytes in header order. The image
+ * and tiles are in device pixels; fw and fh are the frame's own size, in its own pixels; zoom is the scale at which the
+ * browser is to show it (CSS pixels per frame pixel), so that the frame may be shown smaller or larger than its own
+ * size (see GameSession.fitFrame).
  */
 class FrameStreamer {
 
     static final int TILE = 128;
     static final long TICK_MS = 100;
+    // An extra frame is sent NUDGE_MS after the browser's input, so that its effect shows before the next tick, unless
+    // another was sent within NUDGE_GAP_MS.
+    static final long NUDGE_MS = 15, NUDGE_GAP_MS = 30;
+    // A frame is painted only when something in it has asked to be repainted (see DirtyTracker), and at least this
+    // often, in case something changed without asking.
+    static final long REFRESH_MS = 2000;
 
     private final JFrame frame;
     private final Sender out;
@@ -41,16 +51,23 @@ class FrameStreamer {
         t.setDaemon(true);
         return t;
     });
-    private volatile double scale;
+    private volatile double scale, zoom;
     private int[] previous;
     private int previousW, previousH;
     private long seq;
     private Dimension frameSize;
+    // set to send the whole image on the next tick
+    private volatile boolean resendAll;
+    private final AtomicBoolean nudged = new AtomicBoolean();
+    private volatile long lastTick;
+    private long lastPaint;
+    private volatile boolean rescaled;
 
-    FrameStreamer(JFrame frame, Sender out, double scale) {
+    FrameStreamer(JFrame frame, Sender out, double scale, double zoom) {
         this.frame = frame;
         this.out = out;
         this.scale = scale;
+        this.zoom = zoom;
     }
 
     void start() {
@@ -59,17 +76,51 @@ class FrameStreamer {
 
     void stop() {
         ticker.shutdownNow();
+        DirtyTracker.forget(frame);
     }
 
     /**
-     * Image pixels per frame pixel.
+     * @param scale image pixels per frame pixel
+     * @param zoom  CSS pixels per frame pixel, at which the browser shows the frame
      */
-    void setScale(double scale) {
+    void setScale(double scale, double zoom) {
+        if (scale != this.scale || zoom != this.zoom) rescaled = true;
         this.scale = scale;
+        this.zoom = zoom;
+    }
+
+    /**
+     * Sends the whole image on the next tick, not just what changed.
+     */
+    void resendAll() {
+        resendAll = true;
+    }
+
+    /**
+     * Sends a frame soon, ahead of the next tick, as the browser's input may have changed what the frame shows.
+     */
+    void nudge() {
+        if (nudged.compareAndSet(false, true)) {
+            try {
+                ticker.schedule(() -> {
+                    nudged.set(false);
+                    if (System.currentTimeMillis() - lastTick >= NUDGE_GAP_MS) tick();
+                }, NUDGE_MS, TimeUnit.MILLISECONDS);
+            } catch (RejectedExecutionException e) {
+                // the streamer has stopped
+            }
+        }
     }
 
     private void tick() {
+        long now = System.currentTimeMillis();
+        lastTick = now;
         if (!out.isOpen()) return;
+        // taken before painting, so that a repaint asked for while painting is painted on the next tick
+        boolean dirty = DirtyTracker.takeDirty(frame);
+        if (!dirty && !resendAll && !rescaled && now - lastPaint < REFRESH_MS) return;
+        lastPaint = now;
+        rescaled = false;
         try {
             BufferedImage image = paint();
             if (image != null) send(image);
@@ -106,7 +157,8 @@ class FrameStreamer {
     private void send(BufferedImage image) throws IOException {
         int w = image.getWidth(), h = image.getHeight();
         int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-        boolean full = previous == null || w != previousW || h != previousH;
+        boolean full = previous == null || w != previousW || h != previousH || resendAll;
+        resendAll = false;
 
         List<Rectangle> changed = new ArrayList<>();
         for (int y = 0; y < h; y += TILE)
@@ -130,6 +182,7 @@ class FrameStreamer {
         header.addProperty("h", h);
         header.addProperty("fw", frameSize.width);
         header.addProperty("fh", frameSize.height);
+        header.addProperty("zoom", zoom);
         JsonArray tiles = new JsonArray();
         int total = 0;
         for (int i = 0; i < changed.size(); i++) {

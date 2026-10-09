@@ -34,6 +34,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * is, and the results when it ends.
  * <p>
  * The session starts on the browser's first resize message, which gives the size to lay the GUI out at.
+ * <p>
+ * The session outlives its connection: if the browser's connection is lost (a phone asleep, a network change), the game
+ * carries on, and the browser may reconnect to it with the session's key (see {@link #attach}).
  */
 public class GameSession {
 
@@ -44,8 +47,12 @@ public class GameSession {
     private final int id = ids.incrementAndGet();
     private final SessionConfig config;
     private final OpponentCatalog opponents;
-    private final Sender out;
+    private final RelaySender out;
     private final boolean showFrames;
+    // the secret with which the browser may reconnect to this session
+    private final String key = newKey();
+    // when the browser's connection was lost (0 while it has one)
+    private volatile long detachedAt;
 
     private Game game;
     private JFrame frame;
@@ -56,11 +63,20 @@ public class GameSession {
     private InputForwarder input;
     private ChromeReader chrome;
     private volatile boolean started, stopped;
+    // for updateDue: used on the Swing thread, except updateNow, which the browser's input sets
+    private int lastGameTick = -1;
+    private boolean lastHumanToMove;
+    private long lastChange, lastUpdate;
+    private volatile boolean updateNow = true;
     // the size of the browser's space for the GUI, and its device pixel ratio (Swing thread only)
     private Dimension space;
     private double dpr;
+    // the zoom the page asked for, or 0 to fit the GUI to the space (Swing thread only)
+    private double zoom;
     // image pixels per frame pixel (see fitFrame)
     private volatile double imageScale;
+    // the scale at which the browser shows the frame (see fitFrame)
+    private volatile double displayScale = 1;
     private volatile long lastActivity = System.currentTimeMillis();
     private final long startedAt = System.currentTimeMillis();
     private long seed;
@@ -69,13 +85,78 @@ public class GameSession {
     private boolean reportedResults;
 
     /**
+     * @param connection the browser's connection, to which the session's key is sent at once (see {@link #attach})
      * @param showFrames place the Swing frame on screen (for debugging); otherwise it is off screen
      */
-    public GameSession(SessionConfig config, OpponentCatalog opponents, Sender out, boolean showFrames) {
+    public GameSession(SessionConfig config, OpponentCatalog opponents, Sender connection, boolean showFrames) {
         this.config = config;
         this.opponents = opponents;
-        this.out = out;
+        this.out = new RelaySender(connection);
         this.showFrames = showFrames;
+        sendKey();
+    }
+
+    private static String newKey() {
+        byte[] bytes = new byte[18];
+        new java.security.SecureRandom().nextBytes(bytes);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    public String key() {
+        return key;
+    }
+
+    private void sendKey() {
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "session");
+        msg.addProperty("key", key);
+        out.sendText(msg.toString());
+    }
+
+    /**
+     * Carries on the session over a new connection from the browser (one that has reconnected, or the same game
+     * opened in another window), sending it all the page needs. Returns the connection it replaces, or null.
+     */
+    public synchronized Sender attach(Sender connection) {
+        if (streamer != null) streamer.resendAll();
+        Sender previous = out.attach(connection);
+        detachedAt = 0;
+        lastActivity = System.currentTimeMillis();
+        updateNow = true;
+        sendKey();
+        if (started && !stopped)
+            SwingUtilities.invokeLater(() -> {
+                sendStarted(seed, game.getPlayers());
+                chrome.resend();
+                reportedTurn = null;
+                reportedResults = false;
+            });
+        return previous;
+    }
+
+    /**
+     * Stops sending to the connection, which has been lost. The session carries on until the browser reconnects (see
+     * {@link #attach}) or it is stopped. Returns whether the connection was the session's current one.
+     */
+    public synchronized boolean detach(Sender connection) {
+        if (!out.detach(connection)) return false;
+        detachedAt = System.currentTimeMillis();
+        return true;
+    }
+
+    public long detachedAt() {
+        return detachedAt;
+    }
+
+    /**
+     * Whether there is a game for a browser to come back to.
+     */
+    public boolean isResumable() {
+        return started && !stopped && game.getGameState().isNotTerminal();
+    }
+
+    public boolean isStopped() {
+        return stopped;
     }
 
     /**
@@ -91,6 +172,8 @@ public class GameSession {
         // Swing moves a tooltip on to a real screen, and so out of the frame; the InputForwarder sends their text to
         // the browser instead
         ToolTipManager.sharedInstance().setEnabled(false);
+        // so that a frame is streamed only when something in it has changed
+        DirtyTracker.install();
         JPopupMenu.setDefaultLightWeightPopupEnabled(true);
         // a message a GUI would show in a dialog goes to the browser of the session the GUI belongs to
         GUIMessages.setHandler((parent, title, message) -> {
@@ -105,15 +188,21 @@ public class GameSession {
         lastActivity = System.currentTimeMillis();
         JsonObject msg = JsonParser.parseString(text).getAsJsonObject();
         String type = msg.get("type").getAsString();
+        // Anything but a mouse move may change what the GUI shows (a click may change its tab, say), so the GUI is
+        // updated. A move's effects are the views' own, and they repaint themselves.
+        if (!(type.equals("mouse") && msg.get("kind").getAsString().equals("move"))) updateNow = true;
         if (type.equals("resize")) {
             int w = msg.get("w").getAsInt(), h = msg.get("h").getAsInt();
             double dpr = msg.get("dpr").getAsDouble();
+            // the page's zoom, or none (0) to fit the GUI to the space
+            double zoom = msg.has("zoom") && !msg.get("zoom").isJsonNull() ? msg.get("zoom").getAsDouble() : 0;
+            zoom = zoom <= 0 ? 0 : Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
             if (started) {
-                resize(w, h, dpr);
+                resize(w, h, dpr, zoom);
                 return;
             }
             try {
-                start(w, h, dpr);
+                start(w, h, dpr, zoom);
             } catch (RuntimeException e) {
                 e.printStackTrace();
                 // nothing was left running to stop
@@ -127,14 +216,25 @@ public class GameSession {
             int i = msg.get("i").getAsInt();
             String label = msg.get("label").getAsString();
             SwingUtilities.invokeLater(() -> chrome.choose(i, label));
+            streamer.nudge();
+        } else if (type.equals("region")) {
+            int v = msg.get("v").getAsInt(), r = msg.get("r").getAsInt(), o = msg.get("o").getAsInt();
+            SwingUtilities.invokeLater(() -> chrome.chooseRegion(v, r, o));
+            streamer.nudge();
         } else if (type.equals("log")) {
             out.sendText(gameLog().toString());
         } else if (type.equals("actionHover")) {
             int i = msg.get("i").getAsInt();
             boolean enter = msg.get("enter").getAsBoolean();
             SwingUtilities.invokeLater(() -> chrome.hover(i, enter));
+            streamer.nudge();
+        } else if (type.equals("quit")) {
+            // the player has left this game for another, so it will not be resumed
+            stop();
+            out.close();
         } else {
             input.handle(type, msg);
+            streamer.nudge();
         }
     }
 
@@ -145,7 +245,7 @@ public class GameSession {
         return lastActivity;
     }
 
-    private void start(int w, int h, double dpr) {
+    private void start(int w, int h, double dpr, double zoom) {
         started = true;
         GameType gameType = config.game();
         long seed = config.seed() == -1 ? System.currentTimeMillis() : config.seed();
@@ -177,15 +277,20 @@ public class GameSession {
                 frame.setSize(w, h);
                 space = new Dimension(w, h);
                 this.dpr = dpr;
+                this.zoom = zoom;
                 // Off screen, unless debugging. Its events come from the browser, so where it is does not matter.
                 frame.setLocation(showFrames ? 0 : -10_000, 0);
                 frame.setVisible(true);
-                chrome = new ChromeReader(gui, out);
+                chrome = new ChromeReader(gui, game, frame.getRootPane(), gameType.getDataPath(), out);
                 fitFrame();
                 byFrame.put(frame, this);
                 sendStarted(seed, players);
                 guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, e -> {
-                    game.updateGUI(gui, frame);
+                    // with no browser to see it, the GUI waits until one reconnects (see attach)
+                    if (detachedAt > 0 || !updateDue()) return;
+                    // As game.updateGUI does, but without repainting the frame: the frame streamer paints it, and a
+                    // repaint would paint it a second time, for a screen no one sees.
+                    gui.update(game.getPlayers().get(game.getPlayerToMove()), game.getGameState(), game.isHumanToMove());
                     // a GUI can grow as the game goes on
                     fitFrame();
                     chrome.update();
@@ -198,7 +303,7 @@ public class GameSession {
         }
 
         input = new InputForwarder(frame, out);
-        streamer = new FrameStreamer(frame, out, imageScale);
+        streamer = new FrameStreamer(frame, out, imageScale, displayScale);
         streamer.start();
 
         gameThread = new Thread(this::runGame, "web-game-" + id);
@@ -206,6 +311,30 @@ public class GameSession {
         gameThread.start();
         System.out.printf("Session %d: %s, %d players, browser in seat %d, seed %d%n", id, gameType.name(), config.nPlayers(), config.seat(), seed);
     }
+
+    /**
+     * Whether the GUI should be updated on this tick of the GUI timer.
+     */
+    private boolean updateDue() {
+        // Updating a GUI repaints much of it, which is most of a session's work, so it is done only while the game is
+        // moving: when the game state has moved on, and for a while after, as the game thread may still be finishing
+        // a move when the tick changes; after input from the browser; and every few seconds regardless.
+        long now = System.currentTimeMillis();
+        int tick = game.getGameState().getGameTick();
+        boolean human = game.isHumanToMove();
+        if (tick != lastGameTick || human != lastHumanToMove) {
+            lastGameTick = tick;
+            lastHumanToMove = human;
+            lastChange = now;
+        }
+        if (!updateNow && now - lastChange > UPDATE_SETTLE_MS && now - lastUpdate < FrameStreamer.REFRESH_MS)
+            return false;
+        updateNow = false;
+        lastUpdate = now;
+        return true;
+    }
+
+    static final long UPDATE_SETTLE_MS = 1000;
 
     private void runGame() {
         try {
@@ -352,17 +481,24 @@ public class GameSession {
         out.sendText(msg.toString());
     }
 
-    private void resize(int w, int h, double dpr) {
+    private void resize(int w, int h, double dpr, double zoom) {
         SwingUtilities.invokeLater(() -> {
             space = new Dimension(w, h);
             this.dpr = dpr;
+            this.zoom = zoom;
             fitFrame();
         });
     }
 
+    // the zooms the page may ask for, and the most a GUI is enlarged to fit its space
+    static final double MIN_ZOOM = 0.25, MAX_ZOOM = 4, MAX_FIT = 3;
+    // a GUI whose layout asks for less than this (in either direction) gives no real size of its own
+    static final int MIN_LAYOUT = 100;
+    // the most pixels in an image; beyond this a zoomed frame is drawn less sharply, rather than sent larger
+    static final double MAX_IMAGE_PIXELS = 12_000_000;
+
     /**
-     * Sizes the frame to the browser's space or, where the GUI needs more, to a larger frame of the same proportions,
-     * which the browser scales down to fit. Swing thread only.
+     * Sizes the frame, and sets the scales at which it is drawn and shown. Swing thread only.
      */
     private void fitFrame() {
         Container content = frame.getContentPane();
@@ -370,16 +506,31 @@ public class GameSession {
         // Many GUIs are laid out at a fixed size. The layout's own preferred size is used, not the size the GUI may have
         // set on its panel, as that counts the panels the ChromeReader hides.
         Dimension needed = layout != null ? layout.preferredLayoutSize(content) : content.getPreferredSize();
-        // scaled down by s, a frame of the space's proportions fills the space exactly
-        double s = Math.min(1, Math.min((double) space.width / needed.width, (double) space.height / needed.height));
-        Dimension size = new Dimension((int) Math.ceil(space.width / s), (int) Math.ceil(space.height / s));
+        needed = new Dimension(Math.max(1, needed.width), Math.max(1, needed.height));
+        // The browser shows the frame scaled by s: the zoom the page asked for or, with none, the scale at which the
+        // GUI just fits the space (enlarged, up to MAX_FIT, if it needs less). The page centres a frame smaller than
+        // its space, and scrolls one larger.
+        double fit = Math.min(MAX_FIT, Math.min((double) space.width / needed.width, (double) space.height / needed.height));
+        double s = zoom > 0 ? zoom : fit;
+        // The frame is laid out at the GUI's own size, not larger to fill the space: many views draw from their top
+        // left corner, and would be left against one side of a larger frame.
+        Dimension size = needed;
+        if (needed.width < MIN_LAYOUT || needed.height < MIN_LAYOUT) {
+            // a GUI that gives no real size of its own is laid out to the space, as it would be in a window
+            s = zoom > 0 ? zoom : 1;
+            size = new Dimension((int) Math.floor(space.width / s), (int) Math.floor(space.height / s));
+        }
         if (!size.equals(frame.getSize())) {
             frame.setSize(size);
             frame.validate();
         }
-        // the browser shows the frame scaled by s, so an image at dpr * s is as sharp as it can show
-        imageScale = dpr * s;
-        if (streamer != null) streamer.setScale(imageScale);
+        // an image at dpr * s is as sharp as the browser can show, unless that is too many pixels
+        double image = dpr * s;
+        double pixels = image * image * size.width * size.height;
+        if (pixels > MAX_IMAGE_PIXELS) image *= Math.sqrt(MAX_IMAGE_PIXELS / pixels);
+        imageScale = image;
+        displayScale = s;
+        if (streamer != null) streamer.setScale(imageScale, s);
     }
 
     /**

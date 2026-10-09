@@ -14,12 +14,14 @@ public class RulesView extends JPanel {
     public static final int COLUMN_WIDTH = 660;
 
     final JEditorPane pane;
+    final String bodyHtml;
 
     /**
      * @param bodyHtml the page, without the html and body tags
      * @param height   the height of the column; the page scrolls within it
      */
     public RulesView(String bodyHtml, int height) {
+        this.bodyHtml = bodyHtml;
         pane = new JEditorPane("text/html",
                 "<html><body style='font-family:sans-serif; font-size:11pt; margin:8px'>" + bodyHtml + "</body></html>");
         pane.setEditable(false);
@@ -35,5 +37,12 @@ public class RulesView extends JPanel {
         // the default FlowLayout centres the column in a wider tab
         setOpaque(false);
         add(scroll);
+    }
+
+    /**
+     * The page, without the html and body tags.
+     */
+    public String getBodyHtml() {
+        return bodyHtml;
     }
 }

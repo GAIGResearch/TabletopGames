@@ -13,7 +13,15 @@
     <span class="status" id="status">Connecting</span>
     <span class="spacer"></span>
     <span class="muted" id="seed"></span>
+    <span class="zoom" role="group" aria-label="Zoom">
+        <button id="zoom-out" title="Smaller (Ctrl + mouse wheel, or pinch)">−</button>
+        <button id="zoom-fit" title="Fit the game to the window">Fit</button>
+        <button id="zoom-in" title="Larger (Ctrl + mouse wheel, or pinch)">+</button>
+    </span>
     <span class="actions">
+        <button id="rules-button" title="The rules of the game" hidden>Rules</button>
+        <button id="panel-toggle" title="Show or hide the side panel">Panel</button>
+        <button id="sound" title="A sound when it becomes your turn while this tab is in the background"></button>
         <button id="log" title="Download a record of this game: its setup, seed and moves">Log</button>
         <button id="restart" title="Play this game again from the start, with the same seed">Restart</button>
         <button id="new-game" title="The same setup with a new seed">New game</button>
@@ -21,12 +29,31 @@
     </span>
 </header>
 <div class="main">
-    <div class="stage" id="stage">
-        <canvas id="screen" tabindex="0"></canvas>
+    <div class="stage-wrap">
+        <div class="stage" id="stage">
+            <div class="board" id="board">
+                <canvas id="screen" tabindex="0"></canvas>
+                <canvas id="overlay"></canvas>
+            </div>
+        </div>
         <div id="notice"><span class="spinner"></span>Starting the game…</div>
         <div class="toasts" id="toasts"></div>
+        <aside class="rules-panel" id="rules-panel" hidden>
+            <div class="rules-head">
+                <div class="rules-tabs" id="rules-tabs" role="tablist"></div>
+                <button class="close" id="rules-close" title="Close">×</button>
+            </div>
+            <div class="rules-body" id="rules-body"></div>
+        </aside>
     </div>
     <aside class="sidebar" id="sidebar" hidden>
+        <section class="panel" id="summary-panel" hidden>
+            <div class="panel-head">
+                <h2>Since your last move</h2>
+                <button class="close" id="summary-close" title="Dismiss">×</button>
+            </div>
+            <ol class="summary" id="summary"></ol>
+        </section>
         <section class="panel" id="actions-panel" hidden>
             <div class="panel-head">
                 <h2>Your move</h2>
@@ -41,6 +68,8 @@
         </section>
         <section class="panel" id="info-panel" hidden>
             <div class="panel-head"><h2>Game</h2></div>
+            <table class="scoreboard" id="scoreboard" hidden></table>
+            <p class="muted progress" id="progress" hidden></p>
             <dl class="info" id="info"></dl>
         </section>
         <section class="panel grow" id="history-panel" hidden>
@@ -50,6 +79,7 @@
     </aside>
 </div>
 <div id="tooltip" hidden></div>
+<div id="region-menu" role="menu" hidden></div>
 
 <dialog id="results">
     <h2 id="results-title">Game over</h2>

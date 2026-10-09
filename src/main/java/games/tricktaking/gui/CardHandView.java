@@ -110,6 +110,13 @@ public class CardHandView<C extends Component, S> extends JComponent {
     }
 
     /**
+     * The showing part of the card with this deck index (in this view's coordinates), or null if it is not drawn.
+     */
+    public Shape cardShape(int index) {
+        return handView.visibleCardShape(index);
+    }
+
+    /**
      * Outlines the showing part of each card with the deck index given, in its colour; the rest are not outlined.
      */
     public void setOutlines(Map<Integer, Color> outlines) {
