@@ -168,7 +168,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Poker", gameState, width, defaultInfoPanelHeight +15);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
                 main.add(mainGameArea, BorderLayout.CENTER);
@@ -239,34 +239,6 @@ public class PokerGUIManager extends AbstractGUIManager {
 //        historyContainer.getViewport().setOpaque(false);
         historyInfo.setEditable(false);
         return wrapper;
-    }
-
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setOpaque(false);
-        if (boxLayout) {
-            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
-        }
-
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights);
-            actionButtons[i] = ab;
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.informAllActionButtons(actionButtons);
-        }
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
-        return pane;
     }
 
     @Override

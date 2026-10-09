@@ -108,7 +108,7 @@ public class SGGUIManager extends AbstractGUIManager {
 
                 // Bottom area will show actions available
                 if (!humanID.isEmpty()) {
-                    JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, false, null, null, null);
+                    JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, null, null, null);
                     parent.add(actionPanel, BorderLayout.SOUTH);
                 }
 
@@ -173,8 +173,7 @@ public class SGGUIManager extends AbstractGUIManager {
                 SGGameState parsedGameState = (SGGameState) gameState;
                 for (int i = 0; i < gameState.getNPlayers(); i++) {
                     playerHands[i].update(parsedGameState);
-                    if (i == gameState.getCurrentPlayer()
-                            || humanPlayerIds.contains(i)) {
+                    if (showHiddenInfo(gameState, i)) {
                         playerHands[i].playerHandView.setFront(true);
                         playerHands[i].setFocusable(true);
                     } else {

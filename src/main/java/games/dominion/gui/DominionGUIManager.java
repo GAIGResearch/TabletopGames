@@ -21,7 +21,6 @@ public class DominionGUIManager extends AbstractGUIManager {
 
     // Currently active player
     int activePlayer = -1;
-    int humanId;
 
     // Border highlight of active player
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 27, 67), 3);
@@ -61,7 +60,7 @@ public class DominionGUIManager extends AbstractGUIManager {
             JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
             int next = 0;
             for (int i = 0; i < nPlayers; i++) {
-                DominionPlayerView playerView = new DominionPlayerView(i, humanId, params.getDataPath(), state);
+                DominionPlayerView playerView = new DominionPlayerView(i, -1, params.getDataPath(), state);
 
                 // Get agent name
                 String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -97,7 +96,7 @@ public class DominionGUIManager extends AbstractGUIManager {
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dominion", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true, null, null, null);
 
             // Add all views to frame
             parent.setLayout(new BorderLayout());
@@ -133,9 +132,7 @@ public class DominionGUIManager extends AbstractGUIManager {
             DominionGameState state = (DominionGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerViews[i].update(state);
-                if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanId
-                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
+                if (showHiddenInfo(gameState, i)) {
                     playerViews[i].playerHand.setFront(true);
                     playerViews[i].playerHand.setFocusable(true);
                 } else {

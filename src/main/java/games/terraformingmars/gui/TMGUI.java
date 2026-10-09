@@ -5,7 +5,6 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameState;
-import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.PlaceTile;
@@ -60,10 +59,12 @@ public class TMGUI extends AbstractGUIManager {
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
 
     TMAction lastAction;
-    TMTurnOrder turnOrder;
+    int lastTick = -1;
 
     public TMGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
+        // start on a human player's own cards
+        focusPlayer = humanPlayerIds.stream().min(Integer::compare).orElse(0);
         if (game == null) return;
 
         // Make backgroundImage the content pane.
@@ -86,7 +87,7 @@ public class TMGUI extends AbstractGUIManager {
             }
         });
 
-        actionMenus = new HashMap<>();
+        actionMenus = new LinkedHashMap<>();
         JMenuBar menuBar = new JMenuBar();
         menuBar.setBackground(bgColor);
         int mnemonicStart = KeyEvent.VK_A;
@@ -111,7 +112,7 @@ public class TMGUI extends AbstractGUIManager {
             //Handle exception
         }
 
-        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2, new HashSet<>());
+        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2, new LinkedHashSet<>());
         historyInfo.setFont(defaultFont);
         historyInfo.setForeground(fontColor);
         JPanel historyWrapper = new JPanel();
@@ -226,7 +227,7 @@ public class TMGUI extends AbstractGUIManager {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(fontColor);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null, null, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false, null, null, null);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
@@ -534,11 +535,10 @@ public class TMGUI extends AbstractGUIManager {
 
             if (player instanceof HumanGUIPlayer) {
                 TMAction action = (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1).b;
-                TMTurnOrder turnOrder = (TMTurnOrder) gs.getTurnOrder();
-                if (!action.equals(lastAction) || !turnOrder.equals(this.turnOrder)) {
+                if (!action.equals(lastAction) || gs.getGameTick() != lastTick) {
                     createActionMenu(player, (TMGameState) gameState);
                     this.lastAction = action.copy();
-                    this.turnOrder = (TMTurnOrder) turnOrder.copy();
+                    this.lastTick = gs.getGameTick();
                 }
             } else {
                 resetActionButtons();
@@ -553,10 +553,17 @@ public class TMGUI extends AbstractGUIManager {
 
             view.update(gs);
             playerView.update(gs);
-            playerHand.update(gs.getPlayerHands()[focusPlayer], false);
+            // another player's hand and card choice are hidden (shown as a count) unless allowed
+            boolean showHand = showHiddenInfo(gs, focusPlayer);
+            Deck<TMCard> hand = gs.getPlayerHands()[focusPlayer];
             Deck<TMCard> deck = gs.getPlayerCardChoice()[focusPlayer];
+            playerHand.update(showHand ? hand : hiddenDeck(), false);
+            paneHand.setToolTipText(showHand ? null : "Player " + focusPlayer + "'s hand is hidden: " + hand.getSize() + " cards");
             playerCardChoice.clearHighlights();
-            playerCardChoice.update(deck, gs.allCorpChosen() && deck.getSize() > 0);
+            playerCardChoice.update(showHand ? deck : hiddenDeck(), showHand && gs.allCorpChosen() && deck.getSize() > 0);
+            paneCardChoice.setToolTipText(showHand ? null : "Player " + focusPlayer + "'s card choice is hidden: " + deck.getSize() + " cards");
+            focusPlayerButton.setText("Current player: " + currentPlayerIdx
+                    + (showHand ? "" : "  (p" + focusPlayer + " hand hidden: " + hand.getSize() + " cards)"));
 
             // Display points and resource cards, + most recent card played
             if (gs.getPlayedCards()[focusPlayer].getSize() > 0) {
@@ -571,6 +578,10 @@ public class TMGUI extends AbstractGUIManager {
 
         }
         parent.repaint();
+    }
+
+    private static Deck<TMCard> hiddenDeck() {
+        return new Deck<>("Hidden", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
     }
 
     private Image getScaledImage(Image srcImg, int w, int h){

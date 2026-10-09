@@ -5,6 +5,8 @@ import core.components.Component;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
+import java.util.Comparator;
 
 
 public abstract class DeckView<T extends Component> extends ComponentView {
@@ -16,7 +18,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     protected Rectangle[] rects;
     // Rectangle containing the DeckView
     protected Rectangle rect;
-    // Index of card highlighted
+    // Index in the deck of the card highlighted
     protected int cardHighlight = -1;  // left click (or ALT+hover) show card, right click back in deck
     // If currently highlighting (ALT)
     protected boolean highlighting;
@@ -25,6 +27,14 @@ public abstract class DeckView<T extends Component> extends ComponentView {
 
     // card and display sizes
     protected int itemWidth, itemHeight;
+
+    // Order in which to lay out the cards when the deck is face-up (null: deck order). Display only.
+    protected Comparator<? super T> displayOrder;
+    // Deck indices in the order last drawn, left to right
+    protected int[] drawnOrder = new int[0];
+    // Overlapping cards: false puts the leftmost on top (a pile, whose top card is index 0); true puts the
+    // rightmost on top (a fanned hand, where each card's top-left corner index stays visible)
+    protected boolean rightmostOnTop;
 
     public DeckView(int humanPlayer, Deck<T> d, boolean visible, int componentWidth, int componentHeight) {
         this(humanPlayer, d, visible, componentWidth, componentHeight, new Rectangle(0, 0, componentWidth, componentHeight));
@@ -62,12 +72,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (highlighting) {
-                    for (int i = 0; i < rects.length; i++) {
-                        if (rects[i].contains(e.getPoint())) {
-                            cardHighlight = i;
-                            break;
-                        }
-                    }
+                    cardHighlight = cardAt(e.getPoint(), cardHighlight);
                 }
             }
         });
@@ -76,12 +81,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == 1 && rects != null) {
                     // Left click, highlight
-                    for (int i = 0; i < rects.length; i++) {
-                        if (rects[i].contains(e.getPoint())) {
-                            cardHighlight = i;
-                            break;
-                        }
-                    }
+                    cardHighlight = cardAt(e.getPoint(), cardHighlight);
                 } else {
                     // Other click, reset highlight
                     cardHighlight = -1;
@@ -98,16 +98,17 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     public void drawDeck(Graphics2D g) {
         @SuppressWarnings("unchecked") Deck<T> deck = (Deck<T>) component;
         if (deck != null && deck.getSize() > 0) {
-            // Draw cards, 0 index on top
+            // Draw cards, the leftmost on top unless rightmostOnTop
             int offset = Math.max((rect.width - itemWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
-            for (int i = deck.getSize() - 1; i >= 0; i--) {
-                if (i < deck.getSize()) {
-                    T card = deck.get(i);
-                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, itemWidth, itemHeight);
-                    rects[i] = r;
-                    drawComponent(g, r, card, front || componentVisibility(deck, i));
-                }
+            drawnOrder = displayIndices(deck);
+            for (int n = 0; n < deck.getSize(); n++) {
+                int pos = rightmostOnTop ? n : deck.getSize() - 1 - n;
+                int i = drawnOrder[pos];
+                T card = deck.get(i);
+                Rectangle r = new Rectangle(rect.x + offset * pos, rect.y, itemWidth, itemHeight);
+                rects[i] = r;
+                drawComponent(g, r, card, front || componentVisibility(deck, i));
             }
             if (cardHighlight != -1) {
                 // Draw this one on top
@@ -126,6 +127,75 @@ public abstract class DeckView<T extends Component> extends ComponentView {
 //            }
             if (!front) g.drawString("" + deck.getSize(), rect.x + 10, rect.y + rect.height - size);
         }
+    }
+
+    /**
+     * The deck indices in the order the cards are laid out, left to right. This is the deck order, unless a display
+     * order is set and the whole deck is face-up: sorting a partly hidden deck would reveal something about the
+     * hidden cards from where they fall among the visible ones.
+     */
+    protected int[] displayIndices(Deck<T> deck) {
+        Integer[] order = new Integer[deck.getSize()];
+        for (int i = 0; i < order.length; i++) order[i] = i;
+        if (displayOrder != null && front)
+            Arrays.sort(order, Comparator.comparing(deck::get, displayOrder));
+        return Arrays.stream(order).mapToInt(Integer::intValue).toArray();
+    }
+
+    /**
+     * The deck index of the topmost card drawn at point p, or {@code otherwise} if there is none.
+     */
+    private int cardAt(Point p, int otherwise) {
+        if (rects == null) return otherwise;
+        for (int n = 0; n < drawnOrder.length; n++) {
+            int i = drawnOrder[rightmostOnTop ? drawnOrder.length - 1 - n : n];
+            if (i < rects.length && rects[i] != null && rects[i].contains(p))
+                return i;
+        }
+        return otherwise;
+    }
+
+    /**
+     * The deck index of the topmost card drawn at point p, or -1 if there is none (as last drawn).
+     */
+    public int cardIndexAt(Point p) {
+        return cardAt(p, -1);
+    }
+
+    /**
+     * The part of the card at this deck index that was left showing when the deck was last drawn: its rectangle less
+     * the cards drawn on top of it. Null if it was not drawn.
+     */
+    public Shape visibleCardShape(int index) {
+        if (rects == null || index < 0 || index >= rects.length || rects[index] == null) return null;
+        java.awt.geom.Area shape = new java.awt.geom.Area(rects[index]);
+        int pos = -1;
+        for (int n = 0; n < drawnOrder.length; n++)
+            if (drawnOrder[n] == index) pos = n;
+        // the cards drawn after this one, which overlap it
+        for (int n = 0; n < drawnOrder.length; n++) {
+            boolean onTop = rightmostOnTop ? n > pos : n < pos;
+            int other = drawnOrder[n];
+            if (onTop && other < rects.length && rects[other] != null)
+                shape.subtract(new java.awt.geom.Area(rects[other]));
+        }
+        return shape;
+    }
+
+    /**
+     * Lay out the cards in this order when the deck is face-up (e.g. {@link FrenchCard#HAND_DISPLAY_ORDER} for a
+     * hand). Null for deck order. This affects display only.
+     */
+    public void setDisplayOrder(Comparator<? super T> displayOrder) {
+        this.displayOrder = displayOrder;
+    }
+
+    /**
+     * True for a fanned hand: each card overlaps the one to its left, so the index in every card's top-left corner
+     * stays visible. False (the default) for a pile, where the leftmost card (index 0, the top) is drawn on top.
+     */
+    public void setRightmostOnTop(boolean rightmostOnTop) {
+        this.rightmostOnTop = rightmostOnTop;
     }
 
     public boolean componentVisibility(Deck<T> deck, int index) {

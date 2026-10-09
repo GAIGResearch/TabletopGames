@@ -133,7 +133,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true, null, null, null);
                 actionPanel.setOpaque(false);
 
                 main.add(infoPanel, BorderLayout.NORTH);
@@ -188,34 +188,6 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
         return wrapper;
     }
 
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setOpaque(false);
-        if (boxLayout) {
-            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
-        }
-
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights);
-            actionButtons[i] = ab;
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.informAllActionButtons(actionButtons);
-        }
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
-        return pane;
-    }
-
     IGamePhase currentGamePhase;
 
     @Override
@@ -248,10 +220,9 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 }
             }
             plannedActions.updateComponent(cegs.getPlannedActions());
-            int activePlayer = player != null? (gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer ||
-                    gameState.getCoreGameParameters().alwaysDisplayFullObservable? player.getPlayerID():
-                    humanPlayerIds.contains(player.getPlayerID())? player.getPlayerID():-1) : -1;
-            plannedActions.informActivePlayer(activePlayer);
+            // planned cards are drawn as the viewing (human) player sees them, or all in full-observability mode
+            plannedActions.informActivePlayer(viewingPlayer(gameState));
+            plannedActions.setFront(gameState.getCoreGameParameters().alwaysDisplayFullObservable);
 
             // Show planned actions from the first played
             plannedActions.setFirstOnTop(gameState.getGamePhase() == ExecuteActions);

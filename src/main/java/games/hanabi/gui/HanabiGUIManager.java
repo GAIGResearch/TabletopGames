@@ -40,8 +40,6 @@ public class HanabiGUIManager extends AbstractGUIManager {
 
     // Currently active player
     int activePlayer = -1;
-    // ID of human player
-    int humanID;
 
     // Border highlight of active player
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
@@ -116,7 +114,7 @@ public class HanabiGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Hanabi", gameState, width, defaultInfoPanelHeight+50);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true, null, null, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());
@@ -193,15 +191,9 @@ public class HanabiGUIManager extends AbstractGUIManager {
             // Update decks and visibility
             HanabiGameState ugs = (HanabiGameState)gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                playerHands[i].update((HanabiGameState) gameState);
-                if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanID
-                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
-                    playerHands[i].playerHandView.setFront(true);
-                    playerHands[i].setFocusable(true);
-                } else {
-                    playerHands[i].playerHandView.setFront(false);
-                }
+                // each hand is drawn as the viewing player knows it: others' hands in full, their own from hints
+                playerHands[i].update((HanabiGameState) gameState, viewingPlayer(gameState),
+                        gameState.getCoreGameParameters().alwaysDisplayFullObservable);
 
                 // Highlight active player
                 if (i == gameState.getCurrentPlayer()) {

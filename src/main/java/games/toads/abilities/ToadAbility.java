@@ -51,4 +51,11 @@ public interface ToadAbility {
         return List.of();
     }
 
+    /**
+     * False if a Block (e.g. a Bodyguard) has no effect on the card's Tactics.
+     */
+    default boolean canBeBlocked() {
+        return true;
+    }
+
 }

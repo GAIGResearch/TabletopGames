@@ -17,6 +17,8 @@ import javax.swing.Timer;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 import java.util.*;
@@ -53,15 +55,19 @@ public class Frontend extends GUI {
 
         JPanel gameSelect = new JPanel(new BorderLayout(5, 5));
         gameSelect.add(BorderLayout.WEST, new JLabel("  Game type:"));
-        String[] gameNames = new String[GameType.values().length];
+        // listed alphabetically, not in enum order; every per-game array below is indexed by position in this list
+        GameType[] gameTypes = Arrays.stream(GameType.values())
+                .sorted(Comparator.comparing(gt -> gt.name().toLowerCase()))
+                .toArray(GameType[]::new);
+        String[] gameNames = new String[gameTypes.length];
         TunableParameters[] gameParameters = new TunableParameters[GameType.values().length];
         gameParameterEditWindow = new JFrame[GameType.values().length];
         // Keep a handle on the parameter combo-boxes per game, so a loaded game state can update them
         @SuppressWarnings("unchecked")
         HashMap<String, JComboBox<Object>>[] gameParamValueOptions = new HashMap[GameType.values().length];
         for (int i = 0; i < gameNames.length; i++) {
-            gameNames[i] = GameType.values()[i].name();
-            AbstractParameters params = GameType.values()[i].createParameters(0);
+            gameNames[i] = gameTypes[i].name();
+            AbstractParameters params = gameTypes[i].createParameters(0);
             if (params instanceof TunableParameters) {
                 gameParameters[i] = (TunableParameters) params;
                 gameParameterEditWindow[i] = new JFrame();
@@ -485,6 +491,13 @@ public class Frontend extends GUI {
 
         // Frame properties
         setFrameProperties();
+        // Closing the main window ends the program (the game thread and AWT threads would otherwise keep the JVM alive)
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                System.exit(0);
+            }
+        });
     }
 
     public static void main(String[] args) {
@@ -668,8 +681,7 @@ public class Frontend extends GUI {
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
         AbstractGameState gameState = gameRunning.getGameState().copy();
-        int currentPlayer = gameState.getCurrentPlayer();
-        AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
+        AbstractPlayer player = gameRunning.getPlayers().get(gameRunning.getPlayerToMove());
         if (gui != null) {
             gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
             if (!gameRunning.isHumanToMove() && paused && showAll) {

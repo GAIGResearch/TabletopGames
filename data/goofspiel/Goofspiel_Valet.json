@@ -1,0 +1,6 @@
+{
+  "class": "games.goofspiel.GoofspielParameters",
+  "cardsPerSuit": 13,
+  "aceHigh": false,
+  "tieRule": "CARRY_OVER"
+}

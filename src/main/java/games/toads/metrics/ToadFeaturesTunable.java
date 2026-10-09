@@ -39,6 +39,7 @@ public class ToadFeaturesTunable extends TunableStateFeatures {
         features[0] = state.getGameTick();
         features[1] = state.getGamePhase() == ToadConstants.ToadGamePhase.PLAY ? 0
                 : state.getGamePhase() == ToadConstants.ToadGamePhase.DISCARD ? 1
+                : state.getGamePhase() == ToadConstants.ToadGamePhase.OPENING_RETURN ? 3
                 : 2;
         int round = state.getRoundCounter();
         features[2] = state.getTurnCounter();

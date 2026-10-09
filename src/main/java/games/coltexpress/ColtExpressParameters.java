@@ -36,7 +36,7 @@ public class ColtExpressParameters extends TunableParameters {
     public int playerHandShuffleSeed = -1;
 
     // How many cards of each type are in a player's deck, total minimum nCardsInHand + nCardsInHandExtraDoc
-    public HashMap<ColtExpressCard.CardType, Integer> cardCounts = new HashMap<ColtExpressCard.CardType, Integer>() {{
+    public HashMap<ColtExpressCard.CardType, Integer> cardCounts = new LinkedHashMap<ColtExpressCard.CardType, Integer>() {{
         put(ColtExpressCard.CardType.MoveSideways, 2);
         put(ColtExpressCard.CardType.MoveVertical, 2);
         put(ColtExpressCard.CardType.Punch, 1);
@@ -75,27 +75,27 @@ public class ColtExpressParameters extends TunableParameters {
 
     // Configurations of train compartments available for the game. Values for loot are randomly chosen from those available
     public ArrayList<HashMap<ColtExpressTypes.LootType, Integer>> trainCompartmentConfigurations = new ArrayList<HashMap<ColtExpressTypes.LootType, Integer>>() {{
-        add(new HashMap<ColtExpressTypes.LootType, Integer>() {{
+        add(new LinkedHashMap<ColtExpressTypes.LootType, Integer>() {{
             put(Purse, 1);
         }});
-        add(new HashMap<ColtExpressTypes.LootType, Integer>() {{
+        add(new LinkedHashMap<ColtExpressTypes.LootType, Integer>() {{
             put(Purse, 2);
         }});
-        add(new HashMap<ColtExpressTypes.LootType, Integer>() {{
+        add(new LinkedHashMap<ColtExpressTypes.LootType, Integer>() {{
             put(Purse, 3);
         }});
-        add(new HashMap<ColtExpressTypes.LootType, Integer>() {{
+        add(new LinkedHashMap<ColtExpressTypes.LootType, Integer>() {{
             put(Purse, 1);
             put(ColtExpressTypes.LootType.Jewel, 1);
         }});
-        add(new HashMap<ColtExpressTypes.LootType, Integer>() {{
+        add(new LinkedHashMap<ColtExpressTypes.LootType, Integer>() {{
             put(Purse, 4);
             put(ColtExpressTypes.LootType.Jewel, 1);
         }});
-        add(new HashMap<ColtExpressTypes.LootType, Integer>() {{
+        add(new LinkedHashMap<ColtExpressTypes.LootType, Integer>() {{
             put(ColtExpressTypes.LootType.Jewel, 3);
         }});
-        add(new HashMap<ColtExpressTypes.LootType, Integer>() {{  // Locomotive
+        add(new LinkedHashMap<ColtExpressTypes.LootType, Integer>() {{  // Locomotive
             put(ColtExpressTypes.LootType.Strongbox, 1);
         }});
     }};
@@ -111,7 +111,7 @@ public class ColtExpressParameters extends TunableParameters {
     // Loot types available for the game. Each type has a list of pairs:
     // - a: what value
     // - b: how many of this type/value combination
-    public HashMap<ColtExpressTypes.LootType, ArrayList<Pair<Integer, Integer>>> loot = new HashMap<ColtExpressTypes.LootType, ArrayList<Pair<Integer, Integer>>>() {{
+    public HashMap<ColtExpressTypes.LootType, ArrayList<Pair<Integer, Integer>>> loot = new LinkedHashMap<ColtExpressTypes.LootType, ArrayList<Pair<Integer, Integer>>>() {{
         put(Purse, new ArrayList<Pair<Integer, Integer>>() {{
             add(new Pair<>(250, 8));
             add(new Pair<>(300, 2));
@@ -176,19 +176,19 @@ public class ColtExpressParameters extends TunableParameters {
         cep.shooterReward = shooterReward;
         cep.nCardsDraw = nCardsDraw;
         cep.nRoofMove = nRoofMove;
-        cep.cardCounts = new HashMap<>(cardCounts);
+        cep.cardCounts = new LinkedHashMap<>(cardCounts);
         cep.characterTypes = characterTypes.clone();
         cep.endRoundCards = endRoundCards.clone();
         cep.roundCards = roundCards.clone();
         cep.trainCompartmentConfigurations = new ArrayList<>();
         for (HashMap<ColtExpressTypes.LootType, Integer> a: trainCompartmentConfigurations) {
-            cep.trainCompartmentConfigurations.add(new HashMap<>(a));
+            cep.trainCompartmentConfigurations.add(new LinkedHashMap<>(a));
         }
         cep.playerStartLoot = new ArrayList<>();
         for (Group<ColtExpressTypes.LootType, Integer, Integer> g: playerStartLoot) {
             cep.playerStartLoot.add(new Group<>(g.a, g.b, g.c));
         }
-        cep.loot = new HashMap<>();
+        cep.loot = new LinkedHashMap<>();
         for (Map.Entry<ColtExpressTypes.LootType, ArrayList<Pair<Integer, Integer>>> e: loot.entrySet()) {
             ArrayList<Pair<Integer, Integer>> values = new ArrayList<>();
             for (Pair<Integer, Integer> p: e.getValue()) {

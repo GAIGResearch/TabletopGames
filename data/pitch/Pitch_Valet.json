@@ -1,0 +1,15 @@
+{
+  "class": "games.pitch.PitchParameters",
+  "targetScore": 1,
+  "handSize": 6,
+  "minBid": 2,
+  "smudgeBid": 5,
+  "smudgePoints": 5,
+  "countHighLowSeparately": false,
+  "gameValueAce": 4,
+  "gameValueKing": 3,
+  "gameValueQueen": 2,
+  "gameValueJack": 1,
+  "gameValueTen": 10,
+  "rememberVoids": true
+}

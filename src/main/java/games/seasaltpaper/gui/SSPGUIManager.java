@@ -70,7 +70,7 @@ public class SSPGUIManager extends AbstractGUIManager {
         mainGameArea.add(drawDiscardPanel, BorderLayout.CENTER);
 
         JPanel infoPanel = createGameStateInfoPanel("Sea Salt and Paper", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true, null, null, null);
 
 //        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + 20));
         parent.setLayout(new BorderLayout());
@@ -90,5 +90,9 @@ public class SSPGUIManager extends AbstractGUIManager {
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+        for (int i = 0; i < playerViews.length; i++) {
+            playerViews[i].playerHandView.setFront(showHiddenInfo(gameState, i));
+            playerViews[i].repaint();
+        }
     }
 }

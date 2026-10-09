@@ -7,7 +7,7 @@ import core.actions.AbstractAction;
 import games.spades.SpadesGameState;
 import games.spades.SpadesParameters;
 import games.spades.actions.Bid;
-import games.spades.actions.PlayCard;
+import games.tricktaking.PlayCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -148,7 +148,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
         JPanel infoPanel = createGameStateInfoPanel("Spades", gameState, WINDOW_WIDTH, defaultInfoPanelHeight);
         
         // Action panel at bottom
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], WINDOW_WIDTH, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], WINDOW_WIDTH, defaultActionPanelHeight);
         
         mainPanel.add(infoPanel, BorderLayout.NORTH);
         mainPanel.add(gameArea, BorderLayout.CENTER);
@@ -233,7 +233,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
                 if (playerViews[i] != null) {
                     playerViews[i].setDeck(this.gameState.getPlayerHands().get(i));
                     // Show cards for human players
-                    playerViews[i].setVisible(humanPlayerIds.contains(i) || i == 0); // Always show player 0 for demo
+                    playerViews[i].setVisible(showHiddenInfo(this.gameState, i));
                 }
             }
         }
@@ -283,8 +283,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
                 } else {
                     button.setText("Bid " + bidAction.bidAmount);
                 }
-            } else if (action instanceof PlayCard) {
-                PlayCard playAction = (PlayCard) action;
+            } else if (action instanceof PlayCard<?> playAction) {
                 button.setText("Play " + playAction.card.toString());
             } else {
                 button.setText(action.toString());

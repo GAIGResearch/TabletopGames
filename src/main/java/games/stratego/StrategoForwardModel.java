@@ -98,7 +98,7 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END || currentState.isActionInProgress()){
+        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END) {
             return;
         }
 

@@ -83,8 +83,6 @@ public class DominionForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DominionGameState state = (DominionGameState) currentState;
 
-        if (state.isActionInProgress()) return;
-
         // Fix for an edge case where players have trashed all their cards with Chapel
         // And the game goes into an infinite loop of players not being able to do anything
         for (PartialObservableDeck<DominionCard> deck : state.playerHands) {

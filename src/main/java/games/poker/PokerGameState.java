@@ -230,16 +230,26 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         return false;
     }
 
+    /**
+     * The round is over once no player has a decision left to make: either no-one can act (all others have
+     * Folded or are AllIn), or only one player can, and they have already matched the biggest bet of those AllIn.
+     * A player who is left to face an AllIn bigger than their own bet still gets to Call or Fold.
+     */
     public boolean isRoundOver() {
         int stillAlive = 0;
+        int lastAlive = -1;
+        int biggestAllIn = 0;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (getPlayerResults()[i] != LOSE_GAME && !playerFold[i] && !playerAllIn[i]) {
+            if (getPlayerResults()[i] == LOSE_GAME || playerFold[i]) continue;
+            if (playerAllIn[i]) {
+                biggestAllIn = Math.max(biggestAllIn, playerBet[i].getValue());
+            } else {
                 stillAlive++;
+                lastAlive = i;
             }
         }
-        if (stillAlive <= 1) {
-            return true;
-        }
+        if (stillAlive == 0) return true;
+        if (stillAlive == 1) return playerBet[lastAlive].getValue() >= biggestAllIn;
         return false;
     }
 

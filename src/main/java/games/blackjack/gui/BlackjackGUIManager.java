@@ -1,11 +1,17 @@
 package games.blackjack.gui;
 
-import gui.*;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.components.Deck;
+import core.components.FrenchCard;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
+import gui.IScreenHighlight;
+import gui.views.RulesView;
+import gui.views.CardView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -16,234 +22,237 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Set;
 
+/**
+ * <p>GUI for Blackjack: the dealer at the top of the table, and the players in a row (or two) below.</p>
+ *
+ * <p>This is a view only - it holds no rules and never changes the state. Every player's cards are dealt face up,
+ * so they are always shown; the dealer's hole card is face down until it is turned up (or in full-observability
+ * mode).</p>
+ */
 public class BlackjackGUIManager extends AbstractGUIManager {
-    final static int playerWidth = 300;
-    final static int playerHeight = 130;
-    final static int cardWidth = 90;
-    final static int cardHeight = 115;
 
-    int width, height;
-    BlackjackPlayerView[] playerHands;
+    static final String dataPath = "data/FrenchCards/";
+    static final int cardWidth = 60;
+    static final int cardHeight = 80;
+    // the horizontal step between overlapping cards of one hand
+    static final int cardOffset = 20;
+    static final int playersPerRow = 4;
 
-    int activePlayer = -1;
+    BlackjackDealerView dealerView;
+    BlackjackPlayerView[] playerViews;
+    TitledBorder[] playerTitles;
+    String[] agentNames;
 
-    Border highlightActive = BorderFactory.createLineBorder(new Color(47,132,220), 3);
-    Border[] playerViewBorders;
+    final Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
 
-    public BlackjackGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
-        super(parent, game, ac, humanID);
+    public BlackjackGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
+        super(parent, game, ac, human);
+        if (game == null) return;
+        AbstractGameState gameState = game.getGameState();
+        if (gameState == null) return;
 
+        BlackjackGameState state = (BlackjackGameState) gameState;
+        BlackjackParameters params = (BlackjackParameters) state.getGameParameters();
+        int nPlayers = state.getNPlayers();
+        // getMaxActionSpace is called by the super constructor, before the parameters are known
+        maxActionSpace = maxActions(params);
+
+        dealerView = new BlackjackDealerView();
+        playerViews = new BlackjackPlayerView[nPlayers];
+        playerTitles = new TitledBorder[nPlayers];
+        agentNames = new String[nPlayers];
+
+        JPanel players = new JPanel(new GridLayout(0, Math.min(nPlayers, playersPerRow), 6, 6));
+        players.setOpaque(false);
+        for (int i = 0; i < nPlayers; i++) {
+            playerViews[i] = new BlackjackPlayerView(i, params.splitting);
+            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
+            agentNames[i] = split[split.length - 1];
+            playerTitles[i] = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                    "Player " + i, TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
+            playerViews[i].setBorder(playerTitles[i]);
+            players.add(playerViews[i]);
+        }
+
+        JPanel table = new JPanel();
+        table.setOpaque(false);
+        table.setLayout(new BoxLayout(table, BoxLayout.Y_AXIS));
+        JPanel dealerRow = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        dealerRow.setOpaque(false);
+        dealerRow.add(dealerView);
+        JPanel playersRow = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        playersRow.setOpaque(false);
+        playersRow.add(players);
+        table.add(dealerRow);
+        table.add(playersRow);
+
+        int rows = (nPlayers + playersPerRow - 1) / playersPerRow;
+        Dimension playerSize = playerViews[0].getPreferredSize();
+        // each player area has its titled border below it, and each row the grid and flow gaps
+        this.width = Math.max(dealerView.getPreferredSize().width,
+                Math.min(nPlayers, playersPerRow) * (playerSize.width + 16)) + 40;
+        this.height = dealerView.getPreferredSize().height + rows * (playerSize.height + 36) + 40;
+
+        parent.setBackground(ImageIO.GetInstance().getImage(dataPath + "table-background.jpg"));
+        // without these the tabbed pane's content area paints over the parent's background image
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
         UIManager.put("TabbedPane.tabsOpaque", false);
 
-        if (game != null){
-            AbstractGameState gameState = game.getGameState();
-            if (gameState != null){
-                JTabbedPane pane = new JTabbedPane();
-                JPanel main = new JPanel();
-                main.setOpaque(false);
-                main.setLayout(new BorderLayout());
-                JPanel rules = new JPanel();
-                pane.add("Main", main);
-                pane.add("Rules", rules);
-                JLabel ruleText = new JLabel(getRuleText());
-                rules.add(ruleText);
-                rules.setBackground(new Color(43, 108, 25, 111));
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.setOpaque(false);
+        JPanel main = new JPanel(new BorderLayout());
+        main.setOpaque(false);
+        tabs.add("Game", main);
+        tabs.add("Rules", new RulesView(rulesHtml(params), height));
 
-                activePlayer = gameState.getCurrentPlayer();
+        JPanel infoPanel = createGameStateInfoPanel("Blackjack", gameState, width, defaultInfoPanelHeight);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
+        main.add(infoPanel, BorderLayout.NORTH);
+        main.add(table, BorderLayout.CENTER);
+        main.add(actionPanel, BorderLayout.SOUTH);
 
-                int nPlayers = gameState.getNPlayers();
-                int nHorizAreas = 1 + (nPlayers <= 3 ? 2 : nPlayers == 4 ? 3 : nPlayers <= 8 ? 4 : 5);
-                double nVertAreas = 3.5;
-                this.width = playerWidth * nHorizAreas;
-                this.height = (int) (playerHeight* nVertAreas);
-                ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
-
-                BlackjackGameState bjgs = (BlackjackGameState) gameState;
-                BlackjackParameters bjgp = (BlackjackParameters) gameState.getGameParameters();
-
-                parent.setBackground(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"));
-
-                playerHands = new BlackjackPlayerView[nPlayers];
-                playerViewBorders = new Border[nPlayers];
-                JPanel mainGameArea = new JPanel();
-                mainGameArea.setOpaque(false);
-                mainGameArea.setLayout(new BorderLayout());
-
-                String[] locations = new String[]{BorderLayout.NORTH, BorderLayout.EAST, BorderLayout.SOUTH, BorderLayout.WEST};
-                JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
-                int next = 0;
-                for (int i = 0; i < nPlayers; i++) {
-                    BlackjackPlayerView playerHand = new BlackjackPlayerView(bjgs.getPlayerDecks().get(i), i, bjgp.getDataPath());
-                    playerHand.setOpaque(false);
-
-                    // Get agent name
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
-
-                    // Create border, layouts and keep track of this view
-                    TitledBorder title;
-                    if (i == bjgs.getDealerPlayer()) {
-                        title = BorderFactory.createTitledBorder(
-                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "DEALER [" + agentName + "]",
-                                TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
-                    } else {
-                        title = BorderFactory.createTitledBorder(
-                                BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i + " [" + agentName + "]",
-                                TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
-                    }
-                    playerViewBorders[i] = title;
-                    playerHand.setBorder(title);
-
-                    sides[next].add(playerHand);
-                    sides[next].setLayout(new GridBagLayout());
-                    sides[next].setOpaque(false);
-                    next = (next + 1) % (locations.length);
-                    playerHands[i] = playerHand;
-                }
-                for (int i = 0; i < locations.length; i++) {
-                    mainGameArea.add(sides[i], locations[i]);
-                }
-
-                // Top area will show state information
-                JPanel infoPanel = createGameStateInfoPanel("Blackjack", gameState, width, defaultInfoPanelHeight);
-                // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
-
-                // Add all views to frame
-                main.add(mainGameArea, BorderLayout.CENTER);
-                main.add(infoPanel, BorderLayout.NORTH);
-                main.add(actionPanel, BorderLayout.SOUTH);
-
-                pane.add("Main", main);
-                pane.add("Rules", rules);
-
-                parent.setLayout(new BorderLayout());
-                parent.add(pane, BorderLayout.CENTER);
-                parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20));
-                parent.revalidate();
-                parent.setVisible(true);
-                parent.repaint();
-            }
-        }
+        parent.setLayout(new BorderLayout());
+        parent.add(tabs, BorderLayout.CENTER);
+        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + 40));
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
     }
 
+    /**
+     * The most actions at one decision: Betting offers every even amount from minBet to maxBet (if the player has
+     * the chips), Insurance offers 2, and Play at most 4 (Hit, Stand, DoubleDown, Split).
+     */
+    static int maxActions(BlackjackParameters params) {
+        return Math.max(4, (params.maxBet - params.minBet) / 2 + 1);
+    }
+
+    /**
+     * Called by the super constructor before the parameters are available, so this covers the largest maxBet that
+     * BlackjackParameters offers (50); the constructor then sets the exact figure from the game's parameters.
+     */
     @Override
     public int getMaxActionSpace() {
-        return 15;
-    }
-
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setOpaque(false);
-        if (boxLayout) {
-            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
-        }
-
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights);
-            actionButtons[i] = ab;
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.informAllActionButtons(actionButtons);
-        }
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
-        return pane;
-    }
-
-    @Override
-    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
-        JPanel gameInfo = new JPanel();
-        gameInfo.setOpaque(false);
-        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
-        gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
-
-        updateGameStateInfo(gameState);
-
-        gameInfo.add(gameStatus);
-        gameInfo.add(playerStatus);
-        gameInfo.add(playerScores);
-        gameInfo.add(gamePhase);
-        gameInfo.add(turn);
-        gameInfo.add(currentPlayer);
-
-        gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
-
-        JPanel wrapper = new JPanel();
-        wrapper.setOpaque(false);
-        wrapper.setLayout(new FlowLayout());
-        wrapper.add(gameInfo);
-
-        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
-        historyContainer = new JScrollPane(historyInfo);
-        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
-        wrapper.add(historyContainer);
-        historyInfo.setOpaque(false);
-        historyContainer.setOpaque(false);
-        historyContainer.getViewport().setBackground(new Color(43, 108, 25, 111));
-//        historyContainer.getViewport().setOpaque(false);
-        historyInfo.setEditable(false);
-        return wrapper;
+        return (50 - 2) / 2 + 1;
     }
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState != null) {
-            if (gameState.getCurrentPlayer() != activePlayer) {
-                playerHands[activePlayer].setCardHighlight(-1);
-                activePlayer = gameState.getCurrentPlayer();
-            }
-
-            // Update decks and visibility
-            BlackjackGameState bjgs = (BlackjackGameState) gameState;
-            for (int i = 0; i < gameState.getNPlayers(); i++) {
-                playerHands[i].update(bjgs);
-
-                // Highlight active player
-                if (i == gameState.getCurrentPlayer()) {
-                    Border compound = BorderFactory.createCompoundBorder(
-                            highlightActive, playerViewBorders[i]);
-                    playerHands[i].setBorder(compound);
-                } else {
-                    playerHands[i].setBorder(playerViewBorders[i]);
-                }
-            }
+        if (!(gameState instanceof BlackjackGameState state)) return;
+        int currentPlayer = state.getCurrentPlayer();
+        dealerView.update(state, state.getCoreGameParameters().alwaysDisplayFullObservable);
+        for (int i = 0; i < playerViews.length; i++) {
+            playerViews[i].update(state);
+            String result = state.isNotTerminal() ? "" : " - " + state.getPlayerResults()[i];
+            playerTitles[i].setTitle("Player " + i + " [" + agentNames[i] + "]" + result);
+            playerViews[i].setBorder(i == currentPlayer && state.isNotTerminal()
+                    ? BorderFactory.createCompoundBorder(highlightActive, playerTitles[i])
+                    : playerTitles[i]);
         }
+        parent.repaint();
     }
 
-    private String getRuleText() {
-        String rules = "<html><center><h1>Blackjack</h1></center><br/><hr><br/>";
-        rules += "<p>Players are each dealt 2 cards face up. The dealer is also dealt 2 cards, one up (exposed) and one down (hidden). " +
-                "The value of number cards 2 through 10 is their pip value (2 through 10). " +
-                "Face cards (jack, queen, and king) are all worth 10. " +
-                "Aces can be worth 1 or 11. A hand's value is the sum of the card values. Players are allowed to draw additional cards to improve their hands. " +
-                "A hand with an ace valued as 11 is called \"soft\", meaning that the hand will be guaranteed to not score more than 21 by taking an additional card. The value of the ace will become 1 to prevent the hand from exceeding 21. Otherwise, the hand is called \"hard\".\n" +
-                "</p><br/><p>" +
-                "Once all the players have completed their hands, it is the dealer's turn. The dealer hand will not be completed if all players have either exceeded the total of 21 or received blackjacks. The dealer then reveals the hidden card and must draw cards, one by one, until the cards total up to 17 points. " +
-                "At 17 points or higher the dealer must stop. " +
-                "The better hand is the hand where the sum of the card values is closer to 21 without exceeding 21. The detailed outcome of the hand follows:" +
-                "</p><br/><ul><li>" +
-                "If the player is dealt an ace and a ten-value card (called a \"blackjack\" or \"natural\"), and the dealer does not, the player wins." +
-                "</li><li>If the player exceeds a sum of 21 (\"busts\"), the player loses, even if the dealer also exceeds 21." +
-                "</li><li>If the dealer exceeds 21 (\"busts\") and the player does not, the player wins." +
-                "</li><li>If the player attains a final sum higher than the dealer and does not bust, the player wins." +
-                "</li><li>If both dealer and player receive a blackjack or any other hands with the same sum, this will be called a \"push\" and no one wins.</li></ul>";
+    /**
+     * Draw a hand in the order the cards were dealt, overlapping left to right. Deck.add puts each new card at
+     * index 0, so the first card dealt is the last in the Deck. A {@code hole} card (the dealer's), if given,
+     * follows them, face up only if {@code showHole}. Cards are {@code maxStep} apart, or closer if needed to fit
+     * {@code maxWidth}.
+     */
+    static void drawHand(Graphics2D g, Deck<FrenchCard> hand, int x, int y, int maxWidth, int maxStep,
+                         FrenchCard hole, boolean showHole) {
+        int n = hand.getSize() + (hole == null ? 0 : 1);
+        if (n == 0) return;
+        int step = n == 1 ? 0 : Math.min(maxStep, (maxWidth - cardWidth) / (n - 1));
+        int i = 0;
+        for (int c = hand.getSize() - 1; c >= 0; c--, i++)
+            drawCard(g, hand.get(c), new Rectangle(x + i * step, y, cardWidth, cardHeight), true);
+        if (hole != null)
+            drawCard(g, hole, new Rectangle(x + i * step, y, cardWidth, cardHeight), showHole);
+    }
 
+    static void drawCard(Graphics2D g, FrenchCard card, Rectangle rect, boolean faceUp) {
+        Image back = ImageIO.GetInstance().getImage(dataPath + "gray_back.png");
+        CardView.drawCard(g, rect, card, cardImage(card), back, faceUp);
+    }
 
-        rules += "<hr><p><b>INTERFACE: </b> Choose action (Hit or Stand) at the bottom of the screen.</p>";
-        rules += "</html>";
-        return rules;
+    /**
+     * Image file names are &lt;number&gt;&lt;suit&gt;.png for spot cards and &lt;type&gt;&lt;suit&gt;.png for the
+     * others - so an Ace is "AceHearts.png", not "14Hearts.png".
+     */
+    static Image cardImage(FrenchCard card) {
+        String name = card.type == FrenchCard.FrenchCardType.Number
+                ? card.number + card.suite.name()
+                : card.type.name() + card.suite.name();
+        return ImageIO.GetInstance().getImage(dataPath + name + ".png");
+    }
+
+    /**
+     * A hand's total as shown to players: "soft" when an Ace counts 11, "bust" over 21.
+     */
+    static String describeTotal(java.util.List<FrenchCard> cards) {
+        int total = BlackjackGameState.handValue(cards);
+        if (total > BlackjackGameState.BLACKJACK) return "bust (" + total + ")";
+        return (BlackjackGameState.isSoft(cards) ? "soft " : "") + total;
+    }
+
+    private static String rulesHtml(BlackjackParameters params) {
+        double p21 = params.payout21;
+        String odds = (p21 == Math.floor(p21) ? String.valueOf((int) p21) : String.valueOf(p21)) + " : 1";
+        String row = "<tr><td>%s</td><td>%s</td></tr>";
+        String payouts = "<table border=1 cellpadding=4 cellspacing=0>" +
+                "<tr><th align=left>Result</th><th align=left>Paid</th></tr>" +
+                String.format(row, params.payout21NaturalOnly ? "Natural" : "Winning hand of 21",
+                        odds + " (rounded down)") +
+                String.format(row, "Other winning hand", "1 : 1") +
+                String.format(row, "Push (equal totals)", "bet returned") +
+                String.format(row, "Insurance, when the dealer has Blackjack", "2 : 1") +
+                "</table>";
+        return "<h2>Blackjack</h2>" +
+                "<p>Each player plays against the dealer, not against the other players. Each player starts with " +
+                params.startingChips + " chips. The game lasts " + params.nHands + (params.nHands == 1 ? " hand" :
+                " hands") + ", played with one deck that is shuffled before each hand.</p>" +
+                "<p><b>Card values.</b> Court cards count 10. An Ace counts 11 (and the hand is then soft) " +
+                "unless that would take the total over 21, when it counts 1. A hand over 21 is bust and loses. " +
+                "A natural (Blackjack) is an Ace and a ten-value card as the first two cards, not after a split.</p>" +
+                "<p><b>Each hand.</b></p><ol>" +
+                "<li>Each player bets an even number of chips from " + params.minBet + " to " + params.maxBet +
+                ". A player with fewer than " + params.minBet + " chips sits the hand out.</li>" +
+                "<li>Each player is dealt two cards face up. The dealer is dealt one card face up and one face down " +
+                "(the hole card).</li>" +
+                "<li>If the dealer's up card is an Ace or a ten-value card, each player may buy insurance for half " +
+                "their bet.</li>" +
+                "<li>If the dealer has Blackjack, the hand ends. A player with a natural gets the bet back, and " +
+                "every other bet is lost.</li>" +
+                (params.payout21NaturalOnly ? "<li>Otherwise insurance is lost, and each natural is paid at once." +
+                        "</li>" : "<li>Otherwise insurance is lost.</li>") +
+                "<li>Each player in turn plays their hand.</li>" +
+                "<li>The dealer turns the hole card up and draws until the total is 17 or more" +
+                (params.dealerHitsSoft17 ? ", and also draws on a soft 17" : ", and stands on a soft 17") +
+                ".</li>" +
+                "<li>A hand wins if its total is higher than the dealer's or the dealer is bust.</li></ol>" +
+                "<p><b>Playing a hand.</b></p><ul>" +
+                "<li><b>Hit</b> takes a card. The hand ends if it goes bust.</li>" +
+                "<li><b>Stand</b> ends the hand.</li>" +
+                (params.doubleDown ? "<li><b>Double down</b> doubles the bet on the first two cards, takes one more " +
+                        "card and ends the hand. It is not allowed on a natural or after a split.</li>" : "") +
+                (params.splitting ? "<li><b>Split</b> makes a pair of the same rank into two hands, each with the " +
+                        "same bet and a second card. A player may have up to " + params.maxHandsAfterSplit +
+                        " hands. Split Aces get one card each and end.</li>" : "") +
+                "</ul>" +
+                (params.doubleDown || params.splitting ? "<p>" + (params.doubleDown && params.splitting
+                        ? "Double down and Split need" : params.doubleDown ? "Double down needs" : "Split needs") +
+                        " the chips to match the bet.</p>" : "") +
+                "<p><b>Payouts.</b></p>" + payouts +
+                "<p><b>Winning.</b> The game ends after the last hand, or sooner if no player has " + params.minBet +
+                " chips. A player with more chips than at the start wins, and one with the same number draws.</p>" +
+                "<h3>Interface</h3>" +
+                "<p>Choose from the action buttons at the bottom. The dealer's area shows the dealer's cards and " +
+                "total (\"showing\" counts the up card only), the hand number, the stage of the hand and the cards " +
+                "left in the draw deck. Each player's area shows their chips and any insurance, and under each hand " +
+                "its total (\"Blackjack!\" for a natural) and bet. " +
+                "\"(sitting out)\" marks a player with no bet this hand.</p>" +
+                "<p>A blue outline shows whose turn it is, and the hand being played is outlined in yellow. At the " +
+                "end the result is shown after each player's name.</p>";
     }
 }
-
