@@ -18,7 +18,7 @@ public class ColtExpressMetrics implements IMetricsCollection {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            Map<String, Class<?>> columns = new HashMap<>();
+            Map<String, Class<?>> columns = new LinkedHashMap<>();
             columns.put("TrainSeed", Integer.class);
             columns.put("RoundSeed", Integer.class);
             columns.put("CharacterSeed", Integer.class);

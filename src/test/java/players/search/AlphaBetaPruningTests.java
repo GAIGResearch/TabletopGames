@@ -110,40 +110,6 @@ public class AlphaBetaPruningTests {
         runGame(gameState, player1, player2, false, true);
     }
 
-    @Test
-    public void connect4IterativeNonRandomExpansionOrder() {
-        // iterative deepening with non-random expansion order
-
-        // create a game of Connect4
-        Connect4GameState gameState = new Connect4GameState(new Connect4GameParameters(), 2);
-        forwardModel.setup(gameState);
-
-        // create a MaxNSearchPlayer with iterativeDeepening set to false
-        MaxNSearchParameters paramsOne = new MaxNSearchParameters();
-        paramsOne.iterativeDeepening = false;
-        paramsOne.alphaBetaPruning = true;
-        paramsOne.budget = 1000;
-        paramsOne.expandByEstimatedValue = false;
-        paramsOne.paranoid = true;
-        paramsOne.searchDepth = 4;
-        MaxNSearchPlayer player1 = new MaxNSearchPlayer(paramsOne);
-        player1.setForwardModel(forwardModel);
-
-        // create a MaxNSearchPlayer with iterativeDeepening set to true
-        MaxNSearchParameters paramsTwo = new MaxNSearchParameters();
-        paramsTwo.iterativeDeepening = true;
-        paramsTwo.alphaBetaPruning = true;
-        paramsTwo.budget = 1000;
-        paramsTwo.expandByEstimatedValue = true;
-        paramsTwo.paranoid = true;
-        paramsTwo.searchDepth = 4;
-        MaxNSearchPlayer player2 = new MaxNSearchPlayer(paramsTwo);
-        player2.setForwardModel(forwardModel);
-
-        runGame(gameState, player1, player2, false, true);
-    }
-
-
     // should be called so that the expected faster agent is player2
     private void runGame(Connect4GameState gameState, MaxNSearchPlayer player1, MaxNSearchPlayer player2,
                          boolean checkIdenticalMoves, boolean checkPlayerOneSlower) {

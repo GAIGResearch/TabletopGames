@@ -93,9 +93,6 @@ public class ToadForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
-
-        if (gameState.isActionInProgress())
-            return;
         // Player 0 takes two turns (field and flank) [well, turn-owner to be more precise]
         // then Player 1 does the same
         // then we reveal the hidden cards and resolve the two battles

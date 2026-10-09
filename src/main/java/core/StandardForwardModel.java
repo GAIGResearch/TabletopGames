@@ -1,7 +1,6 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 
@@ -21,39 +20,25 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         // We can't just register with all items in the Stack, as this may represent some complex dependency
         // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
         IExtendedSequence decisionOwner = currentState.isActionInProgress() ? currentState.actionsInProgress.peek() : null;
-        _beforeAction(currentState, action);
+        if (decisionOwner != null)
+            decisionOwner._beforeAction(currentState, action);
+        else
+            _beforeAction(currentState, action);
 
         action.execute(currentState);
-        // If the action has itself been put on the stack (it continues as a sequence), then the decisionOwner is not
-        // told now; it is told once the action completes, via afterRemovalFromQueue().
-        // Any other sequence the action started (directly or via nested actions) must not be told about the action
-        // that created it.
-        if (decisionOwner != null && !continuesAsSequence(currentState, action))
+        // Only that sequence is told, even if the action has put itself on the stack (see IExtendedSequence)
+        if (decisionOwner != null && decisionOwner != action)
             decisionOwner._afterAction(currentState, action);
-        // TODO: Currently we always inform the forward model of the action taken, even if it is not
-        // currently controlling the game flow. All games check this independently; so would be good to remove this
-        // if possible..but need to check if any games rely on this behaviour first.
-        _afterAction(currentState, action);
-    }
-
-    private static boolean continuesAsSequence(AbstractGameState state, AbstractAction action) {
-        if (isOnStack(state, action)) return true;
-        // For a simultaneous action, it is the constituent actions that may have put themselves on the stack
-        return action instanceof SimultaneousAction simultaneousAction
-                && simultaneousAction.getPlayerActions().values().stream().anyMatch(a -> isOnStack(state, a));
-    }
-
-    private static boolean isOnStack(AbstractGameState state, AbstractAction action) {
-        // Identity, not equals(): an equal copy of the action on the stack is a different sequence
-        for (IExtendedSequence sequence : state.actionsInProgress) {
-            if (sequence == action) return true;
-        }
-        return false;
+        // The forward model is told only once no sequence is in control (this also removes any completed sequences)
+        if (!currentState.isActionInProgress())
+            _afterAction(currentState, action);
     }
 
     /**
      * This is a method hook for any game-specific functionality that should run before an Action is executed
-     * by the forward model
+     * by the forward model.
+     * It is only called when no IExtendedSequence is in control of the game; otherwise the sequence on top of the
+     * stack is told instead (see IExtendedSequence._beforeAction()).
      *
      * @param currentState - the current game state
      * @param actionChosen - the action chosen by the current player, not yet applied to the game state
@@ -64,7 +49,10 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
 
     /**
      * This is a method hook for any game-specific functionality that should run after an Action is executed
-     * by the forward model
+     * by the forward model.
+     * It is only called when no IExtendedSequence is in control of the game after the action. If the action has
+     * started a sequence, then this is not called until the decision that completes it (and any others on the stack),
+     * and is then passed that decision. Hence it may not be paired with a _beforeAction() call for the same action.
      *
      * @param currentState the current game state
      * @param actionTaken  the action taken by the current player, already applied to the game state

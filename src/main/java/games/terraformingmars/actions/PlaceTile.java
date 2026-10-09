@@ -119,7 +119,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
         this.tile = tile;
         if (tile == City && name == null) {
             // Cities can't be adjacent to other cities, unless named
-            adjacencyRequirement = new AdjacencyRequirement(new HashMap<TMTypes.Tile, Integer>() {{ put(City, 1);}});
+            adjacencyRequirement = new AdjacencyRequirement(new LinkedHashMap<TMTypes.Tile, Integer>() {{ put(City, 1);}});
             adjacencyRequirement.reversed = true;
         } else if (tile == Greenery) {
             // Greeneries must be adjacent to other owned tiles
@@ -148,7 +148,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
                 if (resourcesGainedRestriction != null) {
                     // Production of each resource type gained increased by 1
                     TMTypes.Resource[] gained = mt.getResources();
-                    HashSet<TMTypes.Resource> typesAdded = new HashSet<>();
+                    HashSet<TMTypes.Resource> typesAdded = new LinkedHashSet<>();
                     for (TMTypes.Resource r : gained) {
                         if (contains(resourcesGainedRestriction, r) && !typesAdded.contains(r)) {
                             gs.getPlayerProduction()[player].get(r).increment(1);
@@ -157,7 +157,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
                     }
                 }
                 if (removeResourcesAdjacentOwner) {
-                    HashSet<Integer> adjacentOwners = new HashSet<>();
+                    HashSet<Integer> adjacentOwners = new LinkedHashSet<>();
                     List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
                     for (Vector2D n : neighbours) {
                         TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
@@ -191,7 +191,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
         copy.placed = placed;
         HashSet<Integer> copyPos = null;
         if (legalPositions != null) {
-            copyPos = new HashSet<>(legalPositions);
+            copyPos = new LinkedHashSet<>(legalPositions);
         }
         copy.legalPositions = copyPos;
         if (adjacencyRequirement != null) {
@@ -267,11 +267,11 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
             }
             if (actions.size() == 0) {
                 impossible = true;
-                actions.add(new TMAction(player));
+                actions.add(TMAction.passInSequence(player));
             }
         } else {
             impossible = true;
-            actions.add(new TMAction(player));
+            actions.add(TMAction.passInSequence(player));
         }
         return actions;
     }

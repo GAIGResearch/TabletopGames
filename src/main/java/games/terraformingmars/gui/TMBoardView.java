@@ -19,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import static gui.AbstractGUIManager.defaultItemSize;
 import static games.terraformingmars.gui.TMCardView.drawResource;
@@ -49,7 +50,7 @@ public class TMBoardView extends ComponentView implements IScreenHighlight {
         width = 500;
         height = 500;
 
-        rects = new HashMap<>();
+        rects = new LinkedHashMap<>();
         highlight = new ArrayList<>();
         background = ImageIO.GetInstance().getImage("data/terraformingmars/images/mars.png");
         counterTop = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/meter-scale-top.png");
