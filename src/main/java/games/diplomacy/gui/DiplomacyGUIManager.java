@@ -3,6 +3,7 @@ package games.diplomacy.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import games.GameType;
 import games.diplomacy.*;
 import games.diplomacy.actions.*;
 import gui.AbstractGUIManager;
@@ -93,8 +94,7 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
         JTabbedPane tabs = new JTabbedPane();
         JPanel main = new JPanel(new BorderLayout());
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml(params), height + ACTION_HEIGHT));
-        tabs.add("How to Play", new RulesView(HOW_TO_PLAY, height + ACTION_HEIGHT));
+        RulesView.addTabs(tabs, GameType.Diplomacy, params, height + ACTION_HEIGHT);
 
         JPanel gameArea = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         gameArea.add(mapView);
@@ -291,95 +291,5 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
         if (o instanceof Convoy c) helped = shown.getUnit(c.from);
         if (helped == null) return "";
         return helped.owner() == me ? " - helps your own unit" : " - helps the " + describe(helped);
-    }
-
-    static final String HOW_TO_PLAY = "<h2>How to play</h2>"
-            + "<p>In each phase you give one order at a time, for the unit whose province is outlined in green. "
-            + "Every province where a click gives an order is outlined in yellow.</p>"
-            + "<ul><li><b>Hold</b>: click the unit being ordered.</li>"
-            + "<li><b>Move</b>: click the province to move to.</li>"
-            + "<li><b>Support</b>: click the province the support goes into. For a support to hold, that is the "
-            + "province of the unit supported.</li>"
-            + "<li><b>Convoy</b>: click the province the army is to be convoyed to.</li>"
-            + "<li><b>Retreat</b>: click the province to retreat to, or the dislodged unit's own province to "
-            + "disband it.</li>"
-            + "<li><b>Build</b> and <b>disband</b>: click the home supply centre to build in, or the unit to "
-            + "disband.</li></ul>"
-            + "<p>When one order is aimed at the province you click, it is given at once. When several are (a move "
-            + "and supports into the same province, a choice of coasts, a move by land or via convoy), a menu lists "
-            + "them: choose one, or click elsewhere to close it.</p>"
-            + "<p>Hover over any province for its name, who controls it, the unit in it, and the orders a "
-            + "click there would give, with who they would attack or help.</p>"
-            + "<p>The action buttons below the map offer the same orders. <b>Waive builds</b> is only on the "
-            + "buttons.</p>";
-
-    static String rulesHtml(DiplomacyParameters params) {
-        DiplomacyMap map = params.getMap();
-        return "<h2>Diplomacy</h2>"
-                + "<p><a href='#year'>The year</a> - <a href='#orders'>Orders</a> - <a href='#resolution'>Resolution</a>"
-                + " - <a href='#retreats'>Retreats</a> - <a href='#adjustments'>Builds and disbands</a>"
-                + " - <a href='#interface'>Interface</a></p>"
-                + "<p>Seven powers fight for the supply centres of Europe. A power that controls " + map.victoryCentres()
-                + " supply centres after a Fall turn wins. Otherwise the game ends after the Fall turn of "
-                + params.lastYear + ", and the power with the most supply centres wins (powers with the same number "
-                + "share the win). There is no negotiation in this implementation.</p>"
-                + "<a name='year'></a><h3>The year</h3>"
-                + "<p>Each year has a Spring turn and a Fall turn. Each turn has an orders phase and, if any unit was "
-                + "dislodged, a retreat phase. After the Fall turn every supply centre with a unit in it comes under "
-                + "that unit's power, and the powers then build or disband units to match their supply centres. (The "
-                + "other land provinces change hands at the same time, but only the supply centres count.)</p>"
-                + "<p>In each phase the powers give their orders one at a time, one order per unit. The orders stay "
-                + "hidden until every power has given them; then all are carried out together.</p>"
-                + "<a name='orders'></a><h3>Orders</h3>"
-                + "<ul><li><b>Hold</b>: the unit stays.</li>"
-                + "<li><b>Move</b>: an army moves to an adjacent land or coastal province, and a fleet to an adjacent "
-                + "sea or coastal province along the coast. A fleet entering Spain, St. Petersburg or Bulgaria names "
-                + "the coast.</li>"
-                + "<li><b>Support</b> (S): the unit adds 1 to the strength of a unit holding, or moving, in a province "
-                + "it could move to itself.</li>"
-                + "<li><b>Convoy</b> (C): a fleet at sea carries an army across the water. A chain of fleets can carry "
-                + "it over several seas. A move marked <i>via convoy</i> goes by sea even where it could go by land. "
-                + "An army is also convoyed when a fleet of its own power convoys it.</li></ul>"
-                + "<a name='resolution'></a><h3>Resolution</h3>"
-                + "<ul><li>Every unit has strength 1, plus 1 for each support that is not cut.</li>"
-                + "<li>A move succeeds if it is stronger than the unit holding there and than every other move into "
-                + "the same province. Moves of equal strength into one province all fail (a standoff).</li>"
-                + "<li>A unit that is beaten by a move into its province is dislodged.</li>"
-                + "<li>A support is cut if its unit is attacked from any province except the one it supports into, "
-                + "or if its unit is dislodged.</li>"
-                + "<li>A power cannot dislodge its own unit, and its supports do not count against its own unit. "
-                + "An attack by a power on its own unit does not cut support.</li>"
-                + "<li>Two units cannot swap places unless one of them is convoyed.</li>"
-                + "<li>A convoy fails only if every route it could take has a fleet dislodged.</li>"
-                + (params.paradoxRule == DiplomacyParadoxRule.SZYKMAN
-                ? "<li>In a convoy paradox the convoying fleets hold (the Szykman rule).</li>"
-                : "<li>A convoyed army does not cut the support of an attack on one of its convoying fleets, unless "
-                + "it has another route (rules 21 and 22 of the 2000 rulebook). In any other convoy paradox the "
-                + "convoying fleets hold (the Szykman rule).</li>")
-                + "</ul>"
-                + "<a name='retreats'></a><h3>Retreats</h3>"
-                + "<p>A dislodged unit retreats to an adjacent province it could move to, that is empty, that is not "
-                + "the province its attacker came from (unless the attacker was convoyed) and that was not left empty "
-                + "by a standoff. Two units retreating to one province are both disbanded. A unit with no retreat is "
-                + "disbanded at once, and any unit may be disbanded instead of retreating.</p>"
-                + "<a name='adjustments'></a><h3>Builds and disbands</h3>"
-                + "<p>A power with more supply centres than units may build one unit for each, in its home supply "
-                + "centres that it still controls and that are empty. An army may be built in any of them, a fleet "
-                + "only on a coast. <b>Waive builds</b> gives up the rest. A power with more units than supply "
-                + "centres disbands the units of its choice.</p>"
-                + "<a name='interface'></a><h3>Interface</h3>"
-                + "<ul><li>Each land province is shaded in the colour of the power controlling it, and left buff if "
-                + "nobody does. A star marks a supply centre. The grey hatched land is impassable.</li>"
-                + "<li>A cannon in a power's colour is an army, and a ship is a fleet. A red-bordered unit beside "
-                + "its province has been dislodged and must retreat.</li>"
-                + "<li>The last orders carried out are drawn on the map: black arrows for moves that succeeded, red "
-                + "dashed arrows ending in a cross for moves that failed, green dotted lines for supports, blue for "
-                + "convoys and orange arrows for retreats. A dashed ring marks a unit built, and a red cross a unit "
-                + "disbanded. Purple shows the orders given so far this phase by the "
-                + "powers you may see (your own, when you play).</li>"
-                + "<li>On the right are the powers, with their supply centres and units, and the list of last "
-                + "orders.</li>"
-                + "<li>The action buttons are the orders for the unit being ordered now. You may also click on "
-                + "the map: see How to Play.</li></ul>";
     }
 }

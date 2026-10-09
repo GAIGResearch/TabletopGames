@@ -47,9 +47,9 @@ The page also:
   or on the space around the game, or with two fingers. Over a part of a game that scrolls with the wheel itself, the
   wheel scrolls it (Ctrl and the wheel always zoom). The zoom is kept for each game, and the side panel can be hidden
   to give the game the whole width;
-- shows the game's rules as a web page beside the game (the Rules button): the GUI's Rules and How to Play tabs are
-  taken out of the streamed image, and a game may also have its rules in Markdown, in `rules.md` and `how-to-play.md`
-  in its data directory (see `gui.RulesPages`);
+- shows the game's rules as a web page beside the game (the Rules button), taking the GUI's rules tabs out of the
+  streamed image. A game's rules are written in Markdown, in `data/rules/<GameType>/` (one file for each page, filled
+  in from the game's parameters; see `gui.RulesPages`), and the desktop GUI shows the same files in its tabs;
 - works by touch: a tap clicks, a long press is the right button, a drag drags, and two fingers zoom and pan;
 - reconnects to the same game when the connection drops (a phone asleep, a network change) or the page is reloaded;
 - outlines and answers clicks on the parts of the board a GUI offers as click regions (see

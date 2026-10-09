@@ -12,6 +12,7 @@ import games.tricktaking.gui.TrickView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
@@ -77,7 +78,7 @@ public class EuchreGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml((EuchreParameters) state.getGameParameters()), height));
+        RulesView.addTabs(tabs, GameType.Euchre, state.getGameParameters(), height);
 
         // Player areas: player 0 at the bottom, then clockwise round the table, so partners face each other
         playerViews = new PlayerHandView[nPlayers];
@@ -248,66 +249,5 @@ public class EuchreGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(EuchreParameters params) {
-        // FrenchCard numbers the Ace 14
-        int deckSize = 4 * (15 - params.lowestCard);
-        int kitty = deckSize - 4 * params.handSize;
-        int need = params.handSize / 2 + 1;
-        String sittingOutDealer = params.sittingOutDealerPicksUp
-                ? "If that partner is the dealer, the dealer still takes the up-card and discards."
-                : "If that partner is the dealer, the up-card stays in the kitty.";
-        return "<h2>Euchre</h2>" +
-                "<p>Four players play in two fixed teams, with partners sitting opposite each other. Team 0 is " +
-                "players 0 and 2, and team 1 is players 1 and 3.</p>" +
-                "<p><b>The deal.</b> The deck has " + deckSize + " cards, from " + params.lowestCard + " to Ace in " +
-                "each suit. Each player is dealt " + params.handSize + " cards. The other " + kitty + " go face " +
-                "down to the kitty, and its top card is turned face up as the up-card.</p>" +
-                "<p><b>Choosing trumps.</b> Starting on the dealer's left, each player in turn chooses Pass or " +
-                "calls the up-card's suit as trumps. After a call the dealer takes the up-card and discards any " +
-                "card face down. If all four pass, the up-card is turned down. Each player in turn then chooses " +
-                "Pass or calls any other suit. The dealer may not pass in this second round.</p>" +
-                "<p><b>Going alone.</b> The player who calls trumps is the maker. A maker who calls alone plays " +
-                "without their partner, who sits out the deal. " + sittingOutDealer + "</p>" +
-                "<p><b>Card order.</b> The Jack of trumps (the right bower) is the highest trump. The other Jack " +
-                "of the same colour (the left bower) is the next highest, and belongs to the trump suit, not its " +
-                "own. The rest of the trumps follow in the order A, K, Q, 10, 9. The other suits run A, K, Q, J, " +
-                "10, 9.</p>" +
-                "<p><b>Play.</b> The player on the dealer's left leads the first trick. If the maker is alone, the " +
-                "player on the maker's left leads instead.</p><ul>" +
-                "<li>Each player in turn must follow the suit led if they can. A player who cannot follow may play " +
-                "any card.</li>" +
-                "<li>The highest trump wins the trick. If no trump was played, the highest card of the suit led " +
-                "wins.</li>" +
-                "<li>The winner of a trick leads the next one.</li></ul>" +
-                "<p><b>Scoring.</b> After the " + params.handSize + " tricks, one team scores points.</p>" +
-                "<table border=1 cellpadding=4 cellspacing=0>" +
-                "<tr><th align=left>Tricks taken by the makers</th><th>Points</th></tr>" +
-                "<tr><td>" + need + " to " + (params.handSize - 1) + "</td><td align=center>" + params.pointsMade +
-                " to the makers</td></tr>" +
-                "<tr><td>All " + params.handSize + " (a march)</td><td align=center>" + params.pointsMarch +
-                " to the makers</td></tr>" +
-                "<tr><td>All " + params.handSize + ", by a maker going alone</td><td align=center>" +
-                params.pointsAloneMarch + " to the makers</td></tr>" +
-                "<tr><td>Fewer than " + need + " (euchred)</td><td align=center>" + params.pointsEuchred +
-                " to the defenders</td></tr></table>" +
-                "<p><b>Winning.</b> The deal passes to the left after each deal. The game ends after the deal in " +
-                "which a team reaches " + params.targetScore + (params.targetScore == 1 ? " point" : " points") +
-                ", and that team wins.</p>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose from the action buttons at the bottom. Pass, Call (a suit) and Call (a suit) alone " +
-                "choose trumps. Discard is the dealer's discard, and Play plays a card. Player 0 sits at the " +
-                "bottom of the table, and play goes clockwise.</p>" +
-                "<p>Each player's area shows their hand, the number of cards in it, their team and the tricks " +
-                "they have taken, or \"sitting out\". \"Void in\" lists the suits a player is known to hold " +
-                "none of, because they did not follow that suit in this deal (the left bower counts as a trump). " +
-                "The title under the area adds \"dealer\" and \"maker\". The current player's area has a blue " +
-                "border.</p>" +
-                "<p>In the centre, the up-card is shown with what became of it (on offer as trumps, turned down, " +
-                "taken by the dealer, or left in the kitty). Beside it are what is trumps and who made them, the " +
-                "suit led, and the trick so far. The card winning the trick is outlined in orange. Below the " +
-                "trick are the tricks each team has taken in this deal, and below that the " +
-                "points of each team and the target.</p>";
     }
 }

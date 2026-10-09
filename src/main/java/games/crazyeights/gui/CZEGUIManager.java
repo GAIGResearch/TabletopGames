@@ -4,10 +4,10 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.crazyeights.CZEGameState;
-import games.crazyeights.CZEParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
@@ -75,7 +75,7 @@ public class CZEGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml((CZEParameters) state.getGameParameters()), height));
+        RulesView.addTabs(tabs, GameType.CrazyEights, state.getGameParameters(), height);
 
         // Player areas, spread round the four sides
         playerViews = new CZEPlayerView[nPlayers];
@@ -206,41 +206,5 @@ public class CZEGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(CZEParameters params) {
-        String starter = params.dealerNominatesStarterSuit
-                ? "If the starter is an Eight, the dealer nominates the suit to match before play starts."
-                : "If the starter is an Eight, the suit to match is " + params.starterEightSuit + ".";
-        return "<h2>Crazy Eights</h2>" +
-                "<p>Be the first player to get rid of all your cards.</p>" +
-                "<p><b>Deal.</b> Each player is dealt " + params.nCardsPerPlayer + " cards (" +
-                params.nCardsPerPlayerTwoPlayers + " cards with two players). The last player is the dealer. The " +
-                "next card is turned up to start the discards (the starter), and its suit is the suit to match. " +
-                starter + " Player 0 plays first.</p>" +
-                "<p><b>Each turn.</b></p><ul>" +
-                "<li>Play a card of the suit to match, or of the same rank as the top discard. Its suit becomes the " +
-                "suit to match.</li>" +
-                "<li>An Eight can always be played, and the player nominates the next suit to match.</li>" +
-                "<li>A player who can play must play. A player who cannot play draws one card, and the turn " +
-                "ends.</li>" +
-                "<li>When the stock is empty, the discards except the top card are shuffled to make a new stock. " +
-                "If there is nothing to draw, the player passes.</li></ul>" +
-                "<p><b>End.</b> The first player with no cards wins. If every player passes in a row, the game is " +
-                "blocked, and every player with the fewest cards wins.</p>" +
-                "<p><b>Penalty.</b> When a player goes out, the other players are ranked by the penalty points for " +
-                "the cards left in their hands (fewest first):</p>" +
-                "<table border=1 cellpadding=4 cellspacing=0>" +
-                "<tr><td>Eight</td><td align=right>" + params.eightPenalty + "</td></tr>" +
-                "<tr><td>Jack, Queen, King</td><td align=right>" + params.pictureCardPenalty + "</td></tr>" +
-                "<tr><td>Ace</td><td align=right>" + params.acePenalty + "</td></tr>" +
-                "<tr><td>2 to 10</td><td align=right>face value</td></tr></table>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose from the action buttons at the bottom. An Eight has one button for each suit it can " +
-                "nominate (\"nominating Spades\"). The button that names no suit keeps the Eight's own " +
-                "suit. The centre shows the Stock, the Discards and the Suit to match, with the number of passes " +
-                "in a row. Each player's area shows their hand and the number of cards, " +
-                "and the penalty when the hand is shown. The dealer is marked \"dealer\" below their area, and a " +
-                "blue outline shows whose turn it is.</p>";
     }
 }

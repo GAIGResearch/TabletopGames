@@ -10,6 +10,7 @@ import games.tricktaking.gui.CardArt;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
@@ -90,7 +91,7 @@ public class GolfSixGUIManager extends AbstractGUIManager {
         Dimension gridSize = gridViews[0].getPreferredSize();
         this.width = Math.max(bottomRow, 2) * (gridSize.width + 10) + 30;
         this.height = 2 * gridSize.height + new GolfSixTableView().getPreferredSize().height + 20;
-        tabs.add("Rules", new RulesView(rulesHtml((GolfSixParameters) state.getGameParameters()), height));
+        RulesView.addTabs(tabs, GameType.GolfSix, state.getGameParameters(), height);
 
         for (int i = nPlayers - 1; i >= bottomRow; i--)
             top.add(gridViews[i]);
@@ -196,53 +197,5 @@ public class GolfSixGUIManager extends AbstractGUIManager {
                 : state.getDrawnCard() == null ? "to draw a card" : "to place the drawn card";
         text.append("<b>Player ").append(current).append(" ").append(task).append("</b>");
         return text.append("</html>").toString();
-    }
-
-    private static String rulesHtml(GolfSixParameters params) {
-        int columns = GolfSixParameters.COLUMNS, gridSize = GolfSixParameters.GRID_SIZE;
-        String turnUp = params.initialFaceUp == 0 ? ""
-                : "<p><b>Before play</b> each player in turn turns " + params.initialFaceUp + " of their cards " +
-                "face up.</p>";
-        String end = params.finalTurns
-                ? "When all of a player's cards are face up, each other player will have one more turn. The deal " +
-                "is then scored."
-                : "The deal is scored as soon as all of a player's cards are face up.";
-        String deals = params.nDeals == 1 ? "The game is a single deal. The lowest score wins."
-                : "The game is " + params.nDeals + " deals, and the deal passes to the next player each time. " +
-                "The lowest total wins.";
-        return "<h2>Six-card Golf</h2>" +
-                "<p>The aim is to score as few points as possible with the cards in your grid.</p>" +
-                "<p><b>The deal.</b> Each player is dealt " + gridSize + " cards face down, in a grid of " + columns +
-                " columns and two rows. Nobody may look at a face-down card, including its owner. The top card of " +
-                "the draw deck is turned face up to start the discard pile.</p>" +
-                turnUp +
-                "<p><b>Each turn</b> has two steps.</p><ol>" +
-                "<li>Draw from the draw deck, or draw from the discard pile.</li>" +
-                "<li>Put the drawn card face up in your grid in place of any card, face up or face down. The card " +
-                "it replaces goes face up on the discard pile. A card drawn from the draw deck may instead be " +
-                "discarded. A card drawn from the discard pile must be placed in the grid.</li></ol>" +
-                "<p>When the draw deck runs out, the discard pile except its top card is shuffled to form a new " +
-                "draw deck.</p>" +
-                "<p><b>End of a deal.</b> " + end + " A deal is also scored once each player has had " +
-                params.maxTurnsPerPlayer + " turns. All the cards are turned face up and scored.</p>" +
-                "<table border=1 cellpadding=4 cellspacing=0>" +
-                "<tr><th align=left>Card</th><th>Ace</th><th>Two</th><th>Jack, Queen</th><th>King</th></tr>" +
-                "<tr><th align=left>Points</th><td align=center>" + params.aceValue + "</td><td align=center>" +
-                params.twoValue + "</td><td align=center>" + params.courtValue + "</td><td align=center>" +
-                params.kingValue + "</td></tr></table>" +
-                "<p>The other cards score their number. Two cards of the same rank in a column score nothing (a " +
-                "pair of Twos included).</p>" +
-                "<p><b>Winning.</b> " + deals + " Players with the same lowest score draw.</p>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose from the action buttons at the bottom. Turn up position, Draw from draw deck, Draw " +
-                "from discard pile, Replace position and Discard drawn card are the steps above. The number on " +
-                "each card is its position, from 0 to " + (columns - 1) + " along the top row and " + columns +
-                " to " + (gridSize - 1) + " along the bottom row.</p>" +
-                "<p>Player 0's grid is at the bottom left, and play goes round the table in the order of the " +
-                "player numbers. Under each grid are the points its face-up cards show" +
-                (params.nDeals > 1 ? ", and the player's total from earlier deals" : "") +
-                ". The current player's grid has a blue border. The centre shows the draw deck and the discard " +
-                "pile (with the number of cards in each), the drawn card, the dealer, and what the current " +
-                "player is to do. A card drawn from the draw deck is face up only to the player who drew it.</p>";
     }
 }

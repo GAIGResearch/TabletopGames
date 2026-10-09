@@ -3,6 +3,7 @@ package games.lawnandorder.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import games.GameType;
 import games.lawnandorder.LawnAndOrderGameState;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.lawnandorder.components.RuleCard;
@@ -64,7 +65,7 @@ public class LawnAndOrderGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml(params), height));
+        RulesView.addTabs(tabs, GameType.LawnAndOrder, params, height);
 
         JPanel tableWrapper = new JPanel(new GridBagLayout());
         tableWrapper.setOpaque(false);
@@ -171,53 +172,5 @@ public class LawnAndOrderGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(LawnAndOrderParameters params) {
-        StringBuilder groups = new StringBuilder("<tr><th align=left>Cards</th>");
-        StringBuilder points = new StringBuilder("<tr><th align=left>Points</th>");
-        int[] table = LawnAndOrderParameters.GROUP_POINTS;
-        for (int n = 2; n < table.length; n++) {
-            groups.append("<td align=center>").append(n).append(n == table.length - 1 ? "+" : "").append("</td>");
-            points.append("<td align=center>").append(table[n]).append("</td>");
-        }
-        return "<h2>Lawn &amp; Order</h2>" +
-                "<p>Build matching sets on your lawn while the Homeowners Association condemns attributes one by " +
-                "one.</p>" +
-                "<p><b>Cards.</b> Each Lawn card has a Type (Ornament, Furniture, Structure, Water Feature), " +
-                "a Colour (Red, Yellow, Pink, Blue) and a Feature (Oversized, Illuminated, Plastic, Repurposed). " +
-                "The Agenda holds " + params.ruleCards().size() + " Rule cards. " +
-                "Each Standard Rule condemns one attribute. The others are " + params.nAdministrativeError + " Administrative Errors, " +
-                params.nEmergencySession + " Emergency Session and " + params.nZeroTolerance +
-                " Zero Tolerance Policy.</p>" +
-                "<p><b>Each round</b> starts with " + params.handSize + " Lawn cards dealt to each player. One Rule " +
-                "card is dealt face down between each pair of neighbours as an Insider Tip. You may look at the " +
-                "two beside you.</p>" +
-                "<p><b>Each turn</b> all active players act together:</p><ol>" +
-                "<li>Each chooses a card from their hand face down. The cards are then revealed onto the lawns.</li>" +
-                "<li>Each gains 1 Citation for each attribute of their new card that is already condemned.</li>" +
-                "<li>The top Agenda card is revealed, and stays in force for the round. An Administrative Error does " +
-                "nothing. An Emergency Session reveals the next " + params.emergencySessionReveals + " cards too. " +
-                "Zero Tolerance lowers every Citation limit by " + params.zeroToleranceReduction + ".</li>" +
-                "<li>Each active player gains 1 Citation for each card on their lawn with an attribute condemned " +
-                "this turn. Players who have passed are immune.</li>" +
-                "<li>A player with more Citations than lawn cards receives a Cease &amp; Desist. Their lawn and hand " +
-                "are cleared, and they score nothing this round.</li>" +
-                "<li>Each active player chooses in secret to <b>Continue</b> (draw a card and play again) or to " +
-                "<b>Pass</b> (keep their lawn, safe from later rules).</li></ol>" +
-                "<p><b>Scoring.</b> The round ends when no player is active, or when the Agenda runs out. Each " +
-                "category scores on its own track: Type on Improvements, Colour on Colour, Feature on Character. " +
-                "In each category, every group of lawn cards that share an attribute scores:</p>" +
-                "<table border=1 cellpadding=4 cellspacing=0>" + groups + "</tr>" + points + "</tr></table>" +
-                "<p><b>Goodwill.</b> A player who received a Cease &amp; Desist has a Citation limit " +
-                params.goodwillBonus + " higher in the next round.</p>" +
-                "<p><b>Winning.</b> The first player with " + params.targetScore + " or more on all three tracks " +
-                "wins. If several reach it in the same round, the highest total of the three tracks wins. After " +
-                params.getMaxRounds() + " rounds the highest total wins.</p>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose from the action buttons at the bottom. The top panel shows the rules revealed this round " +
-                "and the Insider Tips (face up only to the players beside them). Each player's area shows their " +
-                "status and Citations, their hand, the card they have chosen this turn (face down), their lawn, " +
-                "the attributes with two or more cards on it, and their three tracks (★ = target reached).</p>";
     }
 }

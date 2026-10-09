@@ -3,12 +3,14 @@ package games.poker.gui;
 import gui.GUIMessages;
 import core.*;
 import gui.AbstractGUIManager;
+import games.GameType;
 import games.poker.PokerForwardModel;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
 import games.poker.components.MoneyPot;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 import utilities.Pair;
@@ -70,12 +72,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 JPanel main = new JPanel();
                 main.setOpaque(false);
                 main.setLayout(new BorderLayout());
-                JPanel rules = new JPanel();
                 pane.add("Main", main);
-                pane.add("Rules", rules);
-                JLabel ruleText = new JLabel(getRuleText());
-                rules.add(ruleText);
-                rules.setBackground(new Color(43, 108, 25, 111));
 
                 potMoney = new JLabel();
                 currentBets = new JLabel();
@@ -93,7 +90,6 @@ public class PokerGUIManager extends AbstractGUIManager {
                 pgs = (PokerGameState) gameState.copy();
                 pfm = (PokerForwardModel) game.getForwardModel();
                 PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
-                ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
                 parent.setBackground(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"));
 
@@ -176,7 +172,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 main.add(actionPanel, BorderLayout.SOUTH);
 
                 pane.add("Main", main);
-                pane.add("Rules", rules);
+                RulesView.addTabs(pane, GameType.Poker, pgp, height*2/3+100);
 
                 parent.setLayout(new BorderLayout());
                 parent.add(pane, BorderLayout.CENTER);
@@ -317,16 +313,5 @@ public class PokerGUIManager extends AbstractGUIManager {
             communityPile.setFocusable(true);
 
         }
-    }
-
-
-    private String getRuleText() {
-        String rules = "<html><center><h1>Poker</h1></center><br/><hr><br/>";
-        rules += "<p>Coming soon ...</p>";
-
-
-        rules += "<hr><p><b>INTERFACE: </b> Choose action at the bottom of the screen.</p>";
-        rules += "</html>";
-        return rules;
     }
 }

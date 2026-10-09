@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import core.Game;
 import core.actions.AbstractAction;
+import games.GameType;
 import gui.AbstractGUIManager;
 import gui.ClickRegion;
 import gui.RulesPages;
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
  * {@link AbstractGUIManager#getActionPanel()}) from the streamed image into the page, where the browser draws them
  * natively. A GUI that does not use a standard panel keeps that part in the image. It also sends the GUI's click
  * regions (see {@link AbstractGUIManager#getClickRegions()}), the parts of the frame that take the mouse wheel, and the
- * game's rules: its GUI's rules tabs, taken out of the image, and any rules written in Markdown.
+ * game's rules (see {@link RulesPages}), whose tabs it takes out of the image.
  * <p>
  * Everything here runs on the Swing thread.
  */
@@ -57,9 +58,9 @@ class ChromeReader {
     private String sentWheelAreas;
 
     /**
-     * @param dataPath the game's data directory, for any rules written in Markdown (see {@link RulesPages}); may be null
+     * @param gameType the game, for its rules written in Markdown (see {@link RulesPages})
      */
-    ChromeReader(AbstractGUIManager gui, Game game, JRootPane root, String dataPath, Sender out) {
+    ChromeReader(AbstractGUIManager gui, Game game, JRootPane root, GameType gameType, Sender out) {
         this.gui = gui;
         this.game = game;
         this.root = root;
@@ -69,28 +70,19 @@ class ChromeReader {
         // hidden, not removed: update still reads them, and choose clicks their buttons
         if (hasActions) gui.getActionPanel().setVisible(false);
         if (hasInfo) gui.getInfoPanel().setVisible(false);
-        takeRulesTabs(root.getContentPane());
-        for (RulesPages.Page page : RulesPages.fromDataDirectory(dataPath))
-            if (rules.stream().noneMatch(p -> p.title().equals(page.title())))
-                rules.add(page);
+        removeRulesTabs(root.getContentPane());
+        rules.addAll(RulesPages.load(gameType, game.getGameState().getGameParameters()));
     }
 
     /**
-     * Removes the GUI's rules tabs, keeping their pages to send to the page. A rules tab is a {@link RulesView}, or a
-     * tab titled Rules or How to Play that holds HTML or text.
+     * Removes the GUI's rules tabs ({@link RulesView}s), whose pages are sent to the page instead.
      */
-    private void takeRulesTabs(Container container) {
+    private void removeRulesTabs(Container container) {
         for (Component child : container.getComponents()) {
             if (child instanceof JTabbedPane tabs)
-                for (int i = tabs.getTabCount() - 1; i >= 0; i--) {
-                    Component tab = tabs.getComponentAt(i);
-                    String title = tabs.getTitleAt(i);
-                    String html = tab instanceof RulesView || RULES_TAB.matcher(title).matches() ? rulesHtml(tab) : null;
-                    if (html != null) {
-                        rules.add(0, new RulesPages.Page(title, html));
+                for (int i = tabs.getTabCount() - 1; i >= 0; i--)
+                    if (tabs.getComponentAt(i) instanceof RulesView)
                         tabs.removeTabAt(i);
-                    }
-                }
             // A tab strip with one tab left only takes room, so the tab replaces the tabbed pane where the layout
             // allows it (a BorderLayout, which the GUIs with rules tabs use).
             if (child instanceof JTabbedPane tabs && tabs.getTabCount() == 1
@@ -101,32 +93,8 @@ class ChromeReader {
                 container.add(only, where);
                 child = only;
             }
-            if (child instanceof Container c) takeRulesTabs(c);
+            if (child instanceof Container c) removeRulesTabs(c);
         }
-    }
-
-    private static final Pattern RULES_TAB = Pattern.compile("(?i).*\\b(rules|how to play)\\b.*");
-
-    /**
-     * The rules a component shows, as HTML (which may be a whole document), or null if it shows none.
-     */
-    static String rulesHtml(Component c) {
-        if (c instanceof RulesView view) return view.getBodyHtml();
-        if (c instanceof JEditorPane pane && pane.getContentType().contains("html")) return pane.getText();
-        // a label holding a page of text, which a Swing label may hold as HTML
-        if (c instanceof JLabel label && label.getText() != null && label.getText().length() >= 100) return label.getText();
-        if (c instanceof JTextArea area && area.getText().length() >= 100)
-            return "<div style='white-space: pre-wrap'>" + escapeHtml(area.getText()) + "</div>";
-        if (c instanceof Container container)
-            for (Component child : container.getComponents()) {
-                String html = rulesHtml(child);
-                if (html != null) return html;
-            }
-        return null;
-    }
-
-    private static String escapeHtml(String text) {
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     /**

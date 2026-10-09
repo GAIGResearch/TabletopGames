@@ -8,6 +8,7 @@ import games.cribbage.CribbageParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
@@ -88,7 +89,7 @@ public class CribbageGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml((CribbageParameters) state.getGameParameters()), height));
+        RulesView.addTabs(tabs, GameType.Cribbage, state.getGameParameters(), height);
 
         JPanel mainGameArea = new JPanel(new BorderLayout());
         mainGameArea.setOpaque(false);
@@ -153,61 +154,5 @@ public class CribbageGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(CribbageParameters params) {
-        int handSize = params.nCardsDealt - params.nCardsToCrib;
-        String row = "<tr><td>%s</td><td align=center>%s</td><td align=center>%s</td></tr>";
-        String scoring = "<table border=1 cellpadding=4 cellspacing=0>" +
-                "<tr><th align=left>Combination</th><th>The play</th><th>The show</th></tr>" +
-                String.format(row, "Fifteen", params.playFifteenPoints, params.fifteenPoints + " each") +
-                String.format(row, "Count of " + params.maxCount, params.thirtyOnePoints, "") +
-                String.format(row, "Last card", params.lastCardPoints, "") +
-                String.format(row, "Pair", params.pairPoints, params.pairPoints) +
-                String.format(row, "Three of a kind", params.pairRoyalPoints, params.pairRoyalPoints) +
-                String.format(row, "Four of a kind", params.doublePairRoyalPoints, params.doublePairRoyalPoints) +
-                String.format(row, "Run of 3 or more", "1 per card", "1 per card") +
-                String.format(row, "Flush", "", params.flushPoints + ", or " + (params.flushPoints + 1) +
-                        " with the starter") +
-                String.format(row, "His nobs", "", params.hisNobsPoints) +
-                "</table>";
-        String end = params.targetScore > 0
-                ? "The game ends at once when a player reaches " + params.targetScore + ", or after " +
-                params.nRounds + " rounds."
-                : "The game ends after " + params.nRounds + " rounds.";
-        return "<h2>Cribbage</h2>" +
-                "<p>A game for two players, who deal in turn. Player 0 deals first. The dealer owns the crib.</p>" +
-                "<p><b>Card values.</b> Ace counts 1 and court cards count 10. For pairs and runs the cards rank " +
-                "from Ace (low) to King.</p>" +
-                "<p><b>Each round.</b></p><ol>" +
-                "<li>Each player is dealt " + params.nCardsDealt + " cards and discards " + params.nCardsToCrib +
-                " of them face down to the crib. The non-dealer discards first.</li>" +
-                "<li>The top card of the deck is turned up as the starter. If it is a Jack, the dealer scores " +
-                params.hisHeelsPoints + " (his heels).</li>" +
-                "<li>In the play, the non-dealer leads. The players then take turns to play a card, and each card " +
-                "adds its value to the count. The count may not go over " + params.maxCount + ".</li>" +
-                "<li>A player who cannot play is skipped (a go), and the other player plays on alone. When neither " +
-                "can play, or the count reaches " + params.maxCount + ", the count starts again from 0. The " +
-                "opponent of the player of the last card leads.</li>" +
-                "<li>In the show, the " + handSize + " cards each player played are scored with the starter. The " +
-                "non-dealer is scored first, then the dealer, then the crib (for the dealer).</li></ol>" +
-                "<p><b>Scoring.</b></p>" + scoring +
-                "<ul><li>In the play, a card scores for the count it makes, and for a pair or run it makes with the " +
-                "cards just before it in the same count. A run may be in any order. The last card scores only if " +
-                "the count is below " + params.maxCount + ".</li>" +
-                "<li>In the show, every combination of cards that adds up to 15 scores. Only the longest runs score" +
-                (params.runsIncludeStarter ? "" : ", and they are made without the starter") + ". Each different " +
-                "set of cards making a run counts, so 6-7-7-8 is two runs.</li>" +
-                "<li>A flush is all " + handSize + " cards of one suit" +
-                (params.cribFlushNeedsStarter ? ". In the crib a flush scores only if the starter matches too" : "") +
-                ". His nobs is the Jack of the starter's suit in the hand or crib.</li></ul>" +
-                "<p><b>Winning.</b> " + end + " The higher score wins, and equal scores draw.</p>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose a pair of cards to discard (\"Discard ... to crib\"), then a card to play, from the " +
-                "action buttons at the bottom. The centre shows the Starter, the Crib (face down, except the cards " +
-                "a human player discarded) and the Count with the cards played in it. The line below says whose " +
-                "turn it is. Each player's area shows their Hand and the cards they have Played this round, with " +
-                "their score and \"dealer (owns the crib)\" for the dealer. A blue outline shows whose turn it " +
-                "is.</p>";
     }
 }

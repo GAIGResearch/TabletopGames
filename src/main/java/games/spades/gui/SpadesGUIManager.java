@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import games.GameType;
 import games.spades.SpadesGameState;
 import games.spades.SpadesParameters;
 import games.spades.actions.Bid;
@@ -11,6 +12,7 @@ import games.tricktaking.PlayCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -68,9 +70,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
         JPanel mainPanel = createMainGamePanel();
         tabbedPane.add("Game", mainPanel);
         
-        // Rules panel
-        JPanel rulesPanel = createRulesPanel();
-        tabbedPane.add("Rules", rulesPanel);
+        RulesView.addTabs(tabbedPane, GameType.Spades, gameState.getGameParameters(), WINDOW_HEIGHT * 2/3);
         
         parent.setLayout(new BorderLayout());
         parent.add(tabbedPane, BorderLayout.CENTER);
@@ -154,52 +154,6 @@ public class SpadesGUIManager extends AbstractGUIManager {
         mainPanel.add(actionPanel, BorderLayout.SOUTH);
         
         return mainPanel;
-    }
-    
-    private JPanel createRulesPanel() {
-        JPanel rulesPanel = new JPanel();
-        rulesPanel.setBackground(new Color(43, 108, 25, 111));
-        
-        JLabel rulesLabel = new JLabel(getRulesText());
-        rulesLabel.setVerticalAlignment(SwingConstants.TOP);
-        
-        JScrollPane scrollPane = new JScrollPane(rulesLabel);
-        scrollPane.setPreferredSize(new Dimension(WINDOW_WIDTH * 2/3, WINDOW_HEIGHT * 2/3));
-        
-        rulesPanel.add(scrollPane);
-        return rulesPanel;
-    }
-    
-    private String getRulesText() {
-        return "<html><center><h1>Spades</h1></center><br/><hr><br/>" +
-               "<p>Spades is a trick-taking card game for 4 players in 2 partnerships.</p>" +
-               "<ul>" +
-               "<li><b>Teams:</b> Players 0 & 2 vs Players 1 & 3</li>" +
-               "<li><b>Goal:</b> First team to reach 500 points wins</li>" +
-               "<li><b>Trump:</b> Spades are always trump cards</li>" +
-               "</ul>" +
-               "<h3>Bidding Phase:</h3>" +
-               "<ul>" +
-               "<li>Each player bids the number of tricks they expect to win (0-13)</li>" +
-               "<li>Bid of 0 is called 'Nil' - attempting to win no tricks</li>" +
-               "<li>All players must bid before playing begins</li>" +
-               "</ul>" +
-               "<h3>Playing Phase:</h3>" +
-               "<ul>" +
-               "<li>Players must follow suit if possible</li>" +
-               "<li>Spades beat all other suits (trump)</li>" +
-               "<li>Cannot lead spades until 'broken' (someone plays a spade)</li>" +
-               "<li>Exception: Can lead spades if only spades remaining</li>" +
-               "</ul>" +
-               "<h3>Scoring:</h3>" +
-               "<ul>" +
-               "<li><b>Made bid:</b> 10 points per bid trick + 1 per overtrick</li>" +
-               "<li><b>Failed bid:</b> Lose 10 points per bid trick</li>" +
-               "<li><b>Sandbags:</b> Every 10 overtricks = 100 point penalty</li>" +
-               "<li><b>Nil:</b> +100 if successful, -100 if failed</li>" +
-               "</ul>" +
-               "<hr><p><b>INTERFACE:</b> Click cards to play them. Use action buttons to bid.</p>" +
-               "</html>";
     }
     
     @Override

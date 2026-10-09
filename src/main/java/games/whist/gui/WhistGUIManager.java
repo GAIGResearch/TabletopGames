@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.FrenchCard;
+import games.GameType;
 import games.tricktaking.gui.CardArt;
 import games.tricktaking.gui.PlayerHandView;
 import games.tricktaking.gui.TrickView;
@@ -73,7 +74,7 @@ public class WhistGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml((WhistParameters) state.getGameParameters()), height));
+        RulesView.addTabs(tabs, GameType.Whist, state.getGameParameters(), height);
 
         // Player areas: player 0 at the bottom, then clockwise round the table, so partners face each other
         playerViews = new PlayerHandView[nPlayers];
@@ -214,46 +215,5 @@ public class WhistGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(WhistParameters params) {
-        String trumps;
-        if (params.trumpMode == WhistParameters.TrumpMode.TURN_UP) {
-            trumps = "The dealer's last card is turned face up, and its suit is trumps. The dealer keeps the card, " +
-                    "and may play it like any other card.";
-        } else {
-            StringBuilder order = new StringBuilder();
-            for (FrenchCard.Suite suit : WhistParameters.TRUMP_ROTATION)
-                order.append(order.isEmpty() ? "" : ", ").append(suit.name());
-            trumps = "Trumps change with each deal, in the order " + order +
-                    (params.noTrumpsInRotation ? ", and then a deal with no trumps" : "") + ". The order then repeats.";
-        }
-        String deals = params.nDeals == 1 ? "The game is a single deal. The team with more points wins."
-                : "After " + params.nDeals + " deals the team with more points wins.";
-        return "<h2>Whist</h2>" +
-                "<p>Four players play in two fixed teams, with partners sitting opposite each other. Team 0 is " +
-                "players 0 and 2, and team 1 is players 1 and 3.</p>" +
-                "<p><b>The deal.</b> All 52 cards are dealt one at a time, starting on the dealer's left, so each " +
-                "player holds 13. Aces are high.</p>" +
-                "<p><b>Trumps.</b> " + trumps + "</p>" +
-                "<p><b>Play.</b> The player on the dealer's left leads to the first trick with any card.</p><ul>" +
-                "<li>Each player in turn must follow the suit led if they can. A player who cannot follow may play " +
-                "any card.</li>" +
-                "<li>The highest trump wins the trick. If no trump was played, the highest card of the suit led " +
-                "wins.</li>" +
-                "<li>The winner of a trick leads the next one.</li></ul>" +
-                "<p><b>Scoring.</b> After the 13 tricks, a team that won more than six scores one point for each " +
-                "trick over six. The deal then passes to the left.</p>" +
-                "<p><b>Winning.</b> " + deals + " Teams with the same points draw.</p>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose a card to play from the action buttons at the bottom. Player 0 sits at the bottom of " +
-                "the table, and play goes clockwise. Each player's area shows their hand, the number of cards in " +
-                "it, their team and the tricks they have taken. \"Void in\" lists the suits a player is known to " +
-                "hold none of, because they did not follow that suit in this deal. The title under the area adds " +
-                "\"dealer\" for the dealer and \"led\" for the player who led the current trick. The current " +
-                "player's area has a blue border.</p>" +
-                "<p>The centre shows the deal and trick numbers, what is trumps, the suit led, and the trick so " +
-                "far. The card winning the trick is outlined in orange. Below the trick are the tricks each team " +
-                "has taken in this deal, and below that the points of each team.</p>";
     }
 }

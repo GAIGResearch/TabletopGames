@@ -4,10 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import gui.views.RulesView;
 import org.junit.Test;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
@@ -68,22 +66,6 @@ public class ChromeReaderTest {
         assertTrue(path.startsWith("M"));
         assertFalse(path.contains("C") || path.contains("Q"));
         assertTrue(path.endsWith("Z"));
-    }
-
-    @Test
-    public void rulesAreFoundInTheComponentsOfARulesTab() {
-        assertEquals("<h2>Rules</h2>", ChromeReader.rulesHtml(new RulesView("<h2>Rules</h2>", 300)));
-
-        String long_ = "<html><p>" + "Play a card. ".repeat(10) + "</p></html>";
-        JPanel panel = new JPanel();
-        panel.add(new JScrollPane(new JLabel(long_)));
-        assertEquals(long_, ChromeReader.rulesHtml(panel));
-
-        JTextArea area = new JTextArea("Lead <any> card & follow suit.\n".repeat(5));
-        assertTrue(ChromeReader.rulesHtml(area).contains("Lead &lt;any&gt; card &amp; follow suit."));
-
-        // a short label is a caption, not rules
-        assertNull(ChromeReader.rulesHtml(new JLabel("Score: 4")));
     }
 
     @Test

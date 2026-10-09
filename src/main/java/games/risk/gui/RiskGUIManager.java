@@ -3,6 +3,7 @@ package games.risk.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import games.GameType;
 import games.risk.RiskGameState;
 import games.risk.RiskParameters;
 import gui.AbstractGUIManager;
@@ -54,7 +55,7 @@ public class RiskGUIManager extends AbstractGUIManager {
         JTabbedPane tabs = new JTabbedPane();
         JPanel main = new JPanel(new BorderLayout());
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml(params), height + actionHeight + defaultInfoPanelHeight));
+        RulesView.addTabs(tabs, GameType.Risk, params, height + actionHeight + defaultInfoPanelHeight);
 
         JPanel gameArea = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         gameArea.add(mapView);
@@ -102,78 +103,5 @@ public class RiskGUIManager extends AbstractGUIManager {
         mapView.update(state);
         playersView.update(state);
         parent.repaint();
-    }
-
-    private static String rulesHtml(RiskParameters p) {
-        StringBuilder values = new StringBuilder();
-        for (int k = 1; k <= 8; k++)
-            values.append(k == 1 ? "" : ", ").append(p.tradeValue(k));
-        String limit = p.maxArmiesPerTerritory > 0
-                ? "<p>No territory may hold more than " + p.maxArmiesPerTerritory + " armies. Armies that " +
-                "cannot be placed for this reason are lost.</p>" : "";
-        String fortify = p.fortifyAlongPath
-                ? "to another territory you hold that is joined to it by a chain of territories you hold"
-                : "to a neighbouring territory you hold";
-        String setup = p.randomTerritoryDeal || p.secretMission
-                ? "<p>The territories are dealt at random, one army on each. "
-                : "<p>In turn, each player puts one army on an empty territory until all are claimed. ";
-        String winning = p.secretMission
-                ? "<p><b>Winning.</b> Each player has a secret mission. The first to complete it wins at once. " +
-                "Taking every territory also wins. If another player eliminates the player your mission tells you " +
-                "to destroy, you take over the eliminated player's mission. A mission to destroy yourself, or a " +
-                "player who is not in the game or is already out, is to occupy " + p.getMap().backupTerritories() +
-                " territories instead.</p>"
-                : "<p><b>Winning.</b> The player who holds every territory wins.</p>";
-        String placing = p.placementBatch > 1
-                ? p.placementBatch + " armies at a time while more than " + p.placementBatch + " are left, then one " +
-                "at a time"
-                : "one army at a time";
-        return "<h2>Risk</h2>" +
-                "<p><a href='#setup'>Setup</a> | <a href='#turn'>Turn</a> | <a href='#cards'>Cards</a> | " +
-                "<a href='#end'>End</a> | <a href='#screen'>Screen</a></p>" +
-                "<h3><a name='setup'>Setup</a></h3>" + setup +
-                "Then each player in turn places " + placing + " on a territory they hold, until all their " +
-                "starting armies are on the board.</p>" +
-                "<table border=1 cellpadding=3 cellspacing=0><tr><th>Players</th><th>3</th><th>4</th><th>5</th>" +
-                "<th>6</th></tr><tr><td>Starting armies</td><td>" + p.startArmies3 + "</td><td>" + p.startArmies4 +
-                "</td><td>" + p.startArmies5 + "</td><td>" + p.startArmies6 + "</td></tr></table>" +
-                "<h3><a name='turn'>Turn</a></h3><ol>" +
-                "<li><b>Reinforce.</b> You receive the number of territories you hold divided by " +
-                p.territoriesPerArmy + " (at least " + p.minReinforcements + "), plus the bonus for each " +
-                "continent you hold entirely (shown on the map). Place them " + placing + ". You may trade in " +
-                "cards before placing the last.</li>" +
-                "<li><b>Attack</b> (optional). Attack from a territory with at least 2 armies to a neighbouring " +
-                "enemy territory, rolling up to " + p.maxAttackDice + " dice but fewer than your armies there. " +
-                "The defender " + (p.defenderChoosesDice ? "chooses to roll from 1 to " : "rolls ") +
-                p.maxDefendDice + " dice, but no more than their armies there" +
-                ". The highest dice are compared in pairs, and the lower of each pair loses one army. The " +
-                "defender wins a tie. " +
-                (p.allowBlitz ? "Blitz attacks again and again with the most dice until the territory is taken " +
-                        "or you are down to one army. " : "") +
-                "When you take a territory you move in at least as many armies as dice rolled.</li>" +
-                "<li><b>Fortify</b> (optional). Move armies once, from one territory " + fortify +
-                ", leaving at least one behind. Then your turn ends.</li></ol>" + limit +
-                "<p>When moving armies (fortifying or moving in), at most " + p.maxMoveChoices + " numbers are " +
-                "offered: the least, the most, and evenly spaced numbers between.</p>" +
-                "<h3><a name='cards'>Cards</a></h3>" +
-                "<p>If you took at least one territory in your turn, you draw one card when you end your " +
-                "attacks. A set is three cards with the same symbol, one of each symbol, or any two with a wild " +
-                "card. The sets traded in by all players are worth " + values + (p.linearTradeValues ? ", and so " +
-                "on." : ", and then " + p.tradeValueIncrement + " more each.") + " If a card in the set " +
-                "shows a territory you hold, " + p.territoryBonus + " extra armies go on it (once a turn). With " +
-                p.handLimit + " or more cards you must trade before placing. If you eliminate a player you take " +
-                "their cards, and with " + p.eliminationTradeLimit + " or more you must trade at once until you " +
-                "hold fewer than " + p.handLimit + ".</p>" +
-                "<h3><a name='end'>End</a></h3>" + winning +
-                "<p>A player who loses their last territory is out. After " + p.getMaxRounds() + " rounds the " +
-                "game ends, and the players still in are ranked by territories, then armies.</p>" +
-                "<h3><a name='screen'>Screen</a></h3><ul>" +
-                "<li>Each disc is a territory, in its owner's colour with its armies, ringed in its continent's " +
-                "colour. Lines join neighbours. Alaska and Kamchatka are joined off the edges of the map.</li>" +
-                "<li>A black ring marks the two territories of an attack, move-in or defence waiting for a choice.</li>" +
-                "<li>The panel on the right lists the players (the one to act is marked &gt;), their cards by " +
-                "symbol (I Infantry, C Cavalry, A Artillery, W wild) and their mission when you may see them.</li>" +
-                "<li>The actions are listed below the map. ChooseAttack(from, to) picks the attack, " +
-                "then Attack(from, to, n) rolls n dice once" + (p.allowBlitz ? " or Blitz attacks to the end" : "") + ".</li></ul>";
     }
 }

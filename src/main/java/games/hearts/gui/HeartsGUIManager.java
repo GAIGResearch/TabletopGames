@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
+import games.GameType;
 import games.hearts.HeartsGameState;
 import games.hearts.HeartsParameters;
 import games.hearts.actions.Pass;
@@ -71,12 +72,7 @@ public class HeartsGUIManager extends AbstractGUIManager {
                 JPanel main = new JPanel();
                 main.setOpaque(false);
                 main.setLayout(new BorderLayout());
-                JPanel rules = new JPanel();
                 pane.add("Main", main);
-                pane.add("Rules", rules);
-                JLabel ruleText = new JLabel(getRuleText((HeartsParameters) gameState.getGameParameters()));
-                rules.add(ruleText);
-                rules.setBackground(new Color(43, 108, 25, 111));
 
                 activePlayer = gameState.getCurrentPlayer();
 
@@ -86,7 +82,6 @@ public class HeartsGUIManager extends AbstractGUIManager {
                 this.width = playerWidth * nHorizAreas;
                 this.height = (int) (playerHeight * nVertAreas * 2); // double the height
                 parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight * 2 + 20));
-                ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
                 HeartsGameState hgs = (HeartsGameState) gameState;
                 HeartsParameters bjgp = (HeartsParameters) gameState.getGameParameters();
@@ -170,8 +165,7 @@ public class HeartsGUIManager extends AbstractGUIManager {
                 main.add(south, BorderLayout.SOUTH);
 
                 pane.add("Main", main);
-                pane.add("Rules", rules);
-                pane.add("How to Play", new RulesView(howToPlayHtml(), height));
+                RulesView.addTabs(pane, GameType.Hearts, gameState.getGameParameters(), height);
 
                 parent.setLayout(new BorderLayout());
                 parent.add(pane, BorderLayout.CENTER);
@@ -369,23 +363,6 @@ public class HeartsGUIManager extends AbstractGUIManager {
         return text.toString();
     }
 
-    private static String howToPlayHtml() {
-        return "<h2>How to Play</h2>" +
-                "<p>Your hand is shown face up when it is your turn. Instead of using the action buttons below the " +
-                "table you can click on your cards.</p>" +
-                "<ul><li><b>Passing.</b> At the start of a round, click a card to pass it. Pass three cards, one " +
-                "click each. The line above the action buttons says which way the cards go.</li>" +
-                "<li><b>Playing.</b> Click a card to play it to the trick. The line above the action buttons shows " +
-                "the trick so far: who played what, and the suit led.</li></ul>" +
-                "<p>The cards you may pass or play have a yellow outline. A card without one cannot be played now, " +
-                "for example because you must follow the suit led.</p>" +
-                "<p><b>Tooltips.</b> Rest the mouse on a card to see what clicking it would do: who you would pass it " +
-                "to, or whether it follows suit, who would be winning the trick, how many points the trick would " +
-                "hold, and whether it breaks hearts. On a card you cannot play it says why.</p>" +
-                "<p>A left click on any card in a hand still raises it to the front so you can see it whole, as " +
-                "before.</p>";
-    }
-
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
 
@@ -445,20 +422,5 @@ public class HeartsGUIManager extends AbstractGUIManager {
 
 
         }
-    }
-
-    private String getRuleText(HeartsParameters params) {
-        String rules = "<html><center><h1>Hearts</h1></center><br/><hr><br/>";
-        rules = "<html><p>Hearts is a trick taking game where the objective is to avoid scoring points. The game is played over several rounds, and the player with the fewest points at the end of the game wins.</p>" +
-                "<ul><li>Each round starts with players passing three cards to another player. The direction of passing alternates each round. In the first round, players pass to the left. In the second round, they pass to the right. In the third round, they pass across. There is no passing in the fourth round, and then the cycle repeats.</li>" +
-                "<li>After the pass, play starts with the player holding the 2 of clubs leading the trick by playing it. Each player, in turn, must follow suit if possible. If a player does not have any cards of the leading suit, they can play any other card. The player who played the highest value card of the leading suit wins the trick and leads the next one.</li>" +
-                "<li>The player cannot play a Heart or the Queen of Spades in the first trick, and cannot play them in other tricks unless they have been 'broken', i.e., played in a previous trick. Hearts are broken with the first Heart played in the game.</li>" +
-                "<li>Each Heart card in a trick scores 1 point, and the Queen of Spades scores 13. However, if a player manages to take all scoring cards in a round (a move known as 'shooting the moon'), they score 0 points and each other player scores 26 points.</li>" +
-                "<li>The game ends when a player reaches or exceeds " + params.matchScore + " points at the end of a round, and the player with the fewest points is the winner.</li></ul>" +
-                "<hr><p><b>INTERFACE: </b> Choose a card to play from your hand at the bottom of the screen.</p>";
-        rules += "</html>";
-
-
-        return rules;
     }
 }

@@ -281,7 +281,7 @@ public class GameSession {
                 // Off screen, unless debugging. Its events come from the browser, so where it is does not matter.
                 frame.setLocation(showFrames ? 0 : -10_000, 0);
                 frame.setVisible(true);
-                chrome = new ChromeReader(gui, game, frame.getRootPane(), gameType.getDataPath(), out);
+                chrome = new ChromeReader(gui, game, frame.getRootPane(), gameType, out);
                 fitFrame();
                 byFrame.put(frame, this);
                 sendStarted(seed, players);

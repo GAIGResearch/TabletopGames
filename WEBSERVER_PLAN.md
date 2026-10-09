@@ -276,12 +276,16 @@ choice still reaches `HumanGUIPlayer` through the `ActionController`, and is one
 - Checked: contact sheets of the first frames of all 65 games at a 1400x800 space, drawn as the page shows them
   (centred); Ctrl+wheel zoom and pinch with synthetic events in Chrome. Not yet checked in a browser: the plain wheel
   and wheel areas, dragging to pan, and pinching on the stage around the game.
-- **Rules.** `ChromeReader` takes a GUI's rules tabs out of the image (any `RulesView`, and tabs titled Rules or How
-  to Play holding HTML in an editor or label, or text) and sends their HTML; a tab strip left with one tab is replaced
-  by that tab where the layout is a `BorderLayout`. The page shows the pages in a panel beside the game, with the page's
-  fonts and theme, wrapping to the width; links to anchors scroll within it. 33 games have rules this way. A game may
-  also have Markdown files in its data directory (`rules.md`, `how-to-play.md`; `gui.RulesPages`, commonmark with GFM
-  tables and heading anchors), which a desktop `RulesView` can show too; none are written yet.
+- **Rules.** A game's rules are Markdown files in `data/rules/<GameType>/`, one for each page, as the single source
+  for the desktop and the page. They are a template filled in from the game's parameters (`{param}` values, dotted
+  paths, and `<!-- if/elif/else/end -->` sections; `gui.RulesPages`, commonmark with GFM tables and heading anchors), so
+  that the rules are those of the variant being played; a name that is not a parameter is an error, in any branch. The
+  GUI adds the pages as `RulesView` tabs (`RulesView.addTabs`); `ChromeReader` takes those tabs out of the image (a tab
+  strip left with one tab is replaced by that tab where the layout is a `BorderLayout`) and sends the pages, which the
+  page shows in a panel beside the game, with the page's fonts and theme, wrapping to the width; links to headings
+  scroll within it (on the desktop too: `RulesView` follows ids as well as `<a name>`). The 33 games' rules, built in
+  Java before, were converted word for word: a throwaway checker compared each game's old rules tabs with the Markdown
+  filled in from the same parameters, for the defaults and for values exercising every branch.
 - Found: at its own preferred height Hearts' GUI draws its "0 points" over the player titles (a layout bug of the GUI,
   seen when zoomed in beyond the fit or in a small window).
 

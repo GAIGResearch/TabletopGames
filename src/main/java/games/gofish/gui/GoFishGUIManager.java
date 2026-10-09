@@ -15,6 +15,7 @@ import gui.AbstractGUIManager;
 import gui.ClickRegion;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
@@ -88,8 +89,7 @@ public class GoFishGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml((GoFishParameters) state.getGameParameters()), height));
-        tabs.add("How to Play", new RulesView(howToPlayHtml(), height));
+        RulesView.addTabs(tabs, GameType.GoFish, state.getGameParameters(), height);
 
         playerViews = new PlayerHandView[nPlayers];
         playerViewBorders = new Border[nPlayers];
@@ -348,23 +348,6 @@ public class GoFishGUIManager extends AbstractGUIManager {
         };
     }
 
-    private static String howToPlayHtml() {
-        return "<h2>How to Play</h2>" +
-                "<p>When it is your turn to ask you can click on the table instead of using the action buttons " +
-                "below it.</p><ol>" +
-                "<li><b>Choose the rank.</b> The cards in your hand that you can ask for have a yellow outline. " +
-                "Click one to ask for its rank: your cards of that rank turn green. Click it again to change your " +
-                "mind.</li>" +
-                "<li><b>Choose the player.</b> The players you can ask for that rank have a green border. Click one " +
-                "to ask them. When there is only one player to ask, clicking the card asks them straight away.</li>" +
-                "</ol>" +
-                "<p>Right-click on the players' areas to clear your choice.</p>" +
-                "<p><b>Tooltips.</b> Rest the mouse on a card or a player to see what clicking would do: the rank " +
-                "and how many you hold, what you know about whether the player holds it (cards they have shown, or " +
-                "known not to hold), and what happens if they have it and if they do not.</p>" +
-                "<p>The action buttons below the table offer the same asks, one button for each player and rank.</p>";
-    }
-
     /**
      * The player's books, and the ranks they are known not to hold.
      */
@@ -409,43 +392,5 @@ public class GoFishGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(GoFishParameters params) {
-        String given = params.continueOnSuccess
-                ? "they must give you all of them, face up, and you ask again."
-                : "they must give you all of them, face up, and the turn passes to the next player.";
-        String drawn = params.continueOnDrawingSameRank
-                ? "If it is the rank you asked for, you show it and ask again. Otherwise the turn passes to the " +
-                "next player."
-                : "The turn then passes to the next player.";
-        String end = params.playUntilAllBooks
-                ? "<p><b>The end.</b> Play goes on after a hand or the draw deck is empty. A player whose turn " +
-                "starts with an empty hand draws a card, or is skipped if the draw deck is empty. You may ask " +
-                "only a player who holds cards. The game ends when the player to ask has nobody to ask.</p>"
-                : "<p><b>The end.</b> The game ends as soon as any player's hand or the draw deck is empty.</p>";
-        return "<h2>Go Fish</h2>" +
-                "<p>Collect books. A book is all four cards of a rank. The player with the most books wins, and " +
-                "players tied for the most books share first place.</p>" +
-                "<p><b>The deal.</b> Each player is dealt " + params.startingHandSize + " cards (" +
-                params.twoPlayerHandSize + " each with 2 players). The rest form the draw deck. Player 0 asks " +
-                "first.</p>" +
-                "<p><b>Each turn</b> you ask another player for a rank that you hold. Asking shows everyone one of " +
-                "your cards of that rank.</p><ul>" +
-                "<li>If they have any cards of that rank, " + given + "</li>" +
-                "<li>If they have none, they say Go fish, and you draw the top card of the draw deck. " + drawn +
-                "</li></ul>" +
-                "<p>As soon as you hold all four cards of a rank, they are laid down as a book.</p>" +
-                end +
-                "<h3>Interface</h3>" +
-                "<p>The players' hands are in two rows, each titled with the player's number and agent. The current " +
-                "player's hand has a blue border. In a hidden hand, the cards shown to the table are face up. The " +
-                "line under a hand shows the number of cards, the ranks of the player's books, and the ranks the " +
-                "player is known not to hold (\"has no\"). A player is known not to hold a rank after saying Go " +
-                "fish or giving those cards away, until they next draw. J, Q, K and A stand for Jack, Queen, King " +
-                "and Ace.</p>" +
-                "<p>The centre shows the draw deck with its number of cards, when the game will end, and the " +
-                "player to ask. Each action button is an ask, such as \"Ask P1 for Kings\". How to Play " +
-                "explains asking by clicking on the table.</p>";
     }
 }

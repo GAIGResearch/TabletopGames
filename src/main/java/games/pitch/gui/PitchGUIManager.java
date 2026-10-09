@@ -3,8 +3,8 @@ package games.pitch.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import games.GameType;
 import games.pitch.PitchGameState;
-import games.pitch.PitchParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -87,7 +87,7 @@ public class PitchGUIManager extends AbstractGUIManager {
         JTabbedPane tabs = new JTabbedPane();
         tabs.setOpaque(false);
         tabs.add("Main", main);
-        tabs.add("Rules", new RulesView(rulesHtml((PitchParameters) state.getGameParameters()), tableHeight));
+        RulesView.addTabs(tabs, GameType.Pitch, state.getGameParameters(), tableHeight);
 
         height = tableHeight + defaultInfoPanelHeight + defaultActionPanelHeight + 60;
         parent.setLayout(new BorderLayout());
@@ -127,58 +127,5 @@ public class PitchGUIManager extends AbstractGUIManager {
         int bid = state.getPlayerBid(p);
         String bidText = bid < 0 ? "" : bid == 0 ? " - passed" : " - bid " + bid;
         return "Player " + p + agent + " (team " + state.getTeam(p) + role + ")" + bidText;
-    }
-
-    private static String rulesHtml(PitchParameters params) {
-        String hlj = params.countHighLowSeparately
-                ? "A card that is two or three of High, Low and Jack scores 1 for each of them."
-                : "A card that is two or three of High, Low and Jack scores only 1.";
-        String winning = params.targetScore <= 1
-                ? "The game is a single deal. The team with the higher score wins, and teams with the same score " +
-                  "draw."
-                : "Deals continue until the pitching team makes its bid and ends the deal with a score of " +
-                  params.targetScore + " or more. That team wins, whatever the other team's score.";
-        return "<h2>Pitch</h2>" +
-                "<p>Players 0 and 2 (team 0) play against players 1 and 3 (team 1). Each player is dealt " +
-                params.handSize + " cards from a 52-card deck, and the other cards are not used. Aces are high. " +
-                "The deal passes to the left after each deal.</p>" +
-                "<p><b>Bidding.</b> There is one round of bidding, starting on the dealer's left. Each player " +
-                "passes, or bids from " + params.minBid + " to " + params.smudgeBid + " points. A bid must be " +
-                "higher than the highest bid so far. The dealer bids last, and may take the bid by equalling the " +
-                "highest bid. If everyone else has passed, the dealer must bid. The highest bidder is the " +
-                "pitcher.</p>" +
-                "<p><b>Play.</b> The pitcher leads to the first trick, and the suit of that card is trumps for " +
-                "the deal. If you hold a card of the suit led, you must play a card of that suit or a trump. " +
-                "Otherwise you may play any card. The highest trump wins the trick. If the trick holds no trump, " +
-                "the highest card of the suit led wins. The winner leads the next trick.</p>" +
-                "<p><b>Points.</b> At the end of the deal each team takes these points from the cards in the " +
-                "tricks it won.</p>" +
-                "<table border=1 cellpadding=4 cellspacing=0>" +
-                "<tr><td>High</td><td>1 for the highest trump played</td></tr>" +
-                "<tr><td>Low</td><td>1 for the lowest trump played</td></tr>" +
-                "<tr><td>Jack</td><td>1 for the Jack of trumps, if it was dealt</td></tr>" +
-                "<tr><td>Game</td><td>1 for the higher total of card values below (nobody scores it when the " +
-                "totals are equal)</td></tr></table>" +
-                "<p>" + hlj + " The card values for Game are:</p>" +
-                "<table border=1 cellpadding=4 cellspacing=0>" +
-                "<tr><th align=left>Card</th><td align=center>Ace</td><td align=center>King</td>" +
-                "<td align=center>Queen</td><td align=center>Jack</td><td align=center>Ten</td></tr>" +
-                "<tr><th align=left>Value</th><td align=center>" + params.gameValueAce + "</td><td align=center>" +
-                params.gameValueKing + "</td><td align=center>" + params.gameValueQueen + "</td><td align=center>" +
-                params.gameValueJack + "</td><td align=center>" + params.gameValueTen + "</td></tr></table>" +
-                "<p><b>Scoring a deal.</b> The other team scores its points. The pitching team scores its points " +
-                "if they reach its bid, and otherwise loses the value of its bid. A bid of " + params.smudgeBid +
-                " is a smudge. The pitching team will then score " + params.smudgePoints + " if it wins every " +
-                "trick and all four points, and otherwise lose " + params.smudgePoints + ".</p>" +
-                "<p><b>Winning.</b> " + winning + "</p>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose Pass, a Bid or a card to Play from the action buttons at the bottom. Player 0 sits at " +
-                "the bottom, with players 1, 2 and 3 to the left, top and right. Each seat's title gives the " +
-                "player's team, marks the dealer, and shows their bid or \"passed\". The player to act has a " +
-                "blue border.</p>" +
-                "<p>The middle of the table shows the current trick, each card on the side of the player who " +
-                "played it. Below the trick are the trump suit, the pitcher and their bid, and each team's score " +
-                "and tricks won in this deal. When the game ends it also shows the points each team took in the " +
-                "last deal.</p>";
     }
 }

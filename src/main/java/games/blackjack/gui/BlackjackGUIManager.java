@@ -10,6 +10,7 @@ import games.blackjack.BlackjackParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import gui.views.CardView;
 import players.human.ActionController;
@@ -103,7 +104,7 @@ public class BlackjackGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml(params), height));
+        RulesView.addTabs(tabs, GameType.Blackjack, params, height);
 
         JPanel infoPanel = createGameStateInfoPanel("Blackjack", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
@@ -193,65 +194,5 @@ public class BlackjackGUIManager extends AbstractGUIManager {
         int total = BlackjackGameState.handValue(cards);
         if (total > BlackjackGameState.BLACKJACK) return "bust (" + total + ")";
         return (BlackjackGameState.isSoft(cards) ? "soft " : "") + total;
-    }
-
-    private static String rulesHtml(BlackjackParameters params) {
-        double p21 = params.payout21;
-        String odds = (p21 == Math.floor(p21) ? String.valueOf((int) p21) : String.valueOf(p21)) + " : 1";
-        String row = "<tr><td>%s</td><td>%s</td></tr>";
-        String payouts = "<table border=1 cellpadding=4 cellspacing=0>" +
-                "<tr><th align=left>Result</th><th align=left>Paid</th></tr>" +
-                String.format(row, params.payout21NaturalOnly ? "Natural" : "Winning hand of 21",
-                        odds + " (rounded down)") +
-                String.format(row, "Other winning hand", "1 : 1") +
-                String.format(row, "Push (equal totals)", "bet returned") +
-                String.format(row, "Insurance, when the dealer has Blackjack", "2 : 1") +
-                "</table>";
-        return "<h2>Blackjack</h2>" +
-                "<p>Each player plays against the dealer, not against the other players. Each player starts with " +
-                params.startingChips + " chips. The game lasts " + params.nHands + (params.nHands == 1 ? " hand" :
-                " hands") + ", played with one deck that is shuffled before each hand.</p>" +
-                "<p><b>Card values.</b> Court cards count 10. An Ace counts 11 (and the hand is then soft) " +
-                "unless that would take the total over 21, when it counts 1. A hand over 21 is bust and loses. " +
-                "A natural (Blackjack) is an Ace and a ten-value card as the first two cards, not after a split.</p>" +
-                "<p><b>Each hand.</b></p><ol>" +
-                "<li>Each player bets an even number of chips from " + params.minBet + " to " + params.maxBet +
-                ". A player with fewer than " + params.minBet + " chips sits the hand out.</li>" +
-                "<li>Each player is dealt two cards face up. The dealer is dealt one card face up and one face down " +
-                "(the hole card).</li>" +
-                "<li>If the dealer's up card is an Ace or a ten-value card, each player may buy insurance for half " +
-                "their bet.</li>" +
-                "<li>If the dealer has Blackjack, the hand ends. A player with a natural gets the bet back, and " +
-                "every other bet is lost.</li>" +
-                (params.payout21NaturalOnly ? "<li>Otherwise insurance is lost, and each natural is paid at once." +
-                        "</li>" : "<li>Otherwise insurance is lost.</li>") +
-                "<li>Each player in turn plays their hand.</li>" +
-                "<li>The dealer turns the hole card up and draws until the total is 17 or more" +
-                (params.dealerHitsSoft17 ? ", and also draws on a soft 17" : ", and stands on a soft 17") +
-                ".</li>" +
-                "<li>A hand wins if its total is higher than the dealer's or the dealer is bust.</li></ol>" +
-                "<p><b>Playing a hand.</b></p><ul>" +
-                "<li><b>Hit</b> takes a card. The hand ends if it goes bust.</li>" +
-                "<li><b>Stand</b> ends the hand.</li>" +
-                (params.doubleDown ? "<li><b>Double down</b> doubles the bet on the first two cards, takes one more " +
-                        "card and ends the hand. It is not allowed on a natural or after a split.</li>" : "") +
-                (params.splitting ? "<li><b>Split</b> makes a pair of the same rank into two hands, each with the " +
-                        "same bet and a second card. A player may have up to " + params.maxHandsAfterSplit +
-                        " hands. Split Aces get one card each and end.</li>" : "") +
-                "</ul>" +
-                (params.doubleDown || params.splitting ? "<p>" + (params.doubleDown && params.splitting
-                        ? "Double down and Split need" : params.doubleDown ? "Double down needs" : "Split needs") +
-                        " the chips to match the bet.</p>" : "") +
-                "<p><b>Payouts.</b></p>" + payouts +
-                "<p><b>Winning.</b> The game ends after the last hand, or sooner if no player has " + params.minBet +
-                " chips. A player with more chips than at the start wins, and one with the same number draws.</p>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose from the action buttons at the bottom. The dealer's area shows the dealer's cards and " +
-                "total (\"showing\" counts the up card only), the hand number, the stage of the hand and the cards " +
-                "left in the draw deck. Each player's area shows their chips and any insurance, and under each hand " +
-                "its total (\"Blackjack!\" for a natural) and bet. " +
-                "\"(sitting out)\" marks a player with no bet this hand.</p>" +
-                "<p>A blue outline shows whose turn it is, and the hand being played is outlined in yellow. At the " +
-                "end the result is shown after each player's name.</p>";
     }
 }
