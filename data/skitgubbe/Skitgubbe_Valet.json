@@ -1,0 +1,7 @@
+{
+  "class": "games.skitgubbe.SkitgubbeParameters",
+  "handSize": 3,
+  "maxPhaseTwoActions": 1000,
+  "completerLeads": false,
+  "exitOrderTiebreak": false
+}

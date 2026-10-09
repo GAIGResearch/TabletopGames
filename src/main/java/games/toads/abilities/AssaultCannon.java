@@ -26,7 +26,7 @@ public class AssaultCannon implements ToadAbility {
     @Override
     public List<Pair<Integer, BattleEffect>> tactics() {
         return List.of(
-                new Pair<>(10, (isAttacker, isFlank, br) -> br.postBattleActions.add(new AssaultCannonInterrupt(isAttacker ? 0 : 1))
+                new Pair<>(10, (isAttacker, isFlank, br) -> br.postBattleActions.add(new AssaultCannonInterrupt(isAttacker ? br.attacker : 1 - br.attacker))
                 ));
     }
 }

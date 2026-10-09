@@ -1,0 +1,11 @@
+{
+  "class": "games.schwimmen.SchwimmenParameters",
+  "handSize": 3,
+  "maxCircuitsPerDeal": 10,
+  "threeOfAKindValue": 30.5,
+  "threeAcesValue": 32.0,
+  "schnauzTotal": 31,
+  "livesGame": false,
+  "startingChips": 3,
+  "maxDeals": 100
+}
