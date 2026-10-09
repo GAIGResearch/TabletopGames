@@ -33,11 +33,11 @@ public class SessionConfigTest {
     @Test
     public void aFullSetupIsRead() {
         SessionConfig c = read("game", "LawnAndOrder", "players", "4", "seat", "2",
-                "opponents", "mcts-100,random,you,osla", "seed", "42", "pause", "0", "p.handSize", "6", "insight", "1");
+                "opponents", "Granny,random,you,osla", "seed", "42", "pause", "0", "p.handSize", "6", "insight", "1");
         assertEquals(GameType.LawnAndOrder, c.game());
         assertEquals(4, c.nPlayers());
         assertEquals(2, c.seat());
-        assertEquals(List.of("mcts-100", "random", "you", "osla"), c.opponents());
+        assertEquals(List.of("Granny", "random", "you", "osla"), c.opponents());
         assertEquals(42, c.seed());
         assertEquals(0, c.turnPause());
         assertEquals(Map.of("handSize", "6"), c.params());
@@ -50,7 +50,7 @@ public class SessionConfigTest {
         assertEquals(GameType.LawnAndOrder, c.game());   // the first game offered
         assertEquals(3, c.nPlayers());
         assertEquals(0, c.seat());
-        assertEquals(List.of("you", "mcts-1000", "mcts-1000"), c.opponents());   // the default in json/players/webserver
+        assertEquals(List.of("you", "Enid", "Enid"), c.opponents());   // the default in json/players/webserver
         assertEquals(-1, c.seed());
         assertEquals(SessionConfig.DEFAULT_TURN_PAUSE, c.turnPause());
         assertTrue(c.params().isEmpty());

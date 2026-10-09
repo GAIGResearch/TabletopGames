@@ -69,7 +69,7 @@ public class OpponentCatalogTest {
     public void theDefaultDirectoryOffersTheStandardAgents() {
         OpponentCatalog catalog = new OpponentCatalog(OpponentCatalog.DEFAULT_DIR);
         List<String> ids = catalog.forGame(GameType.LawnAndOrder).stream().map(OpponentCatalog.Opponent::id).toList();
-        assertTrue(ids.containsAll(List.of("random", "osla", "mcts-100", "mcts-1000", "mcts-5000")));
+        assertTrue(ids.containsAll(List.of("random", "osla", "Granny", "Enid", "Fabian")));
         for (String id : ids)
             assertNotNull(id, catalog.find(GameType.LawnAndOrder, id).create());
     }

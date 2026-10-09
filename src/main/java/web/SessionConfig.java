@@ -13,7 +13,7 @@ import java.util.Map;
  * <p>
  * It is read from the query string of the play page, so a game set up on the start page can be bookmarked or shared
  * as a link:
- * <pre>game=LawnAndOrder&amp;players=3&amp;seat=0&amp;opponents=you,mcts-1000,random&amp;seed=42&amp;pause=300&amp;p.handSize=6&amp;insight=1</pre>
+ * <pre>game=LawnAndOrder&amp;players=3&amp;seat=0&amp;opponents=you,Enid,random&amp;seed=42&amp;pause=300&amp;p.handSize=6&amp;insight=1</pre>
  *
  * @param opponents an {@link OpponentCatalog} id for every seat, in seat order; the browser player's entry is ignored
  * @param seed      the game seed, or -1 for a new seed for each game
