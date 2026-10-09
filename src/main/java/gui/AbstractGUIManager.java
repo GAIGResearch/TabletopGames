@@ -94,7 +94,8 @@ public abstract class AbstractGUIManager {
             clickable.offer(gameState, actions, player.getPlayerID());
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
-                actionButtons[i].setButtonAction(actions.get(i), gameState);
+                // the buttons are seen by the player choosing, so may show what only they know
+                actionButtons[i].setButtonAction(actions.get(i), actions.get(i).getString(gameState, player.getPlayerID()));
                 actionButtons[i].setBackground(Color.white);
             }
             for (int i = actions.size(); i < actionButtons.length; i++) {

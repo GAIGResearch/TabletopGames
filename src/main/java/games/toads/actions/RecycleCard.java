@@ -57,8 +57,16 @@ public class RecycleCard extends AbstractAction {
             return "Recycle nothing";
         return "Recycle " + discardedCard;
     }
+
+    // the opponent does not see which card was recycled
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return discardedCard == null ? toString() : "Player " + gameState.getCurrentPlayer() + " puts a card at the bottom of their deck and draws";
+    }
+
+    // the history is written before the action executes, so the current player is the one recycling the card
+    @Override
+    public String getString(AbstractGameState gameState, int perspectivePlayer) {
+        return perspectivePlayer == gameState.getCurrentPlayer() ? toString() : getString(gameState);
     }
 }
