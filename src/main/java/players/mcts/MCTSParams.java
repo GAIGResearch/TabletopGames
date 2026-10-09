@@ -1,11 +1,12 @@
 package players.mcts;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
 import org.jetbrains.annotations.NotNull;
 import players.PlayerParameters;
+import players.heuristics.GameDefaultHeuristic;
+import players.heuristics.NullActionHeuristic;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
 
@@ -57,12 +58,12 @@ public class MCTSParams extends PlayerParameters {
     public boolean maintainMasterState = false;
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = EXACT;
-    public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    public IStateHeuristic heuristic = new GameDefaultHeuristic();
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
     public double firstPlayUrgency = 1e6;
-    @NotNull public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
+    @NotNull public IActionHeuristic actionHeuristic = new NullActionHeuristic();
     public boolean useActionHeuristicForMoveOrdering = true;
     public boolean useMASTAsActionHeuristic = false;
     public int actionHeuristicRecalculationThreshold = 20;
@@ -104,7 +105,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("decoupled", false, Arrays.asList(false, true));
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", IStateHeuristic.class, AbstractGameState::getHeuristicScore);
+        addTunableParameter("heuristic", IStateHeuristic.class, new GameDefaultHeuristic());
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);

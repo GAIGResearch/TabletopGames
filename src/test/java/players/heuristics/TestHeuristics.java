@@ -1,12 +1,15 @@
 package players.heuristics;
 
 import core.actions.AbstractAction;
+import core.components.Deck;
+import games.dominion.DominionConstants;
 import games.dominion.DominionFGParameters;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
 import games.dominion.actions.BuyCard;
 import games.dominion.actions.EndPhase;
 import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
 import games.dominion.metrics.DomStateFeaturesReduced;
 import games.loveletter.*;
 import games.loveletter.actions.PlayCard;
@@ -16,6 +19,7 @@ import games.loveletter.features.LLStateFeaturesReduced;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -34,8 +38,30 @@ public class TestHeuristics {
     @Before
     public void setup() {
         fm.setup(domState);
+        setOpeningHandCoppers(5);
         llState.getGameParameters().setRandomSeed(393);
         llFm.setup(llState);
+    }
+
+    /**
+     * The opening hand is dealt at random from 7 Copper and 3 Estates. The tests need player 0 to be able to
+     * afford a Silver (otherwise the BuyCard fails silently), so we fix the hand rather than rely on the shuffle.
+     */
+    private void setOpeningHandCoppers(int coppers) {
+        Deck<DominionCard> hand = domState.getDeck(DominionConstants.DeckType.HAND, 0);
+        Deck<DominionCard> draw = domState.getDeck(DominionConstants.DeckType.DRAW, 0);
+        draw.add(hand);
+        hand.clear();
+        for (CardType type : new CardType[]{CardType.COPPER, CardType.ESTATE}) {
+            int wanted = type == CardType.COPPER ? coppers : 5 - coppers;
+            for (DominionCard card : new ArrayList<>(draw.getComponents())) {
+                if (wanted > 0 && card.cardType() == type) {
+                    draw.remove(card);
+                    hand.add(card);
+                    wanted--;
+                }
+            }
+        }
     }
 
     @Test
