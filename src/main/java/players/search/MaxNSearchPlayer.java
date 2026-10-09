@@ -203,6 +203,7 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
         MaxNSearchPlayer retValue = new MaxNSearchPlayer((MaxNSearchParameters) getParameters().shallowCopy());
         if (getForwardModel() != null)
             retValue.setForwardModel(getForwardModel());
+        retValue.setName(toString());
         return retValue;
     }
 
