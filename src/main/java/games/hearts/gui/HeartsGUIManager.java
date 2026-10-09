@@ -116,8 +116,7 @@ public class HeartsGUIManager extends AbstractGUIManager {
                     playerTrick.setOpaque(false);
 
 
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
+                    String agentName = game.getPlayers().get(i).toString();
 
 
                     TitledBorder title;

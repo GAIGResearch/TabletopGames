@@ -51,8 +51,7 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
         int nPlayers = state.getNPlayers();
         String[] agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
         }
 
         shown = state;

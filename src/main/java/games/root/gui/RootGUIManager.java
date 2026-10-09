@@ -73,8 +73,7 @@ public class RootGUIManager extends AbstractGUIManager {
                 switch (state.getPlayerFaction(i)) {
                     case MarquiseDeCat:
                         catPlayerView = new MarquisePlayerView(i, humanId, parameters.getDataPath(), state);
-                        String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                        String agentName = split[split.length - 1];
+                        String agentName = game.getPlayers().get(i).toString();
 
                         // Create border, layouts and keep track of this view
                         TitledBorder title = BorderFactory.createTitledBorder(
@@ -86,8 +85,7 @@ public class RootGUIManager extends AbstractGUIManager {
                         break;
                     case WoodlandAlliance:
                         woodlandPlayerView = new WoodlandPlayerView(i, humanId, parameters.getDataPath(), state);
-                        String[] split1 = game.getPlayers().get(i).getClass().toString().split("\\.");
-                        String agentName1 = split1[split1.length - 1];
+                        String agentName1 = game.getPlayers().get(i).toString();
 
                         // Create border, layouts and keep track of this view
                         TitledBorder title1 = BorderFactory.createTitledBorder(
@@ -99,8 +97,7 @@ public class RootGUIManager extends AbstractGUIManager {
                         break;
                     case EyrieDynasties:
                         eyriePlayerView = new EyriePlayerView(i, humanId, parameters.dataPath, state);
-                        String[] split2 = game.getPlayers().get(i).getClass().toString().split("\\.");
-                        String agentName2 = split2[split2.length - 1];
+                        String agentName2 = game.getPlayers().get(i).toString();
 
                         // Create border, layouts and keep track of this view
                         TitledBorder title2 = BorderFactory.createTitledBorder(
@@ -112,8 +109,7 @@ public class RootGUIManager extends AbstractGUIManager {
                         break;
                     case Vagabond:
                         vagabondPlayerView = new VagabondPlayerView(i, humanId, parameters.getDataPath(), state);
-                        String[] split3 = game.getPlayers().get(i).getClass().toString().split("\\.");
-                        String agentName3 = split3[split3.length - 1];
+                        String agentName3 = game.getPlayers().get(i).toString();
 
                         // Create border, layouts and keep track of this view
                         TitledBorder title3 = BorderFactory.createTitledBorder(

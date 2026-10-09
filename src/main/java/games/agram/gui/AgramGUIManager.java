@@ -88,8 +88,7 @@ public class AgramGUIManager extends AbstractGUIManager {
         for (int i = 0; i < nPlayers; i++) {
             PlayerHandView playerView = new PlayerHandView(state.getPlayerHands().get(i), i, playerAreaWidth);
             playerView.setOpaque(false);
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
             TitledBorder title = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i,
                     TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);

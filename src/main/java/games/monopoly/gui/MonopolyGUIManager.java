@@ -37,8 +37,7 @@ public class MonopolyGUIManager extends AbstractGUIManager {
 
         String[] agentNames = new String[state.getNPlayers()];
         for (int i = 0; i < agentNames.length; i++) {
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
         }
         boardView = new MonopolyBoardView();
         playersView = new MonopolyPlayersView(agentNames);

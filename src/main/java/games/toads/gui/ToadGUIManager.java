@@ -53,8 +53,7 @@ public class ToadGUIManager extends AbstractGUIManager {
         agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
             playerViews[i] = new ToadPlayerView();
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
         }
 
         int gap = 12;

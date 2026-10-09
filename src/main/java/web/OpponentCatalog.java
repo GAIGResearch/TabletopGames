@@ -28,9 +28,14 @@ class OpponentCatalog {
 
     record Opponent(String id, String description, boolean isDefault, File file) {
         AbstractPlayer create() {
-            JSONObject json = agentJson(file);
-            Object loaded = JSONUtils.loadClassFromJSON(json);
-            if (loaded instanceof TunableParameters<?> params) loaded = params.instantiate();
+            Object loaded;
+            try {
+                loaded = JSONUtils.loadClassFromJSON(agentJson(file));
+                if (loaded instanceof TunableParameters<?> params) loaded = params.instantiate();
+            } catch (RuntimeException | AssertionError e) {
+                // JSONUtils reports a bad file with an AssertionError
+                throw new IllegalArgumentException("The agent " + id + " (" + file + ") could not be loaded: " + e.getMessage(), e);
+            }
             if (!(loaded instanceof AbstractPlayer player))
                 throw new IllegalArgumentException(file + " does not define an AbstractPlayer or TunableParameters class");
             player.setName(id);

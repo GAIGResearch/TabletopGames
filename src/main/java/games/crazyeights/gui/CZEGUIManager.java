@@ -94,8 +94,7 @@ public class CZEGUIManager extends AbstractGUIManager {
             CZEPlayerView playerView = new CZEPlayerView(state.getPlayerHands().get(i), i, dataPath);
             playerView.setOpaque(false);
 
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            String agentName = split[split.length - 1];
+            String agentName = game.getPlayers().get(i).toString();
             TitledBorder title = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                     "Player " + i + " [" + agentName + "]" + (i == nPlayers - 1 ? " - dealer" : ""),

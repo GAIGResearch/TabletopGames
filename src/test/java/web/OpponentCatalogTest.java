@@ -45,6 +45,15 @@ public class OpponentCatalogTest {
     }
 
     @Test
+    public void aBadAgentFileIsReportedByName() throws IOException {
+        agent("broken", "{\"class\": \"players.mcts.MCTSParams\", \"treePolicy\": \"NoSuchPolicy\"}");
+        OpponentCatalog catalog = new OpponentCatalog(folder.getRoot().getPath());
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> catalog.find(GameType.LawnAndOrder, "broken").create());
+        assertTrue(e.getMessage(), e.getMessage().contains("broken") && e.getMessage().contains("NoSuchPolicy"));
+    }
+
+    @Test
     public void theDefaultIsTheMarkedAgentElseTheFirst() throws IOException {
         agent("a", "{\"class\": \"players.simple.RandomPlayer\"}");
         agent("b", "{\"class\": \"players.simple.RandomPlayer\"}");

@@ -116,8 +116,7 @@ public class SpadesGUIManager extends AbstractGUIManager {
             // Create border with player info
             String playerName = "Player " + i;
             if (game.getPlayers() != null && i < game.getPlayers().size()) {
-                String[] agentParts = game.getPlayers().get(i).getClass().getSimpleName().split("\\.");
-                String agentName = agentParts[agentParts.length - 1];
+                String agentName = game.getPlayers().get(i).toString();
                 playerName += " [" + agentName + "]";
             }
             

@@ -104,8 +104,7 @@ public class GoFishGUIManager extends AbstractGUIManager {
             PlayerHandView playerView = new PlayerHandView(state.getPlayerHands().get(i), (i + 1) % nPlayers,
                     playerAreaWidth);
             playerView.setOpaque(false);
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
             TitledBorder title = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i,
                     TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);

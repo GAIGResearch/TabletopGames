@@ -73,8 +73,7 @@ public class ScopaGUIManager extends AbstractGUIManager {
         agentNames = new String[nPlayers];
         JPanel[] playerRows = new JPanel[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
 
             CardHandView<TarotCard, TarotCard.Suit> hand = new CardHandView<>(FACE, state.getPlayerHand(i), i, handWidth);
             TitledBorder title = BorderFactory.createTitledBorder(

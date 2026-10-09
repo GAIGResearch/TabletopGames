@@ -125,6 +125,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("pUCTTemperature", 10001.0);
         addTunableParameter("initialiseVisits", 0);
         addTunableParameter("actionHeuristicRecalculation", 20);
+        addTunableParameter("actionHeuristicRecalculation", 2);
         addTunableParameter("useActionHeuristicForMoveOrdering", true);
         addTunableParameter("reuseTree", false);
         addTunableParameter("backupPolicy", MCTSEnums.BackupPolicy.MonteCarlo, Arrays.asList(MCTSEnums.BackupPolicy.values()));

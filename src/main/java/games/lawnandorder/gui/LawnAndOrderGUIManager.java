@@ -76,8 +76,7 @@ public class LawnAndOrderGUIManager extends AbstractGUIManager {
         playerCells = new JPanel[nPlayers];
         agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
             playerViews[i] = new LawnAndOrderPlayerView(i);
             JPanel cell = new JPanel(new BorderLayout());
             cell.setOpaque(false);

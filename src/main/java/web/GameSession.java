@@ -116,6 +116,8 @@ public class GameSession {
                 start(w, h, dpr);
             } catch (RuntimeException e) {
                 e.printStackTrace();
+                // nothing was left running to stop
+                started = false;
                 sendError("The game could not be started: " + e.getMessage());
                 out.close();
             }
@@ -152,8 +154,12 @@ public class GameSession {
 
         ActionController ac = new ActionController();
         List<AbstractPlayer> players = new ArrayList<>();
-        for (int i = 0; i < config.nPlayers(); i++)
-            players.add(i == config.seat() ? new HumanGUIPlayer(ac) : opponents.find(gameType, config.opponents().get(i)).create());
+        for (int i = 0; i < config.nPlayers(); i++) {
+            AbstractPlayer player = i == config.seat() ? new HumanGUIPlayer(ac) : opponents.find(gameType, config.opponents().get(i)).create();
+            // the GUIs show each player's name; an agent's is its file name
+            if (i == config.seat()) player.setName("Human");
+            players.add(player);
+        }
         game = gameType.createGameInstance(config.nPlayers(), seed, params);
         game.reset(players);
         game.setTurnPause(config.turnPause());

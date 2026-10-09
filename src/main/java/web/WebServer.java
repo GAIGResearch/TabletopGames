@@ -78,11 +78,12 @@ public class WebServer {
                     SessionConfig config = SessionConfig.fromQuery(ctx.queryParamMap(), games, opponents);
                     sessions.put(ctx.sessionId(), new GameSession(config, opponents, sender, showFrames));
                 } catch (IllegalArgumentException | IllegalStateException e) {
-                    JsonObject msg = new JsonObject();
-                    msg.addProperty("type", "error");
-                    msg.addProperty("message", e.getMessage());
-                    sender.sendText(msg.toString());
-                    sender.close();
+                    sendError(sender, e.getMessage());
+                } catch (Throwable t) {
+                    // anything else is a fault in the server or a game, not in the setup
+                    System.out.println("Could not start a game for " + ctx.queryString());
+                    t.printStackTrace();
+                    sendError(sender, "The game could not be started: " + t);
                 }
             });
             ws.onMessage(ctx -> {
@@ -94,6 +95,10 @@ public class WebServer {
                 if (session != null) session.stop();
             });
             ws.onError(ctx -> {
+                if (ctx.error() != null) {
+                    System.out.println("WebSocket error in session " + ctx.sessionId());
+                    ctx.error().printStackTrace();
+                }
                 GameSession session = sessions.remove(ctx.sessionId());
                 if (session != null) session.stop();
             });
@@ -113,5 +118,13 @@ public class WebServer {
         System.out.printf("Serving %s on http://localhost:%d/%s%n",
                 games.games().size() == 1 ? games.games().get(0).name() : games.games().size() + " games", port,
                 access.isOpen() ? "" : "?token=" + Utils.getArg(args, "token", ""));
+    }
+
+    private static void sendError(Sender sender, String message) {
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "error");
+        msg.addProperty("message", message);
+        sender.sendText(msg.toString());
+        sender.close();
     }
 }

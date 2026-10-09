@@ -66,8 +66,7 @@ public class BlackjackGUIManager extends AbstractGUIManager {
         players.setOpaque(false);
         for (int i = 0; i < nPlayers; i++) {
             playerViews[i] = new BlackjackPlayerView(i, params.splitting);
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
             playerTitles[i] = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                     "Player " + i, TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
             playerViews[i].setBorder(playerTitles[i]);

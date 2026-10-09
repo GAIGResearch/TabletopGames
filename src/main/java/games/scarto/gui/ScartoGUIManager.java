@@ -97,8 +97,7 @@ public class ScartoGUIManager extends AbstractGUIManager {
             CardHandView<TarotCard, TarotCard.Suit> playerView =
                     new CardHandView<>(FACE, state.getPlayerHand(i), i, playerAreaWidth);
             playerView.setOpaque(false);
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
             TitledBorder title = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i,
                     TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
