@@ -5,21 +5,16 @@ import core.AbstractParameters;
 import core.Game;
 import core.components.FrenchCard;
 import evaluation.optimisation.TunableParameters;
+import games.tricktaking.ITrickTakingParameters;
 import games.GameType;
 
 import java.util.*;
 
 /**
- * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
- * maximum number of rounds in the game etc.). These parameters should be used everywhere in the code instead of
- * local variables or hard-coded numbers, by accessing these parameters from the game state via {@link AbstractGameState#getGameParameters()}.</p>
- *
- * <p>It should then implement appropriate {@link #_copy()}, {@link #_equals(Object)} and {@link #hashCode()} functions.</p>
- *
- * <p>The class can optionally extend from {@link evaluation.optimisation.TunableParameters} instead, which allows to use
- * automatic game parameter optimisation tools in the framework.</p>
+ * Parameters for Hearts (https://www.pagat.com/reverse/hearts.html): a game to 100 points, with cards passed before
+ * each hand. data/hearts/Hearts_Valet.json gives the Valet version of the game, a single hand with no passing.
  */
-public class HeartsParameters extends TunableParameters<HeartsParameters> {
+public class HeartsParameters extends TunableParameters<HeartsParameters> implements ITrickTakingParameters {
     public String dataPath = "data/FrenchCards/";
     public final int shootTheMoon = 26;
     public final int heartCard = 1;
@@ -28,19 +23,30 @@ public class HeartsParameters extends TunableParameters<HeartsParameters> {
     public final FrenchCard startingCard = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2);
     public final int queenOfSpades = 13;
     public final int cardsPassedPerRound = 3;
-    public final int matchScore = 50;
+    // The game ends at the end of the first hand (round) in which any player has at least this many points
+    public int matchScore = 100;
     // If true then a player who fails to follow suit is remembered as being void in it, and
     // redeterminisation will not deal them any cards of that suit
     public boolean rememberVoids = true;
+    // If false then the simultaneous card-passing phase at the start of each round is skipped
+    // entirely, and every round goes straight to trick play
+    public boolean passCards = true;
+    // The game also ends after this many hands (rounds), even if nobody has reached matchScore.
+    // The default is high enough that in practice the score ends the game
+    public int maxRounds = 100;
 
     // Number of cards per player - index to array is nPlayers
     public final int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
             17, 13, 10, 8, 7};
 
+    // Cards to remove for each number of players
     Map<Integer, List<FrenchCard>> cardsToRemove = new HashMap<>();
 
     public HeartsParameters() {
         addTunableParameter("rememberVoids", true, Arrays.asList(false, true));
+        addTunableParameter("passCards", true, Arrays.asList(false, true));
+        addTunableParameter("maxRounds", 100, Arrays.asList(1, 2, 3, 5, 10, 100));
+        addTunableParameter("matchScore", 100, Arrays.asList(25, 50, 75, 100));
         cardsToRemove.put(3, Collections.singletonList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
         cardsToRemove.put(4, Collections.emptyList());
         cardsToRemove.put(5, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
@@ -57,6 +63,14 @@ public class HeartsParameters extends TunableParameters<HeartsParameters> {
     @Override
     public void _reset() {
         rememberVoids = (boolean) getParameterValue("rememberVoids");
+        passCards = (boolean) getParameterValue("passCards");
+        maxRounds = (int) getParameterValue("maxRounds");
+        matchScore = (int) getParameterValue("matchScore");
+    }
+
+    @Override
+    public boolean rememberVoids() {
+        return rememberVoids;
     }
 
     @Override

@@ -15,7 +15,7 @@ public class ScoutCards  implements IExtendedSequence {
 
     protected int player;
     protected boolean complete = false;
-    protected int CARDS_TO_SHOW = 3;
+    protected static final int CARDS_TO_SHOW = 3;
 
     public ScoutCards(int player) {
         this.player = player;

@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 /**
  * The Lambda, MaxLambda and MaxMC backup policies at a multi-actor node of a decoupled search,
  * on hand-built trees in the style of {@link BackupTests}. The rule under test (see
- * {@code MaxBackupAtSimultaneousNodes.md}):
+ * {@code DecoupledUCT.md} §7.2):
  * <ul>
  *     <li>each acting player's entry of the value handed to the parent is mixed with that player's
  *     own counterfactual, read from that player's own table;</li>

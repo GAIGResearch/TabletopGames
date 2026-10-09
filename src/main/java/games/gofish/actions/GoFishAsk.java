@@ -4,140 +4,108 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
+import games.gofish.GoFishForwardModel;
 import games.gofish.GoFishGameState;
+import games.gofish.GoFishKnownVoids;
+import games.gofish.GoFishParameters;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.Arrays;
 
 /**
- * Player asks another player for all cards of a specific rank.
- * If target has cards, asker gets them and continues turn (handled by FM).
- * If not, FM will require a draw ("Go Fish").
+ * The current player asks another player for all their cards of a rank the asker holds. If the target has none, the
+ * asker draws a card from the draw deck ("Go fish").
  */
 public class GoFishAsk extends AbstractAction {
 
     public final int targetPlayer;
-    public final int rankAsked;
+    public final int rank;
 
-    // Outcome flag set during execute(), read by ForwardModel._afterAction
-    public boolean receivedCards = false;
-
-    public GoFishAsk(int targetPlayer, int rankAsked) {
+    public GoFishAsk(int targetPlayer, int rank) {
         this.targetPlayer = targetPlayer;
-        this.rankAsked = rankAsked;
+        this.rank = rank;
     }
 
     @Override
     public boolean execute(AbstractGameState gameState) {
         GoFishGameState state = (GoFishGameState) gameState;
-        // Transfer all cards of that rank if target has them
-        if (state.playerHasRank(targetPlayer, rankAsked)) {
-            List<FrenchCard> transferred = state.removeCardsOfRank(targetPlayer, rankAsked);
-            int currentPlayer = state.getCurrentPlayer();
-            PartialObservableDeck<FrenchCard> askerHand = state.getPlayerHands().get(currentPlayer);
+        GoFishParameters params = (GoFishParameters) state.getGameParameters();
+        GoFishKnownVoids knownVoids = state.getKnownVoids();
+        int asker = state.getCurrentPlayer();
+        PartialObservableDeck<FrenchCard> askerHand = state.getPlayerHands().get(asker);
+        PartialObservableDeck<FrenchCard> targetHand = state.getPlayerHands().get(targetPlayer);
+        boolean[] allVisible = new boolean[state.getNPlayers()];
+        Arrays.fill(allVisible, true);
 
-            // Add transferred cards to asker's hand
-            for (FrenchCard c : transferred) {
-                askerHand.add(c);
-            }
-            receivedCards = true; // same player continues (FM decides)
-
-            // Visibility update: preserve any pre-existing "visible to all" cards, then reveal transferred cards first,
-            // and reveal one pre-existing card only if asker had pre-existing cards but none were visible-to-all before.
-            boolean[] allVisible = new boolean[state.getNPlayers()];
-            Arrays.fill(allVisible, true);
-            boolean[] noneVisible = new boolean[state.getNPlayers()];
-            Arrays.fill(noneVisible, false);
-            noneVisible[currentPlayer] = true;
-
-            // Collect indices of all cards of the asked rank in the asker's hand
-            List<Integer> transferredIndices = new java.util.ArrayList<>();
-            List<Integer> preexistingInvisibleIndices = new java.util.ArrayList<>();
-            List<Integer> preexistingVisibleIndices = new java.util.ArrayList<>();
-
-            for (int i = 0; i < askerHand.getSize(); i++) {
-                FrenchCard fc = askerHand.get(i);
-                if (fc.number != rankAsked) continue;
-                // check if currently visible to all players
-                boolean visibleToAll = true;
-                for (int p = 0; p < state.getNPlayers(); p++) {
-                    if (!askerHand.isComponentVisible(i, p)) { visibleToAll = false; break; }
+        // asking shows the table that the asker holds the rank
+        if (!holdsVisibleToAll(askerHand, rank))
+            for (int i = 0; i < askerHand.getSize(); i++)
+                if (askerHand.get(i).number == rank) {
+                    askerHand.setVisibilityOfComponent(i, allVisible);
+                    break;
                 }
-                if (visibleToAll) {
-                    preexistingVisibleIndices.add(i);
-                } else {
-                    // check if this object is one of the transferred ones (identity)
-                    boolean isTransferred = false;
-                    for (FrenchCard tc : transferred) {
-                        if (askerHand.get(i) == tc) { isTransferred = true; break; }
-                    }
-                    if (isTransferred) transferredIndices.add(i);
-                    else preexistingInvisibleIndices.add(i);
-                }
-            }
 
-            // compute whether asker had pre-existing cards (after transfer math)
-            int totalRankAfter = transferredIndices.size() + preexistingInvisibleIndices.size() + preexistingVisibleIndices.size();
-            int preExistingCount = Math.max(0, totalRankAfter - transferred.size());
-
-            int needVisible = transferred.size() + (preExistingCount > 0 && preexistingVisibleIndices.isEmpty() ? 1 : 0);
-
-            // Do NOT hide any indices that are already visible to all; hide only the non-visible ones for determinism
-            for (int idx : transferredIndices) askerHand.setVisibilityOfComponent(idx, noneVisible);
-            for (int idx : preexistingInvisibleIndices) askerHand.setVisibilityOfComponent(idx, noneVisible);
-
-            // Reveal transferred indices first
-            int revealed = 0;
-            for (int idx : transferredIndices) {
-                if (revealed >= needVisible) break;
-                askerHand.setVisibilityOfComponent(idx, allVisible);
-                revealed++;
-            }
-            // If still need more (i.e., transferred < needVisible), reveal some preexisting invisible indices
-            for (int idx : preexistingInvisibleIndices) {
-                if (revealed >= needVisible) break;
-                askerHand.setVisibilityOfComponent(idx, allVisible);
-                revealed++;
-            }
-
+        knownVoids.record(targetPlayer, rank);
+        if (state.playerHasRank(targetPlayer, rank)) {
+            for (FrenchCard c : GoFishForwardModel.removeCardsOfRank(targetHand, rank).getComponents())
+                askerHand.add(c, allVisible);
+            knownVoids.received(asker, rank);
+            state.setExtraTurn(params.continueOnSuccess);
         } else {
-            receivedCards = false; // FM will force a draw or pass
+            // Go fish: the drawn card is private, unless it is the rank asked for and is shown to take another turn
+            FrenchCard drawn = state.getDrawDeck().draw();
+            if (drawn == null) {
+                // the draw deck is empty (GoFishParameters.playUntilAllBooks)
+                state.setExtraTurn(false);
+                return true;
+            }
+            boolean shown = params.continueOnDrawingSameRank && drawn.number == rank;
+            if (shown)
+                askerHand.add(drawn, allVisible);
+            else
+                askerHand.add(drawn);
+            knownVoids.drew(asker);
+            state.setExtraTurn(shown);
         }
         return true;
     }
 
+    private static boolean holdsVisibleToAll(PartialObservableDeck<FrenchCard> hand, int rank) {
+        for (int i = 0; i < hand.getSize(); i++) {
+            if (hand.get(i).number != rank) continue;
+            boolean visibleToAll = true;
+            for (boolean v : hand.getVisibilityOfComponent(i))
+                visibleToAll &= v;
+            if (visibleToAll)
+                return true;
+        }
+        return false;
+    }
+
     @Override
     public GoFishAsk copy() {
-        GoFishAsk retValue =  new GoFishAsk(targetPlayer, rankAsked);
-        retValue.receivedCards = this.receivedCards;
-        return retValue;
+        return this;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof GoFishAsk other)) return false;
-        // Equality is based on intent (who asks whom for what), not the outcome.
-        return targetPlayer == other.targetPlayer
-                && receivedCards == other.receivedCards
-                && rankAsked == other.rankAsked;
+        return targetPlayer == other.targetPlayer && rank == other.rank;
     }
 
     @Override
     public int hashCode() {
-        // Do NOT include receivedCards in hash (it changes after execute()).
-        return Objects.hash(targetPlayer, rankAsked, receivedCards);
+        return 31 * targetPlayer + rank + 294017;
     }
 
     @Override
     public String toString() {
-        String rankName = switch (rankAsked) {
+        String rankName = switch (rank) {
             case 14 -> "Aces";
             case 11 -> "Jacks";
             case 12 -> "Queens";
             case 13 -> "Kings";
-            default -> rankAsked + "s";
+            default -> rank + "s";
         };
         return "Ask P" + targetPlayer + " for " + rankName;
     }

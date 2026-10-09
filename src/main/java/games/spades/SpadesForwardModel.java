@@ -7,14 +7,14 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
 import games.spades.actions.Bid;
-import games.spades.actions.PlayCard;
-import utilities.Pair;
+import games.tricktaking.CardOrder;
+import games.tricktaking.PlayCard;
+import games.tricktaking.PlayRule;
+import games.tricktaking.Trick;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 public class SpadesForwardModel extends StandardForwardModel {
@@ -36,7 +36,6 @@ public class SpadesForwardModel extends StandardForwardModel {
             state.playerBids[i] = -1;
             state.tricksTaken[i] = 0;
         }
-        state.currentTrick.clear();
         state.spadesBroken = false;
 
         startNewRound(state);
@@ -62,45 +61,16 @@ public class SpadesForwardModel extends StandardForwardModel {
                 actions.add(new Bid(0, true));
             }
         } else if (state.getGamePhase() == SpadesGameState.Phase.PLAYING) {
-            Deck<FrenchCard> playerHand = state.getPlayerHands().get(currentPlayer);
-
-            for (FrenchCard card : playerHand.getComponents()) {
-                if (isValidPlay(state, card)) {
-                    actions.add(new PlayCard(card));
-                }
+            // spades may not be led until they are broken, unless the leader holds nothing else
+            PlayRule<FrenchCard, FrenchCard.Suite> rule = state.isSpadesBroken() ? PlayRule.FOLLOW_SUIT
+                    : PlayRule.leadRestricted(FrenchCard.Suite.Spades);
+            List<FrenchCard> hand = state.getPlayerHand(currentPlayer).getComponents();
+            for (FrenchCard card : rule.legalPlays(hand, state.getCurrentTrick())) {
+                actions.add(new PlayCard<>(card));
             }
         }
 
         return actions;
-    }
-
-    /**
-     * Determines legal card plays
-     */
-    private boolean isValidPlay(SpadesGameState state, FrenchCard card) {
-        List<Pair<Integer, FrenchCard>> currentTrick = state.getCurrentTrick();
-        int currentPlayer = state.getCurrentPlayer();
-        Deck<FrenchCard> playerHand = state.getPlayerHands().get(currentPlayer);
-
-        if (currentTrick.isEmpty()) {
-            if (card.suite == FrenchCard.Suite.Spades) {
-                if (!state.isSpadesBroken()) {
-                    return playerHand.getComponents().stream()
-                            .allMatch(c -> c.suite == FrenchCard.Suite.Spades);
-                }
-            }
-            return true;
-        } else {
-            FrenchCard.Suite leadSuit = state.getLeadSuit();
-            if (card.suite == leadSuit) {
-                return true;
-            }
-
-            boolean hasLeadSuit = playerHand.getComponents().stream()
-                    .anyMatch(c -> c.suite == leadSuit);
-
-            return !hasLeadSuit;
-        }
     }
 
     @Override
@@ -112,27 +82,23 @@ public class SpadesForwardModel extends StandardForwardModel {
                 state.setGamePhase(SpadesGameState.Phase.PLAYING);
             }
             endPlayerTurn(state);
-        } else if (actionTaken instanceof PlayCard playAction) {
+        } else if (actionTaken instanceof PlayCard<?> playAction) {
 
-            if (state.getCurrentTrick().size() == 1) {
-                state.setLeadSuit(playAction.card.suite);
-            }
-
-            if (playAction.card.suite == FrenchCard.Suite.Spades) {
+            if (((FrenchCard) playAction.card).suite == FrenchCard.Suite.Spades) {
                 state.setSpadesBroken(true);
             }
 
-            if (state.getCurrentTrick().size() == state.getNPlayers()) {
-                // trick finished
-                int trickWinner = determineTrickWinner(state);
+            Trick<FrenchCard, FrenchCard.Suite> trick = state.getCurrentTrick();
+            if (trick.isComplete()) {
+                // trick finished: spades are trumps
+                int trickWinner = trick.winner(FrenchCard.Suite.Spades);
                 state.incrementTricksTaken(trickWinner);
 
                 Deck<FrenchCard> trickDeck = new Deck<>("Trick", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
-                for (Pair<Integer, FrenchCard> entry : state.getCurrentTrick()) {
-                    trickDeck.add(entry.b);
-                }
+                for (FrenchCard card : trick.getComponents())
+                    trickDeck.addToBottom(card);
                 state.tricksWon.get(trickWinner).add(trickDeck);
-                state.clearCurrentTrick();
+                state.currentTrick = new Trick<>("CurrentTrick", state.getNPlayers(), trickWinner, CardOrder.STANDARD);
                 endPlayerTurn(state, trickWinner);
 
                 if (state.getPlayerHands().get(0).getSize() == 0) {
@@ -144,47 +110,6 @@ public class SpadesForwardModel extends StandardForwardModel {
             }
 
         }
-    }
-
-    /**
-     * Determines the winner of a completed trick
-     */
-    private int determineTrickWinner(SpadesGameState state) {
-        List<Pair<Integer, FrenchCard>> trick = state.getCurrentTrick();
-        FrenchCard.Suite leadSuit = state.getLeadSuit();
-
-        int winner = trick.get(0).a;
-        FrenchCard winningCard = trick.get(0).b;
-
-        for (Pair<Integer, FrenchCard> entry : trick) {
-            FrenchCard card = entry.b;
-
-            if (card.suite == FrenchCard.Suite.Spades && winningCard.suite != FrenchCard.Suite.Spades) {
-                winner = entry.a;
-                winningCard = card;
-            } else if (card.suite == FrenchCard.Suite.Spades) {
-                if (getCardValue(card) > getCardValue(winningCard)) {
-                    winner = entry.a;
-                    winningCard = card;
-                }
-            } else if (card.suite == leadSuit && winningCard.suite != FrenchCard.Suite.Spades) {
-                if (winningCard.suite != leadSuit || getCardValue(card) > getCardValue(winningCard)) {
-                    winner = entry.a;
-                    winningCard = card;
-                }
-            }
-        }
-
-        return winner;
-    }
-
-    /**
-     * Gets the value of a card for comparison (higher is better)
-     */
-    private int getCardValue(FrenchCard card) {
-        if (card.type == FrenchCard.FrenchCardType.Number)
-            return card.number;
-        return card.type.getNumber();
     }
 
     /**
@@ -283,15 +208,13 @@ public class SpadesForwardModel extends StandardForwardModel {
             state.tricksWon.get(i).clear();
         }
 
-        state.currentTrick.clear();
+        // the first player of the round bids first, and then leads the first trick
+        state.currentTrick = new Trick<>("CurrentTrick", state.getNPlayers(), state.getFirstPlayer(), CardOrder.STANDARD);
         state.setGamePhase(SpadesGameState.Phase.BIDDING);
         state.setSpadesBroken(false);
-        state.leadSuit = null;
 
         // known voids are only valid for the current round, as hands are re-dealt each round
-        for (Set<FrenchCard.Suite> voids : state.knownVoids) {
-            voids.clear();
-        }
+        state.knownVoids.clear();
 
         for (int i = 0; i < state.getNPlayers(); i++) {
             Deck<FrenchCard> hand = state.getPlayerHands().get(i);

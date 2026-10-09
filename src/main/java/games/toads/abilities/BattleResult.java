@@ -2,6 +2,7 @@ package games.toads.abilities;
 
 import core.interfaces.IExtendedSequence;
 import games.toads.*;
+import games.toads.ToadConstants.ToadCardType;
 import games.toads.actions.AssaultCannonInterrupt;
 import games.toads.components.ToadCard;
 import utilities.Pair;
@@ -14,10 +15,10 @@ public class BattleResult {
     ToadCard defenderField;
     ToadCard attackerFlank;
     ToadCard defenderFlank;
-    int AField;
-    int AFlank;
-    int DField;
-    int DFlank;
+    double AField;
+    double AFlank;
+    double DField;
+    double DFlank;
     final int attacker;
     final boolean[] frogOverride = new boolean[2];
     final boolean[] activatedFields = new boolean[2];
@@ -27,6 +28,12 @@ public class BattleResult {
     boolean useTactics = false;
     ToadGameState state;
     PriorityQueue<Tactic> tacticsToApply = new PriorityQueue<>(Comparator.comparingInt(t -> t.priority));
+    // the group of tactics being run, the values before it started, and the cards it has blocked
+    List<Tactic> currentGroup = new ArrayList<>();
+    double[] snapshot = new double[4];
+    final List<boolean[]> pendingBlocks = new ArrayList<>();
+    // tieBreak[side][lane]: side 0 is the Attacker, lane 0 the Field
+    final boolean[][] tieBreak = new boolean[2][2];
 
     record Tactic(int priority, boolean isAttacker, boolean isFlank, ToadAbility.BattleEffect effect) {
     }
@@ -65,6 +72,7 @@ public class BattleResult {
         AFlank = attackerFlank.value;
         DField = defenderField.value;
         DFlank = defenderFlank.value;
+        snapshot = new double[]{AField, AFlank, DField, DFlank};
 
 
         if (useTactics) {
@@ -84,10 +92,7 @@ public class BattleResult {
         }
 
         // then apply tactics
-        while (!tacticsToApply.isEmpty() && tacticsToApply.peek().priority < 0) {
-            Tactic tactic = tacticsToApply.poll();
-            tactic.effect.apply(tactic.isAttacker, tactic.isFlank, this);
-        }
+        applyTactics(0);
 
         // apply CardModifiers at priority 0
         if (attackerField.ability != null) {
@@ -112,20 +117,12 @@ public class BattleResult {
         }
 
         // then apply tactics that occur after Card Modifiers
-        while (!tacticsToApply.isEmpty()) {
-            Tactic tactic = tacticsToApply.poll();
-            tactic.effect.apply(tactic.isAttacker, tactic.isFlank, this);
-        }
+        applyTactics(Integer.MAX_VALUE);
 
-        if (AField > DField) {
-            result[0]++;
-        } else if (AField < DField) {
-            result[1]++;
-        }
-        if (AFlank > DFlank) {
-            result[0]++;
-        } else if (AFlank < DFlank) {
-            result[1]++;
+        for (boolean isFlank : new boolean[]{false, true}) {
+            int winner = resolveLane(isFlank);
+            if (winner >= 0)
+                result[winner]++;
         }
 
         int[] retValue = new int[2];
@@ -138,7 +135,65 @@ public class BattleResult {
         return retValue;
     }
 
-    void swapFieldAndFlank(int player) {
+    /**
+     * Runs the queued tactics with a priority below maxPriority, in groups that share a priority.
+     */
+    private void applyTactics(int maxPriority) {
+        while (!tacticsToApply.isEmpty() && tacticsToApply.peek().priority < maxPriority) {
+            int priority = tacticsToApply.peek().priority;
+            currentGroup = new ArrayList<>();
+            while (!tacticsToApply.isEmpty() && tacticsToApply.peek().priority == priority)
+                currentGroup.add(tacticsToApply.poll());
+            // the Attacker's tactics run first, and the Flank's before the Field's
+            currentGroup.sort(Comparator.comparing((Tactic t) -> !t.isAttacker).thenComparing(t -> !t.isFlank));
+            snapshot = new double[]{AField, AFlank, DField, DFlank};
+            for (int i = 0; i < currentGroup.size(); i++) {
+                Tactic tactic = currentGroup.get(i);
+                tactic.effect.apply(tactic.isAttacker, tactic.isFlank, this);
+            }
+            // blocks take effect only once the whole group has run, so two Bodyguards block each other
+            for (boolean[] target : pendingBlocks) {
+                ToadCard card = getCard(target[0], target[1]);
+                if (card.tactics == null || card.tactics.canBeBlocked())
+                    setActivation(target[0], target[1], false);
+            }
+            pendingBlocks.clear();
+        }
+        currentGroup = new ArrayList<>();
+    }
+
+    /**
+     * The winner of a lane: 0 for the Attacker, 1 for the Defender, or -1 for a tie.
+     */
+    private int resolveLane(boolean isFlank) {
+        ToadCard attackerCard = getCard(true, isFlank);
+        ToadCard defenderCard = getCard(false, isFlank);
+        // a Siege Cannon ignores Strength: it loses in Defence, and in Attack wins unless it faces a Saboteur
+        if (attackerCard.type == ToadCardType.SIEGE_CANNON)
+            return defenderCard.type == ToadCardType.SABOTEUR ? 1 : 0;
+        if (defenderCard.type == ToadCardType.SIEGE_CANNON)
+            return 0;
+        // an Assassin beats a General (the printed value of both Generals)
+        if (attackerCard.type == ToadCardType.ASSASSIN && defenderCard.value == ToadConstants.ASSASSIN_KILLS)
+            return 0;
+        if (defenderCard.type == ToadCardType.ASSASSIN && attackerCard.value == ToadConstants.ASSASSIN_KILLS)
+            return 1;
+        double attackerValue = getCurrentValue(true, isFlank);
+        double defenderValue = getCurrentValue(false, isFlank);
+        if (attackerValue != defenderValue)
+            return attackerValue > defenderValue ? 0 : 1;
+        // a tie is broken only if exactly one side breaks ties
+        int lane = isFlank ? 1 : 0;
+        if (tieBreak[0][lane] != tieBreak[1][lane])
+            return tieBreak[0][lane] ? 0 : 1;
+        return -1;
+    }
+
+    /**
+     * Swaps a player's Field and Flank cards, with their values, activation, queued Tactics and tie-break flags.
+     * player is 0 for the Attacker, 1 for the Defender. (Public so that tests can build a swapping ability.)
+     */
+    public void swapFieldAndFlank(int player) {
 
         // then activation state
         boolean tempBool = activatedFields[player];
@@ -150,17 +205,20 @@ public class BattleResult {
             ToadCard temp = attackerField;
             attackerField = attackerFlank;
             attackerFlank = temp;
-            int tempVal = AField;
+            double tempVal = AField;
             AField = AFlank;
             AFlank = tempVal;
         } else if (player == 1) {
             ToadCard temp = defenderField;
             defenderField = defenderFlank;
             defenderFlank = temp;
-            int tempVal = DField;
+            double tempVal = DField;
             DField = DFlank;
             DFlank = tempVal;
         }
+        boolean tempTieBreak = tieBreak[player][0];
+        tieBreak[player][0] = tieBreak[player][1];
+        tieBreak[player][1] = tempTieBreak;
 
         // we map any tactic for the cards to be identical, but with isFlank marker reversed
         List<Tactic> newTactics = tacticsToApply.stream().map(t -> {
@@ -172,13 +230,15 @@ public class BattleResult {
         }).toList();
         tacticsToApply.clear();
         tacticsToApply.addAll(newTactics);
+        // and likewise any tactics of the current group that have yet to run
+        currentGroup.replaceAll(t -> t.isAttacker() == (player == 0) ? new Tactic(t.priority, t.isAttacker, !t.isFlank, t.effect) : t);
     }
 
-    public int getCurrentValue(boolean isAttacker, boolean isFlank) {
+    public double getCurrentValue(boolean isAttacker, boolean isFlank) {
         return isAttacker ? (isFlank ? AFlank : AField) : (isFlank ? DFlank : DField);
     }
 
-    public void addValue(boolean isAttacker, boolean isFlank, int value) {
+    public void addValue(boolean isAttacker, boolean isFlank, double value) {
         if (isAttacker) {
             if (isFlank) {
                 AFlank += value;
@@ -251,6 +311,32 @@ public class BattleResult {
                 defenderField = card;
             }
         }
+    }
+
+    /**
+     * The value of a card as it stood before the current group of Tactics (those sharing a priority) started.
+     */
+    public double getSnapshotValue(boolean isAttacker, boolean isFlank) {
+        return snapshot[(isAttacker ? 0 : 2) + (isFlank ? 1 : 0)];
+    }
+
+    /**
+     * Blocks the Tactics of a card. The block takes effect once every Tactic of the current group has run, and has
+     * no effect on a card whose ability cannot be blocked.
+     */
+    public void block(boolean isAttacker, boolean isFlank) {
+        pendingBlocks.add(new boolean[]{isAttacker, isFlank});
+    }
+
+    /**
+     * The card wins its lane if the lane is tied (unless the opposing card also breaks ties).
+     */
+    public void setTieBreak(boolean isAttacker, boolean isFlank) {
+        tieBreak[isAttacker ? 0 : 1][isFlank ? 1 : 0] = true;
+    }
+
+    public boolean hasTieBreak(boolean isAttacker, boolean isFlank) {
+        return tieBreak[isAttacker ? 0 : 1][isFlank ? 1 : 0];
     }
 
     public boolean getFrogOverride(int player) {
