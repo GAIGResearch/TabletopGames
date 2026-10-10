@@ -13,10 +13,8 @@ import static games.ventlife.VentlifeTestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Volcano Snail placement: the first Snail on any empty Basalt Ridge hex, as a normal creature step; then the same
- * player may place more, one at a time, each on an empty Basalt hex next to a Snail placed this turn, or stop
- * (StopPlacing). The turn ends without a decision once maxSnailsPerTurn are placed, the supply is empty or no
- * adjacent Basalt hex is left. Most tests use the Basalt chain field (VentlifeTestUtils.buildBasaltChain): Basalt
+ * Volcano Snail placement: the first Snail, the follow-on Snails of the same turn, and when the turn ends.
+ * Most tests use the Basalt chain field (VentlifeTestUtils.buildBasaltChain): Basalt
  * (0,1)-(1,0)-(2,0)-(3,0) in a chain and (-1,0) on its own, all level 1; player 1 places D/M at ((1,-2),0)
  * ((1,-2) S, (1,-1) D, (2,-2) M) and then has the creature step.
  */

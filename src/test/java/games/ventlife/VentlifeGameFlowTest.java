@@ -22,13 +22,6 @@ import static org.junit.Assert.*;
  */
 public class VentlifeGameFlowTest {
 
-    /** Parameters with the species-exhaustion end (a later phase) switched off, so only the tiles end the game. */
-    private static VentlifeParameters tilesOnlyEnd() {
-        VentlifeParameters params = new VentlifeParameters();
-        params.setParameterValue("exhaustedSpeciesToEnd", 0);
-        return params;
-    }
-
     @Test
     public void placingATileDrawsTheTopTileAndPassesTheTurn() {
         Game game = newGame(3, 5);
@@ -76,7 +69,7 @@ public class VentlifeGameFlowTest {
     }
 
     /**
-     * The 7.4 example in a real game with only Tube Worms in play: a worm placed on a seafloor Smoker scores 1, 2 once
+     * The rulebook's Tube Worm example (section 7.4) in a real game with only Tube Worms in play: a worm placed on a seafloor Smoker scores 1, 2 once
      * a plateau tile's Smoker lifts it to level 2, and 3 at level 3; worms under the other hexes of a plateau tile
      * return; the creature step is skipped while no Smoker is empty. Tiles as in buildStandardField.
      */
@@ -201,7 +194,7 @@ public class VentlifeGameFlowTest {
 
     @Test
     public void snailGroupThenCoveringAndAnOctopusWalkThrough() {
-        Game game = newGame(2, 5, tilesOnlyEnd());
+        Game game = newGame(2, 5);
         VentlifeGameState state = (VentlifeGameState) game.getGameState();
         AbstractForwardModel fm = game.getForwardModel();
         useSpecies(state);
@@ -258,7 +251,7 @@ public class VentlifeGameFlowTest {
         int[] tiles = {36, 48, 60};
         for (int n = 2; n <= 4; n++) {
             int total = tiles[n - 2];
-            Game game = newGame(n, 100 + n, tilesOnlyEnd());
+            Game game = newGame(n, 100 + n);
             VentlifeGameState state = (VentlifeGameState) game.getGameState();
             AbstractForwardModel fm = game.getForwardModel();
             // every species, so that creature steps are certain to arise
@@ -302,14 +295,80 @@ public class VentlifeGameFlowTest {
         }
     }
 
+    /** The number of species in play of which the player has no tokens left in their supply. */
+    private static int speciesRunOut(VentlifeGameState state, int player) {
+        int n = 0;
+        for (Species s : state.getSpeciesInPlay())
+            if (state.getSupply(player, s) == 0)
+                n++;
+        return n;
+    }
+
+    /**
+     * At the default parameters (4 random species, 6 tokens each) the game ends only when every tile has been placed,
+     * even after a player has used up two or more species: every player has the same number of turns, and the tiles
+     * and tokens are all accounted for at the end.
+     */
+    @Test
+    public void aRandomGameAtTheDefaultParametersEndsOnlyWhenEveryTileIsPlaced() {
+        int[] tiles = {36, 48, 60};
+        // turns taken while some player had run out of at least two species: random play must reach that position,
+        // or the test would not show that running out does not end the game
+        int turnsAfterRunningOut = 0;
+        for (int n = 2; n <= 4; n++)
+            for (long seed = 1; seed <= 3; seed++) {
+                int total = tiles[n - 2];
+                Game game = newGame(n, 300 + 10 * n + seed);
+                VentlifeGameState state = (VentlifeGameState) game.getGameState();
+                AbstractForwardModel fm = game.getForwardModel();
+                Random rnd = new Random(seed);
+                int[] turns = new int[n];
+                int placements = 0, steps = 0;
+                while (state.isNotTerminal() && steps++ < 5000) {
+                    int placer = state.getCurrentPlayer();
+                    // placement k (from 0) is by player k mod n
+                    assertEquals("placer of tile " + placements, placements % n, placer);
+                    boolean someoneRunOut = false;
+                    for (int p = 0; p < n; p++)
+                        someoneRunOut |= speciesRunOut(state, p) >= 2;
+                    List<AbstractAction> actions = fm.computeAvailableActions(state);
+                    assertFalse("no legal action at step " + steps, actions.isEmpty());
+                    fm.next(state, actions.get(rnd.nextInt(actions.size())));
+                    while (!turnOver(state) && steps++ < 5000) {
+                        actions = fm.computeAvailableActions(state);
+                        assertFalse("no legal action at step " + steps, actions.isEmpty());
+                        fm.next(state, actions.get(rnd.nextInt(actions.size())));
+                    }
+                    turns[placer]++;
+                    placements++;
+                    if (someoneRunOut)
+                        turnsAfterRunningOut++;
+                    if (placements < total)
+                        assertTrue(n + " players, seed " + seed + ": game ended after only " + placements + " of "
+                                + total + " tiles", state.isNotTerminal());
+                }
+                String which = n + " players, seed " + seed;
+                assertFalse(which + ": did not end within 5000 actions", state.isNotTerminal());
+                assertEquals(which, CoreConstants.GameResult.GAME_END, state.getGameStatus());
+                assertEquals(which, total, placements);
+                assertEquals(which, total, state.getTilesPlaced());
+                assertEquals(which, 0, unplacedCount(state));
+                for (int p = 0; p < n; p++) {
+                    assertEquals(which + ": turns of player " + p, total / n, turns[p]);
+                    assertNotNull(which + ": result of player " + p, state.getPlayerResults()[p]);
+                }
+                assertTokensConserved(state, which + " at the end");
+            }
+        assertTrue("no player ran out of two species in any game", turnsAfterRunningOut > 0);
+    }
+
     @Test
     public void tilesAndCreatureTokensAreConservedThroughARandomGame() {
-        // seed 26 gives displacement decisions and turns with several Snails (chosen by scanning seeds once the rules
-        // existed: seed 77 gave no decision, seed 6 no multi-Snail turn)
-        Game game = newGame(3, 26, tilesOnlyEnd());
+        // seed 26 gives displacement decisions and turns with several Snails
+        Game game = newGame(3, 26);
         VentlifeGameState state = (VentlifeGameState) game.getGameState();
         AbstractForwardModel fm = game.getForwardModel();
-        // every species in play, so every placement and covering rule implemented so far is exercised
+        // every species in play, so every placement and covering rule is exercised
         useSpecies(state, Species.values());
         Random rnd = new Random(26);
         int steps = 0, plateaus = 0, creaturesPlaced = 0, returns = 0, decisions = 0, multiSnailTurns = 0;
@@ -336,7 +395,7 @@ public class VentlifeGameFlowTest {
                 // maxSnailsPerTurn a turn
                 assertEquals("snail placed off Basalt at step " + steps, BASALT, state.getCell(pc.hex).terrain());
                 assertTrue("snail not next to this turn's snails at step " + steps, snailsThisTurn.isEmpty()
-                        || snailsThisTurn.stream().anyMatch(h -> h.isAdjacentTo(pc.hex)));
+                        || snailsThisTurn.stream().anyMatch(h -> distance(h, pc.hex) == 1));
                 snailsThisTurn.add(pc.hex);
                 assertTrue("too many snails in one turn", snailsThisTurn.size() <= state.getParams().maxSnailsPerTurn);
             }
@@ -426,7 +485,7 @@ public class VentlifeGameFlowTest {
             assertTrue("follow-on snail off empty Basalt: " + a,
                     state.isEmptyHex(h) && state.getCell(h).terrain() == BASALT);
             assertTrue("follow-on snail not next to this turn's: " + a,
-                    snailsThisTurn.stream().anyMatch(s -> s.isAdjacentTo(h)));
+                    snailsThisTurn.stream().anyMatch(s -> distance(s, h) == 1));
         }
     }
 

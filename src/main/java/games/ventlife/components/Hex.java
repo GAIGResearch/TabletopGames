@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * A position in the vent field, in axial coordinates (q, r) for pointy-topped hexes: q increases to the east, r to
- * the south-east. Positions are values; the field maps each covered position to its top hex.
+ * the south-east.
  */
 public record Hex(int q, int r) {
 
@@ -27,11 +27,6 @@ public record Hex(int q, int r) {
         for (int d = 0; d < 6; d++)
             retValue.add(neighbour(d));
         return retValue;
-    }
-
-    public boolean isAdjacentTo(Hex other) {
-        int dq = other.q - q, dr = other.r - r;
-        return Math.abs(dq) + Math.abs(dr) + Math.abs(dq + dr) == 2;
     }
 
     @Override

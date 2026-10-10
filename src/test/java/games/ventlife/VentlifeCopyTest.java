@@ -180,5 +180,45 @@ public class VentlifeCopyTest {
         assertEquals(before, state);
         assertEquals(choices, new HashSet<>(legalSet(state, fm)));
         assertNotEquals(state, copy);
+        // the two creature steps differ only in the Snails placed so far
+        assertNotEquals(state.currentActionInProgress(), copy.currentActionInProgress());
+    }
+
+    @Test
+    public void copyDuringTheDraftKeepsTheDraftAndEqualsTheOriginal() {
+        VentlifeGameState drafting = newState(3, 31, draftParams(4));
+        draft(drafting, fm, CRAB);                              // player 0 picked; player 1 to pick
+        VentlifeGameState copy = (VentlifeGameState) drafting.copy();
+        assertEquals(drafting, copy);
+        assertEquals(drafting.hashCode(), copy.hashCode());
+        // the draft is public: a player's copy keeps it, whatever happens to the hidden tiles
+        VentlifeGameState own = (VentlifeGameState) drafting.copy(2);
+        assertEquals(List.of(CRAB), own.getDrafted());
+        assertEquals(VentlifeGameState.Phase.DRAFT, own.getGamePhase());
+        assertEquals(1, own.getCurrentPlayer());
+    }
+
+    @Test
+    public void aPickInACopyDoesNotChangeTheOriginal() {
+        VentlifeGameState drafting = newState(2, 31, draftParams(4));
+        draft(drafting, fm, WORM);
+        VentlifeGameState before = (VentlifeGameState) drafting.copy();
+        VentlifeGameState copy = (VentlifeGameState) drafting.copy();
+        draft(copy, fm, SNAIL);
+        assertEquals(List.of(WORM, SNAIL), copy.getDrafted());
+        assertEquals(List.of(WORM), drafting.getDrafted());
+        assertEquals(1, drafting.getCurrentPlayer());
+        assertEquals(before, drafting);
+        assertNotEquals(drafting, copy);
+    }
+
+    @Test
+    public void statesDifferingOnlyInTheirDraftedListsAreNotEqual() {
+        VentlifeGameState a = newState(2, 32, draftParams(4));
+        VentlifeGameState b = (VentlifeGameState) a.copy();
+        assertEquals(a, b);
+        a.drafted.add(WORM);
+        b.drafted.add(SPONGE);
+        assertNotEquals(a, b);
     }
 }

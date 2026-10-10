@@ -21,6 +21,7 @@ import games.blackjack.BlackjackParameters;
 import games.goofspiel.GoofspielParameters;
 import games.leducpoker.LeducPokerParameters;
 import games.toads.ToadParameters;
+import games.ventlife.VentlifeParameters;
 import games.crazyeights.CZEParameters;
 import games.cribbage.CribbageParameters;
 import games.pitch.PitchParameters;
@@ -518,5 +519,16 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("discardOption", true);
         params.setParameterValue("secondRoundStart", ToadParameters.SecondRoundStart.WINNER);
         new ForwardModelTester(params, "game=WarOfTheToads", "nGames=10", "nPlayers=2");
+    }
+
+    @Test
+    public void testVentlife() {
+        new ForwardModelTester("game=Ventlife", "nGames=1", "nPlayers=2");
+        new ForwardModelTester("game=Ventlife", "nGames=1", "nPlayers=4");
+        // the draft, with Black Smokers open to every species but Fish
+        VentlifeParameters params = new VentlifeParameters();
+        params.setParameterValue("speciesSelection", VentlifeParameters.SpeciesSelection.DRAFT);
+        params.setParameterValue("smokersOnlyForWormsAndShrimp", false);
+        new ForwardModelTester(params, "game=Ventlife", "nGames=1", "nPlayers=3");
     }
 }

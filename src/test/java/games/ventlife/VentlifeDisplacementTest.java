@@ -13,10 +13,8 @@ import static games.ventlife.VentlifeTestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Displacement of covered Shrimp, Fish and Crabs: destinations are the empty hexes next to the covered position
- * (the new tile's own hexes included), by species; none -> returned to the supply; one -> moved there; several -> the
- * creature's owner chooses with Displace, whoever placed the tile. Resolution order: the placing player's creatures
- * first, then the other players clockwise. After the last one, the placing player's creature step.
+ * Displacement of covered Shrimp, Fish and Crabs: the destinations of each species, the owner's choice among several,
+ * the order in which the owners decide, and the placing player's creature step after the last one.
  * Two layouts (2 players):
  * - seafloor pair: standard tiles 0 and 1, level 1: (0,0) S, (-1,1) B, (0,1) D [tile 0]; (1,0) S, (1,1) D, (2,0) M
  *   [tile 1]; then player 0 places M/B at ((0,0),0): (0,0) S2, left (0,1) M2, right (1,0) B2.
@@ -163,6 +161,23 @@ public class VentlifeDisplacementTest {
         // player 1's step: level-1 non-Smoker (2,0) M1, (-2,0) B1; player 1 has no fish
         assertCreatureStepOf(1);
         assertEquals(Set.of(fish(hex(2, 0)), fish(hex(-2, 0))), legalSet(state, fm));
+    }
+
+    @Test
+    public void aCoveredFishStaysOffSmokersEvenWhenSmokersAreOpenToEverySpecies() {
+        state = newState(2, 42, smokersForAll());
+        standardFieldBeforeTile5(FISH);
+        putCreature(state, hex(-1, 1), FISH, 0, 1);
+        placeTile5();
+        // (-1,1) B2 is under the new left hex; neighbours: (-2,1) D2 (same level), (-1,0) S2 (same level, but a
+        // Smoker, and Fish never go on Smokers, whatever the parameter), (0,1) D3 and (0,0) S3 (new, higher),
+        // (-1,2) and (-2,2) uncovered -> the single destination (-2,1), with no decision
+        assertEquals(Map.of(hex(-2, 1), new Creature(FISH, 0, 1)), state.getCreatures());
+        assertNoCoveringDecision(state);
+        assertTokensConserved(state, "after the displacement");
+        // player 1's step (no fish of their own): the level-1 non-Smoker hexes (1,1) D1, (2,0) M1, (-2,0) B1
+        assertCreatureStepOf(1);
+        assertEquals(Set.of(fish(hex(1, 1)), fish(hex(2, 0)), fish(hex(-2, 0))), legalSet(state, fm));
     }
 
     @Test

@@ -14,11 +14,8 @@ import static games.ventlife.VentlifeTestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Deep-Sea Octopus placement (an empty edge hex - a covered position with an uncovered neighbour - not a Smoker by
- * default) and retreat when covered: along each of the 6 straight lines from the covered position, the first empty
- * edge hex (not a Smoker by default) is that direction's destination; occupied, non-edge (and restricted Smoker)
- * positions are passed over; reaching an uncovered position fails the direction. None -> returned, one -> moved,
- * several -> the owner chooses.
+ * Deep-Sea Octopus placement on edge hexes (covered positions with an uncovered neighbour), and its retreat along
+ * the six straight lines from the covered position when covered.
  * Layout "ring" (2 players): standard tiles 0-4 (players 0, 1, 0, 1, 0); player 1 places D/M at ((-2,2),0):
  * (-2,2) S, (-2,3) D, (-1,2) M; player 0 places M/D at ((-1,4),4): (-1,4) S, (0,3) M, (-1,3) D; then player 1 places
  * tile 5 M/D at ((0,0),1), covering (0,0), (-1,1), (0,1) to level 3. Afterwards (-1,1) is the only position with no
