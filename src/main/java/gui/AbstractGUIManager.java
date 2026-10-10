@@ -100,7 +100,7 @@ public abstract class AbstractGUIManager {
             clickable.offer(gameState, actions, player.getPlayerID());
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
-                actionButtons[i].setButtonAction(actions.get(i), actionLabel(actions.get(i), gameState));
+                actionButtons[i].setButtonAction(actions.get(i), actionLabel(actions.get(i), gameState, player.getPlayerID()));
                 actionButtons[i].setBackground(Color.white);
             }
             for (int i = actions.size(); i < actionButtons.length; i++) {
@@ -114,11 +114,9 @@ public abstract class AbstractGUIManager {
      * The text of the button offering the action: by default the action's getString. A GUI may add what the player
      * should know to choose it (the odds of a battle, say).
      */
-    public String actionLabel(AbstractAction action, AbstractGameState gameState) {
-        return action.getString(gameState);
-
+    public String actionLabel(AbstractAction action, AbstractGameState gameState, int playerID) {
         // the buttons are seen by the player choosing, so may show what only they know
-        actionButtons[i].setButtonAction(actions.get(i), actions.get(i).getString(gameState, player.getPlayerID()));
+        return action.getString(gameState, playerID);
     }
 
     /**

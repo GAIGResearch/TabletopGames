@@ -487,12 +487,12 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                     if (c.getProperty(effectHash) == null || bnHighlights.contains(((MovePlayer) action).getDestination()) &&
                                 (pIdx == id || playerTokenHighlights.contains(pIdx))) {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                     }
                 } else if (bnHighlights.contains(((MovePlayer) action).getDestination()) &&
                         (pIdx == id || playerTokenHighlights.contains(pIdx))) {
                     actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                 }
             } else if (action instanceof AddResearchStation) {
                 Card playerRole = (Card) this.gameState.getComponentActingPlayer(playerCardHash);
@@ -505,17 +505,17 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                             if (!(action instanceof AddResearchStationWithCardFrom) ||
                                     isCardHighlighted(((AddResearchStationWithCardFrom)action).getCard(gameState), id)) {
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                             }
                         }
                     } else {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                     }
                 }
             } else if (actions.size() > 0 && action instanceof DoNothing || action instanceof TreatDisease) {
                 actionButtons[k].setVisible(true);
-                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
             } else if (action instanceof CureDisease) {
                 ArrayList<Integer> cards = ((CureDisease) action).getCards();
                 boolean allSelected = true;
@@ -527,11 +527,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                 }
                 if (allSelected) {
                     actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                 }
             } else if (action instanceof QuietNight || action instanceof Forecast) {  // Event
                 actionButtons[k].setVisible(true);
-                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
             } else if (action instanceof RearrangeDeckOfCards) {  // Event
                 Card eventCard = ((RearrangeDeckOfCards)action).getCard(gameState);
                 int[] cardOrder = ((RearrangeDeckOfCards) action).getNewCardOrder();
@@ -609,17 +609,17 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                                 // Give card
                                 // card in hand selected and other player, show this action as available
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                             } else if (id == receiverID) {
                                 //Take card
                                 // A card from another player selected
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                             }
                         }
                     } else {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                     }
                 }
             } else {
@@ -705,9 +705,8 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
      * The actions in words: how a move gets there and the card it costs, what a cure or a station costs.
      */
     @Override
-    public String actionLabel(AbstractAction action, AbstractGameState state) {
+    public String actionLabel(AbstractAction action, AbstractGameState state, int acting) {
         PandemicGameState s = (PandemicGameState) state;
-        int acting = s.getTurnOrder().getCurrentPlayer(s);
         if (action instanceof MovePlayer m) {
             String to = m.getDestination();
             String card = m instanceof MovePlayerWithCard c ? cardName(c.getCard(s)) : null;
@@ -740,7 +739,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
             return k.getGiver() == acting ? "Give " + card + " to Player " + k.getReceiver() + " (" + role(k.getReceiver()) + ")"
                     : "Take " + card + " from Player " + k.getGiver() + " (" + role(k.getGiver()) + ")";
         }
-        return super.actionLabel(action, state);
+        return super.actionLabel(action, state, acting);
     }
 
     /**
