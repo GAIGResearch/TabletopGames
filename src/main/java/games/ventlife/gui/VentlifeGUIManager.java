@@ -4,8 +4,8 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import games.GameType;
 import games.ventlife.VentlifeGameState;
-import games.ventlife.VentlifeParameters;
 import games.ventlife.VentlifeUtils;
 import games.ventlife.actions.*;
 import games.ventlife.components.*;
@@ -58,6 +58,8 @@ public class VentlifeGUIManager extends AbstractGUIManager {
 
         fieldView = new VentlifeFieldView();
         playersView = new VentlifePlayersView(agentNames, this::showHiddenInfo);
+        // the views show this state until the first update, and their tooltips read it
+        shown = state;
         fieldView.update(state);
         playersView.update(state);
         fieldView.addMouseListener(new MouseAdapter() {
@@ -93,8 +95,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
         JTabbedPane tabs = new JTabbedPane();
         JPanel main = new JPanel(new BorderLayout());
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml(state.getParams()), height + actionHeight + defaultInfoPanelHeight));
-        tabs.add("How to Play", new RulesView(howToPlayHtml(), height + actionHeight + defaultInfoPanelHeight));
+        RulesView.addTabs(tabs, GameType.Ventlife, state.getParams(), height + actionHeight + defaultInfoPanelHeight);
 
         JPanel gameArea = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         gameArea.add(fieldView);
@@ -386,115 +387,5 @@ public class VentlifeGUIManager extends AbstractGUIManager {
             }
         }
         return tip.append("</html>").toString();
-    }
-
-    private static String rulesHtml(VentlifeParameters p) {
-        String species = switch (p.speciesSelection) {
-            case RANDOM -> p.nSpecies + " of the " + Species.values().length + " species are chosen at random.";
-            case FIRST_GAME -> "The species are Tube Worms, Blind Vent Shrimp, Volcano Snails and Yeti Crabs.";
-            case DRAFT -> "Before the first tile, the players take turns to draft species, starting with player 0. " +
-                    "With 2 or 4 players they draft the " + VentlifeUtils.draftPicks(p.nSpecies, 2) + " species " +
-                    "that will be used; with 3 players they draft the " + VentlifeUtils.draftPicks(p.nSpecies, 3) +
-                    " species that will not be used.";
-        };
-        String smokers = p.smokersOnlyForWormsAndShrimp
-                ? "Only Tube Worms and Shrimp may be placed on, or moved onto, a Black Smoker."
-                : "Fish may not be placed on, or moved onto, a Black Smoker. Every other species may.";
-        return "<h2>Ventlife</h2>" +
-                "<p><a href='#turn'>Turn</a> | <a href='#tiles'>Tiles</a> | <a href='#covering'>Covering</a> | " +
-                "<a href='#species'>Species</a> | <a href='#end'>End</a> | <a href='#screen'>Screen</a></p>" +
-                "<p>Each player holds one hidden tile. " + species + " Each player has " + p.tokensPerSpecies +
-                " tokens of each species in play.</p>" +
-                "<h3><a name='turn'>Turn</a></h3><ol>" +
-                "<li><b>Place your tile</b> on the seafloor or on top of the field.</li>" +
-                "<li><b>Resolve covered creatures</b> (see Covering).</li>" +
-                "<li><b>Place creatures of one species</b> from your supply. This is compulsory whenever any " +
-                "placement is possible.</li>" +
-                "<li><b>Draw a tile</b>, if any are left.</li></ol>" +
-                "<h3><a name='tiles'>Tiles</a></h3>" +
-                "<p>Each tile has a Black Smoker and two seafloor terrains. The first tile goes with its Black Smoker " +
-                "at (0,0).</p><ul>" +
-                "<li><b>Seafloor.</b> All three hexes go on empty seafloor, and at least one touches the field " +
-                "along a side. The hexes are at level 1.</li>" +
-                "<li><b>Plateau.</b> The tile's Black Smoker goes on a Black Smoker, all three hexes lie on hexes of " +
-                "the same level, and they rest on at least two different tiles. The hexes are one level higher.</li>" +
-                "</ul>" +
-                "<h3><a name='covering'>Covering</a></h3>" +
-                "<p>Creatures under the new tile move or return to their owner's supply. Your own creatures are " +
-                "resolved first, then the other players' clockwise. A creature moves to an empty neighbouring hex " +
-                "its species allows. With no such hex it returns; with one it moves there; with several, its owner " +
-                "chooses. " + smokers + "</p>" +
-                "<h3><a name='species'>Species</a></h3>" +
-                "<table border=1 cellpadding=3 cellspacing=0>" +
-                "<tr><th>Species</th><th>Placed on</th><th>When covered</th><th>Scores</th></tr>" +
-                "<tr><td>Tube Worms (W)</td><td>An empty Black Smoker. On a level-1 Black Smoker you may place " +
-                (1 + p.lowVentBonus) + ".</td><td>They climb onto a Black Smoker placed on theirs; otherwise " +
-                "they return.</td><td>The level of their hex, each.</td></tr>" +
-                "<tr><td>Volcano Snails (Sn)</td><td>Basalt Ridge. You may place up to " + p.maxSnailsPerTurn +
-                ", each after the first next to a Snail placed this turn.</td><td>To a lower hex.</td><td>" +
-                p.snailPointsPerHeightEdge + " for each neighbouring hex of a different level.</td></tr>" +
-                "<tr><td>Blind Vent Shrimp (Sh)</td><td>Any hex but Basalt Ridge.</td><td>To any hex but Basalt " +
-                "Ridge.</td><td>" + p.shrimpPointsOneTerrain + " next to Diffuse Vents or Microbial Mat, " +
-                p.shrimpPointsBothTerrains + " next to both.</td></tr>" +
-                "<tr><td>Eelpout Fish (F)</td><td>A level-1 hex, or a hex next to one of your Fish.</td><td>To a " +
-                "hex of the same or a lower level.</td><td>Each shoal of 2 or more connected Fish scores " +
-                p.shoalPoints + " for each Fish after the first.</td></tr>" +
-                "<tr><td>Yeti Crabs (C)</td><td>A hex of level 2 or more.</td><td>To a hex of the same level." +
-                "</td><td>On each plateau (connected hexes of one level, 2 or more), most Crabs score its size, " +
-                "second most half (rounded down). Players tied for most all score the size, and no second place " +
-                "is scored.</td></tr>" +
-                "<tr><td>Deep-Sea Octopus (O)</td><td>An edge hex (next to empty seafloor).</td><td>Its owner " +
-                "chooses a direction; it moves in a straight line to the first empty edge hex.</td><td>" +
-                p.octopusPointsPerSpecies + " for each other species next to it.</td></tr>" +
-                "<tr><td>Vent Sponges (Sp)</td><td>Any hex.</td><td>They return.</td><td>" +
-                p.spongePointsPerTerrain + " for each terrain next to them.</td></tr></table>" +
-                "<h3><a name='end'>End</a></h3>" +
-                "<p>The game ends when every tile has been placed. The highest score wins. Ties are broken by the " +
-                "best single species score, then by the Tube Worm score.</p>" +
-                "<h3><a name='screen'>Screen</a></h3><ul>" +
-                "<li>Each hex shows its terrain colour and its level. Black Smokers are near-black, Basalt Ridge " +
-                "grey, Diffuse Vents blue and Microbial Mat white. Thick lines separate tiles, and the last tile " +
-                "placed is outlined in orange.</li>" +
-                "<li>Creatures are discs in their owner's colour, marked with their species' letters (Wx2 is two " +
-                "Tube Worms).</li>" +
-                "<li>A creature drawn faded in a dashed ring is covered and waiting for its owner's choice.</li>" +
-                "<li>Positions are written (q,r), as the action buttons name them. Empty seafloor next to the " +
-                "field is outlined.</li>" +
-                "<li>A tile is named left terrain / right terrain. Orientation n puts the right terrain in " +
-                "direction n from the Black Smoker and the left terrain in the next direction clockwise. The " +
-                "directions are 0 east, 1 south-east, 2 south-west, 3 west, 4 north-west and 5 north-east, so " +
-                "orientation 1 is the tile as printed, with the Black Smoker at the top.</li>" +
-                "<li>The panel on the right lists the players (the one to act is marked &gt;), their score so far, " +
-                "the tokens left of each species, and their tile when you may see it.</li></ul>" +
-                "<p>The How to Play tab explains how to choose by clicking on the field and the species key.</p>";
-    }
-
-    private static String howToPlayHtml() {
-        return "<h2>How to Play</h2>" +
-                "<p>On your turn you may choose by clicking on the field and on the species key, as well as with " +
-                "the action buttons. The buttons offer the same choices. Yellow outlines what you may click now, " +
-                "and green what you have chosen so far. Hold the mouse over a hex or a species for a tooltip that " +
-                "gives what a click would do.</p>" +
-                "<h3>Placing your tile</h3><ol>" +
-                "<li>Click the position for the tile's Black Smoker. Every position where it may go is outlined. A " +
-                "position on top of the field is a Black Smoker already there.</li>" +
-                "<li>Click the neighbouring hex where the tile's right terrain is to go. The hexes outlined are " +
-                "those the rules allow. While the mouse is over one of them, the whole tile is drawn faintly where " +
-                "it would go, and the tooltip gives its level and the creatures it would cover.</li></ol>" +
-                "<p>To choose another position, click it instead, or click the chosen one again.</p>" +
-                "<h3>Placing creatures</h3>" +
-                "<p>Click an outlined hex. If more than one species may go there, the species that may are " +
-                "outlined in the key on the right: click one of them. You may also click a species in the key " +
-                "first, and then one of the hexes outlined for it. The tooltip on a hex gives your score after " +
-                "each placement there.</p>" +
-                "<p>The Low-Vent Bonus (two Tube Worms on one hex) and Place no more creatures (after a Volcano " +
-                "Snail) are chosen with the action buttons.</p>" +
-                "<h3>Covered creatures</h3>" +
-                "<p>When one of your covered creatures may go to more than one hex, it is drawn faded in a dashed " +
-                "ring and the hexes it may go to are outlined. Click one of them.</p>" +
-                "<h3>The draft</h3>" +
-                "<p>Click a species in the key to draft it.</p>" +
-                "<h3>Cancelling</h3>" +
-                "<p>Click with the right mouse button, or click a hex that is not outlined, to clear your choice.</p>";
     }
 }
