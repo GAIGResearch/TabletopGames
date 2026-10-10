@@ -54,9 +54,23 @@
             </div>
             <ol class="summary" id="summary"></ol>
         </section>
+        <section class="panel" id="plan-panel" hidden>
+            <div class="panel-head">
+                <h2>Your plan</h2>
+                <span class="muted" id="plan-count"></span>
+            </div>
+            <p class="muted" id="plan-empty">Choose on the map or below, in any order. Nothing is sent until you press
+                the button.</p>
+            <ol class="plan-steps" id="plan-steps"></ol>
+            <ul class="plan-warnings" id="plan-warnings"></ul>
+            <div class="row plan-buttons">
+                <button id="plan-clear" title="Take everything out of the plan">Clear</button>
+                <button id="plan-send" class="primary" title="Send the plan to the game">Send</button>
+            </div>
+        </section>
         <section class="panel" id="actions-panel" hidden>
             <div class="panel-head">
-                <h2>Your move</h2>
+                <h2 id="actions-title">Your move</h2>
                 <span class="muted" id="action-count"></span>
             </div>
             <input id="action-filter" type="search" placeholder="Filter actions" hidden>

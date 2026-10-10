@@ -8,10 +8,12 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
+import core.actions.AbstractAction;
 import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUIMessages;
 import gui.GamePanel;
+import gui.IMovePlanner;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 /**
  * One browser player's game: the {@link Game} on its own thread, with a {@link HumanGUIPlayer} in the browser player's
@@ -34,6 +37,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * is, and the results when it ends.
  * <p>
  * The session starts on the browser's first resize message, which gives the size to lay the GUI out at.
+ * <p>
+ * If the GUI offers a planner (see {@link IMovePlanner}), the browser player plans the decisions it covers on a copy
+ * of the game (a {@link MovePlan}): the GUI shows the planned state and offers the plan's options, and a choice adds
+ * to the plan rather than going to the game, until the plan is sent (see {@link BrowserPlayer}).
  * <p>
  * The session outlives its connection: if the browser's connection is lost (a phone asleep, a network change), the game
  * carries on, and the browser may reconnect to it with the session's key (see {@link #attach}).
@@ -62,6 +69,11 @@ public class GameSession {
     private FrameStreamer streamer;
     private InputForwarder input;
     private ChromeReader chrome;
+    private BrowserPlayer browser;
+    private DivertingController ac;
+    // the plan being made, and the plan last sent to the page (Swing thread only)
+    private MovePlan plan;
+    private String sentPlan;
     private volatile boolean started, stopped;
     // for updateDue: used on the Swing thread, except updateNow, which the browser's input sets
     private int lastGameTick = -1;
@@ -128,6 +140,7 @@ public class GameSession {
             SwingUtilities.invokeLater(() -> {
                 sendStarted(seed, game.getPlayers());
                 chrome.resend();
+                sentPlan = null;
                 reportedTurn = null;
                 reportedResults = false;
             });
@@ -221,6 +234,11 @@ public class GameSession {
             int v = msg.get("v").getAsInt(), r = msg.get("r").getAsInt(), o = msg.get("o").getAsInt();
             SwingUtilities.invokeLater(() -> chrome.chooseRegion(v, r, o));
             streamer.nudge();
+        } else if (type.equals("plan")) {
+            String op = msg.get("op").getAsString();
+            int i = msg.has("i") ? msg.get("i").getAsInt() : -1;
+            SwingUtilities.invokeLater(() -> planOp(op, i));
+            streamer.nudge();
         } else if (type.equals("log")) {
             out.sendText(gameLog().toString());
         } else if (type.equals("actionHover")) {
@@ -252,10 +270,11 @@ public class GameSession {
         AbstractParameters params = gameType.createParameters(seed);
         GameCatalog.apply(params, config.params());
 
-        ActionController ac = new ActionController();
+        ac = new DivertingController();
+        browser = new BrowserPlayer(ac, text -> sendMessage("Plan stopped", text));
         List<AbstractPlayer> players = new ArrayList<>();
         for (int i = 0; i < config.nPlayers(); i++) {
-            AbstractPlayer player = i == config.seat() ? new HumanGUIPlayer(ac) : opponents.find(gameType, config.opponents().get(i)).create();
+            AbstractPlayer player = i == config.seat() ? browser : opponents.find(gameType, config.opponents().get(i)).create();
             // the GUIs show each player's name; an agent's is its file name
             if (i == config.seat()) player.setName("Human");
             players.add(player);
@@ -285,17 +304,9 @@ public class GameSession {
                 fitFrame();
                 byFrame.put(frame, this);
                 sendStarted(seed, players);
-                guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, e -> {
-                    // with no browser to see it, the GUI waits until one reconnects (see attach)
-                    if (detachedAt > 0 || !updateDue()) return;
-                    // As game.updateGUI does, but without repainting the frame: the frame streamer paints it, and a
-                    // repaint would paint it a second time, for a screen no one sees.
-                    gui.update(game.getPlayers().get(game.getPlayerToMove()), game.getGameState(), game.isHumanToMove());
-                    // a GUI can grow as the game goes on
-                    fitFrame();
-                    chrome.update();
-                    reportProgress();
-                });
+                // a choice made while planning adds to the plan
+                ac.divert = this::addToPlan;
+                guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, e -> tick());
                 guiUpdater.start();
             });
         } catch (Exception e) {
@@ -310,6 +321,103 @@ public class GameSession {
         gameThread.setDaemon(true);
         gameThread.start();
         System.out.printf("Session %d: %s, %d players, browser in seat %d, seed %d%n", id, gameType.name(), config.nPlayers(), config.seat(), seed);
+    }
+
+    /**
+     * Updates the GUI, if due, and sends the page what has changed. Swing thread only.
+     */
+    private void tick() {
+        // with no browser to see it, the GUI waits until one reconnects (see attach)
+        if (detachedAt > 0 || !updateDue()) return;
+        updatePlan();
+        // As game.updateGUI does, but without repainting the frame: the frame streamer paints it, and a repaint would
+        // paint it a second time, for a screen no one sees.
+        if (plan != null) {
+            gui.offerInstead(plan.options());
+            gui.update(browser, plan.preview(), true);
+        } else {
+            gui.update(game.getPlayers().get(game.getPlayerToMove()), game.getGameState(), game.isHumanToMove());
+        }
+        // a GUI can grow as the game goes on
+        fitFrame();
+        chrome.update();
+        sendPlan();
+        reportProgress();
+    }
+
+    /**
+     * Starts a plan when the game waits for a decision the GUI's planner covers, and drops one whose decision has
+     * passed.
+     */
+    private void updatePlan() {
+        IMovePlanner planner = gui.getPlanner();
+        if (planner == null) return;
+        AbstractGameState waiting = browser.waitingOn();
+        if (plan != null && plan.decision() != waiting) endPlan();
+        if (plan == null && waiting != null && !browser.isSending() && planner.plans(waiting, config.seat()))
+            plan = new MovePlan(planner, waiting, config.seat(), gui::actionLabel);
+    }
+
+    private void endPlan() {
+        plan = null;
+        gui.offerInstead(null);
+    }
+
+    /**
+     * Adds a choice to the plan, if one is being made. Returns whether it was taken for the plan (and so not passed
+     * to the game).
+     */
+    private boolean addToPlan(AbstractAction action) {
+        if (plan == null) return false;
+        plan.add(action);
+        refresh();
+        return true;
+    }
+
+    /**
+     * A change to the plan from the page: "remove" step i, "clear" all of it, or "send" it to the game.
+     */
+    private void planOp(String op, int i) {
+        if (plan == null) return;
+        switch (op) {
+            case "remove" -> plan.remove(i);
+            case "clear" -> plan.clear();
+            case "send" -> {
+                MovePlan sent = plan;
+                endPlan();
+                browser.send(gui.getPlanner(), sent.decision(), sent.steps());
+            }
+            default -> {
+                return;
+            }
+        }
+        refresh();
+    }
+
+    /**
+     * Updates the GUI as soon as the Swing thread is free (not at once: a choice is made from within a button's or
+     * a view's handler, which may still be changing the GUI).
+     */
+    private void refresh() {
+        updateNow = true;
+        SwingUtilities.invokeLater(this::tick);
+    }
+
+    /**
+     * Sends the plan to the page when it has changed (no steps when there is no plan).
+     */
+    private void sendPlan() {
+        JsonObject msg;
+        if (plan != null) {
+            msg = plan.toJson();
+        } else {
+            msg = new JsonObject();
+            msg.addProperty("type", "plan");
+        }
+        String text = msg.toString();
+        if (text.equals(sentPlan)) return;
+        sentPlan = text;
+        out.sendText(text);
     }
 
     /**
@@ -544,6 +652,22 @@ public class GameSession {
     /**
      * Ends the game and disposes of the frame.
      */
+    /**
+     * The browser player's action controller, whose choices may be diverted (to a plan) rather than go to the game.
+     */
+    private static class DivertingController extends ActionController {
+
+        // given each choice first, and returns whether it took it
+        volatile Predicate<AbstractAction> divert;
+
+        @Override
+        public void addAction(AbstractAction candidate) {
+            Predicate<AbstractAction> d = divert;
+            if (d != null && candidate != null && d.test(candidate)) return;
+            super.addAction(candidate);
+        }
+    }
+
     public synchronized void stop() {
         if (stopped) return;
         stopped = true;

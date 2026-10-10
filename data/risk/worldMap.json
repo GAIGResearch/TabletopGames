@@ -23,6 +23,8 @@
     {"territories": 18, "armies": 2}
   ],
   "backupTerritories": 24,
+  "svg": "data/risk/worldMap.svg",
+  "svgCredit": "Map adapted from Risk game board by CMG Lee, Wikimedia Commons\nCC BY-SA 4.0: creativecommons.org/licenses/by-sa/4.0",
   "nodes": [
     {"name": ["String", "Alaska"], "position": ["Vector2D", [55, 95]], "continent": ["String", "North America"], "symbol": ["String", "Infantry"],
      "neighbours": ["String[]", ["Northwest Territory", "Alberta", "Kamchatka"]]},

@@ -3,11 +3,14 @@ package games.diplomacy.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.actions.AbstractAction;
 import games.GameType;
 import games.diplomacy.*;
 import games.diplomacy.actions.*;
 import gui.AbstractGUIManager;
-import gui.ClickRegion;
+import gui.IMovePlanner;
+import gui.MapMove;
+import gui.MapRegion;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import gui.views.RulesView;
@@ -39,6 +42,7 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
     JTextArea lastOrders;
     // the state last shown (a copy), read by the click handler and the tooltips
     DiplomacyGameState shown;
+    DiplomacyPlanner planner;
 
     public DiplomacyGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
@@ -55,6 +59,7 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
         }
 
         shown = state;
+        planner = new DiplomacyPlanner((DiplomacyForwardModel) game.getForwardModel());
         mapView = new DiplomacyMapView(params.getMap(), p -> showHiddenInfo(shown, p));
         mapView.addMouseListener(new MouseAdapter() {
             @Override
@@ -116,8 +121,9 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
     @Override
     public int getMaxActionSpace() {
         // the most actions at one decision are a unit's hold, moves, supports and, for a fleet at sea, convoys: the
-        // most seen in 30 random games to 1912 was 100 (a fleet in the North Sea), and the panel scrolls
-        return 400;
+        // most seen in 30 random games to 1912 was 100 (a fleet in the North Sea), and the panel scrolls; a plan (see
+        // DiplomacyPlanner) offers the orders of all the power's units at once
+        return 1500;
     }
 
     @Override
@@ -176,18 +182,27 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    public List<ClickRegion> getClickRegions() {
+    public List<MapRegion> getMapRegions() {
         if (mapView == null) return List.of();
-        // a region for each province an offered order is aimed at
-        Map<DiplomacyProvince, List<DiplomacyOrder>> byProvince = new LinkedHashMap<>();
-        for (DiplomacyOrder o : clickable.matching(DiplomacyOrder.class, o -> true)) {
-            DiplomacyProvince target = target(o);
-            if (target != null)
-                byProvince.computeIfAbsent(target, p -> new ArrayList<>()).add(o);
-        }
-        List<ClickRegion> regions = new ArrayList<>();
-        byProvince.forEach((p, orders) -> regions.add(new ClickRegion(mapView, mapView.provinceShape(p), orders)));
+        List<MapRegion> regions = new ArrayList<>();
+        for (DiplomacyProvince p : shown.getMap().provinces())
+            regions.add(new MapRegion(p.name(), p.fullName(), mapView, mapView.provinceShape(p)));
         return regions;
+    }
+
+    /**
+     * An order is chosen by pointing at the unit ordered (or where a unit is built) and then at the province the
+     * order is aimed at (see target).
+     */
+    @Override
+    public MapMove getMapMove(AbstractAction action) {
+        if (!(action instanceof DiplomacyOrder o) || o.province() == null) return null;
+        return new MapMove(o.province().name(), target(o).name());
+    }
+
+    @Override
+    public IMovePlanner getPlanner() {
+        return planner;
     }
 
     /**
@@ -223,7 +238,14 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
     private void showClickable() {
         if (mapView == null) return;
         Map<DiplomacyProvince, Color> outlines = new HashMap<>();
-        if (clickable.isOffered()) {
+        Set<DiplomacyProvince> units = new HashSet<>();
+        for (DiplomacyOrder o : clickable.matching(DiplomacyOrder.class, o -> o instanceof Hold || o instanceof Retreat))
+            units.add(o.province());
+        if (units.size() > 1) {
+            // the orders for several units at once (a plan, see DiplomacyPlanner): the units, not every province
+            // some order is aimed at
+            units.forEach(p -> outlines.put(p, ORDERING));
+        } else if (clickable.isOffered()) {
             for (DiplomacyOrder o : clickable.matching(DiplomacyOrder.class, o -> true)) {
                 DiplomacyProvince target = target(o);
                 if (target != null)
@@ -258,8 +280,13 @@ public class DiplomacyGUIManager extends AbstractGUIManager {
             text.append("<br>Left empty by a standoff: no retreat here");
         if (clickable.isOffered()) {
             List<DiplomacyOrder> orders = ordersAt(p);
+            // the orders of several units at once, in a plan (see DiplomacyPlanner), are chosen unit by unit
+            boolean planning = clickable.matching(DiplomacyOrder.class, o -> o instanceof Hold || o instanceof Retreat)
+                    .stream().map(DiplomacyOrder::province).distinct().count() > 1;
             if (orders.isEmpty()) {
-                text.append("<br><i>No order for the unit being ordered is aimed here</i>");
+                if (!planning) text.append("<br><i>No order for the unit being ordered is aimed here</i>");
+            } else if (planning) {
+                text.append("<br>Orders that could be aimed here:");
             } else {
                 text.append(orders.size() == 1 ? "<br>Click to order:" : "<br>Click to choose one of:");
                 for (DiplomacyOrder o : orders)

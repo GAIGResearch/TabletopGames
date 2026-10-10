@@ -90,6 +90,10 @@ public class MovePlayer extends AbstractAction {
         return moveType + ": p" + playerToMove + " to " + destination;
     }
 
+    public MoveType getMoveType() {
+        return moveType;
+    }
+
     public int getPlayerToMove() {
         return playerToMove;
     }

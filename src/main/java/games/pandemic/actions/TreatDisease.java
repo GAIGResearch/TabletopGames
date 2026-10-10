@@ -96,6 +96,14 @@ public class TreatDisease extends AbstractAction {
         return Objects.hash(initialDiseaseCubes, color, city, treatAll);
     }
 
+    public String getCity() {
+        return city;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();

@@ -1,7 +1,7 @@
 // The play page shows a game's Swing GUI, streamed from the server as tiles, and sends the mouse, touches and keys back
 // to it. The page's query string is the game setup (see web.SessionConfig), and is repeated on the WebSocket URL.
-// See web.FrameStreamer for the frame format, web.InputForwarder for the input messages, and web.ChromeReader for the
-// actions, information, history and click regions drawn in the page.
+// See web.FrameStreamer for the frame format, web.InputForwarder for the input messages, web.ChromeReader for the
+// actions, information, history, click regions and maps drawn in the page, and web.MovePlan for plans.
 'use strict';
 
 const $ = id => document.getElementById(id);
@@ -177,6 +177,12 @@ function onText(msg) {
         case 'regions':
             setRegions(msg);
             break;
+        case 'map':
+            setMap(msg);
+            break;
+        case 'plan':
+            showPlan(msg);
+            break;
         case 'message':
             showToast(msg.title, msg.text);
             break;
@@ -305,11 +311,57 @@ function notifyTurn() {
 // A long list is grouped by the kind of action (its class), with the kinds offered only once listed first. The groups
 // the player opens or closes stay so for the rest of the game.
 const GROUP_OVER = 8;
-const groupChoice = new Map();   // kind -> open
+const groupChoice = new Map();   // group -> open
+let currentActions = [];         // the actions offered: {i, label, kind, from, to}
 
 function showActions(actions) {
+    currentActions = actions;
+    if (selected !== null && !isSource(selected)) selected = null;
+    listActions();
+    drawOverlay();
+    offerFollowOn();
+}
+
+// After a choice on the map, the next decision's choices are offered where the player clicked, if none of them is
+// on the map (the dice for an attack just chosen, say): a menu there rather than a trip to the list.
+const FOLLOW_ON_MS = 15000;
+let followOn = null;    // {x, y, t}: where the last choice on the map was made, and when
+
+function offerFollowOn() {
+    if (!followOn || planning || currentActions.length === 0) return;
+    const at = followOn;
+    followOn = null;
+    if (performance.now() - at.t > FOLLOW_ON_MS || currentActions.some(a => a.from !== undefined)) return;
+    showMenu(currentActions.map(a => ({label: a.label, choose: () => chooseAction(a, at)})), at.x, at.y);
+}
+
+// Actions on a map are grouped by the region of the piece that acts, others by their kind. With a region selected on
+// the map, only its actions are listed.
+function groupOf(a) {
+    return a.from !== undefined ? `at:${a.from}` : (a.kind ?? '');
+}
+
+function groupName(group) {
+    if (group.startsWith('at:')) return mapById.get(group.slice(3))?.name ?? group.slice(3);
+    return group ? humanise(group) : 'Other';
+}
+
+function listActions() {
     const list = $('action-list');
     list.replaceChildren();
+    let actions = currentActions;
+    if (selected !== null) {
+        actions = actions.filter(a => a.from === selected);
+        const head = document.createElement('div');
+        head.className = 'selection';
+        const name = document.createElement('span');
+        name.textContent = mapById.get(selected)?.name ?? selected;
+        const all = document.createElement('button');
+        all.textContent = 'Show all';
+        all.addEventListener('click', () => select(null));
+        head.append(name, all);
+        list.append(head);
+    }
     $('action-count').textContent = actions.length > 1 ? `${actions.length} choices` : '';
     const filter = $('action-filter');
     filter.hidden = actions.length <= 10;
@@ -323,15 +375,15 @@ function showActions(actions) {
     }
     const groups = new Map();
     for (const a of actions) {
-        const kind = a.kind ?? '';
-        if (!groups.has(kind)) groups.set(kind, []);
-        groups.get(kind).push(a);
+        const g = groupOf(a);
+        if (!groups.has(g)) groups.set(g, []);
+        groups.get(g).push(a);
     }
     const multi = [...groups.values()].filter(g => g.length > 1);
     if (actions.length <= GROUP_OVER || groups.size < 2 || multi.length === 0) {
         for (const a of actions) list.append(actionButton(a));
     } else {
-        for (const a of actions) if (groups.get(a.kind ?? '').length === 1) list.append(actionButton(a));
+        for (const a of actions) if (groups.get(groupOf(a)).length === 1) list.append(actionButton(a));
         for (const [kind, group] of groups) {
             if (group.length === 1) continue;
             const details = document.createElement('details');
@@ -339,7 +391,7 @@ function showActions(actions) {
             details.dataset.kind = kind;
             details.open = groupChoice.get(kind) ?? (multi.length === 1 || group.length <= 6);
             const summary = document.createElement('summary');
-            summary.textContent = `${kind ? humanise(kind) : 'Other'} (${group.length})`;
+            summary.textContent = `${groupName(kind)} (${group.length})`;
             summary.addEventListener('click', () => {
                 groupChoice.set(kind, !details.open);
                 // the details open or close after the click
@@ -357,18 +409,27 @@ function actionButton(a) {
     b.className = 'action';
     setRichText(b, a.label);
     b.dataset.label = a.label.toLowerCase();
-    b.addEventListener('click', () => {
-        // Only one choice per decision. The list is replaced when the server sends the next one.
-        actionChosen();
-        send({type: 'action', i: a.i, label: a.label});
-    });
+    b.addEventListener('click', () => chooseAction(a));
     b.addEventListener('mouseenter', () => send({type: 'actionHover', i: a.i, enter: true}));
     b.addEventListener('mouseleave', () => send({type: 'actionHover', i: a.i, enter: false}));
     return b;
 }
 
-// After a choice (on a button or the board), nothing more can be chosen until the server offers the next decision.
+// at: where on the page the choice was made, if on the map (or in a menu there)
+function chooseAction(a, at = null) {
+    hideMenu();
+    // Only one choice per decision, unless it is added to a plan. The list is replaced when the server sends the next
+    // one.
+    actionChosen();
+    followOn = at ? {x: at.x, y: at.y, t: performance.now()} : null;
+    send({type: 'action', i: a.i, label: a.label});
+    if (selected !== null) select(null);
+}
+
+// After a choice (on a button or the board), nothing more can be chosen until the server offers the next decision;
+// while planning, a choice only adds to the plan.
 function actionChosen() {
+    if (planning) return;
     for (const b of $('action-list').querySelectorAll('button')) b.disabled = true;
     $('summary-panel').hidden = true;
     // the GUI's tooltip described what the choice would do
@@ -1004,50 +1065,90 @@ function regionAt(p) {
 
 function hover(p) {
     const r = p ? regionAt(p) : -1;
-    if (r === hovered) return;
+    const m = p && r < 0 && mapActive() ? mapRegionAt(p) : null;
+    const mh = m !== null && (isSource(m) || targetsOf(selected).has(m)) ? m : null;
+    if (r === hovered && mh === mapHovered) return;
     hovered = r;
-    canvas.style.cursor = r >= 0 ? 'pointer' : '';
+    mapHovered = mh;
+    canvas.style.cursor = r >= 0 || mh !== null ? 'pointer' : '';
     drawOverlay();
 }
 
 function drawOverlay() {
     octx.setTransform(1, 0, 0, 1, 0, 0);
     octx.clearRect(0, 0, overlay.width, overlay.height);
-    if (hovered < 0 || !frameSize) return;
+    if (!frameSize) return;
     const s = overlay.width / frameSize.w;
     octx.setTransform(s, 0, 0, s, 0, 0);
     const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#2f6fd6';
-    octx.fillStyle = `${accent}40`;
-    octx.fill(regions[hovered].path);
-    octx.strokeStyle = accent;
-    octx.lineWidth = 2.5 / (scale || 1);
-    octx.stroke(regions[hovered].path);
+    const line = 1 / (scale || 1);
+    if (mapActive()) drawMap(accent, line);
+    if (hovered >= 0) {
+        octx.fillStyle = `${accent}40`;
+        octx.fill(regions[hovered].path);
+        octx.strokeStyle = accent;
+        octx.lineWidth = 2.5 * line;
+        octx.stroke(regions[hovered].path);
+    }
     // hit tests are in frame coordinates
     octx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
+// The region selected, strongly; the regions its piece may act on, lightly; and the region under the pointer.
+function drawMap(accent, line) {
+    const sel = selected !== null ? mapById.get(selected) : null;
+    if (sel) {
+        octx.setLineDash([6 * line, 4 * line]);
+        octx.strokeStyle = accent;
+        octx.lineWidth = 2 * line;
+        octx.fillStyle = `${accent}26`;
+        for (const id of targetsOf(selected)) {
+            const r = mapById.get(id);
+            if (!r || id === selected) continue;
+            octx.fill(r.path);
+            octx.stroke(r.path);
+        }
+        octx.setLineDash([]);
+        octx.fillStyle = `${accent}4d`;
+        octx.fill(sel.path);
+        octx.lineWidth = 3.5 * line;
+        octx.stroke(sel.path);
+    }
+    const hov = mapHovered !== null ? mapById.get(mapHovered) : null;
+    if (hov && hov !== sel) {
+        octx.fillStyle = `${accent}33`;
+        octx.fill(hov.path);
+        octx.strokeStyle = accent;
+        octx.lineWidth = 2.5 * line;
+        octx.stroke(hov.path);
+    }
+}
+
 function chooseRegion(r, clientX, clientY) {
     if (regions[r].options.length === 1) sendRegion(r, 0);
-    else showMenu(r, clientX, clientY);
+    else showMenu(regions[r].options.map((label, o) => ({label, choose: () => sendRegion(r, o)})), clientX, clientY);
 }
 
 function sendRegion(r, o) {
+    hideMenu();
     send({type: 'region', v: regionsVersion, r, o});
     actionChosen();
 }
 
 const menu = $('region-menu');
 
-function showMenu(r, clientX, clientY) {
+// a menu of items {label, choose, className}
+function showMenu(items, clientX, clientY) {
     tooltip.hidden = true;
     menu.replaceChildren();
-    regions[r].options.forEach((label, o) => {
+    for (const item of items) {
         const b = document.createElement('button');
         b.setAttribute('role', 'menuitem');
-        setRichText(b, label);
-        b.addEventListener('click', () => sendRegion(r, o));
+        setRichText(b, item.label);
+        if (item.className) b.className = item.className;
+        b.addEventListener('click', item.choose);
         menu.append(b);
-    });
+    }
     menu.hidden = false;
     const box = menu.getBoundingClientRect();
     menu.style.left = `${Math.max(4, Math.min(clientX, window.innerWidth - box.width - 4))}px`;
@@ -1060,15 +1161,144 @@ function hideMenu() {
 }
 
 window.addEventListener('pointerdown', e => {
-    if (!menu.hidden && !menu.contains(e.target)) hideMenu();
+    if (menu.hidden || menu.contains(e.target)) return;
+    hideMenu();
+    // a press on the game that closes the menu does nothing else (it would act on the board); without the press,
+    // its release is ignored too
+    if (e.target === canvas) e.stopPropagation();
 }, {capture: true});
 window.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !menu.hidden) {
         hideMenu();
         canvas.focus();
+    } else if (e.key === 'Escape' && selected !== null) {
+        select(null);
     } else if (e.key === 'Escape' && !$('rules-panel').hidden) {
         openRules(false);
     }
+});
+
+// ---- maps: boards whose regions the player points at, first at the piece that acts and then at where it acts (see
+// gui.MapMove). The actions say which regions they involve (from and to).
+
+let mapRegions = [];        // {id, name, path: Path2D}, in frame coordinates
+const mapById = new Map();
+let selected = null;        // the region whose piece's actions are offered on the map and listed
+let mapHovered = null;
+
+function setMap(msg) {
+    mapRegions = msg.regions.map(r => ({id: r.id, name: r.name, path: new Path2D(r.path)}));
+    mapById.clear();
+    for (const r of mapRegions) mapById.set(r.id, r);
+    mapHovered = null;
+    // the actions are listed under the regions' names
+    listActions();
+    drawOverlay();
+}
+
+// whether the actions are chosen on the map now
+function mapActive() {
+    return mapRegions.length > 0 && currentActions.some(a => a.from !== undefined)
+        && !$('action-list').querySelector('button.action:disabled');
+}
+
+function mapRegionAt(p) {
+    for (let i = mapRegions.length - 1; i >= 0; i--)
+        if (octx.isPointInPath(mapRegions[i].path, p.x, p.y)) return mapRegions[i].id;
+    return null;
+}
+
+function isSource(id) {
+    return currentActions.some(a => a.from === id);
+}
+
+function targetsOf(id) {
+    return new Set(id === null ? [] : currentActions.filter(a => a.from === id).map(a => a.to));
+}
+
+function select(id) {
+    selected = id;
+    listActions();
+    drawOverlay();
+}
+
+// A click on a region the selected piece may act on offers those actions; otherwise a click on a piece selects it
+// (and offers its actions at once if they are all on the spot, like a build); anywhere else, it clears the selection.
+function mapClick(id, clientX, clientY) {
+    const name = mapById.get(id)?.name ?? id;
+    if (selected !== null) {
+        const acts = currentActions.filter(a => a.from === selected && a.to === id);
+        if (acts.length > 0) {
+            const at = {x: clientX, y: clientY};
+            const items = acts.map(a => ({label: a.label, choose: () => chooseAction(a, at)}));
+            // a single action is chosen at once; with a menu anyway, it may also select the piece clicked on
+            if (items.length > 1 && id !== selected && isSource(id))
+                items.push({label: `Select ${name} instead`, className: 'muted', choose: () => {
+                    hideMenu();
+                    selectAndOffer(id, clientX, clientY);
+                }});
+            if (items.length === 1) chooseAction(acts[0], at);
+            else showMenu(items, clientX, clientY);
+            return;
+        }
+    }
+    if (id !== selected && isSource(id)) selectAndOffer(id, clientX, clientY);
+    else select(null);
+}
+
+function selectAndOffer(id, clientX, clientY) {
+    select(id);
+    const own = currentActions.filter(a => a.from === id);
+    if (own.every(a => a.to === id)) {
+        const at = {x: clientX, y: clientY};
+        if (own.length === 1) chooseAction(own[0], at);
+        else showMenu(own.map(a => ({label: a.label, choose: () => chooseAction(a, at)})), clientX, clientY);
+    }
+}
+
+// ---- a plan: several decisions made in the page and sent to the game together (see gui.IMovePlanner)
+
+let planning = false;
+
+function showPlan(msg) {
+    planning = Array.isArray(msg.steps);
+    $('plan-panel').hidden = !planning;
+    $('actions-title').textContent = planning ? 'Add to your plan' : 'Your move';
+    if (!planning) return;
+    const list = $('plan-steps');
+    list.replaceChildren();
+    msg.steps.forEach((text, i) => {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        const label = document.createElement('span');
+        setRichText(label, text);
+        const remove = document.createElement('button');
+        remove.className = 'remove';
+        remove.textContent = '×';
+        remove.title = 'Take this out of the plan';
+        remove.addEventListener('click', () => send({type: 'plan', op: 'remove', i}));
+        span.append(label, remove);
+        li.append(span);
+        list.append(li);
+    });
+    $('plan-empty').hidden = msg.steps.length > 0;
+    $('plan-count').textContent = msg.steps.length > 0 ? `${msg.steps.length} planned` : '';
+    $('plan-warnings').replaceChildren(...msg.warnings.map(w => {
+        const li = document.createElement('li');
+        li.textContent = w;
+        return li;
+    }));
+    $('plan-send').textContent = msg.send;
+    $('plan-clear').disabled = msg.steps.length === 0;
+}
+
+$('plan-clear').addEventListener('click', () => send({type: 'plan', op: 'clear'}));
+$('plan-send').addEventListener('click', () => {
+    send({type: 'plan', op: 'send'});
+    planning = false;
+    if (selected !== null) select(null);
+    actionChosen();
+    $('plan-panel').hidden = true;
 });
 
 // ---- browser to server
@@ -1136,15 +1366,17 @@ canvas.addEventListener('pointerdown', e => {
         hover(p);
     }
     const region = e.button === 0 ? regionAt(p) : -1;
+    const mapId = e.button === 0 && region < 0 && mapActive() ? mapRegionAt(p) : null;
     // with the right or middle button, a drag moves the view about a game larger than its space
     const pan = !touch && (e.button === 1 || e.button === 2) && canPan();
     if (e.button === 1) e.preventDefault();   // not the browser's own scrolling
     press = {id: e.pointerId, p, clientX: e.clientX, clientY: e.clientY, button: e.button, clicks: clickCount(e),
-        region, touch, held: touch || region >= 0 || pan, pan, panning: false, x: e.clientX, y: e.clientY,
+        region, mapId, touch, held: touch || region >= 0 || mapId !== null || pan, pan, panning: false,
+        x: e.clientX, y: e.clientY,
         done: false, timer: null};
     if (!press.held) {
         sendMouse('down', p, e, e.button, press.clicks);
-    } else if (touch && region < 0) {
+    } else if (touch && region < 0 && mapId === null) {
         press.timer = setTimeout(() => {
             // a long press is a right click
             press.done = true;
@@ -1212,6 +1444,9 @@ canvas.addEventListener('pointerup', e => {
         sendMouse('up', p, e, held.button, held.clicks);
     } else if (held.region >= 0 && regionAt(p) === held.region) {
         chooseRegion(held.region, e.clientX, e.clientY);
+    } else if (held.mapId !== null) {
+        // a press and release on the map, even ending on another region, is the page's: the GUI would answer it too
+        if (mapRegionAt(p) === held.mapId) mapClick(held.mapId, e.clientX, e.clientY);
     } else {
         // a tap is a click where it began
         sendMouse('down', held.p, e, held.button, held.clicks, 1);

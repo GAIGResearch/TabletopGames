@@ -361,7 +361,8 @@ public class DiplomacyMapView extends JComponent {
      * it helps, a build as a ring and a disband as a cross. colour null means the order's usual colour.
      */
     private void drawOrder(Graphics2D g, DiplomacyOrder order, Color colour, boolean pending) {
-        float width = pending ? 3f : 3.8f;
+        // the pending orders (a plan, while it is made) are drawn more strongly than the last results, to stand out
+        float width = pending ? 5.5f : 3.8f;
         boolean dashed = colour == FAILURE;
         if (order instanceof Move m) {
             arrow(g, centre(m.unit), at(m.to), colour == null ? SUCCESS : colour, width, dashed);

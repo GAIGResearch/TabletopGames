@@ -7,6 +7,8 @@ import core.actions.AbstractAction;
 import games.GameType;
 import gui.AbstractGUIManager;
 import gui.ClickRegion;
+import gui.MapMove;
+import gui.MapRegion;
 import gui.RulesPages;
 import gui.views.RulesView;
 
@@ -25,8 +27,9 @@ import java.util.regex.Pattern;
  * Moves a GUI's standard parts (its action buttons, game state information and history; see
  * {@link AbstractGUIManager#getActionPanel()}) from the streamed image into the page, where the browser draws them
  * natively. A GUI that does not use a standard panel keeps that part in the image. It also sends the GUI's click
- * regions (see {@link AbstractGUIManager#getClickRegions()}), the parts of the frame that take the mouse wheel, and the
- * game's rules (see {@link RulesPages}), whose tabs it takes out of the image.
+ * regions (see {@link AbstractGUIManager#getClickRegions()}), the regions of a map and where each action is on it
+ * (see {@link AbstractGUIManager#getMapRegions()}), the parts of the frame that take the mouse wheel, and the game's
+ * rules (see {@link RulesPages}), whose tabs it takes out of the image.
  * <p>
  * Everything here runs on the Swing thread.
  */
@@ -45,6 +48,8 @@ class ChromeReader {
     private final boolean hasActions, hasInfo;
 
     private JsonArray sentActions;
+    // the game tick when they were sent
+    private int sentTick = -1;
     private JsonObject sentInfo;
     private List<String> sentHistory = List.of();
     private boolean historyReset;
@@ -56,6 +61,7 @@ class ChromeReader {
     private final List<RulesPages.Page> rules = new ArrayList<>();
     private boolean sentRules;
     private String sentWheelAreas;
+    private List<Object> sentMap;
 
     /**
      * @param gameType the game, for its rules written in Markdown (see {@link RulesPages})
@@ -122,6 +128,7 @@ class ChromeReader {
         sentRegions = null;
         sentRules = false;
         sentWheelAreas = null;
+        sentMap = null;
     }
 
     /**
@@ -154,10 +161,20 @@ class ChromeReader {
                     a.addProperty("label", buttons[i].getText());
                     String kind = kind(gui.getButtonAction(i));
                     if (kind != null) a.addProperty("kind", kind);
+                    MapMove move = gui.getButtonAction(i) == null ? null : gui.getMapMove(gui.getButtonAction(i));
+                    if (move != null) {
+                        a.addProperty("from", move.from());
+                        a.addProperty("to", move.to());
+                    }
                     actions.add(a);
                 }
-            if (!actions.equals(sentActions)) {
+            // a new decision may offer the same actions as the last (placing armies again, say), and the page, which
+            // stops offering them once one is chosen, needs them again: so they are sent again whenever the game has
+            // moved on
+            int tick = game.getGameState().getGameTick();
+            if (!actions.equals(sentActions) || (tick != sentTick && !actions.isEmpty())) {
                 sentActions = actions;
+                sentTick = tick;
                 JsonObject msg = new JsonObject();
                 msg.addProperty("type", "actions");
                 msg.add("actions", actions);
@@ -175,7 +192,42 @@ class ChromeReader {
             sendHistory(gui.getHistory());
         }
         sendRegions();
+        sendMap();
         sendWheelAreas();
+    }
+
+    /**
+     * Sends the map's regions when they have changed: each one's id, name and shape, and where its view is in the
+     * frame.
+     */
+    private void sendMap() {
+        List<MapRegion> map = new ArrayList<>();
+        for (MapRegion region : gui.getMapRegions())
+            if (region.view().isShowing()) map.add(region);
+        // the regions are the same as those sent if their views are where they were and their shapes the same
+        // objects, which their GUI keeps until a view is resized: so the paths are made again only then
+        List<Object> key = new ArrayList<>();
+        for (MapRegion region : map) {
+            key.add(region.id());
+            key.add(region.name());
+            key.add(System.identityHashCode(region.shape()));
+            key.add(SwingUtilities.convertPoint(region.view(), 0, 0, root));
+        }
+        if (key.equals(sentMap)) return;
+        sentMap = key;
+        JsonArray json = new JsonArray();
+        for (MapRegion region : map) {
+            Point offset = SwingUtilities.convertPoint(region.view(), 0, 0, root);
+            JsonObject r = new JsonObject();
+            r.addProperty("id", region.id());
+            r.addProperty("name", region.name());
+            r.addProperty("path", svgPath(region.shape(), offset.x, offset.y));
+            json.add(r);
+        }
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "map");
+        msg.add("regions", json);
+        out.sendText(msg.toString());
     }
 
     /**

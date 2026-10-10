@@ -43,6 +43,8 @@ public abstract class AbstractGUIManager {
     protected List<String> history = new ArrayList<>();
 
     private int actionsAtLastUpdate;
+    // the actions to offer instead of the forward model's, or null (see offerInstead)
+    private List<AbstractAction> offerInstead;
 
     // the panels made by createActionPanel and createGameStateInfoPanel, if the GUI uses them
     private JComponent actionPanel, infoPanel;
@@ -93,11 +95,12 @@ public abstract class AbstractGUIManager {
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
-            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace, player.getPlayerID());
+            List<AbstractAction> actions = offerInstead != null ? offerInstead
+                    : player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace, player.getPlayerID());
             clickable.offer(gameState, actions, player.getPlayerID());
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
-                actionButtons[i].setButtonAction(actions.get(i), gameState);
+                actionButtons[i].setButtonAction(actions.get(i), actionLabel(actions.get(i), gameState));
                 actionButtons[i].setBackground(Color.white);
             }
             for (int i = actions.size(); i < actionButtons.length; i++) {
@@ -105,6 +108,14 @@ public abstract class AbstractGUIManager {
                 actionButtons[i].setButtonAction(null, "");
             }
         }
+    }
+
+    /**
+     * The text of the button offering the action: by default the action's getString. A GUI may add what the player
+     * should know to choose it (the odds of a battle, say).
+     */
+    public String actionLabel(AbstractAction action, AbstractGameState gameState) {
+        return action.getString(gameState);
     }
 
     /**
@@ -216,6 +227,48 @@ public abstract class AbstractGUIManager {
      */
     public List<ClickRegion> getClickRegions() {
         return List.of();
+    }
+
+    /**
+     * The regions of the board, when it is a map on which a player acts by pointing at one region and then another
+     * (see {@link #getMapMove}): all of them, whether or not an action is offered on them now. None by default. A GUI
+     * with a map may override this and getMapMove, so that a GUI shown elsewhere (the web server's page) can offer the
+     * actions on the map; it should then use the standard action buttons (createActionPanel).
+     */
+    public List<MapRegion> getMapRegions() {
+        return List.of();
+    }
+
+    /**
+     * The map regions an action involves (see {@link #getMapRegions()}), or null if it is not chosen on the map.
+     */
+    public MapMove getMapMove(AbstractAction action) {
+        return null;
+    }
+
+    /**
+     * The planner with which a human player may plan several decisions and send them together, or null (the
+     * default) if the game offers none. See {@link IMovePlanner}.
+     */
+    public IMovePlanner getPlanner() {
+        return null;
+    }
+
+    /**
+     * Offers the actions, rather than the forward model's, from the next update on (if the GUI uses the default
+     * updateActionButtons); null to offer the forward model's again. A planner's options are offered this way, with
+     * the GUI updated with the planned state.
+     */
+    public void offerInstead(List<AbstractAction> actions) {
+        offerInstead = actions == null ? null : List.copyOf(actions);
+    }
+
+    /**
+     * Whether actions are being offered instead of the forward model's (see offerInstead). A GUI that overrides
+     * updateActionButtons may then offer them with the default one.
+     */
+    protected boolean offersInstead() {
+        return offerInstead != null;
     }
 
     /**

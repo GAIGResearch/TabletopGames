@@ -245,8 +245,8 @@ choice still reaches `HumanGUIPlayer` through the `ActionController`, and is one
 - **Click regions** (Tier 2): `AbstractGUIManager.getClickRegions()` (default none) lists the parts of the views a click
   may choose an action on, each with its offered actions; `chooseClicked` submits one through `ClickableActions`. The
   page outlines a region under the pointer and answers a click itself: one action is chosen at once, several give a
-  menu. Presses on a region are not passed to the GUI unless they become drags. Implemented for Diplomacy (provinces,
-  traced from the map's region image), Go Fish and Hearts (cards).
+  menu. Presses on a region are not passed to the GUI unless they become drags. Implemented for Go Fish and Hearts
+  (cards); Diplomacy had them too, until its map (Stage 8) replaced them.
 - **Server load.** The GUI is no longer repainted twice per tick (`game.updateGUI` repainted the off-screen window as
   well as the streamer painting it); the GUI is updated only while the game is moving, after input, and every 2 s; and a
   frame is painted only when Swing has been asked to repaint something in it (`DirtyTracker`), or every 2 s. An idle
@@ -288,6 +288,158 @@ choice still reaches `HumanGUIPlayer` through the `ActionController`, and is one
   filled in from the same parameters, for the defaults and for values exercising every branch.
 - Found: at its own preferred height Hearts' GUI draws its "0 points" over the player titles (a layout bug of the GUI,
   seen when zoomed in beyond the fit or in a small window).
+
+### Stage 8 (Tier 3): easier decisions on map games
+
+Make the page feel native to the browser where that makes deciding easier, without redrawing what the Swing GUI already
+draws well. The streamed image stays, and the board is still the GUI's; the page adds, over and beside it, what helps a
+player decide and enter a decision: information where the pointer is, direct ways of entering moves, and a plan of
+several moves made and checked before it is sent. Every move still reaches the engine through `HumanGUIPlayer` as one
+the forward model offered. Start with three games whose boards are clickable maps: **Diplomacy, Risk and Pandemic**.
+
+**What gets in the player's way now.** A decision means scanning a long action list (Diplomacy offers every support and
+convoy of the next unit), or clicking a region and choosing from a menu. The engine sets the order of the decisions
+(Diplomacy asks for the units one by one in its own order; Pandemic takes each of the 4 actions as it comes), and a
+choice cannot be taken back. What a player needs to judge a move (the armies next door, a continent's bonus, the cubes
+on a city and what an outbreak would reach) is spread across the board, the side panels and the player's memory.
+
+**Principles**
+
+- **Information where you look.** Hovering over a region shows a card with what matters there; the GUI already knows
+  it. Only what the player could see in the GUI: no hidden information.
+- **Point at the thing, then at where it goes.** Select a unit or territory, and the places it can act on are lit up;
+  click (or drag to) one. Choices that remain (a support or a move, how many armies) come in a small menu at the target,
+  with a sensible default.
+- **Plan, then commit**, wherever the engine would take a run of the player's own decisions with nothing random or
+  hidden revealed between them. The page builds the run in any order, shows it, and lets each step be changed or undone;
+  a button sends it all.
+- **Show the consequence before it happens**: orders as arrows, the planned state on the board, the odds of an attack.
+- **Fewer, clearer steps**: keys for the common actions, defaults that are usually right, the phase and what remains
+  (armies to place, actions left) always in view.
+
+**Shared structure**
+
+- **Map regions.** The Tier 2 `ClickRegion` grows into a map description from the GUI manager: each region has an id, a
+  name, its shape, an anchor (where an arrow or badge goes), and its card (lines of text from the GUI, as the player
+  sees them). The page draws its overlays (highlights, arrows, badges, cards) in the browser, over the image.
+- **Actions in map terms.** A per-game mapping from an action to the regions it involves (from, to, and the region it
+  acts through, e.g. the unit supported), so that the page can offer an action by selecting and dragging, and draw it as
+  an arrow. Actions that involve no region stay in the action list.
+- **The planner.** A `GameSession` keeps a copy of the game from the player's view (`getCopy(player)`), advances it with
+  the forward model as moves are planned, and sends the actions available next, the regions, and a frame of the GUI
+  drawing the planned state (marked as a plan). Undo replays the plan less its last step on a fresh copy. The game says
+  how far a plan may run (a hook: true while the next decision is still the player's and nothing random or hidden has
+  been revealed). On commit, each planned action is given to `HumanGUIPlayer` when the engine asks; if one is no longer
+  offered (an event card, a reaction), the plan stops there and the page shows what is left of it.
+
+**Diplomacy**
+
+- Orders for all units in any order, shown as arrows (move, support, convoy) and markers (hold, disband, build) on the
+  map. Click a unit, then a province: one order is made at once; when there are several (move or support someone else's
+  move there, a convoyed move) a menu at the province. Units without an order are marked, and Hold is their default.
+- A unit's orders do not depend on the other orders, so the planner finds each unit's options on a copy where it is the
+  next to order; the plan is sent in the engine's unit order. Builds and disbands work the same way.
+- Warnings before sending, not errors: a support for a move nobody ordered, a convoy with no matching move, two own
+  units ordered into one province.
+- Province card: name, supply centre and its owner, unit, and the orders given to or involving it.
+
+**Risk**
+
+- **Swing first**: the map becomes shaped territories like Diplomacy's, from
+  `claude_game_creator/Risk_game_board.svg` (one path per territory, ids such as `alaska`, `eastern_united_states`;
+  `Risk_board.svg` is the Inkscape original it is based on), tinted by owner with the army counts on them. This gives the
+  click regions and the shapes for both the desktop and the page.
+- **Reinforce**: click a territory to place one army, Shift for 5 (or the batch the engine offers), with the armies left
+  to place in view; the placements are a plan, sent together. Card trades are offered when they are possible and forced
+  when the hand is full.
+- **Attack**: drag from a territory to an enemy neighbour. The dice default to the most allowed, with the odds of
+  winning the roll and of taking the territory shown; Attack once or Blitz. Rolls are random, so attacks are not planned
+  ahead. After a capture, a slider over the numbers `MoveArmiesChoice` offers, defaulting to the most.
+- **Fortify**: drag between connected territories, slider for the armies.
+- Territory card: owner, armies, continent with its bonus and who holds the rest of it, the enemy armies next door.
+
+**Pandemic**
+
+- The 4 actions are a plan with the actions left in view; cards are drawn and cities infected only after them, so the
+  plan is exact. Click a city to see how to get there and what it costs (drive steps, or which card a direct or charter
+  flight uses, or a shuttle) and choose one; then treat, build, share or cure there from a menu or keys. Undo any step.
+- City card: cubes by colour, research station, pawns there, which cards in the players' hands are that city, and
+  whether it is in the infection discard. Outbreak warnings on cities with 3 cubes of a colour.
+- The discard choice (hand over the limit) shows what each card would be needed for (cures, flights).
+
+**Order of work.** The shared regions and planner with Diplomacy first (its shapes and click regions exist, and
+planning all orders is the largest gain), then Risk (the SVG map in Swing, then drag and odds), then Pandemic (routes).
+
+**Status:** implemented for all three games.
+
+- **Map regions.** `AbstractGUIManager.getMapRegions()` (all the regions, id, name, view and shape) and
+  `getMapMove(action)` (the regions an offered action involves, `from` and `to`). `ChromeReader` sends the regions
+  (`map`, again only when a shape or view position changes) and adds `from`/`to` to each action. The page: click a
+  piece to select it (outlined; the places it can act on dashed; the action list narrowed to it, with Show all), then
+  a place: one action is chosen, several give a menu (with "Select X instead" when the place has a piece of its own).
+  After a choice on the map, a next decision with nothing on the map (Risk's dice, the armies to move) is offered in a
+  menu where the player clicked (`offerFollowOn`).
+  Actions all on the spot (builds) are offered as soon as the piece is selected. Escape clears the selection, and a
+  click that closes a menu does nothing else. The action list is grouped by piece rather than by kind. The Swing
+  tooltips stay as the region cards.
+- **The planner.** `gui.IMovePlanner` (the game's rules for a plan: when one starts, the options at the planned state,
+  applying a step, what replaces what, the fallback for a decision with no planned action, warnings, the button's
+  label) from `AbstractGUIManager.getPlanner()`. `web.MovePlan` keeps the steps on a copy of the decision the game is
+  waiting for (rebuilt from the decision on every change, dropping steps no longer offered); the GUI is updated with
+  the planned state and offered the plan's options (`AbstractGUIManager.offerInstead`), and the session's action
+  controller diverts choices to the plan. The page shows the steps (each removable), the warnings, Clear and Send.
+  `web.BrowserPlayer` (the seat's `HumanGUIPlayer`) answers the run's decisions from the sent plan on the game thread:
+  the first planned action offered, else the fallback, else the plan stops (with a message) and the player is asked.
+  The run is the player's turn (turn, round and current player as when it was sent).
+- **Diplomacy** (`DiplomacyPlanner`): all the power's orders at once, in any order, from the first decision of the
+  phase; a new order for a unit replaces its old one; unordered units hold (retreats: disband; unused builds are
+  waived). Warnings: units holding for want of an order, own units ordered into one province, a support for an own
+  unit's move it is not ordered to make, a hold support for an own unit ordered to move, a convoy with no matching
+  move. `DiplomacyForwardModel.ordersFor(state, unit)` gives any unit's orders. The map draws the planned orders as the
+  pending (purple) ones; with several units' orders offered it outlines the units only, not every province an order
+  could aim at.
+- Tests: `DiplomacyPlannerTest`, `web.MovePlanTest` (the plan, and the browser player carrying it out by hand, as the
+  game loop would ask). Checked in Chrome: selecting, a menu, the plan and its warnings, sending (the orders reached
+  the game, and Fall's plan began). Not yet checked: retreats and builds in the page, touch.
+- Found: the planned orders were thin purple lines, hard to see at the fitted size; they are now drawn more strongly.
+- **Risk** (Swing first, then the page):
+  - The map is drawn from `data/risk/worldMap.svg` (the map file's new optional `"svg"`; a copy of
+    `claude_game_creator/Risk_game_board.svg`, by CMG Lee on Wikimedia Commons, under CC BY-SA 4.0,
+    whose credit, with the licence's address, the map file's `"svgCredit"` gives and the map shows in its bottom right
+    corner): `RiskBoardShapes` reads the territory paths (any path command but arcs, with
+    translate and scale transforms) and finds a label point well inside each. `RiskMapView` tints each territory in
+    its owner's colour with its armies in a disc, outlines the continents (painted at the device's scale: Java's
+    `Area` goes wrong on these many curves, leaving stripes), and dashes the connections across the sea. A map file
+    without an SVG keeps the discs.
+  - Desktop: a territory's tooltip (continent and bonus, how much of it the owner holds, owner and armies, the
+    neighbours); clicking on the map (a click places or claims; or picks a territory to attack or fortify from, then a
+    click on a target chooses, with a menu when there are several ways; a right click drops the pick).
+  - Labels in words, with the odds (`RiskOdds`, exact): "Attack Alberta (1) from Ontario (25): taken >99% of the
+    time by attacking until it falls"; a roll's chance of each number of armies lost; a Blitz's chance of taking it.
+    `AbstractGUIManager.actionLabel` is the new hook, used by the buttons and the plan's steps.
+  - The page: claim, place, attack and fortify on the map, the dice and the armies to move in the follow-on menu;
+    `RiskPlanner` plans the reinforce phase (trades and placements; nothing random happens in it).
+- **Pandemic**:
+  - The cities are discs a little larger than the board's (`PandemicBoardView.cityAreas`, following the board's own
+    zoom and pan); a move goes from the moving pawn's city to its destination, treating, building, sharing and curing
+    are on the acting player's city. Selecting one's city and then another gives the ways there and what each costs
+    ("Direct flight to Istanbul (discard Istanbul)"); clicking one's city again gives what can be done there.
+  - `PandemicPlanner` plans the turn's actions (not Forecast, which looks at the infection deck; nothing once a hand
+    is over its limit). The forward model is rule-based and keeps its place in the turn in itself, so a planned action
+    is carried out as its PlayerAction rule does (with the Medic's treating, and a step of the turn), never by running
+    the game's forward model on a copy. While a plan offers the actions, the GUI offers all of them (its desktop
+    buttons only offer those matching what the player has picked out on the board).
+  - A city's tooltip: its cubes (and which another would make an outbreak), research station, pawns, who holds its
+    card, and whether it is in the infection discard pile. A card to discard says its colour, how many of it the
+    player holds and how many a cure needs.
+- Found and fixed: the page was not sent a decision that offered the same actions as the one before (placing armies
+  again, after an opponent's quick turn), and stayed with its buttons disabled; the actions are now sent again
+  whenever the game has moved on.
+- Tests: `RiskPlannerTest`, `RiskMapDrawingTest` (shapes, label points, odds), `RiskMapClickTest` (the desktop map,
+  headless), `PandemicPlannerTest`. Checked in Chrome: Risk placing, planning and sending reinforcements, an attack
+  with its dice and move-in menus, a fortifying move; Pandemic selecting a city, the ways to another, planning and
+  sending, the city tooltip. Not yet checked: Diplomacy's retreats and builds in the page, Pandemic's sharing and
+  curing on the map, touch.
 
 ## Testing
 

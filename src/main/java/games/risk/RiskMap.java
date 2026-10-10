@@ -30,6 +30,10 @@ public class RiskMap {
     private final List<List<RiskTerritory>> neighbours = new ArrayList<>();
     private final List<RiskMission> missions = new ArrayList<>();
     private final int backupTerritories;
+    // an SVG drawing of the board with a path for each territory, or null (see svgFile)
+    private final String svgFile;
+    // the credit the drawing's licence asks for, shown with it, or null
+    private final String svgCredit;
 
     public RiskMap(String fileName) {
         this.fileName = fileName;
@@ -52,6 +56,8 @@ public class RiskMap {
         if (missionList != null && backup == null)
             throw new IllegalArgumentException(fileName + ": a map with missions needs backupTerritories");
         backupTerritories = backup == null ? 0 : backup.intValue();
+        svgFile = (String) json.get("svg");
+        svgCredit = (String) json.get("svgCredit");
         if (missionList != null)
             for (Object o : missionList) {
                 JSONObject m = (JSONObject) o;
@@ -156,6 +162,22 @@ public class RiskMap {
      */
     public int backupTerritories() {
         return backupTerritories;
+    }
+
+    /**
+     * The map file's "svg": an SVG drawing of the board, with a path for each territory whose id is its name in
+     * lower case with underscores for spaces ("North Africa" is north_africa), for the GUI; or null if it has none.
+     */
+    public String svgFile() {
+        return svgFile;
+    }
+
+    /**
+     * The map file's "svgCredit": the attribution the SVG drawing's licence asks for (lines separated by \n), which
+     * the GUI shows with the drawing; or null if it has none.
+     */
+    public String svgCredit() {
+        return svgCredit;
     }
 
     /**

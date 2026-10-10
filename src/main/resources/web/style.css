@@ -789,6 +789,78 @@ dialog h2 {
     flex-direction: column;
 }
 
+#plan-panel {
+    max-height: 40%;
+    background: var(--surface-2);
+}
+
+#plan-empty {
+    margin: 0 0 8px;
+    font-size: 13px;
+}
+
+.plan-steps {
+    margin: 0;
+    padding: 0 0 0 22px;
+    overflow-y: auto;
+    min-height: 0;
+    font-size: 13px;
+}
+
+.plan-steps li {
+    padding: 1px 0;
+}
+
+.plan-steps li > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.plan-steps .remove {
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    line-height: 1.2;
+}
+
+.plan-steps .remove:hover {
+    color: var(--bad);
+}
+
+.plan-warnings {
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: var(--warn);
+}
+
+.plan-warnings li::before {
+    content: "⚠ ";
+}
+
+.plan-buttons {
+    margin-top: 10px;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.action-list .selection {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.action-list .selection button {
+    padding: 2px 8px;
+    border-color: var(--border);
+    font-weight: normal;
+}
+
 .action-list details.group > summary {
     padding: 4px 2px;
     font-size: 13px;

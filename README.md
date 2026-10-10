@@ -53,8 +53,16 @@ The page also:
 - works by touch: a tap clicks, a long press is the right button, a drag drags, and two fingers zoom and pan;
 - reconnects to the same game when the connection drops (a phone asleep, a network change) or the page is reloaded;
 - outlines and answers clicks on the parts of the board a GUI offers as click regions (see
-  `AbstractGUIManager.getClickRegions`; Diplomacy, Go Fish and Hearts do), without waiting for the image, with a menu
-  when a click there could mean several actions.
+  `AbstractGUIManager.getClickRegions`; Go Fish and Hearts do), without waiting for the image, with a menu
+  when a click there could mean several actions;
+- on a board that is a map (`AbstractGUIManager.getMapRegions` and `getMapMove`; Diplomacy, Risk and Pandemic), lets
+  the player point at a piece and then at where it goes: the piece's choices are outlined and listed, and a menu offers
+  them when there are several; the action list is grouped by piece. A choice that follows one made on the map (the
+  dice for an attack, the armies to move) is offered in a menu where the player clicked;
+- lets the player plan several decisions and send them together, where the game offers a planner
+  (`AbstractGUIManager.getPlanner`, `gui.IMovePlanner`): Diplomacy's orders, in any order, each changeable, with
+  warnings such as a support for a move not ordered; Risk's reinforcements; the actions of a Pandemic turn. The board
+  shows the planned state; nothing is sent until the player presses the button.
 
 ```bash
 java -jar target/TAG.jar WebServer token=some-long-secret

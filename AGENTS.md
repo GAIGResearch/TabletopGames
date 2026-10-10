@@ -50,6 +50,11 @@ page (via read-only accessors on `AbstractGUIManager`). See the README's "Playin
 must not open modal dialogs directly: use `gui.GUIMessages`, which the web server turns into
 messages in the page. A GUI that lets a human click on its views to act (via `ClickableActions`) may also
 override `AbstractGUIManager.getClickRegions()`, so that the page outlines those regions and answers clicks itself.
+A GUI whose board is a map may instead override `getMapRegions()` and `getMapMove(action)` (the page then offers each
+action by pointing at its piece and then where it acts), and `getPlanner()` (a `gui.IMovePlanner`, with which the
+browser player plans a run of decisions on a copy of the game and sends them together; see `web.MovePlan` and
+`web.BrowserPlayer`). Diplomacy, Risk and Pandemic do both. A GUI may describe its actions in words (with what bears
+on the choice, such as Risk's odds) by overriding `actionLabel`, which the buttons, the page and a plan's steps use.
 A game's rules are Markdown files in `data/rules/<GameType>/` (`1-rules.md`, `2-how-to-play.md`, ...), a template
 filled in from the game's parameters (`{param}` values and `<!-- if ... -->` sections; see `gui.RulesPages`). The GUI
 adds them as tabs with `RulesView.addTabs(tabs, GameType.<Game>, params, height)`; the web server shows the same pages

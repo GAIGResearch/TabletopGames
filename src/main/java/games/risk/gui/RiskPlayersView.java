@@ -35,6 +35,12 @@ public class RiskPlayersView extends JComponent {
         this.state = state;
     }
 
+    /** a mixed with b: t of b. */
+    static Color blend(Color a, Color b, double t) {
+        return new Color((int) (a.getRed() * (1 - t) + b.getRed() * t), (int) (a.getGreen() * (1 - t) + b.getGreen() * t),
+                (int) (a.getBlue() * (1 - t) + b.getBlue() * t));
+    }
+
     /** Black or white, whichever reads better on the colour. */
     static Color textOn(Color c) {
         return (c.getRed() * 299 + c.getGreen() * 587 + c.getBlue() * 114) / 1000 > 150 ? Color.black : Color.white;

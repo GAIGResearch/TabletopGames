@@ -13,6 +13,7 @@ import core.interfaces.IGamePhase;
 import core.properties.PropertyColor;
 import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
+import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
@@ -20,6 +21,9 @@ import games.pandemic.actions.*;
 import gui.IScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.IMovePlanner;
+import gui.MapMove;
+import gui.MapRegion;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Hash;
@@ -39,6 +43,14 @@ import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction
 import static games.pandemic.gui.PandemicCardView.*;
 import static javax.swing.ScrollPaneConstants.*;
 
+/**
+ * GUI for Pandemic. On the desktop, a player picks out cities, pawns and cards on the board and in the hands, and the
+ * action buttons offer only the actions that match. Shown in a browser, the cities are a map: the player points at
+ * their pawn's city and then at a city to go to (with a menu of the ways there, and what each costs) or at their own
+ * city again (to treat, build, share or cure there), and plans the actions of their turn (see
+ * {@link PandemicPlanner}), with every action offered. The actions are described in words, and a city's tooltip tells
+ * its disease cubes, who is there and who holds its card.
+ */
 public class PandemicGUIManager extends AbstractGUIManager implements IScreenHighlight {
     PandemicCardView[] playerCards;
     JLabel[][] playerHandCardCounts;
@@ -48,6 +60,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
     PandemicCounterView cY, cR, cB, cK;
 
     PandemicGameState gameState;
+    PandemicPlanner planner;
     int nPlayers;
     int maxCards;
     int maxBufferCards = 50;
@@ -70,6 +83,8 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
         nPlayers = gameState.getNPlayers();
         this.gameState = (PandemicGameState) game.getGameState();
         boardView = new PandemicBoardView(gameState);
+        boardView.setToolTips(this::toolTip);
+        planner = new PandemicPlanner((PandemicForwardModel) game.getForwardModel());
 
         handCardHighlights = new ArrayList[nPlayers];
         playerHighlights = new HashSet<>();
@@ -432,6 +447,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
 
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        // a plan's options (see PandemicPlanner) are all offered, to be chosen on the map or from the list
+        if (offersInstead()) {
+            super.updateActionButtons(player, gameState);
+            return;
+        }
         int id = player.getPlayerID();
         List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
         resetActionButtons();
@@ -467,12 +487,12 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                     if (c.getProperty(effectHash) == null || bnHighlights.contains(((MovePlayer) action).getDestination()) &&
                                 (pIdx == id || playerTokenHighlights.contains(pIdx))) {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, gameState);
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
                     }
                 } else if (bnHighlights.contains(((MovePlayer) action).getDestination()) &&
                         (pIdx == id || playerTokenHighlights.contains(pIdx))) {
                     actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action, gameState);
+                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
                 }
             } else if (action instanceof AddResearchStation) {
                 Card playerRole = (Card) this.gameState.getComponentActingPlayer(playerCardHash);
@@ -485,17 +505,17 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                             if (!(action instanceof AddResearchStationWithCardFrom) ||
                                     isCardHighlighted(((AddResearchStationWithCardFrom)action).getCard(gameState), id)) {
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, gameState);
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
                             }
                         }
                     } else {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, gameState);
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
                     }
                 }
             } else if (actions.size() > 0 && action instanceof DoNothing || action instanceof TreatDisease) {
                 actionButtons[k].setVisible(true);
-                actionButtons[k++].setButtonAction(action, gameState);
+                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
             } else if (action instanceof CureDisease) {
                 ArrayList<Integer> cards = ((CureDisease) action).getCards();
                 boolean allSelected = true;
@@ -507,11 +527,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                 }
                 if (allSelected) {
                     actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action, gameState);
+                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
                 }
             } else if (action instanceof QuietNight || action instanceof Forecast) {  // Event
                 actionButtons[k].setVisible(true);
-                actionButtons[k++].setButtonAction(action, gameState);
+                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
             } else if (action instanceof RearrangeDeckOfCards) {  // Event
                 Card eventCard = ((RearrangeDeckOfCards)action).getCard(gameState);
                 int[] cardOrder = ((RearrangeDeckOfCards) action).getNewCardOrder();
@@ -554,10 +574,9 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                     int idx = ((DrawCard) action).getFromIndex();
                     Card c = (Card) playerHands[id].get(idx).getComponent();
                     if (c != null) {
-                        String name = ((PropertyString)c.getProperty(nameHash)).value;
                         // Action name should be just "Discard" for card selected in hand
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, "Discard: " + name);
+                        actionButtons[k++].setButtonAction(action, "Discard: " + cardNote(c, id));
                     }
                 } else {
                     if (this.gameState.getPlayerRole(id).equals("Contingency Planner")) {  // Special role
@@ -590,17 +609,17 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                                 // Give card
                                 // card in hand selected and other player, show this action as available
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, gameState);
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
                             } else if (id == receiverID) {
                                 //Take card
                                 // A card from another player selected
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, gameState);
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
                             }
                         }
                     } else {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, gameState);
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
                     }
                 }
             } else {
@@ -639,4 +658,137 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
         return false;
     }
 
+
+    @Override
+    public IMovePlanner getPlanner() {
+        return planner;
+    }
+
+    @Override
+    public List<MapRegion> getMapRegions() {
+        if (boardView == null) return List.of();
+        List<MapRegion> regions = new ArrayList<>();
+        boardView.cityAreas().forEach((city, area) -> regions.add(new MapRegion(city, city, boardView, area)));
+        return regions;
+    }
+
+    /**
+     * A move goes from the moving pawn's city to its destination; treating, building, sharing and curing are done in
+     * the acting player's city (a research station moved by the Operations Expert goes from where the player is to
+     * where it is built).
+     */
+    @Override
+    public MapMove getMapMove(AbstractAction action) {
+        if (gameState == null) return null;
+        int acting = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        String here = location(acting);
+        if (action instanceof MovePlayer m) return new MapMove(location(m.getPlayerToMove()), m.getDestination());
+        if (action instanceof TreatDisease t) return new MapMove(t.getCity(), t.getCity());
+        if (action instanceof AddResearchStation a) return new MapMove(here, a.getCity());
+        if (action instanceof CureDisease || action instanceof ShareKnowledge) return new MapMove(here, here);
+        return null;
+    }
+
+    private String location(int player) {
+        return ((PropertyString) gameState.getComponent(playerCardHash, player).getProperty(playerLocationHash)).value;
+    }
+
+    private String cardName(Card c) {
+        return c == null ? "?" : ((PropertyString) c.getProperty(nameHash)).value;
+    }
+
+    private String role(int player) {
+        return cardName((Card) gameState.getComponent(playerCardHash, player));
+    }
+
+    /**
+     * The actions in words: how a move gets there and the card it costs, what a cure or a station costs.
+     */
+    @Override
+    public String actionLabel(AbstractAction action, AbstractGameState state) {
+        PandemicGameState s = (PandemicGameState) state;
+        int acting = s.getTurnOrder().getCurrentPlayer(s);
+        if (action instanceof MovePlayer m) {
+            String to = m.getDestination();
+            String card = m instanceof MovePlayerWithCard c ? cardName(c.getCard(s)) : null;
+            String who = m.getPlayerToMove() == acting ? "" : "Move Player " + m.getPlayerToMove() + ": ";
+            return who + switch (m.getMoveType()) {
+                case DriveFerry -> "Drive to " + to;
+                case DirectFlight -> "Direct flight to " + to + " (discard " + card + ")";
+                case CharterFlight -> "Charter flight to " + to + " (discard " + card + ")";
+                case ShuttleFlight -> "Shuttle flight to " + to;
+                case Airlift -> "Airlift to " + to + (card == null ? "" : " (play " + card + ")");
+                case OperationsExpert -> "Fly to " + to + " from a research station (discard " + card + ")";
+                case Dispatcher -> "Dispatch to " + to + " (to a city with another pawn)";
+            };
+        }
+        if (action instanceof TreatDisease t)
+            return "Treat " + t.getColor() + " in " + t.getCity() + (t.toString().endsWith("(all)") ? " (all cubes)" : "");
+        if (action instanceof AddResearchStationWithCardFrom a)
+            return "Build a research station in " + a.getCity() + ", moving the one in " + a.getFromCity()
+                    + " (discard " + cardName(a.getCard(s)) + ")";
+        if (action instanceof AddResearchStationFrom a)
+            return "Build a research station in " + a.getCity() + ", moving the one in " + a.getFromCity();
+        if (action instanceof AddResearchStationWithCard a)
+            return "Build a research station in " + a.getCity() + " (discard " + cardName(a.getCard(s)) + ")";
+        if (action instanceof AddResearchStation a)
+            return "Build a research station in " + a.getCity();
+        if (action instanceof CureDisease c)
+            return "Cure " + c.getColor() + " (discard " + c.getCards().size() + " " + c.getColor() + " cards)";
+        if (action instanceof ShareKnowledge k) {
+            String card = cardName(k.getCard(s));
+            return k.getGiver() == acting ? "Give " + card + " to Player " + k.getReceiver() + " (" + role(k.getReceiver()) + ")"
+                    : "Take " + card + " from Player " + k.getGiver() + " (" + role(k.getGiver()) + ")";
+        }
+        return super.actionLabel(action, state);
+    }
+
+    /**
+     * A card's name and what the player needs it for: a city card's colour, with how many of that colour they hold
+     * and a cure needs.
+     */
+    private String cardNote(Card c, int player) {
+        String name = cardName(c);
+        if (!(c.getProperty(colorHash) instanceof PropertyColor colour)) return name + " (event)";
+        Deck<Card> hand = (Deck<Card>) gameState.getComponent(playerHandHash, player);
+        long held = hand.getComponents().stream()
+                .filter(x -> x.getProperty(colorHash) instanceof PropertyColor pc && pc.valueStr.equals(colour.valueStr)).count();
+        PandemicParameters params = (PandemicParameters) gameState.getGameParameters();
+        int needed = params.getnCardsForCure() - (role(player).equals("Scientist") ? params.getnCardsForCureReducedBy() : 0);
+        return name + " (" + colour.valueStr + ": you hold " + held + ", a cure needs " + needed + ")";
+    }
+
+    /**
+     * The city under the mouse: its disease cubes (and whether another would cause an outbreak), its research station,
+     * the pawns there, and who holds its card.
+     */
+    private String toolTip(String city) {
+        PandemicGameState s = gameState;
+        if (s == null) return null;
+        core.components.BoardNode node = s.getWorld().getNodeByStringProperty(nameHash, city);
+        if (node == null) return null;
+        StringBuilder text = new StringBuilder("<html><b>").append(city).append("</b> (")
+                .append(((PropertyColor) node.getProperty(colorHash)).valueStr).append(")");
+        int[] cubes = ((core.properties.PropertyIntArray) node.getProperty(infectionHash)).getValues();
+        int max = ((PandemicParameters) s.getGameParameters()).getMaxCubesPerCity();
+        List<String> diseases = new ArrayList<>();
+        for (int c = 0; c < cubes.length; c++)
+            if (cubes[c] > 0)
+                diseases.add(cubes[c] + " " + colors[c] + (cubes[c] >= max ? " - another means an outbreak" : ""));
+        text.append("<br>").append(diseases.isEmpty() ? "No disease" : String.join("<br>", diseases));
+        if (((core.properties.PropertyBoolean) node.getProperty(researchStationHash)).value)
+            text.append("<br>Research station");
+        for (int p : ((core.properties.PropertyIntArrayList) node.getProperty(playersHash)).getValues())
+            text.append("<br>Player ").append(p).append(" (").append(role(p)).append(") is here");
+        for (int p = 0; p < s.getNPlayers(); p++) {
+            Deck<Card> hand = (Deck<Card>) s.getComponent(playerHandHash, p);
+            for (Card c : hand.getComponents())
+                if (city.equals(cardName(c)))
+                    text.append("<br>Player ").append(p).append(" holds its card");
+        }
+        Deck<Card> discard = (Deck<Card>) s.getComponent(infectionDiscardHash);
+        if (discard != null && discard.getComponents().stream().anyMatch(c -> city.equals(cardName(c))))
+            text.append("<br>In the infection discard pile: not drawn again until an epidemic");
+        return text.append("</html>").toString();
+    }
 }
