@@ -332,11 +332,16 @@ public class GameSession {
         updatePlan();
         // As game.updateGUI does, but without repainting the frame: the frame streamer paints it, and a repaint would
         // paint it a second time, for a screen no one sees.
+        AbstractGameState waiting = browser.waitingOn();
         if (plan != null) {
             gui.offerInstead(plan.options());
             gui.update(browser, plan.preview(), true);
+        } else if (waiting != null) {
+            gui.update(browser, waiting, true);
         } else {
-            gui.update(game.getPlayers().get(game.getPlayerToMove()), game.getGameState(), game.isHumanToMove());
+            // The game thread may be part way through a move in the live state, so no actions are offered from it:
+            // they would be computed from a state between two rules.
+            gui.update(game.getPlayers().get(game.getPlayerToMove()), game.getGameState(), false);
         }
         // a GUI can grow as the game goes on
         fitFrame();
