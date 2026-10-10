@@ -4,13 +4,13 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 
 /**
- * The current player places no more creatures this turn (after at least one Volcano Snail).
+ * The current player places no more creatures this turn.
  */
 public class StopPlacing extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // PlaceMoreSnails ends when told
+        // the CreatureStep ends when told
         return true;
     }
 

@@ -11,9 +11,8 @@ import static games.ventlife.VentlifeTestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Covering: a plateau tile covers the creatures on its three positions. Tube Worms under the new Smoker climb onto it
- * (same position, one level up); Tube Worms under its other hexes, and every covered Sponge, return to their owner's
- * supply. Resolved inside the tile placement, before the creature step.
+ * Covering of Tube Worms and Vent Sponges by a plateau tile: which climb onto the new Smoker and which return to their
+ * owner's supply.
  * Field: tile 0 B/D at ((0,0),1) -> (0,0) S, (-1,1) B, (0,1) D; tile 1 D/M at ((1,0),0) -> (1,0) S, (1,1) D, (2,0) M.
  */
 public class VentlifeCoveringTest {

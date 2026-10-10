@@ -11,14 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The creatures covered by a tile, still to be moved or returned, in the order they are resolved. A creature with no
- * destination returns to its owner's supply and one with a single destination moves there; one with a choice waits
- * for its owner to decide (a Displace).
+ * The creatures covered by a tile, still to be moved or returned, in the order they are resolved. The owner of a
+ * creature with more than one destination chooses where it goes (a Displace).
  */
 public class ResolveCovering implements IExtendedSequence {
 
     /**
-     * A covered creature: where it was, and the level of that hex before the tile covered it.
+     * A covered creature, the hex it was on, and that hex's level before the tile covered it.
      */
     public record Covered(Creature creature, Hex from, int fromLevel) {
     }
@@ -47,6 +46,13 @@ public class ResolveCovering implements IExtendedSequence {
             pending.remove(0);
         }
         return false;
+    }
+
+    /**
+     * The covered creature whose owner is to choose where it goes.
+     */
+    public Covered waiting() {
+        return pending.get(0);
     }
 
     private static List<Hex> destinations(VentlifeGameState state, Covered c) {

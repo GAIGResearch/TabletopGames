@@ -6,18 +6,15 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.ventlife.actions.CreatureStep;
+import games.ventlife.actions.DraftSpecies;
 import games.ventlife.actions.PlaceTile;
 import games.ventlife.components.*;
 
 import java.util.*;
 
-/**
- * The rules of Ventlife; see claude_game_creator/Ventlife_plan.txt for the implementation phases.
- */
 public class VentlifeForwardModel extends StandardForwardModel {
 
     private static final Hex ORIGIN = new Hex(0, 0);
-    private static final Comparator<Hex> HEX_ORDER = Comparator.comparingInt(Hex::q).thenComparingInt(Hex::r);
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -42,21 +39,31 @@ public class VentlifeForwardModel extends StandardForwardModel {
 
         state.speciesInPlay = new ArrayList<>();
         switch (params.speciesSelection) {
-            case FIRST_GAME -> state.speciesInPlay.addAll(VentlifeParameters.FIRST_GAME_SPECIES);
+            case FIRST_GAME -> state.speciesInPlay.addAll(VentlifeUtils.FIRST_GAME_SPECIES);
             case RANDOM -> {
                 List<Species> all = new ArrayList<>(List.of(Species.values()));
                 Collections.shuffle(all, state.getRnd());
                 state.speciesInPlay.addAll(all.subList(0, params.nSpecies));
             }
-            // the draft is added in Phase F of Ventlife_plan.txt
-            case DRAFT -> throw new UnsupportedOperationException("Phase F");
+            // the species are drafted before the first tile, and the supplies filled once the draft is over
+            case DRAFT -> {
+            }
         }
-        state.supply = new int[nPlayers][Species.values().length];
-        for (int p = 0; p < nPlayers; p++)
-            for (Species s : state.speciesInPlay)
-                state.supply[p][s.ordinal()] = params.tokensPerSpecies;
+        state.drafted = new ArrayList<>();
+        fillSupplies(state);
 
-        state.setGamePhase(VentlifeGameState.Phase.PLACE_TILE);
+        state.setGamePhase(params.speciesSelection == VentlifeParameters.SpeciesSelection.DRAFT
+                ? VentlifeGameState.Phase.DRAFT : VentlifeGameState.Phase.PLACE_TILE);
+    }
+
+    /**
+     * Gives every player tokensPerSpecies of each species in play, and none of the others.
+     */
+    private void fillSupplies(VentlifeGameState state) {
+        state.supply = new int[state.getNPlayers()][Species.values().length];
+        for (int p = 0; p < state.getNPlayers(); p++)
+            for (Species s : state.speciesInPlay)
+                state.supply[p][s.ordinal()] = state.getParams().tokensPerSpecies;
     }
 
     @Override
@@ -64,6 +71,12 @@ public class VentlifeForwardModel extends StandardForwardModel {
         // the creature step and the covering decisions are sequences, which offer their own actions
         VentlifeGameState state = (VentlifeGameState) gameState;
         List<AbstractAction> actions = new ArrayList<>();
+        if (state.getGamePhase() == VentlifeGameState.Phase.DRAFT) {
+            for (Species s : Species.values())
+                if (!state.drafted.contains(s))
+                    actions.add(new DraftSpecies(s));
+            return actions;
+        }
         VentTile tile = state.hands.get(state.getCurrentPlayer()).peek();
         // the first tile could go anywhere, so it goes at the origin: only its orientation is a choice
         if (state.field.isEmpty()) {
@@ -73,7 +86,7 @@ public class VentlifeForwardModel extends StandardForwardModel {
         }
         // candidate Smoker positions: within two steps of the field (seafloor), or on a Black Smoker (plateau);
         // sorted, so that equal states list their actions in the same order
-        Set<Hex> candidates = new TreeSet<>(HEX_ORDER);
+        Set<Hex> candidates = new TreeSet<>(VentlifeUtils.HEX_ORDER);
         for (Map.Entry<Hex, HexCell> e : state.field.entrySet()) {
             if (e.getValue().terrain() == Terrain.BLACK_SMOKER)
                 candidates.add(e.getKey());
@@ -129,6 +142,10 @@ public class VentlifeForwardModel extends StandardForwardModel {
         if (state.isActionInProgress())
             return;
         int player = state.getCurrentPlayer();
+        if (state.getGamePhase() == VentlifeGameState.Phase.DRAFT) {
+            afterDraftPick(state);
+            return;
+        }
         // after the tile (and any covering), the creature step if the player can place anything; it is compulsory
         if (state.getGamePhase() == VentlifeGameState.Phase.PLACE_TILE) {
             CreatureStep step = new CreatureStep(player);
@@ -150,5 +167,21 @@ public class VentlifeForwardModel extends StandardForwardModel {
             endRound(state);
         else
             endPlayerTurn(state, next);
+    }
+
+    private void afterDraftPick(VentlifeGameState state) {
+        int nPlayers = state.getNPlayers();
+        if (state.drafted.size() < VentlifeUtils.draftPicks(state.getParams().nSpecies, nPlayers)) {
+            endPlayerTurn(state, (state.getCurrentPlayer() + 1) % nPlayers);
+            return;
+        }
+        // at 3 players the species drafted are those not used; the first player then places the first tile, whoever
+        // made the last pick
+        for (Species s : Species.values())
+            if (state.drafted.contains(s) != (nPlayers == 3))
+                state.speciesInPlay.add(s);
+        fillSupplies(state);
+        state.setGamePhase(VentlifeGameState.Phase.PLACE_TILE);
+        endPlayerTurn(state, state.getFirstPlayer());
     }
 }

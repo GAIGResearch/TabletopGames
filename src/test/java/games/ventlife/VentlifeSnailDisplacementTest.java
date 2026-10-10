@@ -11,9 +11,7 @@ import static games.ventlife.VentlifeTestUtils.*;
 import static org.junit.Assert.*;
 
 /**
- * Volcano Snail displacement: to an adjacent empty hex whose level is strictly lower than the Snail's own hex before
- * it was covered; any terrain except a Black Smoker while smokersOnlyForWormsAndShrimp is on. None -> returned, one
- * -> moved, several -> the owner chooses.
+ * Volcano Snail displacement to lower neighbouring hexes.
  * Layout "downhill" (2 players): standard tiles 0-4 (players 0, 1, 0, 1, 0); player 1 places D/M at ((0,2),2):
  * (0,2) S1, (-1,2) D1, (-1,3) M1; then player 0 places tile 5 M/D at ((0,0),1), covering (0,0), (-1,1), (0,1) to
  * level 3. Neighbours of (0,1) M2 then: (1,1) D1, (0,2) S1, (-1,2) D1, (1,0) B2, (-1,1) M3, (0,0) S3. Neighbours of

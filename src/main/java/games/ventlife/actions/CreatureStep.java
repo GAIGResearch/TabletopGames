@@ -4,19 +4,17 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.ventlife.VentlifeGameState;
+import games.ventlife.VentlifeUtils;
 import games.ventlife.components.Hex;
 import games.ventlife.components.Species;
 
 import java.util.*;
 
 /**
- * The creature step of a turn: the player places creatures of one species. Most species place once; after a Volcano
- * Snail the player may place more Snails, each next to a Snail placed this turn, up to
- * VentlifeParameters.maxSnailsPerTurn, or stop.
+ * The creature step of a turn, in which the player places creatures of one species. After a Volcano Snail they may
+ * place more Snails, each next to one placed this turn, up to VentlifeParameters.maxSnailsPerTurn.
  */
 public class CreatureStep implements IExtendedSequence {
-
-    private static final Comparator<Hex> HEX_ORDER = Comparator.comparingInt(Hex::q).thenComparingInt(Hex::r);
 
     private final int player;
     // whether a placement has been made this step
@@ -37,7 +35,7 @@ public class CreatureStep implements IExtendedSequence {
     }
 
     /**
-     * Whether the player has any legal placement, i.e. whether the step happens at all (it is compulsory).
+     * Whether the player has any legal placement.
      */
     public boolean hasPlacement(VentlifeGameState state) {
         return !firstPlacements(state).isEmpty();
@@ -49,7 +47,7 @@ public class CreatureStep implements IExtendedSequence {
     private List<AbstractAction> firstPlacements(VentlifeGameState state) {
         List<AbstractAction> actions = new ArrayList<>();
         List<Hex> hexes = new ArrayList<>(state.getField().keySet());
-        hexes.sort(HEX_ORDER);
+        hexes.sort(VentlifeUtils.HEX_ORDER);
         for (Species s : state.getSpeciesInPlay()) {
             int supply = state.getSupply(player, s);
             if (supply == 0)
@@ -68,7 +66,7 @@ public class CreatureStep implements IExtendedSequence {
      * The empty Basalt hexes next to a Snail placed this step.
      */
     private List<Hex> moreSnailHexes(VentlifeGameState state) {
-        Set<Hex> retValue = new TreeSet<>(HEX_ORDER);
+        Set<Hex> retValue = new TreeSet<>(VentlifeUtils.HEX_ORDER);
         for (Hex p : snails)
             for (Hex n : p.neighbours())
                 if (Species.VOLCANO_SNAIL.canPlace(state, player, n))

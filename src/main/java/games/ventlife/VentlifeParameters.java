@@ -1,7 +1,6 @@
 package games.ventlife;
 
 import evaluation.optimisation.TunableParameters;
-import games.ventlife.components.Species;
 import games.ventlife.components.Terrain;
 import games.ventlife.components.VentTile;
 import org.json.simple.JSONArray;
@@ -13,16 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Parameters for Ventlife. The defaults are the rules of Rulebook 3.0 (Regular Game), with the decisions recorded in
- * claude_game_creator/Ventlife_plan.txt. The tile distribution is read from tileFile.
+ * The defaults are the rules of Ventlife Rulebook 3.0 (Regular Game). The tile distribution is read from tileFile.
  */
 public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
 
     public enum SpeciesSelection {RANDOM, FIRST_GAME, DRAFT}
-
-    /** The species of the First Game. */
-    public static final List<Species> FIRST_GAME_SPECIES = List.of(Species.TUBE_WORM, Species.VENT_SHRIMP,
-            Species.VOLCANO_SNAIL, Species.YETI_CRAB);
 
     // the tile kinds and their quantities by player count, loaded from tileFile; derived from that parameter, so
     // not part of equals
@@ -35,8 +29,6 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
     public SpeciesSelection speciesSelection = SpeciesSelection.RANDOM;
     public int nSpecies = 4;
     public int tokensPerSpecies = 6;
-    // the game ends at the end of the round in which a player has used every token of this many species (0: never)
-    public int exhaustedSpeciesToEnd = 2;
     // only Tube Worms and Shrimp may be on a Black Smoker (the Habitat Guide); if false, only Fish are kept off them
     public boolean smokersOnlyForWormsAndShrimp = true;
     public int lowVentBonus = 1;
@@ -54,7 +46,6 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
         addTunableParameter("speciesSelection", SpeciesSelection.RANDOM, Arrays.asList(SpeciesSelection.values()));
         addTunableParameter("nSpecies", 4, Arrays.asList(3, 4, 5));
         addTunableParameter("tokensPerSpecies", 6, Arrays.asList(4, 5, 6, 7, 8));
-        addTunableParameter("exhaustedSpeciesToEnd", 2, Arrays.asList(0, 1, 2, 3));
         addTunableParameter("smokersOnlyForWormsAndShrimp", true, Arrays.asList(true, false));
         addTunableParameter("lowVentBonus", 1, Arrays.asList(0, 1, 2));
         addTunableParameter("maxSnailsPerTurn", 3, Arrays.asList(1, 2, 3));
@@ -73,7 +64,6 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
         speciesSelection = (SpeciesSelection) getParameterValue("speciesSelection");
         nSpecies = (int) getParameterValue("nSpecies");
         tokensPerSpecies = (int) getParameterValue("tokensPerSpecies");
-        exhaustedSpeciesToEnd = (int) getParameterValue("exhaustedSpeciesToEnd");
         smokersOnlyForWormsAndShrimp = (boolean) getParameterValue("smokersOnlyForWormsAndShrimp");
         lowVentBonus = (int) getParameterValue("lowVentBonus");
         maxSnailsPerTurn = (int) getParameterValue("maxSnailsPerTurn");
@@ -83,13 +73,12 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
         shoalPoints = (int) getParameterValue("shoalPoints");
         octopusPointsPerSpecies = (int) getParameterValue("octopusPointsPerSpecies");
         spongePointsPerTerrain = (int) getParameterValue("spongePointsPerTerrain");
-        if (tileKinds == null || !tileFile.equals(loadedTileFile)) {
-            tileKinds = loadTiles(tileFile);
-            loadedTileFile = tileFile;
-        }
+        // loaded when first needed, so that copying the parameters does not read the file
+        if (!tileFile.equals(loadedTileFile))
+            tileKinds = null;
     }
 
-    private static List<TileKind> loadTiles(String fileName) {
+    private List<TileKind> loadTiles(String fileName) {
         JSONObject json = JSONUtils.loadJSONFile(fileName);
         List<TileKind> retValue = new ArrayList<>();
         for (Object o : (JSONArray) json.get("tiles")) {
@@ -105,12 +94,16 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
     }
 
     /**
-     * The tiles in play for the player count: for each kind, the quantities of every column from 2 players up to
-     * nPlayers.
+     * The tiles in play for the player count.
      */
     public List<VentTile> tilesFor(int nPlayers) {
+        if (tileKinds == null) {
+            tileKinds = loadTiles(tileFile);
+            loadedTileFile = tileFile;
+        }
         List<VentTile> retValue = new ArrayList<>();
         for (TileKind k : tileKinds) {
+            // the quantities are by column (2 players, 3+, 4), each adding the tiles for one more player
             int n = 0;
             for (int col = 0; col <= nPlayers - 2 && col < k.quantity.length; col++)
                 n += k.quantity[col];
@@ -120,9 +113,6 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
         return retValue;
     }
 
-    /**
-     * The points for one shoal of Fish.
-     */
     public int shoalScore(int size) {
         return size < 2 ? 0 : shoalPoints * (size - 1);
     }

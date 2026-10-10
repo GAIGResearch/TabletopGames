@@ -57,6 +57,26 @@ public class VentlifeSetupTest {
     }
 
     @Test
+    public void firstGameUsesTubeWormsVolcanoSnailsShrimpAndYetiCrabsWhateverTheSeed() {
+        // the First Game species, written out: Tube Worms, Volcano Snails, Blind Vent Shrimp, Yeti Crabs; each player
+        // holds tokensPerSpecies (5 here, to show it is the parameter) of each and none of the other three
+        Set<Species> firstGame = Set.of(WORM, SNAIL, SHRIMP, CRAB);
+        for (int n = 2; n <= 4; n++)
+            for (long seed = 0; seed < 5; seed++) {
+                VentlifeParameters params = new VentlifeParameters();
+                params.setParameterValue("speciesSelection", VentlifeParameters.SpeciesSelection.FIRST_GAME);
+                params.setParameterValue("tokensPerSpecies", 5);
+                VentlifeGameState state = newState(n, seed, params);
+                assertEquals("species in play", 4, state.getSpeciesInPlay().size());
+                assertEquals("species in play", firstGame, new HashSet<>(state.getSpeciesInPlay()));
+                for (int p = 0; p < n; p++)
+                    for (Species s : Species.values())
+                        assertEquals(s + " tokens of player " + p + " at " + n + " players",
+                                firstGame.contains(s) ? 5 : 0, state.getSupply(p, s));
+            }
+    }
+
+    @Test
     public void drawDeckIsShuffled() {
         // two set-ups differing only in seed: with 34 tiles of 9 kinds, the same order by chance is negligible
         VentlifeGameState a = newState(2, 1);

@@ -10,9 +10,6 @@ import static org.junit.Assert.*;
 /**
  * Snail and Octopus scoring on the standard 6-tile field (2 players): (0,0) S3, (-1,1) M3, (0,1) D3, (1,0) B2,
  * (1,1) D1, (2,0) M1, (-1,0) S2, (-2,0) B1, (-2,1) D2; every other position uncovered.
- * Snail: snailPointsPerHeightEdge per covered neighbour of a different level (uncovered ones do not count).
- * Octopus: octopusPointsPerSpecies per distinct species, other than Octopus, among the creatures (any owner) on its
- * neighbours.
  */
 public class VentlifeSnailOctopusScoringTest {
 

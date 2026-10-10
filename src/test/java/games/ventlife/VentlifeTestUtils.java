@@ -8,6 +8,7 @@ import core.components.Deck;
 import games.GameType;
 import games.ventlife.actions.CreatureStep;
 import games.ventlife.actions.Displace;
+import games.ventlife.actions.DraftSpecies;
 import games.ventlife.actions.PlaceCreature;
 import games.ventlife.actions.PlaceTile;
 import games.ventlife.actions.StopPlacing;
@@ -81,14 +82,14 @@ class VentlifeTestUtils {
     }
 
     /**
-     * Plays a whole turn from its tile placement: the action, then the first legal Displace for every displacement
-     * decision it raises (whichever player is asked), then, if the player is asked to place creatures, the first legal
-     * placement, and StopPlacing if that was a Volcano Snail with more on offer (fixed choices for tests that do not
-     * care about them).
+     * Plays a whole turn from its tile placement, with fixed choices for the decisions that follow it, for tests that
+     * do not care about them.
      */
     static void takeTurn(VentlifeGameState state, AbstractForwardModel fm, AbstractAction action) {
         fm.next(state, action);
+        // the first legal Displace for every displacement decision, whichever player is asked
         resolveDisplacements(state, fm);
+        // then the first legal creature placement, and StopPlacing if that was a Volcano Snail with more on offer
         if (state.isNotTerminal() && state.getGamePhase() == VentlifeGameState.Phase.PLACE_CREATURES) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
             stopPlacing(state, fm);
@@ -97,7 +98,7 @@ class VentlifeTestUtils {
 
     /**
      * While the current player is still in the creature step after a placement (the Volcano Snail follow-on), takes
-     * StopPlacing if offered, otherwise the first legal action. At most maxSnailsPerTurn steps.
+     * StopPlacing if offered, otherwise the first legal action.
      */
     static void stopPlacing(VentlifeGameState state, AbstractForwardModel fm) {
         for (int guard = 0; guard < 5 && state.isNotTerminal()
@@ -125,9 +126,9 @@ class VentlifeTestUtils {
 
     /**
      * While the game waits for a displacement decision (the legal actions are Displace), takes the first legal one.
-     * At most 10 decisions (a tile covers 3 creatures).
      */
     static void resolveDisplacements(VentlifeGameState state, AbstractForwardModel fm) {
+        // a tile covers at most 3 creatures, so 10 decisions is ample
         for (int guard = 0; guard < 10 && state.isNotTerminal(); guard++) {
             List<AbstractAction> legal = fm.computeAvailableActions(state);
             if (legal.isEmpty() || !(legal.get(0) instanceof Displace))
@@ -150,8 +151,8 @@ class VentlifeTestUtils {
     }
 
     /**
-     * Starts the creature step of the current player (arranging a field without playing a tile), as the forward
-     * model does after a tile: the phase, and the CreatureStep sequence that offers the placements.
+     * Starts the creature step of the current player without playing a tile, for tests that arrange the field
+     * directly.
      */
     static void startCreatureStep(VentlifeGameState state) {
         state.setGamePhase(VentlifeGameState.Phase.PLACE_CREATURES);
@@ -240,6 +241,26 @@ class VentlifeTestUtils {
             Arrays.fill(state.supply[p], 0);
             for (Species s : species)
                 state.supply[p][s.ordinal()] = tokens;
+        }
+    }
+
+    /** Parameters for the Advanced Variant (speciesSelection = DRAFT) with the given number of species. */
+    static VentlifeParameters draftParams(int nSpecies) {
+        VentlifeParameters params = new VentlifeParameters();
+        params.setParameterValue("speciesSelection", VentlifeParameters.SpeciesSelection.DRAFT);
+        params.setParameterValue("nSpecies", nSpecies);
+        return params;
+    }
+
+    /**
+     * Makes these draft picks in order through fm.next, each by whoever is the current player, asserting before each
+     * that the pick is a legal action.
+     */
+    static void draft(VentlifeGameState state, AbstractForwardModel fm, Species... picks) {
+        for (Species s : picks) {
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            assertTrue("Draft " + s + " not offered in " + actions, actions.contains(new DraftSpecies(s)));
+            fm.next(state, new DraftSpecies(s));
         }
     }
 

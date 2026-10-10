@@ -2,6 +2,7 @@ package games.ventlife.components;
 
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeParameters;
+import games.ventlife.VentlifeUtils;
 
 import java.util.*;
 
@@ -16,8 +17,7 @@ public enum Species {
     }
 
     /**
-     * Whether the player may place a creature of this species on the hex (its placement rule; the supply is not
-     * checked here).
+     * Whether the species' placement rule lets the player place one on the hex. The supply is not checked.
      */
     public boolean canPlace(VentlifeGameState state, int player, Hex hex) {
         if (!state.isEmptyHex(hex))
@@ -47,8 +47,7 @@ public enum Species {
 
     /**
      * Where a creature of this species covered at from (whose level was fromLevel before it was covered) may move,
-     * sorted by position; empty if it returns to its owner's supply. Tube Worms that climb with their Smoker are not
-     * displaced at all.
+     * sorted by position; empty if it returns to its owner's supply.
      */
     public List<Hex> destinations(VentlifeGameState state, Hex from, int fromLevel) {
         List<Hex> retValue = new ArrayList<>();
@@ -58,7 +57,7 @@ public enum Species {
                 if (stop != null)
                     retValue.add(stop);
             }
-            retValue.sort(Comparator.comparingInt(Hex::q).thenComparingInt(Hex::r));
+            retValue.sort(VentlifeUtils.HEX_ORDER);
             return retValue;
         }
         for (Hex n : from.neighbours()) {
@@ -77,15 +76,16 @@ public enum Species {
             if (ok)
                 retValue.add(n);
         }
-        retValue.sort(Comparator.comparingInt(Hex::q).thenComparingInt(Hex::r));
+        retValue.sort(VentlifeUtils.HEX_ORDER);
         return retValue;
     }
 
     /**
-     * Where an Octopus retreating from from in the direction stops: the first empty Edge hex it may use along the
-     * straight line, passing over anything else; null if the line leaves the field first.
+     * Where an Octopus retreating from from in the direction stops, or null if it cannot go that way.
      */
     private Hex retreat(VentlifeGameState state, Hex from, int direction) {
+        // along the straight line, passing over everything but an empty Edge hex it may use; the direction fails if
+        // the line leaves the field first
         Hex h = from.neighbour(direction);
         while (state.getCell(h) != null) {
             if (state.isEmptyHex(h) && state.isEdge(h)
@@ -97,18 +97,17 @@ public enum Species {
     }
 
     /**
-     * Whether this species may be on a Black Smoker when nothing more specific is said: Tube Worms and Shrimp always;
-     * the others only when VentlifeParameters.smokersOnlyForWormsAndShrimp is off.
+     * Whether this species may be on a Black Smoker, where its own rule does not say.
      */
     private boolean mayUseSmokers(VentlifeGameState state) {
         return this == TUBE_WORM || this == VENT_SHRIMP || !state.getParams().smokersOnlyForWormsAndShrimp;
     }
 
     /**
-     * The most creatures of this species one placement may put on the hex: more than 1 only for the Tube Worms'
-     * Low-Vent Bonus on a seafloor Black Smoker.
+     * The most creatures of this species one placement may put on the hex.
      */
     public int maxPlaced(VentlifeGameState state, Hex hex) {
+        // the Tube Worms' Low-Vent Bonus, on a seafloor Black Smoker
         if (this == TUBE_WORM && state.getLevel(hex) == 1)
             return 1 + state.getParams().lowVentBonus;
         return 1;
@@ -143,7 +142,7 @@ public enum Species {
                     for (Hex n : hex.neighbours())
                         if (state.getCell(n) != null && state.getLevel(n) != state.getLevel(hex))
                             edges++;
-                    yield edges;
+                    yield params.snailPointsPerHeightEdge * edges;
                 }
                 case OCTOPUS -> {
                     Set<Species> around = EnumSet.noneOf(Species.class);
@@ -162,7 +161,7 @@ public enum Species {
     }
 
     /**
-     * Each shoal - a connected group of the player's Fish - scored by its size.
+     * The player's score for their shoals (connected groups of their Fish).
      */
     private static int shoalScore(VentlifeGameState state, int player) {
         Set<Hex> fish = new HashSet<>();
@@ -176,11 +175,10 @@ public enum Species {
     }
 
     /**
-     * For each Elevated Plateau (connected covered positions of one level of 2 or more): the size to the player(s)
-     * with most Crabs on it, and half the size, rounded down, to those with the second most - unless the most is
-     * tied, when there is no second place.
+     * The player's score for their Yeti Crabs on the Elevated Plateaus.
      */
     private static int plateauScore(VentlifeGameState state, int player) {
+        // an Elevated Plateau is a connected group of covered positions of one level, 2 or more
         Map<Integer, Set<Hex>> byLevel = new HashMap<>();
         for (Map.Entry<Hex, HexCell> e : state.getField().entrySet())
             if (e.getValue().level() >= 2)
@@ -198,6 +196,7 @@ public enum Species {
                     continue;
                 int most = Arrays.stream(crabs).max().orElse(0);
                 long nMost = Arrays.stream(crabs).filter(n -> n == most).count();
+                // the most Crabs score the size; the second most half of it, rounded down, unless the most is tied
                 if (crabs[player] == most)
                     score += plateau.size();
                 else if (nMost == 1) {
