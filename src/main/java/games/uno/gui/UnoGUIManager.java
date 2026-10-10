@@ -72,8 +72,7 @@ public class UnoGUIManager extends AbstractGUIManager {
                     UnoPlayerView playerHand = new UnoPlayerView(ugs.getPlayerDecks().get(i), i, humanID, ugp.getDataPath());
 
                     // Get agent name
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
+                    String agentName = game.getPlayers().get(i).toString();
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(

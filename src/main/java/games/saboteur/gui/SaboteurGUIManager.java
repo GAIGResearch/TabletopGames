@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import games.GameType;
 import games.saboteur.SaboteurForwardModel;
 import games.saboteur.SaboteurGameParameters;
 import games.saboteur.SaboteurGameState;
@@ -15,6 +16,7 @@ import games.saboteur.components.ActionCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -72,11 +74,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 JPanel main = new JPanel();
                 main.setOpaque(false);
                 main.setLayout(new BorderLayout());
-                JPanel rules = new JPanel();
                 pane.add("Main", main);
-                pane.add("Rules", rules);
-                JLabel ruleText = new JLabel(getRuleText());
-                rules.add(ruleText);
 
                 // Initialise active player
                 activePlayer = gameState.getCurrentPlayer();
@@ -87,7 +85,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 int nVertAreas = 2;
                 this.width = playerAreaWidth * nHorizAreas;
                 this.height = (playerAreaHeight * nVertAreas) + boardSize;
-                ruleText.setPreferredSize(new Dimension(width + 50, height + defaultInfoPanelHeight));
+                RulesView.addTabs(pane, GameType.Saboteur, params, height + defaultInfoPanelHeight);
 
                 parent.setBackground(ImageIO.GetInstance().getImage("data/loveletter/bg.png"));
 
@@ -108,8 +106,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                     SaboteurPlayerView playerHand = new SaboteurPlayerView(this, gs, i, humanID);
 
                     // Get agent name
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
+                    String agentName = game.getPlayers().get(i).toString();
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(
@@ -261,14 +258,5 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 }
             }
         }
-    }
-
-
-    private String getRuleText() {
-        String rules = "<html><center><h1>Saboteur</h1></center><br/><hr><br/>";
-        rules += "<p>Rules.</p><br/>";
-        rules += "<hr><p><b>INTERFACE: </b> Find actions available at any time at the bottom of the screen. </p>";
-        rules += "</html>";
-        return rules;
     }
 }

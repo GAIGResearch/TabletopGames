@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
+import players.heuristics.LeaderHeuristic;
 import utilities.Pair;
 
 import java.util.Arrays;
@@ -112,13 +113,7 @@ public class RolloutStateFeatureListener extends StateFeatureListener {
             }
             for (int p = 0; p < state.getNPlayers(); p++) {
                 totalScore[p] += copy.getGameScore(p);
-                double bestOtherScore = Double.NEGATIVE_INFINITY;
-                for (int p2 = 0; p2 < copy.getNPlayers(); p2++) {
-                    if (p2 == p) continue;
-                    if (copy.getGameScore(p2) > bestOtherScore)
-                        bestOtherScore = copy.getGameScore(p2);
-                }
-                totalLead[p] += copy.getGameScore(p) - bestOtherScore;
+                totalLead[p] += copy.getGameScore(p) - LeaderHeuristic.bestOtherTeamScore(copy, p);
                 if (copy.getWinners().contains(p)) {
                     if (copy.getWinners().size() == 1) {
                         totalWin[p] += 1.0;
@@ -135,6 +130,7 @@ public class RolloutStateFeatureListener extends StateFeatureListener {
         Arrays.setAll(totalScore, p -> totalScore[p] / rollouts);
         Arrays.setAll(totalLead, p -> totalLead[p] / rollouts);
         Arrays.setAll(totalOrdinal, p -> totalOrdinal[p] / rollouts);
-        return new double[][]{totalHeuristic, totalWin, totalLead, totalScore, totalOrdinal};
+        // this order must match that of the extra columns in names()
+        return new double[][]{totalHeuristic, totalWin, totalScore, totalLead, totalOrdinal};
     }
 }

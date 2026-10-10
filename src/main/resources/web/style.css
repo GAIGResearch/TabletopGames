@@ -1,0 +1,1036 @@
+:root {
+    --bg: #f3f3f0;
+    --surface: #ffffff;
+    --surface-2: #f7f7f4;
+    --fg: #1d1d1b;
+    --muted: #6b6b66;
+    --border: #00000021;
+    --accent: #2f6fd6;
+    --accent-fg: #ffffff;
+    --good: #1f8a4c;
+    --warn: #b26a00;
+    --bad: #c23a2b;
+    --shadow: 0 6px 24px #0000001f;
+    --radius: 10px;
+    --bar-height: 48px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #18191b;
+        --surface: #232427;
+        --surface-2: #2b2c30;
+        --fg: #ececea;
+        --muted: #a0a09a;
+        --border: #ffffff24;
+        --accent: #6b9ff0;
+        --accent-fg: #0f1115;
+        --good: #4cc27f;
+        --warn: #e0a24a;
+        --bad: #ef6a5b;
+        --shadow: 0 6px 24px #00000066;
+    }
+}
+
+:root[data-theme="dark"] {
+    --bg: #18191b;
+    --surface: #232427;
+    --surface-2: #2b2c30;
+    --fg: #ececea;
+    --muted: #a0a09a;
+    --border: #ffffff24;
+    --accent: #6b9ff0;
+    --accent-fg: #0f1115;
+    --good: #4cc27f;
+    --warn: #e0a24a;
+    --bad: #ef6a5b;
+    --shadow: 0 6px 24px #00000066;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+button, select, input {
+    font: inherit;
+    color: inherit;
+}
+
+button {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--surface-2);
+}
+
+button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 600;
+}
+
+button.primary:hover {
+    filter: brightness(1.07);
+}
+
+select, input {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+/* ---- start page */
+
+.setup {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+}
+
+.setup h1 {
+    margin: 0 0 4px;
+    font-size: 26px;
+}
+
+.setup .subtitle {
+    margin: 0 0 24px;
+    color: var(--muted);
+}
+
+.card {
+    padding: 20px;
+    margin-bottom: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.card h2 {
+    margin: 0 0 14px;
+    font-size: 15px;
+}
+
+.fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+label {
+    display: block;
+}
+
+label > span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+label.changed > span::after {
+    content: " (changed)";
+    color: var(--accent);
+}
+
+details > summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+details[open] > summary {
+    margin-bottom: 14px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.link-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+}
+
+.link-button:hover {
+    background: none;
+    text-decoration: underline;
+}
+
+.error {
+    color: var(--bad);
+}
+
+/* ---- play page */
+
+body.play {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.bar {
+    flex: none;
+    height: var(--bar-height);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.bar .title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bar .spacer {
+    flex: 1;
+}
+
+.bar .actions {
+    display: flex;
+    gap: 6px;
+}
+
+.bar button {
+    padding: 5px 11px;
+}
+
+.status {
+    padding: 3px 11px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.status.your-turn {
+    background: var(--good);
+    border-color: var(--good);
+    color: #fff;
+    font-weight: 600;
+}
+
+.status.thinking::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: var(--warn);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: 0.25;
+    }
+}
+
+.main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+
+/* the stage scrolls when the game is zoomed in beyond the window; its scrollbars always have their room, so that the
+   space the game is laid out to does not change as they come and go */
+.stage-wrap {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+}
+
+.stage {
+    position: absolute;
+    inset: 0;
+    overflow: auto;
+    scrollbar-gutter: stable;
+    display: flex;
+}
+
+/* centred while it is smaller than the stage, and scrolled to from its corner when larger */
+.board {
+    position: relative;
+    flex: none;
+    margin: auto;
+}
+
+.no-sidebar .sidebar {
+    display: none;
+}
+
+.zoom {
+    display: flex;
+}
+
+.zoom button {
+    padding: 5px 9px;
+    border-radius: 0;
+}
+
+.zoom button:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+.zoom button:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+.zoom button + button {
+    border-left: 0;
+}
+
+#zoom-fit {
+    min-width: 4.2em;
+    font-variant-numeric: tabular-nums;
+}
+
+#panel-toggle[aria-pressed="false"], #rules-button[aria-pressed="true"] {
+    background: var(--surface-2);
+    box-shadow: inset 0 1px 3px #0002;
+}
+
+/* ---- the rules, as a web page beside the game */
+
+.rules-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(600px, 100%);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    z-index: 3;
+}
+
+.rules-panel[hidden] {
+    display: none;
+}
+
+.rules-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.rules-tabs {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.rules-tabs button {
+    padding: 4px 11px;
+    border-color: transparent;
+}
+
+.rules-tabs button[aria-selected="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.rules-head .close {
+    padding: 0 8px;
+    border: 0;
+    background: none;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.rules-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 22px 24px;
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.rules-body h1, .rules-body h2 {
+    font-size: 1.3em;
+    margin: 1em 0 0.5em;
+}
+
+.rules-body h3 {
+    font-size: 1.1em;
+    margin: 1.2em 0 0.4em;
+}
+
+.rules-body table {
+    border-collapse: collapse;
+    margin: 0.6em 0;
+}
+
+.rules-body th, .rules-body td {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.rules-body a {
+    color: var(--accent);
+}
+
+.rules-body img {
+    max-width: 100%;
+}
+
+/* ---- sidebar: the GUI's actions, game information and history, drawn natively */
+
+.sidebar {
+    flex: none;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.sidebar[hidden] {
+    display: none;
+}
+
+.panel {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.panel[hidden] {
+    display: none;
+}
+
+.panel.grow {
+    flex: 1;
+    border-bottom: 0;
+}
+
+#actions-panel {
+    max-height: 50%;
+}
+
+.panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.panel h2 {
+    margin: 0;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+}
+
+#action-filter {
+    margin-bottom: 8px;
+}
+
+.action-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.action-list button {
+    text-align: left;
+    padding: 8px 11px;
+    border-color: var(--accent);
+    color: var(--fg);
+}
+
+.action-list button:hover {
+    background: var(--accent);
+    color: var(--accent-fg);
+}
+
+.action-list button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.action-list .waiting {
+    color: var(--muted);
+}
+
+.info {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 12px;
+    margin: 0;
+}
+
+.info dt {
+    color: var(--muted);
+}
+
+.info dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.info .whole {
+    grid-column: 1 / -1;
+}
+
+.history {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 0 0 0 22px;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+.history li {
+    padding: 2px 0;
+    overflow-wrap: anywhere;
+}
+
+.history li::marker {
+    color: var(--muted);
+}
+
+#insight-panel {
+    max-height: 40%;
+    overflow-y: auto;
+}
+
+.insight-head {
+    margin: 0 0 6px;
+}
+
+.insight, .insight .candidates {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.insight {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.insight .candidates {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 13px;
+}
+
+.insight .candidates li {
+    display: grid;
+    gap: 2px;
+}
+
+.insight li.chosen .label {
+    font-weight: 600;
+}
+
+.insight li.chosen .label::after {
+    content: " (chosen)";
+    font-weight: 400;
+    color: var(--muted);
+}
+
+.insight .bar {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--accent) var(--share), var(--surface-2) var(--share));
+}
+
+.insight .numbers {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+label.check {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    margin-top: 14px;
+}
+
+label.check > span {
+    margin: 0;
+    font-size: 13px;
+}
+
+label.check input {
+    width: auto;
+    margin-top: 3px;
+}
+
+/* ---- toasts: messages the game would show in a dialog */
+
+.toasts {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: min(420px, calc(100% - 32px));
+    z-index: 3;
+}
+
+.toast {
+    position: relative;
+    padding: 10px 34px 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.toast strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.toast .close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 0 7px;
+    border: 0;
+    background: none;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+@media (max-width: 800px) {
+    .main {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: auto;
+        height: 42vh;
+        border-left: 0;
+        border-top: 1px solid var(--border);
+    }
+}
+
+#screen {
+    display: block;
+    outline: none;
+}
+
+#tooltip {
+    position: fixed;
+    max-width: 420px;
+    padding: 6px 9px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    pointer-events: none;
+    z-index: 2;
+}
+
+#notice {
+    position: absolute;
+    left: 50%;
+    top: 16px;
+    transform: translateX(-50%);
+    max-width: calc(100% - 32px);
+    padding: 8px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    z-index: 3;
+}
+
+#notice:empty {
+    display: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 9px;
+    vertical-align: -1px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner, .status.thinking::before {
+        animation: none;
+    }
+}
+
+dialog {
+    min-width: min(380px, calc(100vw - 32px));
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--fg);
+    box-shadow: var(--shadow);
+}
+
+dialog::backdrop {
+    background: #0005;
+}
+
+dialog h2 {
+    margin: 0 0 12px;
+}
+
+.results {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 18px;
+}
+
+.results th, .results td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.results td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.results tr.you td {
+    font-weight: 600;
+}
+
+@media (max-width: 640px) {
+    .bar .title {
+        display: none;
+    }
+}
+
+/* ---- touch: the page handles the gestures itself (see play.js), rather than the browser zooming or selecting */
+
+#screen {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* the click regions' highlight, over the image */
+#overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+}
+
+/* ---- actions: grouped by kind when there are many, the first nine numbered for the keyboard */
+
+.action-list details.group {
+    display: flex;
+    flex-direction: column;
+}
+
+#plan-panel {
+    max-height: 40%;
+    background: var(--surface-2);
+}
+
+#plan-empty {
+    margin: 0 0 8px;
+    font-size: 13px;
+}
+
+.plan-steps {
+    margin: 0;
+    padding: 0 0 0 22px;
+    overflow-y: auto;
+    min-height: 0;
+    font-size: 13px;
+}
+
+.plan-steps li {
+    padding: 1px 0;
+}
+
+.plan-steps li > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.plan-steps .remove {
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    line-height: 1.2;
+}
+
+.plan-steps .remove:hover {
+    color: var(--bad);
+}
+
+.plan-warnings {
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: var(--warn);
+}
+
+.plan-warnings li::before {
+    content: "⚠ ";
+}
+
+.plan-buttons {
+    margin-top: 10px;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.action-list .selection {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.action-list .selection button {
+    padding: 2px 8px;
+    border-color: var(--border);
+    font-weight: normal;
+}
+
+.action-list details.group > summary {
+    padding: 4px 2px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.action-list details.group[open] > summary {
+    margin-bottom: 6px;
+}
+
+.action-list details.group > button + button {
+    margin-top: 6px;
+}
+
+.action-list details.group > button {
+    width: 100%;
+}
+
+.action-list button.action[data-key]::before {
+    content: attr(data-key);
+    display: inline-block;
+    min-width: 1.4em;
+    margin-right: 8px;
+    padding: 0 4px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    text-align: center;
+    color: var(--muted);
+    background: var(--surface-2);
+}
+
+.action-list button.action[data-key]:hover::before {
+    color: var(--muted);
+}
+
+/* ---- what happened while the player waited */
+
+#summary-panel {
+    background: var(--surface-2);
+    max-height: 30%;
+}
+
+.panel-head .close {
+    padding: 0 7px;
+    border: 0;
+    background: none;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.summary {
+    margin: 0;
+    padding: 0 0 0 4px;
+    list-style: none;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+.summary li, .history li {
+    padding: 2px 0;
+    overflow-wrap: anywhere;
+}
+
+.who {
+    font-weight: 600;
+}
+
+.history li.mine {
+    color: var(--muted);
+}
+
+/* ---- the scoreboard */
+
+.scoreboard {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 6px;
+}
+
+.scoreboard td {
+    padding: 3px 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.scoreboard td.marker {
+    width: 1.2em;
+    color: var(--good);
+}
+
+.scoreboard td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.scoreboard tr.current td {
+    font-weight: 600;
+}
+
+.scoreboard tr.you td:nth-child(2) {
+    color: var(--accent);
+}
+
+.progress {
+    margin: 0 0 6px;
+    font-size: 13px;
+}
+
+/* ---- the menu of a click region's actions */
+
+#region-menu {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: min(420px, calc(100vw - 8px));
+    max-height: calc(100vh - 8px);
+    overflow-y: auto;
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    z-index: 4;
+}
+
+#region-menu[hidden] {
+    display: none;
+}
+
+#region-menu button {
+    text-align: left;
+    padding: 7px 11px;
+    border-color: transparent;
+}
+
+#region-menu button:hover, #region-menu button:focus-visible {
+    background: var(--accent);
+    color: var(--accent-fg);
+}
+
+/* ---- small screens: the bar keeps to one line */
+
+@media (max-width: 640px) {
+    .bar {
+        gap: 6px;
+        padding: 0 6px;
+    }
+
+    #seed, #log, #sound, #restart, #new-game {
+        display: none;
+    }
+
+    .bar button {
+        padding: 4px 8px;
+    }
+}
+
+.bar .status {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* two fingers on the stage zoom and move the view (see play.js), rather than zooming the page */
+.stage {
+    touch-action: none;
+}
+
+.panning, .panning * {
+    cursor: grabbing !important;
+}

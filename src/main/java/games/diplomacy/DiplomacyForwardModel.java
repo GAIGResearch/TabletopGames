@@ -79,7 +79,17 @@ public class DiplomacyForwardModel extends StandardForwardModel {
         if (toOrder.isEmpty())
             return actions;
         // the orders for the power's next unit
-        DiplomacyProvince unit = toOrder.get(0);
+        actions.addAll(ordersFor(state, toOrder.get(0)));
+        return actions;
+    }
+
+    /**
+     * The orders the unit in the province may be given in an orders or retreat phase (a dislodged unit in a retreat
+     * phase), whether or not it is the next unit the forward model asks about. They depend only on where the units
+     * are, not on the orders given so far.
+     */
+    public List<AbstractAction> ordersFor(DiplomacyGameState state, DiplomacyProvince unit) {
+        List<AbstractAction> actions = new ArrayList<>();
         if (state.getPhase().isRetreats()) {
             for (DiplomacyLocation to : state.retreats(unit))
                 actions.add(new Retreat(unit, to));

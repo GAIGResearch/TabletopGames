@@ -63,8 +63,7 @@ public class DominionGUIManager extends AbstractGUIManager {
                 DominionPlayerView playerView = new DominionPlayerView(i, -1, params.getDataPath(), state);
 
                 // Get agent name
-                String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                String agentName = split[split.length - 1];
+                String agentName = game.getPlayers().get(i).toString();
 
                 // Create border, layouts and keep track of this view
                 TitledBorder title = BorderFactory.createTitledBorder(

@@ -146,6 +146,15 @@ public class HeartsDeckView extends ComponentView {
     }
 
     /**
+     * The part of the card that was showing when the deck was last drawn, or null if it was not drawn.
+     */
+    public Shape cardShape(FrenchCard card) {
+        if (rects == null || drawnCards == null) return null;
+        int position = drawnCards.indexOf(card);
+        return position < 0 || position >= rects.length ? null : visibleShape(position);
+    }
+
+    /**
      * The card showing at point p (the topmost there), or null for none.
      */
     public FrenchCard cardAt(Point p) {

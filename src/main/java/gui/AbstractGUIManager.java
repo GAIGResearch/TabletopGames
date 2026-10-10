@@ -43,6 +43,11 @@ public abstract class AbstractGUIManager {
     protected List<String> history = new ArrayList<>();
 
     private int actionsAtLastUpdate;
+    // the actions to offer instead of the forward model's, or null (see offerInstead)
+    private List<AbstractAction> offerInstead;
+
+    // the panels made by createActionPanel and createGameStateInfoPanel, if the GUI uses them
+    private JComponent actionPanel, infoPanel;
 
     protected int width, height;
 
@@ -90,12 +95,12 @@ public abstract class AbstractGUIManager {
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
-            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace, player.getPlayerID());
+            List<AbstractAction> actions = offerInstead != null ? offerInstead
+                    : player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace, player.getPlayerID());
             clickable.offer(gameState, actions, player.getPlayerID());
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
-                // the buttons are seen by the player choosing, so may show what only they know
-                actionButtons[i].setButtonAction(actions.get(i), actions.get(i).getString(gameState, player.getPlayerID()));
+                actionButtons[i].setButtonAction(actions.get(i), actionLabel(actions.get(i), gameState));
                 actionButtons[i].setBackground(Color.white);
             }
             for (int i = actions.size(); i < actionButtons.length; i++) {
@@ -103,6 +108,17 @@ public abstract class AbstractGUIManager {
                 actionButtons[i].setButtonAction(null, "");
             }
         }
+    }
+
+    /**
+     * The text of the button offering the action: by default the action's getString. A GUI may add what the player
+     * should know to choose it (the odds of a battle, say).
+     */
+    public String actionLabel(AbstractAction action, AbstractGameState gameState) {
+        return action.getString(gameState);
+
+        // the buttons are seen by the player choosing, so may show what only they know
+        actionButtons[i].setButtonAction(actions.get(i), actions.get(i).getString(gameState, player.getPlayerID()));
     }
 
     /**
@@ -161,6 +177,7 @@ public abstract class AbstractGUIManager {
         pane.setOpaque(opaque);
         pane.getViewport().setOpaque(opaque);
 
+        this.actionPanel = pane;
         return pane;
     }
 
@@ -170,6 +187,127 @@ public abstract class AbstractGUIManager {
 
     public Set<Integer> getHumanPlayerIds() {
         return humanPlayerIds;
+    }
+
+    /* Read-only access to the standard parts of the GUI, so that they can be shown elsewhere (as the web package
+       does). Call on the Swing thread. */
+
+    /**
+     * The panel of action buttons made by createActionPanel, or null if this GUI does not use one.
+     */
+    public JComponent getActionPanel() {
+        return actionPanel;
+    }
+
+    /**
+     * The game state information and history panel made by createGameStateInfoPanel, or null if this GUI does not
+     * use one.
+     */
+    public JComponent getInfoPanel() {
+        return infoPanel;
+    }
+
+    /**
+     * The action buttons (empty if this GUI has none). A button offers an action when it is visible and has text, and
+     * doClick chooses it.
+     */
+    public JButton[] getActionButtons() {
+        return actionButtons == null ? new JButton[0] : actionButtons.clone();
+    }
+
+    /**
+     * Null if action button i has no action.
+     */
+    public AbstractAction getButtonAction(int i) {
+        return actionButtons == null || i < 0 || i >= actionButtons.length ? null : actionButtons[i].getButtonAction();
+    }
+
+    /**
+     * The parts of the views a human player may click now to choose an action, for a GUI shown elsewhere (the web
+     * server answers clicks on them in the page). None by default. A GUI that offers actions on its views with
+     * {@link ClickableActions} may override this, taking each region's actions from {@code clickable.matching}, so
+     * that there are none when nothing is offered.
+     */
+    public List<ClickRegion> getClickRegions() {
+        return List.of();
+    }
+
+    /**
+     * The regions of the board, when it is a map on which a player acts by pointing at one region and then another
+     * (see {@link #getMapMove}): all of them, whether or not an action is offered on them now. None by default. A GUI
+     * with a map may override this and getMapMove, so that a GUI shown elsewhere (the web server's page) can offer the
+     * actions on the map; it should then use the standard action buttons (createActionPanel).
+     */
+    public List<MapRegion> getMapRegions() {
+        return List.of();
+    }
+
+    /**
+     * The map regions an action involves (see {@link #getMapRegions()}), or null if it is not chosen on the map.
+     */
+    public MapMove getMapMove(AbstractAction action) {
+        return null;
+    }
+
+    /**
+     * The planner with which a human player may plan several decisions and send them together, or null (the
+     * default) if the game offers none. See {@link IMovePlanner}.
+     */
+    public IMovePlanner getPlanner() {
+        return null;
+    }
+
+    /**
+     * Offers the actions, rather than the forward model's, from the next update on (if the GUI uses the default
+     * updateActionButtons); null to offer the forward model's again. A planner's options are offered this way, with
+     * the GUI updated with the planned state.
+     */
+    public void offerInstead(List<AbstractAction> actions) {
+        offerInstead = actions == null ? null : List.copyOf(actions);
+    }
+
+    /**
+     * Whether actions are being offered instead of the forward model's (see offerInstead). A GUI that overrides
+     * updateActionButtons may then offer them with the default one.
+     */
+    protected boolean offersInstead() {
+        return offerInstead != null;
+    }
+
+    /**
+     * Chooses an action from one of the click regions, as a click on its action button would. Returns whether it was
+     * chosen, which it is only if it is still offered.
+     */
+    public boolean chooseClicked(AbstractAction action) {
+        if (!clickable.submit(action)) return false;
+        resetActionButtons();
+        return true;
+    }
+
+    /**
+     * The lines of game state information shown in the info panel: status, scores, phase, turn and current player.
+     */
+    public List<String> getGameStateInfo() {
+        List<String> lines = new ArrayList<>();
+        // not playerStatus: each player's result is mostly noise until the game ends
+        for (JLabel label : new JLabel[]{gameStatus, playerScores, gamePhase, turn, currentPlayer})
+            if (label.getText() != null && !label.getText().isEmpty())
+                lines.add(label.getText());
+        return lines;
+    }
+
+    /**
+     * The action history shown in the history panel.
+     */
+    public List<String> getHistory() {
+        // the history is added to by a game listener on the game's thread, so copying it may meet a change
+        for (int attempt = 0; ; attempt++) {
+            try {
+                return new ArrayList<>(history);
+            } catch (ConcurrentModificationException e) {
+                if (attempt == 5) throw e;
+            }
+        }
     }
 
     /**
@@ -226,6 +364,7 @@ public abstract class AbstractGUIManager {
 
         createActionHistoryPanel(width / 2 - 10, height, humanPlayerIds);
         wrapper.add(historyContainer);
+        this.infoPanel = wrapper;
         return wrapper;
     }
 

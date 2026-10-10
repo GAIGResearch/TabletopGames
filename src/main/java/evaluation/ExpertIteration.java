@@ -106,7 +106,8 @@ public class ExpertIteration {
 
         params = AbstractParameters.createFromFile(gameToPlay, (String) config.get(RunArg.gameParams));
 
-        int totalExpertIterations = (int) config.get(RunArg.expertIterations);
+        // +1 as the final tournament (to check the last tuned agent) runs with iter == expertIterations
+        int totalExpertIterations = (int) config.get(RunArg.expertIterations) + 1;
         actionRowsPerIteration = new int[totalExpertIterations];
         stateRowsPerIteration = new int[totalExpertIterations];
         stateDataFilesByIteration = new String[totalExpertIterations];
@@ -225,21 +226,29 @@ public class ExpertIteration {
 
             // the above code has loaded all agents...we now cut this down to just the ones that were in the
             // running at the point from which we are reloading
-            List<AbstractPlayer> toRemove =  new ArrayList<>();
-            for (AbstractPlayer agent : agents) {
-                if (runningTournamentResults.getPlayerResults(agent.toString()).isEmpty()) {
-                    // has already been removed
-                    runningTournamentResults.filterPlayer(agent.toString());
-                    toRemove.add(agent);
+            // The exception is the most recent agent, which may have no results because the run was aborted
+            // before it played in a tournament (it can only be removed after playing one)
+            // If no results were saved at all (aborted before the first multi-agent tournament completed), then
+            // nothing has been removed yet, and the original agent remains the best agent
+            if (!runningTournamentResults.getAllAgentNames().isEmpty()) {
+                String newestAgentName = String.format("NTBEA_%02d.json", restartAtIteration - 1);
+                List<AbstractPlayer> toRemove = new ArrayList<>();
+                for (AbstractPlayer agent : agents) {
+                    if (agent.toString().equals(newestAgentName))
+                        continue;
+                    if (runningTournamentResults.getPlayerResults(agent.toString()).isEmpty()) {
+                        // has already been removed
+                        runningTournamentResults.filterPlayer(agent.toString());
+                        toRemove.add(agent);
+                    }
                 }
+                agents.removeAll(toRemove);
+                // then work out who the current best agent is
+                WinRateAnalysis winRateAnalysis = new WinRateAnalysis();
+                String bestAgentName = winRateAnalysis.getRanking(runningTournamentResults).firstEntry().getKey();
+                bestAgent = agents.stream().filter(a -> a.toString().equals(bestAgentName)).findFirst()
+                        .orElseThrow(() -> new IllegalStateException("Best agent from previous run not found among loaded agents"));
             }
-            agents.removeAll(toRemove);
-            // then work out who the current best agent is
-            WinRateAnalysis winRateAnalysis = new WinRateAnalysis();
-            String bestAgentName = winRateAnalysis.getRanking(runningTournamentResults).firstEntry().getKey();
-            bestAgent = agents.stream().filter(a -> a.toString().equals(bestAgentName)).findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Best agent from previous run not found among loaded agents"));
-
         }
 
         do {
@@ -250,6 +259,13 @@ public class ExpertIteration {
                 restartWithTuning = false;
             } else {
                 finished = gatherDataAndCheckConvergence();
+                if (!finished) {
+                    try {
+                        dataGatheredMarker(iter).createNewFile();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
 
             long dataGatheringTime = System.currentTimeMillis() - iterationStartTime;
@@ -358,9 +374,16 @@ public class ExpertIteration {
             boolean agentsOKForAction = !hasActionSS || actionExists;
             if (!agentsOKForState || !agentsOKForAction) {
                 // we now check to see if the data has been gathered for the next iteration
-                int iterationRef = config.get(RunArg.expertTrainingMode) == TrainingMode.Exponential ? 0 : completedIterations;
-                String stateDataFile = dataDir + File.separator + String.format("State_%s_%02d.txt", prefix, iterationRef);
-                String actionDataFile = dataDir + File.separator + String.format("Action_%s_%02d.txt", prefix, iterationRef);
+                if (dataGatheredMarker(completedIterations).exists())
+                    return new Pair<>(completedIterations, completedIterations + 1);
+                // Runs started before markers were written have no marker for iteration 0. For these we fall back
+                // to the data files. In Exponential mode all data is in the one (_00) file, so its existence does
+                // not tell us whether the data for this iteration was gathered, and we always re-gather.
+                boolean legacyRun = completedIterations > 0 && !dataGatheredMarker(0).exists();
+                if (!legacyRun || config.get(RunArg.expertTrainingMode) == TrainingMode.Exponential)
+                    return new Pair<>(completedIterations, completedIterations);
+                String stateDataFile = dataDir + File.separator + String.format("State_%s_%02d.txt", prefix, completedIterations);
+                String actionDataFile = dataDir + File.separator + String.format("Action_%s_%02d.txt", prefix, completedIterations);
                 boolean dataOKForState = stateLearnerFile == null || new File(stateDataFile).exists();
                 boolean dataOKForAction = actionLearnerFile == null || new File(actionDataFile).exists();
                 if (dataOKForState && dataOKForAction) {
@@ -371,6 +394,11 @@ public class ExpertIteration {
             }
             completedIterations++;
         }
+    }
+
+    // Written once all data for an iteration has been gathered, so that a restart knows it can skip straight to learning
+    private File dataGatheredMarker(int iteration) {
+        return new File(dataDir + File.separator + String.format("DataGathered_%s_%02d.txt", prefix, iteration));
     }
 
 
