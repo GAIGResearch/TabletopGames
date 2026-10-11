@@ -10,6 +10,7 @@ import core.properties.PropertyString;
 import games.pandemic.*;
 import games.pandemic.actions.Forecast;
 import games.pandemic.actions.MovePlayer;
+import games.pandemic.actions.QuietNight;
 import games.pandemic.actions.TreatDisease;
 import gui.IMovePlanner;
 import utilities.Hash;
@@ -77,6 +78,7 @@ public class PandemicPlanner implements IMovePlanner {
         PandemicTurnOrder order = (PandemicTurnOrder) s.getTurnOrder();
         int player = order.getCurrentPlayer(s);
         action.execute(s);
+        if (action instanceof QuietNight) s.setQuietNight(true);
         if (action instanceof MovePlayer move) {
             Card role = (Card) s.getComponent(PandemicConstants.playerCardHash, move.getPlayerToMove());
             if (((PropertyString) role.getProperty(nameHash)).value.equals("Medic")) {

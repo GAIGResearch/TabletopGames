@@ -80,7 +80,10 @@ public class MovePlayer extends AbstractAction {
         if(other instanceof MovePlayer)
         {
             MovePlayer otherAction = (MovePlayer) other;
-            return destination.equals(otherAction.destination) && playerToMove == otherAction.playerToMove;
+            // how the player moves matters too: a direct flight to a city, which uses up a card, is not a shuttle
+            // flight there
+            return moveType == otherAction.moveType && destination.equals(otherAction.destination)
+                    && playerToMove == otherAction.playerToMove;
 
         }else return false;
     }
@@ -100,7 +103,7 @@ public class MovePlayer extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerToMove, destination);
+        return Objects.hash(moveType, playerToMove, destination);
     }
 
     @Override

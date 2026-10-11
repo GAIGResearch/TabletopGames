@@ -92,7 +92,8 @@ class MovePlan {
 
     /**
      * Carries out the steps again on a fresh copy of the decision, keeping them only as far as each is still an
-     * option (a step taken away may have been what made the next ones possible).
+     * option (a step taken away may have been what made the next ones possible). Each step is carried out as a copy:
+     * some actions record what they did on themselves (Pandemic's ShareKnowledge), which changes what they equal.
      */
     private void rebuild() {
         preview = decision.copy();
@@ -100,7 +101,7 @@ class MovePlan {
         List<AbstractAction> kept = new ArrayList<>();
         for (AbstractAction step : steps) {
             if (!options.contains(step)) break;
-            planner.apply(preview, step);
+            planner.apply(preview, step.copy());
             kept.add(step);
             options = planner.options(preview, player);
         }
@@ -119,7 +120,7 @@ class MovePlan {
         AbstractGameState state = decision.copy();
         for (AbstractAction step : steps) {
             list.add(describe.apply(step, state));
-            planner.apply(state, step);
+            planner.apply(state, step.copy());
         }
         msg.add("steps", list);
         JsonArray warnings = new JsonArray();
