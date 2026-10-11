@@ -28,7 +28,7 @@ Each tile has a Black Smoker and two seafloor terrains. The first tile goes with
 
 ### Covering
 
-Creatures under the new tile move or return to their owner's supply. Your own creatures are resolved first, then those of the other players in clockwise order. A creature moves to an empty neighbouring hex its species allows:
+Creatures under the new tile move or return to their owner's supply. Your own creatures are resolved first, then those of the other players in clockwise order. Each creature is resolved in turn, so an earlier one may take the hex a later one needed. A creature moves to an empty neighbouring hex its species allows, never onto the new tile itself (the Octopus may pass over it):
 
 - If there is no such hex, it returns to the supply.
 - If there is one, it moves there.

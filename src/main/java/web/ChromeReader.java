@@ -189,7 +189,8 @@ class ChromeReader {
                 msg.addProperty("type", "info");
                 out.sendText(msg.toString());
             }
-            sendHistory(gui.getHistory());
+            List<String> history = gui.getHistory();
+            sendHistory(history, gui.getHistoryRounds());
         }
         sendRegions();
         sendMap();
@@ -269,9 +270,10 @@ class ChromeReader {
     }
 
     /**
-     * Sends the lines added since the last update or, if the history was replaced rather than added to, all of it.
+     * Sends the lines added since the last update or, if the history was replaced rather than added to, all of it; each
+     * with its round, where rounds holds it.
      */
-    private void sendHistory(List<String> history) {
+    private void sendHistory(List<String> history, List<Integer> rounds) {
         int sent = sentHistory.size();
         boolean appended = !historyReset && history.size() >= sent
                 && (sent == 0 || Objects.equals(history.get(sent - 1), sentHistory.get(sent - 1)));
@@ -280,8 +282,11 @@ class ChromeReader {
         msg.addProperty("type", "history");
         msg.addProperty("reset", !appended);
         JsonArray lines = new JsonArray();
-        for (String line : appended ? history.subList(sent, history.size()) : history)
-            lines.add(historyLine(line));
+        for (int i = appended ? sent : 0; i < history.size(); i++) {
+            JsonObject line = historyLine(history.get(i));
+            line.addProperty("round", i < rounds.size() ? rounds.get(i) : -1);
+            lines.add(line);
+        }
         msg.add("lines", lines);
         sentHistory = history;
         historyReset = false;

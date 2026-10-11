@@ -126,13 +126,13 @@ public class VentlifeOctopusTest {
     }
 
     @Test
-    public void aRetreatingOctopusMayStopOnAnEdgeSmokerWhenSmokersAreOpenToEverySpecies() {
+    public void aRetreatingOctopusNeverStopsOnTheTileThatCoveredItEvenWhereSmokersAreOpenToEverySpecies() {
         state = newState(2, 42, smokersForAll());
         ringBeforeTile5();
         octopusOn01With(hex(-1, 2));
         placeTile5();
-        // as before, and NW now ends on the Smoker (0,0) S3 (an edge: (0,-1) is uncovered)
-        assertEquals(retreats(hex(1, 1), hex(-2, 3), hex(-2, 1), hex(1, 0), hex(0, 0)), legalSet(state, fm));
+        // as before: NW passes the Smoker (0,0) S3, an empty edge hex, because it is on tile 5, and then fails
+        assertEquals(retreats(hex(1, 1), hex(-2, 3), hex(-2, 1), hex(1, 0)), legalSet(state, fm));
     }
 
     @Test

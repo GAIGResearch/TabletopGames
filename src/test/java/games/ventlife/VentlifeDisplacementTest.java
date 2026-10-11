@@ -72,44 +72,85 @@ public class VentlifeDisplacementTest {
     }
 
     @Test
-    public void ownerOfACoveredShrimpChoosesAmongNonBasaltHexesNextToItSmokersIncluded() {
+    public void ownerOfACoveredShrimpChoosesAmongNonBasaltHexesNextToItOffTheNewTile() {
         seafloorPair(SHRIMP);
-        putCreature(state, hex(0, 1), SHRIMP, 1, 1);
+        putCreature(state, hex(1, 0), SHRIMP, 1, 1);
         coverSeafloorPair();
-        // (0,1) is under the new left hex; its neighbours: (1,1) D1, (-1,1) B1, (0,0) S2 and (1,0) B2 (new tile),
-        // (0,2) and (-1,2) uncovered. Not Basalt: (1,1) and the Smoker (0,0). Player 1 decides on player 0's turn
+        // (1,0), tile 1's Smoker, is under the new right hex; its neighbours: (2,0) M1, (1,1) D1, (0,0) S2 and
+        // (0,1) M2 (the new tile, which no covered creature may move onto), (1,-1) and (2,-1) uncovered.
+        // Player 1 decides on player 0's turn
         assertEquals(1, state.getCurrentPlayer());
-        Set<AbstractAction> expected = Set.of(displace(SHRIMP, 1, hex(0, 1), hex(1, 1)),
-                displace(SHRIMP, 1, hex(0, 1), hex(0, 0)));
+        Set<AbstractAction> expected = Set.of(displace(SHRIMP, 1, hex(1, 0), hex(2, 0)),
+                displace(SHRIMP, 1, hex(1, 0), hex(1, 1)));
         assertEquals(expected, legalSet(state, fm));
         assertTrue(state.getCreatures().isEmpty());
 
-        Displace choice = displace(SHRIMP, 1, hex(0, 1), hex(0, 0));
+        Displace choice = displace(SHRIMP, 1, hex(1, 0), hex(1, 1));
         String text = choice.getString(state);
-        assertTrue(text, text.contains(SHRIMP.label) && text.contains("(0,1)") && text.contains("(0,0)"));
+        assertTrue(text, text.contains(SHRIMP.label) && text.contains("(1,0)") && text.contains("(1,1)"));
         fm.next(state, choice);
-        assertEquals(Map.of(hex(0, 0), new Creature(SHRIMP, 1, 1)), state.getCreatures());
+        assertEquals(Map.of(hex(1, 1), new Creature(SHRIMP, 1, 1)), state.getCreatures());
         assertEquals(5, state.getSupply(1, SHRIMP));
         assertTokensConserved(state, "after the displacement");
 
-        // then player 0's creature step: empty non-Basalt hexes (0,1) M2, (1,1) D1, (2,0) M1
+        // then player 0's creature step: empty non-Basalt hexes (0,0) S2, (0,1) M2, (2,0) M1
         assertCreatureStepOf(0);
-        assertEquals(Set.of(shrimp(hex(0, 1)), shrimp(hex(1, 1)), shrimp(hex(2, 0))), legalSet(state, fm));
+        assertEquals(Set.of(shrimp(hex(0, 0)), shrimp(hex(0, 1)), shrimp(hex(2, 0))), legalSet(state, fm));
     }
 
     @Test
-    public void aCoveredCreatureWithOneDestinationMovesThereWithoutADecision() {
+    public void aCoveredCreatureWithOneDestinationMovesThereWithoutADecisionAndTheMoveIsLogged() {
+        seafloorPair(SHRIMP);
+        putCreature(state, hex(0, 1), SHRIMP, 1, 1);
+        coverSeafloorPair();
+        // (0,1)'s neighbours off the new tile: (1,1) D1 and (-1,1) B1; only (1,1) is not Basalt
+        assertEquals(Map.of(hex(1, 1), new Creature(SHRIMP, 1, 1)), state.getCreatures());
+        assertNoCoveringDecision(state);
+        assertCreatureStepOf(0);
+        assertEquals(Set.of(shrimp(hex(0, 0)), shrimp(hex(0, 1)), shrimp(hex(2, 0))), legalSet(state, fm));
+        assertTokensConserved(state, "after the displacement");
+        assertLogged("Player 1's " + SHRIMP + " covered at (0,1) moves to (1,1)");
+    }
+
+    @Test
+    public void aCoveredShrimpWithNoHexOffTheNewTileReturnsToSupplyAndTheReturnIsLogged() {
         seafloorPair(SHRIMP);
         putCreature(state, hex(1, 1), SHRIMP, 0, 1);
         putCreature(state, hex(0, 1), SHRIMP, 1, 1);
         coverSeafloorPair();
-        // (1,1) is occupied, so player 1's shrimp has only the new Smoker (0,0)
-        assertEquals(Map.of(hex(1, 1), new Creature(SHRIMP, 0, 1), hex(0, 0), new Creature(SHRIMP, 1, 1)),
-                state.getCreatures());
+        // (1,1) is occupied, and the new Smoker (0,0) is on the tile that covered the shrimp: it returns
+        assertEquals(Map.of(hex(1, 1), new Creature(SHRIMP, 0, 1)), state.getCreatures());
+        assertEquals(6, state.getSupply(1, SHRIMP));
         assertNoCoveringDecision(state);
         assertCreatureStepOf(0);
-        assertEquals(Set.of(shrimp(hex(0, 1)), shrimp(hex(2, 0))), legalSet(state, fm));
+        assertEquals(Set.of(shrimp(hex(0, 0)), shrimp(hex(0, 1)), shrimp(hex(2, 0))), legalSet(state, fm));
         assertTokensConserved(state, "after the displacement");
+        assertLogged("Player 1's " + SHRIMP + " covered at (0,1) has nowhere to go: returned to supply");
+    }
+
+    @Test
+    public void thePlacerChoosesFirstAndMayTakeTheOnlyHexLeftForAnotherPlayersCreature() {
+        seafloorPair(SHRIMP);
+        putCreature(state, hex(1, 0), SHRIMP, 0, 1);
+        putCreature(state, hex(0, 1), SHRIMP, 1, 1);
+        coverSeafloorPair();
+        // player 0's shrimp from (1,0) is resolved first: (2,0) or (1,1); player 1's from (0,1) has only (1,1)
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(Set.of(displace(SHRIMP, 0, hex(1, 0), hex(2, 0)), displace(SHRIMP, 0, hex(1, 0), hex(1, 1))),
+                legalSet(state, fm));
+        assertTrue("nothing moves before the placer's choice", state.getCreatures().isEmpty());
+        fm.next(state, displace(SHRIMP, 0, hex(1, 0), hex(1, 1)));
+
+        assertEquals(Map.of(hex(1, 1), new Creature(SHRIMP, 0, 1)), state.getCreatures());
+        assertEquals(6, state.getSupply(1, SHRIMP));
+        assertCreatureStepOf(0);
+        assertTokensConserved(state, "after the displacements");
+        assertLogged("Player 1's " + SHRIMP + " covered at (0,1) has nowhere to go: returned to supply");
+    }
+
+    private void assertLogged(String line) {
+        List<String> history = state.getHistoryAsText();
+        assertTrue(line + " not in " + history, history.stream().anyMatch(h -> h.startsWith(line)));
     }
 
     @Test

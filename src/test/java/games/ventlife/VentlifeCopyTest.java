@@ -124,16 +124,16 @@ public class VentlifeCopyTest {
 
     @Test
     public void aCopyTakenDuringADisplacementDecisionAwaitsTheSameDecisionIndependently() {
-        // standard tiles 0 and 1, player 1's shrimp on (0,1) D1; player 0 covers it with M/B at ((0,0),0), and
-        // player 1 is to choose (1,1) or (0,0) (as in VentlifeDisplacementTest)
+        // standard tiles 0 and 1, player 1's shrimp on (1,0) S1; player 0 covers it with M/B at ((0,0),0), and
+        // player 1 is to choose (2,0) or (1,1) (as in VentlifeDisplacementTest)
         useSpecies(state);
         buildStandardField(state, fm, 2);
         useSpecies(state, SHRIMP);
-        putCreature(state, hex(0, 1), SHRIMP, 1, 1);
+        putCreature(state, hex(1, 0), SHRIMP, 1, 1);
         giveTile(state, 0, MAT, BASALT);
         fm.next(state, placeTile(state, hex(0, 0), 0));
-        Set<Object> decision = Set.of(displace(SHRIMP, 1, hex(0, 1), hex(1, 1)),
-                displace(SHRIMP, 1, hex(0, 1), hex(0, 0)));
+        Set<Object> decision = Set.of(displace(SHRIMP, 1, hex(1, 0), hex(2, 0)),
+                displace(SHRIMP, 1, hex(1, 0), hex(1, 1)));
         assertEquals(decision, new HashSet<>(legalSet(state, fm)));
 
         VentlifeGameState before = (VentlifeGameState) state.copy();
@@ -143,8 +143,8 @@ public class VentlifeCopyTest {
         assertEquals(1, copy.getCurrentPlayer());
         assertEquals(decision, new HashSet<>(legalSet(copy, fm)));
 
-        fm.next(copy, displace(SHRIMP, 1, hex(0, 1), hex(0, 0)));
-        assertEquals(new Creature(SHRIMP, 1, 1), copy.getCreature(hex(0, 0)));
+        fm.next(copy, displace(SHRIMP, 1, hex(1, 0), hex(1, 1)));
+        assertEquals(new Creature(SHRIMP, 1, 1), copy.getCreature(hex(1, 1)));
         assertEquals(0, copy.getCurrentPlayer());
         // the original still awaits player 1's choice
         assertEquals(before, state);

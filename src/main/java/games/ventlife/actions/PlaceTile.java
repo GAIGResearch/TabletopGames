@@ -49,7 +49,7 @@ public class PlaceTile extends AbstractAction {
         state.setCell(hexes.get(0), new HexCell(Terrain.BLACK_SMOKER, level, tileId));
         state.setCell(hexes.get(1), new HexCell(tile.left, level, tileId));
         state.setCell(hexes.get(2), new HexCell(tile.right, level, tileId));
-        ResolveCovering resolution = new ResolveCovering(covered);
+        ResolveCovering resolution = new ResolveCovering(covered, tileId);
         if (resolution.resolveAutomatic(state))
             state.setActionInProgress(resolution);
         return true;

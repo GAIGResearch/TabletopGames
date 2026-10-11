@@ -531,7 +531,8 @@ function showInfo(msg) {
     }
 }
 
-const historyLog = [];   // {player, text}, player -1 for a line about no one player
+const historyLog = [];   // {player, text, round}, player -1 for a line about no one player, round -1 if not known
+let roundGroup = null;   // the last round's group in the history: {round, details, list, count}
 
 function historyItem(line) {
     const li = document.createElement('li');
@@ -546,20 +547,72 @@ function historyItem(line) {
     return li;
 }
 
+// Lines whose round is known are grouped by round, each group collapsible. A new round closes the one before, unless the
+// player opened or closed that one themselves.
 function addHistory(lines, reset) {
     const history = $('history');
     const atBottom = history.scrollTop + history.clientHeight >= history.scrollHeight - 4;
     if (reset) {
         history.replaceChildren();
+        history.classList.remove('grouped');
+        $('history-rounds').hidden = true;
         historyLog.length = 0;
+        roundGroup = null;
     }
     for (const line of lines) {
         historyLog.push(line);
-        history.append(historyItem(line));
+        const round = line.round ?? -1;
+        if (round >= 0 && round !== roundGroup?.round) {
+            if (roundGroup && !roundGroup.details.dataset.chosen) roundGroup.details.open = false;
+            roundGroup = newRoundGroup(round);
+            history.classList.add('grouped');
+            $('history-rounds').hidden = false;
+            history.append(roundGroup.item);
+        }
+        if (roundGroup) {
+            roundGroup.list.append(historyItem(line));
+            const n = roundGroup.list.childElementCount;
+            roundGroup.count.textContent = `· ${n} ${n === 1 ? 'entry' : 'entries'}`;
+        } else {
+            history.append(historyItem(line));
+        }
     }
     summaryFrom = Math.min(summaryFrom, historyLog.length);
     if (atBottom || reset) history.scrollTop = history.scrollHeight;
 }
+
+function newRoundGroup(round) {
+    const item = document.createElement('li');
+    item.className = 'round';
+    const details = document.createElement('details');
+    details.open = true;
+    const summary = document.createElement('summary');
+    const count = document.createElement('span');
+    count.className = 'muted';
+    // numbered as the game's own information numbers them
+    summary.append(`Round ${round} `, count);
+    // a click on the round's heading is the player's choice, which a new round leaves alone
+    summary.addEventListener('click', () => details.dataset.chosen = 'yes');
+    const list = document.createElement('ol');
+    details.append(summary, list);
+    item.append(details);
+    return {round, item, details, list, count};
+}
+
+$('history-rounds').addEventListener('click', () => {
+    const groups = [...$('history').querySelectorAll('li.round > details')];
+    const open = !groups.every(d => d.open);
+    for (const d of groups) {
+        d.open = open;
+        d.dataset.chosen = 'yes';
+    }
+});
+
+$('history-expand').addEventListener('click', () => {
+    const expanded = $('sidebar').classList.toggle('history-expanded');
+    $('history-expand').textContent = expanded ? '⤡' : '⤢';
+    $('history-expand').title = expanded ? 'Show the other panels again' : 'Show the history in the whole side panel';
+});
 
 // ---- what the AI players weighed up for their last decisions (only sent if the setup asked for it)
 

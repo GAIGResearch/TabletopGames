@@ -38,7 +38,8 @@ and, if the setup asks for it, shows what the AI players weighed up for each dec
 The page also:
 
 - groups a long list of actions by kind, and numbers the first nine for the keys 1 to 9;
-- shows a scoreboard (whose turn, and the scores where the GUI shows them) and the history with the players' names, and
+- shows a scoreboard (whose turn, and the scores where the GUI shows them) and the whole history with the players'
+  names, grouped by round (each round can be opened or closed; the ⤢ button gives the history the whole side panel), and
   when it becomes your turn, what the other players did since your last move (with a sound if the tab is in the
   background; the bell button switches it off);
 - fits the game to the window, centred (enlarging a small GUI as well as shrinking a large one), or zooms it to the

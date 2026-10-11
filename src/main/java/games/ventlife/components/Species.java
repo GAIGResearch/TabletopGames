@@ -46,14 +46,15 @@ public enum Species {
     }
 
     /**
-     * Where a creature of this species covered at from (whose level was fromLevel before it was covered) may move,
-     * sorted by position; empty if it returns to its owner's supply.
+     * Where a creature of this species covered at from (whose level was fromLevel before it was covered) by the tile
+     * newTile may move, sorted by position; empty if it returns to its owner's supply. No creature moves onto the
+     * tile that covered it.
      */
-    public List<Hex> destinations(VentlifeGameState state, Hex from, int fromLevel) {
+    public List<Hex> destinations(VentlifeGameState state, Hex from, int fromLevel, int newTile) {
         List<Hex> retValue = new ArrayList<>();
         if (this == OCTOPUS) {
             for (int d = 0; d < 6; d++) {
-                Hex stop = retreat(state, from, d);
+                Hex stop = retreat(state, from, d, newTile);
                 if (stop != null)
                     retValue.add(stop);
             }
@@ -61,7 +62,7 @@ public enum Species {
             return retValue;
         }
         for (Hex n : from.neighbours()) {
-            if (!state.isEmptyHex(n))
+            if (!state.isEmptyHex(n) || state.getCell(n).tileId() == newTile)
                 continue;
             Terrain terrain = state.getCell(n).terrain();
             int level = state.getLevel(n);
@@ -83,12 +84,12 @@ public enum Species {
     /**
      * Where an Octopus retreating from from in the direction stops, or null if it cannot go that way.
      */
-    private Hex retreat(VentlifeGameState state, Hex from, int direction) {
-        // along the straight line, passing over everything but an empty Edge hex it may use; the direction fails if
-        // the line leaves the field first
+    private Hex retreat(VentlifeGameState state, Hex from, int direction, int newTile) {
+        // along the straight line, passing over everything but an empty Edge hex it may use (not on the new tile); the
+        // direction fails if the line leaves the field first
         Hex h = from.neighbour(direction);
         while (state.getCell(h) != null) {
-            if (state.isEmptyHex(h) && state.isEdge(h)
+            if (state.isEmptyHex(h) && state.isEdge(h) && state.getCell(h).tileId() != newTile
                     && (state.getCell(h).terrain() != Terrain.BLACK_SMOKER || mayUseSmokers(state)))
                 return h;
             h = h.neighbour(direction);

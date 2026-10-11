@@ -131,15 +131,15 @@ public class VentlifeGameFlowTest {
     }
 
     /**
-     * Displacement decisions in a real 3-player game: player 1 places a plateau over three Shrimp, its own and players
-     * 2's and 0's; the owners decide in the order placer, placer + 1, placer + 2, each choosing among the hexes still
-     * empty at that moment; then player 1's creature step. Only Shrimp in play.
+     * Displacement in a real 3-player game: player 1 places a plateau over three Shrimp, its own and players 2's and
+     * 0's; they are resolved in the order placer, placer + 1, placer + 2, each among the hexes still empty at that
+     * moment and never onto the new tile; then player 1's creature step. Only Shrimp in play.
      * Tiles (level 1): P0 B/D at ((0,0),1): (0,0) S, (-1,1) B, (0,1) D; P1 D/M at ((1,0),0): (1,0) S, (1,1) D, (2,0) M;
      * P2 B/M at ((-1,0),2): (-1,0) S, (-2,0) B, (-2,1) M; P0 B/B at ((-2,-1),3): (-2,-1) S, (-2,-2) B, (-3,-1) B.
-     * Then P1 places M/B at ((0,0),0): (0,0) S2 [P1's shrimp], left (0,1) M2 [P2's], right (1,0) B2 [P0's].
+     * Then P1 places M/B at ((0,0),0): (0,0) S2 [P1's shrimp], left (0,1) M2 [P0's], right (1,0) B2 [P2's].
      */
     @Test
-    public void coveredCreaturesAreDecidedByTheirOwnersFromThePlacerClockwise() {
+    public void coveredCreaturesAreResolvedFromThePlacerClockwise() {
         Game game = newGame(3, 21);
         VentlifeGameState state = (VentlifeGameState) game.getGameState();
         AbstractForwardModel fm = game.getForwardModel();
@@ -150,44 +150,36 @@ public class VentlifeGameFlowTest {
         place(state, fm, BASALT, BASALT, hex(-2, -1), 3);
         useSpecies(state, SHRIMP);
         putCreature(state, hex(0, 0), SHRIMP, 1, 1);
-        putCreature(state, hex(0, 1), SHRIMP, 2, 1);
-        putCreature(state, hex(1, 0), SHRIMP, 0, 1);
+        putCreature(state, hex(0, 1), SHRIMP, 0, 1);
+        putCreature(state, hex(1, 0), SHRIMP, 2, 1);
         assertEquals(1, state.getCurrentPlayer());
         giveTile(state, 1, MAT, BASALT);
         fm.next(state, placeTile(state, hex(0, 0), 0));
 
-        // player 1's shrimp from (0,0): (0,1) M2, (-1,0) S1; not (1,0) B2 or (-1,1) B1
-        assertEquals(1, state.getCurrentPlayer());
-        assertEquals(Set.of(displace(SHRIMP, 1, hex(0, 0), hex(0, 1)), displace(SHRIMP, 1, hex(0, 0), hex(-1, 0))),
-                legalSet(state, fm));
-        fm.next(state, displace(SHRIMP, 1, hex(0, 0), hex(-1, 0)));
-
-        // then player 2's (placer + 1) from (0,1): (1,1) D1, (0,0) S2; not (-1,1) B1 or (1,0) B2
+        // player 1's shrimp from (0,0) has only (-1,0) S1 (not (-1,1) B1, nor (0,1) or (1,0) on the new tile)
+        assertEquals(new Creature(SHRIMP, 1, 1), state.getCreature(hex(-1, 0)));
+        // then player 2's (placer + 1) from (1,0): (2,0) M1 or (1,1) D1
         assertEquals(2, state.getCurrentPlayer());
-        assertEquals(Set.of(displace(SHRIMP, 2, hex(0, 1), hex(1, 1)), displace(SHRIMP, 2, hex(0, 1), hex(0, 0))),
+        assertEquals(Set.of(displace(SHRIMP, 2, hex(1, 0), hex(2, 0)), displace(SHRIMP, 2, hex(1, 0), hex(1, 1))),
                 legalSet(state, fm));
-        fm.next(state, displace(SHRIMP, 2, hex(0, 1), hex(1, 1)));
+        fm.next(state, displace(SHRIMP, 2, hex(1, 0), hex(1, 1)));
 
-        // then player 0's from (1,0): (2,0) M1, (0,1) M2, (0,0) S2 - not (1,1), just taken by player 2's shrimp
-        assertEquals(0, state.getCurrentPlayer());
-        assertEquals(Set.of(displace(SHRIMP, 0, hex(1, 0), hex(2, 0)), displace(SHRIMP, 0, hex(1, 0), hex(0, 1)),
-                displace(SHRIMP, 0, hex(1, 0), hex(0, 0))), legalSet(state, fm));
-        fm.next(state, displace(SHRIMP, 0, hex(1, 0), hex(0, 1)));
-
-        assertEquals(Map.of(hex(-1, 0), new Creature(SHRIMP, 1, 1), hex(1, 1), new Creature(SHRIMP, 2, 1),
-                hex(0, 1), new Creature(SHRIMP, 0, 1)), state.getCreatures());
+        // then player 0's from (0,1), whose only hex (1,1) player 2's shrimp has just taken: returned
+        assertEquals(Map.of(hex(-1, 0), new Creature(SHRIMP, 1, 1), hex(1, 1), new Creature(SHRIMP, 2, 1)),
+                state.getCreatures());
+        assertEquals(6, state.getSupply(0, SHRIMP));
         assertTokensConserved(state, "after the displacements");
-        // player 1's creature step: empty non-Basalt (0,0) S2, (2,0) M1, (-2,1) M1, (-2,-1) S1
+        // player 1's creature step: empty non-Basalt (0,0) S2, (0,1) M2, (2,0) M1, (-2,1) M1, (-2,-1) S1
         assertEquals(VentlifeGameState.Phase.PLACE_CREATURES, state.getGamePhase());
         assertEquals(1, state.getCurrentPlayer());
-        assertEquals(Set.of(shrimp(hex(0, 0)), shrimp(hex(2, 0)), shrimp(hex(-2, 1)), shrimp(hex(-2, -1))),
-                legalSet(state, fm));
+        assertEquals(Set.of(shrimp(hex(0, 0)), shrimp(hex(0, 1)), shrimp(hex(2, 0)), shrimp(hex(-2, 1)),
+                shrimp(hex(-2, -1))), legalSet(state, fm));
         fm.next(state, shrimp(hex(2, 0)));
         assertEquals(2, state.getCurrentPlayer());
         assertEquals(VentlifeGameState.Phase.PLACE_TILE, state.getGamePhase());
         assertEquals(1, state.getHand(1).getSize());
-        // 6 - 1 for players 0 and 2; 6 - 2 for player 1
-        assertEquals(5, state.getSupply(0, SHRIMP));
+        // 6 for player 0, whose shrimp returned; 6 - 2 for player 1; 6 - 1 for player 2
+        assertEquals(6, state.getSupply(0, SHRIMP));
         assertEquals(4, state.getSupply(1, SHRIMP));
         assertEquals(5, state.getSupply(2, SHRIMP));
     }

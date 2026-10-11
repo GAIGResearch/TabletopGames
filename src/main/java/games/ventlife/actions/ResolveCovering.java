@@ -1,6 +1,7 @@
 package games.ventlife.actions;
 
 import core.AbstractGameState;
+import evaluation.metrics.Event;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.ventlife.VentlifeGameState;
@@ -23,9 +24,12 @@ public class ResolveCovering implements IExtendedSequence {
     }
 
     private final List<Covered> pending;
+    // the id of the tile that covered them, which none may move onto
+    private final int newTile;
 
-    public ResolveCovering(List<Covered> pending) {
+    public ResolveCovering(List<Covered> pending, int newTile) {
         this.pending = new ArrayList<>(pending);
+        this.newTile = newTile;
     }
 
     /**
@@ -39,10 +43,16 @@ public class ResolveCovering implements IExtendedSequence {
             List<Hex> destinations = destinations(state, c);
             if (destinations.size() > 1)
                 return true;
-            if (destinations.isEmpty())
+            if (destinations.isEmpty()) {
                 state.changeSupply(c.creature.owner(), c.creature.species(), c.creature.count());
-            else
+                state.logEvent(Event.GameEvent.GAME_EVENT, () -> "Player " + c.creature.owner() + "'s "
+                        + c.creature.species() + " covered at " + c.from + " has nowhere to go: returned to supply");
+            } else {
                 state.setCreature(destinations.get(0), c.creature);
+                state.logEvent(Event.GameEvent.GAME_EVENT, () -> "Player " + c.creature.owner() + "'s "
+                        + c.creature.species() + " covered at " + c.from + " moves to " + destinations.get(0)
+                        + " (its only legal hex)");
+            }
             pending.remove(0);
         }
         return false;
@@ -55,8 +65,8 @@ public class ResolveCovering implements IExtendedSequence {
         return pending.get(0);
     }
 
-    private static List<Hex> destinations(VentlifeGameState state, Covered c) {
-        return c.creature.species().destinations(state, c.from, c.fromLevel);
+    private List<Hex> destinations(VentlifeGameState state, Covered c) {
+        return c.creature.species().destinations(state, c.from, c.fromLevel, newTile);
     }
 
     @Override
@@ -90,17 +100,17 @@ public class ResolveCovering implements IExtendedSequence {
 
     @Override
     public ResolveCovering copy() {
-        return new ResolveCovering(pending);
+        return new ResolveCovering(pending, newTile);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof ResolveCovering other && other.pending.equals(pending);
+        return o instanceof ResolveCovering other && other.newTile == newTile && other.pending.equals(pending);
     }
 
     @Override
     public int hashCode() {
-        return pending.hashCode() + 771307;
+        return pending.hashCode() * 31 + newTile + 771307;
     }
 
     @Override
