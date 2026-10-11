@@ -28,12 +28,6 @@ public class VentlifeSpeciesPlacementTest {
         assertEquals(0, state.getCurrentPlayer());
     }
 
-    private static VentlifeParameters smokersForAll() {
-        VentlifeParameters params = new VentlifeParameters();
-        params.setParameterValue("smokersOnlyForWormsAndShrimp", false);
-        return params;
-    }
-
     @Test
     public void shrimpGoOnAnyEmptyHexExceptBasaltSmokersIncluded() {
         arrange(null, SHRIMP);
@@ -47,34 +41,22 @@ public class VentlifeSpeciesPlacementTest {
 
     @Test
     public void fishGoOnSeafloorHexesOrNextToTheirOwnersFishButNeverOnASmoker() {
-        // the same with Smokers open to every species: Fish still never go on one
-        for (VentlifeParameters params : Arrays.asList(null, smokersForAll())) {
-            arrange(params, FISH);
-            putCreature(state, hex(-2, 1), FISH, 0, 1);
-            putCreature(state, hex(1, 1), FISH, 1, 1);
-            startCreatureStep(state);
-            // level 1: (2,0) M1, (-2,0) B1 [(1,1) occupied]; next to player 0's Fish at (-2,1): (-1,1) M3 (level 3
-            // allowed), (-2,0), not the Smoker (-1,0); not (0,1) or (1,0), next only to player 1's Fish at (1,1)
-            Set<Object> expected = Set.of(fish(hex(2, 0)), fish(hex(-2, 0)), fish(hex(-1, 1)));
-            assertEquals("params " + params, expected, new HashSet<>(legalSet(state, fm)));
-        }
-    }
-
-    @Test
-    public void crabsGoOnEmptyHexesOfLevelTwoOrMoreNotOnSmokersByDefault() {
-        arrange(null, CRAB);
-        putCreature(state, hex(0, 1), CRAB, 1, 1);
+        arrange(null, FISH);
+        putCreature(state, hex(-2, 1), FISH, 0, 1);
+        putCreature(state, hex(1, 1), FISH, 1, 1);
         startCreatureStep(state);
-        // level >= 2: (0,0) S3, (-1,1) M3, (0,1) D3 [occupied], (1,0) B2, (-1,0) S2, (-2,1) D2; minus the Smokers
-        Set<Object> expected = Set.of(crab(hex(-1, 1)), crab(hex(1, 0)), crab(hex(-2, 1)));
+        // level 1: (2,0) M1, (-2,0) B1 [(1,1) occupied]; next to player 0's Fish at (-2,1): (-1,1) M3 (level 3
+        // allowed), (-2,0), not the Smoker (-1,0); not (0,1) or (1,0), next only to player 1's Fish at (1,1)
+        Set<Object> expected = Set.of(fish(hex(2, 0)), fish(hex(-2, 0)), fish(hex(-1, 1)));
         assertEquals(expected, new HashSet<>(legalSet(state, fm)));
     }
 
     @Test
-    public void crabsMayGoOnHighSmokersWhenSmokersAreOpenToEverySpecies() {
-        arrange(smokersForAll(), CRAB);
+    public void crabsGoOnEmptyHexesOfLevelTwoOrMoreSmokersIncluded() {
+        arrange(null, CRAB);
         putCreature(state, hex(0, 1), CRAB, 1, 1);
         startCreatureStep(state);
+        // level >= 2: (0,0) S3, (-1,1) M3, (0,1) D3 [occupied], (1,0) B2, (-1,0) S2, (-2,1) D2
         Set<Object> expected = Set.of(crab(hex(-1, 1)), crab(hex(1, 0)), crab(hex(-2, 1)),
                 crab(hex(0, 0)), crab(hex(-1, 0)));
         assertEquals(expected, new HashSet<>(legalSet(state, fm)));

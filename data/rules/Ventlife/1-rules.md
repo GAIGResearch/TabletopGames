@@ -34,11 +34,7 @@ Creatures under the new tile move or return to their owner's supply. Your own cr
 - If there is one, it moves there.
 - If there are several, its owner chooses one.
 
-<!-- if smokersOnlyForWormsAndShrimp -->
-Only Tube Worms and Shrimp may be placed on, or moved onto, a Black Smoker.
-<!-- else -->
-Fish may not be placed on, or moved onto, a Black Smoker. Every other species may.
-<!-- end -->
+Fish may not be placed on, or moved onto, a Black Smoker. Every other species may, within its own rule: Snails are placed only on Basalt Ridge, but may move onto a Black Smoker.
 
 ### Species
 
@@ -49,7 +45,7 @@ Fish may not be placed on, or moved onto, a Black Smoker. Every other species ma
 | Blind Vent Shrimp (Sh) | Any hex but Basalt Ridge. | To any hex but Basalt Ridge. | {shrimpPointsOneTerrain} next to Diffuse Vents or Microbial Mat, {shrimpPointsBothTerrains} next to both. |
 | Eelpout Fish (F) | A level-1 hex, or a hex next to one of your Fish. | To a hex of the same or a lower level. | Each shoal of 2 or more connected Fish scores {shoalPoints} for each Fish after the first. |
 | Yeti Crabs (C) | A hex of level 2 or more. | To a hex of the same level. | On each plateau (2 or more connected hexes of the same level), the player with the most Crabs scores its size, and the player with the second most scores half of it (rounded down). Players tied for the most all score the size, and no second place is scored. |
-| Deep-Sea Octopus (O) | An edge hex (next to empty seafloor). | Its owner chooses a direction; it moves in a straight line to the first empty edge hex. | {octopusPointsPerSpecies} for each other species next to it. |
+| Deep-Sea Octopus (O) | An edge hex (next to empty seafloor). | Its owner chooses a direction; it moves in a straight line, over anything in its way, to the end of the line: the last hex before one with no tile. If that hex is taken (or on the new tile), it cannot go that way. Edge hexes along the way don't count. | {octopusPointsPerSpecies} for each other species next to it. |
 | Vent Sponges (Sp) | Any hex. | They return. | {spongePointsPerTerrain} for each terrain next to them. |
 
 ### End

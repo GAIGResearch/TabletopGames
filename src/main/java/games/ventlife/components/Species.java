@@ -22,17 +22,17 @@ public enum Species {
     public boolean canPlace(VentlifeGameState state, int player, Hex hex) {
         if (!state.isEmptyHex(hex))
             return false;
+        // Black Smokers are open to every species but Fish (designer, 2026-10-11)
         Terrain terrain = state.getCell(hex).terrain();
-        boolean smokerOk = terrain != Terrain.BLACK_SMOKER || mayUseSmokers(state);
         return switch (this) {
             case TUBE_WORM -> terrain == Terrain.BLACK_SMOKER;
-            case VENT_SPONGE -> smokerOk;
+            case VENT_SPONGE -> true;
             case VENT_SHRIMP -> terrain != Terrain.BASALT_RIDGE;
             case EELPOUT_FISH -> terrain != Terrain.BLACK_SMOKER
                     && (state.getLevel(hex) == 1 || nextToOwnFish(state, player, hex));
-            case YETI_CRAB -> smokerOk && state.getLevel(hex) >= 2;
+            case YETI_CRAB -> state.getLevel(hex) >= 2;
             case VOLCANO_SNAIL -> terrain == Terrain.BASALT_RIDGE;
-            case OCTOPUS -> smokerOk && state.isEdge(hex);
+            case OCTOPUS -> state.isEdge(hex);
         };
     }
 
@@ -69,8 +69,9 @@ public enum Species {
             boolean ok = switch (this) {
                 case VENT_SHRIMP -> terrain != Terrain.BASALT_RIDGE;
                 case EELPOUT_FISH -> terrain != Terrain.BLACK_SMOKER && level <= fromLevel;
-                case YETI_CRAB -> (terrain != Terrain.BLACK_SMOKER || mayUseSmokers(state)) && level == fromLevel;
-                case VOLCANO_SNAIL -> (terrain != Terrain.BLACK_SMOKER || mayUseSmokers(state)) && level < fromLevel;
+                case YETI_CRAB -> level == fromLevel;
+                // placed only on Basalt Ridge, but may move onto any terrain
+                case VOLCANO_SNAIL -> level < fromLevel;
                 // Tube Worms not on the extended Smoker, and Vent Sponges, always return
                 default -> false;
             };
@@ -85,23 +86,16 @@ public enum Species {
      * Where an Octopus retreating from from in the direction stops, or null if it cannot go that way.
      */
     private Hex retreat(VentlifeGameState state, Hex from, int direction, int newTile) {
-        // along the straight line, passing over everything but an empty Edge hex it may use (not on the new tile); the
-        // direction fails if the line leaves the field first
+        // along the straight line, passing over everything, to its end: the last hex before one with no tile in the
+        // direction of travel (designer, 2026-10-11). Edge hexes along the way, with empty seafloor only to the side,
+        // do not count. The direction fails if that end hex is taken or on the new tile, or if there is no tile at
+        // all next to the covered position in that direction
         Hex h = from.neighbour(direction);
-        while (state.getCell(h) != null) {
-            if (state.isEmptyHex(h) && state.isEdge(h) && state.getCell(h).tileId() != newTile
-                    && (state.getCell(h).terrain() != Terrain.BLACK_SMOKER || mayUseSmokers(state)))
-                return h;
+        if (state.getCell(h) == null)
+            return null;
+        while (state.getCell(h.neighbour(direction)) != null)
             h = h.neighbour(direction);
-        }
-        return null;
-    }
-
-    /**
-     * Whether this species may be on a Black Smoker, where its own rule does not say.
-     */
-    private boolean mayUseSmokers(VentlifeGameState state) {
-        return this == TUBE_WORM || this == VENT_SHRIMP || !state.getParams().smokersOnlyForWormsAndShrimp;
+        return state.isEmptyHex(h) && state.getCell(h).tileId() != newTile ? h : null;
     }
 
     /**

@@ -356,13 +356,14 @@ public class VentlifeGameFlowTest {
 
     @Test
     public void tilesAndCreatureTokensAreConservedThroughARandomGame() {
-        // seed 26 gives displacement decisions and turns with several Snails
-        Game game = newGame(3, 26);
+        // a game that has a displacement decision and a turn of several Snails (most seeds do)
+        long seed = 5;
+        Game game = newGame(3, seed);
         VentlifeGameState state = (VentlifeGameState) game.getGameState();
         AbstractForwardModel fm = game.getForwardModel();
         // every species in play, so every placement and covering rule is exercised
         useSpecies(state, Species.values());
-        Random rnd = new Random(26);
+        Random rnd = new Random(seed);
         int steps = 0, plateaus = 0, creaturesPlaced = 0, returns = 0, decisions = 0, multiSnailTurns = 0;
         // the Volcano Snails placed in the current turn, in order
         List<Hex> snailsThisTurn = new ArrayList<>();
@@ -378,8 +379,12 @@ public class VentlifeGameFlowTest {
             // half the time, prefer a plateau (Smoker on a covered position) when one is offered
             List<AbstractAction> onTop = actions.stream()
                     .filter(a -> a instanceof PlaceTile pt && state.getCell(pt.smoker) != null).toList();
-            AbstractAction action = !onTop.isEmpty() && rnd.nextBoolean()
-                    ? onTop.get(rnd.nextInt(onTop.size())) : actions.get(rnd.nextInt(actions.size()));
+            // and half the time, place another Snail when one may follow those placed this turn
+            List<AbstractAction> moreSnails = snailsThisTurn.isEmpty() ? List.of() : actions.stream()
+                    .filter(a -> a instanceof PlaceCreature pc && pc.species == SNAIL).toList();
+            AbstractAction action = !onTop.isEmpty() && rnd.nextBoolean() ? onTop.get(rnd.nextInt(onTop.size()))
+                    : !moreSnails.isEmpty() && rnd.nextBoolean() ? moreSnails.get(rnd.nextInt(moreSnails.size()))
+                    : actions.get(rnd.nextInt(actions.size()));
             if (onTop.contains(action))
                 plateaus++;
             if (action instanceof PlaceCreature pc && pc.species == SNAIL) {
@@ -418,16 +423,12 @@ public class VentlifeGameFlowTest {
                     assertEquals("worm off a Smoker at " + e.getKey(), SMOKER, cell.terrain());
                 else
                     assertEquals("stacked " + where, 1, c.count());
-                // placement and displacement keep each species on its terrain (default: Smokers for worms and
-                // shrimp only); crabs only ever move between hexes of one level >= 2
+                // placement and displacement keep each species on its terrain (Smokers for all but Fish); crabs only
+                // ever move between hexes of one level >= 2
                 switch (c.species()) {
                     case VENT_SHRIMP -> assertNotEquals(where, BASALT, cell.terrain());
-                    case EELPOUT_FISH, VENT_SPONGE, VOLCANO_SNAIL, OCTOPUS ->
-                            assertNotEquals(where, SMOKER, cell.terrain());
-                    case YETI_CRAB -> {
-                        assertNotEquals(where, SMOKER, cell.terrain());
-                        assertTrue(where, cell.level() >= 2);
-                    }
+                    case EELPOUT_FISH -> assertNotEquals(where, SMOKER, cell.terrain());
+                    case YETI_CRAB -> assertTrue(where, cell.level() >= 2);
                     default -> {
                     }
                 }

@@ -32,12 +32,6 @@ public class VentlifeDisplacementTest {
         fm = new VentlifeForwardModel();
     }
 
-    private static VentlifeParameters smokersForAll() {
-        VentlifeParameters params = new VentlifeParameters();
-        params.setParameterValue("smokersOnlyForWormsAndShrimp", false);
-        return params;
-    }
-
     /** Tiles 0 and 1 with no species in play, then only the given species; player 0 to place a tile. */
     private void seafloorPair(Species... species) {
         useSpecies(state);
@@ -205,13 +199,12 @@ public class VentlifeDisplacementTest {
     }
 
     @Test
-    public void aCoveredFishStaysOffSmokersEvenWhenSmokersAreOpenToEverySpecies() {
-        state = newState(2, 42, smokersForAll());
+    public void aCoveredFishStaysOffSmokers() {
         standardFieldBeforeTile5(FISH);
         putCreature(state, hex(-1, 1), FISH, 0, 1);
         placeTile5();
         // (-1,1) B2 is under the new left hex; neighbours: (-2,1) D2 (same level), (-1,0) S2 (same level, but a
-        // Smoker, and Fish never go on Smokers, whatever the parameter), (0,1) D3 and (0,0) S3 (new, higher),
+        // Smoker, and Fish never go on Smokers), (0,1) D3 and (0,0) S3 (new, higher),
         // (-1,2) and (-2,2) uncovered -> the single destination (-2,1), with no decision
         assertEquals(Map.of(hex(-2, 1), new Creature(FISH, 0, 1)), state.getCreatures());
         assertNoCoveringDecision(state);
@@ -222,25 +215,7 @@ public class VentlifeDisplacementTest {
     }
 
     @Test
-    public void coveredCrabsMoveToTheirOnlyHexOfTheSameLevelThatIsNotASmoker() {
-        standardFieldBeforeTile5(CRAB);
-        putCreature(state, hex(0, 1), CRAB, 0, 1);
-        putCreature(state, hex(-1, 1), CRAB, 1, 1);
-        placeTile5();
-        // player 1's crab (placer) under the left hex (-1,1) B2: neighbours (-2,1) D2, (-1,0) S2 (Smoker),
-        // (0,1) and (0,0) now level 3 -> (-2,1).
-        // player 0's crab under the right hex (0,1) M2: (1,0) B2, (1,1) D1, (-1,1) and (0,0) level 3 -> (1,0)
-        assertEquals(Map.of(hex(-2, 1), new Creature(CRAB, 1, 1), hex(1, 0), new Creature(CRAB, 0, 1)),
-                state.getCreatures());
-        assertCreatureStepOf(1);
-        // empty, level >= 2, not a Smoker: (-1,1) M3, (0,1) D3
-        assertEquals(Set.of(crab(hex(-1, 1)), crab(hex(0, 1))), legalSet(state, fm));
-        assertTokensConserved(state, "after the displacement");
-    }
-
-    @Test
-    public void aCoveredCrabMayChooseASmokerOfItsLevelWhenSmokersAreOpenToEverySpecies() {
-        state = newState(2, 42, smokersForAll());
+    public void aCoveredCrabMayChooseASmokerOfItsLevel() {
         standardFieldBeforeTile5(CRAB);
         putCreature(state, hex(0, 1), CRAB, 0, 1);
         putCreature(state, hex(-1, 1), CRAB, 1, 1);
@@ -262,7 +237,6 @@ public class VentlifeDisplacementTest {
 
     @Test
     public void thePlacersCreatureTakesTheOnlyFreeHexAndAnEarlierSeatedPlayersCreatureReturns() {
-        state = newState(2, 42, smokersForAll());
         standardFieldBeforeTile5(CRAB);
         putCreature(state, hex(0, 0), CRAB, 0, 1);
         putCreature(state, hex(-1, 0), CRAB, 0, 1);

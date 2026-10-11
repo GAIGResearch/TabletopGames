@@ -92,11 +92,8 @@ public class VentlifeCoveringTest {
 
     @Test
     public void aSpongeUnderTheNewSmokerReturnsRatherThanClimbing() {
-        VentlifeParameters params = new VentlifeParameters();
-        params.setParameterValue("smokersOnlyForWormsAndShrimp", false);
-        state = newState(2, 42, params);
         useSpecies(state, SPONGE);
-        // sponges on both seafloor Smokers (allowed with the restriction off)
+        // sponges on both seafloor Smokers (open to Sponges)
         place(state, fm, BASALT, DIFFUSE, hex(0, 0), 1, sponge(hex(0, 0)));
         place(state, fm, DIFFUSE, MAT, hex(1, 0), 0, sponge(hex(1, 0)));
         // tile M/B at ((0,0),0): Smoker on (0,0) [player 0's sponge], right E (1,0) [player 1's sponge]

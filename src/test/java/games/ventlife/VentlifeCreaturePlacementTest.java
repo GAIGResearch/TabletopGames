@@ -46,9 +46,9 @@ public class VentlifeCreaturePlacementTest {
         // the draw comes at the end of the turn: not yet (36 tiles - 2 in hands)
         assertEquals(0, state.getHand(0).getSize());
         assertEquals(34, state.getDrawDeck().getSize());
-        // worms on the empty level-1 Smoker, 1 or 1 + lowVentBonus (1); sponges on the two empty non-Smoker hexes
+        // worms on the empty level-1 Smoker, 1 or 1 + lowVentBonus (1); sponges on any of the three hexes
         Set<AbstractAction> expected = Set.of(worm(hex(0, 0), 1), worm(hex(0, 0), 2),
-                sponge(hex(-1, 1)), sponge(hex(0, 1)));
+                sponge(hex(0, 0)), sponge(hex(-1, 1)), sponge(hex(0, 1)));
         assertEquals(expected, legalSet(state, fm));
     }
 
@@ -97,10 +97,10 @@ public class VentlifeCreaturePlacementTest {
         // player 0: tile B/M at ((-1,0),2) -> (-1,0) S, (-2,0) B, (-2,1) M, all level 1
         giveTile(state, 0, BASALT, MAT);
         fm.next(state, placeTile(state, hex(-1, 0), 2));
-        // occupied: (0,0) worm, (0,1) sponge. Empty Smokers (1,0), (-1,0) (level 1: count 1 or 2);
-        // empty non-Smokers (-1,1), (1,1), (2,0), (-2,0), (-2,1)
+        // occupied: (0,0) worm, (0,1) sponge. Worms on the empty Smokers (1,0), (-1,0) (level 1: count 1 or 2);
+        // sponges on those and the empty non-Smokers (-1,1), (1,1), (2,0), (-2,0), (-2,1)
         Set<AbstractAction> expected = Set.of(worm(hex(1, 0), 1), worm(hex(1, 0), 2),
-                worm(hex(-1, 0), 1), worm(hex(-1, 0), 2),
+                worm(hex(-1, 0), 1), worm(hex(-1, 0), 2), sponge(hex(1, 0)), sponge(hex(-1, 0)),
                 sponge(hex(-1, 1)), sponge(hex(1, 1)), sponge(hex(2, 0)), sponge(hex(-2, 0)), sponge(hex(-2, 1)));
         assertEquals(expected, legalSet(state, fm));
     }
@@ -156,14 +156,7 @@ public class VentlifeCreaturePlacementTest {
     }
 
     @Test
-    public void spongesGoOnBlackSmokersOnlyWhenTheHabitatRestrictionIsOff() {
-        useSpecies(state, SPONGE);
-        placeFirstTile();
-        assertEquals(Set.of(sponge(hex(-1, 1)), sponge(hex(0, 1))), legalSet(state, fm));
-
-        VentlifeParameters params = new VentlifeParameters();
-        params.setParameterValue("smokersOnlyForWormsAndShrimp", false);
-        newStateWith(params);
+    public void spongesGoOnAnyEmptyHexBlackSmokersIncluded() {
         useSpecies(state, SPONGE);
         placeFirstTile();
         assertEquals(Set.of(sponge(hex(0, 0)), sponge(hex(-1, 1)), sponge(hex(0, 1))), legalSet(state, fm));

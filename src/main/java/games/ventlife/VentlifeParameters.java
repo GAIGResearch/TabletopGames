@@ -29,8 +29,6 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
     public SpeciesSelection speciesSelection = SpeciesSelection.RANDOM;
     public int nSpecies = 4;
     public int tokensPerSpecies = 6;
-    // only Tube Worms and Shrimp may be on a Black Smoker (the Habitat Guide); if false, only Fish are kept off them
-    public boolean smokersOnlyForWormsAndShrimp = true;
     public int lowVentBonus = 1;
     public int maxSnailsPerTurn = 3;
     public int snailPointsPerHeightEdge = 1;
@@ -46,7 +44,6 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
         addTunableParameter("speciesSelection", SpeciesSelection.RANDOM, Arrays.asList(SpeciesSelection.values()));
         addTunableParameter("nSpecies", 4, Arrays.asList(3, 4, 5));
         addTunableParameter("tokensPerSpecies", 6, Arrays.asList(4, 5, 6, 7, 8));
-        addTunableParameter("smokersOnlyForWormsAndShrimp", true, Arrays.asList(true, false));
         addTunableParameter("lowVentBonus", 1, Arrays.asList(0, 1, 2));
         addTunableParameter("maxSnailsPerTurn", 3, Arrays.asList(1, 2, 3));
         addTunableParameter("snailPointsPerHeightEdge", 1);
@@ -64,7 +61,6 @@ public class VentlifeParameters extends TunableParameters<VentlifeParameters> {
         speciesSelection = (SpeciesSelection) getParameterValue("speciesSelection");
         nSpecies = (int) getParameterValue("nSpecies");
         tokensPerSpecies = (int) getParameterValue("tokensPerSpecies");
-        smokersOnlyForWormsAndShrimp = (boolean) getParameterValue("smokersOnlyForWormsAndShrimp");
         lowVentBonus = (int) getParameterValue("lowVentBonus");
         maxSnailsPerTurn = (int) getParameterValue("maxSnailsPerTurn");
         snailPointsPerHeightEdge = (int) getParameterValue("snailPointsPerHeightEdge");

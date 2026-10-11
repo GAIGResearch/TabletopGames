@@ -115,12 +115,6 @@ public class VentlifeShrimpFishCrabScoringTest {
         assertEquals(9, state.speciesScore(0, FISH));
     }
 
-    private static VentlifeParameters smokersForAll() {
-        VentlifeParameters params = new VentlifeParameters();
-        params.setParameterValue("smokersOnlyForWormsAndShrimp", false);
-        return params;
-    }
-
     /**
      * Crabs on the standard field at 3 players (Smokers open to Crabs, so every plateau hex may hold one). Elevated
      * Plateaus: level 3 {(0,0) S, (-1,1) M, (0,1) D} size 3; level 2 {(1,0)} size 1 (its neighbours (0,0), (0,1) are
@@ -129,7 +123,7 @@ public class VentlifeShrimpFishCrabScoringTest {
      */
     @Test
     public void crabsScoreEachElevatedPlateauOfOneConnectedLevel() {
-        state = newState(3, 42, smokersForAll());
+        state = newState(3, 42);
         useSpecies(state);
         buildStandardField(state, fm, 6);
         useSpecies(state, CRAB);

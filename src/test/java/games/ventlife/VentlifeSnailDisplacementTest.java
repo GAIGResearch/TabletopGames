@@ -28,12 +28,6 @@ public class VentlifeSnailDisplacementTest {
         fm = new VentlifeForwardModel();
     }
 
-    private static VentlifeParameters smokersForAll() {
-        VentlifeParameters params = new VentlifeParameters();
-        params.setParameterValue("smokersOnlyForWormsAndShrimp", false);
-        return params;
-    }
-
     /** The downhill layout up to tile 5, with no species, then only Snails; player 0 to move. */
     private void downhillBeforeTile5() {
         useSpecies(state);
@@ -61,15 +55,15 @@ public class VentlifeSnailDisplacementTest {
     }
 
     @Test
-    public void theOwnerOfACoveredSnailChoosesAmongLowerNeighboursThatAreNotSmokers() {
+    public void theOwnerOfACoveredSnailChoosesAmongLowerNeighboursSmokersIncluded() {
         downhillBeforeTile5();
         putCreature(state, hex(0, 1), SNAIL, 1, 1);
         placeTile5();
-        // from M2: (1,1) D1 and (-1,2) D1; not (0,2) S1 (a Smoker), (1,0) B2 (same level), the level-3 tile hexes.
-        // Player 1 decides on player 0's turn
+        // from M2: (1,1) D1, (-1,2) D1 and the Smoker (0,2) S1 (Snails are placed only on Basalt, but may move onto
+        // a Smoker); not (1,0) B2 (same level), nor the level-3 tile hexes. Player 1 decides on player 0's turn
         assertEquals(1, state.getCurrentPlayer());
-        assertEquals(Set.of(displace(SNAIL, 1, hex(0, 1), hex(1, 1)), displace(SNAIL, 1, hex(0, 1), hex(-1, 2))),
-                legalSet(state, fm));
+        assertEquals(Set.of(displace(SNAIL, 1, hex(0, 1), hex(1, 1)), displace(SNAIL, 1, hex(0, 1), hex(-1, 2)),
+                displace(SNAIL, 1, hex(0, 1), hex(0, 2))), legalSet(state, fm));
         fm.next(state, displace(SNAIL, 1, hex(0, 1), hex(1, 1)));
         assertEquals(Map.of(hex(1, 1), new Creature(SNAIL, 1, 1)), state.getCreatures());
         assertTokensConserved(state, "after the displacement");
@@ -77,16 +71,6 @@ public class VentlifeSnailDisplacementTest {
         assertEquals(VentlifeGameState.Phase.PLACE_CREATURES, state.getGamePhase());
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(Set.of(snail(hex(1, 0)), snail(hex(-2, 0))), legalSet(state, fm));
-    }
-
-    @Test
-    public void aCoveredSnailMayChooseALowerSmokerWhenSmokersAreOpenToEverySpecies() {
-        state = newState(2, 42, smokersForAll());
-        downhillBeforeTile5();
-        putCreature(state, hex(0, 1), SNAIL, 1, 1);
-        placeTile5();
-        assertEquals(Set.of(displace(SNAIL, 1, hex(0, 1), hex(1, 1)), displace(SNAIL, 1, hex(0, 1), hex(-1, 2)),
-                displace(SNAIL, 1, hex(0, 1), hex(0, 2))), legalSet(state, fm));
     }
 
     @Test

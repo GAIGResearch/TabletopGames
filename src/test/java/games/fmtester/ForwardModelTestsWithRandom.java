@@ -525,10 +525,9 @@ public class ForwardModelTestsWithRandom {
     public void testVentlife() {
         new ForwardModelTester("game=Ventlife", "nGames=1", "nPlayers=2");
         new ForwardModelTester("game=Ventlife", "nGames=1", "nPlayers=4");
-        // the draft, with Black Smokers open to every species but Fish
+        // the draft
         VentlifeParameters params = new VentlifeParameters();
         params.setParameterValue("speciesSelection", VentlifeParameters.SpeciesSelection.DRAFT);
-        params.setParameterValue("smokersOnlyForWormsAndShrimp", false);
         new ForwardModelTester(params, "game=Ventlife", "nGames=1", "nPlayers=3");
     }
 }
