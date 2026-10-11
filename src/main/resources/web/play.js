@@ -154,6 +154,7 @@ function onText(msg) {
             $('actions-panel').hidden = !msg.actionsInPage;
             $('info-panel').hidden = !msg.infoInPage;
             $('history-panel').hidden = !msg.infoInPage;
+            placeHistory();
             $('sidebar').hidden = !msg.actionsInPage && !msg.infoInPage;
             $('panel-toggle').hidden = $('sidebar').hidden;
             stageChanged();
@@ -245,6 +246,7 @@ function showSummary() {
     const list = $('summary');
     list.replaceChildren();
     $('summary-panel').hidden = others.length === 0;
+    $('summary-count').textContent = `· ${others.length}`;
     const shown = 8;
     if (others.length > shown) {
         const li = document.createElement('li');
@@ -255,7 +257,15 @@ function showSummary() {
     for (const line of others.slice(-shown)) list.append(historyItem(line));
 }
 
-$('summary-close').addEventListener('click', () => $('summary-panel').hidden = true);
+// Hiding the list leaves its heading, so that it can be shown again until the player moves.
+let summaryCollapsed = false;
+
+$('summary-toggle').addEventListener('click', () => {
+    summaryCollapsed = !summaryCollapsed;
+    $('summary').hidden = summaryCollapsed;
+    $('summary-toggle').textContent = summaryCollapsed ? '▸' : '▾';
+    $('summary-toggle').title = summaryCollapsed ? 'Show the list' : 'Hide the list';
+});
 
 // When it becomes the player's turn while the tab is in the background, the tab's title says so, and a sound plays
 // unless switched off.
@@ -606,6 +616,32 @@ $('history-rounds').addEventListener('click', () => {
         d.open = open;
         d.dataset.chosen = 'yes';
     }
+});
+
+// The history may have a column of its own, beside the side panel, as the player chooses.
+let historyInColumn = localStorage.getItem('tag-history-column') === 'column';
+
+function placeHistory() {
+    const panel = $('history-panel'), column = $('history-column');
+    const inColumn = historyInColumn && !panel.hidden;
+    if (inColumn) {
+        $('sidebar').classList.remove('history-expanded');
+        column.append(panel);
+    } else {
+        $('sidebar').append(panel);
+    }
+    column.hidden = !inColumn;
+    $('history-expand').hidden = inColumn;
+    $('history-column-toggle').setAttribute('aria-pressed', String(inColumn));
+    $('history-column-toggle').title = inColumn ? 'Show the history in the side panel'
+        : 'Show the history in its own column beside the side panel';
+    stageChanged();
+}
+
+$('history-column-toggle').addEventListener('click', () => {
+    historyInColumn = !historyInColumn;
+    localStorage.setItem('tag-history-column', historyInColumn ? 'column' : 'panel');
+    placeHistory();
 });
 
 $('history-expand').addEventListener('click', () => {

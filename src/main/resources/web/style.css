@@ -466,6 +466,10 @@ body.play {
     gap: 2px;
 }
 
+.head-buttons button[aria-pressed="true"] {
+    color: var(--accent);
+}
+
 #actions-panel {
     max-height: 50%;
 }

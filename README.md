@@ -39,7 +39,8 @@ The page also:
 
 - groups a long list of actions by kind, and numbers the first nine for the keys 1 to 9;
 - shows a scoreboard (whose turn, and the scores where the GUI shows them) and the whole history with the players'
-  names, grouped by round (each round can be opened or closed; the ⤢ button gives the history the whole side panel), and
+  names, grouped by round (each round can be opened or closed; the ⤢ button gives the history the whole side panel, and
+  the ◫ button gives it a column of its own beside the side panel), and
   when it becomes your turn, what the other players did since your last move (with a sound if the tab is in the
   background; the bell button switches it off);
 - fits the game to the window, centred (enlarging a small GUI as well as shrinking a large one), or zooms it to the
