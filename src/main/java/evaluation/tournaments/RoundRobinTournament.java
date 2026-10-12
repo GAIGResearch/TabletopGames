@@ -105,6 +105,11 @@ public class RoundRobinTournament extends AbstractTournament {
             }
             this.tournamentSeeds = gameSeeds.size();
         }
+        if (seedsReused()) {
+            // several games are played on each seed, so we cluster standard errors by seed
+            winRateAnalysis = new SeedClusteredAnalysis(false);
+            ordinalAnalysis = new SeedClusteredAnalysis(true);
+        }
         int agentPositions = byTeam ? nTeams : playersPerGame;
         int actualGames = this.totalGameBudget;
         switch (tournamentMode) {
@@ -354,7 +359,7 @@ public class RoundRobinTournament extends AbstractTournament {
             game.run();  // Always running tournaments without visuals
             GameResult[] results = game.getGameState().getPlayerResults();
 
-            tournamentResults.record(game);
+            tournamentResults.record(game, seeds.get(i));
 
             if (verbose) {
                 StringBuffer sb = new StringBuffer();
@@ -434,7 +439,9 @@ public class RoundRobinTournament extends AbstractTournament {
             if (verbose) System.out.println();
         }
 
-        String str = "---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) \n";
+        String str = seedsReused() ?
+                "---- Ranking ---- (+/- are standard errors on the mean, clustered by game seed) \n" :
+                "---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) \n";
         if (toFile) dataDump.add(str);
         if (verbose) System.out.print(str);
 
@@ -460,6 +467,21 @@ public class RoundRobinTournament extends AbstractTournament {
             }
         }
 
+        if (seedsReused()) {
+            String advice = tournamentSeeds > 0 ?
+                    "Use more distinct seeds (distinctRandomSeeds or seedFile), or set distinctRandomSeeds=0 for a new seed per game." :
+                    tournamentMode == ONE_VS_ALL ?
+                            "Use mode=random for future tournaments if a focus agent is not needed (onevsall always reuses seeds across positions)." :
+                            "Use mode=random for future tournaments.";
+            List<String> lines = new ArrayList<>();
+            lines.add("\n\n");
+            lines.addAll(SeedClusteredAnalysis.analyse(tournamentResults).toLines(advice));
+            for (String line : lines) {
+                if (toFile) dataDump.add(line);
+                if (verbose) System.out.print(line);
+            }
+        }
+
         // To file
         if (toFile) {
             try {
@@ -481,6 +503,15 @@ public class RoundRobinTournament extends AbstractTournament {
         }
     }
 
+
+    /**
+     * True if the tournament plays several games on each seed: exhaustive modes reuse the seeds for every seating,
+     * onevsall for every position of the focus agent, and distinctRandomSeeds / seedFile reuse one seed for many games.
+     */
+    private boolean seedsReused() {
+        return tournamentMode == EXHAUSTIVE || tournamentMode == EXHAUSTIVE_SELF_PLAY || tournamentMode == ONE_VS_ALL
+                || tournamentSeeds > 0;
+    }
 
     public double getWinRate(int agentID) {
         String name = agents.get(agentID).toString();

@@ -66,5 +66,32 @@ public class TournamentResultsSerializationTest {
         assertNull(tr2.getAgent("P1"));
         assertNull(tr2.getAgent("P2"));
     }
+
+    @Test
+    public void gameRecordsRoundTrip() throws Exception {
+        TournamentResults tr = new TournamentResults();
+        tr.gameRecords.add(new TournamentResults.GameRecord(42L, new String[]{"P1", "P2"},
+                new double[]{1.0, 0.0}, new int[]{1, 2}));
+
+        ObjectMapper om = new ObjectMapper();
+        TournamentResults tr2 = om.readValue(om.writeValueAsString(tr), TournamentResults.class);
+
+        assertEquals(1, tr2.getGameRecords().size());
+        TournamentResults.GameRecord record = tr2.getGameRecords().get(0);
+        assertEquals(42L, record.seed);
+        assertArrayEquals(new String[]{"P1", "P2"}, record.agents);
+        assertArrayEquals(new double[]{1.0, 0.0}, record.points, 1e-9);
+        assertArrayEquals(new int[]{1, 2}, record.ordinals);
+    }
+
+    @Test
+    public void jsonWithoutGameRecordsStillLoads() throws Exception {
+        // files written before game records were added
+        String json = "{\"nGamesPlayedPerOpponent\":{},\"winsPerPlayerPerOpponent\":{},\"ordinalDeltaPerOpponent\":{}," +
+                "\"playerResults\":{\"P1\":[{\"points\":1.0,\"ordinal\":1,\"score\":3.0,\"win\":1}]}}";
+        TournamentResults tr = new ObjectMapper().readValue(json, TournamentResults.class);
+        assertEquals(1, tr.getPlayerPoints("P1").size());
+        assertTrue(tr.getGameRecords().isEmpty());
+    }
 }
 
