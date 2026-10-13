@@ -16,7 +16,7 @@ public class WinPlusHeuristic extends WinOnlyHeuristic implements IToJSON {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         if (gs.isNotTerminalForPlayer(playerId))
-            return Math.clamp(gs.getHeuristicScore(playerId) / scale, 0.05, 0.95);
+            return Math.clamp(gs.getGameScore(playerId) / scale, 0.05, 0.95);
 
         return super.evaluateState(gs, playerId);
     }
