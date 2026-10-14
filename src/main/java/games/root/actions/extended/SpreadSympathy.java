@@ -116,6 +116,6 @@ public class SpreadSympathy extends AbstractAction implements IExtendedSequence 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString()  + " spreads sympathy at location " + locationID;
+        return gs.getPlayerFaction(playerID).toString()  + " spreads sympathy at location " + gs.getGameMap().getNodeByID(locationID).identifier;
     }
 }

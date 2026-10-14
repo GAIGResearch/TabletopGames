@@ -47,7 +47,7 @@ public class Hero extends Figure {
         handEquipment = new Deck<>("Hands", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         otherEquipment = new Deck<>("OtherItems", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
-        equipSlotsAvailable = new HashMap<>();
+        equipSlotsAvailable = new LinkedHashMap<>();
         equipSlotsAvailable.put("hand", 2);
         equipSlotsAvailable.put("armor", 1);
         equipSlotsAvailable.put("other", 2);
@@ -186,7 +186,7 @@ public class Hero extends Figure {
             // Equipment! Check if it's legal to equip
             String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
             boolean canEquip = true;
-            Map<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
+            Map<String, Integer> equipSlots = new LinkedHashMap<>(equipSlotsAvailable);
             for (String e : equip) {
                 if (equipSlots.get(e) < 1) {
                     canEquip = false;
@@ -264,7 +264,7 @@ public class Hero extends Figure {
     }
 
     private Hero copyTo(Hero copy) {
-        copy.equipSlotsAvailable = new HashMap<>();
+        copy.equipSlotsAvailable = new LinkedHashMap<>();
         copy.equipSlotsAvailable.putAll(equipSlotsAvailable);
         if (skills != null) copy.skills = skills.copy();
         if (handEquipment != null) copy.handEquipment = handEquipment.copy();

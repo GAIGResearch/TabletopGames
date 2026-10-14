@@ -10,13 +10,13 @@ public class BoardNodeWithEdges extends Component {
 
     public BoardNodeWithEdges() {
         super(CoreConstants.ComponentType.BOARD_NODE, "");
-        neighbourEdgeMapping = new HashMap<>();
+        neighbourEdgeMapping = new LinkedHashMap<>();
     }
 
     protected BoardNodeWithEdges(int owner, int ID) {
         super(CoreConstants.ComponentType.BOARD_NODE, "", ID);
         setOwnerId(owner);
-        neighbourEdgeMapping = new HashMap<>();
+        neighbourEdgeMapping = new LinkedHashMap<>();
     }
 
     /**
@@ -42,7 +42,7 @@ public class BoardNodeWithEdges extends Component {
      * @return the neighbours of this node.
      */
     public Set<BoardNodeWithEdges> getNeighbours() {
-        return new HashSet<>(neighbourEdgeMapping.values());
+        return new LinkedHashSet<>(neighbourEdgeMapping.values());
     }
 
     public Map<Edge, BoardNodeWithEdges> getNeighbourEdgeMapping() {

@@ -49,7 +49,7 @@ public class MonopolyDealParameters extends TunableParameters {
     public int JUSTSAYNO_COUNT;
     public int MULTICOLORRENT_COUNT;
     public int PROPERTYRENT_COUNT;
-    Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
+    Map<CardType, Integer> cardsIncludedInGame = new LinkedHashMap<>();
     public MonopolyDealParameters() {
         addTunableParameter("HAND_SIZE", 7, Arrays.asList(3,5,7,10));
         addTunableParameter("INITIAL_DEAL", 5, Arrays.asList(3,5));
@@ -182,7 +182,7 @@ public class MonopolyDealParameters extends TunableParameters {
         params.JUSTSAYNO_COUNT = JUSTSAYNO_COUNT;
         params.MULTICOLORRENT_COUNT = MULTICOLORRENT_COUNT;
         params.PROPERTYRENT_COUNT = PROPERTYRENT_COUNT;
-        params.cardsIncludedInGame = new HashMap<>(cardsIncludedInGame);
+        params.cardsIncludedInGame = new LinkedHashMap<>(cardsIncludedInGame);
         return params;
     }
 

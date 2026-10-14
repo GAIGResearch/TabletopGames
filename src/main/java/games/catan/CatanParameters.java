@@ -11,6 +11,7 @@ import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import static games.catan.actions.build.BuyAction.BuyType.*;
 import static games.catan.CatanParameters.Resource.*;
@@ -54,16 +55,16 @@ public class CatanParameters extends TunableParameters {
     public int hexShuffleSeed = -1;
     public int diceSeed = -1;
 
-    public HashMap<Building.Type, Integer> buildingValue = new HashMap<Building.Type, Integer>() {{
+    public HashMap<Building.Type, Integer> buildingValue = new LinkedHashMap<Building.Type, Integer>() {{
         put(Building.Type.Settlement, 1);
         put(Building.Type.City, 2);
     }};
-    public HashMap<Building.Type, Integer> nProduction = new HashMap<Building.Type, Integer>() {{
+    public HashMap<Building.Type, Integer> nProduction = new LinkedHashMap<Building.Type, Integer>() {{
         put(Building.Type.Settlement, 1);
         put(Building.Type.City, 2);
     }};
 
-    HashMap<CatanTile.TileType, Integer> tileCounts = new HashMap<CatanTile.TileType, Integer>() {{
+    HashMap<CatanTile.TileType, Integer> tileCounts = new LinkedHashMap<CatanTile.TileType, Integer>() {{
         put(CatanTile.TileType.HILLS, 3);
         put(CatanTile.TileType.FOREST, 4);
         put(CatanTile.TileType.MOUNTAINS, 3);
@@ -76,7 +77,7 @@ public class CatanParameters extends TunableParameters {
     // todo that could be simplified
     // [2, 12]    x 1
     // [3,...,11] x 2
-    HashMap<Integer, Integer> numberTokens = new HashMap<Integer, Integer>(){{
+    HashMap<Integer, Integer> numberTokens = new LinkedHashMap<Integer, Integer>(){{
         put(2, 1);
         put(3, 2);
         put(4, 2);
@@ -116,7 +117,7 @@ public class CatanParameters extends TunableParameters {
     }
 
     /* Mapping of which field produces what*/
-    public HashMap<CatanTile.TileType, Resource> productMapping = new HashMap<CatanTile.TileType, Resource>(){{
+    public HashMap<CatanTile.TileType, Resource> productMapping = new LinkedHashMap<CatanTile.TileType, Resource>(){{
         put(CatanTile.TileType.HILLS, BRICK);
         put(CatanTile.TileType.FOREST, LUMBER);
         put(CatanTile.TileType.MOUNTAINS, ORE);
@@ -127,36 +128,36 @@ public class CatanParameters extends TunableParameters {
     }};
 
     /* Mapping from name to price of item (cost is in the same order as Resources) */
-    public HashMap<BuyAction.BuyType, HashMap<Resource, Integer>> costMapping = new HashMap<BuyAction.BuyType, HashMap<Resource, Integer>>(){{
+    public HashMap<BuyAction.BuyType, HashMap<Resource, Integer>> costMapping = new LinkedHashMap<BuyAction.BuyType, HashMap<Resource, Integer>>(){{
         // cost order: Brick, lumber, ore, grain, wool
-        put(Settlement, new HashMap<Resource, Integer>() {{
+        put(Settlement, new LinkedHashMap<Resource, Integer>() {{
             put(BRICK, 1);
             put(LUMBER, 1);
             put(GRAIN, 1);
             put(WOOL, 1);
         }});
-        put(City, new HashMap<Resource, Integer>() {{
+        put(City, new LinkedHashMap<Resource, Integer>() {{
             put(ORE, 3);
             put(GRAIN, 2);
         }});
-        put(Road, new HashMap<Resource, Integer>() {{
+        put(Road, new LinkedHashMap<Resource, Integer>() {{
             put(BRICK, 1);
             put(LUMBER, 1);
         }});
-        put(DevCard, new HashMap<Resource, Integer>() {{
+        put(DevCard, new LinkedHashMap<Resource, Integer>() {{
             put(ORE, 1);
             put(GRAIN, 1);
             put(WOOL, 1);
         }});
     }};
 
-    HashMap<BuyAction.BuyType, Integer> tokenCounts = new HashMap<BuyAction.BuyType, Integer>() {{
+    HashMap<BuyAction.BuyType, Integer> tokenCounts = new LinkedHashMap<BuyAction.BuyType, Integer>() {{
         put(Settlement, 5);
         put(City, 4);
         put(Road, 15);
     }};
 
-    HashMap<CatanCard.CardType, Integer> developmentCardCount = new HashMap<CatanCard.CardType, Integer>() {{
+    HashMap<CatanCard.CardType, Integer> developmentCardCount = new LinkedHashMap<CatanCard.CardType, Integer>() {{
         put(CatanCard.CardType.KNIGHT_CARD, 14);
         put(CatanCard.CardType.MONOPOLY, 2);
         put(CatanCard.CardType.YEAR_OF_PLENTY, 2);
@@ -164,7 +165,7 @@ public class CatanParameters extends TunableParameters {
         put(CatanCard.CardType.VICTORY_POINT_CARD, 5);
     }};
 
-    public HashMap<Resource, Integer> harborCount = new HashMap<Resource, Integer>() {{
+    public HashMap<Resource, Integer> harborCount = new LinkedHashMap<Resource, Integer>() {{
         put(Resource.BRICK, 1);
         put(Resource.LUMBER, 1);
         put(Resource.ORE, 1);
@@ -226,15 +227,15 @@ public class CatanParameters extends TunableParameters {
         retValue.n_settlements_setup = n_settlements_setup;
         retValue.nResourcesYoP = nResourcesYoP;
         retValue.nRoadsRB = nRoadsRB;
-        retValue.buildingValue = new HashMap<>(buildingValue);
-        retValue.nProduction = new HashMap<>(nProduction);
-        retValue.tileCounts = new HashMap<>(tileCounts);
-        retValue.numberTokens = new HashMap<>(numberTokens);
-        retValue.productMapping = new HashMap<>(productMapping);
-        retValue.costMapping = new HashMap<>(costMapping);
-        retValue.tokenCounts = new HashMap<>(tokenCounts);
-        retValue.developmentCardCount = new HashMap<>(developmentCardCount);
-        retValue.harborCount = new HashMap<>(harborCount);
+        retValue.buildingValue = new LinkedHashMap<>(buildingValue);
+        retValue.nProduction = new LinkedHashMap<>(nProduction);
+        retValue.tileCounts = new LinkedHashMap<>(tileCounts);
+        retValue.numberTokens = new LinkedHashMap<>(numberTokens);
+        retValue.productMapping = new LinkedHashMap<>(productMapping);
+        retValue.costMapping = new LinkedHashMap<>(costMapping);
+        retValue.tokenCounts = new LinkedHashMap<>(tokenCounts);
+        retValue.developmentCardCount = new LinkedHashMap<>(developmentCardCount);
+        retValue.harborCount = new LinkedHashMap<>(harborCount);
         return retValue;
     }
 

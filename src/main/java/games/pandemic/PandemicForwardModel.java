@@ -153,7 +153,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         _data.load(pp.getDataPath());
 
         state.tempDeck = new Deck<>("Temp Deck", VISIBLE_TO_ALL);
-        state.areas = new HashMap<>();
+        state.areas = new LinkedHashMap<>();
 
         // For each player, initialize their own areas: they get a player hand and a player card
         int capacity = pp.maxCardsPerPlayer;
@@ -317,7 +317,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
     private Card getPlayerCardWithRole(Deck<Card> cards, String role, PandemicGameState pp) {
         // Possible to have multiple possible roles separated by ","
-        HashSet<String> roles = new HashSet<>();
+        HashSet<String> roles = new LinkedHashSet<>();
         if (role.contains(",")) {
             String[] several = role.split(",");
             roles.addAll(Arrays.asList(several));
@@ -325,7 +325,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             roles.add(role);
         }
         // the roles are given as PlayerRole names, which have no spaces ("OperationsExpert" is "Operations Expert")
-        Set<String> wanted = new HashSet<>();
+        Set<String> wanted = new LinkedHashSet<>();
         for (String r : roles) wanted.add(r.replace(" ", ""));
         List<Card> subset = new ArrayList<>();
         for (Card c: cards.getComponents()) {

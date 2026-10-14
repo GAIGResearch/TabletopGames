@@ -83,9 +83,9 @@ public class Figure extends Token {
     public Figure(String name, int nActionsPossible) {
         super(name);
         size = new Pair<>(1,1);
-        conditions = new HashSet<>();
+        conditions = new LinkedHashSet<>();
         attributeTests = new ArrayList<>();
-        attributes = new HashMap<>();
+        attributes = new LinkedHashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
         attributes.put(Gold, new Counter(0, 0, -1, "Gold"));
         abilities = new ArrayList<>();
@@ -331,7 +331,7 @@ public class Figure extends Token {
     public void copyComponentTo(Figure copyTo) {
         super.copyComponentTo(copyTo);
         copyTo.tokenType = tokenType;
-        copyTo.attributes = new HashMap<>();
+        copyTo.attributes = new LinkedHashMap<>();
         for (Map.Entry<Attribute, Counter> e : attributes.entrySet()) {
             copyTo.attributes.put(e.getKey(), e.getValue().copy());
         }
@@ -340,7 +340,7 @@ public class Figure extends Token {
         }
         copyTo.nActionsExecuted = nActionsExecuted.copy();
         copyTo.size = size.copy();
-        copyTo.conditions = new HashSet<>(conditions);
+        copyTo.conditions = new LinkedHashSet<>(conditions);
         copyTo.removedConditionThisTurn = removedConditionThisTurn;
         if (attributeTests != null) {
             copyTo.attributeTests = new ArrayList<>();
@@ -402,7 +402,7 @@ public class Figure extends Token {
      * @param figure - JSON to parse into Figure object.
      */
     public void loadFigure(JSONObject figure) {
-        loadFigure(figure, new HashSet<>());
+        loadFigure(figure, new LinkedHashSet<>());
     }
 
     @Override

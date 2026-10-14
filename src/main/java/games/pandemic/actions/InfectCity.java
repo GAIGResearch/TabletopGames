@@ -15,6 +15,7 @@ import utilities.Utils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.LinkedHashSet;
 
 import static games.pandemic.PandemicConstants.*;
 import static core.CoreConstants.*;
@@ -73,7 +74,7 @@ public class InfectCity extends DrawCard {
 
                     diseaseCubeCounter.decrement(maxCubesPerCity - array[colorIdx]);
                     array[colorIdx] = maxCubesPerCity;
-                    HashSet<BoardNode> allCityOutbreaks = new HashSet<>();  // Make sure we don't get stuck in loop
+                    HashSet<BoardNode> allCityOutbreaks = new LinkedHashSet<>();  // Make sure we don't get stuck in loop
                     ArrayList<BoardNode> outbreaks = outbreak(bn, gs, colorIdx, diseaseCubeCounter, outbreakCounter);
                     while (outbreaks.size() > 0) {  // Chain reaction
                         ArrayList<BoardNode> outbreaks2 = new ArrayList<>();

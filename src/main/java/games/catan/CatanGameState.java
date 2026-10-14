@@ -441,14 +441,14 @@ public class CatanGameState extends AbstractGameState {
 //        }
 
         for (int i = 0; i < getNPlayers(); i++) {
-            Map<CatanParameters.Resource, Counter> exchangeRate = new HashMap<>();
+            Map<CatanParameters.Resource, Counter> exchangeRate = new LinkedHashMap<>();
             for (Map.Entry<CatanParameters.Resource, Counter> e: exchangeRates.get(i).entrySet()) {
                 exchangeRate.put(e.getKey(), e.getValue().copy());
             }
             copy.exchangeRates.add(exchangeRate);
 
             // Resources in hand
-            Map<CatanParameters.Resource, Counter> playerRes = new HashMap<>();
+            Map<CatanParameters.Resource, Counter> playerRes = new LinkedHashMap<>();
             for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(i).entrySet()) {
                 playerRes.put(e.getKey(), e.getValue().copy());
             }
@@ -478,7 +478,7 @@ public class CatanGameState extends AbstractGameState {
             }
 
             // Player tokens
-            Map<BuyAction.BuyType, Counter> playerTok = new HashMap<>();
+            Map<BuyAction.BuyType, Counter> playerTok = new LinkedHashMap<>();
             for (Map.Entry<BuyAction.BuyType, Counter> e: playerTokens.get(i).entrySet()) {
                 playerTok.put(e.getKey(), e.getValue().copy());
             }
@@ -494,7 +494,7 @@ public class CatanGameState extends AbstractGameState {
 
         copy.developmentCardPlayed = developmentCardPlayed;
 
-        copy.resourcePool = new HashMap<>();
+        copy.resourcePool = new LinkedHashMap<>();
         for (Map.Entry<CatanParameters.Resource, Counter> e: resourcePool.entrySet()) {
             copy.resourcePool.put(e.getKey(), e.getValue().copy());
         }

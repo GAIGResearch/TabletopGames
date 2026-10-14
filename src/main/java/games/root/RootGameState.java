@@ -271,14 +271,14 @@ public class RootGameState extends AbstractGameState {
             copy.rabbitQuests = rabbitQuests;
             copy.mouseQuests = mouseQuests;
 
-            copy.relationships = new HashMap<>() {
+            copy.relationships = new LinkedHashMap<>() {
                 {
                     put(RootParameters.Factions.MarquiseDeCat, relationships.get(RootParameters.Factions.MarquiseDeCat));
                     put(RootParameters.Factions.EyrieDynasties, relationships.get(RootParameters.Factions.EyrieDynasties));
                     put(RootParameters.Factions.WoodlandAlliance, relationships.get(RootParameters.Factions.WoodlandAlliance));
                 }
             };
-            copy.aidNumbers = new HashMap<>() {
+            copy.aidNumbers = new LinkedHashMap<>() {
                 {
                     put(RootParameters.Factions.MarquiseDeCat, aidNumbers.get(RootParameters.Factions.MarquiseDeCat));
                     put(RootParameters.Factions.EyrieDynasties, aidNumbers.get(RootParameters.Factions.EyrieDynasties));
@@ -874,7 +874,7 @@ public class RootGameState extends AbstractGameState {
         if (location == null) {
             return false; // Return false if the location does not exist
         }
-        Set<Integer> explored = new HashSet<>();
+        Set<Integer> explored = new LinkedHashSet<>();
         Queue<Integer> queue = new LinkedList<>();
         queue.add(location.getComponentID());
         explored.add(location.getComponentID());
@@ -917,8 +917,8 @@ public class RootGameState extends AbstractGameState {
             return false;
         }
 
-        Set<Integer> exploredFirst = new HashSet<>();
-        Set<Integer> exploredSecond = new HashSet<>();
+        Set<Integer> exploredFirst = new LinkedHashSet<>();
+        Set<Integer> exploredSecond = new LinkedHashSet<>();
         Queue<Integer> queueFirst = new LinkedList<>();
         Queue<Integer> queueSecond = new LinkedList<>();
 
@@ -1005,7 +1005,7 @@ public class RootGameState extends AbstractGameState {
                 return false;
             }
         }
-        Map<RootParameters.ClearingTypes, Integer> availableMap = new HashMap<>();
+        Map<RootParameters.ClearingTypes, Integer> availableMap = new LinkedHashMap<>();
 
         for (RootParameters.ClearingTypes clearingType : available) {
             availableMap.put(clearingType, availableMap.getOrDefault(clearingType, 0) + 1);
