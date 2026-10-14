@@ -48,16 +48,16 @@ public abstract class Move extends AbstractAction {
 
     public Vector2D from(StrategoGameState gs) {
         if (position == null) {
-            return ((Piece) gs.getComponentById(movedPieceID)).getPiecePosition();
+            return gs.getPiece(movedPieceID).getPiecePosition();
         }
         return position;
     }
 
     public Piece getPiece(StrategoGameState gs) {
         if (position != null) {
-            return (Piece) gs.getGridBoard().getElement(position.getX(), position.getY());
+            return gs.getPiece(position);
         } else {
-            return (Piece) gs.getComponentById(movedPieceID);
+            return gs.getPiece(movedPieceID);
         }
     }
 

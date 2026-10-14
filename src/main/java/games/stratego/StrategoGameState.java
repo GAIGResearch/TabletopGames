@@ -2,17 +2,19 @@ package games.stratego;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.BoardNode;
 import core.components.Component;
-import core.components.GridBoard;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import games.GameType;
 import games.stratego.components.Piece;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class StrategoGameState extends AbstractGameState{
-    GridBoard gridBoard;
+    SparseGrid<SquareCoord, Piece> gridBoard;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -36,38 +38,25 @@ public class StrategoGameState extends AbstractGameState{
     @Override
     protected AbstractGameState _copy(int playerId) {
         StrategoGameState s = new StrategoGameState(gameParameters.copy(), 2);
-        s.gridBoard = gridBoard.emptyCopy();
-        Piece.Alliance playerAlliance = null;
+        s.gridBoard = gridBoard.copy();
 
-        // All piece types that will be hidden for opponent
-        ArrayList<Piece.PieceType> pieceTypesHidden = new ArrayList<>();
         if (playerId != -1 && getCoreGameParameters().partialObservable){
-            playerAlliance = StrategoConstants.playerMapping.get(playerId);
-
-            for (BoardNode bn: gridBoard.getComponents()) {
-                Piece p = (Piece) bn;
-                if (p != null && p.getPieceAlliance() != playerAlliance && !p.isPieceKnown()) {
-                    pieceTypesHidden.add(p.getPieceType());
+            // the opponent's unknown pieces, row by row, are dealt their types again at random
+            Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
+            List<Piece> hidden = new ArrayList<>();
+            for (Piece p : getPieces()) {
+                if (p.getPieceAlliance() != playerAlliance && !p.isPieceKnown()) {
+                    hidden.add(p);
                 }
             }
-        }
-
-        for (BoardNode bn : gridBoard.getComponents()){
-            Piece piece = (Piece) bn;
-            if (piece != null) {
-                if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
-                    // Hide type, everything else is known
-                    int typeIdx = redeterminisationRnd.nextInt(pieceTypesHidden.size());
-                    Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
-                    pieceTypesHidden.remove(typeIdx);
-                    s.gridBoard.setElement(piece.getPiecePosition(), piece.partialCopy(hiddenPieceType));
-                } else{
-                    s.gridBoard.setElement(piece.getPiecePosition(), piece.copy());
-                }
+            List<Piece.PieceType> pieceTypesHidden = new ArrayList<>();
+            for (Piece p : hidden) {
+                pieceTypesHidden.add(p.getPieceType());
             }
-        }
-        if (!pieceTypesHidden.isEmpty()) {
-            throw new AssertionError("We have a hidden piece that has not been placed on the copied board");
+            for (Piece p : hidden) {
+                Piece.PieceType hiddenPieceType = pieceTypesHidden.remove(redeterminisationRnd.nextInt(pieceTypesHidden.size()));
+                s.setPiece(p.getPiecePosition(), p.partialCopy(hiddenPieceType));
+            }
         }
         return s;
     }
@@ -98,22 +87,51 @@ public class StrategoGameState extends AbstractGameState{
         return gridBoard.hashCode();
     }
 
-    public GridBoard getGridBoard() {
+    public SparseGrid<SquareCoord, Piece> getGridBoard() {
         return gridBoard;
+    }
+
+    /**
+     * The pieces on the board, row by row.
+     */
+    public Collection<Piece> getPieces() {
+        return gridBoard.asMap().values();
+    }
+
+    /**
+     * The piece at the position, or null if there is none.
+     */
+    public Piece getPiece(Vector2D position) {
+        return gridBoard.get(new SquareCoord(position.getX(), position.getY()));
+    }
+
+    /**
+     * The piece on the board with the componentID, or null if it has been taken.
+     */
+    public Piece getPiece(int componentID) {
+        // not getComponentById, which may hold an earlier version of the piece
+        for (Piece p : getPieces())
+            if (p.getComponentID() == componentID)
+                return p;
+        return null;
+    }
+
+    /**
+     * Puts the piece at the position, or empties it if the piece is null.
+     */
+    public void setPiece(Vector2D position, Piece piece) {
+        gridBoard.set(new SquareCoord(position.getX(), position.getY()), piece);
     }
 
     @Override
     protected List<Integer> _getUnknownComponentsIds(int playerId) {
         ArrayList<Integer> pieceList = new ArrayList<>();
 
-        for (BoardNode bn : gridBoard.getComponents()){
-            Piece piece = (Piece) bn;
-            if (piece != null){
-                if (playerId != -1){
-                    Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
-                    if (playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()) {
-                        pieceList.add(piece.getComponentID());
-                    }
+        for (Piece piece : getPieces()){
+            if (playerId != -1){
+                Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
+                if (playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()) {
+                    pieceList.add(piece.getComponentID());
                 }
             }
         }
