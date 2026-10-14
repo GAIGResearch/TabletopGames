@@ -28,14 +28,14 @@ public class BattleloreRangeTest {
         Game game = GameType.Battlelore.createGameInstance(2, 5);
         game.reset(List.of(new RandomPlayer(), new RandomPlayer()));
         state = (BattleloreGameState) game.getGameState();
-        for (int x = 0; x < state.getBoard().getWidth(); x++)
-            for (int y = 0; y < state.getBoard().getHeight(); y++)
+        for (int x = 0; x < state.getWidth(); x++)
+            for (int y = 0; y < state.getHeight(); y++)
                 state.RemoveUnit(x, y);
     }
 
     MapTile addUnit(int x, int y, Unit.Faction faction) {
         state.AddUnit(x, y, new Unit(CoreConstants.ComponentType.TOKEN, "u", "Unit", 1, 1, 1, faction, "U", true));
-        return (MapTile) state.getBoard().getElement(x, y);
+        return state.getTile(x, y);
     }
 
     static Set<List<Integer>> positions(List<MapTile> tiles) {

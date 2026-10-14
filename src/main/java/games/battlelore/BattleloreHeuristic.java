@@ -44,10 +44,10 @@ public class BattleloreHeuristic extends TunableParameters implements IStateHeur
             return 0;
         }
 
-        for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
-            for(int y = 0; y < gameState.gameBoard.getHeight(); y++) {
+        for (int x = 0; x < gameState.getWidth(); x++) {
+            for(int y = 0; y < gameState.getHeight(); y++) {
 
-                MapTile tile = (MapTile) gameState.gameBoard.getElement(x, y);
+                MapTile tile = gameState.getTile(x, y);
                 Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
                 if (tile != null && tile.GetUnits() != null && tile.GetUnits().size() > 0) {

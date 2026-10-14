@@ -38,10 +38,10 @@ public class PlayCommandCardAction extends AbstractAction {
             return false;
         }
         else {
-            for (int x = 0; x < state.getBoard().getWidth(); x++) {
-                for (int y = 0; y < state.getBoard().getHeight(); y++) {
+            for (int x = 0; x < state.getWidth(); x++) {
+                for (int y = 0; y < state.getHeight(); y++) {
 
-                    MapTile tile = (MapTile) state.getBoard().getElement(x, y);
+                    MapTile tile = state.getTile(x, y);
                     if (type == CommandCard.CommandType.AttackRight && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.right)) {
                         state.SetUnitsAsOrderable(x,y);

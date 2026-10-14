@@ -6,7 +6,7 @@ import games.battlelore.BattleloreGameState;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class MoveUnitsAction extends AbstractAction {
@@ -32,15 +32,13 @@ public class MoveUnitsAction extends AbstractAction {
             System.out.println("Wrong player id'");
             return false;
         } else {
-            MapTile tile = (MapTile) gameState.getComponentById(tileID);
-            ArrayList<Unit> units = ((MapTile)state.getBoard().getElement(tile.getLocationX(), tile.getLocationY())).GetUnits();
+            MapTile tile = state.getTile(tileID);
 
-            for (Unit unit : units) {
-                state.AddUnit(locationX, locationY, unit);
-                unit.SetCanMove(false);
+            // the units have used their move
+            for (Unit unit : tile.GetUnits()) {
+                state.AddUnit(locationX, locationY, unit.withOrders(false, unit.CanAttack()));
             }
-
-            state.RemoveUnit(tile.getLocationX(), tile.getLocationY());
+            state.setTile(tile.withUnits(List.of()));
             return true;
         }
     }
@@ -69,7 +67,7 @@ public class MoveUnitsAction extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        MapTile tile = (MapTile) gameState.getComponentById(tileID);
+        MapTile tile = ((BattleloreGameState) gameState).getTile(tileID);
         return playerFaction.name() + " moves units from " + tile.getLocationX() + ":" +
                 tile.getLocationY() + " to " + locationX + ":" + locationY;
     }
