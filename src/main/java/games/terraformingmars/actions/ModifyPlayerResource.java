@@ -131,9 +131,9 @@ public class ModifyPlayerResource extends TMModifyCounter implements TMExtendedS
             } else if (tileToCount != null) {
                 if (onMars) {
                     int count = 0;
-                    for (int i = 0; i < gs.getBoard().getHeight(); i++) {
-                        for (int j = 0; j < gs.getBoard().getHeight(); j++) {
-                            TMMapTile mt = (TMMapTile) gs.getBoard().getElement(j, i);
+                    for (int i = 0; i < gs.getBoardSize(); i++) {
+                        for (int j = 0; j < gs.getBoardSize(); j++) {
+                            TMMapTile mt = gs.getTile(j, i);
                             if (mt != null && mt.getTilePlaced() == tileToCount) {
                                 if (any) count ++;
                                 else if (opponents && mt.getOwnerId() != player || !opponents && mt.getOwnerId() == player) count ++;

@@ -1,34 +1,50 @@
 package games.terraformingmars.components;
 
 import core.components.BoardNode;
-import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
-import games.terraformingmars.actions.ModifyGlobalParameter;
 import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * A space for a tile, on Mars or off it (at x = y = -1). Immutable, as the values of a SparseGrid must be: when a
+ * tile is placed or the space reserved, it is replaced by a new one with the same componentID
+ * (see TMGameState.setMapTile).
+ */
 public class TMMapTile extends BoardNode {
-    int x, y;
-    TMTypes.Tile tilePlaced;
+    final int x, y;
+    final TMTypes.Tile tilePlaced;
 
-    TMTypes.MapTileType type;
-    TMTypes.Resource[] resources;
+    final TMTypes.MapTileType type;
+    final TMTypes.Resource[] resources;
 
-    boolean volcanic;
-    int reserved = -1;
+    final boolean volcanic;
+    final int reserved;
 
-    public TMMapTile(int x, int y) {
+    // a new space, with no tile and not reserved
+    private TMMapTile(int x, int y, TMTypes.MapTileType type, TMTypes.Resource[] resources, boolean volcanic) {
         super(-1, "Tile");
         this.x = x;
         this.y = y;
+        this.tilePlaced = null;
+        this.type = type;
+        this.resources = resources;
+        this.volcanic = volcanic;
+        this.reserved = -1;
     }
 
-    protected TMMapTile(int x, int y, int componentID) {
-        super(-1, "Tile", componentID);
-        this.x = x;
-        this.y = y;
+    // the space with a tile and reservation
+    private TMMapTile(TMMapTile orig, TMTypes.Tile tilePlaced, int reserved) {
+        super(-1, "Tile", orig.componentID);
+        orig.copyComponentTo(this);
+        this.x = orig.x;
+        this.y = orig.y;
+        this.tilePlaced = tilePlaced;
+        this.type = orig.type;
+        this.resources = orig.resources;
+        this.volcanic = orig.volcanic;
+        this.reserved = reserved;
     }
 
     public boolean isReserved() {
@@ -39,24 +55,15 @@ public class TMMapTile extends BoardNode {
         return reserved;
     }
 
-    public void setReserved(int reserved) {
-        this.reserved = reserved;
+    /**
+     * This space reserved for the player.
+     */
+    public TMMapTile withReserved(int player) {
+        return new TMMapTile(this, tilePlaced, player);
     }
 
     public boolean isVolcanic() {
         return volcanic;
-    }
-
-    public void setVolcanic(boolean volcanic) {
-        this.volcanic = volcanic;
-    }
-
-    public void setType(TMTypes.MapTileType type) {
-        this.type = type;
-    }
-
-    public void setResources(TMTypes.Resource[] resources) {
-        this.resources = resources;
     }
 
     public TMTypes.MapTileType getTileType() {
@@ -71,6 +78,17 @@ public class TMMapTile extends BoardNode {
         return tilePlaced;
     }
 
+    /**
+     * This space with the tile placed by the player, who owns it if it can be owned.
+     */
+    public TMMapTile withTilePlaced(TMTypes.Tile which, int player) {
+        TMMapTile retValue = new TMMapTile(this, which, reserved);
+        if (which.canBeOwned()) {
+            retValue.ownerId = player;
+        }
+        return retValue;
+    }
+
     public int getX() {
         return x;
     }
@@ -79,56 +97,9 @@ public class TMMapTile extends BoardNode {
         return y;
     }
 
-    public void setTilePlaced(TMTypes.Tile which, TMGameState gs) {
-        tilePlaced = which;
-        int player = gs.getCurrentPlayer();
-
-        // Owner is current player
-        if (which.canBeOwned()) {
-            ownerId = player;
-        }
-
-        if (player >= 0 && player < gs.getNPlayers()) {
-            gs.getPlayerTilesPlaced()[player].get(which).increment(1);
-
-            // Current player gets resources
-            for (TMTypes.Resource res : resources) {
-                gs.getPlayerResources()[player].get(res).increment(1);
-                gs.getPlayerResourceIncreaseGen()[player].put(res, true);
-            }
-        }
-    }
-
-    public boolean placeTile(TMTypes.Tile which, TMGameState gs) {
-        int player = gs.getCurrentPlayer();
-        if (tilePlaced == null) {
-            TMTypes.GlobalParameter gp = which.getGlobalParameterToIncrease();
-            setTilePlaced(which, gs);
-            if (gp != null) {
-                // Increase global parameter, unless already at maximum (e.g. greenery placed when oxygen is maxed)
-                ModifyGlobalParameter increase = new ModifyGlobalParameter(gp, 1, true);
-                if (increase.canBePlayed(gs)) return increase.execute(gs);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public void removeTile() {
-        ownerId = -1;
-        tilePlaced = null;
-    }
-
     @Override
     public TMMapTile copy() {
-        TMMapTile copy = new TMMapTile(x, y, componentID);
-        copyComponentTo(copy);
-        copy.tilePlaced = tilePlaced;
-        copy.type = type;
-        copy.resources = resources.clone();
-        copy.volcanic = volcanic;
-        copy.reserved = reserved;
-        return copy;
+        return this;
     }
 
     public static TMMapTile parseMapTile(String s) {
@@ -138,20 +109,19 @@ public class TMMapTile extends BoardNode {
     public static TMMapTile parseMapTile(String s, int x, int y) {
         if (s.equals("0")) return null;
 
-        TMMapTile mt = new TMMapTile(x, y);
-
         String[] split = s.split(":");
 
         // First element is tile type
         TMTypes.MapTileType type = Utils.searchEnum(TMTypes.MapTileType.class, split[0]);
+        String cityName = null;
+        boolean volcanic = false;
         if (type == null) {
             type = TMTypes.MapTileType.City;
-            mt.setComponentName(split[0]); // Keep city name
+            cityName = split[0];
         } else if (type == TMTypes.MapTileType.Volcanic) {
             type = TMTypes.MapTileType.Ground;
-            mt.setVolcanic(true);
+            volcanic = true;
         }
-        mt.setType(type);
 
         // The rest are resources existing here
         int nResources = split.length-1;
@@ -164,8 +134,11 @@ public class TMMapTile extends BoardNode {
                 // TODO: Ocean (place tile), MegaCredit/-6 (reduce MC by 6)
             }
         }
-        mt.setResources(resources);
 
+        TMMapTile mt = new TMMapTile(x, y, type, resources, volcanic);
+        if (cityName != null) {
+            mt.setComponentName(cityName); // Keep city name
+        }
         return mt;
     }
 

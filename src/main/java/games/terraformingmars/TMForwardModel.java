@@ -6,7 +6,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
-import core.components.GridBoard;
+import core.components.grid.SparseGrid;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.Award;
 import games.terraformingmars.components.Milestone;
@@ -68,8 +68,8 @@ public class TMForwardModel extends StandardForwardModel {
         gs.discardCards = new Deck<>("Discard", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
         // Load info from expansions (includes base)
-        gs.board = new GridBoard(params.boardSize, params.boardSize);
-        gs.extraTiles = new LinkedHashSet<>();
+        gs.board = new SparseGrid<>("Mars");
+        gs.extraTiles = new ArrayList<>();
         gs.bonuses = new LinkedHashSet<>();
         gs.milestones = new LinkedHashSet<>();
         gs.awards = new LinkedHashSet<>();
@@ -200,8 +200,6 @@ public class TMForwardModel extends StandardForwardModel {
 
         // Solo setup: place X cities randomly, with 1 greenery adjacent each (no oxygen increase)
         if (gs.getNPlayers() == 1) {
-            int boardH = gs.board.getHeight();
-            int boardW = gs.board.getWidth();
             gs.setTurnOwner(1);
             for (int i = 0; i < params.soloCities; i++) {
                 // Place city + greenery adjacent
@@ -209,14 +207,14 @@ public class TMForwardModel extends StandardForwardModel {
                 List<AbstractAction> actions = pt._computeAvailableActions(gs);
                 PlaceTile action = (PlaceTile) actions.get(gs.getRnd().nextInt(actions.size()));
                 action.execute(gs);
-                TMMapTile mt = (TMMapTile) gs.getComponentById(action.mapTileID);
+                TMMapTile mt = gs.getMapTile(action.mapTileID);
                 List<Vector2D> neighbours = PlaceTile.getNeighbours(new Vector2D(mt.getX(), mt.getY()));
                 boolean placed = false;
                 while (!placed) {
                     Vector2D v = neighbours.get(gs.getRnd().nextInt(neighbours.size()));
-                    TMMapTile mtn = (TMMapTile) gs.board.getElement(v.getX(), v.getY());
+                    TMMapTile mtn = gs.getTile(v.getX(), v.getY());
                     if (mtn != null && mtn.getOwnerId() == -1 && mtn.getTileType() == TMTypes.MapTileType.Ground) {
-                        mtn.setTilePlaced(TMTypes.Tile.Greenery, gs);
+                        gs.setTilePlaced(mtn, TMTypes.Tile.Greenery);
                         placed = true;
                     }
                 }

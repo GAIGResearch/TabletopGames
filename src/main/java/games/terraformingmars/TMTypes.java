@@ -3,7 +3,8 @@ package games.terraformingmars;
 import core.components.BoardNode;
 import core.components.Counter;
 import core.components.Deck;
-import core.components.GridBoard;
+import core.components.grid.HexCoord;
+import core.components.grid.SparseGrid;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.*;
 import games.terraformingmars.rules.effects.Bonus;
@@ -293,7 +294,7 @@ public class TMTypes {
 
         /* custom loading info from json */
 
-        public void loadBoard(GridBoard board, HashSet<TMMapTile> extraTiles, HashSet<Bonus> bonuses,
+        public void loadBoard(SparseGrid<HexCoord, TMMapTile> board, java.util.List<TMMapTile> extraTiles, HashSet<Bonus> bonuses,
                               HashSet<Milestone> milestones, HashSet<Award> awards, HashMap<GlobalParameter, games.terraformingmars.components.GlobalParameter> globalParameters) {
             JSONParser jsonParser = new JSONParser();
             try (FileReader reader = new FileReader(getBoardPath())) {
@@ -307,7 +308,7 @@ public class TMTypes {
                         JSONArray row = (JSONArray) g;
                         int x = 0;
                         for (Object o1 : row) {
-                            board.setElement(x, y, parseMapTile((String) o1, x, y));
+                            board.set(HexCoord.fromOffset(x, y, HexCoord.Offset.ODD_R), parseMapTile((String) o1, x, y));
                             x++;
                         }
                         y++;
