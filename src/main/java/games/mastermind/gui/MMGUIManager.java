@@ -8,6 +8,7 @@ import core.actions.SetGridValueAction;
 import core.components.Token;
 import games.mastermind.MMConstants;
 import games.mastermind.MMGameState;
+import games.mastermind.MMParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -28,12 +29,13 @@ public class MMGUIManager extends AbstractGUIManager {
         if (game == null) return;
 
         MMGameState gameState = (MMGameState) game.getGameState();
-        guessView = new MMBoardView(gameState.getGuessBoard());
-        resultView = new MMBoardView(gameState.getResultBoard());
+        MMParameters mmp = (MMParameters) gameState.getGameParameters();
+        guessView = new MMBoardView(gameState.getGuessBoard(), mmp.boardWidth, mmp.boardHeight);
+        resultView = new MMBoardView(gameState.getResultBoard(), mmp.boardWidth, mmp.boardHeight);
 
         // Set width/height of display
-        this.width = Math.max(defaultDisplayWidth, defaultItemSize*gameState.getGuessBoard().getWidth());
-        this.height = defaultItemSize*gameState.getGuessBoard().getHeight();
+        this.width = Math.max(defaultDisplayWidth, defaultItemSize*mmp.boardWidth);
+        this.height = defaultItemSize*mmp.boardHeight;
 
         // Add sections to the GUI (Game stats, grids, action buttons)
         parent.setLayout(new BorderLayout());
@@ -86,6 +88,7 @@ public class MMGUIManager extends AbstractGUIManager {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             guessView.updateComponent(((MMGameState)gameState).getGuessBoard());
+            resultView.updateComponent(((MMGameState)gameState).getResultBoard());
         }
     }
 }

@@ -3,6 +3,8 @@ package games.mastermind;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import games.GameType;
 
 import java.util.*;
@@ -10,8 +12,9 @@ import java.util.*;
 public class MMGameState extends AbstractGameState {
 
     PartialObservableDeck<BoardNode> answerCode;
-    GridBoard guessBoard;
-    GridBoard resultBoard;
+    // the guess and result pegs, each row a turn; a square with no peg is empty
+    SparseGrid<SquareCoord, BoardNode> guessBoard;
+    SparseGrid<SquareCoord, BoardNode> resultBoard;
     int activeRow;
     int activeCol;
 
@@ -61,10 +64,11 @@ public class MMGameState extends AbstractGameState {
 
     private boolean satisfiesPreviousHints(PartialObservableDeck<BoardNode> answerCode) {
         MMParameters mmp = (MMParameters) getGameParameters();
-        for (int i = 0; i < activeRow - 1; i++) {
+        // every row before the active one has its results
+        for (int i = 0; i < activeRow; i++) {
             List<Integer> result = checkGuessAgainstAnswer(answerCode, i);
             for (int j = 0; j < mmp.boardWidth; j++) {
-                if (!MMConstants.resultColours.get(result.get(j)).getComponentName().equals(resultBoard.getElement(j, i).getComponentName())) {
+                if (!MMConstants.resultColours.get(result.get(j)).equals(resultBoard.get(new SquareCoord(j, i)))) {
                     return false;
                 }
             }
@@ -80,10 +84,8 @@ public class MMGameState extends AbstractGameState {
         BoardNodeToScoreMap.put(MMConstants.resultColours.get(1), 1.0);
         BoardNodeToScoreMap.put(MMConstants.resultColours.get(2), 0.0);
 
-        List<BoardNode> resultsBoardNode = resultBoard.getComponents();
-
         double score = 0.0;
-        for (BoardNode BoardNode : resultsBoardNode) {
+        for (BoardNode BoardNode : resultBoard.asMap().values()) {
             score += BoardNodeToScoreMap.getOrDefault(BoardNode, 0.0);
         }
 
@@ -113,11 +115,11 @@ public class MMGameState extends AbstractGameState {
         return Objects.hash(answerCode, guessBoard, resultBoard, activeRow, activeCol) + 31 * super.hashCode();
     }
 
-    public GridBoard getGuessBoard() {
+    public SparseGrid<SquareCoord, BoardNode> getGuessBoard() {
         return guessBoard;
     }
 
-    public GridBoard getResultBoard() {
+    public SparseGrid<SquareCoord, BoardNode> getResultBoard() {
         return resultBoard;
     }
 
@@ -136,7 +138,7 @@ public class MMGameState extends AbstractGameState {
 
         for (int i = mmp.boardWidth - 1; i >= 0; i--) {
             // If a guess peg is the correct colour in the correct place, add a 0 to the returned list
-            if (guessBoard.getElement(i, activeRow).getComponentName().equals(answerCode.get(i).getComponentName())) {
+            if (guessBoard.get(new SquareCoord(i, activeRow)).getComponentName().equals(answerCode.get(i).getComponentName())) {
                 result.set(i, 0);
                 copyAnswerCode.remove(i);
             }
@@ -148,7 +150,7 @@ public class MMGameState extends AbstractGameState {
                 boolean found = false;
                 BoardNode toRemove = null;
                 for (BoardNode BoardNode : copyAnswerCode) {
-                    if (guessBoard.getElement(i, activeRow).getComponentName().equals(BoardNode.getComponentName())) {
+                    if (guessBoard.get(new SquareCoord(i, activeRow)).getComponentName().equals(BoardNode.getComponentName())) {
                         result.set(i, 1);
                         toRemove = BoardNode;
                         found = true;

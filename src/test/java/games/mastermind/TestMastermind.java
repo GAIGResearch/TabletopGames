@@ -8,6 +8,7 @@ import core.actions.SetGridValueAction;
 import core.components.BoardNode;
 import core.components.PartialObservableDeck;
 import core.components.Token;
+import core.components.grid.SquareCoord;
 import games.GameType;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,15 +43,15 @@ public class TestMastermind {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(mmgs);
             forwardModel.next(mmgs, actions.get(0));
             if (i != mmp.boardWidth-1) {
-                assertEquals(mmgs.resultBoard.getElement(0,0).getComponentName(), MMConstants.emptyPeg);
-                assertEquals(mmgs.resultBoard.getElement(1,0).getComponentName(), MMConstants.emptyPeg);
-                assertEquals(mmgs.resultBoard.getElement(2,0).getComponentName(), MMConstants.emptyPeg);
-                assertEquals(mmgs.resultBoard.getElement(3,0).getComponentName(), MMConstants.emptyPeg);
+                assertNull(mmgs.resultBoard.get(new SquareCoord(0, 0)));
+                assertNull(mmgs.resultBoard.get(new SquareCoord(1, 0)));
+                assertNull(mmgs.resultBoard.get(new SquareCoord(2, 0)));
+                assertNull(mmgs.resultBoard.get(new SquareCoord(3, 0)));
             } else {
-                assertNotEquals(mmgs.resultBoard.getElement(0,0).getComponentName(), MMConstants.emptyPeg);
-                assertNotEquals(mmgs.resultBoard.getElement(1,0).getComponentName(), MMConstants.emptyPeg);
-                assertNotEquals(mmgs.resultBoard.getElement(2,0).getComponentName(), MMConstants.emptyPeg);
-                assertNotEquals(mmgs.resultBoard.getElement(3,0).getComponentName(), MMConstants.emptyPeg);
+                assertNotNull(mmgs.resultBoard.get(new SquareCoord(0, 0)));
+                assertNotNull(mmgs.resultBoard.get(new SquareCoord(1, 0)));
+                assertNotNull(mmgs.resultBoard.get(new SquareCoord(2, 0)));
+                assertNotNull(mmgs.resultBoard.get(new SquareCoord(3, 0)));
             }
         }
     }
@@ -79,6 +80,8 @@ public class TestMastermind {
     }
 
     private boolean _testCorrectResult(String guess, String answerString, String expectedResult) {
+        // a new game, so that the guess is the first row
+        mastermind.reset(players);
         MMGameState mmgs = (MMGameState) mastermind.getGameState();
         PartialObservableDeck<BoardNode> answerCode = new PartialObservableDeck<>("Answer Code", 0, new boolean[]{false});
 
