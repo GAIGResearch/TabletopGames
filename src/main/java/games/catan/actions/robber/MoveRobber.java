@@ -3,6 +3,7 @@ package games.catan.actions.robber;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
+import core.components.grid.HexCoord;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.components.Building;
@@ -13,30 +14,24 @@ import java.util.*;
 import static core.CoreConstants.DefaultGamePhase.Main;
 
 public class MoveRobber extends AbstractAction implements IExtendedSequence {
-    public final int x;
-    public final int y;
+    public final HexCoord hex;
     public final int player;
 
     boolean executed;
 
-    public MoveRobber(int x, int y, int player){
-        this.x = x;
-        this.y = y;
+    public MoveRobber(HexCoord hex, int player){
+        this.hex = hex;
         this.player = player;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
-        CatanTile robberTile = cgs.getRobber(cgs.getBoard());
+        CatanTile robberTile = cgs.getRobber();
         if(gs.getCoreGameParameters().verbose){
-            System.out.println("moving robber from " + robberTile.toString() + " to " + cgs.getBoard()[x][y].toString());
+            System.out.println("moving robber from " + robberTile.toString() + " to " + cgs.getTile(hex).toString());
         }
 
-        if (robberTile.removeRobber()){
-            cgs.getBoard()[x][y].placeRobber();
-        } else {
-            throw new AssertionError("Cannot move robber from " + robberTile + " to " + cgs.getBoard()[x][y].toString());
-        }
+        cgs.setRobber(hex);
 
         if (_computeAvailableActions(gs).size() > 0) {
             // it may be that we have nobody to steal from, don't even try
@@ -56,8 +51,7 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
         List<AbstractAction> actions = new ArrayList<>();
         CatanGameState gs = (CatanGameState) state;
-        CatanTile[][] board = gs.getBoard();
-        CatanTile tile = board[x][y];
+        CatanTile tile = gs.getTile(hex);
         Set<Integer> targets = new LinkedHashSet<>();
         Building[] settlements = gs.getBuildings(tile);
         for (Building settlement : settlements) {
@@ -89,7 +83,7 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
 
     @Override
     public MoveRobber copy() {
-        MoveRobber mr = new MoveRobber(x, y, player);
+        MoveRobber mr = new MoveRobber(hex, player);
         mr.executed = executed;
         return mr;
     }
@@ -99,17 +93,17 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (!(o instanceof MoveRobber)) return false;
         MoveRobber that = (MoveRobber) o;
-        return x == that.x && y == that.y && player == that.player && executed == that.executed;
+        return hex.equals(that.hex) && player == that.player && executed == that.executed;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, player, executed);
+        return Objects.hash(hex, player, executed);
     }
 
     @Override
     public String toString() {
-        return "p" + player + " moves robber to x=" + x + " y=" + y;
+        return "p" + player + " moves robber to " + hex;
     }
     @Override
     public String getString(AbstractGameState gameState) {

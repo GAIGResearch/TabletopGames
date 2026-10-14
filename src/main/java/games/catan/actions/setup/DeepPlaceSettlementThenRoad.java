@@ -3,6 +3,7 @@ package games.catan.actions.setup;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Edge;
+import core.components.grid.HexCoord;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
@@ -23,13 +24,13 @@ import static games.catan.CatanConstants.HEX_SIDES;
 public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad implements IExtendedSequence {
     boolean executed;
 
-    public DeepPlaceSettlementThenRoad(int x, int y, int vertex, int player) {
-        super(x, y, vertex, -1, player);
+    public DeepPlaceSettlementThenRoad(HexCoord hex, int vertex, int player) {
+        super(hex, vertex, -1, player);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        BuildSettlement buildSettlement = new BuildSettlement(x,y,vertex,player,true);
+        BuildSettlement buildSettlement = new BuildSettlement(hex, vertex, player, true);
         buildSettlement.execute(gs);
         gs.setActionInProgress(this);
         return true;
@@ -39,23 +40,22 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         List<AbstractAction> actions = new ArrayList<>();
         CatanGameState gs = (CatanGameState) state;
-        CatanTile[][] board = gs.getBoard();
-        CatanTile tile = board[x][y];
+        CatanTile tile = gs.getTile(hex);
 
-        int[][] coords = tile.getNeighboursOnVertex(vertex);
+        HexCoord[] coords = tile.getNeighboursOnVertex(vertex);
         int edge = (HEX_SIDES+vertex-1)%HEX_SIDES;
         Building settlement = gs.getBuilding(tile, vertex);
         Edge edgeObj = gs.getRoad(settlement, tile, edge);
         if (edgeObj.getOwnerId() == -1) {
-            actions.add(new BuildRoad(x, y, edge, player, true, edgeObj.getComponentID()));
+            actions.add(new BuildRoad(hex, edge, player, true, edgeObj.getComponentID()));
             for (int k = 0; k < coords.length; k++) {
-                int[] neighbour = coords[k];
+                HexCoord neighbour = coords[k];
                 int v = (vertex + 2*(k+1)) % HEX_SIDES;
                 edge = (HEX_SIDES+v-1)%HEX_SIDES;
-                CatanTile nTile = board[neighbour[0]][neighbour[1]];
+                CatanTile nTile = gs.getTile(neighbour);
                 edgeObj = gs.getRoad(nTile, v, edge);
                 if (edgeObj != null && edgeObj.getOwnerId() == -1) {
-                    actions.add(new BuildRoad(neighbour[0], neighbour[1], edge, player, true, edgeObj.getComponentID()));
+                    actions.add(new BuildRoad(neighbour, edge, player, true, edgeObj.getComponentID()));
                 }
             }
         }
@@ -75,15 +75,12 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
         // players get the resources in the second round after the settlements they placed
         if (state.getRoundCounter() == 1){
             CatanGameState cgs = ((CatanGameState)state);
-            CatanTile[][] board = cgs.getBoard();
             // in the second round players get the resources from the tiles around the settlement
             ArrayList<CatanTile> tiles = new ArrayList<>();
-            CatanTile tile = cgs.getBoard()[x][y];
-            // next step is to find the tiles around the settlement
-            int[][] neighbourCoords =  tile.getNeighboursOnVertex(((BuildRoad)action).edge);
+            CatanTile tile = cgs.getTile(hex);
             tiles.add(tile);
-            tiles.add(board[neighbourCoords[0][0]][neighbourCoords[0][1]]);
-            tiles.add(board[neighbourCoords[1][0]][neighbourCoords[1][1]]);
+            for (HexCoord neighbour : tile.getNeighboursOnVertex(vertex))
+                tiles.add(cgs.getTile(neighbour));
 
             for (CatanTile t: tiles){
                 CatanParameters.Resource res = cp.productMapping.get(t.getTileType());
@@ -105,7 +102,7 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
 
     @Override
     public DeepPlaceSettlementThenRoad copy() {
-        DeepPlaceSettlementThenRoad copy = new DeepPlaceSettlementThenRoad(x, y, vertex, player);
+        DeepPlaceSettlementThenRoad copy = new DeepPlaceSettlementThenRoad(hex, vertex, player);
         copy.executed = executed;
         return copy;
     }
@@ -126,7 +123,7 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
 
     @Override
     public String toString() {
-        return String.format("p%d settles (x=%d y=%d vertex=%d)",player,x,y,vertex);
+        return String.format("p%d settles (hex=%s vertex=%d)", player, hex, vertex);
     }
     @Override
     public String getString(AbstractGameState gameState) {

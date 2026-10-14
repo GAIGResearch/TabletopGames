@@ -10,6 +10,10 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.Edge;
 import core.components.GraphBoardWithEdges;
+import core.components.grid.HexCoord;
+import core.components.grid.HexSide;
+import core.components.grid.HexVertex;
+import core.components.grid.SparseGrid;
 import evaluation.metrics.Event;
 import games.catan.actions.build.BuyAction;
 import games.catan.actions.discard.DiscardResourcesPhase;
@@ -38,6 +42,10 @@ public class CatanForwardModel extends StandardForwardModel {
         CatanParameters params = (CatanParameters) state.getGameParameters();
 
         state.setBoard(generateBoard(params, state.getRnd()));
+        // the robber starts on the desert
+        for (CatanTile tile : state.getTiles())
+            if (tile.getTileType() == CatanTile.TileType.DESERT)
+                state.setRobber(tile.hex);
         state.setGraph(extractGraphFromBoard(state.getBoard(), params, state.getRnd()));
 
         state.scores = new int[state.getNPlayers()];
@@ -200,7 +208,6 @@ public class CatanForwardModel extends StandardForwardModel {
         if (gs.getCoreGameParameters().verbose) {
             System.out.println("Dice roll: " + gs.rollValue);
         }
-        CatanTile[][] board = gs.getBoard();
         if (rollValue == cp.robber_die_roll) {
             // Dice roll was 7, so we change the phase
             // Check if anyone needs to discard cards
@@ -215,23 +222,21 @@ public class CatanForwardModel extends StandardForwardModel {
             gs.logEvent(RobberRoll);
             gs.setGamePhase(Robber);
         } else {
-            for (CatanTile[] catanTiles : board) {
-                for (CatanTile tile : catanTiles) {
-                    if (tile.getNumber() == rollValue && !tile.hasRobber()) {
-                        // Allocate resource for each settlement/city on this tile to their owner
-                        for (Building settl : gs.getBuildings(tile)) {
-                            int who = settl.getOwnerId();
-                            if (who != -1) {
-                                // Move the card from the resource deck and give it to the player
-                                CatanParameters.Resource res = cp.productMapping.get(tile.getTileType());
-                                int nGenerated = cp.nProduction.get(settl.getBuildingType());
-                                gs.resourcePool.get(res).decrement(nGenerated);
-                                gs.playerResources.get(who).get(res).increment(nGenerated);
-                                if (gs.getCoreGameParameters().verbose) {
-                                    System.out.println("p" + who + " gets " + res);
-                                }
-                                gs.logEvent(Event.GameEvent.GAME_EVENT, () -> "Player " + who + " gets " + res);
+            for (CatanTile tile : gs.getTiles()) {
+                if (tile.getNumber() == rollValue && !gs.hasRobber(tile)) {
+                    // Allocate resource for each settlement/city on this tile to their owner
+                    for (Building settl : gs.getBuildings(tile)) {
+                        int who = settl.getOwnerId();
+                        if (who != -1) {
+                            // Move the card from the resource deck and give it to the player
+                            CatanParameters.Resource res = cp.productMapping.get(tile.getTileType());
+                            int nGenerated = cp.nProduction.get(settl.getBuildingType());
+                            gs.resourcePool.get(res).decrement(nGenerated);
+                            gs.playerResources.get(who).get(res).increment(nGenerated);
+                            if (gs.getCoreGameParameters().verbose) {
+                                System.out.println("p" + who + " gets " + res);
                             }
+                            gs.logEvent(Event.GameEvent.GAME_EVENT, () -> "Player " + who + " gets " + res);
                         }
                     }
                 }
@@ -286,7 +291,7 @@ public class CatanForwardModel extends StandardForwardModel {
         return mainActions;
     }
 
-    private CatanTile[][] generateBoard(CatanParameters params, Random rnd) {
+    private SparseGrid<HexCoord, CatanTile> generateBoard(CatanParameters params, Random rnd) {
         // Shuffle the tile types
         ArrayList<CatanTile.TileType> tileList = new ArrayList<>();
         for (Map.Entry<CatanTile.TileType, Integer> tileCount : params.tileCounts.entrySet()) {
@@ -306,85 +311,68 @@ public class CatanForwardModel extends StandardForwardModel {
         Collections.shuffle(tileList, toUse);
         Collections.shuffle(numberList, toUse);
 
-        CatanTile[][] board = new CatanTile[params.n_tiles_per_row][params.n_tiles_per_row];
-        int midX = board.length / 2;
-        int midY = board[0].length / 2;
-
-        CatanTile midTile = new CatanTile(midX, midY);
-
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = new CatanTile(x, y);
-                // mid_x should be the same as the distance
-                if (midTile.getDistanceToTile(tile) >= midX) {
-                    tile.setTileType(CatanTile.TileType.SEA);
-                } else if (tileList.size() > 0) {
-                    tile.setTileType(tileList.remove(0));
-                    // desert has no number and has to place the robber there
-                    if (tile.getTileType().equals(CatanTile.TileType.DESERT)) {
-                        tile.placeRobber();
-                    } else {
-                        tile.setNumber(numberList.remove(0));
-                    }
-
+        // land within the radius of the centre, ringed by sea
+        int radius = params.n_tiles_per_row / 2;
+        SparseGrid<HexCoord, CatanTile> board = new SparseGrid<>("Board");
+        for (HexCoord hex : HexCoord.hexagon(radius)) {
+            CatanTile.TileType type = null;
+            int number = 0;
+            if (hex.distance(HexCoord.ORIGIN) == radius) {
+                type = CatanTile.TileType.SEA;
+            } else if (!tileList.isEmpty()) {
+                type = tileList.remove(0);
+                // desert has no number
+                if (type != CatanTile.TileType.DESERT) {
+                    number = numberList.remove(0);
                 }
-                board[x][y] = tile;
             }
+            board.set(hex, new CatanTile(hex, type, number));
         }
         return board;
     }
 
-    private GraphBoardWithEdges extractGraphFromBoard(CatanTile[][] board, CatanParameters cp, Random rnd) {
+    private GraphBoardWithEdges extractGraphFromBoard(SparseGrid<HexCoord, CatanTile> board, CatanParameters cp, Random rnd) {
         GraphBoardWithEdges graph = new GraphBoardWithEdges();
+        List<CatanTile> tiles = new ArrayList<>();
+        for (HexCoord hex : board.sortedPositions())
+            tiles.add(board.get(hex));
 
-        // Create vertices and add references in tiles
-        for (CatanTile[] catanTiles : board) {
-            for (CatanTile tile : catanTiles) {
-                for (int vertex = 0; vertex < HEX_SIDES; vertex++) {
-                    // settlement has already been set so skip this loop
-                    if (tile.getVerticesBoardNodeIDs()[vertex] == -1) {
-                        Building building = new Building();
-                        graph.addBoardNode(building);
-                        tile.setVertexBoardNodeID(vertex, building.getComponentID());
+        // A building at each vertex, shared by the tiles meeting there
+        Map<HexVertex, Integer> buildings = new HashMap<>();
+        Map<HexCoord, int[]> vertexIDs = new HashMap<>();
+        for (CatanTile tile : tiles) {
+            int[] ids = new int[HEX_SIDES];
+            for (int vertex = 0; vertex < HEX_SIDES; vertex++) {
+                ids[vertex] = buildings.computeIfAbsent(new HexVertex(tile.hex, vertex), v -> {
+                    Building building = new Building();
+                    graph.addBoardNode(building);
+                    return building.getComponentID();
+                });
+            }
+            vertexIDs.put(tile.hex, ids);
+        }
 
-                        // Get the other 2 settlements along that vertex and set both of them separately
-                        // has to do it in 2 steps as there could be cases with only 2 tiles on along a vertex
-                        int[][] neighbourCoords = tile.getNeighboursOnVertex(vertex);
-                        // check neighbour #1
-                        if (Arrays.stream(neighbourCoords[0]).max().getAsInt() < board.length &&
-                                Arrays.stream(neighbourCoords[0]).min().getAsInt() >= 0) {
-                            board[neighbourCoords[0][0]][neighbourCoords[0][1]].setVertexBoardNodeID((vertex + 2) % HEX_SIDES, building.getComponentID());
-                        }
-                        // check neighbour #2
-                        if (Arrays.stream(neighbourCoords[1]).max().getAsInt() < board.length &&
-                                Arrays.stream(neighbourCoords[1]).min().getAsInt() >= 0) {
-                            board[neighbourCoords[1][0]][neighbourCoords[1][1]].setVertexBoardNodeID((vertex + 4) % HEX_SIDES, building.getComponentID());
-                        }
-                    }
+        // A road along each side of a land tile other than the desert, from one of its vertices to the next. The
+        // tile across the side, whatever it is, shares it
+        Map<HexSide, Integer> roads = new HashMap<>();
+        for (CatanTile tile : tiles) {
+            if (tile.getTileType() == CatanTile.TileType.DESERT || tile.getTileType() == CatanTile.TileType.SEA)
+                continue;
+            for (int i = 0; i < HEX_SIDES; i++) {
+                HexSide side = new HexSide(tile.hex, i);
+                if (!roads.containsKey(side)) {
+                    Edge edge = graph.addConnection(vertexIDs.get(tile.hex)[i], vertexIDs.get(tile.hex)[(i + 1) % HEX_SIDES]);
+                    roads.put(side, edge.getComponentID());
                 }
             }
         }
-
-        // Create connections between vertices (edges/roads) and add references in tiles
-        for (CatanTile[] catanTiles : board) {
-            for (CatanTile tile : catanTiles) {
-                // logic to generate the graph from the board representation
-                // We are not interested in references to DESERT or SEA tiles
-                if (!(tile.getTileType() == CatanTile.TileType.DESERT || tile.getTileType() == CatanTile.TileType.SEA)) {
-                    for (int i = 0; i < HEX_SIDES; i++) {
-                        Edge edge = graph.addConnection(tile.getVerticesBoardNodeIDs()[i], tile.getVerticesBoardNodeIDs()[(i + 1) % HEX_SIDES]);
-                        tile.setEdgeID(i, edge.getComponentID());
-
-                        // last one requires a road and a settlement from a neighbour
-                        int[] otherCoords = tile.getNeighbourOnEdge(i);
-                        if (Arrays.stream(otherCoords).max().getAsInt() < board.length &&
-                                Arrays.stream(otherCoords).min().getAsInt() >= 0) {
-                            CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
-                            neighbour.setEdgeID((i+3) % HEX_SIDES, edge.getComponentID());
-                        }
-                    }
-                }
+        for (CatanTile tile : tiles) {
+            int[] edgeIDs = new int[HEX_SIDES];
+            for (int i = 0; i < HEX_SIDES; i++) {
+                Integer id = roads.get(new HexSide(tile.hex, i));
+                edgeIDs[i] = id == null ? -1 : id;
             }
+            board.set(tile.hex, tile.withIDs(vertexIDs.get(tile.hex), edgeIDs));
         }
 
         // Finally set Harbors types
@@ -393,7 +381,7 @@ public class CatanForwardModel extends StandardForwardModel {
         return graph;
     }
 
-    private void setHarbors(CatanTile[][] board, GraphBoardWithEdges graphBoard, CatanParameters cp, Random rnd) {
+    private void setHarbors(SparseGrid<HexCoord, CatanTile> board, GraphBoardWithEdges graphBoard, CatanParameters cp, Random rnd) {
         // set harbors along the tiles where the SEA borders the land
         ArrayList<CatanParameters.Resource> harbors = new ArrayList<>();
         for (Map.Entry<CatanParameters.Resource, Integer> entry : cp.harborCount.entrySet()) {
@@ -403,30 +391,16 @@ public class CatanForwardModel extends StandardForwardModel {
         Random toUse = cp.hexShuffleSeed > -1 ? new Random(cp.hexShuffleSeed * 2L) : rnd;
         Collections.shuffle(harbors, toUse);
 
-        int radius = board.length / 2;
-        // todo edge 4 can work, but random would be better, the math changes with different directions.
-        //int edge = random.nextInt(HEX_SIDES);
-        int edge = 4;
-        // Get mid tile
-        CatanTile tile = board[radius][radius];
-        // move along a certain edge to reach SEA tiles
-        for (int i = 0; i < radius; i++) {
-            int[] tileLocation = tile.getNeighbourOnEdge(edge);
-            tile = board[tileLocation[0]][tileLocation[1]];
-        }
-        // go around in a circle
-        int counter = 0;
-        for (int i = 0; i < HEX_SIDES; i++) {
-            for (int j = 0; j < board.length / 2; j++) {
-                int[] tileLocation = tile.getNeighbourOnEdge(i);
-                tile = board[tileLocation[0]][tileLocation[1]];
-                if (counter % 2 == 0 && !harbors.isEmpty()) {
-                    CatanParameters.Resource harbour = harbors.remove(0);
-                    ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 2) % HEX_SIDES])).setHarbour(harbour);
-                    ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 3) % HEX_SIDES])).setHarbour(harbour);
-                }
-                counter++;
-            }
+        // on every other tile of the ring of sea, at its two vertices facing the land
+        int radius = cp.n_tiles_per_row / 2;
+        List<HexCoord> ring = HexCoord.ORIGIN.ring(radius);
+        for (int k = 0; k < ring.size() && !harbors.isEmpty(); k += 2) {
+            CatanTile tile = board.get(ring.get(k));
+            // the ring reaches this tile by a step in direction i, so the land is at its vertices i + 2 and i + 3
+            int i = k / radius;
+            CatanParameters.Resource harbour = harbors.remove(0);
+            ((Building) graphBoard.getNodeByID(tile.getVertexID((i + 2) % HEX_SIDES))).setHarbour(harbour);
+            ((Building) graphBoard.getNodeByID(tile.getVertexID((i + 3) % HEX_SIDES))).setHarbour(harbour);
         }
     }
 }

@@ -6,6 +6,7 @@ import core.actions.DoNothing;
 import core.components.Counter;
 import core.components.Deck;
 import core.components.Edge;
+import core.components.grid.HexCoord;
 import games.catan.actions.build.*;
 import games.catan.actions.dev.*;
 import games.catan.actions.discard.DiscardResources;
@@ -36,39 +37,35 @@ public class CatanActionFactory {
     static List<AbstractAction> getSetupActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         // find possible settlement locations and propose them as actions
-        CatanTile[][] board = gs.getBoard();
         HashSet<Integer> settlementsAdded = new HashSet<>();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-                // where it is legal to place tile then it can be placed from there
-                if (!(tile.getTileType().equals(CatanTile.TileType.SEA) ||
-                        tile.getTileType().equals(CatanTile.TileType.DESERT))) {
-                    for (int i = 0; i < HEX_SIDES; i++) {
-                        Building settlement = gs.getBuilding(tile, i);
-                        if (!settlementsAdded.contains(settlement.getComponentID()) && settlement.getOwnerId() == -1) {
-                            if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                                settlementsAdded.add(settlement.getComponentID());
-                                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
-                                    int[][] coords = tile.getNeighboursOnVertex(i);
-                                    int edge = (HEX_SIDES + i - 1) % HEX_SIDES;
-                                    Edge edgeObj = gs.getRoad(settlement, tile, edge);
-                                    if (edgeObj.getOwnerId() == -1) {
-                                        actions.add(new PlaceSettlementWithRoad(x, y, i, edge, player));
-                                        for (int k = 0; k < coords.length; k++) {
-                                            int[] neighbour = coords[k];
-                                            int vertex = (i + 2 * (k + 1)) % HEX_SIDES;
-                                            edge = (HEX_SIDES + vertex - 1) % HEX_SIDES;
-                                            CatanTile nTile = board[neighbour[0]][neighbour[1]];
-                                            edgeObj = gs.getRoad(nTile, vertex, edge);
-                                            if (edgeObj != null && edgeObj.getOwnerId() == -1) {
-                                                actions.add(new PlaceSettlementWithRoad(neighbour[0], neighbour[1], vertex, edge, player));
-                                            }
+        for (CatanTile tile : gs.getTiles()) {
+            // where it is legal to place tile then it can be placed from there
+            if (!(tile.getTileType().equals(CatanTile.TileType.SEA) ||
+                    tile.getTileType().equals(CatanTile.TileType.DESERT))) {
+                for (int i = 0; i < HEX_SIDES; i++) {
+                    Building settlement = gs.getBuilding(tile, i);
+                    if (!settlementsAdded.contains(settlement.getComponentID()) && settlement.getOwnerId() == -1) {
+                        if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
+                            settlementsAdded.add(settlement.getComponentID());
+                            if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                                HexCoord[] coords = tile.getNeighboursOnVertex(i);
+                                int edge = (HEX_SIDES + i - 1) % HEX_SIDES;
+                                Edge edgeObj = gs.getRoad(settlement, tile, edge);
+                                if (edgeObj.getOwnerId() == -1) {
+                                    actions.add(new PlaceSettlementWithRoad(tile.hex, i, edge, player));
+                                    for (int k = 0; k < coords.length; k++) {
+                                        HexCoord neighbour = coords[k];
+                                        int vertex = (i + 2 * (k + 1)) % HEX_SIDES;
+                                        edge = (HEX_SIDES + vertex - 1) % HEX_SIDES;
+                                        CatanTile nTile = gs.getTile(neighbour);
+                                        edgeObj = gs.getRoad(nTile, vertex, edge);
+                                        if (edgeObj != null && edgeObj.getOwnerId() == -1) {
+                                            actions.add(new PlaceSettlementWithRoad(neighbour, vertex, edge, player));
                                         }
                                     }
-                                } else {
-                                    actions.add(new DeepPlaceSettlementThenRoad(x, y, i, player));
                                 }
+                            } else {
+                                actions.add(new DeepPlaceSettlementThenRoad(tile.hex, i, player));
                             }
                         }
                     }
@@ -239,32 +236,28 @@ public class CatanActionFactory {
      */
     static List<AbstractAction> getRobberActions(CatanGameState gs, ActionSpace actionSpace, int player, boolean knight) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        CatanTile[][] board = gs.getBoard();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-                if (!(tile.getTileType().equals(CatanTile.TileType.SEA))) {
-                    if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
-                        Set<Integer> targets = new LinkedHashSet<>();
-                        Building[] settlements = gs.getBuildings(tile);
-                        for (Building settlement : settlements) {
-                            if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {
-                                targets.add(settlement.getOwnerId());
-                            }
+        for (CatanTile tile : gs.getTiles()) {
+            if (!(tile.getTileType().equals(CatanTile.TileType.SEA))) {
+                if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
+                    Set<Integer> targets = new LinkedHashSet<>();
+                    Building[] settlements = gs.getBuildings(tile);
+                    for (Building settlement : settlements) {
+                        if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {
+                            targets.add(settlement.getOwnerId());
                         }
-                        for (int target : targets) {
-                            if (knight) actions.add(new PlayKnightCard(x, y, player, target));
-                            else actions.add(new MoveRobberAndSteal(x, y, player, target));
-                        }
-                        if (targets.isEmpty()) {
-                            if (knight) actions.add(new PlayKnightCard(x, y, player, -1));
-                            else actions.add(new MoveRobberAndSteal(x, y, player, -1));
-                        }
-                    } else {
-                        // Deep: first move, then steal
-                        if (knight) actions.add(new PlayKnightCardDeep(x, y, player));
-                        else actions.add(new MoveRobber(x, y, player));
                     }
+                    for (int target : targets) {
+                        if (knight) actions.add(new PlayKnightCard(tile.hex, player, target));
+                        else actions.add(new MoveRobberAndSteal(tile.hex, player, target));
+                    }
+                    if (targets.isEmpty()) {
+                        if (knight) actions.add(new PlayKnightCard(tile.hex, player, -1));
+                        else actions.add(new MoveRobberAndSteal(tile.hex, player, -1));
+                    }
+                } else {
+                    // Deep: first move, then steal
+                    if (knight) actions.add(new PlayKnightCardDeep(tile.hex, player));
+                    else actions.add(new MoveRobber(tile.hex, player));
                 }
             }
         }
@@ -313,25 +306,21 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (free || gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
-            CatanTile[][] board = gs.getBoard();
             HashSet<Edge> edgesChecked = new HashSet<>(256);
-            for (int x = 0; x < board.length; x++) {
-                for (int y = 0; y < board[x].length; y++) {
-                    CatanTile tile = board[x][y];
-                    // Skip sea and desert tiles; we will look at their edges via their neighbours
-                    if (tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                        continue;
-                    for (int i = 0; i < HEX_SIDES; i++) {
-                        // we build from a vertex (settlement) to an adjacent vertex, but do not need to
-                        // actually retrieve the settlement object
-                        Edge edge = gs.getRoad(tile, i, i);
-                        if (edge == null) continue;
-                        if (edgesChecked.contains(edge)) continue;
-                        edgesChecked.add(edge);
+            for (CatanTile tile : gs.getTiles()) {
+                // Skip sea and desert tiles; we will look at their edges via their neighbours
+                if (tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                    continue;
+                for (int i = 0; i < HEX_SIDES; i++) {
+                    // we build from a vertex (settlement) to an adjacent vertex, but do not need to
+                    // actually retrieve the settlement object
+                    Edge edge = gs.getRoad(tile, i, i);
+                    if (edge == null) continue;
+                    if (edgesChecked.contains(edge)) continue;
+                    edgesChecked.add(edge);
 
-                        if (gs.checkRoadPlacement(tile, i, (i + 1) % HEX_SIDES, edge, gs.getCurrentPlayer())) {
-                            actions.add(new BuildRoad(x, y, i, player, free, edge.getComponentID()));
-                        }
+                    if (gs.checkRoadPlacement(tile, i, (i + 1) % HEX_SIDES, edge, gs.getCurrentPlayer())) {
+                        actions.add(new BuildRoad(tile.hex, i, player, free, edge.getComponentID()));
                     }
                 }
             }
@@ -348,25 +337,21 @@ public class CatanActionFactory {
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.City).isMaximum();
         if (canBuySettlement || canBuyCity) {
             Set<Building> settlementsAdded = new HashSet<>();
-            CatanTile[][] board = gs.getBoard();
-            for (int x = 0; x < board.length; x++) {
-                for (int y = 0; y < board[x].length; y++) {
-                    CatanTile tile = board[x][y];
-                    for (int i = 0; i < HEX_SIDES; i++) {
-                        Building settlement = gs.getBuilding(tile, i);
-                        if (settlementsAdded.contains(settlement)) continue;
-                        settlementsAdded.add(settlement);
+            for (CatanTile tile : gs.getTiles()) {
+                for (int i = 0; i < HEX_SIDES; i++) {
+                    Building settlement = gs.getBuilding(tile, i);
+                    if (settlementsAdded.contains(settlement)) continue;
+                    settlementsAdded.add(settlement);
 
-                        if (canBuyCity && settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
-                            actions.add(new BuildCity(x, y, i, player));
-                        }
+                    if (canBuyCity && settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
+                        actions.add(new BuildCity(tile.hex, i, player));
+                    }
 
-                        if (canBuySettlement && settlement.getOwnerId() == -1) {  // cannot build on top of existing settlement
-                            // legal to place?
-                            if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                                    && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                                actions.add(new BuildSettlement(x, y, i, player, false));
-                            }
+                    if (canBuySettlement && settlement.getOwnerId() == -1) {  // cannot build on top of existing settlement
+                        // legal to place?
+                        if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                                && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
+                            actions.add(new BuildSettlement(tile.hex, i, player, false));
                         }
                     }
                 }

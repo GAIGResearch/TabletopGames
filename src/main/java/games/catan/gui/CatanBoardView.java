@@ -2,6 +2,9 @@ package games.catan.gui;
 
 import core.actions.AbstractAction;
 import core.components.Edge;
+import core.components.grid.HexCoord;
+import core.components.grid.HexSide;
+import core.components.grid.HexVertex;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
@@ -13,13 +16,14 @@ import games.catan.actions.setup.DeepPlaceSettlementThenRoad;
 import games.catan.actions.setup.PlaceSettlementWithRoad;
 import games.catan.components.Building;
 import games.catan.components.CatanTile;
+import gui.HexLayout;
 import gui.IScreenHighlight;
-import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -59,19 +63,20 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
     Color tileColorHighlight = new Color(89, 243, 138);
     Dimension size;
 
-    Point tileHighlight;
-    Pair<Point, Integer>  buildingHighlight;
-    Pair<Point, Integer> roadHighlight;
+    HexLayout layout;
+    HexCoord tileHighlight;
+    HexVertex buildingHighlight;
+    HexSide roadHighlight;
 
     HashMap<Integer, Integer> nDotsPerRoll = new HashMap<>();
 
     // Highlights from clicking on the board
-    HashMap<Pair<Point, Integer>, Rectangle> vertexToRectMap;
-    Set<Pair<Point, Integer>> vertexHighlight;  // A set to represent one vertex highlighted, because it may be respective to any of the 3 adjacent tiles
-    HashMap<Pair<Point, Integer>, Rectangle> edgeToRectMap;
-    Set<Pair<Point, Integer>> edgeHighlight;  // A set to represent one edge highlighted, because it may be respective to any of the 2 adjacent tiles
-    HashMap<Point, Rectangle> hexToRectMap;
-    Set<Point> hexHighlight;
+    HashMap<HexVertex, Rectangle> vertexToRectMap;
+    Set<HexVertex> vertexHighlight;
+    HashMap<HexSide, Rectangle> edgeToRectMap;
+    Set<HexSide> edgeHighlight;
+    HashMap<HexCoord, Rectangle> hexToRectMap;
+    Set<HexCoord> hexHighlight;
     int minSize = 10;
 
     public CatanBoardView(CatanGameState gs) {
@@ -79,6 +84,7 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
         this.params = (CatanParameters) gs.getGameParameters();
         this.tileRadius = 40;
         size = new Dimension((params.n_tiles_per_row-1) * tileRadius * 2 + 10, (params.n_tiles_per_row-1) * tileRadius * 2);
+        layout = new HexLayout(tileRadius, size.width / 2.0, size.height / 2.0);
 
         int nDots = 0;
         for (int i = params.nDice; i <= params.nDice*params.dieType.nSides; i++) {
@@ -105,17 +111,17 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
                 hexHighlight.clear();
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     // Left-click
-                    for (Map.Entry<Pair<Point, Integer>, Rectangle> entry: vertexToRectMap.entrySet()) {
+                    for (Map.Entry<HexVertex, Rectangle> entry: vertexToRectMap.entrySet()) {
                         if (entry.getValue().contains(e.getPoint())) {
                             vertexHighlight.add(entry.getKey());
                         }
                     }
-                    for (Map.Entry<Pair<Point, Integer>, Rectangle> entry: edgeToRectMap.entrySet()) {
+                    for (Map.Entry<HexSide, Rectangle> entry: edgeToRectMap.entrySet()) {
                         if (entry.getValue().contains(e.getPoint())) {
                             edgeHighlight.add(entry.getKey());
                         }
                     }
-                    for (Map.Entry<Point, Rectangle> entry: hexToRectMap.entrySet()) {
+                    for (Map.Entry<HexCoord, Rectangle> entry: hexToRectMap.entrySet()) {
                         if (entry.getValue().contains(e.getPoint())) {
                             hexHighlight.add(entry.getKey());
                             break;
@@ -135,163 +141,117 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
 
     private void drawBoard(Graphics2D g) {
         // Draw board
-        CatanTile[][] board = gs.getBoard();
-
-        int midX = board.length/2;
-        int midY = board[0].length/2;
-        CatanTile midTile = new CatanTile(midX, midY);
-
         FontMetrics fm = g.getFontMetrics();
         Font f = g.getFont();
         Font boldFont = new Font(g.getFont().getName(), Font.BOLD, 12);
-        for (CatanTile[] tiles : board) {
-            for (CatanTile tile : tiles) {
-                // mid_x should be the same as the distance
-                if (midTile.getDistanceToTile(tile) >= midX + 1) {
-                    continue;
-                }
-                Point centreCoords = tile.getCentreCoords(tileRadius);
-                hexToRectMap.put(new Point(tile.x, tile.y), new Rectangle(centreCoords.x - tileRadius/2, centreCoords.y - tileRadius/2, tileRadius, tileRadius));
+        for (CatanTile tile : gs.getTiles()) {
+            Point centreCoords = layout.pixel(tile.hex);
+            hexToRectMap.put(tile.hex, new Rectangle(centreCoords.x - tileRadius/2, centreCoords.y - tileRadius/2, tileRadius, tileRadius));
 
-                g.setColor(tileColourMap.get(tile.getTileType()));
-                Polygon tileHex = tile.getHexagon(tileRadius);
-                g.fillPolygon(tileHex);
-                g.setColor(Color.BLACK);
-                g.drawPolygon(tileHex);
+            g.setColor(tileColourMap.get(tile.getTileType()));
+            g.fill(layout.outline(tile.hex, tileRadius));
+            g.setColor(Color.BLACK);
+            g.draw(layout.outline(tile.hex, tileRadius));
 
-                if (tile.getTileType() != CatanTile.TileType.SEA && tile.getTileType() != CatanTile.TileType.DESERT) {
-                    g.setColor(textColourMap.get(tile.getTileType()));
-                    String type = "" + tile.getTileType();
-                    int number = tile.getNumber();
-                    g.drawString(type, centreCoords.x - fm.stringWidth(type)/2, centreCoords.y);
-                    if (number != 0) {
-//                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
-                        String nDots = "";
-                        for (int i = 0; i < nDotsPerRoll.get(number); i++) {
-                            nDots += ".";
-                        }
-                        int nSize = fm.stringWidth(nDots);
-                        int nSize2 = fm.stringWidth(""+number);
-                        g.setColor(numberColor);
-                        g.fillOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
-                        g.setColor(Color.BLACK);
-                        g.drawOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
-                        if (number-1 == params.robber_die_roll || number+1 == params.robber_die_roll) g.setColor(Color.red);
-                        g.setFont(boldFont);
-                        g.drawString(""+number, centreCoords.x - nSize2/2, centreCoords.y + 25);
-                        g.drawString(nDots, centreCoords.x - nSize/2, centreCoords.y + 28);
-                        g.setFont(f);
+            if (tile.getTileType() != CatanTile.TileType.SEA && tile.getTileType() != CatanTile.TileType.DESERT) {
+                g.setColor(textColourMap.get(tile.getTileType()));
+                String type = "" + tile.getTileType();
+                int number = tile.getNumber();
+                g.drawString(type, centreCoords.x - fm.stringWidth(type)/2, centreCoords.y);
+                if (number != 0) {
+                    String nDots = "";
+                    for (int i = 0; i < nDotsPerRoll.get(number); i++) {
+                        nDots += ".";
                     }
+                    int nSize = fm.stringWidth(nDots);
+                    int nSize2 = fm.stringWidth(""+number);
+                    g.setColor(numberColor);
+                    g.fillOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
+                    g.setColor(Color.BLACK);
+                    g.drawOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
+                    if (number-1 == params.robber_die_roll || number+1 == params.robber_die_roll) g.setColor(Color.red);
+                    g.setFont(boldFont);
+                    g.drawString(""+number, centreCoords.x - nSize2/2, centreCoords.y + 25);
+                    g.drawString(nDots, centreCoords.x - nSize/2, centreCoords.y + 28);
+                    g.setFont(f);
                 }
+            }
 
-                if (tile.hasRobber()) {
-                    drawRobber(g, centreCoords);
-                }
+            if (gs.hasRobber(tile)) {
+                drawRobber(g, centreCoords);
             }
         }
 
         // Draw harbours
         HashSet<Integer> harboursDrawn = new HashSet<>();  // avoid overlap
-        for (CatanTile[] catanTiles : board) {
-            for (CatanTile tile : catanTiles) {
-                Building[] settlements = gs.getBuildings(tile);
-                for (int i = 0; i < settlements.length; i++) {
-                    if (settlements[i].getHarbour() != null && tile.getTileType() == CatanTile.TileType.SEA &&
-                            !harboursDrawn.contains(settlements[i].getComponentID()) &&
-                            settlements[(i+1)%HEX_SIDES].getHarbour() != null && !harboursDrawn.contains(settlements[(i+1)%HEX_SIDES].getComponentID())) {
-                        if (board[tile.getNeighbourOnEdge(i)[0]][tile.getNeighbourOnEdge(i)[1]].getTileType() == CatanTile.TileType.SEA) continue;
-                        CatanParameters.Resource type = settlements[i].getHarbour();
-                        drawHarbour(g, tile, i, type);
-                        harboursDrawn.add(settlements[i].getComponentID());
-                        harboursDrawn.add(settlements[(i + 1)%HEX_SIDES].getComponentID());
-                    }
+        for (CatanTile tile : gs.getTiles()) {
+            Building[] settlements = gs.getBuildings(tile);
+            for (int i = 0; i < settlements.length; i++) {
+                if (settlements[i].getHarbour() != null && tile.getTileType() == CatanTile.TileType.SEA &&
+                        !harboursDrawn.contains(settlements[i].getComponentID()) &&
+                        settlements[(i+1)%HEX_SIDES].getHarbour() != null && !harboursDrawn.contains(settlements[(i+1)%HEX_SIDES].getComponentID())) {
+                    CatanTile across = gs.getTile(tile.hex.neighbour(i));
+                    if (across == null || across.getTileType() == CatanTile.TileType.SEA) continue;
+                    CatanParameters.Resource type = settlements[i].getHarbour();
+                    drawHarbour(g, tile, i, type);
+                    harboursDrawn.add(settlements[i].getComponentID());
+                    harboursDrawn.add(settlements[(i + 1)%HEX_SIDES].getComponentID());
                 }
             }
         }
 
         // Draw roads top of board
-        for (CatanTile[] catanTiles : board) {
-            for (CatanTile tile : catanTiles) {
-                // draw roads
-                Edge[] roads = gs.getRoads(tile);
-                for (int i = 0; i < roads.length; i++) {
-                    Point[] p = tile.getEdgeCoords(i, tileRadius);
+        for (CatanTile tile : gs.getTiles()) {
+            // draw roads
+            Edge[] roads = gs.getRoads(tile);
+            for (int i = 0; i < roads.length; i++) {
+                Point[] p = {corner(tile, i), corner(tile, i + 1)};
 
-                    // Save position of edge
-                    Rectangle r = new Rectangle(Math.min(p[0].x, p[1].x), Math.min(p[0].y, p[1].y), Math.abs(p[0].x-p[1].x), Math.abs(p[0].y-p[1].y));
-                    if (r.width == 0) {
-                        r.x -= minSize/2;
-                        r.width = minSize;
-                    }
-                    if (r.height == 0) {
-                        r.y -= minSize/2;
-                        r.height = minSize;
-                    }
-                    edgeToRectMap.put(new Pair<>(new Point(tile.x, tile.y), i), r);
+                // Save position of edge
+                Rectangle r = new Rectangle(Math.min(p[0].x, p[1].x), Math.min(p[0].y, p[1].y), Math.abs(p[0].x-p[1].x), Math.abs(p[0].y-p[1].y));
+                if (r.width == 0) {
+                    r.x -= minSize/2;
+                    r.width = minSize;
+                }
+                if (r.height == 0) {
+                    r.y -= minSize/2;
+                    r.height = minSize;
+                }
+                edgeToRectMap.put(new HexSide(tile.hex, i), r);
 
-                    // Draw road if it exists or if highlighted
-                    if (roads[i] != null && roads[i].getOwnerId() != -1 ||
-                            roadHighlight != null && roadHighlight.a.x == tile.x && roadHighlight.a.y == tile.y && roadHighlight.b == i) {
-                        drawRoad(g, i, p, CatanConstants.getPlayerColor(roads[i].getOwnerId()));
-
-                        // Useful for showing road IDs on the GUI
-//                        g.setFont(new Font("TimeRoman", Font.PLAIN, 10));
-//                        g.setColor(Color.BLACK);
-//                        Point[] location = tile.getEdgeCoords(i, tileRadius);
-//                        g.drawLine(location[0].x, location[0].y, location[1].x, location[1].y);
-//                        g.drawString(i + "", ((location[0].x + location[1].x) / 2), ((location[0].y + location[1].y) / 2));
-                    }
+                // Draw road if it exists or if highlighted
+                if (roads[i] != null && roads[i].getOwnerId() != -1 ||
+                        new HexSide(tile.hex, i).equals(roadHighlight)) {
+                    drawRoad(g, i, p, CatanConstants.getPlayerColor(roads[i].getOwnerId()));
                 }
             }
         }
 
         // Finally draw settlements
         HashSet<Integer> buildingsDrawn = new HashSet<>();  // avoid overlap
-        for (CatanTile[] catanTiles : board) {
-            for (CatanTile tile : catanTiles) {
-                // draw settlements
-                Building[] settlements = gs.getBuildings(tile);
-                for (int i = 0; i < settlements.length; i++) {
-                    Point p = tile.getVerticesCoords(i, tileRadius);
+        for (CatanTile tile : gs.getTiles()) {
+            // draw settlements
+            Building[] settlements = gs.getBuildings(tile);
+            for (int i = 0; i < settlements.length; i++) {
+                Point p = corner(tile, i);
+                HexVertex vertex = new HexVertex(tile.hex, i);
 
-                    // Save position of settlement
-                    vertexToRectMap.put(new Pair<>(new Point(tile.x, tile.y), i), new Rectangle(p.x-buildingRadius/2,p.y-buildingRadius/2, buildingRadius, buildingRadius));
+                // Save position of settlement
+                vertexToRectMap.put(vertex, new Rectangle(p.x-buildingRadius/2,p.y-buildingRadius/2, buildingRadius, buildingRadius));
 
-//                    g.drawString("" + settlements[i].hashCode(), tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
-                    if (!buildingsDrawn.contains(settlements[i].getComponentID()) && settlements[i].getOwnerId() != -1 ||
-                        buildingHighlight != null && buildingHighlight.a.x == tile.x && buildingHighlight.a.y == tile.y && buildingHighlight.b == i) {
-                        drawSettlement(g, tile.x, tile.y, i, p, CatanConstants.getPlayerColor(settlements[i].getOwnerId()), settlements[i].getBuildingType());
-                        buildingsDrawn.add(settlements[i].getComponentID());
-                    }
-
-                    // Lines below are useful for debugging as they display settlement IDs
-                    /*
-                        g.setFont(new Font("TimeRoman", Font.PLAIN, 15));
-                        g.setColor(Color.GRAY);
-                        g.drawString(settlements[i].getHarbour() + "", tile.getVerticesCoords(i, tileRadius).x, tile.getVerticesCoords(i, tileRadius).y);
-                     */
+                if (!buildingsDrawn.contains(settlements[i].getComponentID()) && settlements[i].getOwnerId() != -1 ||
+                    vertex.equals(buildingHighlight)) {
+                    drawSettlement(g, vertex, p, CatanConstants.getPlayerColor(settlements[i].getOwnerId()), settlements[i].getBuildingType());
+                    buildingsDrawn.add(settlements[i].getComponentID());
                 }
-
-                // lines below render cube coordinates and distances from middle
-//                String s = Arrays.toString(tile.to_cube(tile));
-//                String mid = Arrays.toString(tile.to_cube(board[3][3]));
-//                String dist = "" + tile.distance(board[3][3]);
-//                g.drawString(s, (int)tile.x_coord - 20, (int)tile.y_coord - 20);
-//                g.drawString(mid, (int)tile.x_coord - 20, (int)tile.y_coord);
-//                g.setColor(Color.ORANGE);
-//                g.drawString(dist, (int)tile.x_coord - 20, (int)tile.y_coord + 20);
-
-
             }
         }
 
         Stroke s = g.getStroke();
         if (tileHighlight != null) {
-            CatanTile tile = gs.getBoard()[tileHighlight.x][tileHighlight.y];
-            Polygon tileHex = tile.getHexagon(tileRadius);
             g.setColor(tileColorHighlight);
             g.setStroke(new BasicStroke(8));
-            g.drawPolygon(tileHex);
+            g.draw(layout.outline(tileHighlight, tileRadius));
         }
         g.setStroke(new BasicStroke(3));
         if (!vertexHighlight.isEmpty()) {
@@ -323,9 +283,9 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
     }
 
     public void drawHarbour(Graphics2D g, CatanTile tile, int i, CatanParameters.Resource type) {
-        Point point1 = tile.getVerticesCoords(i, tileRadius);
-        Point point2 = tile.getVerticesCoords((i+1) % HEX_SIDES, tileRadius);
-        Point middle = tile.getCentreCoords(tileRadius);
+        Point point1 = corner(tile, i);
+        Point point2 = corner(tile, i + 1);
+        Point middle = layout.pixel(tile.hex);
         FontMetrics fm = g.getFontMetrics();
         int exchangeRate = params.harbour_exchange_rate;
         if (type == CatanParameters.Resource.WILD) exchangeRate = params.harbour_wild_exchange_rate;
@@ -356,7 +316,15 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
 //        g.drawString("" + edge, location[0].x + 5, location[0].y);
     }
 
-    public void drawSettlement(Graphics2D g, int x, int y, int vertex, Point point, Color color, Building.Type type){
+    /**
+     * The pixel at the vertex of the tile.
+     */
+    private Point corner(CatanTile tile, int vertex) {
+        Point2D p = layout.corner(tile.hex, vertex);
+        return new Point((int) Math.round(p.getX()), (int) Math.round(p.getY()));
+    }
+
+    public void drawSettlement(Graphics2D g, HexVertex vertex, Point point, Color color, Building.Type type){
 
         /* point is the centre of the hexagon
         *  / \  settl.  / \___  city
@@ -377,7 +345,7 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
 
         g.setColor(color);
         g.fillPolygon(settlement);
-        if (buildingHighlight != null && buildingHighlight.a.x == x && buildingHighlight.a.y == y && buildingHighlight.b == vertex) g.setColor(tileColorHighlight);
+        if (vertex.equals(buildingHighlight)) g.setColor(tileColorHighlight);
         else g.setColor(Color.BLACK);
         g.drawPolygon(settlement);
 
@@ -403,33 +371,33 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
         if (action instanceof BuildCity) {
             // Highlight board node
             BuildCity buildCity = (BuildCity)action;
-            buildingHighlight = new Pair<>(new Point(buildCity.row, buildCity.col), buildCity.vertex);
+            buildingHighlight = new HexVertex(buildCity.hex, buildCity.vertex);
         }
         else if (action instanceof BuildRoad) {
             // Highlight edge
             BuildRoad buildRoad = (BuildRoad) action;
-            roadHighlight = new Pair<>(new Point(buildRoad.x, buildRoad.y), buildRoad.edge);
+            roadHighlight = new HexSide(buildRoad.hex, buildRoad.edge);
         }
         else if (action instanceof BuildSettlement) {
             // Highlight board node
             BuildSettlement buildCity = (BuildSettlement)action;
-            buildingHighlight = new Pair<>(new Point(buildCity.x, buildCity.y), buildCity.vertex);
+            buildingHighlight = new HexVertex(buildCity.hex, buildCity.vertex);
         }
         else if (action instanceof DeepPlaceSettlementThenRoad) {
             // settle
             DeepPlaceSettlementThenRoad buildCity = (DeepPlaceSettlementThenRoad)action;
-            buildingHighlight = new Pair<>(new Point(buildCity.x, buildCity.y), buildCity.vertex);
+            buildingHighlight = new HexVertex(buildCity.hex, buildCity.vertex);
         }
         else if (action instanceof MoveRobber) {  // Includes MoveRobberAndSteal
             // tile
             MoveRobber mr = (MoveRobber) action;
-            tileHighlight = new Point(mr.x, mr.y);
+            tileHighlight = mr.hex;
         }
         else if (action instanceof PlaceSettlementWithRoad) {
             // settle + road
             PlaceSettlementWithRoad pswr = (PlaceSettlementWithRoad) action;
-            buildingHighlight = new Pair<>(new Point(pswr.x, pswr.y), pswr.vertex);
-            roadHighlight = new Pair<>(new Point(pswr.x, pswr.y), pswr.edge);
+            buildingHighlight = new HexVertex(pswr.hex, pswr.vertex);
+            roadHighlight = new HexSide(pswr.hex, pswr.edge);
         }
     }
 

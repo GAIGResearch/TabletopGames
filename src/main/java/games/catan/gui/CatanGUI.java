@@ -6,6 +6,9 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.Counter;
+import core.components.grid.HexCoord;
+import core.components.grid.HexSide;
+import core.components.grid.HexVertex;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.actions.build.BuildCity;
@@ -23,7 +26,6 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import players.human.ActionController;
-import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -170,9 +172,9 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
     }
 
     public enum Filter {
-        Vertex(Pair.class, "Select vertex on map"), // <Point, Integer>
-        Edge(Pair.class, "Select edge on map"),  // <Point, Integer>
-        Tile(Point.class, "Select hex tile on map"),
+        Vertex(HexVertex.class, "Select vertex on map"),
+        Edge(HexSide.class, "Select edge on map"),
+        Tile(HexCoord.class, "Select hex tile on map"),
         Resource(CatanParameters.Resource[].class, "Select resource(s) in player panel"),
         Player(Integer.class, "Select target player name in player panel");
         final Class<?> type;
@@ -217,22 +219,22 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
                     if (aa instanceof DeepPlaceSettlementThenRoad) {
                         DeepPlaceSettlementThenRoad a = (DeepPlaceSettlementThenRoad) aa;
                         Filter f = Filter.Vertex;
-                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        f.ref = new HexVertex(a.hex, a.vertex);
                         filtersAvailable.add(f);
                     } else if (aa instanceof BuildRoad) {
                         BuildRoad a = (BuildRoad) aa;
                         Filter f = Filter.Edge;
-                        f.ref = new Pair<>(new Point(a.x, a.y), a.edge);
+                        f.ref = new HexSide(a.hex, a.edge);
                         filtersAvailable.add(f);
                     } else if (aa instanceof BuildCity) {
                         BuildCity a = (BuildCity) aa;
                         Filter f = Filter.Vertex;
-                        f.ref = new Pair<>(new Point(a.col, a.row), a.vertex);
+                        f.ref = new HexVertex(a.hex, a.vertex);
                         filtersAvailable.add(f);
                     } else if (aa instanceof BuildSettlement) {
                         BuildSettlement a = (BuildSettlement) aa;
                         Filter f = Filter.Vertex;
-                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        f.ref = new HexVertex(a.hex, a.vertex);
                         filtersAvailable.add(f);
                     } else if (aa instanceof MoveRobberAndSteal) {
                         MoveRobberAndSteal a = (MoveRobberAndSteal) aa;
@@ -240,20 +242,20 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
                         f1.ref = a.targetPlayer;
                         filtersAvailable.add(f1);
                         Filter f2 = Filter.Tile;
-                        f2.ref = new Point(a.x, a.y);
+                        f2.ref = a.hex;
                         filtersAvailable.add(f2);
                     } else if (aa instanceof MoveRobber) {
                         MoveRobber a = (MoveRobber) aa;
                         Filter f2 = Filter.Tile;
-                        f2.ref = new Point(a.x, a.y);
+                        f2.ref = a.hex;
                         filtersAvailable.add(f2);
                     } else if (aa instanceof PlaceSettlementWithRoad) {
                         PlaceSettlementWithRoad a = (PlaceSettlementWithRoad) aa;
                         Filter f = Filter.Vertex;
-                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        f.ref = new HexVertex(a.hex, a.vertex);
                         filtersAvailable.add(f);
                         Filter f2 = Filter.Edge;
-                        f2.ref = new Pair<>(new Point(a.x, a.y), a.edge);
+                        f2.ref = new HexSide(a.hex, a.edge);
                         filtersAvailable.add(f2);
                     } else if (aa instanceof DiscardResources) {
                         DiscardResources a = (DiscardResources) aa;

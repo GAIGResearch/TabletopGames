@@ -78,15 +78,13 @@ public class CatanMetrics implements IMetricsCollection {
                 initResources.add(new ArrayList<>());
             }
 
-            for (CatanTile[] catanTiles : gs.getBoard()) {
-                for (CatanTile tile : catanTiles) {
-                    if (tile.getTileType() != CatanTile.TileType.DESERT && tile.getTileType() != CatanTile.TileType.SEA) {
-                        for (Building settl : gs.getBuildings(tile)) {
-                            int who = settl.getOwnerId();
-                            if (who != -1) {
-                                initResources.get(who).add(cp.productMapping.get(tile.getTileType()));
-                                initProductionSum[who] += nDots.get(tile.getNumber());
-                            }
+            for (CatanTile tile : gs.getTiles()) {
+                if (tile.getTileType() != CatanTile.TileType.DESERT && tile.getTileType() != CatanTile.TileType.SEA) {
+                    for (Building settl : gs.getBuildings(tile)) {
+                        int who = settl.getOwnerId();
+                        if (who != -1) {
+                            initResources.get(who).add(cp.productMapping.get(tile.getTileType()));
+                            initProductionSum[who] += nDots.get(tile.getNumber());
                         }
                     }
                 }
@@ -374,33 +372,31 @@ public class CatanMetrics implements IMetricsCollection {
             CatanGameState gs = (CatanGameState) e.state;
             int[] cutOffs = new int[e.state.getNPlayers()];  // players cut off by others
             int[] cuttingOffs = new int[e.state.getNPlayers()];  // players doing the cut offs
-            for (CatanTile[] row: gs.getBoard()) {
-                for (CatanTile tile: row) {
-                    for (int v = 0; v < HEX_SIDES; v++) {
-                        Building settlement = gs.getBuilding(tile, v);
-                        List<Integer> owners = new ArrayList<>();
-                        for (Edge edge: settlement.getEdges()) {
-                            if (edge.getOwnerId() != -1) {
-                                owners.add(edge.getOwnerId());
-                            }
+            for (CatanTile tile : gs.getTiles()) {
+                for (int v = 0; v < HEX_SIDES; v++) {
+                    Building settlement = gs.getBuilding(tile, v);
+                    List<Integer> owners = new ArrayList<>();
+                    for (Edge edge: settlement.getEdges()) {
+                        if (edge.getOwnerId() != -1) {
+                            owners.add(edge.getOwnerId());
                         }
-                        if (owners.size() == 3) {
-                            Set<Integer> ownerSet = new HashSet<>(owners);
-                            if (ownerSet.size() == 2) {
-                                // A cutting off happened!
-                                // Find the one who only appears once in owners list
-                                int cutOffPlayer = -1;
-                                int cuttingOffPlayer = -1;
-                                for (int p: ownerSet) {
-                                    if (Collections.frequency(owners, p) == 1) {
-                                        cutOffPlayer = p;
-                                    } else {
-                                        cuttingOffPlayer = p;
-                                    }
+                    }
+                    if (owners.size() == 3) {
+                        Set<Integer> ownerSet = new HashSet<>(owners);
+                        if (ownerSet.size() == 2) {
+                            // A cutting off happened!
+                            // Find the one who only appears once in owners list
+                            int cutOffPlayer = -1;
+                            int cuttingOffPlayer = -1;
+                            for (int p: ownerSet) {
+                                if (Collections.frequency(owners, p) == 1) {
+                                    cutOffPlayer = p;
+                                } else {
+                                    cuttingOffPlayer = p;
                                 }
-                                cutOffs[cutOffPlayer]++;
-                                cuttingOffs[cuttingOffPlayer]++;
                             }
+                            cutOffs[cutOffPlayer]++;
+                            cuttingOffs[cuttingOffPlayer]++;
                         }
                     }
                 }

@@ -3,6 +3,7 @@ package games.catan.actions.build;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
+import core.components.grid.HexCoord;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
@@ -11,14 +12,12 @@ import games.catan.components.Building;
 import java.util.Objects;
 
 public class BuildCity extends AbstractAction {
-    public final int row;
-    public final int col;
+    public final HexCoord hex;
     public final int vertex;
     public final int playerID;
 
-    public BuildCity(int row, int col, int vertex, int playerID) {
-        this.row = row;
-        this.col = col;
+    public BuildCity(HexCoord hex, int vertex, int playerID) {
+        this.hex = hex;
         this.vertex = vertex;
         this.playerID = playerID;
     }
@@ -26,10 +25,9 @@ public class BuildCity extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        CatanTile[][] board = cgs.getBoard();
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
-        Building settlement = cgs.getBuilding(board[row][col], vertex);
+        Building settlement = cgs.getBuilding(cgs.getTile(hex), vertex);
         if (settlement != null && settlement.getOwnerId() == playerID) {
             if (!cgs.spendResourcesIfPossible(cp.costMapping.get(BuyAction.BuyType.City), playerID)) {
                 throw new AssertionError("Player cannot afford city");
@@ -63,14 +61,14 @@ public class BuildCity extends AbstractAction {
     public boolean equals(Object other) {
         if (other instanceof BuildCity){
             BuildCity otherAction = (BuildCity)other;
-            return row == otherAction.row && col == otherAction.col && vertex == otherAction.vertex && playerID == otherAction.playerID;
+            return hex.equals(otherAction.hex) && vertex == otherAction.vertex && playerID == otherAction.playerID;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(row,col,vertex,playerID);
+        return Objects.hash(hex, vertex, playerID);
     }
 
     @Override
@@ -80,6 +78,6 @@ public class BuildCity extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("p%d Buy:City (row=%d col=%d vertex=%d)",playerID,row,col,vertex);
+        return String.format("p%d Buy:City (hex=%s vertex=%d)", playerID, hex, vertex);
     }
 }

@@ -10,6 +10,7 @@ import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 
 import static games.catan.actions.build.BuyAction.BuyType.*;
@@ -63,7 +64,8 @@ public class CatanParameters extends TunableParameters {
         put(Building.Type.City, 2);
     }};
 
-    HashMap<CatanTile.TileType, Integer> tileCounts = new HashMap<CatanTile.TileType, Integer>() {{
+    // EnumMaps, so that the board is laid out in the same order in every run (a HashMap's order of enum keys varies)
+    EnumMap<CatanTile.TileType, Integer> tileCounts = new EnumMap<>(CatanTile.TileType.class) {{
         put(CatanTile.TileType.HILLS, 3);
         put(CatanTile.TileType.FOREST, 4);
         put(CatanTile.TileType.MOUNTAINS, 3);
@@ -164,7 +166,7 @@ public class CatanParameters extends TunableParameters {
         put(CatanCard.CardType.VICTORY_POINT_CARD, 5);
     }};
 
-    public HashMap<Resource, Integer> harborCount = new HashMap<Resource, Integer>() {{
+    public EnumMap<Resource, Integer> harborCount = new EnumMap<>(Resource.class) {{
         put(Resource.BRICK, 1);
         put(Resource.LUMBER, 1);
         put(Resource.ORE, 1);
@@ -228,13 +230,13 @@ public class CatanParameters extends TunableParameters {
         retValue.nRoadsRB = nRoadsRB;
         retValue.buildingValue = new HashMap<>(buildingValue);
         retValue.nProduction = new HashMap<>(nProduction);
-        retValue.tileCounts = new HashMap<>(tileCounts);
+        retValue.tileCounts = new EnumMap<>(tileCounts);
         retValue.numberTokens = new HashMap<>(numberTokens);
         retValue.productMapping = new HashMap<>(productMapping);
         retValue.costMapping = new HashMap<>(costMapping);
         retValue.tokenCounts = new HashMap<>(tokenCounts);
         retValue.developmentCardCount = new HashMap<>(developmentCardCount);
-        retValue.harborCount = new HashMap<>(harborCount);
+        retValue.harborCount = new EnumMap<>(harborCount);
         return retValue;
     }
 

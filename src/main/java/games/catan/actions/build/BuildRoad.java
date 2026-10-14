@@ -7,22 +7,21 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
 import core.components.Edge;
+import core.components.grid.HexCoord;
 
 import java.util.Objects;
 
 import static games.catan.stats.CatanMetrics.CatanEvent.LongestRoadSteal;
 
 public class BuildRoad extends AbstractAction {
-    public final int x;
-    public final int y;
+    public final HexCoord hex;
     public final int edge;
     public final int playerID;
     public final boolean free;
     public final int componentID;
 
-    public BuildRoad(int x, int y, int edge, int playerID, boolean free, int componentID) {
-        this.x = x;
-        this.y = y;
+    public BuildRoad(HexCoord hex, int edge, int playerID, boolean free, int componentID) {
+        this.hex = hex;
         this.edge = edge;
         this.playerID = playerID;
         this.free = free;
@@ -33,7 +32,7 @@ public class BuildRoad extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
-        CatanTile tile = cgs.getBoard()[x][y];
+        CatanTile tile = cgs.getTile(hex);
         Edge road = cgs.getRoad(tile, edge, edge);
         if (road.getComponentID() != componentID) {
             throw new AssertionError("Road component ID mismatch: " + road.getComponentID() + " != " + componentID);
@@ -55,7 +54,7 @@ public class BuildRoad extends AbstractAction {
             road.setOwnerId(playerID);
 
             // Check longest road
-            int new_length = cgs.getRoadDistance(x, y, edge);
+            int new_length = cgs.getRoadDistance(hex, edge);
             cgs.getRoadLengths()[playerID] = new_length;
             if (new_length > cgs.getLongestRoadLength() && new_length > cp.min_longest_road) {
                 cgs.setLongestRoadLength(new_length);
@@ -87,7 +86,7 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public boolean equals(Object other) {
-        // equality does not actually depend on x, y and edge...it really just needs to use the edge componentID
+        // equality does not actually depend on hex and edge...it really just needs to use the edge componentID
         // as the road is the same if built from one hex, or from another next door that shares the edge
         if (other instanceof BuildRoad otherAction) {
             return playerID == otherAction.playerID && free == otherAction.free && componentID == otherAction.componentID;
@@ -107,15 +106,7 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public String toString() {
-        return "p" + playerID + " Buy:Road (x=" + x + " y=" + y + " edge=" + edge + ")";
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
+        return "p" + playerID + " Buy:Road (hex=" + hex + " edge=" + edge + ")";
     }
 
     public int getEdge() {

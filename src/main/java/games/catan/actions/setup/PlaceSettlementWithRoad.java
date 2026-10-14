@@ -2,6 +2,7 @@ package games.catan.actions.setup;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.actions.build.BuildRoad;
@@ -15,14 +16,12 @@ import java.util.Objects;
 * Class to execute both placing a settlement and a road at the same time instead of doing it as a 2 step process
 *  */
 public class PlaceSettlementWithRoad extends AbstractAction {
-    public final int x;
-    public final int y;
+    public final HexCoord hex;
     public final int vertex, edge;
     public final int player;
 
-    public PlaceSettlementWithRoad(int x, int y, int vertex, int edge, int player) {
-        this.x = x;
-        this.y = y;
+    public PlaceSettlementWithRoad(HexCoord hex, int vertex, int edge, int player) {
+        this.hex = hex;
         this.vertex = vertex;
         this.edge = edge;
         this.player = player;
@@ -31,23 +30,20 @@ public class PlaceSettlementWithRoad extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = ((CatanGameState)gs);
-        BuildSettlement buildSettlement  = new BuildSettlement(x,y,vertex,player,true);
-        int edgeID = cgs.getBoard()[x][y].getEdgeIDs()[edge];
-        BuildRoad buildRoad = new BuildRoad(x,y,edge,player,true, edgeID);
+        BuildSettlement buildSettlement  = new BuildSettlement(hex, vertex, player, true);
+        int edgeID = cgs.getTile(hex).getEdgeID(edge);
+        BuildRoad buildRoad = new BuildRoad(hex, edge, player, true, edgeID);
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
         if (buildSettlement.execute(gs) && buildRoad.execute(gs)){
             // players get the resources in the second round after the settlements they placed
             if (gs.getRoundCounter() == 1){
-                CatanTile[][] board = cgs.getBoard();
                 // in the second round players get the resources from the tiles around the settlement
                 ArrayList<CatanTile> tiles = new ArrayList<CatanTile>();
-                CatanTile tile = cgs.getBoard()[buildSettlement.x][buildSettlement.y];
-                // next step is to find the tiles around the settlement
-                int[][] neighbourCoords =  tile.getNeighboursOnVertex(buildSettlement.vertex);
+                CatanTile tile = cgs.getTile(hex);
                 tiles.add(tile);
-                tiles.add(board[neighbourCoords[0][0]][neighbourCoords[0][1]]);
-                tiles.add(board[neighbourCoords[1][0]][neighbourCoords[1][1]]);
+                for (HexCoord neighbour : tile.getNeighboursOnVertex(vertex))
+                    tiles.add(cgs.getTile(neighbour));
 
                 for (CatanTile t: tiles){
                     CatanParameters.Resource res = cp.productMapping.get(t.getTileType());
@@ -76,17 +72,17 @@ public class PlaceSettlementWithRoad extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof PlaceSettlementWithRoad)) return false;
         PlaceSettlementWithRoad that = (PlaceSettlementWithRoad) o;
-        return x == that.x && y == that.y && vertex == that.vertex && edge == that.edge && player == that.player;
+        return hex.equals(that.hex) && vertex == that.vertex && edge == that.edge && player == that.player;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, vertex, edge, player);
+        return Objects.hash(hex, vertex, edge, player);
     }
 
     @Override
     public String toString() {
-        return String.format("p%d settles (x=%d y=%d vertex=%d) and builds road (edge=%d)",player,x,y,vertex,edge);
+        return String.format("p%d settles (hex=%s vertex=%d) and builds road (edge=%d)", player, hex, vertex, edge);
     }
     @Override
     public String getString(AbstractGameState gameState) {

@@ -1,7 +1,14 @@
 package games.catan;
 
+import games.catan.components.Building;
 import games.catan.components.CatanTile;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,26 +23,16 @@ public class HexSeedTests {
         params.setParameterValue("hexShuffleSeed", 39392);
         CatanGameState state = new CatanGameState(params, 4);
         fm.setup(state);
-        CatanTile[][] board = state.getBoard();
-        CatanTile[][] boardCopy = new CatanTile[board.length][board[0].length];
-
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                boardCopy[i][j] = board[i][j].copy();
-            }
-        }
+        List<CatanTile> boardCopy = copyTiles(state);
         for (int loop = 0; loop < 9; loop++) {
             params.setRandomSeed(loop);
             fm.setup(state);
-            board = state.getBoard();
-            for (int i = 0; i < board.length; i++) {
-                for (int j = 0; j < board[i].length; j++) {
-     //               System.out.println("Checking " + board[i][j].toString() + " vs " + boardCopy[i][j].toString());
-                    assertEquals(boardCopy[i][j].x, board[i][j].x);
-                    assertEquals(boardCopy[i][j].y, board[i][j].y);
-                    assertEquals(boardCopy[i][j].getTileType(), board[i][j].getTileType());
-                    assertEquals(boardCopy[i][j].getNumber(), board[i][j].getNumber());
-                }
+            List<CatanTile> board = state.getTiles();
+            assertEquals(boardCopy.size(), board.size());
+            for (int i = 0; i < board.size(); i++) {
+                assertEquals(boardCopy.get(i).hex, board.get(i).hex);
+                assertEquals(boardCopy.get(i).getTileType(), board.get(i).getTileType());
+                assertEquals(boardCopy.get(i).getNumber(), board.get(i).getNumber());
             }
         }
     }
@@ -45,34 +42,26 @@ public class HexSeedTests {
         CatanParameters params = new CatanParameters();
         CatanGameState state = new CatanGameState(params, 4);
         fm.setup(state);
-        CatanTile[][] board = state.getBoard();
-        CatanTile[][] boardCopy = new CatanTile[board.length][board[0].length];
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                boardCopy[i][j] = board[i][j].copy();
-            }
-        }
+        List<CatanTile> boardCopy = copyTiles(state);
         // the initial setup used the default seed of 0, so start from seed 1
         for (int loop = 1; loop < 10; loop++) {
             params.setRandomSeed(loop);
             fm.setup(state);
-            board = state.getBoard();
+            List<CatanTile> board = state.getTiles();
+            assertEquals(boardCopy.size(), board.size());
             int landTiles = 0;
             int numberMatches = 0;
             int typeMatches = 0;
             int bothMatch = 0;
-            for (int i = 0; i < board.length; i++) {
-                for (int j = 0; j < board[i].length; j++) {
-                    assertEquals(boardCopy[i][j].x, board[i][j].x);
-                    assertEquals(boardCopy[i][j].y, board[i][j].y);
-                    if (board[i][j].getTileType() != CatanTile.TileType.SEA) {
-                        landTiles++;
-                        boolean numberMatch = boardCopy[i][j].getNumber() == board[i][j].getNumber();
-                        boolean typeMatch = boardCopy[i][j].getTileType() == board[i][j].getTileType();
-                        if (numberMatch) numberMatches++;
-                        if (typeMatch) typeMatches++;
-                        if (numberMatch && typeMatch) bothMatch++;
-                    }
+            for (int i = 0; i < board.size(); i++) {
+                assertEquals(boardCopy.get(i).hex, board.get(i).hex);
+                if (board.get(i).getTileType() != CatanTile.TileType.SEA) {
+                    landTiles++;
+                    boolean numberMatch = boardCopy.get(i).getNumber() == board.get(i).getNumber();
+                    boolean typeMatch = boardCopy.get(i).getTileType() == board.get(i).getTileType();
+                    if (numberMatch) numberMatches++;
+                    if (typeMatch) typeMatches++;
+                    if (numberMatch && typeMatch) bothMatch++;
                 }
             }
             // a random shuffle will leave some tiles matching, but nowhere near the whole board
@@ -80,6 +69,34 @@ public class HexSeedTests {
             assertTrue("seed " + loop + ": " + typeMatches + " of " + landTiles + " types match", typeMatches <= landTiles / 2);
             assertTrue("seed " + loop + ": " + bothMatch + " of " + landTiles + " tiles match", bothMatch <= landTiles / 4);
         }
+    }
+
+    @Test
+    public void hexSeedGivesTheRecordedBoard() {
+        // the land tiles in order of position (initial and number), then the harbours by the vertices of the tiles in
+        // order of position; the same in every run, whatever the JVM has done before
+        CatanParameters params = new CatanParameters();
+        params.setParameterValue("hexShuffleSeed", 39392);
+        CatanGameState state = new CatanGameState(params, 4);
+        fm.setup(state);
+        StringBuilder land = new StringBuilder(), harbours = new StringBuilder();
+        for (CatanTile t : state.getTiles())
+            if (t.getTileType() != CatanTile.TileType.SEA)
+                land.append(t.getTileType().name().charAt(0)).append(t.getNumber()).append(' ');
+        Set<Building> seen = new HashSet<>();
+        for (CatanTile t : state.getTiles())
+            for (Building b : state.getBuildings(t))
+                if (b.getHarbour() != null && seen.add(b))
+                    harbours.append(b.getHarbour().name().charAt(0));
+        assertEquals("H3 F4 H6 M8 M11 P5 P11 F12 M9 H2 D0 F8 F4 P10 F10 F9 F3 F6 P5 ", land.toString());
+        assertEquals("WWBBWWWLWLOOWWWWGG", harbours.toString());
+    }
+
+    private static List<CatanTile> copyTiles(CatanGameState state) {
+        List<CatanTile> retValue = new ArrayList<>();
+        for (CatanTile tile : state.getTiles())
+            retValue.add(tile.copy());
+        return retValue;
     }
 
     @Test

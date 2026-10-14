@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.components.*;
+import core.components.grid.HexCoord;
+import core.components.grid.SparseGrid;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.catan.actions.build.BuyAction;
@@ -18,7 +20,8 @@ import static games.catan.CatanConstants.HEX_SIDES;
 import static games.catan.stats.CatanMetrics.CatanEvent.LargestArmySteal;
 
 public class CatanGameState extends AbstractGameState {
-    protected CatanTile[][] board;
+    protected SparseGrid<HexCoord, CatanTile> board;
+    protected HexCoord robber; // the hex the robber is on
     protected GraphBoardWithEdges catanGraph;
     protected int[] scores; // score for each player
     protected int[] victoryPoints; // secret points from victory cards
@@ -97,9 +100,7 @@ public class CatanGameState extends AbstractGameState {
             addAll(playerDevCards);
             addAll(resourcePool.values());
             add(devCards);
-            for (CatanTile[] tiles: board) {
-                this.addAll(Arrays.asList(tiles));
-            }
+            add(board);
         }};
     }
 
@@ -109,13 +110,13 @@ public class CatanGameState extends AbstractGameState {
         if (!(o instanceof CatanGameState)) return false;
         if (!super.equals(o)) return false;
         CatanGameState that = (CatanGameState) o;
-        return largestArmyOwner == that.largestArmyOwner && longestRoadOwner == that.longestRoadOwner && longestRoadLength == that.longestRoadLength && largestArmySize == that.largestArmySize && rollValue == that.rollValue && developmentCardPlayed == that.developmentCardPlayed && negotiationStepsCount == that.negotiationStepsCount && nTradesThisTurn == that.nTradesThisTurn && Arrays.deepEquals(board, that.board) && Objects.equals(catanGraph, that.catanGraph) && Arrays.equals(scores, that.scores) && Arrays.equals(victoryPoints, that.victoryPoints) && Arrays.equals(knights, that.knights) && Arrays.equals(roadLengths, that.roadLengths) && Objects.equals(exchangeRates, that.exchangeRates) && Objects.equals(playerResources, that.playerResources) && Objects.equals(playerTokens, that.playerTokens) && Objects.equals(playerDevCards, that.playerDevCards) && Objects.equals(resourcePool, that.resourcePool) && Objects.equals(devCards, that.devCards) && Objects.equals(tradeOffer, that.tradeOffer);
+        return largestArmyOwner == that.largestArmyOwner && longestRoadOwner == that.longestRoadOwner && longestRoadLength == that.longestRoadLength && largestArmySize == that.largestArmySize && rollValue == that.rollValue && developmentCardPlayed == that.developmentCardPlayed && negotiationStepsCount == that.negotiationStepsCount && nTradesThisTurn == that.nTradesThisTurn && Objects.equals(board, that.board) && Objects.equals(robber, that.robber) && Objects.equals(catanGraph, that.catanGraph) && Arrays.equals(scores, that.scores) && Arrays.equals(victoryPoints, that.victoryPoints) && Arrays.equals(knights, that.knights) && Arrays.equals(roadLengths, that.roadLengths) && Objects.equals(exchangeRates, that.exchangeRates) && Objects.equals(playerResources, that.playerResources) && Objects.equals(playerTokens, that.playerTokens) && Objects.equals(playerDevCards, that.playerDevCards) && Objects.equals(resourcePool, that.resourcePool) && Objects.equals(devCards, that.devCards) && Objects.equals(tradeOffer, that.tradeOffer);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), catanGraph, exchangeRates, largestArmyOwner, longestRoadOwner, longestRoadLength, largestArmySize, rollValue, playerResources, playerTokens, playerDevCards, resourcePool, devCards, developmentCardPlayed, tradeOffer, negotiationStepsCount, nTradesThisTurn);
-        result = 31 * result + Arrays.deepHashCode(board);
+        result = 31 * result + Objects.hash(board, robber);
         result = 31 * result + Arrays.hashCode(scores);
         result = 31 * result + Arrays.hashCode(victoryPoints);
         result = 31 * result + Arrays.hashCode(knights);
@@ -123,12 +124,29 @@ public class CatanGameState extends AbstractGameState {
         return result;
     }
 
-    public void setBoard(CatanTile[][] board) {
+    public void setBoard(SparseGrid<HexCoord, CatanTile> board) {
         this.board = board;
     }
 
-    public CatanTile[][] getBoard() {
+    public SparseGrid<HexCoord, CatanTile> getBoard() {
         return board;
+    }
+
+    /**
+     * The tile at the hex, or null if it is off the board.
+     */
+    public CatanTile getTile(HexCoord hex) {
+        return board.get(hex);
+    }
+
+    /**
+     * Every tile, in order of position.
+     */
+    public List<CatanTile> getTiles() {
+        List<CatanTile> retValue = new ArrayList<>(board.size());
+        for (HexCoord hex : board.sortedPositions())
+            retValue.add(board.get(hex));
+        return retValue;
     }
 
     public void setGraph(GraphBoardWithEdges graph) {
@@ -156,16 +174,16 @@ public class CatanGameState extends AbstractGameState {
         return roadLengths;
     }
 
-    public CatanTile getRobber(CatanTile[][] board) {
-        for (CatanTile[] catanTiles : board) {
-            for (CatanTile tile : catanTiles) {
-                if (tile.hasRobber()) {
-                    return tile;
-                }
-            }
-        }
-        System.out.println("Robber not found - should not happen");
-        return null;
+    public CatanTile getRobber() {
+        return robber == null ? null : board.get(robber);
+    }
+
+    public boolean hasRobber(CatanTile tile) {
+        return tile.hex.equals(robber);
+    }
+
+    public void setRobber(HexCoord hex) {
+        robber = hex;
     }
 
     public void addScore(int playerID, int score) {
@@ -240,8 +258,8 @@ public class CatanGameState extends AbstractGameState {
         return exchangeRates.get(playerID);
     }
 
-    // The road distance between two adjacent settlements, one at x, y, the other along the specified edgeIdx
-    public int getRoadDistance(int x, int y, int edgeIdx) {
+    // The road distance between two adjacent settlements, one at the hex, the other along the specified edgeIdx
+    public int getRoadDistance(HexCoord hex, int edgeIdx) {
         // As the settlements are the nodes, we expand them to find roads
         // calculates the distance length of the road
         Set<Edge> roadSet = new LinkedHashSet<>();
@@ -249,8 +267,8 @@ public class CatanGameState extends AbstractGameState {
 
         ArrayList<Building> dir1 = new ArrayList<>();
         ArrayList<Building> dir2 = new ArrayList<>();
-        Building settl1 = (Building) catanGraph.getNodeByID(board[x][y].getVerticesBoardNodeIDs()[edgeIdx]);
-        Building settl2 = (Building) catanGraph.getNodeByID(board[x][y].getVerticesBoardNodeIDs()[(edgeIdx + 1) % 6]);
+        Building settl1 = (Building) catanGraph.getNodeByID(board.get(hex).getVertexID(edgeIdx));
+        Building settl2 = (Building) catanGraph.getNodeByID(board.get(hex).getVertexID((edgeIdx + 1) % 6));
 
         dir1.add(settl1);
         dir2.add(settl2);
@@ -403,7 +421,8 @@ public class CatanGameState extends AbstractGameState {
     protected CatanGameState _copy(int playerId) {
         CatanGameState copy = new CatanGameState(getGameParameters().copy(), getNPlayers());
         copy.gamePhase = gamePhase;
-        copy.board = copyBoard();
+        copy.board = board.copy();
+        copy.robber = robber;
         copy.catanGraph = catanGraph.copy();
 
         copy.gameStatus = gameStatus;
@@ -570,7 +589,7 @@ public class CatanGameState extends AbstractGameState {
     }
 
     public Building getBuilding(CatanTile tile, int vertex) {
-        return (Building) catanGraph.getNodeByID(tile.getVerticesBoardNodeIDs()[vertex]);
+        return (Building) catanGraph.getNodeByID(tile.getVertexID(vertex));
     }
     public Building[] getBuildings(CatanTile tile) {
         Building[] buildings = new Building[HEX_SIDES];
@@ -580,10 +599,10 @@ public class CatanGameState extends AbstractGameState {
         return buildings;
     }
     public Edge getRoad(Building building, CatanTile tile, int edge) {
-        return building.getEdgeByID(tile.getEdgeIDs()[edge]);
+        return building.getEdgeByID(tile.getEdgeID(edge));
     }
     public Edge getRoad(CatanTile tile, int vertex, int edge) {
-        return getBuilding(tile, vertex).getEdgeByID(tile.getEdgeIDs()[edge]);
+        return getBuilding(tile, vertex).getEdgeByID(tile.getEdgeID(edge));
     }
     public Edge[] getRoads(CatanTile tile) {
         Edge[] roads = new Edge[HEX_SIDES];
@@ -602,8 +621,8 @@ public class CatanGameState extends AbstractGameState {
      */
     public boolean checkRoadPlacement(CatanTile tile, int v1, int v2, Edge edge, int player) {
         GraphBoardWithEdges graph = getGraph();
-        BoardNodeWithEdges origin = graph.getNodeByID(tile.getVerticesBoardNodeIDs()[v1]);
-        BoardNodeWithEdges end = graph.getNodeByID(tile.getVerticesBoardNodeIDs()[v2]);
+        BoardNodeWithEdges origin = graph.getNodeByID(tile.getVertexID(v1));
+        BoardNodeWithEdges end = graph.getNodeByID(tile.getVertexID(v2));
 
         // check if road is already taken
         if (edge == null || edge.getOwnerId() != -1) {
@@ -657,16 +676,6 @@ public class CatanGameState extends AbstractGameState {
             return true;
         }
         return false;
-    }
-
-    private CatanTile[][] copyBoard() {
-        CatanTile[][] copy = new CatanTile[board.length][board[0].length];
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[0].length; y++) {
-                copy[x][y] = board[x][y].copy();
-            }
-        }
-        return copy;
     }
 
     @Override
