@@ -7,7 +7,8 @@ import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.SetGridValueAction;
 import core.components.BoardNode;
-import core.components.GridBoard;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import core.interfaces.ITreeActionSpace;
 import utilities.ActionTreeNode;
 
@@ -20,10 +21,9 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
 
     @Override
     protected void _setup(AbstractGameState firstState) {
-        TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
-        int gridSize = tttgp.gridSize;
         TicTacToeGameState state = (TicTacToeGameState) firstState;
-        state.gridBoard = new GridBoard(gridSize, gridSize, new BoardNode(TicTacToeConstants.emptyCell));
+        state.gridBoard = new SparseGrid<>("TicTacToe Board");
+        state.gridSize = ((TicTacToeGameParameters) state.getGameParameters()).gridSize;
     }
 
 
@@ -39,9 +39,9 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
 
         if (gameState.isNotTerminal()){
             // Normal action space
-            for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
-                for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                    if (tttgs.gridBoard.getElement(x, y).getComponentName().equals(TicTacToeConstants.emptyCell)) {
+            for (int x = 0; x < tttgs.getGridSize(); x++) {
+                for (int y = 0; y < tttgs.getGridSize(); y++) {
+                    if (!tttgs.gridBoard.contains(new SquareCoord(x, y))) {
                         actions.add(new SetGridValueAction(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player).getComponentID()));
                     }
                 }
@@ -64,80 +64,31 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
      * @param gameState - game state to check game end.
      */
     private boolean checkAndProcessGameEnd(TicTacToeGameState gameState) {
-        GridBoard gridBoard = gameState.getGridBoard();
+        SparseGrid<SquareCoord, BoardNode> gridBoard = gameState.getGridBoard();
+        int n = gameState.getGridSize();
 
-        // Check columns
-        for (int x = 0; x < gridBoard.getWidth(); x++) {
-            BoardNode c = gridBoard.getElement(x, 0);
-            if (c != null && !c.getComponentName().equals(TicTacToeConstants.emptyCell)) {
-                boolean win = true;
-                for (int y = 1; y < gridBoard.getHeight(); y++) {
-                    BoardNode o = gridBoard.getElement(x, y);
-                    if (o.getComponentName().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
-                        win = false;
-                        break;
-                    }
-                }
-                if (win) {
-                    registerWinner(gameState, c);
-                    return true;
-                }
-            }
-        }
+        // each line is given by its first square and the step along it: the columns, the rows and the two diagonals
+        List<int[]> lines = new ArrayList<>();
+        for (int x = 0; x < n; x++)
+            lines.add(new int[]{x, 0, 0, 1});
+        for (int y = 0; y < n; y++)
+            lines.add(new int[]{0, y, 1, 0});
+        lines.add(new int[]{0, 0, 1, 1});
+        lines.add(new int[]{n - 1, 0, -1, 1});
 
-        // Check rows
-        for (int y = 0; y < gridBoard.getHeight(); y++) {
-            BoardNode c = gridBoard.getElement(0, y);
-            if (!c.getComponentName().equals(TicTacToeConstants.emptyCell)) {
-                boolean win = true;
-                for (int x = 1; x < gridBoard.getWidth(); x++) {
-                    BoardNode o = gridBoard.getElement(x, y);
-                    if (o.getComponentName().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
-                        win = false;
-                        break;
-                    }
-                }
-                if (win) {
-                    registerWinner(gameState, c);
-                    return true;
-                }
-            }
-        }
-
-        // Check diagonals
-        // Primary
-        BoardNode c = gridBoard.getElement(0, 0);
-        if (!c.getComponentName().equals(TicTacToeConstants.emptyCell)) {
+        for (int[] line : lines) {
+            BoardNode c = gridBoard.get(new SquareCoord(line[0], line[1]));
+            if (c == null) continue;
             boolean win = true;
-            for (int i = 1; i < gridBoard.getWidth(); i++) {
-                BoardNode o = gridBoard.getElement(i, i);
-                if (o.getComponentName().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
-                    win = false;
-                }
-            }
+            for (int i = 1; i < n && win; i++)
+                win = c.equals(gridBoard.get(new SquareCoord(line[0] + i * line[2], line[1] + i * line[3])));
             if (win) {
                 registerWinner(gameState, c);
                 return true;
             }
         }
 
-        // Secondary
-        c = gridBoard.getElement(gridBoard.getWidth() - 1, 0);
-        if (!c.getComponentName().equals(TicTacToeConstants.emptyCell)) {
-            boolean win = true;
-            for (int i = 1; i < gridBoard.getWidth(); i++) {
-                BoardNode o = gridBoard.getElement(gridBoard.getWidth() - 1 - i, i);
-                if (o.getComponentName().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
-                    win = false;
-                }
-            }
-            if (win) {
-                registerWinner(gameState, c);
-                return true;
-            }
-        }
-        boolean tie = gridBoard.getComponents().stream().noneMatch(t -> t.getComponentName().equals(TicTacToeConstants.emptyCell));
-
+        boolean tie = gridBoard.size() == n * n;
         if (tie) {
             gameState.setGameStatus(CoreConstants.GameResult.DRAW_GAME);
             Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW_GAME);
@@ -159,7 +110,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
     }
 
     public ActionTreeNode initActionTree(AbstractGameState gameState){
-        int gridSize = ((TicTacToeGameState) gameState).gridBoard.getWidth();
+        int gridSize = ((TicTacToeGameState) gameState).getGridSize();
         ActionTreeNode root = new ActionTreeNode(0, "root");
         for (int x = 0; x < gridSize; x++) {
             ActionTreeNode xNode = root.addChild(0, "X" + x);
@@ -174,11 +125,11 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
 
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         int player = tttgs.getCurrentPlayer();
-        for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
+        for (int x = 0; x < tttgs.getGridSize(); x++) {
             ActionTreeNode xNode = root.findChildrenByName("X" + x);
-            for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
+            for (int y = 0; y < tttgs.getGridSize(); y++) {
                 ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
-                if (tttgs.gridBoard.getElement(x, y).getComponentName().equals(TicTacToeConstants.emptyCell)) {
+                if (!tttgs.gridBoard.contains(new SquareCoord(x, y))) {
                     xNode.setValue(1); // make sure that we set parent available
                     yNode.setAction(new SetGridValueAction(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player).getComponentID()));
                 }

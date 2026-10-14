@@ -1,6 +1,8 @@
 package games.tictactoe;
 
 import core.AbstractGameState;
+import core.components.BoardNode;
+import core.components.grid.SquareCoord;
 import core.interfaces.IStateFeatureJSON;
 import core.interfaces.IStateFeatureVector;
 import org.json.simple.JSONObject;
@@ -24,9 +26,10 @@ public class TTTFeatures implements IStateFeatureVector, IStateFeatureJSON {
         JSONObject json = new JSONObject();
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         String playerSymbol = (playerId == 0) ? "x" : "o";
-        for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
-            for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                String cellSymbol = tttgs.gridBoard.getElement(x, y).getComponentName();
+        for (int x = 0; x < tttgs.getGridSize(); x++) {
+            for (int y = 0; y < tttgs.getGridSize(); y++) {
+                BoardNode cell = tttgs.gridBoard.get(new SquareCoord(x, y));
+                String cellSymbol = cell == null ? "." : cell.getComponentName();
                 if (cellSymbol.equals(playerSymbol)) {
                     json.put(x + "," + y, 1);
                 } else if (cellSymbol.equals(".")) {
@@ -44,9 +47,10 @@ public class TTTFeatures implements IStateFeatureVector, IStateFeatureJSON {
         TicTacToeGameState tttgs = (TicTacToeGameState) state;
         List<Double> listVec = new ArrayList<>();
         String playerSymbol = (playerID == 0) ? "x" : "o";
-        for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
-            for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                String cellSymbol = tttgs.gridBoard.getElement(x, y).getComponentName();
+        for (int x = 0; x < tttgs.getGridSize(); x++) {
+            for (int y = 0; y < tttgs.getGridSize(); y++) {
+                BoardNode cell = tttgs.gridBoard.get(new SquareCoord(x, y));
+                String cellSymbol = cell == null ? "." : cell.getComponentName();
                 if (cellSymbol.equals(playerSymbol)) {
                     listVec.add(1.0);
                 } else if (cellSymbol.equals(".")) {

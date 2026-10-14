@@ -5,9 +5,14 @@ import core.components.BoardNode;
 import core.components.Component;
 import core.interfaces.IPrintable;
 import core.components.GridBoard;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 
 import java.util.Objects;
 
+/**
+ * Puts a BoardNode at (x, y) on a GridBoard, or on a SparseGrid of squares.
+ */
 public class SetGridValueAction extends AbstractAction implements IPrintable {
 
     private final int gridBoard;
@@ -31,7 +36,14 @@ public class SetGridValueAction extends AbstractAction implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         BoardNode value = (BoardNode) gs.getComponentById(valueID);
-        return ((GridBoard)gs.getComponentById(gridBoard)).setElement(x, y, value);
+        Component board = gs.getComponentById(gridBoard);
+        if (board instanceof SparseGrid<?, ?> grid) {
+            @SuppressWarnings("unchecked")
+            SparseGrid<SquareCoord, BoardNode> squares = (SparseGrid<SquareCoord, BoardNode>) grid;
+            squares.set(new SquareCoord(x, y), value);
+            return true;
+        }
+        return ((GridBoard) board).setElement(x, y, value);
     }
 
     @Override

@@ -1,7 +1,8 @@
 package games.tictactoe.gui;
 
 import core.components.BoardNode;
-import core.components.GridBoard;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
 
@@ -16,10 +17,12 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
 
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
+    final int gridSize;
 
-    public TTTBoardView(GridBoard gridBoard) {
-        super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
-        rects = new Rectangle[gridBoard.getWidth() * gridBoard.getHeight()];
+    public TTTBoardView(SparseGrid<SquareCoord, BoardNode> gridBoard, int gridSize) {
+        super(gridBoard, gridSize * defaultItemSize, gridSize * defaultItemSize);
+        this.gridSize = gridSize;
+        rects = new Rectangle[gridSize * gridSize];
         highlight = new ArrayList<>();
 
         addMouseListener(new MouseAdapter() {
@@ -44,7 +47,9 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
+        @SuppressWarnings("unchecked")
+        SparseGrid<SquareCoord, BoardNode> gridBoard = (SparseGrid<SquareCoord, BoardNode>) component;
+        drawGridBoard((Graphics2D)g, gridBoard, 0, 0);
 
         if (!highlight.isEmpty()) {
             g.setColor(Color.green);
@@ -57,9 +62,9 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
-        int width = gridBoard.getWidth() * defaultItemSize;
-        int height = gridBoard.getHeight() * defaultItemSize;
+    public void drawGridBoard(Graphics2D g, SparseGrid<SquareCoord, BoardNode> gridBoard, int x, int y) {
+        int width = gridSize * defaultItemSize;
+        int height = gridSize * defaultItemSize;
 
         // Draw background
         g.setColor(Color.lightGray);
@@ -67,14 +72,14 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
         g.setColor(Color.black);
 
         // Draw cells
-        for (int i = 0; i < gridBoard.getHeight(); i++) {
-            for (int j = 0; j < gridBoard.getWidth(); j++) {
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + i * defaultItemSize;
-                drawCell(g, gridBoard.getElement(j, i), xC, yC);
+                drawCell(g, gridBoard.get(new SquareCoord(j, i)), xC, yC);
 
                 // Save rect where cell is drawn
-                int idx = i * gridBoard.getWidth() + j;
+                int idx = i * gridSize + j;
                 if (rects[idx] == null) {
                     rects[idx] = new Rectangle(xC, yC, defaultItemSize, defaultItemSize);
                 }
