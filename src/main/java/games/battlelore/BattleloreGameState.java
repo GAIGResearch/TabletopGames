@@ -115,57 +115,48 @@ public class BattleloreGameState extends AbstractGameState {
         return tiles;
     }
 
-    public int[][] GetPossibleLocationsForUnits(MapTile tile) {
-        int[][] possibleLocations = new int[gameBoard.getWidth()][2];
-        GetPossibleLocations(tile, possibleLocations, false);
-        if (possibleLocations.length == 0) {
-            GetPossibleLocations(tile, possibleLocations, true);
+    /**
+     * The empty tiles the units on the tile can move to.
+     */
+    public List<MapTile> GetPossibleLocationsForUnits(MapTile tile) {
+        // within their move range, or anywhere if no tile in range is empty
+        List<MapTile> possibleLocations = GetPossibleLocations(tile, false);
+        if (possibleLocations.isEmpty()) {
+            possibleLocations = GetPossibleLocations(tile, true);
         }
         return possibleLocations;
     }
 
-    private void GetPossibleLocations(MapTile tile, int[][] possibleLocations, boolean isMovementFlexible) {
+    private List<MapTile> GetPossibleLocations(MapTile tile, boolean isMovementFlexible) {
         int moveRange = tile.GetUnits().get(0).moveRange;
-        int counter = 0;
+        List<MapTile> possibleLocations = new ArrayList<>();
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
-                possibleLocations[x][0] = -1;
-                possibleLocations[x][1] = -1;
-
                 MapTile possibleTile = (MapTile) gameBoard.getElement(x, y);
-                if (possibleTile.GetUnits() == null) {
-                    double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - tile.getLocationX()), 2) +
-                            Math.pow(Math.abs(possibleTile.getLocationY() - tile.getLocationY()), 2));
-                    if (distance <= moveRange || isMovementFlexible) {
-                        possibleLocations[counter][0] = possibleTile.getLocationX();
-                        possibleLocations[counter][1] = possibleTile.getLocationY();
-                        counter++;
-                    }
+                if (possibleTile.GetUnits() == null
+                        && (possibleTile.getHex().distance(tile.getHex()) <= moveRange || isMovementFlexible)) {
+                    possibleLocations.add(possibleTile);
                 }
             }
         }
+        return possibleLocations;
     }
 
-    public int[][] GetPossibleTargetUnits(MapTile attackUnit) {
-        int[][] possibleLocations = new int[gameBoard.getWidth()][nPlayers];
+    /**
+     * The tiles with enemy units within range of the units on the tile.
+     */
+    public List<MapTile> GetPossibleTargetUnits(MapTile attackUnit) {
         boolean isMelee = attackUnit.GetUnits().get(0).isMelee;
         BattleloreGameParameters parameters = (BattleloreGameParameters) gameParameters;
         int range = parameters.getTroopRange(isMelee);
-        int counter = 0;
+        List<MapTile> possibleLocations = new ArrayList<>();
 
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
-                possibleLocations[x][0] = -1;
-                possibleLocations[x][1] = -1;
                 MapTile possibleTile = (MapTile) gameBoard.getElement(x, y);
-                if (possibleTile.GetUnits() != null && possibleTile.GetFaction() != attackUnit.GetFaction()) {
-                    double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - attackUnit.getLocationX()), 2) +
-                            Math.pow(Math.abs(possibleTile.getLocationY() - attackUnit.getLocationY()), 2));
-                    if (distance <= range) {
-                        possibleLocations[counter][0] = possibleTile.getLocationX();
-                        possibleLocations[counter][1] = possibleTile.getLocationY();
-                        counter++;
-                    }
+                if (possibleTile.GetUnits() != null && possibleTile.GetFaction() != attackUnit.GetFaction()
+                        && possibleTile.getHex().distance(attackUnit.getHex()) <= range) {
+                    possibleLocations.add(possibleTile);
                 }
             }
         }

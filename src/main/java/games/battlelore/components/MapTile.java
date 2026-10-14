@@ -1,6 +1,7 @@
 package games.battlelore.components;
 
 import core.components.BoardNode;
+import core.components.grid.HexCoord;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -20,6 +21,13 @@ public class MapTile extends BoardNode {
 
     public int getLocationY() {
         return locationY;
+    }
+
+    /**
+     * The hex of the tile on the board, whose odd rows are shifted right.
+     */
+    public HexCoord getHex() {
+        return HexCoord.fromOffset(locationX, locationY, HexCoord.Offset.ODD_R);
     }
 
     public MapTile(int locationX, int locationY, ArrayList<Unit> units) {

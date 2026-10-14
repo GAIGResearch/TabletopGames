@@ -2,6 +2,7 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -16,7 +17,7 @@ import java.util.*;
 
 import static games.terraformingmars.TMTypes.Tile.City;
 import static games.terraformingmars.TMTypes.Tile.Greenery;
-import static games.terraformingmars.TMTypes.neighbor_directions;
+import static core.components.grid.HexCoord.Offset.ODD_R;
 
 public class PlaceTile extends TMAction implements TMExtendedSequence {
     public boolean respectingAdjacency = true;
@@ -402,12 +403,13 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
         return count;
     }
 
+    /**
+     * The cells next to the cell on the board, whose odd rows are shifted right; some may be off the board.
+     */
     public static List<Vector2D> getNeighbours(Vector2D cell) {
         ArrayList<Vector2D> neighbors = new ArrayList<>();
-        int parity = Math.abs(cell.getY() % 2);
-        for (Vector2D v: neighbor_directions[parity]) {
-            neighbors.add(cell.add(v));
-        }
+        for (HexCoord n : HexCoord.fromOffset(cell.getX(), cell.getY(), ODD_R).neighbours())
+            neighbors.add(new Vector2D(n.offsetCol(ODD_R), n.r()));
         return neighbors;
     }
 

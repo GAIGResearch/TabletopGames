@@ -11,10 +11,13 @@ import games.terraformingmars.rules.effects.PlaceTileEffect;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -95,5 +98,16 @@ public class TMForwardModelTest {
             }
             assertTrue(gs.getGeneration() > 1);
         }
+    }
+
+    @Test
+    public void neighboursFollowTheOddRowsShiftedRight() {
+        // row 2 is not shifted, so the cells above and below are to the left; row 3 is, so they are to the right
+        assertEquals(Set.of(new Vector2D(5, 2), new Vector2D(3, 2), new Vector2D(3, 1), new Vector2D(4, 1),
+                        new Vector2D(3, 3), new Vector2D(4, 3)),
+                new HashSet<>(PlaceTile.getNeighbours(new Vector2D(4, 2))));
+        assertEquals(Set.of(new Vector2D(5, 3), new Vector2D(3, 3), new Vector2D(4, 2), new Vector2D(5, 2),
+                        new Vector2D(4, 4), new Vector2D(5, 4)),
+                new HashSet<>(PlaceTile.getNeighbours(new Vector2D(4, 3))));
     }
 }

@@ -127,16 +127,11 @@ public class BattleloreForwardModel extends StandardForwardModel {
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep) {
             List<MapTile> moveableUnitTiles = state.GetMoveableUnitsFromTile(playerFaction);
-            int[][] possibleLocations;
 
             if (!moveableUnitTiles.isEmpty()) {
                 for (MapTile tile : moveableUnitTiles) {
-                    possibleLocations = state.GetPossibleLocationsForUnits(tile);
-                    //check possible locations size
-                    for (int i = 0; i < state.getBoard().getWidth(); i++) {
-                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
-                            actions.add(new MoveUnitsAction(tile.getComponentID(), playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
-                        }
+                    for (MapTile to : state.GetPossibleLocationsForUnits(tile)) {
+                        actions.add(new MoveUnitsAction(tile.getComponentID(), playerFaction, to.getLocationX(), to.getLocationY(), player));
                     }
                     if (actions.isEmpty()) {
                         actions.add(new SkipTurnAction(tile.getComponentID(), playerFaction, true, false, player));
@@ -147,17 +142,12 @@ public class BattleloreForwardModel extends StandardForwardModel {
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.AttackStep) {
             ArrayList<MapTile> readyToAttackUnits = state.GetReadyForAttackUnitsFromTile(playerFaction);
-            int[][] possibleLocations;
 
             if (!readyToAttackUnits.isEmpty()) {
                 for (MapTile attacker : readyToAttackUnits) {
-                    possibleLocations = state.GetPossibleTargetUnits(attacker);
-
-                    for (int i = 0; i < state.getBoard().getWidth(); i++) {
-                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
-                            actions.add(new AttackUnitsAction(attacker.getComponentID(), state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]).getComponentID(),
-                                    attacker.GetFaction(), player));
-                        }
+                    for (MapTile target : state.GetPossibleTargetUnits(attacker)) {
+                        actions.add(new AttackUnitsAction(attacker.getComponentID(), target.getComponentID(),
+                                attacker.GetFaction(), player));
                     }
                     if (actions.isEmpty()) {
                         actions.add(new SkipTurnAction(attacker.getComponentID(), playerFaction, false, true, player));
