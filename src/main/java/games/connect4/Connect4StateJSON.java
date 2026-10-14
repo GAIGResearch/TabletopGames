@@ -1,14 +1,13 @@
 package games.connect4;
 
 import core.components.BoardNode;
-import core.components.GridBoard;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Pair;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * Serialization of {@link Connect4GameState} to and from JSON, following the same pattern as
@@ -19,8 +18,8 @@ import java.util.Map;
  * <p>
  * Component identity is preserved on reload: occupied cells reference the shared static
  * {@link Connect4Constants#playerMapping} markers (so their componentIDs and any subsequent
- * getComponentById lookups line up), and empty cells / the board itself are rebuilt with their
- * original componentIDs so that the restored state is {@code equals()} to the original.
+ * getComponentById lookups line up), and the board itself is rebuilt with its original componentID
+ * so that the restored state is {@code equals()} to the original.
  */
 public class Connect4StateJSON {
 
@@ -32,21 +31,20 @@ public class Connect4StateJSON {
         // this includes parameters and game phase
         json.put("abstractGameState", state.abstractGameStateToJSON());
 
-        GridBoard board = state.gridBoard;
+        SparseGrid<SquareCoord, BoardNode> board = state.gridBoard;
         json.put("gridBoardID", board.getComponentID());
-        json.put("width", board.getWidth());
-        json.put("height", board.getHeight());
+        json.put("width", state.width);
+        json.put("height", state.height);
 
-        // The board is stored row by row (y outer, x inner). Each cell records its name (which
-        // marker, or the empty cell) and its componentID (needed to restore empty-cell identity).
+        // The board is stored row by row (y outer, x inner). Each cell records its name: which
+        // marker, or the empty cell.
         JSONArray rows = new JSONArray();
-        for (int y = 0; y < board.getHeight(); y++) {
+        for (int y = 0; y < state.height; y++) {
             JSONArray row = new JSONArray();
-            for (int x = 0; x < board.getWidth(); x++) {
-                BoardNode cell = board.getElement(x, y);
+            for (int x = 0; x < state.width; x++) {
+                BoardNode cell = board.get(new SquareCoord(x, y));
                 JSONObject cellJSON = new JSONObject();
-                cellJSON.put("name", cell.getComponentName());
-                cellJSON.put("id", cell.getComponentID());
+                cellJSON.put("name", cell == null ? Connect4Constants.emptyCell : cell.getComponentName());
                 row.add(cellJSON);
             }
             rows.add(row);
@@ -74,18 +72,17 @@ public class Connect4StateJSON {
         int height = rows.size();
         int width = ((JSONArray) rows.get(0)).size();
 
-        BoardNode[][] grid = new BoardNode[height][width];
-        Map<Integer, BoardNode> emptyNodes = new HashMap<>();
+        SparseGrid<SquareCoord, BoardNode> grid = SparseGrid.withComponentID(state.gridBoard.getComponentName(), gridBoardID);
         for (int y = 0; y < height; y++) {
             JSONArray row = (JSONArray) rows.get(y);
             for (int x = 0; x < width; x++) {
-                JSONObject cellJSON = (JSONObject) row.get(x);
-                String name = (String) cellJSON.get("name");
-                int id = ((Number) cellJSON.get("id")).intValue();
-                grid[y][x] = resolveCell(name, id, emptyNodes);
+                String name = (String) ((JSONObject) row.get(x)).get("name");
+                grid.set(new SquareCoord(x, y), marker(name));
             }
         }
-        state.gridBoard = new GridBoard(grid, gridBoardID);
+        state.gridBoard = grid;
+        state.width = width;
+        state.height = height;
 
         LinkedList<Pair<Integer, Integer>> winnerCells = new LinkedList<>();
         JSONArray winnerArray = (JSONArray) json.get("winnerCells");
@@ -101,16 +98,14 @@ public class Connect4StateJSON {
     }
 
     /**
-     * Occupied cells resolve to the shared static playerMapping markers (matched by name) so that
-     * componentIDs are identical to the pre-serialization state. Empty cells are rebuilt once per
-     * distinct componentID and reused across the board, mirroring how the forward model fills the
-     * board with a single shared empty node.
+     * The shared static playerMapping marker with the name, so that componentIDs are identical to the
+     * pre-serialization state; null for the empty cell.
      */
-    private static BoardNode resolveCell(String name, int id, Map<Integer, BoardNode> emptyNodes) {
+    private static BoardNode marker(String name) {
         for (BoardNode marker : Connect4Constants.playerMapping) {
             if (marker.getComponentName().equals(name))
                 return marker;
         }
-        return emptyNodes.computeIfAbsent(id, i -> new BoardNode(name, i));
+        return null;
     }
 }

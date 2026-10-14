@@ -1,7 +1,7 @@
 package games.connect4.gui;
 import core.components.BoardNode;
-import core.components.GridBoard;
-import games.connect4.Connect4Constants;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
 import utilities.Pair;
@@ -19,10 +19,13 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
     LinkedList<Pair<Integer, Integer>> winningCells;
+    final int gridWidth, gridHeight;
 
-    public Connect4BoardView(GridBoard gridBoard) {
-        super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
-        rects = new Rectangle[gridBoard.getWidth()];
+    public Connect4BoardView(SparseGrid<SquareCoord, BoardNode> gridBoard, int gridWidth, int gridHeight) {
+        super(gridBoard, gridWidth * defaultItemSize, gridHeight * defaultItemSize);
+        this.gridWidth = gridWidth;
+        this.gridHeight = gridHeight;
+        rects = new Rectangle[gridWidth];
         highlight = new ArrayList<>();
         winningCells = new LinkedList<>();
 
@@ -48,7 +51,9 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
+        @SuppressWarnings("unchecked")
+        SparseGrid<SquareCoord, BoardNode> gridBoard = (SparseGrid<SquareCoord, BoardNode>) component;
+        drawGridBoard((Graphics2D)g, gridBoard, 0, 0);
 
         if (highlight.size() > 0) {
             g.setColor(Color.green);
@@ -64,9 +69,9 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
             drawWinningCells((Graphics2D) g);
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
-        int width = gridBoard.getWidth() * defaultItemSize;
-        int height = (gridBoard.getHeight()+1) * defaultItemSize;
+    public void drawGridBoard(Graphics2D g, SparseGrid<SquareCoord, BoardNode> gridBoard, int x, int y) {
+        int width = gridWidth * defaultItemSize;
+        int height = (gridHeight+1) * defaultItemSize;
 
         //Draw cells background
         g.setColor(Color.lightGray);
@@ -74,10 +79,10 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
         g.setColor(Color.black);
 
         // Draw column indicators
-        for (int j = 0; j < gridBoard.getWidth(); j++) {
+        for (int j = 0; j < gridWidth; j++) {
             int xC = x + j * defaultItemSize;
             int yC = y;
-            drawCell(g, null, xC, yC);
+            drawColumnIndicator(g, xC, yC);
 
             // Save rect where cell is drawn
             if (rects[j] == null) {
@@ -87,45 +92,37 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
 
 
         // Draw main cells
-        for (int i = 0; i < gridBoard.getHeight(); i++) {
-            for (int j = 0; j < gridBoard.getWidth(); j++) {
+        for (int i = 0; i < gridHeight; i++) {
+            for (int j = 0; j < gridWidth; j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + (i+1) * defaultItemSize;
-                drawCell(g, gridBoard.getElement(j, i), xC, yC);
+                drawCell(g, gridBoard.get(new SquareCoord(j, i)), xC, yC);
 
             }
         }
     }
 
+    // the token, if any, on a light grey square
     private void drawCell(Graphics2D g, BoardNode element, int x, int y) {
+        g.setColor(Color.lightGray);
+        g.fillRect(x, y, defaultItemSize, defaultItemSize);
+        g.setColor(Color.black);
+        g.drawRect(x, y, defaultItemSize, defaultItemSize);
 
-
-        // Paint element in cell
         if (element != null) {
-
-            // Paint cell background
-            g.setColor(Color.lightGray);
-            g.fillRect(x, y, defaultItemSize, defaultItemSize);
-            g.setColor(Color.black);
-            g.drawRect(x, y, defaultItemSize, defaultItemSize);
-
             Font f = g.getFont();
             g.setFont(new Font(f.getName(), Font.BOLD, defaultItemSize * 3 / 2));
-            if(!element.getComponentName().equals(Connect4Constants.emptyCell))
-                g.drawString(element.getComponentName(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
+            g.drawString(element.getComponentName(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
             g.setFont(f);
-        }else
-        {
-            // Paint cell background
-            g.setColor(Color.pink);
-            g.fillRect(x, y, defaultItemSize, defaultItemSize);
-            g.setColor(Color.black);
-            g.drawRect(x, y, defaultItemSize, defaultItemSize);
-
-            // Paint column indicator
-            g.drawString("[Col: " + ((x/defaultItemSize)+1) + "]", x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
         }
+    }
 
+    private void drawColumnIndicator(Graphics2D g, int x, int y) {
+        g.setColor(Color.pink);
+        g.fillRect(x, y, defaultItemSize, defaultItemSize);
+        g.setColor(Color.black);
+        g.drawRect(x, y, defaultItemSize, defaultItemSize);
+        g.drawString("[Col: " + ((x/defaultItemSize)+1) + "]", x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
     }
 
     public ArrayList<Rectangle> getHighlight() {

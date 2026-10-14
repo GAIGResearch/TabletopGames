@@ -49,9 +49,16 @@ public class SparseGrid<C extends GridCoord<C>, T> extends Component implements 
             hiddenFrom.add(new HashSet<>());
     }
 
-    // an empty grid with the original's name and id
-    private SparseGrid(SparseGrid<C, T> orig) {
-        super(CoreConstants.ComponentType.BOARD, orig.componentName, orig.componentID);
+    // an empty fully observable grid
+    private SparseGrid(int componentID, String name) {
+        super(CoreConstants.ComponentType.BOARD, name, componentID);
+    }
+
+    /**
+     * An empty fully observable grid with the given componentID, as when restoring a saved state.
+     */
+    public static <C extends GridCoord<C>, T> SparseGrid<C, T> withComponentID(String name, int componentID) {
+        return new SparseGrid<>(componentID, name);
     }
 
     private int index(int first, int second) {
@@ -228,7 +235,7 @@ public class SparseGrid<C extends GridCoord<C>, T> extends Component implements 
 
     @Override
     public SparseGrid<C, T> copy() {
-        SparseGrid<C, T> copy = new SparseGrid<>(this);
+        SparseGrid<C, T> copy = new SparseGrid<>(componentID, componentName);
         copy.values = values.clone();
         copy.positions = positions.clone();
         copy.minFirst = minFirst;
