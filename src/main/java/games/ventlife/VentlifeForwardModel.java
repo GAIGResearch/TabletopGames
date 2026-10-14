@@ -5,6 +5,8 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import core.components.grid.HexCoord;
+import core.components.grid.SparseGrid;
 import games.ventlife.actions.CreatureStep;
 import games.ventlife.actions.DraftSpecies;
 import games.ventlife.actions.PlaceTile;
@@ -14,16 +16,14 @@ import java.util.*;
 
 public class VentlifeForwardModel extends StandardForwardModel {
 
-    private static final Hex ORIGIN = new Hex(0, 0);
-
     @Override
     protected void _setup(AbstractGameState firstState) {
         VentlifeGameState state = (VentlifeGameState) firstState;
         VentlifeParameters params = state.getParams();
         int nPlayers = state.getNPlayers();
 
-        state.field = new HashMap<>();
-        state.creatures = new HashMap<>();
+        state.field = new SparseGrid<>("Field");
+        state.creatures = new SparseGrid<>("Creatures");
         state.tilesPlaced = 0;
 
         state.drawDeck = new Deck<>("Draw deck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -81,41 +81,41 @@ public class VentlifeForwardModel extends StandardForwardModel {
         // the first tile could go anywhere, so it goes at the origin: only its orientation is a choice
         if (state.field.isEmpty()) {
             for (int o = 0; o < 6; o++)
-                actions.add(new PlaceTile(tile, ORIGIN, o));
+                actions.add(new PlaceTile(tile, HexCoord.ORIGIN, o));
             return actions;
         }
         // candidate Smoker positions: within two steps of the field (seafloor), or on a Black Smoker (plateau);
         // sorted, so that equal states list their actions in the same order
-        Set<Hex> candidates = new TreeSet<>(VentlifeUtils.HEX_ORDER);
-        for (Map.Entry<Hex, HexCell> e : state.field.entrySet()) {
+        Set<HexCoord> candidates = new TreeSet<>();
+        for (Map.Entry<HexCoord, HexCell> e : state.field.asMap().entrySet()) {
             if (e.getValue().terrain() == Terrain.BLACK_SMOKER)
                 candidates.add(e.getKey());
-            for (Hex n : e.getKey().neighbours()) {
-                if (!state.field.containsKey(n))
+            for (HexCoord n : e.getKey().neighbours()) {
+                if (!state.field.contains(n))
                     candidates.add(n);
-                for (Hex nn : n.neighbours())
-                    if (!state.field.containsKey(nn))
+                for (HexCoord nn : n.neighbours())
+                    if (!state.field.contains(nn))
                         candidates.add(nn);
             }
         }
-        for (Hex smoker : candidates)
+        for (HexCoord smoker : candidates)
             for (int o = 0; o < 6; o++)
                 if (canPlaceTile(state, smoker, o))
                     actions.add(new PlaceTile(tile, smoker, o));
         return actions;
     }
 
-    private boolean canPlaceTile(VentlifeGameState state, Hex smoker, int orientation) {
-        List<Hex> hexes = VentlifeUtils.tileHexes(smoker, orientation);
+    private boolean canPlaceTile(VentlifeGameState state, HexCoord smoker, int orientation) {
+        List<HexCoord> hexes = VentlifeUtils.tileHexes(smoker, orientation);
         int covered = 0;
-        for (Hex h : hexes)
-            if (state.field.containsKey(h))
+        for (HexCoord h : hexes)
+            if (state.field.contains(h))
                 covered++;
         if (covered == 0) {
             // seafloor expansion: touching the field along an edge
-            for (Hex h : hexes)
-                for (Hex n : h.neighbours())
-                    if (state.field.containsKey(n))
+            for (HexCoord h : hexes)
+                for (HexCoord n : h.neighbours())
+                    if (state.field.contains(n))
                         return true;
             return false;
         }
@@ -126,7 +126,7 @@ public class VentlifeForwardModel extends StandardForwardModel {
         if (under.terrain() != Terrain.BLACK_SMOKER)
             return false;
         boolean differentTiles = false;
-        for (Hex h : hexes) {
+        for (HexCoord h : hexes) {
             HexCell cell = state.field.get(h);
             if (cell.level() != under.level())
                 return false;

@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import core.components.grid.HexCoord;
 import games.GameType;
 import games.ventlife.actions.CreatureStep;
 import games.ventlife.actions.Displace;
@@ -63,8 +64,8 @@ class VentlifeTestUtils {
         return newState(nPlayers, seed, null);
     }
 
-    static Hex hex(int q, int r) {
-        return new Hex(q, r);
+    static HexCoord hex(int q, int r) {
+        return new HexCoord(q, r);
     }
 
     static VentTile tile(Terrain left, Terrain right) {
@@ -77,7 +78,7 @@ class VentlifeTestUtils {
     }
 
     /** PlaceTile of the tile the current player holds. */
-    static PlaceTile placeTile(VentlifeGameState state, Hex smoker, int orientation) {
+    static PlaceTile placeTile(VentlifeGameState state, HexCoord smoker, int orientation) {
         return new PlaceTile(heldTile(state), smoker, orientation);
     }
 
@@ -163,24 +164,24 @@ class VentlifeTestUtils {
      * Writes the top hex of a position straight into the field (no tile, no rules): for scoring tests only, never
      * under a tile conservation check.
      */
-    static void putCell(VentlifeGameState state, Hex hex, Terrain terrain, int level) {
+    static void putCell(VentlifeGameState state, HexCoord hex, Terrain terrain, int level) {
         state.setCell(hex, new HexCell(terrain, level, 0));
     }
 
-    static PlaceCreature shrimp(Hex hex) {
+    static PlaceCreature shrimp(HexCoord hex) {
         return new PlaceCreature(SHRIMP, hex, 1);
     }
 
-    static PlaceCreature fish(Hex hex) {
+    static PlaceCreature fish(HexCoord hex) {
         return new PlaceCreature(FISH, hex, 1);
     }
 
-    static PlaceCreature crab(Hex hex) {
+    static PlaceCreature crab(HexCoord hex) {
         return new PlaceCreature(CRAB, hex, 1);
     }
 
     /** The decision to move the owner's single covered creature of the species from the covered position to another. */
-    static Displace displace(Species species, int owner, Hex from, Hex to) {
+    static Displace displace(Species species, int owner, HexCoord from, HexCoord to) {
         return new Displace(new Creature(species, owner, 1), from, to);
     }
 
@@ -192,19 +193,19 @@ class VentlifeTestUtils {
         return retValue;
     }
 
-    static PlaceCreature worm(Hex hex, int count) {
+    static PlaceCreature worm(HexCoord hex, int count) {
         return new PlaceCreature(WORM, hex, count);
     }
 
-    static PlaceCreature sponge(Hex hex) {
+    static PlaceCreature sponge(HexCoord hex) {
         return new PlaceCreature(SPONGE, hex, 1);
     }
 
-    static PlaceCreature snail(Hex hex) {
+    static PlaceCreature snail(HexCoord hex) {
         return new PlaceCreature(SNAIL, hex, 1);
     }
 
-    static PlaceCreature octopus(Hex hex) {
+    static PlaceCreature octopus(HexCoord hex) {
         return new PlaceCreature(OCTOPUS, hex, 1);
     }
 
@@ -265,7 +266,7 @@ class VentlifeTestUtils {
     }
 
     /** Puts count creatures of the player's on the hex, taken from their supply (conserves tokens; no rules checked). */
-    static void putCreature(VentlifeGameState state, Hex hex, Species species, int owner, int count) {
+    static void putCreature(VentlifeGameState state, HexCoord hex, Species species, int owner, int count) {
         state.setCreature(hex, new Creature(species, owner, count));
         state.changeSupply(owner, species, -count);
     }
@@ -276,7 +277,7 @@ class VentlifeTestUtils {
      */
     static void assertTokensConserved(VentlifeGameState state, String when) {
         int tokens = state.getParams().tokensPerSpecies;
-        for (Map.Entry<Hex, Creature> e : state.getCreatures().entrySet()) {
+        for (Map.Entry<HexCoord, Creature> e : state.getCreatures().entrySet()) {
             assertTrue(when + ": creature on uncovered " + e.getKey(), state.getField().containsKey(e.getKey()));
             assertTrue(when + ": empty creature at " + e.getKey(), e.getValue().count() >= 1);
         }
@@ -307,7 +308,7 @@ class VentlifeTestUtils {
                 {BASALT, DIFFUSE, hex(0, 0), 1}, {DIFFUSE, MAT, hex(1, 0), 0}, {MAT, BASALT, hex(0, 0), 0},
                 {BASALT, MAT, hex(-1, 0), 2}, {DIFFUSE, BASALT, hex(-1, 0), 1}, {MAT, DIFFUSE, hex(0, 0), 1}};
         for (int i = 0; i < nTiles; i++)
-            place(state, fm, (Terrain) tiles[i][0], (Terrain) tiles[i][1], (Hex) tiles[i][2], (Integer) tiles[i][3]);
+            place(state, fm, (Terrain) tiles[i][0], (Terrain) tiles[i][1], (HexCoord) tiles[i][2], (Integer) tiles[i][3]);
     }
 
     /**
@@ -363,14 +364,14 @@ class VentlifeTestUtils {
 
     /** Gives the current player the tile (left, right) and plays PlaceTile(smoker, orientation) as their turn. */
     static void place(VentlifeGameState state, AbstractForwardModel fm, Terrain left, Terrain right,
-                      Hex smoker, int orientation) {
+                      HexCoord smoker, int orientation) {
         giveTile(state, state.getCurrentPlayer(), left, right);
         takeTurn(state, fm, placeTile(state, smoker, orientation));
     }
 
     /** As place, with the given creature placement as the turn's creature step. */
     static void place(VentlifeGameState state, AbstractForwardModel fm, Terrain left, Terrain right,
-                      Hex smoker, int orientation, PlaceCreature creature) {
+                      HexCoord smoker, int orientation, PlaceCreature creature) {
         giveTile(state, state.getCurrentPlayer(), left, right);
         takeTurn(state, fm, placeTile(state, smoker, orientation), creature);
     }
@@ -399,13 +400,13 @@ class VentlifeTestUtils {
      * positions uncovered and at least one of them sharing an edge with a covered position. Searches smoker positions
      * with |q|, |r| <= 8, enough for the small fields of the unit tests.
      */
-    static Set<PlaceTile> seafloorPlacements(VentTile tile, Set<Hex> covered) {
+    static Set<PlaceTile> seafloorPlacements(VentTile tile, Set<HexCoord> covered) {
         Set<PlaceTile> retValue = new HashSet<>();
         for (int q = -8; q <= 8; q++)
             for (int r = -8; r <= 8; r++)
                 for (int o = 0; o < 6; o++) {
-                    Hex s = hex(q, r);
-                    List<Hex> three = List.of(s, s.neighbour((o + 1) % 6), s.neighbour(o));
+                    HexCoord s = hex(q, r);
+                    List<HexCoord> three = List.of(s, s.neighbour((o + 1) % 6), s.neighbour(o));
                     boolean free = three.stream().noneMatch(covered::contains);
                     boolean touching = three.stream().anyMatch(h -> covered.stream().anyMatch(c -> distance(h, c) == 1));
                     if (free && touching)
@@ -415,7 +416,7 @@ class VentlifeTestUtils {
     }
 
     /** The hex distance (number of steps) between two positions. */
-    static int distance(Hex a, Hex b) {
+    static int distance(HexCoord a, HexCoord b) {
         int dq = a.q() - b.q(), dr = a.r() - b.r();
         return (Math.abs(dq) + Math.abs(dr) + Math.abs(dq + dr)) / 2;
     }

@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.GameType;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeUtils;
@@ -39,7 +40,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
     VentlifePlayersView playersView;
     // the state last shown, the hex and species a human player has clicked (null for none), and the hex under the mouse
     VentlifeGameState shown;
-    Hex selectedHex, hover;
+    HexCoord selectedHex, hover;
     Species selectedSpecies;
 
     public VentlifeGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
@@ -71,7 +72,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
         fieldView.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                Hex h = fieldView.hexAt(e.getPoint());
+                HexCoord h = fieldView.hexAt(e.getPoint());
                 if (!h.equals(hover)) {
                     hover = h;
                     showClickable();
@@ -150,7 +151,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
         selectedSpecies = null;
     }
 
-    private static int direction(Hex from, Hex to) {
+    private static int direction(HexCoord from, HexCoord to) {
         for (int d = 0; d < 6; d++)
             if (from.neighbour(d).equals(to))
                 return d;
@@ -160,7 +161,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
     /**
      * The tile placements with the Black Smoker at the selected hex and the right terrain at the hex.
      */
-    private List<PlaceTile> orientationsTowards(Hex h) {
+    private List<PlaceTile> orientationsTowards(HexCoord h) {
         if (selectedHex == null) return List.of();
         int d = direction(selectedHex, h);
         return clickable.matching(PlaceTile.class, a -> a.smoker.equals(selectedHex) && a.orientation == d);
@@ -170,7 +171,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
      * The single-creature placements on the hex, of the selected species if one is chosen. The Low-Vent Bonus is
      * left to the action buttons.
      */
-    private List<PlaceCreature> creaturesAt(Hex h) {
+    private List<PlaceCreature> creaturesAt(HexCoord h) {
         return clickable.matching(PlaceCreature.class, a -> a.count == 1 && a.hex.equals(h)
                 && (selectedSpecies == null || a.species == selectedSpecies));
     }
@@ -182,7 +183,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
             showClickable();
             return;
         }
-        Hex h = fieldView.hexAt(e.getPoint());
+        HexCoord h = fieldView.hexAt(e.getPoint());
         List<Displace> moves = clickable.matching(Displace.class, a -> a.to.equals(h));
         List<PlaceTile> tiles = clickable.matching(PlaceTile.class, a -> a.smoker.equals(h));
         List<PlaceTile> oriented = orientationsTowards(h);
@@ -234,8 +235,8 @@ public class VentlifeGUIManager extends AbstractGUIManager {
      */
     private void showClickable() {
         if (shown == null) return;
-        Map<Hex, Color> hexes = new HashMap<>();
-        Map<Hex, Terrain> preview = new HashMap<>();
+        Map<HexCoord, Color> hexes = new HashMap<>();
+        Map<HexCoord, Terrain> preview = new HashMap<>();
         Map<Species, Color> species = new EnumMap<>(Species.class);
         if (!clickable.isOffered()) {
             clearSelection();
@@ -277,9 +278,9 @@ public class VentlifeGUIManager extends AbstractGUIManager {
         playersView.setOutlines(species);
     }
 
-    private static Map<Hex, Terrain> tileTerrains(PlaceTile a) {
-        List<Hex> hexes = VentlifeUtils.tileHexes(a.smoker, a.orientation);
-        Map<Hex, Terrain> retValue = new HashMap<>();
+    private static Map<HexCoord, Terrain> tileTerrains(PlaceTile a) {
+        List<HexCoord> hexes = VentlifeUtils.tileHexes(a.smoker, a.orientation);
+        Map<HexCoord, Terrain> retValue = new HashMap<>();
         retValue.put(hexes.get(0), Terrain.BLACK_SMOKER);
         retValue.put(hexes.get(1), a.tile.left);
         retValue.put(hexes.get(2), a.tile.right);
@@ -288,7 +289,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
 
     // ---------------------------------------------------------------- tooltips
 
-    private String describe(Hex h) {
+    private String describe(HexCoord h) {
         HexCell cell = shown.getCell(h);
         String retValue = cell == null ? "Empty seafloor " + h
                 : cell.terrain().label + " " + h + ", level " + cell.level() + " (tile " + (cell.tileId() + 1) + ")";
@@ -312,7 +313,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
      */
     private String covers(PlaceTile a) {
         StringBuilder retValue = new StringBuilder();
-        for (Hex h : VentlifeUtils.tileHexes(a.smoker, a.orientation)) {
+        for (HexCoord h : VentlifeUtils.tileHexes(a.smoker, a.orientation)) {
             Creature c = shown.getCreature(h);
             if (c != null)
                 retValue.append(retValue.isEmpty() ? "" : ", ").append("player ").append(c.owner()).append("'s ")
@@ -322,7 +323,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
     }
 
     private String fieldToolTip(MouseEvent e) {
-        Hex h = fieldView.hexAt(e.getPoint());
+        HexCoord h = fieldView.hexAt(e.getPoint());
         StringBuilder tip = new StringBuilder("<html>").append(describe(h));
         if (clickable.isOffered()) {
             int player = clickable.player();
@@ -336,7 +337,7 @@ public class VentlifeGUIManager extends AbstractGUIManager {
                         .append(m.from).append(" here.");
             } else if (!oriented.isEmpty()) {
                 PlaceTile a = oriented.get(0);
-                List<Hex> at = VentlifeUtils.tileHexes(a.smoker, a.orientation);
+                List<HexCoord> at = VentlifeUtils.tileHexes(a.smoker, a.orientation);
                 tip.append("<br><b>Click</b> to place ").append(a.tile).append(" with its Black Smoker at ")
                         .append(a.smoker).append(", ").append(a.tile.right).append(" here and ").append(a.tile.left)
                         .append(" at ").append(at.get(1)).append(".<br>The tile will be at level ")

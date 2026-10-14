@@ -1,13 +1,15 @@
 package games.ventlife.gui;
 
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.actions.ResolveCovering;
 import games.ventlife.components.*;
+import gui.HexLayout;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Path2D;
+import java.awt.geom.Line2D;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -25,24 +27,24 @@ import java.util.function.Function;
 public class VentlifeFieldView extends JComponent {
 
     static final int WIDTH = 820, HEIGHT = 600, MARGIN = 12;
-    static final double MAX_SIZE = 40, SQRT3 = Math.sqrt(3);
+    static final double MAX_SIZE = 40;
     static final Color SEA = new Color(18, 40, 66);
     static final Color SEAFLOOR = new Color(60, 85, 110);
     static final Color LAST_TILE = new Color(255, 120, 0);
 
     VentlifeGameState state;
-    // the hex size and the pixel position of (0,0), set when painting
-    double size = MAX_SIZE, originX = WIDTH / 2.0, originY = HEIGHT / 2.0;
-    Map<Hex, Color> outlines = new HashMap<>();
+    // set when painting
+    HexLayout layout = new HexLayout(MAX_SIZE, WIDTH / 2.0, HEIGHT / 2.0);
+    Map<HexCoord, Color> outlines = new HashMap<>();
     // the terrains of a tile shown where it would be placed
-    Map<Hex, Terrain> preview = new HashMap<>();
+    Map<HexCoord, Terrain> preview = new HashMap<>();
     Function<MouseEvent, String> toolTips;
 
     public void update(VentlifeGameState state) {
         this.state = state;
     }
 
-    public void setOutlines(Map<Hex, Color> outlines, Map<Hex, Terrain> preview) {
+    public void setOutlines(Map<HexCoord, Color> outlines, Map<HexCoord, Terrain> preview) {
         this.outlines = outlines;
         this.preview = preview;
         repaint();
@@ -77,54 +79,24 @@ public class VentlifeFieldView extends JComponent {
     /**
      * The pixel at the centre of the position, as last painted.
      */
-    public Point centre(Hex h) {
-        return new Point((int) Math.round(originX + size * SQRT3 * (h.q() + h.r() / 2.0)),
-                (int) Math.round(originY + size * 1.5 * h.r()));
+    public Point centre(HexCoord h) {
+        return layout.pixel(h);
     }
 
     /**
      * The position under the pixel, covered or not.
      */
-    Hex hexAt(Point p) {
-        double x = (p.x - originX) / size, y = (p.y - originY) / size;
-        double q = SQRT3 / 3 * x - y / 3, r = 2.0 / 3 * y;
-        // round in cube coordinates
-        double s = -q - r;
-        long rq = Math.round(q), rr = Math.round(r), rs = Math.round(s);
-        double dq = Math.abs(rq - q), dr = Math.abs(rr - r), ds = Math.abs(rs - s);
-        if (dq > dr && dq > ds)
-            rq = -rr - rs;
-        else if (dr > ds)
-            rr = -rq - rs;
-        return new Hex((int) rq, (int) rr);
-    }
-
-    /**
-     * Corner i of the hex (0 at the top right, clockwise), which with corner i + 1 bounds the side facing direction i.
-     */
-    private double[] corner(Point c, int i, double s) {
-        double angle = Math.toRadians(60 * i - 30);
-        return new double[]{c.x + s * Math.cos(angle), c.y + s * Math.sin(angle)};
-    }
-
-    private Path2D hexagon(Point c, double s) {
-        Path2D path = new Path2D.Double();
-        for (int i = 0; i < 6; i++) {
-            double[] p = corner(c, i, s);
-            if (i == 0) path.moveTo(p[0], p[1]);
-            else path.lineTo(p[0], p[1]);
-        }
-        path.closePath();
-        return path;
+    HexCoord hexAt(Point p) {
+        return layout.hexAt(p.x, p.y);
     }
 
     /**
      * The empty seafloor next to the field.
      */
-    private Set<Hex> seafloor() {
-        Set<Hex> retValue = new HashSet<>();
-        for (Hex h : state.getField().keySet())
-            for (Hex n : h.neighbours())
+    private Set<HexCoord> seafloor() {
+        Set<HexCoord> retValue = new HashSet<>();
+        for (HexCoord h : state.getField().keySet())
+            for (HexCoord n : h.neighbours())
                 if (state.getCell(n) == null)
                     retValue.add(n);
         return retValue;
@@ -133,24 +105,12 @@ public class VentlifeFieldView extends JComponent {
     /**
      * Fits the field and the seafloor round it into the view.
      */
-    private void layOut(Set<Hex> seafloor) {
-        double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE, minY = Double.MAX_VALUE, maxY = -Double.MAX_VALUE;
-        Set<Hex> all = new HashSet<>(state.getField().keySet());
+    private void layOut(Set<HexCoord> seafloor) {
+        Set<HexCoord> all = new HashSet<>(state.getField().keySet());
         all.addAll(seafloor);
         if (all.isEmpty())
-            all.add(new Hex(0, 0));
-        for (Hex h : all) {
-            double x = SQRT3 * (h.q() + h.r() / 2.0), y = 1.5 * h.r();
-            minX = Math.min(minX, x);
-            maxX = Math.max(maxX, x);
-            minY = Math.min(minY, y);
-            maxY = Math.max(maxY, y);
-        }
-        // one hex is sqrt3 wide and 2 high at size 1
-        size = Math.min(MAX_SIZE, Math.min((WIDTH - 2 * MARGIN) / (maxX - minX + SQRT3),
-                (HEIGHT - 2 * MARGIN) / (maxY - minY + 2)));
-        originX = WIDTH / 2.0 - size * (minX + maxX) / 2;
-        originY = HEIGHT / 2.0 - size * (minY + maxY) / 2;
+            all.add(HexCoord.ORIGIN);
+        layout = HexLayout.fitting(all, WIDTH, HEIGHT, MARGIN, MAX_SIZE);
     }
 
     @Override
@@ -161,16 +121,16 @@ public class VentlifeFieldView extends JComponent {
         g.fillRect(0, 0, WIDTH, HEIGHT);
         if (state == null) return;
 
-        Set<Hex> seafloor = seafloor();
+        Set<HexCoord> seafloor = seafloor();
         layOut(seafloor);
-        boolean labels = size >= 16;
-        Font coordFont = new Font("SansSerif", Font.PLAIN, (int) Math.max(8, size * 0.28));
+        boolean labels = layout.size() >= 16;
+        Font coordFont = new Font("SansSerif", Font.PLAIN, (int) Math.max(8, layout.size() * 0.28));
 
         g.setStroke(new BasicStroke(1f));
-        for (Hex h : seafloor) {
+        for (HexCoord h : seafloor) {
             Point c = centre(h);
             g.setColor(SEAFLOOR);
-            g.draw(hexagon(c, size - 1));
+            g.draw(layout.outline(h, layout.size() - 1));
             if (labels) {
                 g.setFont(coordFont);
                 drawCentred(g, h.toString(), c.x, c.y + coordFont.getSize() / 2);
@@ -182,54 +142,52 @@ public class VentlifeFieldView extends JComponent {
             drawCentred(g, "The first tile goes with its Black Smoker at (0,0)", WIDTH / 2, HEIGHT - 30);
         }
 
-        Font levelFont = new Font("SansSerif", Font.BOLD, (int) Math.max(8, size * 0.32));
-        for (Map.Entry<Hex, HexCell> e : state.getField().entrySet()) {
+        Font levelFont = new Font("SansSerif", Font.BOLD, (int) Math.max(8, layout.size() * 0.32));
+        for (Map.Entry<HexCoord, HexCell> e : state.getField().entrySet()) {
             Point c = centre(e.getKey());
             HexCell cell = e.getValue();
             g.setColor(terrainColour(cell.terrain()));
-            g.fill(hexagon(c, size));
+            g.fill(layout.outline(e.getKey(), layout.size()));
             g.setColor(textOn(cell.terrain()));
             g.setFont(levelFont);
-            drawCentred(g, String.valueOf(cell.level()), c.x, (int) (c.y - size * 0.45));
+            drawCentred(g, String.valueOf(cell.level()), c.x, (int) (c.y - layout.size() * 0.45));
             if (labels && state.getCreature(e.getKey()) == null) {
                 g.setFont(coordFont);
-                drawCentred(g, e.getKey().toString(), c.x, (int) (c.y + size * 0.6));
+                drawCentred(g, e.getKey().toString(), c.x, (int) (c.y + layout.size() * 0.6));
             }
         }
 
         // the sides between tiles, and round the field; the last tile placed in orange
         int lastTile = state.getTilesPlaced() - 1;
         for (int pass = 0; pass < 2; pass++)
-            for (Map.Entry<Hex, HexCell> e : state.getField().entrySet()) {
+            for (Map.Entry<HexCoord, HexCell> e : state.getField().entrySet()) {
                 boolean last = e.getValue().tileId() == lastTile;
                 if (last != (pass == 1))
                     continue;
-                Point c = centre(e.getKey());
                 g.setColor(last ? LAST_TILE : Color.black);
                 g.setStroke(new BasicStroke(last ? 3f : 2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 for (int d = 0; d < 6; d++) {
                     HexCell other = state.getCell(e.getKey().neighbour(d));
                     if (other != null && other.tileId() == e.getValue().tileId())
                         continue;
-                    double[] a = corner(c, d, size), b = corner(c, d + 1, size);
-                    g.draw(new java.awt.geom.Line2D.Double(a[0], a[1], b[0], b[1]));
+                    g.draw(new Line2D.Double(layout.corner(e.getKey(), d), layout.corner(e.getKey(), d + 1)));
                 }
             }
 
-        for (Map.Entry<Hex, Creature> e : state.getCreatures().entrySet())
+        for (Map.Entry<HexCoord, Creature> e : state.getCreatures().entrySet())
             drawCreature(g, centre(e.getKey()), e.getValue(), false);
 
         Composite opaque = g.getComposite();
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
-        for (Map.Entry<Hex, Terrain> e : preview.entrySet()) {
+        for (Map.Entry<HexCoord, Terrain> e : preview.entrySet()) {
             g.setColor(terrainColour(e.getValue()));
-            g.fill(hexagon(centre(e.getKey()), size - 3));
+            g.fill(layout.outline(e.getKey(), layout.size() - 3));
         }
         g.setComposite(opaque);
-        for (Map.Entry<Hex, Color> e : outlines.entrySet()) {
+        for (Map.Entry<HexCoord, Color> e : outlines.entrySet()) {
             g.setColor(e.getValue());
             g.setStroke(new BasicStroke(3f));
-            g.draw(hexagon(centre(e.getKey()), size - 3));
+            g.draw(layout.outline(e.getKey(), layout.size() - 3));
         }
 
         if (state.isActionInProgress() && state.currentActionInProgress() instanceof ResolveCovering rc) {
@@ -238,13 +196,13 @@ public class VentlifeFieldView extends JComponent {
             drawCreature(g, c, waiting.creature(), true);
             g.setColor(Color.black);
             g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, new float[]{5f, 4f}, 0f));
-            int ring = (int) (size * 0.75);
+            int ring = (int) (layout.size() * 0.75);
             g.drawOval(c.x - ring, c.y - ring, 2 * ring, 2 * ring);
         }
     }
 
     private void drawCreature(Graphics2D g, Point c, Creature creature, boolean faded) {
-        int radius = (int) Math.max(5, size * 0.5);
+        int radius = (int) Math.max(5, layout.size() * 0.5);
         Color colour = VentlifePlayersView.playerColour(creature.owner());
         Composite old = g.getComposite();
         if (faded)
@@ -254,7 +212,7 @@ public class VentlifeFieldView extends JComponent {
         g.setColor(Color.white);
         g.setStroke(new BasicStroke(1.5f));
         g.drawOval(c.x - radius, c.y - radius + 2, 2 * radius, 2 * radius);
-        g.setFont(new Font("SansSerif", Font.BOLD, (int) Math.max(8, size * 0.42)));
+        g.setFont(new Font("SansSerif", Font.BOLD, (int) Math.max(8, layout.size() * 0.42)));
         drawCentred(g, VentlifePlayersView.abbreviation(creature.species())
                 + (creature.count() > 1 ? "x" + creature.count() : ""), c.x, c.y + 2 + g.getFont().getSize() / 3);
         g.setComposite(old);

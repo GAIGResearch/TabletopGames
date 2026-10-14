@@ -4,6 +4,7 @@ import core.AbstractForwardModel;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.ventlife.actions.Displace;
 import games.ventlife.actions.PlaceCreature;
 import games.ventlife.actions.PlaceTile;
@@ -59,7 +60,7 @@ public class VentlifeGameFlowTest {
 
     /** Plays the tile without the creature step, asserting the step is skipped (the turn passes straight on). */
     private static void placeSkippingCreatures(VentlifeGameState state, AbstractForwardModel fm, Terrain left,
-                                               Terrain right, Hex smoker, int orientation) {
+                                               Terrain right, HexCoord smoker, int orientation) {
         int player = state.getCurrentPlayer();
         giveTile(state, player, left, right);
         fm.next(state, placeTile(state, smoker, orientation));
@@ -366,7 +367,7 @@ public class VentlifeGameFlowTest {
         Random rnd = new Random(seed);
         int steps = 0, plateaus = 0, creaturesPlaced = 0, returns = 0, decisions = 0, multiSnailTurns = 0;
         // the Volcano Snails placed in the current turn, in order
-        List<Hex> snailsThisTurn = new ArrayList<>();
+        List<HexCoord> snailsThisTurn = new ArrayList<>();
         while (state.isNotTerminal() && steps++ < 5000) {
             int supplyBefore = totalSupply(state);
             if (state.getGamePhase() == VentlifeGameState.Phase.PLACE_CREATURES)
@@ -414,7 +415,7 @@ public class VentlifeGameFlowTest {
             // while an owner decides where a covered creature goes, it is held by the decision, not on the field
             if (!state.isActionInProgress())
                 assertTokensConserved(state, "step " + steps);
-            for (Map.Entry<Hex, Creature> e : state.getCreatures().entrySet()) {
+            for (Map.Entry<HexCoord, Creature> e : state.getCreatures().entrySet()) {
                 Creature c = e.getValue();
                 HexCell cell = state.getCell(e.getKey());
                 String where = c.species() + " at " + e.getKey() + " on " + cell;
@@ -466,7 +467,7 @@ public class VentlifeGameFlowTest {
      * If StopPlacing is offered (the Snail follow-on): at least one Snail was placed this turn, and every other action
      * is a Snail on an empty Basalt hex next to one of them.
      */
-    private static void assertSnailFollowOn(VentlifeGameState state, List<AbstractAction> actions, List<Hex> snailsThisTurn) {
+    private static void assertSnailFollowOn(VentlifeGameState state, List<AbstractAction> actions, List<HexCoord> snailsThisTurn) {
         if (!actions.contains(new StopPlacing()))
             return;
         assertFalse("StopPlacing before any snail: " + actions, snailsThisTurn.isEmpty());
@@ -474,7 +475,7 @@ public class VentlifeGameFlowTest {
             if (a instanceof StopPlacing)
                 continue;
             assertTrue("not a snail in the follow-on: " + a, a instanceof PlaceCreature pc && pc.species == SNAIL);
-            Hex h = ((PlaceCreature) a).hex;
+            HexCoord h = ((PlaceCreature) a).hex;
             assertTrue("follow-on snail off empty Basalt: " + a,
                     state.isEmptyHex(h) && state.getCell(h).terrain() == BASALT);
             assertTrue("follow-on snail not next to this turn's: " + a,

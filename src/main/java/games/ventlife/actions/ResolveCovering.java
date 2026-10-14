@@ -3,10 +3,10 @@ package games.ventlife.actions;
 import core.AbstractGameState;
 import evaluation.metrics.Event;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import core.interfaces.IExtendedSequence;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.components.Creature;
-import games.ventlife.components.Hex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class ResolveCovering implements IExtendedSequence {
     /**
      * A covered creature, the hex it was on, and that hex's level before the tile covered it.
      */
-    public record Covered(Creature creature, Hex from, int fromLevel) {
+    public record Covered(Creature creature, HexCoord from, int fromLevel) {
     }
 
     private final List<Covered> pending;
@@ -40,7 +40,7 @@ public class ResolveCovering implements IExtendedSequence {
     public boolean resolveAutomatic(VentlifeGameState state) {
         while (!pending.isEmpty()) {
             Covered c = pending.get(0);
-            List<Hex> destinations = destinations(state, c);
+            List<HexCoord> destinations = destinations(state, c);
             if (destinations.size() > 1)
                 return true;
             if (destinations.isEmpty()) {
@@ -65,7 +65,7 @@ public class ResolveCovering implements IExtendedSequence {
         return pending.get(0);
     }
 
-    private List<Hex> destinations(VentlifeGameState state, Covered c) {
+    private List<HexCoord> destinations(VentlifeGameState state, Covered c) {
         return c.creature.species().destinations(state, c.from, c.fromLevel, newTile);
     }
 
@@ -74,7 +74,7 @@ public class ResolveCovering implements IExtendedSequence {
         VentlifeGameState state = (VentlifeGameState) gs;
         Covered c = pending.get(0);
         List<AbstractAction> actions = new ArrayList<>();
-        for (Hex to : destinations(state, c))
+        for (HexCoord to : destinations(state, c))
             actions.add(new Displace(c.creature, c.from, to));
         return actions;
     }

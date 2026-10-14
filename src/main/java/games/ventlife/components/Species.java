@@ -1,8 +1,9 @@
 package games.ventlife.components;
 
+import core.components.grid.GridCoord;
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeParameters;
-import games.ventlife.VentlifeUtils;
 
 import java.util.*;
 
@@ -19,7 +20,7 @@ public enum Species {
     /**
      * Whether the species' placement rule lets the player place one on the hex. The supply is not checked.
      */
-    public boolean canPlace(VentlifeGameState state, int player, Hex hex) {
+    public boolean canPlace(VentlifeGameState state, int player, HexCoord hex) {
         if (!state.isEmptyHex(hex))
             return false;
         // Black Smokers are open to every species but Fish (designer, 2026-10-11)
@@ -36,8 +37,8 @@ public enum Species {
         };
     }
 
-    private static boolean nextToOwnFish(VentlifeGameState state, int player, Hex hex) {
-        for (Hex n : hex.neighbours()) {
+    private static boolean nextToOwnFish(VentlifeGameState state, int player, HexCoord hex) {
+        for (HexCoord n : hex.neighbours()) {
             Creature c = state.getCreature(n);
             if (c != null && c.species() == EELPOUT_FISH && c.owner() == player)
                 return true;
@@ -50,18 +51,18 @@ public enum Species {
      * newTile may move, sorted by position; empty if it returns to its owner's supply. No creature moves onto the
      * tile that covered it.
      */
-    public List<Hex> destinations(VentlifeGameState state, Hex from, int fromLevel, int newTile) {
-        List<Hex> retValue = new ArrayList<>();
+    public List<HexCoord> destinations(VentlifeGameState state, HexCoord from, int fromLevel, int newTile) {
+        List<HexCoord> retValue = new ArrayList<>();
         if (this == OCTOPUS) {
             for (int d = 0; d < 6; d++) {
-                Hex stop = retreat(state, from, d, newTile);
+                HexCoord stop = retreat(state, from, d, newTile);
                 if (stop != null)
                     retValue.add(stop);
             }
-            retValue.sort(VentlifeUtils.HEX_ORDER);
+            retValue.sort(null);
             return retValue;
         }
-        for (Hex n : from.neighbours()) {
+        for (HexCoord n : from.neighbours()) {
             if (!state.isEmptyHex(n) || state.getCell(n).tileId() == newTile)
                 continue;
             Terrain terrain = state.getCell(n).terrain();
@@ -78,19 +79,19 @@ public enum Species {
             if (ok)
                 retValue.add(n);
         }
-        retValue.sort(VentlifeUtils.HEX_ORDER);
+        retValue.sort(null);
         return retValue;
     }
 
     /**
      * Where an Octopus retreating from from in the direction stops, or null if it cannot go that way.
      */
-    private Hex retreat(VentlifeGameState state, Hex from, int direction, int newTile) {
+    private HexCoord retreat(VentlifeGameState state, HexCoord from, int direction, int newTile) {
         // along the straight line, passing over everything, to its end: the last hex before one with no tile in the
         // direction of travel (designer, 2026-10-11). Edge hexes along the way, with empty seafloor only to the side,
         // do not count. The direction fails if that end hex is taken or on the new tile, or if there is no tile at
         // all next to the covered position in that direction
-        Hex h = from.neighbour(direction);
+        HexCoord h = from.neighbour(direction);
         if (state.getCell(h) == null)
             return null;
         while (state.getCell(h.neighbour(direction)) != null)
@@ -101,7 +102,7 @@ public enum Species {
     /**
      * The most creatures of this species one placement may put on the hex.
      */
-    public int maxPlaced(VentlifeGameState state, Hex hex) {
+    public int maxPlaced(VentlifeGameState state, HexCoord hex) {
         // the Tube Worms' Low-Vent Bonus, on a seafloor Black Smoker
         if (this == TUBE_WORM && state.getLevel(hex) == 1)
             return 1 + state.getParams().lowVentBonus;
@@ -118,11 +119,11 @@ public enum Species {
         if (this == YETI_CRAB)
             return plateauScore(state, player);
         int score = 0;
-        for (Map.Entry<Hex, Creature> e : state.getCreatures().entrySet()) {
+        for (Map.Entry<HexCoord, Creature> e : state.getCreatures().entrySet()) {
             Creature c = e.getValue();
             if (c.species() != this || c.owner() != player)
                 continue;
-            Hex hex = e.getKey();
+            HexCoord hex = e.getKey();
             score += switch (this) {
                 case TUBE_WORM -> c.count() * state.getLevel(hex);
                 case VENT_SPONGE -> params.spongePointsPerTerrain * adjacentTerrains(state, hex).size();
@@ -134,14 +135,14 @@ public enum Species {
                 }
                 case VOLCANO_SNAIL -> {
                     int edges = 0;
-                    for (Hex n : hex.neighbours())
+                    for (HexCoord n : hex.neighbours())
                         if (state.getCell(n) != null && state.getLevel(n) != state.getLevel(hex))
                             edges++;
                     yield params.snailPointsPerHeightEdge * edges;
                 }
                 case OCTOPUS -> {
                     Set<Species> around = EnumSet.noneOf(Species.class);
-                    for (Hex n : hex.neighbours()) {
+                    for (HexCoord n : hex.neighbours()) {
                         Creature other = state.getCreature(n);
                         if (other != null && other.species() != OCTOPUS)
                             around.add(other.species());
@@ -159,12 +160,12 @@ public enum Species {
      * The player's score for their shoals (connected groups of their Fish).
      */
     private static int shoalScore(VentlifeGameState state, int player) {
-        Set<Hex> fish = new HashSet<>();
-        for (Map.Entry<Hex, Creature> e : state.getCreatures().entrySet())
+        Set<HexCoord> fish = new HashSet<>();
+        for (Map.Entry<HexCoord, Creature> e : state.getCreatures().entrySet())
             if (e.getValue().species() == EELPOUT_FISH && e.getValue().owner() == player)
                 fish.add(e.getKey());
         int score = 0;
-        for (Set<Hex> shoal : connectedGroups(fish))
+        for (Set<HexCoord> shoal : GridCoord.connectedGroups(fish))
             score += state.getParams().shoalScore(shoal.size());
         return score;
     }
@@ -174,15 +175,15 @@ public enum Species {
      */
     private static int plateauScore(VentlifeGameState state, int player) {
         // an Elevated Plateau is a connected group of covered positions of one level, 2 or more
-        Map<Integer, Set<Hex>> byLevel = new HashMap<>();
-        for (Map.Entry<Hex, HexCell> e : state.getField().entrySet())
+        Map<Integer, Set<HexCoord>> byLevel = new HashMap<>();
+        for (Map.Entry<HexCoord, HexCell> e : state.getField().entrySet())
             if (e.getValue().level() >= 2)
                 byLevel.computeIfAbsent(e.getValue().level(), k -> new HashSet<>()).add(e.getKey());
         int score = 0;
-        for (Set<Hex> sameLevel : byLevel.values())
-            for (Set<Hex> plateau : connectedGroups(sameLevel)) {
+        for (Set<HexCoord> sameLevel : byLevel.values())
+            for (Set<HexCoord> plateau : GridCoord.connectedGroups(sameLevel)) {
                 int[] crabs = new int[state.getNPlayers()];
-                for (Hex h : plateau) {
+                for (HexCoord h : plateau) {
                     Creature c = state.getCreature(h);
                     if (c != null && c.species() == YETI_CRAB)
                         crabs[c.owner()] += c.count();
@@ -204,34 +205,11 @@ public enum Species {
     }
 
     /**
-     * The positions split into groups connected by adjacency.
-     */
-    private static List<Set<Hex>> connectedGroups(Set<Hex> positions) {
-        List<Set<Hex>> retValue = new ArrayList<>();
-        Set<Hex> seen = new HashSet<>();
-        for (Hex start : positions) {
-            if (!seen.add(start))
-                continue;
-            Set<Hex> group = new HashSet<>();
-            Deque<Hex> open = new ArrayDeque<>(List.of(start));
-            while (!open.isEmpty()) {
-                Hex h = open.pop();
-                group.add(h);
-                for (Hex n : h.neighbours())
-                    if (positions.contains(n) && seen.add(n))
-                        open.push(n);
-            }
-            retValue.add(group);
-        }
-        return retValue;
-    }
-
-    /**
      * The distinct terrains of the top hexes next to the hex.
      */
-    private static Set<Terrain> adjacentTerrains(VentlifeGameState state, Hex hex) {
+    private static Set<Terrain> adjacentTerrains(VentlifeGameState state, HexCoord hex) {
         Set<Terrain> retValue = EnumSet.noneOf(Terrain.class);
-        for (Hex n : hex.neighbours()) {
+        for (HexCoord n : hex.neighbours()) {
             HexCell cell = state.getCell(n);
             if (cell != null)
                 retValue.add(cell.terrain());

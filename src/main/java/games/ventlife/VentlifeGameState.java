@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
+import core.components.grid.HexCoord;
+import core.components.grid.SparseGrid;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.ventlife.components.*;
@@ -20,9 +22,9 @@ public class VentlifeGameState extends AbstractGameState {
     public enum Phase implements IGamePhase {DRAFT, PLACE_TILE, PLACE_CREATURES}
 
     // the top hex at each covered position
-    Map<Hex, HexCell> field = new HashMap<>();
+    SparseGrid<HexCoord, HexCell> field;
     // the creatures on each occupied hex
-    Map<Hex, Creature> creatures = new HashMap<>();
+    SparseGrid<HexCoord, Creature> creatures;
     Deck<VentTile> drawDeck;
     List<Deck<VentTile>> hands = new ArrayList<>();
     List<Species> speciesInPlay = new ArrayList<>();
@@ -56,12 +58,12 @@ public class VentlifeGameState extends AbstractGameState {
         return (VentlifeParameters) gameParameters;
     }
 
-    public Map<Hex, HexCell> getField() {
-        return Collections.unmodifiableMap(field);
+    public Map<HexCoord, HexCell> getField() {
+        return field.asMap();
     }
 
-    public Map<Hex, Creature> getCreatures() {
-        return Collections.unmodifiableMap(creatures);
+    public Map<HexCoord, Creature> getCreatures() {
+        return creatures.asMap();
     }
 
     public Deck<VentTile> getDrawDeck() {
@@ -93,39 +95,34 @@ public class VentlifeGameState extends AbstractGameState {
     /**
      * The top hex at the position, or null if no tile covers it.
      */
-    public HexCell getCell(Hex hex) {
+    public HexCell getCell(HexCoord hex) {
         return field.get(hex);
     }
 
     /**
      * The level of the top hex at the position: 0 where no tile covers it.
      */
-    public int getLevel(Hex hex) {
+    public int getLevel(HexCoord hex) {
         HexCell cell = field.get(hex);
         return cell == null ? 0 : cell.level();
     }
 
-    public Creature getCreature(Hex hex) {
+    public Creature getCreature(HexCoord hex) {
         return creatures.get(hex);
     }
 
     /**
      * A covered position with no creature on it.
      */
-    public boolean isEmptyHex(Hex hex) {
-        return field.containsKey(hex) && !creatures.containsKey(hex);
+    public boolean isEmptyHex(HexCoord hex) {
+        return field.contains(hex) && !creatures.contains(hex);
     }
 
     /**
      * Whether the position is an Edge hex: covered, with at least one neighbour that is not.
      */
-    public boolean isEdge(Hex hex) {
-        if (!field.containsKey(hex))
-            return false;
-        for (Hex n : hex.neighbours())
-            if (!field.containsKey(n))
-                return true;
-        return false;
+    public boolean isEdge(HexCoord hex) {
+        return field.isOnBorder(hex);
     }
 
     /**
@@ -137,18 +134,18 @@ public class VentlifeGameState extends AbstractGameState {
 
     // ---------------------------------------------------------------- changes, made by the actions
 
-    public void setCell(Hex hex, HexCell cell) {
-        field.put(hex, cell);
+    public void setCell(HexCoord hex, HexCell cell) {
+        field.set(hex, cell);
     }
 
-    public void setCreature(Hex hex, Creature creature) {
-        creatures.put(hex, creature);
+    public void setCreature(HexCoord hex, Creature creature) {
+        creatures.set(hex, creature);
     }
 
     /**
      * Takes the creatures off the hex, returning them (null if there were none).
      */
-    public Creature removeCreature(Hex hex) {
+    public Creature removeCreature(HexCoord hex) {
         return creatures.remove(hex);
     }
 
@@ -172,8 +169,8 @@ public class VentlifeGameState extends AbstractGameState {
     @Override
     protected VentlifeGameState _copy(int playerId) {
         VentlifeGameState copy = new VentlifeGameState(gameParameters, getNPlayers());
-        copy.field = new HashMap<>(field);
-        copy.creatures = new HashMap<>(creatures);
+        copy.field = field.copy();
+        copy.creatures = creatures.copy();
         copy.drawDeck = drawDeck.copy();
         copy.hands = new ArrayList<>();
         for (Deck<VentTile> h : hands)
