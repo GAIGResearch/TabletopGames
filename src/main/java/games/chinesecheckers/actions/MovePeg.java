@@ -3,7 +3,6 @@ package games.chinesecheckers.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.chinesecheckers.CCGameState;
-import games.chinesecheckers.CCParameters;
 import games.chinesecheckers.components.Peg;
 import games.chinesecheckers.components.StarBoard;
 
@@ -23,19 +22,11 @@ public class MovePeg extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CCGameState state = (CCGameState) gs;
-        CCParameters params = (CCParameters) gs.getGameParameters();
         StarBoard board = state.getStarBoard();
         Peg peg = board.getPeg(from);
 
-        // Then check to see if this is the destination node for the peg
-        boolean inDestination = peg.inDestination();
-        int[] destinationNodes = params.colourIndices.get(params.boardOpposites.get(peg.colour()));
-        for (int destinationNode : destinationNodes) {
-            if (to == destinationNode) {
-                inDestination = true;
-                break;
-            }
-        }
+        // a peg's destination is the nodes of its own colour (it starts on those of the opposite colour)
+        boolean inDestination = peg.inDestination() || board.getBaseColour(to) == peg.colour();
         board.setPeg(from, null);
         board.setPeg(to, inDestination == peg.inDestination() ? peg : new Peg(peg.colour(), true));
 
