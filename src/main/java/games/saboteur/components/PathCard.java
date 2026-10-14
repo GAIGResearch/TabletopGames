@@ -1,13 +1,18 @@
 package games.saboteur.components;
 
+import core.components.grid.SquareCoord;
+
 import java.util.Arrays;
 import java.util.Objects;
 
 public class PathCard extends SaboteurCard {
-    final private boolean[] directions;  // The array is final - but the contents are not!
+    // whether the path leads out of each side, in SquareCoord's direction order (E, S, W, N)
+    final private boolean[] directions;
     final public PathCardType type;
     final boolean hasTreasure;
     final boolean symmetric;
+    // the card turned round, made when first asked for, and turned round again back to this
+    private PathCard turned;
 
     public enum PathCardType {
         Edge,
@@ -23,46 +28,38 @@ public class PathCard extends SaboteurCard {
     public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure) {
         super(SaboteurCardType.Path);
         this.type = type;
-        this.directions = direction;
+        this.directions = direction.clone();
         this.hasTreasure = hasTreasure;
-        this.symmetric = direction[0] == direction[1] && direction[2] == direction[3];
+        this.symmetric = direction[SquareCoord.E] == direction[SquareCoord.W] && direction[SquareCoord.S] == direction[SquareCoord.N];
     }
 
     public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure, int componentID) {
         super(SaboteurCardType.Path, componentID);
         this.type = type;
-        this.directions = direction;
+        this.directions = direction.clone();
         this.hasTreasure = hasTreasure;
-        this.symmetric = direction[0] == direction[1] && direction[2] == direction[3];
+        this.symmetric = direction[SquareCoord.E] == direction[SquareCoord.W] && direction[SquareCoord.S] == direction[SquareCoord.N];
     }
 
-    public void rotate()
+    /**
+     * The card turned round (half a turn): the same card, so with the same component id.
+     */
+    public PathCard rotated()
     {
-        //up down
-        swap(0,1);
-        //left right
-        swap(2,3);
+        if (turned == null) {
+            boolean[] sides = new boolean[directions.length];
+            for (int d = 0; d < directions.length; d++)
+                sides[(d + 2) % directions.length] = directions[d];
+            turned = new PathCard(type, sides, hasTreasure, componentID);
+            turned.turned = this;
+        }
+        return turned;
     }
 
-    private void swap(int indexA, int indexB)
-    {
-        boolean temp = directions[indexA];
-        directions[indexA] = directions[indexB];
-        directions[indexB] = temp;
-    }
-
-    public boolean[] getDirections() {return directions;}
-    public int getOppositeDirection(int direction)
-    {
-        return switch (direction) {
-            case 0 -> 1;
-            case 1 -> 0;
-            case 2 -> 3;
-            case 3 -> 2;
-            default -> -1;
-        };
-    }
-
+    /**
+     * Whether the path leads out of the side facing the direction.
+     */
+    public boolean opensTo(int direction) {return directions[direction];}
     public boolean isSymmetric() {return symmetric;}
 
 
@@ -83,22 +80,22 @@ public class PathCard extends SaboteurCard {
     @Override
     public PathCard copy()
     {
-        return new PathCard(type, directions.clone(), hasTreasure, componentID);
+        return this;
     }
 
     public String getString()
     {
         if(type == PathCard.PathCardType.Path)
         {
-            if(Arrays.equals(directions, new boolean[]{false, false, true, true}))
+            if(Arrays.equals(directions, new boolean[]{true, false, true, false}))
             {
                 return "─";
             }
-            else if(Arrays.equals(directions, new boolean[]{true, true, false, false}))
+            else if(Arrays.equals(directions, new boolean[]{false, true, false, true}))
             {
                 return "│";
             }
-            else if(Arrays.equals(directions, new boolean[]{false, true, false, true}))
+            else if(Arrays.equals(directions, new boolean[]{true, true, false, false}))
             {
                 return "┌";
             }
@@ -110,11 +107,11 @@ public class PathCard extends SaboteurCard {
             {
                 return "└";
             }
-            else if(Arrays.equals(directions, new boolean[]{true, false, true, false}))
+            else if(Arrays.equals(directions, new boolean[]{false, false, true, true}))
             {
                 return "┘";
             }
-            else if(Arrays.equals(directions, new boolean[]{true, true, true, false}))
+            else if(Arrays.equals(directions, new boolean[]{false, true, true, true}))
             {
                 return "┤";
             }
@@ -122,7 +119,7 @@ public class PathCard extends SaboteurCard {
             {
                 return "├";
             }
-            else if(Arrays.equals(directions, new boolean[]{false, true, true, true}))
+            else if(Arrays.equals(directions, new boolean[]{true, true, true, false}))
             {
                 return "┬";
             }
@@ -137,15 +134,15 @@ public class PathCard extends SaboteurCard {
         }
         else if(type == PathCard.PathCardType.Edge)
         {
-            if(Arrays.equals(directions, new boolean[]{false, false, true, true}))
+            if(Arrays.equals(directions, new boolean[]{true, false, true, false}))
             {
                 return "═";
             }
-            else if(Arrays.equals(directions, new boolean[]{true, true, false, false}))
+            else if(Arrays.equals(directions, new boolean[]{false, true, false, true}))
             {
                 return "║";
             }
-            else if(Arrays.equals(directions, new boolean[]{false, true, false, true}))
+            else if(Arrays.equals(directions, new boolean[]{true, true, false, false}))
             {
                 return "╔";
             }
@@ -157,11 +154,11 @@ public class PathCard extends SaboteurCard {
             {
                 return "╚";
             }
-            else if(Arrays.equals(directions, new boolean[]{true, false, true, false}))
+            else if(Arrays.equals(directions, new boolean[]{false, false, true, true}))
             {
                 return "╝";
             }
-            else if(Arrays.equals(directions, new boolean[]{true, true, true, false}))
+            else if(Arrays.equals(directions, new boolean[]{false, true, true, true}))
             {
                 return "╣";
             }
@@ -169,7 +166,7 @@ public class PathCard extends SaboteurCard {
             {
                 return "╠";
             }
-            else if(Arrays.equals(directions, new boolean[]{false, true, true, true}))
+            else if(Arrays.equals(directions, new boolean[]{true, true, true, false}))
             {
                 return "╦";
             }
@@ -181,7 +178,7 @@ public class PathCard extends SaboteurCard {
             {
                 return "╬";
             }
-            else if(Arrays.equals(directions, new boolean[]{false, false, false, true}))
+            else if(Arrays.equals(directions, new boolean[]{true, false, false, false}))
             {
                 return "<";
             }
@@ -189,7 +186,7 @@ public class PathCard extends SaboteurCard {
             {
                 return ">";
             }
-            else if(Arrays.equals(directions, new boolean[]{true, false, false, false}))
+            else if(Arrays.equals(directions, new boolean[]{false, false, false, true}))
             {
                 return "v";
             }

@@ -1,22 +1,25 @@
 package games.saboteur.actions;
 
 import core.AbstractGameState;
-import core.actions.SetGridValueAction;
+import core.actions.AbstractAction;
 import core.components.Deck;
+import core.components.grid.SquareCoord;
 import games.saboteur.SaboteurGameState;
 import games.saboteur.components.ActionCard;
 import games.saboteur.components.SaboteurCard;
 
+import java.util.Arrays;
 
-public class PlayRockFallCard extends SetGridValueAction {
-    public PlayRockFallCard(int gridBoard, int x, int y) {
-        super(gridBoard, x, y, -1);
+public class PlayRockFallCard extends AbstractAction {
+    private final SquareCoord position;
+
+    public PlayRockFallCard(SquareCoord position) {
+        this.position = position;
     }
 
     public boolean execute(AbstractGameState gs) {
         SaboteurGameState sgs = (SaboteurGameState) gs;
-        SaboteurCard deletedCard = (SaboteurCard) sgs.getGridBoard().getElement(getX(), getY());
-        sgs.getGridBoard().setElement(getX(), getY(), null);
+        SaboteurCard deletedCard = sgs.getGridBoard().remove(position);
 
         Deck<SaboteurCard> currentDeck = sgs.getPlayerDecks().get(sgs.getCurrentPlayer());
         int idx = -1;
@@ -33,6 +36,10 @@ public class PlayRockFallCard extends SetGridValueAction {
                 sgs.getRoleDeck().setVisibilityOfComponent(sgs.getCurrentPlayer(), p, true);
         }
         sgs.getDiscardDeck().add(currentDeck.pick(idx));
+        // the card taken off the board is discarded face up: everyone has seen it
+        boolean[] seenByAll = new boolean[sgs.getNPlayers()];
+        Arrays.fill(seenByAll, true);
+        sgs.getDiscardDeck().add(deletedCard, seenByAll);
         return true;
     }
 
@@ -43,12 +50,12 @@ public class PlayRockFallCard extends SetGridValueAction {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PlayRockFallCard && super.equals(obj);
+        return obj instanceof PlayRockFallCard that && position.equals(that.position);
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode() + 67;
+        return position.hashCode() + 67;
     }
 
     @Override
@@ -57,7 +64,6 @@ public class PlayRockFallCard extends SetGridValueAction {
     }
 
     public String toString() {
-        return "RockFall at (" + super.getX() + ", " + super.getY() + ")";
+        return "RockFall at " + position;
     }
 }
-

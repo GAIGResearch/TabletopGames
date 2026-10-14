@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import core.components.grid.SquareCoord;
 import games.GameType;
 import games.saboteur.SaboteurForwardModel;
 import games.saboteur.SaboteurGameParameters;
@@ -167,7 +168,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
         actionCardHighlight = null;
     }
 
-    Point gridHighlight = null;
+    SquareCoord gridHighlight = null;
     int componentIDHighlight = -1;
     int cardIdxHighlight = -1;
     ActionCard.ActionCardType actionCardHighlight = null;
@@ -175,10 +176,10 @@ public class SaboteurGUIManager extends AbstractGUIManager {
     protected void onMouseEnter(ActionButton actionButton) {
         AbstractAction action = actionButton.getButtonAction();
         if (action instanceof PlacePathCard ppc) {
-            gridHighlight = new Point(ppc.getX(), ppc.getY());
-            componentIDHighlight = ppc.getValueID();
+            gridHighlight = ppc.getPosition();
+            componentIDHighlight = ppc.getPathCardID();
         } else if (action instanceof PlayMapCard pmc) {
-            gridHighlight = new Point(pmc.getPosition().getX(), pmc.getPosition().getY());
+            gridHighlight = pmc.getPosition();
             actionCardHighlight = ActionCard.ActionCardType.Map;
         } else if (action instanceof PlayRockFallCard) {
             actionCardHighlight = ActionCard.ActionCardType.RockFall;

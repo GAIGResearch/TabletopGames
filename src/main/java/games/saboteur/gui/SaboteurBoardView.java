@@ -1,7 +1,9 @@
 package games.saboteur.gui;
 
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import games.saboteur.SaboteurGameState;
-import core.components.PartialObservableGridBoard;
+import games.saboteur.SaboteurGameParameters;
 import games.saboteur.components.PathCard;
 
 import javax.swing.*;
@@ -14,7 +16,8 @@ import static games.saboteur.gui.SaboteurGUIManager.boardSize;
 public class SaboteurBoardView extends JComponent {
     SaboteurGameState gs;
     SaboteurGUIManager gui;
-    PartialObservableGridBoard board;
+    SparseGrid<SquareCoord, PathCard> board;
+    int width, height;
     // the player whose view of the board is drawn (a human player, or the player to move when none is), and whether
     // every card is shown; set by the GUI manager
     int viewer = 0;
@@ -31,7 +34,10 @@ public class SaboteurBoardView extends JComponent {
         this.gs = gs;
         this.gui = gui;
         board = gs.getGridBoard();
-        size = new Dimension(board.getWidth() * cellWidth, board.getHeight() * cellHeight);
+        SaboteurGameParameters params = (SaboteurGameParameters) gs.getGameParameters();
+        width = params.boardWidth();
+        height = params.boardHeight();
+        size = new Dimension(width * cellWidth, height * cellHeight);
         panPos = new Point(-size.width/2 + boardSize/2, -size.height/2 + boardSize/2);  // Start focused on center
 
         addMouseListener(new MouseAdapter() {
@@ -62,12 +68,13 @@ public class SaboteurBoardView extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        for (int i = 0; i < board.getHeight(); i++) {
-            for (int j = 0; j < board.getWidth(); j++) {
-                PathCard card = (PathCard) board.getElement(j, i);
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                SquareCoord pos = new SquareCoord(j, i);
+                PathCard card = board.get(pos);
                 if (card != null) drawPathCard((Graphics2D) g, card, panPos.x + j * cellWidth, panPos.y + i * cellHeight,
-                        showAll || board.getElementVisibility(j, i).get(viewer));
-                if (gui.gridHighlight != null && gui.gridHighlight.x == j && gui.gridHighlight.y == i) {
+                        showAll || board.isVisible(pos, viewer));
+                if (pos.equals(gui.gridHighlight)) {
                     g.setColor(Color.green);
                     g.drawRect(panPos.x + j * cellWidth, panPos.y + i * cellHeight, cellWidth, cellHeight);
                 }
@@ -87,38 +94,37 @@ public class SaboteurBoardView extends JComponent {
 
         // Draw paths on card
         g.setColor(Color.gray);
-        boolean[] dirs = card.getDirections();
         if (card.type != PathCard.PathCardType.Edge) {
-            if (dirs[0]) {
+            if (card.opensTo(SquareCoord.N)) {
                 // North - center
                 g.fillRect(mX - pathSize /2, pY, pathSize, cellHeight/2);
             }
-            if (dirs[1]) {
+            if (card.opensTo(SquareCoord.S)) {
                 // South - center
                 g.fillRect(mX - pathSize /2, mY, pathSize, cellHeight/2);
             }
-            if (dirs[2]) {
+            if (card.opensTo(SquareCoord.W)) {
                 // West - center
                 g.fillRect(pX, mY - pathSize /2, cellWidth/2, pathSize);
             }
-            if (dirs[3]) {
+            if (card.opensTo(SquareCoord.E)) {
                 // East - center
                 g.fillRect(mX, mY - pathSize /2, cellWidth/2, pathSize);
             }
         } else {
-            if (dirs[0]) {
+            if (card.opensTo(SquareCoord.N)) {
                 // North - center
                 g.fillRect(mX - pathSize /2, pY, pathSize, cellHeight/2 - centerGap);
             }
-            if (dirs[1]) {
+            if (card.opensTo(SquareCoord.S)) {
                 // South - center
                 g.fillRect(mX - pathSize /2, mY + centerGap, pathSize, cellHeight/2 - centerGap);
             }
-            if (dirs[2]) {
+            if (card.opensTo(SquareCoord.W)) {
                 // West - center
                 g.fillRect(pX, mY - pathSize /2, cellWidth/2 - centerGap, pathSize);
             }
-            if (dirs[3]) {
+            if (card.opensTo(SquareCoord.E)) {
                 // East - center
                 g.fillRect(mX + centerGap, mY - pathSize /2, cellWidth/2 - centerGap, pathSize);
             }

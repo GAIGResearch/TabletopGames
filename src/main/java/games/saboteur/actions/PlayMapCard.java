@@ -3,24 +3,24 @@ package games.saboteur.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import core.components.grid.SquareCoord;
 import games.saboteur.SaboteurGameState;
 import games.saboteur.components.ActionCard;
 import games.saboteur.components.SaboteurCard;
-import utilities.Vector2D;
 
 import java.util.Objects;
 
 public class PlayMapCard extends AbstractAction {
 
-    final Vector2D position;
+    final SquareCoord position;
 
-    public Vector2D getPosition() {
+    public SquareCoord getPosition() {
         return position;
     }
 
-    public PlayMapCard(int x, int y)
+    public PlayMapCard(SquareCoord position)
     {
-        this.position = new Vector2D(x, y);
+        this.position = position;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -37,7 +37,7 @@ public class PlayMapCard extends AbstractAction {
             }
         }
         sgs.getDiscardDeck().add(currentPlayerDeck.pick(idx));
-        sgs.getGridBoard().setElementVisibility(position.getX(), position.getY(), currentPlayer, true);
+        sgs.getGridBoard().setVisible(position, currentPlayer, true);
         return true;
     }
 
@@ -60,10 +60,10 @@ public class PlayMapCard extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Reveals card at (" + position.getX() + ", " + position.getY() + ")";
+        return "Reveals card at " + position;
     }
 
     public String toString() {
-        return "Reveals card at (" + position.getX() + ", " + position.getY() + ")";
+        return "Reveals card at " + position;
     }
 }
