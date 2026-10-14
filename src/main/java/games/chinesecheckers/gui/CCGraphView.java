@@ -1,165 +1,78 @@
 package games.chinesecheckers.gui;
 
-import games.chinesecheckers.components.CCNode;
+import core.components.grid.HexCoord;
 import games.chinesecheckers.components.Peg;
 import games.chinesecheckers.components.StarBoard;
+import gui.HexLayout;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import static gui.GUI.defaultItemSize;
 
+/**
+ * The star: the nodes in their base colours, joined to their neighbours, with their numbers (as the actions name
+ * them), and the pegs on them.
+ */
 public class CCGraphView extends ComponentView implements IScreenHighlight {
 
-    Map<Integer, Rectangle> dots = new HashMap<>();
-    StarBoard starBoard;
+    static final int WIDTH = 520, HEIGHT = 560, MARGIN = 10;
+
+    final HexLayout layout;
 
     public CCGraphView(StarBoard starBoard) {
         super(starBoard, defaultItemSize, defaultItemSize);
-
-        this.starBoard = starBoard;
-        int maxX = 0, maxY = 0;
-        for (CCNode node : starBoard.getBoardNodes()) {
-            dots.put(node.getID(), new Rectangle(node.getX(), node.getY(), 10, 10));
-            maxX = Math.max(maxX, node.getX());
-            maxY = Math.max(maxY, node.getY());
-        }
-        // drawNodes draws the board 30 pixels a step, offset by up to 72 across and 23 down, with 15 pixel pegs; and
-        // there is a margin
-        setPreferredSize(new Dimension(maxX * 30 + 72 + 15 + 40, maxY * 30 + 23 + 15 + 40));
+        List<HexCoord> positions = new ArrayList<>();
+        for (int node = 0; node < starBoard.nNodes(); node++)
+            positions.add(starBoard.getPosition(node));
+        layout = HexLayout.fitting(positions, WIDTH, HEIGHT, MARGIN, 100);
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
     }
 
-    void drawNodes(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        for (Integer nodeID : dots.keySet()) {
-            CCNode node = starBoard.getNodeById(nodeID);
-            g2d.setColor(node.getBaseColour().toGraphicsColor());
+    @Override
+    protected void paintComponent(Graphics g0) {
+        Graphics2D g = (Graphics2D) g0;
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        StarBoard board = (StarBoard) component;
+        double size = layout.size();
+        int dot = (int) (size * 0.8), peg = (int) (size * 1.1);
 
-            int x = node.getX();
-            int y = node.getY();
-            int scale = 30;
-            int size = 15;
-            boolean shift = false;
+        // the links, each drawn once from the node to its east, south-east and south-west
+        g.setColor(Color.gray);
+        for (int node = 0; node < board.nNodes(); node++) {
+            HexCoord h = board.getPosition(node);
+            for (int d = 0; d < 3; d++)
+                if (board.getNode(h.neighbour(d)) >= 0)
+                    g.draw(new Line2D.Double(layout.centre(h), layout.centre(h.neighbour(d))));
+        }
 
-            if (y % 2 != 0) {
-                shift = true;
+        g.setFont(new Font("SansSerif", Font.PLAIN, Math.max(8, (int) (size * 0.45))));
+        FontMetrics fm = g.getFontMetrics();
+        for (int node = 0; node < board.nNodes(); node++) {
+            Point2D c = layout.centre(board.getPosition(node));
+            int x = (int) Math.round(c.getX()), y = (int) Math.round(c.getY());
+            g.setColor(board.getBaseColour(node).toGraphicsColor());
+            g.fillOval(x - dot / 2, y - dot / 2, dot, dot);
+            Peg p = board.getPeg(node);
+            if (p != null) {
+                g.setColor(p.colour().toGraphicsColor());
+                g.fillOval(x - peg / 2, y - peg / 2, peg, peg);
+                g.setColor(Color.black);
+                g.drawOval(x - peg / 2, y - peg / 2, peg, peg);
             }
-
-            x = x * scale;
-            y = y * scale;
-
-            if (shift) {
-                g2d.fillOval(x + 72, y + 23, size, size);
-            } else {
-                g2d.fillOval(x + 57, y + 23, size, size);
-            }
-
-            for (int side = 0; side < 6; side++) {
-                CCNode neighbour = starBoard.getNodeById(node.getNeighbourBySide(side));
-                // now draw lines from this node to its neighbours
-                if (neighbour != null) {
-                    int neighbourX = neighbour.getX() * scale;
-                    int neighbourY = neighbour.getY() * scale;
-
-                    boolean neighbourShift = false;
-                    if (neighbour.getY() % 2 != 0) {
-                        neighbourShift = true;
-                    }
-                    if (neighbourShift) {
-                        neighbourX += 72;
-                        neighbourY += 23;
-                    } else {
-                        neighbourX += 57;
-                        neighbourY += 23;
-                    }
-                    if (shift) {
-                        g2d.drawLine(x + 79,
-                                y + 30,
-                                neighbourX + 7,
-                                neighbourY + 7);
-                    } else {
-                        g2d.drawLine(x + 64,
-                                y + 30,
-                                neighbourX + 7,
-                                neighbourY + 7);
-                    }
-                }
-
-            }
+            // the number above the node
+            String label = Integer.toString(node);
+            g.setColor(Color.darkGray);
+            g.drawString(label, x - fm.stringWidth(label) / 2, (int) (y - size * 0.55));
         }
     }
-
-    void drawPegs(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        for (int i = 0; i < starBoard.getBoardNodes().size(); i++) {
-            if (starBoard.getBoardNodes().get(i).isNodeOccupied()) {
-                Peg peg = (starBoard.getBoardNodes().get(i)).getOccupiedPeg();
-                g2d.setColor(peg.getColour().toGraphicsColor());
-
-                int x = dots.get(i).x;
-                int y = dots.get(i).y;
-                int scale = 30;
-                int size = 20;
-                boolean shift = false;
-
-                if (y % 2 != 0) {
-                    shift = true;
-                }
-
-                x = x * scale;
-                y = y * scale;
-
-                if (shift) {
-                    g2d.fillOval(x + 70, y + 22, size, size);
-                } else {
-                    g2d.fillOval(x + 55, y + 22, size, size);
-                }
-            }
-        }
-    }
-
-    void drawNumbers(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        Font font = new Font("Verdana", Font.BOLD, 13);
-        g2d.setFont(font);
-
-        for (int i = 0; i < starBoard.getBoardNodes().size(); i++) {
-            g2d.setColor(starBoard.getBoardNodes().get(i).getBaseColour().toGraphicsColor());
-
-            int x = dots.get(i).x;
-            int y = dots.get(i).y;
-            int scale = 30;
-            boolean shift = false;
-
-            if (y % 2 != 0) {
-                shift = true;
-            }
-
-            x = x * scale;
-            y = y * scale;
-
-            if (shift) {
-                g2d.drawString(Integer.toString(i), x + 570, y + 28);
-            } else {
-                g2d.drawString(Integer.toString(i), x + 555, y + 28);
-            }
-        }
-    }
-
 
     @Override
     public void clearHighlights() {
-
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        drawNodes(g);
-        drawPegs(g);
-        drawNumbers(g);
     }
 }

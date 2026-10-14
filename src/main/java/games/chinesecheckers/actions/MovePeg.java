@@ -4,8 +4,8 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
-import games.chinesecheckers.components.CCNode;
 import games.chinesecheckers.components.Peg;
+import games.chinesecheckers.components.StarBoard;
 
 import java.util.Objects;
 
@@ -24,23 +24,20 @@ public class MovePeg extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CCGameState state = (CCGameState) gs;
         CCParameters params = (CCParameters) gs.getGameParameters();
-        CCNode nodeStart = state.getStarBoard().getBoardNodes().get(from);
-        CCNode nodeDestination = state.getStarBoard().getBoardNodes().get(to);
-
-        Peg peg = nodeStart.getOccupiedPeg();
-
-        nodeStart.setOccupiedPeg(null);
-        nodeDestination.setOccupiedPeg(peg);
+        StarBoard board = state.getStarBoard();
+        Peg peg = board.getPeg(from);
 
         // Then check to see if this is the destination node for the peg
-        Peg.Colour colour = peg.getColour();
-        int[] destinationNodes = params.colourIndices.get(params.boardOpposites.get(colour));
+        boolean inDestination = peg.inDestination();
+        int[] destinationNodes = params.colourIndices.get(params.boardOpposites.get(peg.colour()));
         for (int destinationNode : destinationNodes) {
             if (to == destinationNode) {
-                peg.setInDestination(true);
+                inDestination = true;
                 break;
             }
         }
+        board.setPeg(from, null);
+        board.setPeg(to, inDestination == peg.inDestination() ? peg : new Peg(peg.colour(), true));
 
         return true;
     }

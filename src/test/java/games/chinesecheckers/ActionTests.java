@@ -23,13 +23,13 @@ public class ActionTests {
 
         fm.computeAvailableActions(state);
         fm.next(state, movePeg);
-        assertEquals("Expected a purple peg at position 14", "purple", state.getStarBoard().getBoardNodes().get(14).getOccupiedPeg().getColour().name());
-        assertFalse("Expected position 6 to be empty", state.getStarBoard().getBoardNodes().get(6).isNodeOccupied());
+        assertEquals("Expected a purple peg at position 14", "purple", state.getStarBoard().getPeg(14).colour().name());
+        assertFalse("Expected position 6 to be empty", state.getStarBoard().isOccupied(6));
 
         fm.computeAvailableActions(state);
         fm.next(state, movePeg_);
-        assertEquals("Expected a purple peg at position 90", "purple", state.getStarBoard().getBoardNodes().get(90).getOccupiedPeg().getColour().name());
-        assertFalse("Expected position 14 to be empty", state.getStarBoard().getBoardNodes().get(14).isNodeOccupied());
+        assertEquals("Expected a purple peg at position 90", "purple", state.getStarBoard().getPeg(90).colour().name());
+        assertFalse("Expected position 14 to be empty", state.getStarBoard().isOccupied(14));
     }
 
     @Test
