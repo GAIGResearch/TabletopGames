@@ -54,6 +54,9 @@ class FrameStreamer {
     private volatile double scale, zoom;
     private int[] previous;
     private int previousW, previousH;
+    // The images are painted into in turn: one is the last sent (whose pixels are previous), and the other, spare, is
+    // painted next. An image may be tens of megabytes, too much to allocate on every tick.
+    private BufferedImage previousImage, spare;
     private long seq;
     private Dimension frameSize;
     // set to send the whole image on the next tick
@@ -141,8 +144,12 @@ class FrameStreamer {
             size[0] = root.getSize();
             int w = (int) Math.ceil(root.getWidth() * scale), h = (int) Math.ceil(root.getHeight() * scale);
             if (w <= 0 || h <= 0) return;
-            BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            BufferedImage image = spare != null && spare.getWidth() == w && spare.getHeight() == h
+                    ? spare : new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = image.createGraphics();
+            // as a new image would be, so that what the frame leaves unpainted matches the image last sent
+            g.setBackground(Color.BLACK);
+            g.clearRect(0, 0, w, h);
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.scale(scale, scale);
@@ -170,6 +177,9 @@ class FrameStreamer {
         previous = pixels;
         previousW = w;
         previousH = h;
+        // the image is kept until the next is sent, and the one it replaces is painted into next
+        spare = previousImage;
+        previousImage = image;
         if (changed.isEmpty()) return;
 
         List<byte[]> pngs = changed.parallelStream()

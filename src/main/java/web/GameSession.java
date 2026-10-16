@@ -608,7 +608,7 @@ public class GameSession {
     // a GUI whose layout asks for less than this (in either direction) gives no real size of its own
     static final int MIN_LAYOUT = 100;
     // the most pixels in an image; beyond this a zoomed frame is drawn less sharply, rather than sent larger
-    static final double MAX_IMAGE_PIXELS = 12_000_000;
+    static final double MAX_IMAGE_PIXELS = 4_000_000;
 
     /**
      * Sizes the frame, and sets the scales at which it is drawn and shown. Swing thread only.
