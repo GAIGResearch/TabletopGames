@@ -1,6 +1,6 @@
 package games.hareandtortoise;
 
-import games.hareandtortoise.components.HareCard;
+import games.hareandtortoise.components.HareCardType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import static games.hareandtortoise.HareAndTortoiseTestUtils.*;
-import static games.hareandtortoise.components.HareCard.Type.*;
+import static games.hareandtortoise.components.HareCardType.*;
 import static org.junit.Assert.*;
 
 public class HareAndTortoiseCopyTest {
@@ -100,13 +100,13 @@ public class HareAndTortoiseCopyTest {
         stackHareDeck(state, FALL_BACK_ONE_POSITION, LAST_TURN_FREE, DRAW_OR_DISCARD, LEAP_AHEAD_ONE_POSITION,
                 NEXT_CARROT_SQUARE, PREVIOUS_CARROT_SQUARE);
         state.nUnseenHareCards = 6;
-        List<HareCard.Type> original = hareTypes(state);
-        List<Set<HareCard.Type>> seenAt = new ArrayList<>();
+        List<HareCardType> original = hareTypes(state);
+        List<Set<HareCardType>> seenAt = new ArrayList<>();
         for (int i = 0; i < 6; i++) seenAt.add(new HashSet<>());
 
         for (int n = 0; n < 30; n++) {
             HareAndTortoiseGameState copy = copyFor(1);
-            List<HareCard.Type> types = hareTypes(copy);
+            List<HareCardType> types = hareTypes(copy);
             assertEquals(12, types.size());
             assertEquals(6, copy.getNUnseenHareCards());
             // the six seen cards keep their order
@@ -124,7 +124,7 @@ public class HareAndTortoiseCopyTest {
     @Test
     public void aPlayersCopyShufflesTheWholePileWhileNothingHasBeenSeen() {
         state.nUnseenHareCards = 12;
-        Set<List<HareCard.Type>> orders = new HashSet<>();
+        Set<List<HareCardType>> orders = new HashSet<>();
         for (int n = 0; n < 5; n++)
             orders.add(hareTypes(copyFor(0)));
         assertTrue(orders.size() > 1);

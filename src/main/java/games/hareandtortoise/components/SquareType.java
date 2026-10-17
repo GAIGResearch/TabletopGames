@@ -1,4 +1,6 @@
-package games.hareandtortoise;
+package games.hareandtortoise.components;
+
+import games.hareandtortoise.HareAndTortoiseGameState;
 
 /**
  * The kinds of square on the Hare and Tortoise board. START and HOME are the spaces before the first square and after

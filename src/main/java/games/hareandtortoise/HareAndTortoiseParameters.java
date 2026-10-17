@@ -2,12 +2,14 @@ package games.hareandtortoise;
 
 import evaluation.optimisation.TunableParameters;
 import games.hareandtortoise.components.HareCard;
+import games.hareandtortoise.components.HareCardType;
+import games.hareandtortoise.components.SquareType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static games.hareandtortoise.SquareType.*;
+import static games.hareandtortoise.components.SquareType.*;
 
 /**
  * Parameters for Hare and Tortoise. The defaults are the rules of the 1978 Ravensburger edition (David Parlett).
@@ -100,19 +102,19 @@ public class HareAndTortoiseParameters extends TunableParameters<HareAndTortoise
      */
     public List<HareCard> hareCards() {
         List<HareCard> cards = new ArrayList<>();
-        addCards(cards, HareCard.Type.FALL_BACK_ONE_POSITION, nFallBackOnePosition);
-        addCards(cards, HareCard.Type.LAST_TURN_FREE, nLastTurnFree);
-        addCards(cards, HareCard.Type.DRAW_OR_DISCARD, nDrawOrDiscard);
-        addCards(cards, HareCard.Type.LEAP_AHEAD_ONE_POSITION, nLeapAheadOnePosition);
-        addCards(cards, HareCard.Type.NEXT_CARROT_SQUARE, nNextCarrotSquare);
-        addCards(cards, HareCard.Type.PREVIOUS_CARROT_SQUARE, nPreviousCarrotSquare);
-        addCards(cards, HareCard.Type.ANOTHER_TURN, nAnotherTurn);
-        addCards(cards, HareCard.Type.MISS_A_TURN, nMissATurn);
-        addCards(cards, HareCard.Type.CHEW_A_LETTUCE, nChewALettuce);
+        addCards(cards, HareCardType.FALL_BACK_ONE_POSITION, nFallBackOnePosition);
+        addCards(cards, HareCardType.LAST_TURN_FREE, nLastTurnFree);
+        addCards(cards, HareCardType.DRAW_OR_DISCARD, nDrawOrDiscard);
+        addCards(cards, HareCardType.LEAP_AHEAD_ONE_POSITION, nLeapAheadOnePosition);
+        addCards(cards, HareCardType.NEXT_CARROT_SQUARE, nNextCarrotSquare);
+        addCards(cards, HareCardType.PREVIOUS_CARROT_SQUARE, nPreviousCarrotSquare);
+        addCards(cards, HareCardType.ANOTHER_TURN, nAnotherTurn);
+        addCards(cards, HareCardType.MISS_A_TURN, nMissATurn);
+        addCards(cards, HareCardType.CHEW_A_LETTUCE, nChewALettuce);
         return cards;
     }
 
-    private static void addCards(List<HareCard> cards, HareCard.Type type, int n) {
+    private static void addCards(List<HareCard> cards, HareCardType type, int n) {
         for (int i = 0; i < n; i++)
             cards.add(new HareCard(type));
     }
