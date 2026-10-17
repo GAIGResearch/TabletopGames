@@ -50,6 +50,7 @@ public class Game {
     private JFrame frame;
     // Timers for various function calls
     private double nextTime, copyTime, agentTime, actionComputeTime;
+    private int nextCount, copyCount, actionComputeCount;
     // Keeps track of action spaces for each game tick, pairs of (player ID, #actions)
     private ArrayList<Pair<Integer, Integer>> actionSpaceSize;
     // Number of times an agent is asked for decisions
@@ -60,6 +61,8 @@ public class Game {
     private boolean debug = false;
     private int turnPause;
     protected AbstractAction overrideAction;
+    // the player being asked for an action; with simultaneous moves this need not be the current player (-1 if none)
+    private volatile int playerToMove = -1;
     protected String savedStateDirectory = "SavedStates";
 
     /**
@@ -172,8 +175,7 @@ public class Game {
     public void updateGUI(AbstractGUIManager gui, JFrame frame) {
         // synchronise on game to avoid updating GUI in middle of action being taken
         AbstractGameState gameState = getGameState();
-        int currentPlayer = gameState.getCurrentPlayer();
-        AbstractPlayer player = getPlayers().get(currentPlayer);
+        AbstractPlayer player = getPlayers().get(getPlayerToMove());
         if (gui != null) {
             gui.update(player, gameState, isHumanToMove());
             frame.repaint();
@@ -247,6 +249,9 @@ public class Game {
         agentTime = 0;
         actionComputeTime = 0;
         nDecisions = 0;
+        actionComputeCount = 0;
+        copyCount = 0;
+        nextCount = 0;
         actionSpaceSize = new ArrayList<>();
         nActionsPerTurnSum = 0;
         nActionsPerTurn = 1;
@@ -336,8 +341,16 @@ public class Game {
     }
 
     public final boolean isHumanToMove() {
-        int activePlayer = gameState.getCurrentPlayer();
-        return this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
+        return this.getPlayers().get(getPlayerToMove()) instanceof HumanGUIPlayer;
+    }
+
+    /**
+     * The player being asked for an action. When several players move simultaneously they are asked one by one, so
+     * this need not be the current player.
+     */
+    public final int getPlayerToMove() {
+        int p = playerToMove;
+        return p >= 0 ? p : gameState.getCurrentPlayer();
     }
 
     public final AbstractAction oneAction() {
@@ -364,16 +377,19 @@ public class Game {
                 throw new AssertionError("Player " + activePlayer + " is not allowed to move");
 
             AbstractPlayer currentPlayer = players.get(activePlayer);
+            playerToMove = activePlayer;
 
             // copy state for this player
             double s = System.nanoTime();
             AbstractGameState observation = gameState.copy(activePlayer);
             copyTime += (System.nanoTime() - s);
+            copyCount++;
 
             // compute available actions
             s = System.nanoTime();
             List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace, activePlayer);
             actionComputeTime += (System.nanoTime() - s);
+            actionComputeCount++;
 
             if (observedActions.isEmpty()) {
                 Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
@@ -450,6 +466,7 @@ public class Game {
 
             actionsChosen.put(activePlayer, action);
         }
+        playerToMove = -1;
         // fire ACTION_CHOSEN per player, only after all simultaneous players have chosen an action
         for (int p : activePlayers) {
             AbstractAction action = actionsChosen.get(p);
@@ -471,7 +488,8 @@ public class Game {
         // apply once
         double s = System.nanoTime();
         forwardModel.next(gameState, finalAction.copy());
-        nextTime = (System.nanoTime() - s);
+        nextTime += (System.nanoTime() - s);
+        nextCount++;
 
         // fire ACTION_TAKEN once per player after applying
         for (int p : activePlayers) {
@@ -535,7 +553,7 @@ public class Game {
      * @return - agent time
      */
     public double getAgentTime() {
-        return agentTime;
+        return agentTime / nDecisions;
     }
 
     /**
@@ -544,8 +562,7 @@ public class Game {
      * @return - copy time
      */
     public double getCopyTime() {
-        //  System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
-        return copyTime;
+        return copyTime / copyCount;
     }
 
     /**
@@ -554,7 +571,7 @@ public class Game {
      * @return - next time
      */
     public double getNextTime() {
-        return nextTime;
+        return nextTime / nextCount;
     }
 
     /**
@@ -564,7 +581,7 @@ public class Game {
      * @return - action compute time
      */
     public double getActionComputeTime() {
-        return actionComputeTime;
+        return actionComputeTime / actionComputeCount;
     }
 
     /**

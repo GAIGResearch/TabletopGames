@@ -2,11 +2,12 @@ package games.spades;
 
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
+import games.tricktaking.ITrickTakingParameters;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-public class SpadesParameters extends TunableParameters<SpadesParameters> {
+public class SpadesParameters extends TunableParameters<SpadesParameters> implements ITrickTakingParameters {
     
     public int winningScore = 500;
     public int sandbagsPerPenalty = 10;
@@ -58,6 +59,11 @@ public class SpadesParameters extends TunableParameters<SpadesParameters> {
         allowNilOverbid = (boolean) getParameterValue("allowNilOverbid");
         pointsPerTrick = (int) getParameterValue("pointsPerTrick");
         rememberVoids = (boolean) getParameterValue("rememberVoids");
+    }
+
+    @Override
+    public boolean rememberVoids() {
+        return rememberVoids;
     }
     
     public SpadesParameters(long seed) {

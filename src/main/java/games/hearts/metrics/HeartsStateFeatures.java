@@ -117,26 +117,26 @@ public class HeartsStateFeatures implements IStateFeatureVector {
         features[11] = suitCounts[FrenchCard.Suite.Spades.ordinal()];
         features[12] = hasQoS ? 1.0 : 0.0;
 
-        features[13] = hgs.currentPlayedCards.size();
+        features[13] = hgs.currentTrick.getSize();
         features[14] = hgs.getCurrentPlayer() == hgs.getFirstPlayer() ? 1.0 : 0.0;
         
-        if (hgs.firstCardSuit != null) {
-            features[15] = hgs.firstCardSuit == FrenchCard.Suite.Clubs ? 1.0 : 0.0;
-            features[16] = hgs.firstCardSuit == FrenchCard.Suite.Diamonds ? 1.0 : 0.0;
-            features[17] = hgs.firstCardSuit == FrenchCard.Suite.Hearts ? 1.0 : 0.0;
-            features[18] = hgs.firstCardSuit == FrenchCard.Suite.Spades ? 1.0 : 0.0;
+        if (hgs.currentTrick.getLeadSuit() != null) {
+            features[15] = hgs.currentTrick.getLeadSuit() == FrenchCard.Suite.Clubs ? 1.0 : 0.0;
+            features[16] = hgs.currentTrick.getLeadSuit() == FrenchCard.Suite.Diamonds ? 1.0 : 0.0;
+            features[17] = hgs.currentTrick.getLeadSuit() == FrenchCard.Suite.Hearts ? 1.0 : 0.0;
+            features[18] = hgs.currentTrick.getLeadSuit() == FrenchCard.Suite.Spades ? 1.0 : 0.0;
 
             int highestInTrick = -1;
-            for (Map.Entry<Integer, FrenchCard> entry : hgs.currentPlayedCards) {
-                if (entry.getValue().suite == hgs.firstCardSuit) {
-                    if (entry.getValue().number > highestInTrick) {
-                        highestInTrick = entry.getValue().number;
+            for (FrenchCard played : hgs.currentTrick.getComponents()) {
+                if (played.suite == hgs.currentTrick.getLeadSuit()) {
+                    if (played.number > highestInTrick) {
+                        highestInTrick = played.number;
                     }
                 }
             }
             boolean canBeat = false;
             for (FrenchCard card : hand.getComponents()) {
-                if (card.suite == hgs.firstCardSuit && card.number > highestInTrick) {
+                if (card.suite == hgs.currentTrick.getLeadSuit() && card.number > highestInTrick) {
                     canBeat = true;
                     break;
                 }

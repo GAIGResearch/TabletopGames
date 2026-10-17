@@ -1,0 +1,12 @@
+{
+  "class": "games.euchre.EuchreParameters",
+  "targetScore": 1,
+  "handSize": 5,
+  "lowestCard": 9,
+  "pointsMade": 1,
+  "pointsMarch": 2,
+  "pointsAloneMarch": 4,
+  "pointsEuchred": 2,
+  "sittingOutDealerPicksUp": true,
+  "rememberVoids": true
+}

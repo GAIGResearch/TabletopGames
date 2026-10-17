@@ -25,9 +25,9 @@ public class ToadQFeatures001 implements IActionFeatureVector {
         for (ToadCardType cardName : ToadCardType.values())
             names.add(cardName + "_DIAGONAL");
         for (ToadCardType cardName : ToadCardType.values())
-            names.add(cardName + "_GUESS"); // for AssaultCannon tactics
+            names.add(cardName + "_GUESS"); // for the Assault Cannon and Siege Cannon tactics
         for (ToadCardType cardName : ToadCardType.values())
-            names.add(cardName + "_RECYCLE");
+            names.add(cardName + "_RECYCLE"); // also the opening return
 
         localNames = names.toArray(new String[0]);
     }
@@ -37,8 +37,7 @@ public class ToadQFeatures001 implements IActionFeatureVector {
         double[] retValue = new double[names().length];
         ToadGameState state = (ToadGameState) ags;
         ToadCard oppField = state.getFieldCard(1 - playerID);
-        // attacker goes first, so turn is even (starting with 0)
-        retValue[1] = ags.getTurnCounter() % 2 == 0 ? 1 : 0;
+        retValue[1] = state.getAttacker() == playerID ? 1 : 0;
 
         List<ToadCardType> allValues = List.of(ToadCardType.values());
         ToadCardType cardPlayed;
@@ -59,10 +58,26 @@ public class ToadQFeatures001 implements IActionFeatureVector {
                 int indexOfOppField = allValues.indexOf(oppField.type);
                 retValue[2 + 2 * allValues.size() + indexOfOppField] = 1;
             }
+        } else if (action instanceof PlayDefenderCards pdc) {
+            // the Defender plays both cards at once: record both, with the flank card as the diagonal
+            retValue[0] = 1;
+            retValue[2 + allValues.indexOf(pdc.fieldCard.type)] = 1;
+            retValue[2 + allValues.indexOf(pdc.flankCard.type)] = 1;
+            if (oppField != null) {
+                int indexOfOppField = allValues.indexOf(oppField.type);
+                retValue[2 + allValues.size() + indexOfOppField] = 1;
+                retValue[2 + 2 * allValues.size() + indexOfOppField] = 1;
+            }
         } else if (action instanceof ForceOpponentDiscard fod) {
             cardPlayed = fod.type;
             int indexOfCard = allValues.indexOf(cardPlayed);
             retValue[2 + 3 * allValues.size() + indexOfCard] = 1;
+        } else if (action instanceof GuessCard gc) {
+            int indexOfCard = allValues.indexOf(gc.type);
+            retValue[2 + 3 * allValues.size() + indexOfCard] = 1;
+        } else if (action instanceof ReturnCardToDeck rc) {
+            int indexOfCard = allValues.indexOf(rc.card.type);
+            retValue[2 + 4 * allValues.size() + indexOfCard] = 1;
         } else if (action instanceof RecycleCard rc) {
             if (rc.discardedCard != null ) {
                 cardPlayed = rc.discardedCard.type;

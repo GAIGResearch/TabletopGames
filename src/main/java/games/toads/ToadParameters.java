@@ -23,12 +23,13 @@ public class ToadParameters extends TunableParameters {
     int nCards = 2;
     int handSize = 4;
     boolean useTactics = true;
-    boolean discardOption = true;
+    boolean discardOption = false;
+    boolean openingReturn = true;
     int firstRoundHandicap = 0;
     int secondRoundHandicap = 0;
-    SecondRoundStart secondRoundStart = SecondRoundStart.WINNER;
+    SecondRoundStart secondRoundStart = SecondRoundStart.TWO;
 
-    enum SecondRoundStart {
+    public enum SecondRoundStart {
         ONE, TWO, LOSER, WINNER
     }
 
@@ -39,10 +40,11 @@ public class ToadParameters extends TunableParameters {
         addTunableParameter("nCards", 2);
         addTunableParameter("handSize", 4);
         addTunableParameter("useTactics", true);
-        addTunableParameter("discardOption", true);
+        addTunableParameter("discardOption", false);
+        addTunableParameter("openingReturn", true);
         addTunableParameter("firstRoundHandicap", 0);
         addTunableParameter("secondRoundHandicap", 0);
-        addTunableParameter("secondRoundStart", SecondRoundStart.WINNER);
+        addTunableParameter("secondRoundStart", SecondRoundStart.TWO);
     }
 
     @Override
@@ -54,6 +56,7 @@ public class ToadParameters extends TunableParameters {
         handSize = (int) getParameterValue("handSize");
         useTactics = (boolean) getParameterValue("useTactics");
         discardOption = (boolean) getParameterValue("discardOption");
+        openingReturn = (boolean) getParameterValue("openingReturn");
         firstRoundHandicap = (int) getParameterValue("firstRoundHandicap");
         secondRoundHandicap = (int) getParameterValue("secondRoundHandicap");
         secondRoundStart = (SecondRoundStart) getParameterValue("secondRoundStart");
@@ -102,7 +105,8 @@ public class ToadParameters extends TunableParameters {
 
     @Override
     protected boolean _equals(Object o) {
-        return (o instanceof ToadParameters) && super.equals(o);
+        // TunableParameters.equals compares the parameter values and calls this method, so super.equals would recurse
+        return o instanceof ToadParameters;
     }
 
     @Override

@@ -1,0 +1,13 @@
+{
+  "class": "games.blackjack.BlackjackParameters",
+  "startingChips": 10,
+  "minBet": 2,
+  "maxBet": 10,
+  "payout21": 2.0,
+  "payout21NaturalOnly": false,
+  "nHands": 1,
+  "dealerHitsSoft17": false,
+  "doubleDown": false,
+  "splitting": false,
+  "maxHandsAfterSplit": 4
+}

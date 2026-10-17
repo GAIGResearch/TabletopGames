@@ -1,0 +1,7 @@
+{
+  "class": "games.scopa.ScopaParameters",
+  "handSize": 3,
+  "tableSize": 4,
+  "targetScore": 0,
+  "redealOnKings": false
+}

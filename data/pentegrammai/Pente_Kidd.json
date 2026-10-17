@@ -3,5 +3,5 @@
 	"blotRuleActive" : true,
 	"onePieceLimitOffSacredLine" : false,
 	"mustMoveFromSacredLine" : true,
-	"bearOffFromSacredLine" : false
+	"slideToMiddleOnSacredLine" : false
 }

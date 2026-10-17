@@ -5,17 +5,21 @@ import core.Game;
 import games.GameType;
 import games.dominion.cards.CardType;
 
+import java.util.List;
+
 public class DominionFGParameters extends DominionParameters {
     public DominionFGParameters() {
-        cardsUsed.add(CardType.CELLAR);
-        cardsUsed.add(CardType.MARKET);
-        cardsUsed.add(CardType.MERCHANT);
-        cardsUsed.add(CardType.MILITIA);
-        cardsUsed.add(CardType.MINE);
-        cardsUsed.add(CardType.MOAT);
-        cardsUsed.add(CardType.REMODEL);
-        cardsUsed.add(CardType.SMITHY);
-        cardsUsed.add(CardType.VILLAGE);
-        cardsUsed.add(CardType.WORKSHOP);
+        super(List.of(
+                CardType.CELLAR,
+                CardType.MARKET,
+                CardType.MERCHANT,
+                CardType.MILITIA,
+                CardType.MINE,
+                CardType.MOAT,
+                CardType.REMODEL,
+                CardType.SMITHY,
+                CardType.VILLAGE,
+                CardType.WORKSHOP
+        ));
     }
 }

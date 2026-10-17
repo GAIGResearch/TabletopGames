@@ -17,6 +17,14 @@ import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
 import games.blackjack.gui.BlackjackGUIManager;
+import games.leducpoker.LeducPokerForwardModel;
+import games.leducpoker.LeducPokerGameState;
+import games.leducpoker.LeducPokerParameters;
+import games.leducpoker.gui.LeducPokerGUIManager;
+import games.goofspiel.GoofspielForwardModel;
+import games.goofspiel.GoofspielGameState;
+import games.goofspiel.GoofspielParameters;
+import games.goofspiel.gui.GoofspielGUIManager;
 import games.cantstop.CantStopForwardModel;
 import games.cantstop.CantStopGameState;
 import games.cantstop.CantStopParameters;
@@ -28,11 +36,63 @@ import games.catan.gui.CatanGUI;
 import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
+import games.agram.AgramForwardModel;
+import games.agram.gui.AgramGUIManager;
+import games.agram.AgramGameState;
+import games.agram.AgramParameters;
+import games.cuckoo.CuckooForwardModel;
+import games.cuckoo.CuckooGameState;
+import games.cuckoo.CuckooParameters;
+import games.cuckoo.gui.CuckooGUIManager;
+import games.golfsix.GolfSixForwardModel;
+import games.golfsix.GolfSixGameState;
+import games.golfsix.GolfSixParameters;
+import games.golfsix.gui.GolfSixGUIManager;
+import games.euchre.EuchreForwardModel;
+import games.euchre.EuchreGameState;
+import games.euchre.EuchreParameters;
+import games.euchre.gui.EuchreGUIManager;
+import games.whist.WhistForwardModel;
+import games.whist.WhistGameState;
+import games.whist.WhistParameters;
+import games.whist.gui.WhistGUIManager;
+import games.scarto.ScartoForwardModel;
+import games.scarto.ScartoGameState;
+import games.scarto.ScartoParameters;
+import games.scarto.gui.ScartoGUIManager;
+import games.scopa.ScopaForwardModel;
+import games.scopa.ScopaGameState;
+import games.scopa.ScopaParameters;
+import games.scopa.gui.ScopaGUIManager;
+import games.skitgubbe.SkitgubbeForwardModel;
+import games.skitgubbe.SkitgubbeGameState;
+import games.skitgubbe.SkitgubbeParameters;
+import games.skitgubbe.gui.SkitgubbeGUIManager;
+import games.schwimmen.SchwimmenForwardModel;
+import games.schwimmen.SchwimmenGameState;
+import games.schwimmen.gui.SchwimmenGUIManager;
+import games.schwimmen.SchwimmenParameters;
+import games.sueca.SuecaForwardModel;
+import games.sueca.SuecaGameState;
+import games.sueca.SuecaParameters;
+import games.sueca.gui.SuecaGUIManager;
+import games.klaverjassen.KlaverjassenForwardModel;
+import games.klaverjassen.KlaverjassenGameState;
+import games.klaverjassen.KlaverjassenParameters;
+import games.klaverjassen.gui.KlaverjassenGUIManager;
 import games.chinesecheckers.gui.CCGUIManager;
 import games.chess.ChessForwardModel;
 import games.chess.ChessGameState;
 import games.chess.ChessParameters;
 import games.chess.ChessGUIManager;
+import games.cribbage.CribbageForwardModel;
+import games.cribbage.gui.CribbageGUIManager;
+import games.cribbage.CribbageGameState;
+import games.cribbage.CribbageParameters;
+import games.crazyeights.CZEForwardModel;
+import games.crazyeights.gui.CZEGUIManager;
+import games.crazyeights.CZEGameState;
+import games.crazyeights.CZEParameters;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -49,6 +109,10 @@ import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
 import games.diamant.gui.DiamantGUIManager;
+import games.lawnandorder.LawnAndOrderForwardModel;
+import games.lawnandorder.LawnAndOrderGameState;
+import games.lawnandorder.gui.LawnAndOrderGUIManager;
+import games.lawnandorder.LawnAndOrderParameters;
 import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
@@ -112,6 +176,18 @@ import games.root.RootForwardModel;
 import games.root.RootGameState;
 import games.root.RootParameters;
 import games.root.gui.RootGUIManager;
+import games.pitch.PitchForwardModel;
+import games.pitch.PitchGameState;
+import games.pitch.PitchParameters;
+import games.pitch.gui.PitchGUIManager;
+import games.president.PresidentForwardModel;
+import games.president.PresidentGameState;
+import games.president.PresidentParameters;
+import games.president.gui.PresidentGUIManager;
+import games.rummy.RummyForwardModel;
+import games.rummy.RummyGameState;
+import games.rummy.RummyParameters;
+import games.rummy.gui.RummyGUIManager;
 import games.saboteur.SaboteurForwardModel;
 import games.saboteur.SaboteurGameParameters;
 import games.saboteur.SaboteurGameState;
@@ -137,7 +213,7 @@ import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.gui.TicTacToeGUIManager;
 import games.toads.ToadForwardModel;
-import games.toads.ToadGUIManager;
+import games.toads.gui.ToadGUIManager;
 import games.toads.ToadGameState;
 import games.toads.ToadParameters;
 import games.uno.UnoForwardModel;
@@ -230,6 +306,10 @@ public enum GameType {
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             UnoGameState.class, UnoForwardModel.class, UnoGameParameters.class, UnoGUIManager.class),
+    CrazyEights(2, 8,
+            Arrays.asList(Cards, Simple),
+            Arrays.asList(HandManagement, TakeThat, MultiUseCards, SuddenDeathEnding),
+            CZEGameState.class, CZEForwardModel.class, CZEParameters.class, CZEGUIManager.class),
     Virus(2, 6,
             Arrays.asList(Cards, Medical),
             Arrays.asList(CardDrafting, SetCollection, TakeThat),
@@ -247,14 +327,26 @@ public enum GameType {
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio, Bluffing),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             PokerGameState.class, PokerForwardModel.class, PokerGameParameters.class, PokerGUIManager.class),
-    Blackjack(2, 7,
-            Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
-            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+    LeducPoker(2, 2,
+            Arrays.asList(Cards, Bluffing),
+            List.of(),
+            LeducPokerGameState.class, LeducPokerForwardModel.class, LeducPokerParameters.class, LeducPokerGUIManager.class),
+    Blackjack(1, 7,
+            Arrays.asList(Cards, Economic, Simple, Banking),
+            List.of(PushYourLuck),
             BlackjackGameState.class, BlackjackForwardModel.class, BlackjackParameters.class, BlackjackGUIManager.class),
+    Goofspiel(2, 7,
+            Arrays.asList(Cards, Bluffing, Simple),
+            List.of(SimultaneousActionSelection),
+            GoofspielGameState.class, GoofspielForwardModel.class, GoofspielParameters.class, GoofspielGUIManager.class),
     Diamant(2, 6,
             Arrays.asList(Adventure, Bluffing, Exploration),
             Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
             DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, DiamantGUIManager.class),
+    LawnAndOrder(2, 6,
+            Arrays.asList(Cards, Humour),
+            Arrays.asList(PushYourLuck, SetCollection, SimultaneousActionSelection),
+            LawnAndOrderGameState.class, LawnAndOrderForwardModel.class, LawnAndOrderParameters.class, LawnAndOrderGUIManager.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
@@ -311,7 +403,7 @@ public enum GameType {
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
             PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
     PowerGrid(3, 6,
-    		Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
+            Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, EngineBuilding),
             PowerGridGameState.class, PowerGridForwardModel.class, PowerGridParameters.class, PowerGridGUI.class),
     Wonders7(3, 7,
@@ -325,6 +417,21 @@ public enum GameType {
     Hearts(3, 7, Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
+    Agram(2, 5, Arrays.asList(Cards, Simple),
+            List.of(TrickTaking),
+            AgramGameState.class, AgramForwardModel.class, AgramParameters.class, AgramGUIManager.class),
+    Cuckoo(4, 10, Arrays.asList(Cards, Simple),
+            Arrays.asList(PlayerElimination, TakeThat),
+            CuckooGameState.class, CuckooForwardModel.class, CuckooParameters.class, CuckooGUIManager.class),
+    GolfSix(2, 4, Arrays.asList(Cards, Simple),
+            Arrays.asList(Memory, SetCollection),
+            GolfSixGameState.class, GolfSixForwardModel.class, GolfSixParameters.class, GolfSixGUIManager.class),
+    Schwimmen(2, 8, List.of(Cards),
+            Arrays.asList(SetCollection, PlayerElimination),
+            SchwimmenGameState.class, SchwimmenForwardModel.class, SchwimmenParameters.class, SchwimmenGUIManager.class),
+    Cribbage(2, 2, Arrays.asList(Cards, Number),
+            Arrays.asList(HandManagement, PatternBuilding, SetCollection),
+            CribbageGameState.class, CribbageForwardModel.class, CribbageParameters.class, CribbageGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             List.of(GridMovement),
@@ -340,8 +447,8 @@ public enum GameType {
     PenteGrammai(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement, DiceRolling),
-            PenteGameState .class, PenteForwardModel.class, PenteParameters.class, PenteGUIManager.class),
-    Mastermind(1,1,
+            PenteGameState.class, PenteForwardModel.class, PenteParameters.class, PenteGUIManager.class),
+    Mastermind(1, 1,
             Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
             List.of(PatternBuilding),
             MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
@@ -363,9 +470,39 @@ public enum GameType {
     Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling),
             PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class,
             PickominoGUIManager.class),
-    Spades(4,4,Arrays.asList(Cards, Strategy),
+    Spades(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement, TakeThat),
-            SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class);
+            SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class),
+    Whist(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement),
+            WhistGameState.class, WhistForwardModel.class, WhistParameters.class, WhistGUIManager.class),
+    Euchre(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement),
+            EuchreGameState.class, EuchreForwardModel.class, EuchreParameters.class, EuchreGUIManager.class),
+    Klaverjassen(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking),
+            KlaverjassenGameState.class, KlaverjassenForwardModel.class, KlaverjassenParameters.class, KlaverjassenGUIManager.class),
+    Pitch(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement),
+            PitchGameState.class, PitchForwardModel.class, PitchParameters.class, PitchGUIManager.class),
+    Sueca(4, 4, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking),
+            SuecaGameState.class, SuecaForwardModel.class, SuecaParameters.class, SuecaGUIManager.class),
+    Scarto(3, 3, Arrays.asList(Cards, Strategy),
+            Arrays.asList(TrickTaking, HandManagement),
+            ScartoGameState.class, ScartoForwardModel.class, ScartoParameters.class, ScartoGUIManager.class),
+    Scopa(2, 2, Arrays.asList(Cards, Strategy),
+            Arrays.asList(HandManagement, SetCollection),
+            ScopaGameState.class, ScopaForwardModel.class, ScopaParameters.class, ScopaGUIManager.class),
+    President(4, 7, Arrays.asList(Cards, Simple),
+            Arrays.asList(HandManagement),
+            PresidentGameState.class, PresidentForwardModel.class, PresidentParameters.class, PresidentGUIManager.class),
+    Skitgubbe(3, 4, Arrays.asList(Cards),
+            Arrays.asList(TrickTaking),
+            SkitgubbeGameState.class, SkitgubbeForwardModel.class, SkitgubbeParameters.class, SkitgubbeGUIManager.class),
+    Rummy(2, 6, Arrays.asList(Cards, Simple),
+            Arrays.asList(SetCollection),
+            RummyGameState.class, RummyForwardModel.class, RummyParameters.class, RummyGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -651,7 +788,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame, Civilization, Ancient, CodeBreaking;
+        Wargame, Civilization, Ancient, CodeBreaking, Banking;
 
         /**
          * @return a list of all games within this category.

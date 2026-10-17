@@ -1,0 +1,7 @@
+{
+  "class": "games.president.PresidentParameters",
+  "presidentPoints": 2,
+  "vicePresidentPoints": 1,
+  "targetScore": 1,
+  "exchangeCards": 0
+}

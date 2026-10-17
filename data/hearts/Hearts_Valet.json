@@ -1,0 +1,7 @@
+{
+  "class": "games.hearts.HeartsParameters",
+  "rememberVoids": true,
+  "passCards": false,
+  "maxRounds": 1,
+  "matchScore": 100
+}

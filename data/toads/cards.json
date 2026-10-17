@@ -3,7 +3,7 @@
     {
       "name": "Assassin",
       "value": 1,
-      "special": "Assassin",
+      "special": "AssassinII",
       "count": 1
     },
     {
@@ -15,43 +15,43 @@
     {
       "name": "Saboteur",
       "value": 3,
-      "special": "SaboteurII",
+      "special": "SaboteurIII",
       "count": 1
     },
     {
       "name": "Trickster",
       "value": 4,
-      "special": "Trickster",
+      "special": "TricksterII",
       "count": 1
     },
     {
       "name": "Berserker",
       "value": 5,
-      "special": "Berserker",
+      "special": "BerserkerII",
       "count": 1
     },
     {
-      "name": "Icon Bearer",
+      "name": "Bodyguard",
       "value": 6,
-      "special": "IconBearer",
+      "special": "Bodyguard",
       "count": 1
     },
     {
       "name": "General One",
       "value": 7,
-      "special": "GeneralOne",
+      "special": "GeneralHostages",
       "count": 1
     },
     {
       "name": "General Two",
       "value": 7,
-      "special": "GeneralTwo",
+      "special": "GeneralFlags",
       "count": 1
     },
     {
-      "name": "Assault Cannon",
+      "name": "Siege Cannon",
       "value": 0,
-      "special": "AssaultCannon",
+      "special": "SiegeCannon",
       "count": 1
     }
   ]

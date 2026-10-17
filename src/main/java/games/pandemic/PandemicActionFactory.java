@@ -16,6 +16,7 @@ import java.util.Set;
 import static core.CoreConstants.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.PandemicConstants.infectionHash;
+import static utilities.Utils.generateCombinations;
 import static utilities.Utils.generatePermutations;
 import static utilities.Utils.indexOf;
 
@@ -98,12 +99,15 @@ class PandemicActionFactory {
                     colorCounter[idx].add(card.getComponentID());
                 }
             }
+            int cardsNeeded = roleString.equals("Scientist") ? pp.nCardsForCure - pp.nCardsForCureReducedBy : pp.nCardsForCure;
             for (int i = 0; i < colorCounter.length; i++) {
-                if (colorCounter[i] != null) {
-                    if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy) {
-                        actions.add(new CureDisease(colors[i], colorCounter[i]));
-                    } else if (colorCounter[i].size() >= pp.nCardsForCure) {
-                        actions.add(new CureDisease(colors[i], colorCounter[i]));
+                if (colorCounter[i] != null && colorCounter[i].size() >= cardsNeeded) {
+                    // Only the cards needed are discarded; the player chooses which ones if they have more
+                    int[] cardIds = colorCounter[i].stream().mapToInt(Integer::intValue).toArray();
+                    for (int[] cardsUsed : generateCombinations(cardIds, cardsNeeded)) {
+                        ArrayList<Integer> cure = new ArrayList<>();
+                        for (int id : cardsUsed) cure.add(id);
+                        actions.add(new CureDisease(colors[i], cure));
                     }
                 }
             }

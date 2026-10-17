@@ -9,7 +9,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import games.GameType;
 import games.hearts.actions.Pass;
-import games.hearts.actions.Play;
+import games.tricktaking.PlayCard;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 import utilities.Pair;
@@ -63,7 +63,6 @@ public class HeartsSimultaneousTests {
 
     private static int playerOf(AbstractAction a) {
         if (a instanceof Pass pass) return pass.playerID;
-        if (a instanceof Play play) return play.playerID;
         throw new AssertionError("unexpected action " + a);
     }
 
@@ -114,7 +113,7 @@ public class HeartsSimultaneousTests {
         }
         List<AbstractAction> actions = fm.computeAvailableActions(s);
         assertEquals(1, actions.size());
-        assertEquals(new Play(holder, ((HeartsParameters) s.getGameParameters()).startingCard), actions.get(0));
+        assertEquals(new PlayCard<>(((HeartsParameters) s.getGameParameters()).startingCard), actions.get(0));
         assertTrue(fm.computeAvailableActions(s, null, (holder + 1) % 4).isEmpty());
     }
 
@@ -251,13 +250,43 @@ public class HeartsSimultaneousTests {
                     List<AbstractAction> actions = fm.computeAvailableActions(s);
                     assertFalse(actions.isEmpty());
                     AbstractAction chosen = actions.get(rnd.nextInt(actions.size()));
-                    assertEquals(p, playerOf(chosen));
+                    if (chosen instanceof Pass)  // a PlayCard carries no player: it is always the current player's
+                        assertEquals(p, playerOf(chosen));
                     assertEquals(s.getGamePhase() == PASSING, chosen instanceof Pass);
                     fm.next(s, chosen);
                 }
             }
         }
         assertTrue("no game reached a fourth round", reachedFourthRound);
+    }
+
+    @Test
+    public void noPassingInAnyRoundWhenPassingIsSwitchedOff() {
+        for (int nPlayers = 3; nPlayers <= 7; nPlayers++) {
+            for (long seed = 10; seed < 15; seed++) {
+                HeartsParameters params = new HeartsParameters();
+                params.setParameterValue("passCards", false);
+                params.setRandomSeed(seed);
+                Game g = GameType.Hearts.createGameInstance(nPlayers, seed, params);
+                List<AbstractPlayer> players = new ArrayList<>();
+                for (int p = 0; p < nPlayers; p++) players.add(new RandomPlayer(new Random(seed + p)));
+                g.reset(players);
+                HeartsGameState s = (HeartsGameState) g.getGameState();
+                AbstractForwardModel fm = g.getForwardModel();
+                Random rnd = new Random(seed);
+                int round = -1;
+                while (s.isNotTerminal()) {
+                    if (s.getRoundCounter() != round) {
+                        round = s.getRoundCounter();
+                        assertEquals("round " + round + " should not pass", PLAYING, s.getGamePhase());
+                        assertEquals(holderOfStartingCard(s), s.getCurrentPlayer());
+                    }
+                    List<AbstractAction> actions = fm.computeAvailableActions(s);
+                    for (AbstractAction a : actions) assertFalse(a instanceof Pass);
+                    fm.next(s, actions.get(rnd.nextInt(actions.size())));
+                }
+            }
+        }
     }
 
     @Test
@@ -269,12 +298,41 @@ public class HeartsSimultaneousTests {
             assertFalse(s.isNotTerminal());
             int passes = 0;
             for (Pair<Integer, AbstractAction> h : s.getHistory()) {
-                assertEquals("history records the wrong player", (int) h.a, playerOf(h.b));
-                if (h.b instanceof Pass) passes++;
+                if (h.b instanceof Pass) {
+                    assertEquals("history records the wrong player", (int) h.a, playerOf(h.b));
+                    passes++;
+                }
             }
             // three cards per player in every passing round
             assertEquals(0, passes % (3 * nPlayers));
             assertTrue(passes > 0);
+        }
+    }
+
+    @Test
+    public void gameEndsAfterMaxRoundsEvenIfNobodyHasReachedTheMatchScore() {
+        for (int maxRounds = 1; maxRounds <= 3; maxRounds++) {
+            for (long seed = 10; seed < 15; seed++) {
+                HeartsParameters params = new HeartsParameters();
+                params.setParameterValue("maxRounds", maxRounds);
+                params.setRandomSeed(seed);
+                Game g = GameType.Hearts.createGameInstance(4, seed, params);
+                List<AbstractPlayer> players = new ArrayList<>();
+                for (int p = 0; p < 4; p++) players.add(new RandomPlayer(new Random(seed + p)));
+                g.reset(players);
+                HeartsGameState s = (HeartsGameState) g.getGameState();
+                AbstractForwardModel fm = g.getForwardModel();
+                Random rnd = new Random(seed);
+                while (s.isNotTerminal()) {
+                    List<AbstractAction> actions = fm.computeAvailableActions(s);
+                    fm.next(s, actions.get(rnd.nextInt(actions.size())));
+                }
+                boolean matchScoreReached = s.playerPoints.values().stream().anyMatch(score -> score >= params.matchScore);
+                // the round counter is zero-based and endGame does not advance it
+                if (!matchScoreReached)
+                    assertEquals(maxRounds, s.getRoundCounter() + 1);
+                assertTrue(s.getRoundCounter() + 1 <= maxRounds);
+            }
         }
     }
 }

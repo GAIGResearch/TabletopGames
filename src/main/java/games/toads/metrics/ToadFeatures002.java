@@ -3,10 +3,9 @@ package games.toads.metrics;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateKey;
+import games.toads.ToadConstants;
 import games.toads.components.ToadCard;
 import games.toads.ToadGameState;
-import games.toads.abilities.GeneralOne;
-import games.toads.abilities.GeneralTwo;
 
 public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
 
@@ -23,22 +22,22 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
                 "TIEBREAK_US",
                 "FIRST_ROUND_WIN",
                 "FIRST_ROUND_LOSS",
-                "AC_IN_HAND",
+                "SIEGE_CANNON_IN_HAND",
                 "ASSASSIN_IN_HAND",
                 "SCOUT_IN_HAND",
                 "TRICKSTER_IN_HAND",
                 "SABOTEUR_IN_HAND",
                 "BERSERKER_IN_HAND",
-                "ICONBEARER_IN_HAND",
+                "BODYGUARD_IN_HAND",
                 "GENERAL1_IN_HAND",
                 "GENERAL2_IN_HAND",
-                "AC_USED",
+                "SIEGE_CANNON_USED",
                 "ASSASSIN_USED",
                 "SCOUT_USED",
                 "TRICKSTER_USED",
                 "SABOTEUR_USED",
                 "BERSERKER_USED",
-                "ICONBEARER_USED",
+                "BODYGUARD_USED",
                 "GENERAL1_USED",
                 "GENERAL2_USED"
         };
@@ -83,10 +82,10 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
         for (int i = 0; i < state.getPlayerHand(playerID).getSize(); i++) {
             ToadCard card = state.getPlayerHand(playerID).get(i);
             if (card.value < 7) {
-                features[13 + i] = 1;
-            } else if (card.tactics instanceof GeneralOne) {
+                features[13 + card.value] = 1;
+            } else if (card.type == ToadConstants.ToadCardType.GENERAL_ONE) {
                 features[20] = 1;
-            } else if (card.tactics instanceof GeneralTwo) {
+            } else if (card.type == ToadConstants.ToadCardType.GENERAL_TWO) {
                 features[21] = 1;
             }
         }
@@ -94,10 +93,10 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
         for (int i = 0; i < state.getDiscards(playerID).getSize(); i++) {
             ToadCard card = state.getDiscards(playerID).get(i);
             if (card.value < 7) {
-                features[22 + i] = 1;
-            } else if (card.tactics instanceof GeneralOne) {
+                features[22 + card.value] = 1;
+            } else if (card.type == ToadConstants.ToadCardType.GENERAL_ONE) {
                 features[29] = 1;
-            } else if (card.tactics instanceof GeneralTwo) {
+            } else if (card.type == ToadConstants.ToadCardType.GENERAL_TWO) {
                 features[30] = 1;
             }
         }
