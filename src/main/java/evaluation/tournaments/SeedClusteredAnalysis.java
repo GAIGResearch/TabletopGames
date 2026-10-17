@@ -11,19 +11,20 @@ import java.util.stream.DoubleStream;
  * <p>
  * Games on the same seed are not independent, so the Normal approximation (all games independent) can be too wide
  * or too narrow. The seed-clustered SE treats the seed as the independent unit, and is valid whatever the dependence
- * between games on the same seed. See PairedSeed_SE.Rmd for the derivations.
+ * between games on the same seed.
  * <p>
  * Notation: n seeds; g cells per seed (a cell is a seating plus the player position of interest); r games per cell
  * per seed (r > 1 when distinctRandomSeeds is used, as each seating then plays all its games on the one seed).
  * The design is balanced when every cell has r games on every seed (exhaustive mode, or onevsall with two agents).
  * The clustered SE does not need balance; the stratified SE and the within-seed correlation rho do.
  * <p>
- * As an IResultsAnalysis this ranks agents exactly as WinRateAnalysis / OrdinalAnalysis, but reports the
+ * As an IResultsAnalysis this ranks agents as WinRateAnalysis / OrdinalAnalysis, but reports the
  * seed-clustered SE. It falls back to the Normal SE for any agent with fewer than two seeds.
  */
 public class SeedClusteredAnalysis implements IResultsAnalysis {
 
     // two-sided 95% t-quantiles for 1..30 degrees of freedom
+    // {JG: Can we not use a suitable maths library for the T tests instead of recording these. We use common maths in Utils for example}
     private static final double[] T_975 = {12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228,
             2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086,
             2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042};
@@ -31,7 +32,7 @@ public class SeedClusteredAnalysis implements IResultsAnalysis {
     private final boolean ordinal;
 
     /**
-     * @param ordinal - if true analyse the ordinal position, otherwise points (1 for a win, 1/k for a k-way tie)
+     * @param ordinal - if true, analyse the ordinal position, otherwise points (1 for a win, 1/k for a k-way tie)
      */
     public SeedClusteredAnalysis(boolean ordinal) {
         this.ordinal = ordinal;
