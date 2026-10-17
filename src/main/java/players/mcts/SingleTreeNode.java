@@ -45,6 +45,9 @@ public class SingleTreeNode {
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
     // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
     protected int lastActorInRollout, lastTurnInRollout, lastRoundInRollout, turnAtStartOfRollout, roundAtStartOfRollout;
+    // number of rollout actions already taken when the rollout clock started (only non-zero for MultiTree,
+    // where players leave their trees at different times)
+    protected int rolloutStartTick;
     // Depth of this node
     protected int depth;
     // the id of the player who makes the decision at this node
@@ -1171,7 +1174,7 @@ public class SingleTreeNode {
         int currentActor = rollerState.getTurnOwner();
         int maxRollout = params.rolloutLengthPerPlayer ? params.rolloutLength * rollerState.getNPlayers() : params.rolloutLength;
         int rolloutDepth = switch (params.rolloutIncrementType) {
-            case TICK -> root.actionsInRollout.size();
+            case TICK -> root.actionsInRollout.size() - rolloutStartTick;
             case TURN -> rollerState.getTurnCounter() - turnAtStartOfRollout;
             case ROUND -> rollerState.getRoundCounter() - roundAtStartOfRollout;
         };
