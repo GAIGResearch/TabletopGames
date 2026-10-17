@@ -797,6 +797,19 @@ public class SingleTreeNode {
             // then pick the best one. Each branch calculates the values it actually needs
             actionChosen = switch (params.treePolicy) {
                 case Uniform -> availableActions.get(rnd.nextInt(availableActions.size()));
+                case UniformFlat -> {
+                    // the least visited action, ties going to the first; with a fixed set of actions this takes each in turn
+                    AbstractAction leastVisited = availableActions.get(0);
+                    int fewestVisits = actionVisits(pds, leastVisited);
+                    for (AbstractAction availableAction : availableActions) {
+                        int visits = actionVisits(pds, availableAction);
+                        if (visits < fewestVisits) {
+                            fewestVisits = visits;
+                            leastVisited = availableAction;
+                        }
+                    }
+                    yield leastVisited;
+                }
                 case Greedy -> {
                     // check exploration first
                     if (explore && rnd.nextDouble() < params.exploreEpsilon) {
@@ -948,7 +961,7 @@ public class SingleTreeNode {
         for (int i = 0; i < actionsToConsider.size(); i++) {
             AbstractAction action = actionsToConsider.get(i);
             retValue[i] = switch (params.treePolicy) {
-                case Uniform -> 1.0;
+                case Uniform, UniformFlat -> 1.0;
                 case Greedy -> getFullValue(pds, action);
                 case UCB, AlphaGo, UCB_Tuned -> ucbValue(pds, action);
                 case RegretMatching, NoAveragingRM -> rmValue(pds, action, nodeValue);
