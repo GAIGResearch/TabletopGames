@@ -2,7 +2,7 @@ package games.terraformingmars;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -23,7 +23,7 @@ import static games.terraformingmars.TMTypes.Resource.TR;
 import static games.terraformingmars.TMTypes.StandardProject.*;
 import static games.terraformingmars.TMTypes.ActionType.*;
 
-public class TMForwardModel extends StandardForwardModelWithTurnOrder {
+public class TMForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -37,9 +37,9 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
         gs.playerResourceIncreaseGen = new HashMap[gs.getNPlayers()];
 
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            gs.playerResources[i] = new HashMap<>();
-            gs.playerProduction[i] = new HashMap<>();
-            gs.playerResourceIncreaseGen[i] = new HashMap<>();
+            gs.playerResources[i] = new LinkedHashMap<>();
+            gs.playerProduction[i] = new LinkedHashMap<>();
+            gs.playerResourceIncreaseGen[i] = new LinkedHashMap<>();
             for (TMTypes.Resource res : TMTypes.Resource.values()) {
                 int startingRes = params.startingResources.get(res);
                 if (res == TR && gs.getNPlayers() == 1) {
@@ -54,13 +54,13 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                 }
                 gs.playerResourceIncreaseGen[i].put(res, false);
             }
-            gs.playerResourceMap[i] = new HashSet<>();
+            gs.playerResourceMap[i] = new LinkedHashSet<>();
             // By default, players can exchange steel for X MC and titanium for X MC. More may be added
             gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Steel, TMTypes.Resource.MegaCredit, params.nSteelMC, new TagOnCardRequirement(new TMTypes.Tag[]{TMTypes.Tag.Building})));
             gs.playerResourceMap[i].add(new TMGameState.ResourceMapping(TMTypes.Resource.Titanium, TMTypes.Resource.MegaCredit, params.nTitaniumMC, new TagOnCardRequirement(new TMTypes.Tag[]{TMTypes.Tag.Space})));
 
             // Set up player discount maps
-            gs.playerDiscountEffects[i] = new HashMap<>();
+            gs.playerDiscountEffects[i] = new LinkedHashMap<>();
         }
 
         gs.projectCards = new Deck<>("Projects", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -69,11 +69,11 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
 
         // Load info from expansions (includes base)
         gs.board = new GridBoard(params.boardSize, params.boardSize);
-        gs.extraTiles = new HashSet<>();
-        gs.bonuses = new HashSet<>();
-        gs.milestones = new HashSet<>();
-        gs.awards = new HashSet<>();
-        gs.globalParameters = new HashMap<>();
+        gs.extraTiles = new LinkedHashSet<>();
+        gs.bonuses = new LinkedHashSet<>();
+        gs.milestones = new LinkedHashSet<>();
+        gs.awards = new LinkedHashSet<>();
+        gs.globalParameters = new LinkedHashMap<>();
 
         // Load base
         TMTypes.Expansion.Base.loadProjectCards(gs.projectCards);
@@ -127,8 +127,8 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
 
         if (gs.getNPlayers() == 1) {
             // Disable milestones and awards for solo play
-            gs.milestones = new HashSet<>();
-            gs.awards = new HashSet<>();
+            gs.milestones = new LinkedHashSet<>();
+            gs.awards = new LinkedHashSet<>();
         }
 
         // Shuffle dekcs
@@ -161,21 +161,25 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
         gs.playerExtraActions = new HashSet[gs.getNPlayers()];
         gs.playerPersistingEffects = new HashSet[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            gs.playerTilesPlaced[i] = new HashMap<>();
+            gs.playerTilesPlaced[i] = new LinkedHashMap<>();
             for (TMTypes.Tile t : TMTypes.Tile.values()) {
                 gs.playerTilesPlaced[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " tiles placed player " + i));
             }
-            gs.playerCardsPlayedTypes[i] = new HashMap<>();
+            gs.playerCardsPlayedTypes[i] = new LinkedHashMap<>();
             for (TMTypes.CardType t : TMTypes.CardType.values()) {
                 gs.playerCardsPlayedTypes[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " cards played player " + i));
             }
-            gs.playerCardsPlayedTags[i] = new HashMap<>();
+            gs.playerCardsPlayedTags[i] = new LinkedHashMap<>();
             for (TMTypes.Tag t : TMTypes.Tag.values()) {
                 gs.playerCardsPlayedTags[i].put(t, new Counter(0, 0, params.maxPoints, t.name() + " cards played player " + i));
             }
-            gs.playerExtraActions[i] = new HashSet<>();
-            gs.playerPersistingEffects[i] = new HashSet<>();
+            gs.playerExtraActions[i] = new LinkedHashSet<>();
+            gs.playerPersistingEffects[i] = new LinkedHashSet<>();
         }
+
+        gs.nActionsTaken = 0;
+        gs.nPassed = 0;
+        gs.passed = new boolean[gs.getNPlayers()];
 
         gs.nAwardsFunded = new Counter(0, 0, params.nCostAwards.length, "Awards funded");
         gs.nMilestonesClaimed = new Counter(0, 0, params.nCostMilestone.length, "Milestones claimed");
@@ -198,7 +202,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
         if (gs.getNPlayers() == 1) {
             int boardH = gs.board.getHeight();
             int boardW = gs.board.getWidth();
-            gs.getTurnOrder().setTurnOwner(1);
+            gs.setTurnOwner(1);
             for (int i = 0; i < params.soloCities; i++) {
                 // Place city + greenery adjacent
                 PlaceTile pt = new PlaceTile(1, TMTypes.Tile.City, TMTypes.MapTileType.Ground, true);
@@ -217,7 +221,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                     }
                 }
             }
-            gs.getTurnOrder().setTurnOwner(0);
+            gs.setTurnOwner(0);
             gs.globalParameters.get(TMTypes.GlobalParameter.Oxygen).setValue(0);
         }
 
@@ -229,6 +233,12 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
         TMGameState gs = (TMGameState) currentState;
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
 
+        // The turn passes to the next player once the turn owner has used all their actions, or passed
+        if (gs.isTurnComplete()) {
+            gs.nActionsTaken = 0;
+            endPlayerTurn(gs, nextPlayer(gs));
+        }
+
         if (gs.getGamePhase() == CorporationSelect) {
             boolean allChosen = true;
             for (TMCard card : gs.getPlayerCorporations()) {
@@ -239,7 +249,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
             }
             if (allChosen) {
                 gs.setGamePhase(Research);
-                gs.getTurnOrder().endRound(gs);
+                endRoundAndResetPasses(gs);
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     for (int j = 0; j < params.nProjectsStart; j++) {
                         gs.playerCardChoice[i].add(gs.drawCard());
@@ -263,11 +273,11 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
             }
             if (allDone) {
                 gs.setGamePhase(Actions);
-                gs.getTurnOrder().endRound(gs);
+                endRoundAndResetPasses(gs);
             }
         } else if (gs.getGamePhase() == Actions) {
             // Check if finished: all players passed
-            if (((TMTurnOrder) gs.getTurnOrder()).nPassed == gs.getNPlayers()) {
+            if (gs.nPassed == gs.getNPlayers()) {
                 // Production
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     // First, energy turns to heat
@@ -303,7 +313,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                 }
 
                 // Move to research phase
-                gs.getTurnOrder().endRound(gs);
+                endRoundAndResetPasses(gs);
                 gs.setGamePhase(Research);
                 for (int j = 0; j < params.nProjectsResearch; j++) {
                     for (int i = 0; i < gs.getNPlayers(); i++) {
@@ -333,6 +343,26 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                 gs.generation++;
             }
         }
+    }
+
+    private int nextPlayer(TMGameState gs) {
+        int next = (gs.getTurnOwner() + 1) % gs.getNPlayers();
+        // Players who have passed are skipped, until all have passed
+        if (gs.nPassed < gs.getNPlayers()) {
+            while (gs.passed[next]) {
+                next = (next + 1) % gs.getNPlayers();
+            }
+        }
+        return next;
+    }
+
+    /**
+     * A round is one phase of a generation (corporation selection, research or actions).
+     */
+    private void endRoundAndResetPasses(TMGameState gs) {
+        super.endRound(gs);
+        Arrays.fill(gs.passed, false);
+        gs.nPassed = 0;
     }
 
     @Override

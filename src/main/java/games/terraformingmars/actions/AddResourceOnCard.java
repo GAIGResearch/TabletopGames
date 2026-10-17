@@ -85,7 +85,7 @@ public class AddResourceOnCard extends TMAction implements TMExtendedSequence {
             addDeckActions(actions, gs, player);
         }
         if (actions.size() == 0) {
-            actions.add(new TMAction(player));  // Pass, can't do any legal actions
+            actions.add(TMAction.passInSequence(player));  // Pass, can't do any legal actions
         }
         return actions;
     }

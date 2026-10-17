@@ -100,7 +100,7 @@ public class PayForAction extends TMAction implements TMExtendedSequence {
 
         TMTypes.Resource res = resourcesToPayWith[stage];
         // Find minimum that must be spent of this resource so that the card is still payable with remaining resources
-        HashSet<TMTypes.Resource> resourcesRemaining = new HashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
+        HashSet<TMTypes.Resource> resourcesRemaining = new LinkedHashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
 
         TMCard card = (TMCard) gs.getComponentById(getPlayCardID());
         double rate = gs.getResourceMapRate(res, getCostResource());

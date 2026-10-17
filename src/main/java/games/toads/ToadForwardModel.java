@@ -134,12 +134,9 @@ public class ToadForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
-
-        if (gameState.isActionInProgress())
-            return;
-        // A turn is a whole Battle (and a round a whole War): endPlayerTurn() is called only once the Battle has been
-        // fought (see afterBattle). Within it, and in the OPENING_RETURN and DISCARD phases that precede it, we just
-        // hand the decision from one player to the other by changing the turn owner.
+        // Player 0 takes two turns (field and flank) [well, turn-owner to be more precise]
+        // then Player 1 does the same
+        // then we reveal the hidden cards and resolve the two battles
         int currentPlayer = gameState.getCurrentPlayer();
         ToadGameState state = (ToadGameState) gameState;
         if (state.getGamePhase() == OPENING_RETURN) {

@@ -271,7 +271,10 @@ public class LawnAndOrderGameState extends AbstractGameState {
      */
     @Override
     public double getGameScore(int playerId) {
-        return Arrays.stream(trackScores[playerId]).sum();
+        int total = 0;
+        for (int score : trackScores[playerId])
+            total += score;
+        return total;
     }
 
     @Override

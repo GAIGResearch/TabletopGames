@@ -61,7 +61,7 @@ public class DiscardCard extends TMAction implements TMExtendedSequence {
                 actions.add(new DiscardCard(player, gs.getPlayerHands()[player].get(i).getComponentID(), cardChoice));
             }
         }
-        if (actions.size() == 0) actions.add(new TMAction(player));
+        if (actions.size() == 0) actions.add(TMAction.passInSequence(player));
         return actions;
     }
 

@@ -15,7 +15,7 @@ import java.util.List;
  * These are the three normal responsibilities of ForwardModel.
  *
  * IExtendedSequence is also responsible for tracking all local state necessary for its set of actions, and marking
- * itself as complete. (ForwardModel will then detect this, and remove it from the Stack of open actions.)
+ * itself as complete. (ForwardModel will then detect this and remove it from the Stack of open actions.)
  * This means that - unlike ForwardModel - IExtendedSequence is not stateless, and hence must implement a copy() method.
  * Effectively an IExtendedSequence also incorporates a mini-GameState that tracks game progress within the sequence.
  *
@@ -45,22 +45,15 @@ import java.util.List;
  * After every action is taken, the ForwardModel will check the top of the stack to see if it is finished (and will
  * continue until it finds one that is not). If it is finished, it will remove it from the stack.
  *
- * When an action is executed with an IExtendedSequence on the stack, then generally _afterAction() will be called
- * on the top of the stack only. There are two exceptions to this to stop an action removing itself:
- *      - Any sequence the action itself starts (directly or via nested actions it executes) is not told about it.
- *      - If the action puts *itself* on the stack (pattern i above), then in StandardForwardModel the sequence that
- *        offered it is not told immediately, but only once the action completes, via afterRemovalFromQueue().
+ * When an action is executed with an IExtendedSequence on the stack, _afterAction() is called straight afterwards on
+ * the sequence that was at the top of the stack before the action was executed. This is the case even
+ * if the action has put itself on the stack to continue as a sequence (pattern i above). Any sequence the action starts
+ * (directly or via nested actions it executes) is not told about it.
  *
- * WARNING: One action must not currently put two (or more) IExtendedSequences on the stack at the same time.
- * For example, a card that makes the player place a tile (TilePlacement) and then make a choice (Choice), each of which
- * is an IExtendedSequence, and both pushed to the stack when the card is played.
- * The stack is then [..., Choice, TilePlacement], and when TilePlacement completes and is removed, the default
- * afterRemovalFromQueue() passes it to Choice._afterAction() - as if it were the decision Choice was waiting for.
- * Choice cannot tell this sibling apart from its own decision.
- * Instead, have a single sequence that runs the steps one after another (pushing the next only when the previous is
- * complete), or override afterRemovalFromQueue() so that completed sequences are not treated as decisions.
- * (Terraforming Mars does the latter: see TMExtendedSequence, used with StandardForwardModelWithTurnOrder, which tells
- * the offering sequence about every action immediately.)
+ * A sequence may therefore be complete while another sequence is still above it on the stack (for example, when the
+ * second play of a card is itself an extended sequence). It is removed from the stack once everything above it has
+ * completed. Only the top of the stack is checked, so a sequence that needs to wait for those above it (e.g. to decide
+ * what to offer next) can check the state in executionComplete().
  */
 public interface IExtendedSequence {
 
@@ -114,14 +107,22 @@ public interface IExtendedSequence {
     }
 
     /**
+     * This is called by ForwardModel just before an action is executed while this sequence is on top of the stack.
+     * It is called instead of the ForwardModel's own _beforeAction().
+     *
+     * @param state The current game state
+     * @param action The action about to be taken
+     */
+    default void _beforeAction(AbstractGameState state, AbstractAction action) {
+    }
+
+    /**
      * This is called by ForwardModel whenever an action has just been taken. It enables the IExtendedSequence
      * to maintain local state in whichever way is most suitable.
      *
-     * It is called as well as (and before) the _afterAction method on the ForwardModel.
-     * This means that ForwardModel._afterAction() may need check to see if an action is in progress and skip
-     * its own logic in this case:
-     *          if (state.isActionInProgress()) continue;
-     * This line of code has not yet been incorporated into the framework due to a couple of older games.
+     * The ForwardModel's own _afterAction() is only called if no sequence is left on the stack after this one has
+     * been told (and any completed sequences removed). So a decision that completes the last sequence on the stack is
+     * passed to the ForwardModel as well; otherwise it is not.
      *
      * After this call, the state of IExtendedSequence should be correct ahead of the next decision to be made.
      * In some cases there is no need to implement anything in this method - if for example you can tell if all
@@ -132,24 +133,6 @@ public interface IExtendedSequence {
      * @param action The action that has just been taken
      */
     void _afterAction(AbstractGameState state, AbstractAction action);
-
-    /**
-     * This is called whenever the IExtendedSequence is moved to the top of the queue.
-     * It provides the extended sequence that was just removed (likely to be a child created by this sequence)
-     * so that any clean up can take place.
-     *
-     * The default behaviour is to call _afterAction() on the completed sequence if it is an AbstractAction.
-     * If it is *not* an AbstractAction, then this will need to be overridden.
-     * Note that the completed sequence may not have been started by this one: see the WARNING in the class comment
-     * about putting two sequences on the stack from one action.
-     * @param state
-     * @param completedSequence
-     */
-    default void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
-        if (completedSequence instanceof AbstractAction action) {
-            this._afterAction(state, action);
-        }
-    }
 
     /**
      * Return true if this extended sequence has now completed and there is nothing left to do.

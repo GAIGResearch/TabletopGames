@@ -35,7 +35,7 @@ public class BuyCard extends GainCard {
             }
             return success;
         }
-        return false;
+        throw new AssertionError("Player " + buyingPlayer + " attempted to buy " + cardType + " but did not have enough money or buys left.");
     }
 
     @Override

@@ -145,4 +145,16 @@ public class SpadesHeuristic implements IStateHeuristic {
 
         return Math.min(6, Math.max(1, suggestedBid));
     }
-} 
+
+    // no settings (any fields are fixed, or worked out from the game): any two are the same heuristic, so that one
+    // read back from JSON equals the one written
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && obj.getClass() == getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().getName().hashCode();
+    }
+}

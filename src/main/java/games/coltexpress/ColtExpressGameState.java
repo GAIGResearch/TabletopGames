@@ -1,11 +1,10 @@
 package games.coltexpress;
 
-import core.AbstractGameStateWithTurnOrder;
+import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.coltexpress.ColtExpressTypes.CharacterType;
 import games.coltexpress.actions.roundcardevents.RoundEvent;
@@ -20,7 +19,7 @@ import java.util.*;
 import static core.CoreConstants.VisibilityMode;
 import static java.util.stream.Collectors.toList;
 
-public class ColtExpressGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class ColtExpressGameState extends AbstractGameState implements IPrintable {
 
     // Colt express adds 4 game phases
     public enum ColtExpressGamePhase implements IGamePhase {
@@ -47,6 +46,14 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     PartialObservableDeck<RoundCard> rounds;
     Random playerHandRnd;
 
+    // Turn state within a round
+    int firstPlayerOfRound;
+    RoundCard.TurnType currentTurnType;
+    int direction = 1;  // 1 is clockwise, -1 is anticlockwise
+    boolean firstAction = true;  // in a double turn, true until the turn owner has taken the first of their two
+    int fullPlayerTurnCounter;  // the number of turns on the round card that have been completed
+    int subTurnCounter;  // the number of player turns taken in the current turn on the round card
+
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -58,14 +65,15 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     @Override
     public void reset() {
         super.reset();
+        firstPlayerOfRound = 0;
+        currentTurnType = null;
+        direction = 1;
+        firstAction = true;
+        fullPlayerTurnCounter = 0;
+        subTurnCounter = 0;
         int playerSeed = ((ColtExpressParameters) gameParameters).playerHandShuffleSeed;
         playerHandRnd = playerSeed == -1 ? rnd : new Random(playerSeed);
     }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) getGameParameters()).nMaxRounds);
-    }
-
     @Override
     protected GameType _getGameType() {
         return GameType.ColtExpress;
@@ -84,13 +92,19 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected ColtExpressGameState _copy(int playerId) {
         ColtExpressGameState copy = new ColtExpressGameState(gameParameters.copy(), getNPlayers());
+        copy.firstPlayerOfRound = firstPlayerOfRound;
+        copy.currentTurnType = currentTurnType;
+        copy.direction = direction;
+        copy.firstAction = firstAction;
+        copy.fullPlayerTurnCounter = fullPlayerTurnCounter;
+        copy.subTurnCounter = subTurnCounter;
 
         ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
         // These are always visible
         copy.bulletsLeft = bulletsLeft.clone();
-        copy.playerCharacters = new HashMap<>(playerCharacters);
+        copy.playerCharacters = new LinkedHashMap<>(playerCharacters);
         copy.playerPlayingBelle = playerPlayingBelle;
 
         // These are modified in PO
@@ -169,7 +183,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
 
             // First we add in the actions that are visible at the right index position
             // cardReplacements stores the cards that we have used so far, to avoid inserting the same card twice
-            HashMap<Integer, ArrayList<Integer>> cardReplacements = new HashMap<>();
+            HashMap<Integer, ArrayList<Integer>> cardReplacements = new LinkedHashMap<>();
             for (int i = 0; i < plannedActions.getSize(); i++) {
                 if (!plannedActions.isComponentVisible(i, playerId)) {
                     int p = plannedActions.get(i).playerID;
@@ -233,11 +247,10 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     public double getGameScore(int playerId) {
         double retValue = getLoot(playerId).sumInt(Loot::getValue);
         if (getBestShooters().contains(playerId)) {
-            ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) turnOrder;
             ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
             // the full shooter reward is given at the end of the game
             // so we only partially incorporate this into the 'score'
-            double gameProgress = ceto.getRoundCounter() / (double) getRounds().getSize();
+            double gameProgress = roundCounter / (double) getRounds().getSize();
             if (!isNotTerminal() && gameProgress != 1.0)
                 throw new AssertionError("Unexpected");
             retValue += cep.shooterReward * gameProgress;
@@ -264,9 +277,14 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ColtExpressGameState)) return false;
-        if (!super.equals(o)) return false;
         ColtExpressGameState gameState = (ColtExpressGameState) o;
         return playerPlayingBelle == gameState.playerPlayingBelle &&
+                firstPlayerOfRound == gameState.firstPlayerOfRound &&
+                currentTurnType == gameState.currentTurnType &&
+                direction == gameState.direction &&
+                firstAction == gameState.firstAction &&
+                fullPlayerTurnCounter == gameState.fullPlayerTurnCounter &&
+                subTurnCounter == gameState.subTurnCounter &&
                 Objects.equals(playerHandCards, gameState.playerHandCards) &&
                 Objects.equals(playerDecks, gameState.playerDecks) &&
                 Objects.equals(playerLoot, gameState.playerLoot) &&
@@ -279,7 +297,8 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(turnOrder, playerHandCards, playerDecks, playerLoot, playerCharacters, playerPlayingBelle, plannedActions, trainCompartments, rounds);
+        int result = Objects.hash(super.hashCode(), firstPlayerOfRound, currentTurnType == null ? -1 : currentTurnType.ordinal(), direction, firstAction,
+                fullPlayerTurnCounter, subTurnCounter, playerHandCards, playerDecks, playerLoot, playerCharacters, playerPlayingBelle, plannedActions, trainCompartments, rounds);
         result = 31 * result + Arrays.hashCode(bulletsLeft);
         return result;
     }
@@ -410,6 +429,18 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return bulletsLeft;
     }
 
+    public boolean isHiddenTurn() {
+        return currentTurnType == RoundCard.TurnType.HiddenTurn;
+    }
+
+    public RoundCard.TurnType getCurrentTurnType() {
+        return currentTurnType;
+    }
+
+    public int getFullPlayerTurnCounter() {
+        return fullPlayerTurnCounter;
+    }
+
     public List<Deck<Loot>> getPlayerLoot() {
         return playerLoot;
     }
@@ -419,7 +450,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         System.out.println("Colt Express Game-State");
         System.out.println("=======================");
 
-        int currentPlayer = turnOrder.getCurrentPlayer(this);
+        int currentPlayer = getCurrentPlayer();
 
         for (int i = 0; i < getNPlayers(); i++) {
             if (currentPlayer == i)
@@ -443,7 +474,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         System.out.println();
         int i = 0;
         for (RoundCard round : rounds.getComponents()) {
-            if (i == turnOrder.getRoundCounter()) {
+            if (i == roundCounter) {
                 System.out.print("->");
             }
             System.out.print(round.toString());

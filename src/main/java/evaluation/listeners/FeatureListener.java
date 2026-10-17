@@ -6,6 +6,7 @@ import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
+import players.heuristics.LeaderHeuristic;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -151,10 +152,9 @@ public abstract class FeatureListener implements IGameListener {
             if (!data.containsKey("FinalScore")) {
                 data.put("FinalScore", finalScores[record.player]);
             }
-            double bestOtherScore = IntStream.range(0, totP)
-                    .filter(p -> p != record.player)
-                    .mapToDouble(i -> finalScores[i])
-                    .max().orElse(0);
+            double bestOtherScore = LeaderHeuristic.bestOtherTeamScore(state, record.player);
+            if (bestOtherScore == Double.NEGATIVE_INFINITY)
+                bestOtherScore = 0;  // no opponents (e.g. a solo game)
             data.put("ActualScoreAdv", finalScores[record.player] - bestOtherScore);
             if (!data.containsKey("FinalScoreAdv")) {
                 data.put("FinalScoreAdv", finalScores[record.player] - bestOtherScore);

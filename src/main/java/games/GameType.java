@@ -109,6 +109,10 @@ import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
 import games.diamant.gui.DiamantGUIManager;
+import games.hareandtortoise.HareAndTortoiseForwardModel;
+import games.hareandtortoise.HareAndTortoiseGameState;
+import games.hareandtortoise.HareAndTortoiseParameters;
+import games.hareandtortoise.gui.HareAndTortoiseGUIManager;
 import games.lawnandorder.LawnAndOrderForwardModel;
 import games.lawnandorder.LawnAndOrderGameState;
 import games.lawnandorder.gui.LawnAndOrderGUIManager;
@@ -347,6 +351,10 @@ public enum GameType {
             Arrays.asList(Cards, Humour),
             Arrays.asList(PushYourLuck, SetCollection, SimultaneousActionSelection),
             LawnAndOrderGameState.class, LawnAndOrderForwardModel.class, LawnAndOrderParameters.class, LawnAndOrderGUIManager.class),
+    HareAndTortoise(3, 6,
+            Arrays.asList(Animals, Strategy),
+            Arrays.asList(Race, LoseATurn, MovementPoints),
+            HareAndTortoiseGameState.class, HareAndTortoiseForwardModel.class, HareAndTortoiseParameters.class, HareAndTortoiseGUIManager.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),

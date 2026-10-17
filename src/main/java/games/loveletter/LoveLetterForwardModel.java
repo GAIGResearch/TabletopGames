@@ -131,8 +131,6 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
-        if (gameState.isActionInProgress()) return;
-
         // each turn begins with the player drawing a card after which one card will be played
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
 

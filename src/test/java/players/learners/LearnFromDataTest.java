@@ -1,5 +1,6 @@
 package players.learners;
 
+import org.junit.After;
 import org.junit.Test;
 import players.heuristics.GLMHeuristic;
 import java.io.File;
@@ -10,6 +11,16 @@ import static org.junit.Assert.assertEquals;
 public class LearnFromDataTest {
 
     OLSLearner ols = new OLSLearner(1.0, 0.01, AbstractLearner.Target.SCORE, new TestFeatures());
+
+    // remove the files the learning creates (even if a test fails), leaving the input data files
+    @After
+    public void removeCreatedFiles() {
+        File dir = new File("src\\test\\java\\players\\learners");
+        for (File file : Objects.requireNonNull(dir.listFiles(f -> f.getName().startsWith("Improve")
+                || f.getName().endsWith("_ASF.txt") || f.getName().endsWith("Results.txt")))) {
+            file.delete();
+        }
+    }
 
     // This test requires --add-opens=java.base/sun.nio.ch=ALL-UNNAMED to be added to the VM command line arguments
     @Test
@@ -31,12 +42,6 @@ public class LearnFromDataTest {
         assertEquals(1.0, heuristic.interactionCoefficients()[0], 0.05);
         assertEquals(0, heuristic.interactions()[0][0]);
         assertEquals(0, heuristic.interactions()[0][1]);
-
-        // then remove the files created
-        File dir = new File("src\\test\\java\\players\\learners");
-        for (File file : Objects.requireNonNull(dir.listFiles(f -> f.getName().startsWith("Improve")))) {
-            file.delete();
-        }
     }
 
     @Test
@@ -55,11 +60,5 @@ public class LearnFromDataTest {
         assertEquals(0.5, coefficients[2], 0.05); // Y
 
         assertEquals(0, heuristic.interactionCoefficients().length);
-
-        // then remove the files created
-        File dir = new File("src\\test\\java\\players\\learners");
-        for (File file : Objects.requireNonNull(dir.listFiles(f -> f.getName().startsWith("Improve")))) {
-            file.delete();
-        }
     }
 }

@@ -9,6 +9,7 @@ import games.terraformingmars.components.TMMapTile;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class PlaceTileEffect extends Effect {
     public TMTypes.Tile tile;
@@ -39,7 +40,7 @@ public class PlaceTileEffect extends Effect {
         boolean marsCondition = !onMars || action.onMars;
         boolean tileCondition = tile == null || action.tile == tile;
 
-        HashSet<TMTypes.Resource> gained = new HashSet<>();
+        HashSet<TMTypes.Resource> gained = new LinkedHashSet<>();
         if (action.mapTileID != -1 && action.onMars) {
             TMMapTile mt = (TMMapTile) gameState.getComponentById(action.mapTileID);
             gained.addAll(Arrays.asList(mt.getResources()));

@@ -399,7 +399,6 @@ public class RootForwardModel extends StandardForwardModel {
         RootGameState state = (RootGameState) gs;
         //1st Recalculate Clearing rulers -> based on number of buildings/warriors of each player
         state.getGameMap().updateRulers();
-        if (state.isActionInProgress()) return;
 
         if (state.scoreGameOver() || state.getTurnCounter() > 200) {
             endGame(state);

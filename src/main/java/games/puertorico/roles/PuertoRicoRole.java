@@ -77,11 +77,6 @@ public abstract class PuertoRicoRole<T extends PuertoRicoRole<T>> implements IEx
         }
     }
 
-    @Override
-    public void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
-        throw new AssertionError("Should not be reachable");
-    }
-
     private void setNextPlayerWithAvailableAction(PuertoRicoGameState state, int fromPlayer) {
         // we move the currentPlayer on by one, until we find a player who has not finished
         // if all players have finished, then we have completed this action

@@ -31,7 +31,6 @@ public class DiscardCard extends AbstractAction {
             DominionCard card = cardToDiscard.get();
             state.moveCard(card, player, DeckType.HAND, player, DeckType.DISCARD);
         } else {
-            System.out.println(ags);
             throw new AssertionError("Cannot discard card that is not in hand : " + this);
         }
         return true;

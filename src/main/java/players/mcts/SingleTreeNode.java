@@ -45,6 +45,9 @@ public class SingleTreeNode {
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
     // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
     protected int lastActorInRollout, lastTurnInRollout, lastRoundInRollout, turnAtStartOfRollout, roundAtStartOfRollout;
+    // number of rollout actions already taken when the rollout clock started (only non-zero for MultiTree,
+    // where players leave their trees at different times)
+    protected int rolloutStartTick;
     // Depth of this node
     protected int depth;
     // the id of the player who makes the decision at this node
@@ -794,6 +797,19 @@ public class SingleTreeNode {
             // then pick the best one. Each branch calculates the values it actually needs
             actionChosen = switch (params.treePolicy) {
                 case Uniform -> availableActions.get(rnd.nextInt(availableActions.size()));
+                case UniformFlat -> {
+                    // the least visited action, ties going to the first; with a fixed set of actions this takes each in turn
+                    AbstractAction leastVisited = availableActions.get(0);
+                    int fewestVisits = actionVisits(pds, leastVisited);
+                    for (AbstractAction availableAction : availableActions) {
+                        int visits = actionVisits(pds, availableAction);
+                        if (visits < fewestVisits) {
+                            fewestVisits = visits;
+                            leastVisited = availableAction;
+                        }
+                    }
+                    yield leastVisited;
+                }
                 case Greedy -> {
                     // check exploration first
                     if (explore && rnd.nextDouble() < params.exploreEpsilon) {
@@ -945,7 +961,7 @@ public class SingleTreeNode {
         for (int i = 0; i < actionsToConsider.size(); i++) {
             AbstractAction action = actionsToConsider.get(i);
             retValue[i] = switch (params.treePolicy) {
-                case Uniform -> 1.0;
+                case Uniform, UniformFlat -> 1.0;
                 case Greedy -> getFullValue(pds, action);
                 case UCB, AlphaGo, UCB_Tuned -> ucbValue(pds, action);
                 case RegretMatching, NoAveragingRM -> rmValue(pds, action, nodeValue);
@@ -1171,7 +1187,7 @@ public class SingleTreeNode {
         int currentActor = rollerState.getTurnOwner();
         int maxRollout = params.rolloutLengthPerPlayer ? params.rolloutLength * rollerState.getNPlayers() : params.rolloutLength;
         int rolloutDepth = switch (params.rolloutIncrementType) {
-            case TICK -> root.actionsInRollout.size();
+            case TICK -> root.actionsInRollout.size() - rolloutStartTick;
             case TURN -> rollerState.getTurnCounter() - turnAtStartOfRollout;
             case ROUND -> rollerState.getRoundCounter() - roundAtStartOfRollout;
         };

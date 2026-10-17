@@ -52,7 +52,7 @@ A game is the combination of four cooperating pieces, all in `core`:
   `_equals()`. State is the single source of truth; the forward model never holds game data.
 - **`AbstractForwardModel`** — the rules engine. Implement `_setup()`, `_next(state, action)`,
   `_computeAvailableActions(state)`, `endPlayerTurn(state)`. Most games extend
-  **`StandardForwardModel`** (use `StandardForwardModelWithTurnOrder` only for legacy turn-order games).
+  **`StandardForwardModel`** (only Pandemic still uses the legacy `AbstractGameStateWithTurnOrder`, via the rule-based forward model).
 - **`AbstractParameters`** — tunable game parameters (implements `ITunableParameters` so games can be
   optimised/searched).
 - **`AbstractGUIManager`** subclass — Swing rendering (optional but expected).

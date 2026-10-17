@@ -82,11 +82,6 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-
-        // Ignore intermediate actions inside extended sequences
-        if (currentState.isActionInProgress())
-            return;
-
         SGGameState gs = (SGGameState) currentState;
 
         int nextPlayer = gs.getCurrentPlayer();
