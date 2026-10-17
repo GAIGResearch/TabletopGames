@@ -24,4 +24,16 @@ public class VirusHeuristic implements IStateHeuristic {
         }
         return nHealthyOrgans * 1.0 / vgs.playerBodies.get(playerId).organs.size();
     }
+
+    // no settings (any fields are fixed, or worked out from the game): any two are the same heuristic, so that one
+    // read back from JSON equals the one written
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && obj.getClass() == getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().getName().hashCode();
+    }
 }
