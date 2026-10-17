@@ -70,8 +70,8 @@ public class CreateOffspring {
 
     // Limitations imposed by the physical board
     static final int transitionLimit = 2;
-    static final int endcapLimit = 5;
-    static final int extenderLimit = 9;
+    static final int endcapLimit = 8;
+    static final int extenderLimit = 6;
 
     int IDEAL_SIZE = 166;
     int IDEAL_GROUP = 5;
