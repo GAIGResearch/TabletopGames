@@ -1,88 +1,72 @@
 package core.components;
 
 import core.CoreConstants;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import core.interfaces.IComponentContainer;
 import core.properties.PropertyString;
-import core.properties.PropertyVector2D;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Pair;
 import utilities.Vector2D;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.Objects;
 
 import static core.CoreConstants.imgHash;
-import static utilities.Utils.getNeighbourhood;
 
 /**
- * GridBoard is a 2D grid of Components. It can be used to represent a board in a game, a map, or any other 2D grid.
- * Each cell on the grid can contain a Component of any type.
+ * A board of width by height squares, each holding a BoardNode or empty: a facade over a SparseGrid of SquareCoords
+ * that bounds it and reads and writes it by (x, y), with x increasing to the east and y to the south.
+ * <p>
+ * Unlike the values of a SparseGrid, BoardNodes may be changed in place (their properties and neighbours), so a copy
+ * of the board copies its nodes, with BoardNode.copy(). A node that is immutable (and has no neighbours) may return
+ * itself from copy(), to be shared by the copies of the board.
  */
 public class GridBoard extends Component implements IComponentContainer<BoardNode> {
 
-    private int width;  // Width of the board
-    private int height;  // Height of the board
+    private int width, height;
+    private SparseGrid<SquareCoord, BoardNode> grid;
 
-    private BoardNode[][] grid;  // 2D grid representation of this board
-
-    protected GridBoard() {
+    // for loadBoard
+    private GridBoard() {
         super(CoreConstants.ComponentType.BOARD);
+        grid = new SparseGrid<>(componentName);
     }
 
     public GridBoard(int width, int height) {
-        super(CoreConstants.ComponentType.BOARD);
-        this.width = width;
-        this.height = height;
-        this.grid = new BoardNode[height][width];
+        this(width, height, "GridBoard");
     }
 
-    public GridBoard(int width, int height, BoardNode defaultValue) {
-        this(width, height);
+    public GridBoard(int width, int height, String name) {
+        super(CoreConstants.ComponentType.BOARD, name);
+        this.width = width;
+        this.height = height;
+        grid = new SparseGrid<>(name);
+    }
+
+    /**
+     * A board with the given componentID, as when restoring a saved state.
+     */
+    public GridBoard(int width, int height, String name, int componentID) {
+        super(CoreConstants.ComponentType.BOARD, name, componentID);
+        this.width = width;
+        this.height = height;
+        grid = new SparseGrid<>(name);
+    }
+
+    /**
+     * A board holding the nodes of the array, indexed [y][x].
+     */
+    public GridBoard(BoardNode[][] nodes) {
+        this(nodes[0].length, nodes.length);
         for (int y = 0; y < height; y++)
-            Arrays.fill(grid[y], defaultValue);
+            for (int x = 0; x < width; x++)
+                set(x, y, nodes[y][x]);
     }
 
-    public GridBoard(BoardNode[][] grid) {
-        super(CoreConstants.ComponentType.BOARD);
-        this.width = grid[0].length;
-        this.height = grid.length;
-        this.grid = grid;
-    }
-
-    /**
-     * Rebuilds a GridBoard from an existing grid with a specific componentID. Used when reloading a
-     * serialized game state, so that the restored board keeps the same identity as the original.
-     */
-    public GridBoard(BoardNode[][] grid, int ID) {
-        super(CoreConstants.ComponentType.BOARD, ID);
-        this.width = grid[0].length;
-        this.height = grid.length;
-        this.grid = grid;
-    }
-
-    protected GridBoard(int width, int height, int ID) {
-        super(CoreConstants.ComponentType.BOARD, ID);
-        this.width = width;
-        this.height = height;
-        this.grid = new BoardNode[height][width];
-    }
-
-    public GridBoard(GridBoard orig) {
-        super(CoreConstants.ComponentType.BOARD);
-        this.width = orig.getWidth();
-        this.height = orig.getHeight();
-        this.grid = orig.grid.clone();
-    }
-
-    /**
-     * Get the width and height of this grid.
-     */
     public int getWidth() {
         return width;
     }
@@ -91,133 +75,100 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         return height;
     }
 
+    public boolean inBounds(int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
     /**
-     * Set the width or height of the grid. Creates a new grid with the new dimensions, and copies elements from the
-     * previous grid that fit in the new one (same x, y coordinates). Possibly adding an offset from which to add
-     * elements in the new grid.
+     * Resizes the board, keeping the nodes that still fit after moving them by (offsetX, offsetY). An offset that
+     * would push the old board past the new one's edge is taken as 0.
      */
-    public void setWidth(int width) {
-        setWidthHeight(width, height, 0, 0);
-    }
-
-    public void setHeight(int height) {
-        setWidthHeight(width, height, 0, 0);
-    }
-
-    public void setWidth(int width, int offset) {
-        setWidthHeight(width, height, offset, 0);
-    }
-
-    public void setHeight(int height, int offset) {
-        setWidthHeight(width, height, 0, offset);
+    public void setWidthHeight(int width, int height, int offsetX, int offsetY) {
+        if (offsetX + this.width > width) offsetX = 0;
+        if (offsetY + this.height > height) offsetY = 0;
+        Map<SquareCoord, BoardNode> old = new HashMap<>(grid.asMap());
+        this.width = width;
+        this.height = height;
+        grid = new SparseGrid<>(componentName);
+        for (Map.Entry<SquareCoord, BoardNode> e : old.entrySet()) {
+            int x = e.getKey().x() + offsetX, y = e.getKey().y() + offsetY;
+            if (inBounds(x, y))
+                set(x, y, e.getValue());
+        }
     }
 
     public void setWidthHeight(int width, int height) {
         setWidthHeight(width, height, 0, 0);
     }
 
-    // Pads the grid with null on the edges, old grid being placed starting at point offsetX and offsetY within the new larger grid
-    // ***
-    // *A*
-    // ***
-    // A = old grid, top-left corner in new larger grid given by (offsetX, offsetY) coordinates.
-    public void setWidthHeight(int width, int height, int offsetX, int offsetY) {
-        if (offsetX + this.width > width) offsetX = 0;
-        if (offsetY + this.height > height) offsetY = 0;
-
-        int w = Math.min(width, this.width);
-        int h = Math.min(height, this.height);
-
-        this.width = width;
-        this.height = height;
-
-        BoardNode[][] grid = new BoardNode[height][width];
-        for (int i = 0; i < h; i++) {
-            if (w >= 0) System.arraycopy(this.grid[i], 0, grid[i + offsetY], offsetX, w);
-        }
-        this.grid = grid;
-    }
-
     /**
-     * Sets the element at position (x, y).
-     *
-     * @param x     - x coordinate in the grid.
-     * @param y     - y coordinate in the grid.
-     * @param value - new value for this element.
-     * @return - true if coordinates in bounds, false otherwise (and function fails).
+     * The node at (x, y), or null if the square is empty or off the board.
      */
-    public boolean setElement(int x, int y, BoardNode value) {
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            grid[y][x] = value;
-            return true;
-        } else
-            return false;
+    public BoardNode get(int x, int y) {
+        return grid.get(new SquareCoord(x, y));
     }
 
-    public boolean setElement(Vector2D pos, BoardNode value){
-        return setElement(pos.getX(), pos.getY(), value);
+    public BoardNode get(SquareCoord pos) {
+        return grid.get(pos);
+    }
+
+    public BoardNode get(Vector2D pos) {
+        return get(pos.getX(), pos.getY());
     }
 
     /**
-     * Retrieves the element at position (x, y).
+     * Puts the node at (x, y), or empties the square if it is null.
      *
-     * @param x - x coordinate in the grid.
-     * @param y - y coordinate in the grid.
-     * @return - element at (x,y) in the grid.
+     * @throws IllegalArgumentException if (x, y) is off the board
      */
-    public BoardNode getElement(int x, int y) {
-        if (x >= 0 && x < width && y >= 0 && y < height)
-            return grid[y][x];
-        return null;
+    public void set(int x, int y, BoardNode value) {
+        if (!inBounds(x, y))
+            throw new IllegalArgumentException("(" + x + ", " + y + ") is off the " + width + " by " + height + " board " + componentName);
+        grid.set(new SquareCoord(x, y), value);
     }
 
-    public BoardNode getElement(Vector2D pos) {
-        return getElement(pos.getX(), pos.getY());
+    public void set(SquareCoord pos, BoardNode value) {
+        set(pos.x(), pos.y(), value);
+    }
+
+    public void set(Vector2D pos, BoardNode value) {
+        set(pos.getX(), pos.getY(), value);
+    }
+
+    public boolean contains(int x, int y) {
+        return grid.contains(new SquareCoord(x, y));
     }
 
     /**
-     * Retrieves the grid.
-     *
-     * @return - 2D grid.
+     * The number of squares holding a node.
      */
-    public BoardNode[][] getGridValues() {
-        return grid;
+    public int size() {
+        return grid.size();
     }
 
-    public List<Vector2D> getEmptyCells(BoardNode defaultElement) {
-        List<Vector2D> emptyCells = new ArrayList<>();
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (getElement(j, i) == null || getElement(j, i).equals(defaultElement)) {
-                    emptyCells.add(new Vector2D(j, i));
-                }
-            }
-        }
-        return emptyCells;
+    public boolean isEmpty() {
+        return grid.isEmpty();
     }
 
     /**
-     * Returns a new grid, copy of this one, with given orientation.
-     *
-     * @param orientation - int orientation, how many times it should be rotated clockwise
-     * @return - new grid with the same elements and correct orientation.
+     * A read-only view of the nodes by position, row by row.
+     */
+    public Map<SquareCoord, BoardNode> asMap() {
+        return grid.asMap();
+    }
+
+    /**
+     * The board's nodes in an array indexed [y][x], turned clockwise by a number of quarter turns. The nodes are
+     * copies.
      */
     public BoardNode[][] rotate(int orientation) {
-        GridBoard copy = copy();
-        orientation %= 4;  // Maximum 4 sides to a grid
-        for (int i = 0; i < orientation; i++) {
-            copy.grid = rotateClockWise(copy.grid);
-        }
-        return copy.grid;
+        BoardNode[][] retValue = copy().toArray();
+        for (int i = 0; i < orientation % 4; i++)
+            retValue = rotateClockWise(retValue);
+        return retValue;
     }
 
-    /**
-     * Rotates a given grid clockwise, returning new one
-     *
-     * @param original - original grid to rotate
-     * @return rotated grid
-     */
-    private BoardNode[][] rotateClockWise(BoardNode[][] original) {
+    private static BoardNode[][] rotateClockWise(BoardNode[][] original) {
         final int M = original.length;
         final int N = original[0].length;
         BoardNode[][] grid = new BoardNode[N][M];
@@ -229,89 +180,64 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         return grid;
     }
 
+    private BoardNode[][] toArray() {
+        BoardNode[][] retValue = new BoardNode[height][width];
+        for (Map.Entry<SquareCoord, BoardNode> e : grid.asMap().entrySet())
+            retValue[e.getKey().y()][e.getKey().x()] = e.getValue();
+        return retValue;
+    }
+
     /**
-     * Returns a 1D representation of this grid, one row after another
-     *
-     * @return 1D flattened grid
+     * The squares row by row, null where one is empty.
      */
     public BoardNode[] flattenGrid() {
-        int length = getHeight() * getWidth();
-        BoardNode[] array = new BoardNode[length];
-        for (int i = 0; i < getHeight(); i++) {
-            System.arraycopy(grid[i], 0, array, i * getWidth(), grid[i].length);
-        }
-        return array;
+        BoardNode[] retValue = new BoardNode[width * height];
+        for (Map.Entry<SquareCoord, BoardNode> e : grid.asMap().entrySet())
+            retValue[e.getKey().y() * width + e.getKey().x()] = e.getValue();
+        return retValue;
     }
 
     @Override
     public GridBoard copy() {
-        BoardNode[][] gridCopy = new BoardNode[getHeight()][getWidth()];
-        Map<Integer, BoardNode> nodeCopies = new HashMap<>();
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (grid[i][j] != null) {
-                    gridCopy[i][j] = new BoardNode(grid[i][j]);
-                    nodeCopies.put(gridCopy[i][j].componentID, gridCopy[i][j]);
-                }
-            }
-        }
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (grid[i][j] != null) {
-                    for (Map.Entry<BoardNode, Double> neighbour : grid[i][j].getNeighbours().entrySet()) {
-                        gridCopy[i][j].addNeighbourWithCost(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
-                    }
-                    for (Map.Entry<BoardNode, Integer> neighbour : grid[i][j].getNeighbourSideMapping().entrySet()) {
-                        gridCopy[i][j].addNeighbourOnSide(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
-                    }
-                }
-            }
-        }
-        GridBoard g = new GridBoard(gridCopy, componentID);
+        GridBoard g = new GridBoard(width, height, componentName, componentID);
+        copyNodesTo(g);
         copyComponentTo(g);
         return g;
     }
 
+    /**
+     * A copy with a new componentID. Its nodes keep theirs.
+     */
     public GridBoard copyNewID() {
-        BoardNode[][] gridCopy = new BoardNode[getHeight()][getWidth()];
-        Map<Integer, BoardNode> nodeCopies = new HashMap<>();
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (grid[i][j] != null) {
-                    gridCopy[i][j] = new BoardNode(grid[i][j]);
-                    nodeCopies.put(gridCopy[i][j].componentID, gridCopy[i][j]);
-                }
-            }
-        }
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (grid[i][j] != null) {
-                    for (Map.Entry<BoardNode, Double> neighbour : grid[i][j].getNeighbours().entrySet()) {
-                        gridCopy[i][j].addNeighbourWithCost(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
-                    }
-                    for (Map.Entry<BoardNode, Integer> neighbour : grid[i][j].getNeighbourSideMapping().entrySet()) {
-                        gridCopy[i][j].addNeighbourOnSide(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
-                    }
-                }
-            }
-        }
-        GridBoard g = new GridBoard(gridCopy);
+        GridBoard g = new GridBoard(width, height, componentName);
+        copyNodesTo(g);
         copyComponentTo(g);
         return g;
     }
 
-    public GridBoard emptyCopy() {
-        GridBoard g = new GridBoard(getWidth(), getHeight(), componentID);
-        copyComponentTo(g);
-        return g;
+    // copies each node into g, with its neighbours the copies of its neighbours
+    private void copyNodesTo(GridBoard g) {
+        Map<Integer, BoardNode> nodeCopies = new HashMap<>();
+        for (Map.Entry<SquareCoord, BoardNode> e : grid.asMap().entrySet()) {
+            BoardNode copy = e.getValue().copy();
+            g.grid.set(e.getKey(), copy);
+            nodeCopies.put(copy.getComponentID(), copy);
+        }
+        for (BoardNode node : grid.asMap().values()) {
+            BoardNode copy = nodeCopies.get(node.getComponentID());
+            for (Map.Entry<BoardNode, Double> neighbour : node.getNeighbours().entrySet())
+                copy.addNeighbourWithCost(nodeCopies.get(neighbour.getKey().getComponentID()), neighbour.getValue());
+            for (Map.Entry<BoardNode, Integer> neighbour : node.getNeighbourSideMapping().entrySet())
+                copy.addNeighbourOnSide(nodeCopies.get(neighbour.getKey().getComponentID()), neighbour.getValue());
+        }
     }
 
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        for (int y = 0; y < getHeight(); y++) {
-            for (int x = 0; x < getWidth(); x++) {
-                BoardNode t = getElement(x, y);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                BoardNode t = get(x, y);
                 if (t != null) s.append(t.getComponentName()).append(" ");
             }
             s.append("\n");
@@ -361,7 +287,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
             properties.put(imgHash, new PropertyString((String) board.get("img")));
         }
 
-        this.grid = new BoardNode[height][width];
+        grid = new SparseGrid<>(componentName);
 
         JSONArray grids = (JSONArray) board.get("grid");
         int y = 0;
@@ -369,139 +295,47 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
             if (((JSONArray) g).get(0) instanceof JSONArray) {
                 y = 0;
                 for (Object o : (JSONArray) g) {
-                    JSONArray row = (JSONArray) o;
-                    int x = 0;
-                    for (Object o1 : row) {
-                        // TODO FIX THIS
-                        if (o1 instanceof String) {
-                            BoardNode bn = new BoardNode(-1, (String) o1);
-                            setElement(x, y, bn);
-                        }
-                        else setElement(x, y, (BoardNode) o1);
-                        x++;
-                    }
+                    loadRow((JSONArray) o, y);
                     y++;
                 }
             } else {
-                JSONArray row = (JSONArray) g;
-                int x = 0;
-                for (Object o1 : row) {
-                    // TODO FIX THIS
-                    if (o1 instanceof String) {
-                        BoardNode bn = new BoardNode(-1, (String) o1);
-                        setElement(x, y, bn);
-                    }
-                    else setElement(x, y, (BoardNode) o1);
-                    x++;
-                }
+                loadRow((JSONArray) g, y);
                 y++;
             }
         }
     }
 
-    /**
-     * Generates a graph from this grid, with 4-way or 8-way connectivity.
-     *
-     * @param way8 - if true, the board has 8-way connectivity, otherwise 4-way.
-     * @return - GraphBoard, board with board nodes connected. All board nodes have information about their location
-     * in the original grid, via the "coordinates" property.
-     */
-    public GraphBoard toGraphBoard(boolean way8) {
-        GraphBoard gb = new GraphBoard(componentName, componentID);
-        HashMap<Vector2D, BoardNode> bnMapping = new HashMap<>();
-        // Add all cells as board nodes connected to each other
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                BoardNode bn = new BoardNode(-1, getElement(j, i).getComponentName());
-                bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
-                bn.setProperty(new PropertyString("terrain", getElement(j, i).getComponentName()));
-                gb.addBoardNode(bn);
-                bnMapping.put(new Vector2D(j, i), bn);
-            }
-        }
-
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                BoardNode bn = bnMapping.get(new Vector2D(j, i));
-
-                // Add neighbours
-                List<Vector2D> neighbours = getNeighbourhood(j, i, width, height, way8);
-                for (Vector2D neighbour : neighbours) {
-                    BoardNode bn2 = bnMapping.get(neighbour);
-                    gb.addConnection(bn, bn2);
-                }
-            }
-        }
-        return gb;
-    }
-
-    /**
-     * Generates a graph from this grid, with 4-way or 8-way connectivity and pre-set neighbouring cells.
-     * Used to restrict grid connectivity further.
-     *
-     * @param neighbours - list of neighbouring cells, where each Vector2D is coordinates to a cell in the grid.
-     * @return - GraphBoard, board with board nodes connected. All board nodes have information about their location
-     * in the original grid, via the "coordinates" property.
-     */
-    public GraphBoard toGraphBoard(List<Pair<Vector2D, Vector2D>> neighbours) {
-        GraphBoard gb = new GraphBoard(componentName, componentID);
-        HashMap<Vector2D, BoardNode> bnMapping = new HashMap<>();
-        // Add all cells as board nodes connected to each other
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (getElement(j, i) != null) {
-                    BoardNode bn = new BoardNode(-1, getElement(j, i).getComponentName());
-                    bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
-                    bn.setProperty(new PropertyString("terrain", getElement(j, i).getComponentName()));
-                    gb.addBoardNode(bn);
-                    bnMapping.put(new Vector2D(j, i), bn);
-                }
-            }
-        }
-        for (Pair<Vector2D, Vector2D> p : neighbours) {
-            if (bnMapping.get(p.a) != null && bnMapping.get(p.b) != null) {
-                gb.addConnection(bnMapping.get(p.a), bnMapping.get(p.b));
-            }
-        }
-        return gb;
-    }
-
-    public void setNeighbours(List<Pair<Vector2D, Vector2D>> neighbours) {
-        HashMap<Vector2D, BoardNode> bnMapping = new HashMap<>();
-        // Add all cells as board nodes connected to each other
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                BoardNode bn = (BoardNode) getElement(j, i);
-                if (bn != null) {
-                    bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
-                    bnMapping.put(new Vector2D(j, i), bn);
-                }
-            }
-        }
-        for (Pair<Vector2D, Vector2D> p : neighbours) {
-            if (bnMapping.get(p.a) != null && bnMapping.get(p.b) != null) {
-                bnMapping.get(p.a).addNeighbourWithCost(bnMapping.get(p.b));
-                bnMapping.get(p.b).addNeighbourWithCost(bnMapping.get(p.a));
-            }
+    private void loadRow(JSONArray row, int y) {
+        int x = 0;
+        for (Object o : row) {
+            // TODO FIX THIS
+            if (o instanceof String name)
+                set(x, y, new BoardNode(-1, name));
+            else
+                set(x, y, (BoardNode) o);
+            x++;
         }
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof GridBoard other) {
-            return componentID == other.componentID && Arrays.equals(flattenGrid(), other.flattenGrid());
-        }
-        return false;
+        if (this == o) return true;
+        if (!(o instanceof GridBoard other)) return false;
+        return componentID == other.componentID && width == other.width && height == other.height &&
+                grid.asMap().equals(other.grid.asMap());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(componentID) + 5 * Arrays.hashCode(flattenGrid());
+        return Objects.hash(componentID, width, height, grid.asMap());
     }
 
+    /**
+     * The nodes on the board, row by row.
+     */
     @Override
     public List<BoardNode> getComponents() {
-        return Arrays.stream(flattenGrid()).collect(Collectors.toList());
+        return new ArrayList<>(grid.asMap().values());
     }
 
     @Override

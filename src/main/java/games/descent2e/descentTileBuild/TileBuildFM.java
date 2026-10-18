@@ -32,10 +32,10 @@ public class TileBuildFM extends StandardForwardModel {
 
                 //Borders:
                 if (i == 0 || j == 0 || i == size - 1 || j == size - 1) {
-                    tbs.tile.setElement(j, i, null);
+                    tbs.tile.set(j, i, null);
                 }else{
                     BoardNode bn = new BoardNode(-1, "plain");
-                    tbs.tile.setElement(j, i, bn);
+                    tbs.tile.set(j, i, bn);
                     bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j,i)));
                 }
             }
@@ -54,7 +54,7 @@ public class TileBuildFM extends StandardForwardModel {
         // Adding neighbours. For all tiles in the board
         for (int i = 0; i < w; i++) for (int j = 0; j < h; j++) {
 
-            BoardNode node = tbs.tile.getElement(i, j);
+            BoardNode node = tbs.tile.get(i, j);
             // The tile must not be null (they have no neighbours)
 
             if (node != null) {
@@ -68,7 +68,7 @@ public class TileBuildFM extends StandardForwardModel {
 
                     // not outside the board...
                     if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                        BoardNode bnN = tbs.tile.getElement(nx, ny);
+                        BoardNode bnN = tbs.tile.get(nx, ny);
                         if (bnN != null)  // ... and not null.
                         {
                             String compName = bnN.getComponentName().substring(0,1).toUpperCase() + bnN.getComponentName().substring(1).toLowerCase();
@@ -125,7 +125,7 @@ public class TileBuildFM extends StandardForwardModel {
                             List<Vector2D> neighbours = getNeighbourhood(j, i, tbs.tile.getWidth(), tbs.tile.getHeight(), false);
                             boolean anyOpen = false;
                             for (Vector2D n : neighbours) {
-                                BoardNode el = tbs.tile.getElement(n.getX(), n.getY());
+                                BoardNode el = tbs.tile.get(n.getX(), n.getY());
                                 if (el != null && el.getComponentName().equals("open")) {
                                     anyOpen = true;
                                     // Check if this would be valid placement
@@ -162,7 +162,7 @@ public class TileBuildFM extends StandardForwardModel {
         List<Vector2D> neighbours = getNeighbourhood(x, y, width, height, false);
         List<Vector2D> insideTileNeighbours = new ArrayList<>();
         for (Vector2D n: neighbours) {
-            BoardNode t = tile.getElement(n.getX(), n.getY());
+            BoardNode t = tile.get(n.getX(), n.getY());
             if (t != null && TerrainType.isInsideTerrain(t.getComponentName())) {
                 insideTileNeighbours.add(n.copy());
             }

@@ -3,7 +3,6 @@ package games.mastermind;
 import core.Game;
 import core.actions.SetGridValueAction;
 import core.components.BoardNode;
-import core.components.grid.SquareCoord;
 import games.GameType;
 import org.junit.Test;
 
@@ -28,7 +27,7 @@ public class MastermindBoardTest {
     List<String> resultRow(int row) {
         List<String> retValue = new ArrayList<>();
         for (int x = 0; x < 4; x++) {
-            BoardNode peg = state.getResultBoard().get(new SquareCoord(x, row));
+            BoardNode peg = state.getResultBoard().get(x, row);
             retValue.add(peg == null ? null : peg.getComponentName());
         }
         return retValue;
@@ -37,7 +36,7 @@ public class MastermindBoardTest {
     @Test
     public void aCompletedGuessGetsItsResults() {
         guess(0, 1, 2);
-        assertEquals(MMConstants.guessColours.get(2), state.getGuessBoard().get(new SquareCoord(2, 0)));
+        assertEquals(MMConstants.guessColours.get(2), state.getGuessBoard().get(2, 0));
         assertTrue(state.getResultBoard().isEmpty());
         guess(3);
         assertEquals(1, state.activeRow);

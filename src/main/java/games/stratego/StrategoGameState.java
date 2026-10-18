@@ -2,9 +2,9 @@ package games.stratego;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.components.BoardNode;
 import core.components.Component;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import games.GameType;
 import games.stratego.components.Piece;
 import utilities.Vector2D;
@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class StrategoGameState extends AbstractGameState{
-    SparseGrid<SquareCoord, Piece> gridBoard;
+    GridBoard gridBoard;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -87,7 +87,7 @@ public class StrategoGameState extends AbstractGameState{
         return gridBoard.hashCode();
     }
 
-    public SparseGrid<SquareCoord, Piece> getGridBoard() {
+    public GridBoard getGridBoard() {
         return gridBoard;
     }
 
@@ -95,14 +95,17 @@ public class StrategoGameState extends AbstractGameState{
      * The pieces on the board, row by row.
      */
     public Collection<Piece> getPieces() {
-        return gridBoard.asMap().values();
+        List<Piece> retValue = new ArrayList<>();
+        for (BoardNode node : gridBoard.asMap().values())
+            retValue.add((Piece) node);
+        return retValue;
     }
 
     /**
      * The piece at the position, or null if there is none.
      */
     public Piece getPiece(Vector2D position) {
-        return gridBoard.get(new SquareCoord(position.getX(), position.getY()));
+        return (Piece) gridBoard.get(position);
     }
 
     /**
@@ -120,7 +123,7 @@ public class StrategoGameState extends AbstractGameState{
      * Puts the piece at the position, or empties it if the piece is null.
      */
     public void setPiece(Vector2D position, Piece piece) {
-        gridBoard.set(new SquareCoord(position.getX(), position.getY()), piece);
+        gridBoard.set(position, piece);
     }
 
     @Override

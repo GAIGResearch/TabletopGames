@@ -5,7 +5,7 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
-import core.components.grid.SparseGrid;
+import core.components.GridBoard;
 import core.interfaces.ITreeActionSpace;
 import games.stratego.actions.AttackMove;
 import games.stratego.actions.Move;
@@ -32,7 +32,7 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
     protected void _setup(AbstractGameState firstState) {
         StrategoParams params = (StrategoParams) firstState.getGameParameters();
         StrategoGameState state = (StrategoGameState) firstState;
-        state.gridBoard = new SparseGrid<>("Stratego Board");
+        state.gridBoard = new GridBoard(params.gridSize, params.gridSize, "Stratego Board");
 
         StrategoConstants.PieceSetups[] setups = StrategoConstants.PieceSetups.values();
         StrategoConstants.PieceSetups RedSetup = setups[state.getRnd().nextInt(setups.length)];

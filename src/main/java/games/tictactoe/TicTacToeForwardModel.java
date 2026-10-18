@@ -7,8 +7,7 @@ import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.SetGridValueAction;
 import core.components.BoardNode;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import core.interfaces.ITreeActionSpace;
 import utilities.ActionTreeNode;
 
@@ -22,8 +21,8 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
     @Override
     protected void _setup(AbstractGameState firstState) {
         TicTacToeGameState state = (TicTacToeGameState) firstState;
-        state.gridBoard = new SparseGrid<>("TicTacToe Board");
-        state.gridSize = ((TicTacToeGameParameters) state.getGameParameters()).gridSize;
+        int gridSize = ((TicTacToeGameParameters) state.getGameParameters()).gridSize;
+        state.gridBoard = new GridBoard(gridSize, gridSize, "TicTacToe Board");
     }
 
 
@@ -41,7 +40,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
             // Normal action space
             for (int x = 0; x < tttgs.getGridSize(); x++) {
                 for (int y = 0; y < tttgs.getGridSize(); y++) {
-                    if (!tttgs.gridBoard.contains(new SquareCoord(x, y))) {
+                    if (!tttgs.gridBoard.contains(x, y)) {
                         actions.add(new SetGridValueAction(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player).getComponentID()));
                     }
                 }
@@ -64,7 +63,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
      * @param gameState - game state to check game end.
      */
     private boolean checkAndProcessGameEnd(TicTacToeGameState gameState) {
-        SparseGrid<SquareCoord, BoardNode> gridBoard = gameState.getGridBoard();
+        GridBoard gridBoard = gameState.getGridBoard();
         int n = gameState.getGridSize();
 
         // each line is given by its first square and the step along it: the columns, the rows and the two diagonals
@@ -77,11 +76,11 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
         lines.add(new int[]{n - 1, 0, -1, 1});
 
         for (int[] line : lines) {
-            BoardNode c = gridBoard.get(new SquareCoord(line[0], line[1]));
+            BoardNode c = gridBoard.get(line[0], line[1]);
             if (c == null) continue;
             boolean win = true;
             for (int i = 1; i < n && win; i++)
-                win = c.equals(gridBoard.get(new SquareCoord(line[0] + i * line[2], line[1] + i * line[3])));
+                win = c.equals(gridBoard.get(line[0] + i * line[2], line[1] + i * line[3]));
             if (win) {
                 registerWinner(gameState, c);
                 return true;
@@ -129,7 +128,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
             ActionTreeNode xNode = root.findChildrenByName("X" + x);
             for (int y = 0; y < tttgs.getGridSize(); y++) {
                 ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
-                if (!tttgs.gridBoard.contains(new SquareCoord(x, y))) {
+                if (!tttgs.gridBoard.contains(x, y)) {
                     xNode.setValue(1); // make sure that we set parent available
                     yNode.setAction(new SetGridValueAction(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player).getComponentID()));
                 }

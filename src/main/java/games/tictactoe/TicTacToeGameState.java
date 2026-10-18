@@ -4,8 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.BoardNode;
 import core.components.Component;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import core.interfaces.IPrintable;
 import games.GameType;
 
@@ -17,9 +16,7 @@ import java.util.Objects;
 public class TicTacToeGameState extends AbstractGameState implements IPrintable {
 
     // the x and o tokens of TicTacToeConstants.playerMapping; a square with none is empty
-    SparseGrid<SquareCoord, BoardNode> gridBoard;
-    // from the parameters at setup: held here as a copy of the parameters keeps only their tunable values
-    int gridSize;
+    GridBoard gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -42,7 +39,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
     protected TicTacToeGameState _copy(int playerId) {
         TicTacToeGameState s = new TicTacToeGameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
-        s.gridSize = gridSize;
         return s;
     }
 
@@ -66,7 +62,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
      * This returns the player id of the token at the given position. Or -1 if this is empty.
      */
     public int getPlayerAt(int x, int y) {
-        BoardNode token = gridBoard.get(new SquareCoord(x, y));
+        BoardNode token = gridBoard.get(x, y);
         return token == null ? -1 : token.getOwnerId();
     }
 
@@ -74,7 +70,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TicTacToeGameState that)) return false;
-        return gridSize == that.gridSize && Objects.equals(gridBoard, that.gridBoard);
+        return Objects.equals(gridBoard, that.gridBoard);
     }
 
     @Override
@@ -90,7 +86,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
                 Objects.hash(gridBoard);
     }
 
-    public SparseGrid<SquareCoord, BoardNode> getGridBoard() {
+    public GridBoard getGridBoard() {
         return gridBoard;
     }
 
@@ -98,7 +94,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
      * The number of squares along each side of the board.
      */
     public int getGridSize() {
-        return gridSize;
+        return ((TicTacToeGameParameters) gameParameters).gridSize;
     }
 
     @Override
@@ -106,7 +102,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < getGridSize(); y++) {
             for (int x = 0; x < getGridSize(); x++) {
-                BoardNode token = gridBoard.get(new SquareCoord(x, y));
+                BoardNode token = gridBoard.get(x, y);
                 sb.append(token == null ? TicTacToeConstants.emptyCell : token.getComponentName()).append(" ");
             }
             sb.append("\n");

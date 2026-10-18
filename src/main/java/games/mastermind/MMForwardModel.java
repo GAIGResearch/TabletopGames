@@ -6,8 +6,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.BoardNode;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 
 import java.util.*;
 
@@ -18,8 +17,8 @@ public class MMForwardModel extends StandardForwardModel {
         MMGameState mmgs = (MMGameState) firstState;
         MMParameters mmp = (MMParameters) mmgs.getGameParameters();
 
-        mmgs.guessBoard = new SparseGrid<>("Guess Board");
-        mmgs.resultBoard = new SparseGrid<>("Result Board");
+        mmgs.guessBoard = new GridBoard(mmp.boardWidth, mmp.boardHeight, "Guess Board");
+        mmgs.resultBoard = new GridBoard(mmp.boardWidth, mmp.boardHeight, "Result Board");
         mmgs.activeRow = 0;
         mmgs.activeCol = 0;
         mmgs.answerCode = mmgs.generateRandomShuffledAnswerCode(mmp.boardWidth, mmgs.getRnd());
@@ -52,7 +51,7 @@ public class MMForwardModel extends StandardForwardModel {
                 mmgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 0);
                 // Fill the resultBoard's last row with 'correct'
                 for (int i=0; i<mmp.boardWidth; i++) {
-                    mmgs.resultBoard.set(new SquareCoord(i, mmgs.activeRow), MMConstants.resultColours.get(0));
+                    mmgs.resultBoard.set(i, mmgs.activeRow, MMConstants.resultColours.get(0));
                 }
             } else {
                 mmgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 0);
@@ -69,7 +68,7 @@ public class MMForwardModel extends StandardForwardModel {
 
             // Update result board with respectively coloured pegs
             for (int i=0; i<rowResult.size(); i++) {
-                mmgs.resultBoard.set(new SquareCoord(i, mmgs.activeRow), MMConstants.resultColours.get(rowResult.get(i)));
+                mmgs.resultBoard.set(i, mmgs.activeRow, MMConstants.resultColours.get(rowResult.get(i)));
             }
 
             // Reset row and column markers, ready for the next row
@@ -85,7 +84,7 @@ public class MMForwardModel extends StandardForwardModel {
         boolean gameEnd = true;
 
         for (int i=0; i<mmp.boardWidth; i++) {
-            BoardNode guess = gameState.guessBoard.get(new SquareCoord(i, gameState.activeRow));
+            BoardNode guess = gameState.guessBoard.get(i, gameState.activeRow);
             if (guess == null || !guess.getComponentName().equals(gameState.answerCode.get(i).getComponentName())) {
                 win = false;
                 gameEnd = false;

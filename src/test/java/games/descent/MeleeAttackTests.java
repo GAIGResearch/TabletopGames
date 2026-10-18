@@ -466,7 +466,7 @@ public class MeleeAttackTests {
         Figure actingFigure = state.getActingFigure();
         Figure victim = state.getMonsters().get(0).get(0);
         Vector2D victimPos = victim.getPosition();
-        assertEquals(victim.getComponentID(), ((PropertyInt) state.getMasterBoard().getElement(victimPos).getProperty("players")).value);
+        assertEquals(victim.getComponentID(), ((PropertyInt) state.getMasterBoard().get(victimPos).getProperty("players")).value);
         List<DescentCard> weapons = ((Hero) actingFigure).getWeapons();
 
         assertEquals(1, weapons.size());
@@ -503,7 +503,7 @@ public class MeleeAttackTests {
         assertTrue(attack.executionComplete(state));
         assertEquals(Math.max(startHP - damage, 0), victim.getAttribute(Figure.Attribute.Health).getValue());
         assertFalse(state.getMonsters().get(0).contains(victim));
-        assertEquals(-1, ((PropertyInt) state.getMasterBoard().getElement(victimPos).getProperty("players")).value);
+        assertEquals(-1, ((PropertyInt) state.getMasterBoard().get(victimPos).getProperty("players")).value);
     }
 
     @Test

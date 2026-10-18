@@ -1,7 +1,6 @@
 package games.connect4;
 import core.AbstractGameState;
 import core.components.BoardNode;
-import core.components.grid.SquareCoord;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateKey;
 
@@ -22,7 +21,7 @@ public class Connect4StateVector implements IStateFeatureVector, IStateKey {
         double[] retValue = new double[state.getWidth() * state.getHeight()];
         for (int y = 0; y < state.getHeight(); y++) {
             for (int x = 0; x < state.getWidth(); x++) {
-                BoardNode c = state.getGridBoard().get(new SquareCoord(x, y));
+                BoardNode c = state.getGridBoard().get(x, y);
                 if (c == null) {
                     retValue[y * state.getWidth() + x] = 0.0;
                 } else if (c.getComponentName().equals(playerChar)) {

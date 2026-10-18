@@ -8,7 +8,6 @@ import core.actions.SetGridValueAction;
 import core.components.BoardNode;
 import core.components.PartialObservableDeck;
 import core.components.Token;
-import core.components.grid.SquareCoord;
 import games.GameType;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,15 +42,15 @@ public class TestMastermind {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(mmgs);
             forwardModel.next(mmgs, actions.get(0));
             if (i != mmp.boardWidth-1) {
-                assertNull(mmgs.resultBoard.get(new SquareCoord(0, 0)));
-                assertNull(mmgs.resultBoard.get(new SquareCoord(1, 0)));
-                assertNull(mmgs.resultBoard.get(new SquareCoord(2, 0)));
-                assertNull(mmgs.resultBoard.get(new SquareCoord(3, 0)));
+                assertNull(mmgs.resultBoard.get(0, 0));
+                assertNull(mmgs.resultBoard.get(1, 0));
+                assertNull(mmgs.resultBoard.get(2, 0));
+                assertNull(mmgs.resultBoard.get(3, 0));
             } else {
-                assertNotNull(mmgs.resultBoard.get(new SquareCoord(0, 0)));
-                assertNotNull(mmgs.resultBoard.get(new SquareCoord(1, 0)));
-                assertNotNull(mmgs.resultBoard.get(new SquareCoord(2, 0)));
-                assertNotNull(mmgs.resultBoard.get(new SquareCoord(3, 0)));
+                assertNotNull(mmgs.resultBoard.get(0, 0));
+                assertNotNull(mmgs.resultBoard.get(1, 0));
+                assertNotNull(mmgs.resultBoard.get(2, 0));
+                assertNotNull(mmgs.resultBoard.get(3, 0));
             }
         }
     }

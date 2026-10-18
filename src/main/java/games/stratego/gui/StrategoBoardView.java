@@ -1,7 +1,6 @@
 package games.stratego.gui;
 
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import games.stratego.StrategoParams;
 import games.stratego.StrategoConstants;
 import games.stratego.StrategoGameState;
@@ -55,7 +54,7 @@ public class StrategoBoardView extends ComponentView {
     @Override
     protected void paintComponent(Graphics g) {
         @SuppressWarnings("unchecked")
-        SparseGrid<SquareCoord, Piece> gridBoard = (SparseGrid<SquareCoord, Piece>) component;
+        GridBoard gridBoard = (GridBoard) component;
         drawGridBoard((Graphics2D)g, gridBoard, 0, 0);
 
         if (highlight.size() > 0) {
@@ -70,7 +69,7 @@ public class StrategoBoardView extends ComponentView {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, SparseGrid<SquareCoord, Piece> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridSize * defaultItemSize;
         int height = gridSize * defaultItemSize;
 
@@ -84,7 +83,7 @@ public class StrategoBoardView extends ComponentView {
             for (int j = 0; j < gridSize; j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + i * defaultItemSize;
-                drawCell(g, gridBoard.get(new SquareCoord(j, i)), xC, yC);
+                drawCell(g, (Piece) gridBoard.get(j, i), xC, yC);
 
                 // Save rect where cell is drawn
                 int idx = i * gridSize + j;

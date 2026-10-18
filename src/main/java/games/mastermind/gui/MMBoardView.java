@@ -1,8 +1,7 @@
 package games.mastermind.gui;
 
 import core.components.BoardNode;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
 
@@ -19,7 +18,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
     ArrayList<Rectangle> highlight;
     final int gridWidth, gridHeight;
 
-    public MMBoardView(SparseGrid<SquareCoord, BoardNode> gridBoard, int gridWidth, int gridHeight) {
+    public MMBoardView(GridBoard gridBoard, int gridWidth, int gridHeight) {
         super(gridBoard, gridWidth*defaultItemSize, gridHeight*defaultItemSize);
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
@@ -43,7 +42,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
     @Override
     protected void paintComponent(Graphics g) {
         @SuppressWarnings("unchecked")
-        SparseGrid<SquareCoord, BoardNode> gridBoard = (SparseGrid<SquareCoord, BoardNode>) component;
+        GridBoard gridBoard = (GridBoard) component;
         drawGridBoard((Graphics2D)g, gridBoard, 0, 0);
 
         if (!highlight.isEmpty()) {
@@ -57,7 +56,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, SparseGrid<SquareCoord, BoardNode> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridWidth * scaledDefaultItemSize;
         int height = gridHeight * scaledDefaultItemSize;
 
@@ -71,7 +70,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
             for (int j = 0; j < gridWidth; j++) {
                 int xC = x + j * scaledDefaultItemSize;
                 int yC = y + i * scaledDefaultItemSize;
-                drawCell(g, gridBoard.get(new SquareCoord(j, i)), xC, yC);
+                drawCell(g, gridBoard.get(j, i), xC, yC);
 
                 // Save rect where cell is drawn
                 int idx = i * gridWidth + j;

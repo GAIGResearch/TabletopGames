@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A piece on the board, owned by the player of its alliance. Immutable, as the values of a SparseGrid must be: a piece
- * that moves or is revealed is replaced on the board by a new one with the same componentID.
+ * A piece on the board, owned by the player of its alliance. Immutable, so that a copy of the board can share it: a
+ * piece that moves or is revealed is replaced on the board by a new one with the same componentID.
  */
 public class Piece extends BoardNode {
 

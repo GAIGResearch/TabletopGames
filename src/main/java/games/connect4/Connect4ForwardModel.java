@@ -4,8 +4,7 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.BoardNode;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import core.forwardModels.SequentialActionForwardModel;
 import utilities.Pair;
 
@@ -21,9 +20,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
     protected void _setup(AbstractGameState firstState) {
         Connect4GameParameters c4gp = (Connect4GameParameters) firstState.getGameParameters();
         Connect4GameState state = (Connect4GameState) firstState;
-        state.gridBoard = new SparseGrid<>("Connect4 Board");
-        state.width = c4gp.width;
-        state.height = c4gp.height;
+        state.gridBoard = new GridBoard(c4gp.width, c4gp.height, "Connect4 Board");
         state.winnerCells = new LinkedList<>();
     }
 
@@ -34,13 +31,13 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         int player = c4gs.getCurrentPlayer();
 
         if (gameState.isNotTerminal())
-            for (int x = 0; x < c4gs.width; x++) {
-                int y = c4gs.height - 1; // this is bottom of column
+            for (int x = 0; x < c4gs.getWidth(); x++) {
+                int y = c4gs.getHeight() - 1; // this is bottom of column
                 boolean end = false;
                 while(!end)
                 {
                     boolean newCol = false;
-                    if (!c4gs.gridBoard.contains(new SquareCoord(x, y))) {
+                    if (!c4gs.gridBoard.contains(x, y)) {
                         actions.add(new SetGridValueAction(c4gs.gridBoard.getComponentID(), x, y, Connect4Constants.playerMapping.get(player).getComponentID()));
                         newCol = true;
                     }
@@ -69,18 +66,18 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
      * @param gameState - game state to check game end.
      */
     private boolean checkGameEnd(Connect4GameState gameState) {
-        SparseGrid<SquareCoord, BoardNode> gridBoard = gameState.getGridBoard();
+        GridBoard gridBoard = gameState.getGridBoard();
         Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         boolean gap = false;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();;
 
         // Check columns
-        for (int x = 0; x < gameState.width; x++) {
+        for (int x = 0; x < gameState.getWidth(); x++) {
             int count = 0;
             String lastToken = null;
             winning.clear();
-            for (int y = gameState.height - 1; y >= 0; y--) {
-                BoardNode c = gridBoard.get(new SquareCoord(x, y));
+            for (int y = gameState.getHeight() - 1; y >= 0; y--) {
+                BoardNode c = gridBoard.get(x, y);
                 if (c == null) {
                     count = 0;
                     lastToken = null;
@@ -106,12 +103,12 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         }
 
         // Check rows
-        for (int y = gameState.height - 1; y >= 0; y--) {
+        for (int y = gameState.getHeight() - 1; y >= 0; y--) {
             int count = 0;
             String lastToken = null;
             winning.clear();
-            for (int x = 0; x < gameState.width; x++) {
-                BoardNode c = gridBoard.get(new SquareCoord(x, y));
+            for (int x = 0; x < gameState.getWidth(); x++) {
+                BoardNode c = gridBoard.get(x, y);
                 if (c == null) {
                     count = 0;
                     lastToken = null;
@@ -136,23 +133,23 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         }
 
         //Check main diagonals (from col 0)
-        for (int y = gameState.height - 1; y >= 0; y--) {
+        for (int y = gameState.getHeight() - 1; y >= 0; y--) {
             if (checkMainDiagonals(gameState, 0, y))
                 return true;
 
         }
 
         //Check main and inverse diagonals (from row 0)
-        for (int x = 1; x < gameState.width; x++) {
-            if (checkMainDiagonals(gameState, x, gameState.height - 1))
+        for (int x = 1; x < gameState.getWidth(); x++) {
+            if (checkMainDiagonals(gameState, x, gameState.getHeight() - 1))
                 return true;
-            if (checkInvDiagonals(gameState, x, gameState.height - 1))
+            if (checkInvDiagonals(gameState, x, gameState.getHeight() - 1))
                 return true;
         }
 
         //Check inv diagonals (from last column)
-        for (int y = gameState.height - 2; y >= 0; y--) { //height -1 is checked in previous loop
-            if (checkInvDiagonals(gameState, gameState.width-1, y))
+        for (int y = gameState.getHeight() - 2; y >= 0; y--) { //height -1 is checked in previous loop
+            if (checkInvDiagonals(gameState, gameState.getWidth()-1, y))
                 return true;
         }
 
@@ -168,14 +165,14 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
 
     private boolean checkMainDiagonals(Connect4GameState gameState, int xStart, int yStart)
     {
-        SparseGrid<SquareCoord, BoardNode> gridBoard = gameState.getGridBoard();
+        GridBoard gridBoard = gameState.getGridBoard();
         Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         int count = 0;
         String lastToken = null;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
 
-        for (int x = xStart, y = yStart; x < gameState.width && y >=0; x++, y--) {
-            BoardNode c = gridBoard.get(new SquareCoord(x, y));
+        for (int x = xStart, y = yStart; x < gameState.getWidth() && y >=0; x++, y--) {
+            BoardNode c = gridBoard.get(x, y);
 
             if (c == null) {
                 count = 0;
@@ -201,14 +198,14 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
 
     private boolean checkInvDiagonals(Connect4GameState gameState, int xStart, int yStart)
     {
-        SparseGrid<SquareCoord, BoardNode> gridBoard = gameState.getGridBoard();
+        GridBoard gridBoard = gameState.getGridBoard();
         Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         int count = 0;
         String lastToken = null;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
 
         for (int x = xStart, y = yStart; x >= 0 && y >= 0; x--, y--) {
-            BoardNode c = gridBoard.get(new SquareCoord(x, y));
+            BoardNode c = gridBoard.get(x, y);
 
             if (c == null) {
                 count = 0;

@@ -1,7 +1,6 @@
 package games.connect4.gui;
 import core.components.BoardNode;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
 import utilities.Pair;
@@ -21,7 +20,7 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
     LinkedList<Pair<Integer, Integer>> winningCells;
     final int gridWidth, gridHeight;
 
-    public Connect4BoardView(SparseGrid<SquareCoord, BoardNode> gridBoard, int gridWidth, int gridHeight) {
+    public Connect4BoardView(GridBoard gridBoard, int gridWidth, int gridHeight) {
         super(gridBoard, gridWidth * defaultItemSize, gridHeight * defaultItemSize);
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
@@ -52,7 +51,7 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
     @Override
     protected void paintComponent(Graphics g) {
         @SuppressWarnings("unchecked")
-        SparseGrid<SquareCoord, BoardNode> gridBoard = (SparseGrid<SquareCoord, BoardNode>) component;
+        GridBoard gridBoard = (GridBoard) component;
         drawGridBoard((Graphics2D)g, gridBoard, 0, 0);
 
         if (highlight.size() > 0) {
@@ -69,7 +68,7 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
             drawWinningCells((Graphics2D) g);
     }
 
-    public void drawGridBoard(Graphics2D g, SparseGrid<SquareCoord, BoardNode> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridWidth * defaultItemSize;
         int height = (gridHeight+1) * defaultItemSize;
 
@@ -96,7 +95,7 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
             for (int j = 0; j < gridWidth; j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + (i+1) * defaultItemSize;
-                drawCell(g, gridBoard.get(new SquareCoord(j, i)), xC, yC);
+                drawCell(g, gridBoard.get(j, i), xC, yC);
 
             }
         }

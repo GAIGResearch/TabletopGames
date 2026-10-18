@@ -4,7 +4,6 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
-import core.components.grid.SquareCoord;
 import games.GameType;
 import org.junit.Test;
 
@@ -38,7 +37,7 @@ public class TicTacToeBoardTest {
             squares.add(s.getX() + "," + s.getY());
         }
         assertEquals(List.of("0,0", "0,1", "0,2", "1,0", "1,1", "1,2", "2,1", "2,2"), squares);
-        assertEquals(TicTacToeConstants.playerMapping.get(0), state.getGridBoard().get(new SquareCoord(2, 0)));
+        assertEquals(TicTacToeConstants.playerMapping.get(0), state.getGridBoard().get(2, 0));
     }
 
     @Test
@@ -90,9 +89,9 @@ public class TicTacToeBoardTest {
     }
     @Test
     public void aCopyKeepsTheBoardSize() {
-        // set directly, as tests often do, the size is not among the parameters' tunable values that a copy keeps
+        // set as a tunable value, as a copy of the parameters keeps only those
         TicTacToeGameParameters params = new TicTacToeGameParameters();
-        params.gridSize = 4;
+        params.setParameterValue("gridSize", 4);
         Game big = GameType.TicTacToe.createGameInstance(2, params);
         TicTacToeGameState copy = (TicTacToeGameState) big.getGameState().copy();
         assertEquals(4, copy.getGridSize());

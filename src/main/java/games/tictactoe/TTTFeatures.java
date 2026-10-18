@@ -2,7 +2,6 @@ package games.tictactoe;
 
 import core.AbstractGameState;
 import core.components.BoardNode;
-import core.components.grid.SquareCoord;
 import core.interfaces.IStateFeatureJSON;
 import core.interfaces.IStateFeatureVector;
 import org.json.simple.JSONObject;
@@ -28,7 +27,7 @@ public class TTTFeatures implements IStateFeatureVector, IStateFeatureJSON {
         String playerSymbol = (playerId == 0) ? "x" : "o";
         for (int x = 0; x < tttgs.getGridSize(); x++) {
             for (int y = 0; y < tttgs.getGridSize(); y++) {
-                BoardNode cell = tttgs.gridBoard.get(new SquareCoord(x, y));
+                BoardNode cell = tttgs.gridBoard.get(x, y);
                 String cellSymbol = cell == null ? "." : cell.getComponentName();
                 if (cellSymbol.equals(playerSymbol)) {
                     json.put(x + "," + y, 1);
@@ -49,7 +48,7 @@ public class TTTFeatures implements IStateFeatureVector, IStateFeatureJSON {
         String playerSymbol = (playerID == 0) ? "x" : "o";
         for (int x = 0; x < tttgs.getGridSize(); x++) {
             for (int y = 0; y < tttgs.getGridSize(); y++) {
-                BoardNode cell = tttgs.gridBoard.get(new SquareCoord(x, y));
+                BoardNode cell = tttgs.gridBoard.get(x, y);
                 String cellSymbol = cell == null ? "." : cell.getComponentName();
                 if (cellSymbol.equals(playerSymbol)) {
                     listVec.add(1.0);

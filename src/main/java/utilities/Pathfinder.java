@@ -51,7 +51,7 @@ public class Pathfinder {
         {
             for (int j = 0; j < h; j++)
             {
-                BoardNode n = graph.getElement(i,j);
+                BoardNode n = graph.get(i,j);
                 if(n != null)
                     initShortestPaths(n);
             }

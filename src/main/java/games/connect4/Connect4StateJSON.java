@@ -1,8 +1,7 @@
 package games.connect4;
 
 import core.components.BoardNode;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Pair;
@@ -31,18 +30,18 @@ public class Connect4StateJSON {
         // this includes parameters and game phase
         json.put("abstractGameState", state.abstractGameStateToJSON());
 
-        SparseGrid<SquareCoord, BoardNode> board = state.gridBoard;
+        GridBoard board = state.gridBoard;
         json.put("gridBoardID", board.getComponentID());
-        json.put("width", state.width);
-        json.put("height", state.height);
+        json.put("width", board.getWidth());
+        json.put("height", board.getHeight());
 
         // The board is stored row by row (y outer, x inner). Each cell records its name: which
         // marker, or the empty cell.
         JSONArray rows = new JSONArray();
-        for (int y = 0; y < state.height; y++) {
+        for (int y = 0; y < board.getHeight(); y++) {
             JSONArray row = new JSONArray();
-            for (int x = 0; x < state.width; x++) {
-                BoardNode cell = board.get(new SquareCoord(x, y));
+            for (int x = 0; x < board.getWidth(); x++) {
+                BoardNode cell = board.get(x, y);
                 JSONObject cellJSON = new JSONObject();
                 cellJSON.put("name", cell == null ? Connect4Constants.emptyCell : cell.getComponentName());
                 row.add(cellJSON);
@@ -72,17 +71,15 @@ public class Connect4StateJSON {
         int height = rows.size();
         int width = ((JSONArray) rows.get(0)).size();
 
-        SparseGrid<SquareCoord, BoardNode> grid = SparseGrid.withComponentID(state.gridBoard.getComponentName(), gridBoardID);
+        GridBoard grid = new GridBoard(width, height, state.gridBoard.getComponentName(), gridBoardID);
         for (int y = 0; y < height; y++) {
             JSONArray row = (JSONArray) rows.get(y);
             for (int x = 0; x < width; x++) {
                 String name = (String) ((JSONObject) row.get(x)).get("name");
-                grid.set(new SquareCoord(x, y), marker(name));
+                grid.set(x, y, marker(name));
             }
         }
         state.gridBoard = grid;
-        state.width = width;
-        state.height = height;
 
         LinkedList<Pair<Integer, Integer>> winnerCells = new LinkedList<>();
         JSONArray winnerArray = (JSONArray) json.get("winnerCells");

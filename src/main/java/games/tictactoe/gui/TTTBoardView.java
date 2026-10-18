@@ -1,8 +1,7 @@
 package games.tictactoe.gui;
 
 import core.components.BoardNode;
-import core.components.grid.SparseGrid;
-import core.components.grid.SquareCoord;
+import core.components.GridBoard;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
 
@@ -19,7 +18,7 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
     ArrayList<Rectangle> highlight;
     final int gridSize;
 
-    public TTTBoardView(SparseGrid<SquareCoord, BoardNode> gridBoard, int gridSize) {
+    public TTTBoardView(GridBoard gridBoard, int gridSize) {
         super(gridBoard, gridSize * defaultItemSize, gridSize * defaultItemSize);
         this.gridSize = gridSize;
         rects = new Rectangle[gridSize * gridSize];
@@ -48,7 +47,7 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
     @Override
     protected void paintComponent(Graphics g) {
         @SuppressWarnings("unchecked")
-        SparseGrid<SquareCoord, BoardNode> gridBoard = (SparseGrid<SquareCoord, BoardNode>) component;
+        GridBoard gridBoard = (GridBoard) component;
         drawGridBoard((Graphics2D)g, gridBoard, 0, 0);
 
         if (!highlight.isEmpty()) {
@@ -62,7 +61,7 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, SparseGrid<SquareCoord, BoardNode> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridSize * defaultItemSize;
         int height = gridSize * defaultItemSize;
 
@@ -76,7 +75,7 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
             for (int j = 0; j < gridSize; j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + i * defaultItemSize;
-                drawCell(g, gridBoard.get(new SquareCoord(j, i)), xC, yC);
+                drawCell(g, gridBoard.get(j, i), xC, yC);
 
                 // Save rect where cell is drawn
                 int idx = i * gridSize + j;
