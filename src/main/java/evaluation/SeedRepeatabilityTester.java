@@ -34,6 +34,9 @@ import java.util.function.Supplier;
  * re-seed its rollout and opponent policies) and by re-seeding its own {@code Random}. An agent with a time
  * budget can never be repeatable, so such a budget is reported as a warning.
  * <p>
+ * The game's {@code redeterminisationSeed} is set to the seed too, so that the random events an agent simulates on
+ * copies of the state are repeatable. This needs a positive seed.
+ * <p>
  * Runs within one JVM share its identity hash codes, so they cannot see a game that depends on them (for
  * example by iterating over a {@code HashMap} keyed by an enum, whose hash code is its identity hash code).
  * {@link #checkAcrossLaunches} plays each run in a separate JVM to catch those. HotSpot draws identity hash codes
@@ -184,6 +187,7 @@ public class SeedRepeatabilityTester {
      */
     public static AbstractGameState play(GameType gameType, int nPlayers, long seed, Supplier<AbstractPlayer> agentFactory) {
         Game game = gameType.createGameInstance(nPlayers, seed);
+        game.getGameState().getGameParameters().setRedeterminisationSeed(seed);
         List<AbstractPlayer> players = new ArrayList<>();
         for (int i = 0; i < nPlayers; i++) {
             AbstractPlayer player = agentFactory.get();

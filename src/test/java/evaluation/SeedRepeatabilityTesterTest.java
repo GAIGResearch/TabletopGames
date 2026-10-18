@@ -86,6 +86,14 @@ public class SeedRepeatabilityTesterTest {
     }
 
     @Test
+    public void cantStopWithMCTSIsRepeatable() {
+        // the dice rolled on the states MCTS searches came from the unseeded redeterminisationRnd
+        SeedRepeatabilityTester.Result result = SeedRepeatabilityTester.check(GameType.CantStop, 3, 42,
+                SeedRepeatabilityTester.agentFactory("", 200), 2);
+        assertTrue(result.toString(), result.repeatable());
+    }
+
+    @Test
     public void divergenceIsReported() {
         SeedRepeatabilityTester.Result result = SeedRepeatabilityTester.check(GameType.TicTacToe, 2, 42, SharedCounterPlayer::new, 2);
         assertFalse(result.repeatable());
