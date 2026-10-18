@@ -29,15 +29,10 @@ Example: `SeedRepeatabilityTester game=Catan nPlayers=3 seed=42 agent=random lau
 ## Summary
 
 - **Random agents**: all 67 games are repeatable, within one JVM and across launches.
-- **MCTS (IS and OL)**: all games are repeatable except:
-  - **Catan**: not repeatable with either MCTS set-up, even within one JVM.
-  - **PowerGrid** and **TerraformingMars**: with MCTS (IS), repeatable within one JVM but not
-    across launches, which suggests iteration over a hash collection in code not reached by random agents.
-  - **Descent2e**: did not finish within the 20-minute limit with either MCTS set-up.
+- **MCTS (IS and OL)**: all games are repeatable, except that Descent2e did not finish within the
+  20-minute limit with either MCTS set-up, so is unchecked.
 
 ## Results
-
-"@ n" is the first log entry where the two runs differ.
 
 | Game | Players | Random | MCTS (IS) | MCTS (OL) |
 |------|--------:|:------:|:---------:|:---------:|
@@ -46,7 +41,7 @@ Example: `SeedRepeatabilityTester game=Catan nPlayers=3 seed=42 agent=random lau
 | Battlelore | 2 | Yes | Yes | Yes |
 | Blackjack | 3 | Yes | Yes | Yes |
 | CantStop | 3 | Yes | Yes | Yes |
-| Catan | 3 | Yes | **No** @ 14 | **No** @ 18 |
+| Catan | 3 | Yes | Yes | Yes |
 | Chess | 2 | Yes | Yes | Yes |
 | ChineseCheckers | 3 | Yes | Yes | Yes |
 | ColtExpress | 3 | Yes | Yes | Yes |
@@ -82,7 +77,7 @@ Example: `SeedRepeatabilityTester game=Catan nPlayers=3 seed=42 agent=random lau
 | Pickomino | 3 | Yes | Yes | Yes |
 | Pitch | 4 | Yes | Yes | Yes |
 | Poker | 3 | Yes | Yes | Yes |
-| PowerGrid | 3 | Yes | **No** across launches @ 44 | Yes |
+| PowerGrid | 3 | Yes | Yes | Yes |
 | President | 4 | Yes | Yes | Yes |
 | PuertoRico | 3 | Yes | Yes | Yes |
 | Resistance | 5 | Yes | Yes | Yes |
@@ -99,7 +94,7 @@ Example: `SeedRepeatabilityTester game=Catan nPlayers=3 seed=42 agent=random lau
 | Stratego | 2 | Yes | Yes | Yes |
 | Sueca | 4 | Yes | Yes | Yes |
 | SushiGo | 3 | Yes | Yes | Yes |
-| TerraformingMars | 3 | Yes | **No** across launches @ 115 | Yes |
+| TerraformingMars | 3 | Yes | Yes | Yes |
 | TicTacToe | 2 | Yes | Yes | Yes |
 | Uno | 3 | Yes | Yes | Yes |
 | Ventlife | 3 | Yes | Yes | Yes |

@@ -73,6 +73,51 @@ public class TMForwardModelTest {
     }
 
     @Test
+    public void advancedAlloysAddsToSteelAndTitaniumValues() {
+        TMCard alloys = allCards().stream().filter(c -> c.getComponentName().equals("Advanced Alloys")).findFirst().orElseThrow();
+        int player = state.getCurrentPlayer();
+        double steel = state.getResourceMapRate(TMTypes.Resource.Steel, TMTypes.Resource.MegaCredit);
+        double titanium = state.getResourceMapRate(TMTypes.Resource.Titanium, TMTypes.Resource.MegaCredit);
+
+        state.getPlayerHands()[player].add(alloys);
+        new PlayCard(player, alloys, false)._execute(state);
+
+        assertEquals(steel + 1, state.getResourceMapRate(TMTypes.Resource.Steel, TMTypes.Resource.MegaCredit), 1e-9);
+        assertEquals(titanium + 1, state.getResourceMapRate(TMTypes.Resource.Titanium, TMTypes.Resource.MegaCredit), 1e-9);
+        // steel still pays only for building cards
+        for (TMGameState.ResourceMapping rm : state.playerResourceMap[player])
+            assertNotNull(rm.from + " should keep its requirement", rm.requirement);
+    }
+
+    @Test
+    public void copyDoesNotUseTheGameRandom() {
+        Game other = GameType.TerraformingMars.createGameInstance(4, 42);
+        other.reset(List.of(new RandomPlayer(), new RandomPlayer(), new RandomPlayer(), new RandomPlayer()));
+
+        state.copy(0);  // shuffles the hidden cards
+        assertEquals(other.getGameState().getRnd().nextLong(), state.getRnd().nextLong());
+    }
+
+    @Test
+    public void executedPayForActionEqualsItsCopy() {
+        state.getPlayerResources()[0].get(TMTypes.Resource.MegaCredit).setValue(20);
+        ModifyPlayerResource inner = new ModifyPlayerResource(0, 1, TMTypes.Resource.Plant, false);
+        inner.setActionCost(TMTypes.Resource.MegaCredit, 5, -1);
+        PayForAction pay = new PayForAction(0, inner);
+        TMGameState before = (TMGameState) state.copy();
+        PayForAction copiedBefore = pay.copy();
+
+        pay.execute(state);  // pays, then executes the inner action, which changes it
+        copiedBefore.execute(before);
+
+        PayForAction copiedAfter = pay.copy();
+        assertEquals(pay, copiedAfter);
+        assertEquals(pay.hashCode(), copiedAfter.hashCode());
+        assertEquals(pay, copiedBefore);
+        assertEquals(pay.hashCode(), copiedBefore.hashCode());
+    }
+
+    @Test
     public void randomGamesRunToCompletionWithCopyableActions() {
         Random rnd = new Random(1);
         for (int g = 0; g < 3; g++) {

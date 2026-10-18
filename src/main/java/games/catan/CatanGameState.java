@@ -502,7 +502,7 @@ public class CatanGameState extends AbstractGameState {
         // PO
         if (playerId != -1 || !getCoreGameParameters().partialObservable) {
             // Combine dev cards with those in hand of unknown players. Shuffle and re-deal to players.
-            copy.shuffleDevelopmentCards(playerId);
+            copy.shuffleDevelopmentCards(playerId, redeterminisationRnd);
 
             // Resources in hand are hidden
 //            for (int i = 0; i < nPlayers; i++) {
@@ -536,7 +536,7 @@ public class CatanGameState extends AbstractGameState {
     }
 
 
-    private void shuffleDevelopmentCards(int playerId) {
+    private void shuffleDevelopmentCards(int playerId, Random rnd) {
         // Dev cards in hand are hidden and shuffled with the main deck
         int[][] turnCardsWereBoughtIn = new int[nPlayers][];
         for (int p = 0; p < getNPlayers(); p++) {
@@ -550,7 +550,7 @@ public class CatanGameState extends AbstractGameState {
             }
             playerDevCards.get(p).clear();
         }
-        devCards.shuffle(redeterminisationRnd);
+        devCards.shuffle(rnd);
         for (int p = 0; p < getNPlayers(); p++) {
             if (p == playerId)
                 continue;

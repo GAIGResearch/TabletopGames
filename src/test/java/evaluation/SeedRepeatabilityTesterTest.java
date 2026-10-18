@@ -94,6 +94,14 @@ public class SeedRepeatabilityTesterTest {
     }
 
     @Test
+    public void catanWithMCTSIsRepeatable() {
+        // the copy's development cards were shuffled by its own redeterminisationRnd, before copy() had seeded it
+        SeedRepeatabilityTester.Result result = SeedRepeatabilityTester.check(GameType.Catan, 3, 42,
+                SeedRepeatabilityTester.agentFactory("", 100), 2);
+        assertTrue(result.toString(), result.repeatable());
+    }
+
+    @Test
     public void divergenceIsReported() {
         SeedRepeatabilityTester.Result result = SeedRepeatabilityTester.check(GameType.TicTacToe, 2, 42, SharedCounterPlayer::new, 2);
         assertFalse(result.repeatable());
