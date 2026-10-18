@@ -212,6 +212,9 @@ public class SeedClusteredAnalysisTest {
         }
         assertEquals(3, report.pairs2P.size());
         assertEquals(2, report.positions.size());
+        // confidence intervals for the clustered SE have one observation per seed
+        assertEquals(10, new SeedClusteredAnalysis(false).sampleSize(tr, "R0"));
+        assertEquals(40, new WinRateAnalysis().sampleSize(tr, "R0"));
     }
 
     @Test

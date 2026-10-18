@@ -23,11 +23,8 @@ import java.util.stream.DoubleStream;
  */
 public class SeedClusteredAnalysis implements IResultsAnalysis {
 
-    // two-sided 95% t-quantiles for 1..30 degrees of freedom
-    // {JG: Can we not use a suitable maths library for the T tests instead of recording these. We use common maths in Utils for example}
-    private static final double[] T_975 = {12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228,
-            2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086,
-            2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042};
+    // the head-to-head tables (pairwise score, and 2P position effect for each pair) are long; set true to report them
+    private static final boolean REPORT_PAIRS = false;
 
     private final boolean ordinal;
 
@@ -133,61 +130,63 @@ public class SeedClusteredAnalysis implements IResultsAnalysis {
             for (String w : warnings)
                 lines.add("WARNING: " + w + "\n");
 
-            int w = Math.max(5, agentWin.keySet().stream().mapToInt(String::length).max().orElse(5));
-            String agentFmt = "%-" + w + "s %8s %10s %10s %10s %10s %8s %6s%n";
-            String agentRowFmt = "%-" + w + "s %8.3f %10.4f %10.4f %10.4f %10.2f %8.3f %6d%n";
             for (int k = 0; k < 2; k++) {
                 Map<String, ClusterStats> stats = k == 0 ? agentWin : agentOrdinal;
                 lines.add(k == 0 ? "\nAgent win rate:\n" : "\nAgent mean ordinal:\n");
-                lines.add(String.format(agentFmt, "Agent", "Mean", "SE Normal", "SE Strat", "SE Clust", "Clu/Strat", "rho", "g"));
+                List<String[]> rows = new ArrayList<>();
+                rows.add(new String[]{"Agent", "Mean", "SE Normal", "SE Strat", "SE Clust", "Clu/Strat", "rho", "g"});
                 for (Map.Entry<String, ClusterStats> e : stats.entrySet()) {
                     ClusterStats s = e.getValue();
-                    lines.add(String.format(agentRowFmt, e.getKey(), s.mean, s.seNormal, s.seStrat, s.seClu,
-                            s.cluOverStrat(), s.rhoBar, s.cells));
+                    rows.add(new String[]{e.getKey(), String.format("%.3f", s.mean), String.format("%.4f", s.seNormal),
+                            String.format("%.4f", s.seStrat), String.format("%.4f", s.seClu),
+                            String.format("%.2f", s.cluOverStrat()), String.format("%.3f", s.rhoBar),
+                            String.valueOf(s.cells)});
                 }
+                lines.addAll(AnalysisFormat.tabTable(rows));
             }
 
-            if (!pairs.isEmpty()) {
+            if (REPORT_PAIRS && !pairs.isEmpty()) {
                 lines.add("\nHead-to-head pairwise score of A against B (1 = A finishes above B, 0.5 = same rank, 0 = below):\n");
-                String pairFmt = "%-" + w + "s %-" + w + "s %8s %10s %10s %10s %10s %8s %6s%n";
-                String pairRowFmt = "%-" + w + "s %-" + w + "s %8.3f %10.4f %10.4f %10.4f %10.2f %8.3f %6d%n";
-                lines.add(String.format(pairFmt, "A", "B", "Mean", "SE Normal", "SE Strat", "SE Clust", "Clu/Strat", "rho", "g"));
+                List<String[]> rows = new ArrayList<>();
+                rows.add(new String[]{"A", "B", "Mean", "SE Normal", "SE Strat", "SE Clust", "Clu/Strat", "rho", "g"});
                 for (Map.Entry<Pair<String, String>, ClusterStats> e : pairs.entrySet()) {
                     ClusterStats s = e.getValue();
-                    lines.add(String.format(pairRowFmt, e.getKey().a, e.getKey().b, s.mean, s.seNormal, s.seStrat,
-                            s.seClu, s.cluOverStrat(), s.rhoBar, s.cells));
+                    rows.add(new String[]{e.getKey().a, e.getKey().b, String.format("%.3f", s.mean),
+                            String.format("%.4f", s.seNormal), String.format("%.4f", s.seStrat),
+                            String.format("%.4f", s.seClu), String.format("%.2f", s.cluOverStrat()),
+                            String.format("%.3f", s.rhoBar), String.valueOf(s.cells)});
                 }
+                lines.addAll(AnalysisFormat.tabTable(rows));
             }
-            if (!pairs2P.isEmpty()) {
+            if (REPORT_PAIRS && !pairs2P.isEmpty()) {
                 lines.add("\nHead-to-head position effect (2P): A's win rate in position 0 (p0) and position 1 (p1); Delta = p0 - p1.\n");
                 lines.add("Paired SE uses the seed pairing; Paired/Normal is about sqrt(1 - rho).\n");
-                String fmt = "%-" + w + "s %-" + w + "s %8s %8s %8s %8s %10s %10s%n";
-                String rowFmt = "%-" + w + "s %-" + w + "s %8.3f %8.3f %8.3f %8.3f %10.4f %10.4f%n";
-                lines.add(String.format(fmt, "A", "B", "p0", "p1", "rho", "Delta", "SE Normal", "SE Paired"));
+                List<String[]> rows = new ArrayList<>();
+                rows.add(new String[]{"A", "B", "p0", "p1", "rho", "Delta", "SE Normal", "SE Paired"});
                 for (Map.Entry<Pair<String, String>, TwoPlayerPair> e : pairs2P.entrySet()) {
                     TwoPlayerPair t = e.getValue();
-                    lines.add(String.format(rowFmt, e.getKey().a, e.getKey().b, t.p0, t.p1, t.rho, t.delta,
-                            t.deltaSeNormal, t.deltaSePaired));
+                    rows.add(new String[]{e.getKey().a, e.getKey().b, String.format("%.3f", t.p0),
+                            String.format("%.3f", t.p1), String.format("%.3f", t.rho), String.format("%.3f", t.delta),
+                            String.format("%.4f", t.deltaSeNormal), String.format("%.4f", t.deltaSePaired)});
                 }
+                lines.addAll(AnalysisFormat.tabTable(rows));
             }
 
             lines.add("\nPosition effects (share of points by player position; delta = share - mean share over positions):\n");
-            lines.add(String.format("%-8s %8s %8s %10s %10s %10s %8s%n", "Position", "Share", "Delta", "SE Normal", "SE Clust", "Clu/Normal", "rho"));
+            List<String[]> rows = new ArrayList<>();
+            rows.add(new String[]{"Position", "Share", "Delta", "SE Normal", "SE Clust", "Clu/Normal", "rho"});
             for (int p = 0; p < positions.size(); p++) {
                 ClusterStats s = positions.get(p);
-                lines.add(String.format("%-8d %8.3f %8.3f %10.4f %10.4f %10.2f %8.3f%n", p, s.mean, positionDelta(p),
-                        s.seNormal, s.seClu, s.seNormal > 0 ? s.seClu / s.seNormal : Double.NaN, s.rhoBar));
+                rows.add(new String[]{String.valueOf(p), String.format("%.3f", s.mean),
+                        String.format("%.3f", positionDelta(p)), String.format("%.4f", s.seNormal),
+                        String.format("%.4f", s.seClu),
+                        String.format("%.2f", s.seNormal > 0 ? s.seClu / s.seNormal : Double.NaN),
+                        String.format("%.3f", s.rhoBar)});
             }
+            lines.addAll(AnalysisFormat.tabTable(rows));
 
             lines.add(String.format("%nGame rho (pooled within-seed correlation over all head-to-head pairs): %.3f%n", gameRho));
-            if (seeds >= 2 && seeds - 1 <= T_975.length) {
-                lines.add(String.format("With only %d seeds the clustered SE has %d degrees of freedom: use %.2f x SE (not 2 x SE) for a 95%% interval.%n",
-                        seeds, seeds - 1, T_975[seeds - 2]));
-            }
             if (!Double.isNaN(medianCluOverNormal)) {
-                double ratioNoise = seeds > 1 ? 1.0 / Math.sqrt(2.0 * (seeds - 1)) : Double.NaN;
-                lines.add(String.format("Median SE ratios for agent win rates: clustered / stratified %.2f, clustered / Normal %.2f (approx. sampling uncertainty +/- %.2f).%n",
-                        medianCluOverStrat, medianCluOverNormal, medianCluOverNormal * ratioNoise));
                 lines.add(String.format("The games played are worth %.2f x as many games with independent seeds and random seating (as in mode=random).%n",
                         1.0 / (medianCluOverNormal * medianCluOverNormal)));
                 if (recommendRandom)
@@ -210,10 +209,23 @@ public class SeedClusteredAnalysis implements IResultsAnalysis {
                 new OrdinalAnalysis().getRanking(results) : new WinRateAnalysis().getRanking(results);
         for (Map.Entry<String, Pair<Double, Double>> entry : ranking.entrySet()) {
             ClusterStats stats = agentStats(results.getGameRecords(), entry.getKey(), ordinal);
-            if (stats.valid() && stats.nObs == results.getPlayerResults(entry.getKey()).size())
+            if (usesClustered(stats, results, entry.getKey()))
                 entry.setValue(new Pair<>(entry.getValue().a, stats.seClu));
         }
         return ranking;
+    }
+
+    /**
+     * Seeds when getRanking reports the clustered SE for this agent, otherwise games (the Normal SE).
+     */
+    @Override
+    public int sampleSize(TournamentResults results, String agent) {
+        ClusterStats stats = agentStats(results.getGameRecords(), agent, ordinal);
+        return usesClustered(stats, results, agent) ? stats.seeds : results.getPlayerResults(agent).size();
+    }
+
+    private static boolean usesClustered(ClusterStats stats, TournamentResults results, String agent) {
+        return stats.valid() && stats.nObs == results.getPlayerResults(agent).size();
     }
 
     /**

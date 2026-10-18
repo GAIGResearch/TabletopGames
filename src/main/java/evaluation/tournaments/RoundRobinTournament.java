@@ -198,7 +198,6 @@ public class RoundRobinTournament extends AbstractTournament {
         } catch (Exception e) {
             throw new IllegalArgumentException("Could not load seeds from file " + seedFile);
         }
-
     }
 
     public int getWinnerIndex() {
@@ -330,7 +329,6 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.println(sb);
         }
 
-        // TODO : Not sure this is the ideal place for this...ask Raluca
         Set<String> agentNames = agents.stream().map(AbstractPlayer::toString).collect(Collectors.toSet());
         for (IGameListener listener : listeners) {
             if (listener instanceof TournamentMetricsGameListener) {
@@ -440,30 +438,53 @@ public class RoundRobinTournament extends AbstractTournament {
         }
 
         String str = seedsReused() ?
-                "---- Ranking ---- (+/- are standard errors on the mean, clustered by game seed) \n" :
-                "---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) \n";
+                "---- Ranking ---- (SE is the standard error on the mean, clustered by game seed) \n" :
+                "---- Ranking ---- (SE is the standard error on the mean calculated using a Normal approximation) \n";
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[]{"Agent", "Win rate", "SE", "95% CI", "99% CI", "Ordinal", "SE", "95% CI", "99% CI"});
+        // agents grouped by the sample size (and so the distribution) of their confidence intervals
+        Map<String, List<String>> agentsByDistribution = new LinkedHashMap<>();
+        for (String agentName : finalWinRanking.keySet()) {
+            Pair<Double, Double> win = finalWinRanking.get(agentName);
+            Pair<Double, Double> ord = finalOrdinalRanking.get(agentName);
+            int nWin = winRateAnalysis.sampleSize(tournamentResults, agentName);
+            int nOrd = ordinalAnalysis.sampleSize(tournamentResults, agentName);
+            String unit = nWin == tournamentResults.getPlayerResults(agentName).size() ? "games" : "seeds";
+            agentsByDistribution.computeIfAbsent(String.format("%s (N = %d %s)",
+                    AnalysisFormat.distribution(nWin), nWin, unit), k -> new ArrayList<>()).add(agentName);
+            rows.add(new String[]{agentName,
+                    String.format("%.2f", win.a), String.format("%.2f", win.b),
+                    AnalysisFormat.interval(win.a, win.b, AnalysisFormat.criticalValue(0.95, nWin), 2),
+                    AnalysisFormat.interval(win.a, win.b, AnalysisFormat.criticalValue(0.99, nWin), 2),
+                    String.format("%.2f", ord.a), String.format("%.2f", ord.b),
+                    AnalysisFormat.interval(ord.a, ord.b, AnalysisFormat.criticalValue(0.95, nOrd), 2),
+                    AnalysisFormat.interval(ord.a, ord.b, AnalysisFormat.criticalValue(0.99, nOrd), 2)});
+        }
+        if (agentsByDistribution.size() == 1)
+            str += "Confidence intervals use " + agentsByDistribution.keySet().iterator().next() + ".\n";
+        else
+            str += "Confidence intervals use " + agentsByDistribution.entrySet().stream()
+                    .map(e -> e.getKey() + " for " + String.join(", ", e.getValue()))
+                    .collect(Collectors.joining("; ")) + ".\n";
         if (toFile) dataDump.add(str);
         if (verbose) System.out.print(str);
-
-        for (String agentName : finalWinRanking.keySet()) {
-            str = String.format("%s: Win rate %.2f +/- %.3f\tMean Ordinal %.2f +/- %.2f\n",
-                    agentName,
-                    finalWinRanking.get(agentName).a, finalWinRanking.get(agentName).b,
-                    finalOrdinalRanking.get(agentName).a, finalOrdinalRanking.get(agentName).b);
-            if (toFile) dataDump.add(str);
-            if (verbose) System.out.print(str);
+        for (String line : AnalysisFormat.tabTable(rows)) {
+            if (toFile) dataDump.add(line);
+            if (verbose) System.out.print(line);
         }
         str = "\n\n---- Alpha Rank ----  \n";
         if (toFile) dataDump.add(str);
         if (verbose) System.out.print(str);
 
         if (finalAlphaRankWinRanking != null && !finalAlphaRankWinRanking.isEmpty()) {
-            for (String agentNames : finalAlphaRankWinRanking.keySet()) {
-                str = String.format("%s: Alpha-rank by Win %.2f\tAlpha-rank by Ordinal %.2f\n",
-                        agentNames,
-                        finalAlphaRankWinRanking.get(agentNames).a, finalAlphaRankOrdinalRanking.get(agentNames).a);
-                if (toFile) dataDump.add(str);
-                if (verbose) System.out.print(str);
+            rows = new ArrayList<>();
+            rows.add(new String[]{"Agent", "Win", "Ordinal"});
+            for (String agentNames : finalAlphaRankWinRanking.keySet())
+                rows.add(new String[]{agentNames, String.format("%.2f", finalAlphaRankWinRanking.get(agentNames).a),
+                        String.format("%.2f", finalAlphaRankOrdinalRanking.get(agentNames).a)});
+            for (String line : AnalysisFormat.tabTable(rows)) {
+                if (toFile) dataDump.add(line);
+                if (verbose) System.out.print(line);
             }
         }
 
