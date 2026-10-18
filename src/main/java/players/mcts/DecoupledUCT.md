@@ -276,7 +276,9 @@ plain action's recorded player must equal the node's `decisionPlayer`. It then c
 2. at a multi-actor node, for each acting player `p`, takes the component
    `joint.getPlayerActions().get(p)` and calls `updateActionStats(p, component, result)`, which
    updates that player's `ActionStats` for that component only. The regret-matching average-policy
-   refresh runs inside this loop, per player, on the shared `nVisits` cadence. 
+   refresh runs inside this loop, per player, on the shared `nVisits` cadence. Under a policy other
+   than `MonteCarlo`, the same loop then mixes each acting player's entry of the value returned to
+   the parent with that player's own counterfactual (`mixWithOwnCounterfactual`; see §7.2);
 3. at a sequential node, runs `updateActionStats(decisionPlayer, ...)` and then the configured
    backup tail (`MonteCarlo`, `Lambda`, `MaxLambda`, `MaxMC`) as before.
 
@@ -360,13 +362,33 @@ the default is `false` and the decoupled test classes set `decoupled = true` the
 
 ### 7.2 Backup policies other than Monte Carlo
 
-The `Lambda`, `MaxLambda` and `MaxMC` tails interpolate the result with the running mean of the
-action taken, or of the best action: a single-actor notion. At a multi-actor node there is one such
-quantity per acting player and no principled way to combine them, so at those nodes the backup is
-plain Monte Carlo whatever `backupPolicy` says. Sequential nodes in the same tree still apply the
-configured policy. A per-player generalisation (compute each player's best action marginalising
-over the others, then interpolate per player) is a possible follow-up; the `TODO` is in
-`backUpSingleNode`.
+**Supported at multi-actor nodes, per player.** The `Lambda`, `MaxLambda` and `MaxMC` tails
+interpolate the result with the running mean of the action taken, or of the best action. That is a
+single-actor quantity, so at a multi-actor node it is computed once per acting player, from that
+player's own table (`SingleTreeNode.mixWithOwnCounterfactual`). The rule:
+
+- For each acting player `p`, entry `p` of the value handed to the parent is `p`'s own reward mixed
+  with `p`'s counterfactual. That is the mean, over every visit on which `p` played it and whatever
+  the others did, of the component `p` took (`Lambda`) or of `p`'s best component (`MaxLambda`,
+  `MaxMC`). This is the decoupled estimate of that action's value, i.e. the other players'
+  choices are marginalised out.
+- `MaxMC` uses the node's shared `nVisits` against `maxBackupThreshold`, with weight
+  `(nVisits - maxBackupThreshold) / nVisits`. It leaves `p`'s entry alone when `p` took their own
+  best component, or when the node has not yet passed the threshold.
+- The entry of a player who does not act at the node passes through unchanged.
+- Under `paranoid`, only the paranoid player's entry is mixed, and every other entry is set to its
+  negation (mirroring `processResultsForParanoidOrSelfOnly`). At a node where the paranoid player
+  does not act, nothing is mixed.
+
+Sequential nodes in the same tree apply the sequential tail in `backUpSingleNode` as before. That
+is separate arithmetic: it mixes *every* entry using the decision player's best action, and is
+deliberately not routed through `mixWithOwnCounterfactual`. `DecoupledBackupTests` pins the
+per-player arithmetic on hand-built trees, and `DecoupledUCTTests.nonMonteCarloBackupChangesTheTree`
+checks end to end that each non-MC policy changes an all-multi-actor tree.
+
+(Before commit `877b3ffad` these policies fell back to plain Monte Carlo at multi-actor nodes. Any
+note or result that calls `backupPolicy` "inert under `decoupled`" predates that commit or relied
+on the earlier text of this section.)
 
 ### 7.3 Tree reuse across a simultaneous turn
 
@@ -434,7 +456,8 @@ All JUnit 4, in `src/test/java/players/mcts/` unless stated.
 | Class | What it pins |
 |---|---|
 | `SequentialMCTSGoldenTests` | Sequential search is byte-identical to what it was before any of this work: exact tree digests and an RNG canary over sixteen LMR configurations, plus structural checks over the Dominion tree shapes (OneTree, SelfOnly, MultiTree, OMA, paranoid, Closed_Loop, MAST, forest, tree reuse). Any change to a value means sequential behaviour changed. |
-| `DecoupledUCTTests` | The decoupled path on `SimultaneousLMRGame`, where every node is multi-actor: joint child keys, per-player visit accounting, independent tables, backup crediting own component only, the `-1` record shape, closed loop, per-player regret matching, MAST expansion, the Monte-Carlo-only backup limitation, `toString` and `TreeStatistics`; and eleven pinned decoupled digests. It also checks that the same fixture searched with `decoupled=false` reproduces the sequential `lmr.ucb` digest byte for byte, which is contract obligation 4 as a test. |
+| `DecoupledUCTTests` | The decoupled path on `SimultaneousLMRGame`, where every node is multi-actor: joint child keys, per-player visit accounting, independent tables, backup crediting own component only, the `-1` record shape, closed loop, per-player regret matching, MAST expansion, non-Monte-Carlo backups changing the tree (§7.2), `toString` and `TreeStatistics`; and eleven pinned decoupled digests. It also checks that the same fixture searched with `decoupled=false` reproduces the sequential `lmr.ucb` digest byte for byte, which is contract obligation 4 as a test. |
+| `DecoupledBackupTests` | The §7.2 rule on hand-built two- and three-player trees: `Lambda`, `MaxLambda` and `MaxMC` each mix every acting player's entry with that player's own counterfactual; `MaxMC` below its threshold is Monte Carlo; a player who took their best action is left alone under `MaxMC`; a non-acting player's entry passes through; the mixed value is what the parent receives; the paranoid mirroring, including a node where the paranoid player does not act. |
 | `SushiGoDecoupledTests` | Three-player SushiGo through the real player API: every seat returns its *own* action from a multi-actor root, joint keys over everyone, MAST, EXP3, regret matching, closed loop, chopsticks inside the tree (an extended sequence narrowing the acting set to one player), the reuse skip, and a whole game with mixed seats. |
 | `DiamantDecoupledTests` | Four-player Diamant, where the acting set shrinks as players leave the cave: joint keys over everyone in the cave, the acting set after two players leave, `nodeValue` at nodes where the root player is not acting, and whole games through `Game.oneAction`. |
 | `games.sushigo.SimultaneousActionTests`, `games.diamant.DiamantSimultaneousTests` | The game side, with no search. |
@@ -445,7 +468,7 @@ Run classes individually rather than the whole suite:
 
 ```bash
 mvn test -Dmaven.test.skip=false -Dtest=SequentialMCTSGoldenTests
-mvn test -Dmaven.test.skip=false -Dtest=DecoupledUCTTests+SushiGoDecoupledTests+DiamantDecoupledTests
+mvn test -Dmaven.test.skip=false -Dtest=DecoupledUCTTests+DecoupledBackupTests+SushiGoDecoupledTests+DiamantDecoupledTests
 ```
 
 **Re-baselining.** Both golden classes have a `main` that prints the current values in the form of

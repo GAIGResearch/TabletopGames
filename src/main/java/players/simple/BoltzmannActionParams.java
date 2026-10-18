@@ -3,6 +3,7 @@ package players.simple;
 import core.AbstractParameters;
 import core.interfaces.IActionHeuristic;
 import evaluation.optimisation.TunableParameters;
+import players.heuristics.NullActionHeuristic;
 import players.mcts.MASTPlusActionHeuristic;
 
 public class BoltzmannActionParams extends TunableParameters {
@@ -16,7 +17,7 @@ public class BoltzmannActionParams extends TunableParameters {
         addTunableParameter("temperature", 1.0);
         addTunableParameter("epsilon", 0.0);
         addTunableParameter("MASTBeta", 0.0);
-        addTunableParameter("actionHeuristic", IActionHeuristic.class, (IActionHeuristic) (gameState, action, actions) -> 0.0);
+        addTunableParameter("actionHeuristic", IActionHeuristic.class, new NullActionHeuristic());
     }
 
     @Override

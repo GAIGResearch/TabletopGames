@@ -8,4 +8,17 @@ public class GameDefaultHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState gs, int playerId) {
         return gs.getHeuristicScore(playerId);
     }
+
+    @Override
+    public String toString() {
+        return "GameDefaultHeuristic";
+    }
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof GameDefaultHeuristic;
+    }
+    @Override
+    public int hashCode() {
+        return 9;
+    }
 }

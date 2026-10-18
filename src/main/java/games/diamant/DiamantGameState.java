@@ -67,16 +67,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     }
 
     // helper data class to store interesting information
-    static class PlayerTurnRecord {
-        public final int player;
-        public final int round;
-        public final int turnLeft;
-
-        PlayerTurnRecord(int player, int round, int turn) {
-            this.player = player;
-            this.round = round;
-            this.turnLeft = turn;
-        }
+        record PlayerTurnRecord(int player, int round, int turnLeft) {
     }
 
     List<PlayerTurnRecord> recordOfPlayerActions = new ArrayList<>();

@@ -2,11 +2,28 @@ package core.components;
 
 import core.CoreConstants;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class FrenchCard extends Card {
 
     public static int[] numbers = {2,3,4,5,6,7,8,9,10};
+
+    /**
+     * The classic order for displaying a hand: Spades, Hearts, Diamonds, Clubs, and Ace down to Two within each
+     * suit. For display only - it says nothing about how any game ranks the cards.
+     */
+    public static final Comparator<FrenchCard> HAND_DISPLAY_ORDER =
+            Comparator.comparingInt(FrenchCard::displaySuitRank).thenComparingInt(c -> -c.number);
+
+    private static int displaySuitRank(FrenchCard card) {
+        return switch (card.suite) {
+            case Spades -> 0;
+            case Hearts -> 1;
+            case Diamonds -> 2;
+            case Clubs -> 3;
+        };
+    }
 
     public enum FrenchCardType {
         Jack (11),

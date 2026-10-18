@@ -443,14 +443,13 @@ public abstract class AbstractGameState {
 
     /*
      * Alert: The method has a side effect of calling checkActionsInProgress(), which will
-     * update the top actions on the stack, and will remove them from the queue.
-     * Formally it therefore can change the state of the stack (the actual removal from the stack is deferred from the
-     * point at which the action is formally completed, to the point at which we actually check the stack).
+     * update the top actions on the stack and will remove them from the queue.
+     * It therefore can formally change the state of the stack.
      */
     public final boolean isActionInProgress() {
         // This checkActionsInProgress is essential
         // When an action is completely executed this is marked on the Action (accessible via IExtendedSequence.executionComplete())
-        // However this does not [currently] actively remove the action from the queue on the game state. Hence,
+        // However, this does not actively remove the action from the queue on the game state. Hence,
         // whenever we check the actionsInProgress queue we
         // first have to remove any completed actions (which is what checkActionsInProgress() does).
         checkActionsInProgress();
@@ -463,21 +462,9 @@ public abstract class AbstractGameState {
     }
 
     final void checkActionsInProgress() {
-        while (!actionsInProgress.isEmpty()) {
-            IExtendedSequence topOfStack = actionsInProgress.peek();
-            if (topOfStack.executionComplete(this)) {
-                actionsInProgress.pop();
-                if (!actionsInProgress.empty()) {
-                    actionsInProgress.peek().afterRemovalFromQueue(this, topOfStack);
-                    // this tells the next item on the queue that it is now at the top and the subsequent one has been completed
-                    // the details of what this subsequent sequence did may be of relevance to its parent
-                }
-                // the next iteration of this loop may then remove the next action in the stack
-            } else {
-                // if the top of the stack is not complete, then we are done
-                break;
-            }
-        }
+        // Removing a completed sequence may reveal another completed one below it
+        while (!actionsInProgress.isEmpty() && actionsInProgress.peek().executionComplete(this))
+            actionsInProgress.pop();
     }
 
     /**

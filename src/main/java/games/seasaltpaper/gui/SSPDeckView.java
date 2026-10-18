@@ -4,10 +4,8 @@ import core.components.Deck;
 import games.seasaltpaper.cards.CardColor;
 import games.seasaltpaper.cards.CardType;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
-import games.sushigo.cards.SGCard;
 import gui.views.CardView;
 import gui.views.DeckView;
-import games.seasaltpaper.gui.SSPGUIManager;
 import utilities.ImageIO;
 
 import java.awt.*;

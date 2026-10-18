@@ -9,11 +9,12 @@ import games.GameType;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeStateVector;
 import games.toads.ToadForwardModel;
-import games.toads.metrics.ToadFeatures001;
+import games.toads.ToadGameState;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +59,28 @@ public class TreeReuseMCGSTests {
         state = game.getGameState();
     }
 
+    /**
+     * A key for War of the Toads that tells apart the states a player can tell apart (a feature vector summarises too
+     * much: states with different actions would share a node). The opponent's face-up card is taken from the
+     * player's own copy of the state, so is there only when the player can see it.
+     */
+    private static Object toadKey(AbstractGameState s, int player) {
+        ToadGameState state = (ToadGameState) s;
+        int opp = 1 - player;
+        List<Object> key = new ArrayList<>(List.of(state.getGameTick(), state.getCurrentPlayer(), state.getGamePhase(),
+                state.isActionInProgress(), state.getRoundCounter(),
+                state.getBattlesWon(state.getRoundCounter(), 0), state.getBattlesWon(state.getRoundCounter(), 1),
+                state.getPlayerHand(player).getComponents().stream().map(c -> c.type).sorted().toList(),
+                String.valueOf(state.getFieldCard(player)), String.valueOf(state.getHiddenFlankCard(player)),
+                String.valueOf(state.getFieldCard(opp)), String.valueOf(state.getTieBreaker(player)),
+                state.getDiscards(player).getComponents().stream().map(c -> c.type).toList(),
+                state.getDiscards(opp).getComponents().stream().map(c -> c.type).toList()));
+        return key.toString();
+    }
+
     public void initialiseToads() {
-        paramsOne.MCGSStateKey = new ToadFeatures001();
-        paramsTwo.MCGSStateKey = new ToadFeatures001();
+        paramsOne.MCGSStateKey = TreeReuseMCGSTests::toadKey;
+        paramsTwo.MCGSStateKey = TreeReuseMCGSTests::toadKey;
         playerOne = new TestMCTSPlayer(paramsOne, MCGSNode::new);
         playerOne.rolloutTest = false;
         playerTwo = new TestMCTSPlayer(paramsTwo, MCGSNode::new);
@@ -128,46 +148,64 @@ public class TreeReuseMCGSTests {
         int[] oldVisits = new int[2];
         do {
             System.out.println("Current Player: " + state.getCurrentPlayer() + ", Turn: " + state.getTurnCounter() + ", Phase: " + state.getGamePhase());
-            int currentPlayer = state.getCurrentPlayer();
-            // we need to know how many visits there were to the old state before the next decision is taken
-            oldOldOldKeys[currentPlayer] = oldOldKeys[currentPlayer];
-            oldOldKeys[currentPlayer] = oldKeys[currentPlayer];
-            oldKeys[currentPlayer] = paramsOne.MCGSStateKey.getKey(state);
-            TestMCTSPlayer player = currentPlayer == 0 ? playerOne : playerTwo;
-            oldRoots[currentPlayer] = (MCGSNode) player.root; // root from last action taken
-            // however we need to copy the transposition map, as this is just passed by reference to the new root node
-            if (player.root != null) {
-                Map<Object, MCGSNode> mapCopy = new HashMap<>();
-                for (Object key : ((MCGSNode) player.root).getTranspositionMap().keySet()) {
-                    mapCopy.put(key, ((MCGSNode) player.root).getTranspositionMap().get(key));
+            // In a simultaneous-move step (e.g. the second step of a Battle in War of the Toads) several players decide
+            // in the same game.oneAction(), so we follow each of them
+            List<Integer> activePlayers = state.getCurrentSimultaneousPlayers();
+            Map<Integer, Map<Object, Integer>> visitMapBeforeAction = new HashMap<>();
+            Map<Integer, Map<Object, Integer>> depthMapBeforeAction = new HashMap<>();
+            Map<Integer, Integer> depthChange = new HashMap<>();
+            Map<Integer, Boolean> oneAction = new HashMap<>();
+            for (int currentPlayer : activePlayers) {
+                // with a single action available the player does not search, so their tree (and its root) is
+                // unchanged: we leave the record of their previous roots as it is
+                oneAction.put(currentPlayer, fm.computeAvailableActions(state, null, currentPlayer).size() == 1);
+                if (oneAction.get(currentPlayer))
+                    continue;
+                // the key is taken from the player's own observation, as their search does (in a simultaneous
+                // step the master state has only one of the deciding players as its current player)
+                AbstractGameState observation = state.copy(currentPlayer);
+                // we need to know how many visits there were to the old state before the next decision is taken
+                oldOldOldKeys[currentPlayer] = oldOldKeys[currentPlayer];
+                oldOldKeys[currentPlayer] = oldKeys[currentPlayer];
+                oldKeys[currentPlayer] = paramsOne.MCGSStateKey.getKey(observation, currentPlayer);
+                TestMCTSPlayer player = currentPlayer == 0 ? playerOne : playerTwo;
+                oldRoots[currentPlayer] = (MCGSNode) player.root; // root from last action taken
+                // however we need to copy the transposition map, as this is just passed by reference to the new root node
+                if (player.root != null) {
+                    Map<Object, MCGSNode> mapCopy = new HashMap<>();
+                    for (Object key : ((MCGSNode) player.root).getTranspositionMap().keySet()) {
+                        mapCopy.put(key, ((MCGSNode) player.root).getTranspositionMap().get(key));
+                    }
+                    oldMaps[currentPlayer] = mapCopy;
                 }
-                oldMaps[currentPlayer] = mapCopy;
+                visitMapBeforeAction.put(currentPlayer, new HashMap<>());
+                depthMapBeforeAction.put(currentPlayer, new HashMap<>());
+                if (player.root != null) {
+                    MCGSNode oldRoot = (MCGSNode) player.root;
+                    oldVisits[currentPlayer] = ((MCGSNode) player.getRoot(currentPlayer)).getTranspositionMap().getOrDefault(oldKeys[currentPlayer], new MCGSNode()).nVisits;
+                    visitMapBeforeAction.put(currentPlayer, oldRoot.getTranspositionMap().entrySet().stream()
+                            .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().nVisits), HashMap::putAll));
+                    depthMapBeforeAction.put(currentPlayer, oldRoot.getTranspositionMap().entrySet().stream()
+                            .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().depth), HashMap::putAll));
+                }
+                // when we take the next action we should first prune any states that were not updated last time
+                // so we check that states in both trees have monotonic increasing visits
+                // and that the depth has been decreased correctly
+                Object newKey = paramsOne.MCGSStateKey.getKey(observation, currentPlayer);
+                depthChange.put(currentPlayer, depthMapBeforeAction.get(currentPlayer).getOrDefault(newKey, 0));
             }
-            Map<Object, Integer> visitMapBeforeAction = new HashMap<>();
-            Map<Object, Integer> depthMapBeforeAction = new HashMap<>();
-            if (player.root != null) {
-                MCGSNode oldRoot = (MCGSNode) player.root;
-                oldVisits[currentPlayer] = ((MCGSNode) player.getRoot(currentPlayer)).getTranspositionMap().getOrDefault(oldKeys[currentPlayer], new MCGSNode()).nVisits;
-                visitMapBeforeAction = oldRoot.getTranspositionMap().entrySet().stream()
-                        .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().nVisits), HashMap::putAll);
-                depthMapBeforeAction = oldRoot.getTranspositionMap().entrySet().stream()
-                        .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().depth), HashMap::putAll);
-            }
-            // when we take the next action we should first prune any states that were not updated last time
-            // so we check that states in both trees have monotonic increasing visits
-            // and that the depth has been decreased correctly
-            Object newKey = paramsOne.MCGSStateKey.getKey(state);
-            int depthChange = depthMapBeforeAction.getOrDefault(newKey, 0);
-            boolean oneAction = fm.computeAvailableActions(state).size() == 1;
             AbstractAction nextAction = game.oneAction();
             System.out.println("Action: " + nextAction.toString());
-            // newRoot is the root of the tree just used - i.e. it is rooted at the state before the action was taken
-            MCGSNode newRoot = (MCGSNode) player.getRoot(currentPlayer);
+            for (int currentPlayer : activePlayers) {
+                if (oneAction.get(currentPlayer))
+                    continue;
+                TestMCTSPlayer player = currentPlayer == 0 ? playerOne : playerTwo;
+                // newRoot is the root of the tree just used - i.e. it is rooted at the state before the action was taken
+                MCGSNode newRoot = (MCGSNode) player.getRoot(currentPlayer);
 
-            // Now remove the nodes that were pruned before the action was taken (because they did not have any visits in the previous search)
-            player.recentlyRemovedKeys.forEach(visitMapBeforeAction::remove);
-            player.recentlyRemovedKeys.forEach(depthMapBeforeAction::remove);
-            if (!oneAction) {
+                // Now remove the nodes that were pruned before the action was taken (because they did not have any visits in the previous search)
+                player.recentlyRemovedKeys.forEach(visitMapBeforeAction.get(currentPlayer)::remove);
+                player.recentlyRemovedKeys.forEach(depthMapBeforeAction.get(currentPlayer)::remove);
                 // check tree reuse
                 if (oldRoots[currentPlayer] != null) {
                     assertNotEquals(oldRoots[currentPlayer], newRoot);
@@ -189,12 +227,12 @@ public class TreeReuseMCGSTests {
                                 .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().nVisits), HashMap::putAll);
                         Map<Object, Integer> depthMapAfterAction = newRoot.getTranspositionMap().entrySet().stream()
                                 .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().depth), HashMap::putAll);
-                        for (Object key : visitMapBeforeAction.keySet()) {
+                        for (Object key : visitMapBeforeAction.get(currentPlayer).keySet()) {
                             if (visitMapAfterAction.containsKey(key)) {
-                                assertTrue(visitMapAfterAction.get(key) >= visitMapBeforeAction.get(key));
-                                int oldDepth = depthMapBeforeAction.get(key);
+                                assertTrue(visitMapAfterAction.get(key) >= visitMapBeforeAction.get(currentPlayer).get(key));
+                                int oldDepth = depthMapBeforeAction.get(currentPlayer).get(key);
                                 int newDepth = depthMapAfterAction.get(key);
-                                assertEquals(oldDepth - depthChange, newDepth);
+                                assertEquals(oldDepth - depthChange.get(currentPlayer), newDepth);
                             }
                         }
                     }

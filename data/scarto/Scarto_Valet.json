@@ -1,0 +1,13 @@
+{
+  "class": "games.scarto.ScartoParameters",
+  "handSize": 25,
+  "kingPoints": 4,
+  "honourTrumpPoints": 4,
+  "queenPoints": 3,
+  "foolPoints": 3,
+  "cavalierPoints": 2,
+  "knavePoints": 1,
+  "nDeals": 1,
+  "dealerExchange": false,
+  "rememberVoids": true
+}

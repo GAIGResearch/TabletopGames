@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.LinkedHashMap;
 
 import static games.terraformingmars.TMGameState.TMPhase.Research;
 
@@ -41,7 +42,7 @@ public class TMHeuristic extends TunableParameters implements IStateHeuristic {
     double unnecessaryAutomatedCardWeight = 0.1;
 
     // Others
-    HashMap<TMTypes.Resource, Double> resourceProductionWeight = new HashMap<TMTypes.Resource, Double>() {{
+    HashMap<TMTypes.Resource, Double> resourceProductionWeight = new LinkedHashMap<TMTypes.Resource, Double>() {{
         put(TMTypes.Resource.MegaCredit, 0.4);
         put(TMTypes.Resource.Steel, 0.15);
         put(TMTypes.Resource.Titanium, 0.05);
@@ -308,7 +309,7 @@ public class TMHeuristic extends TunableParameters implements IStateHeuristic {
         retValue.expensiveCardWeight = expensiveCardWeight;
         retValue.unnecessaryEventCardWeight = unnecessaryEventCardWeight;
         retValue.unnecessaryAutomatedCardWeight = unnecessaryAutomatedCardWeight;
-        retValue.resourceProductionWeight = new HashMap<>(resourceProductionWeight);
+        retValue.resourceProductionWeight = new LinkedHashMap<>(resourceProductionWeight);
         retValue.nActiveCardsDiffForTerraform = nActiveCardsDiffForTerraform;
         retValue.maxProduction = maxProduction;
         retValue.maxAwardScore = maxAwardScore;

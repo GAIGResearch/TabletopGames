@@ -144,9 +144,6 @@ public class PuertoRicoForwardModel extends StandardForwardModel {
     public void _afterAction(AbstractGameState gameState, AbstractAction action) {
         PuertoRicoGameState state = (PuertoRicoGameState) gameState;
 
-        if (state.isActionInProgress())
-            return;  // we always wait for any EAS to finish
-
         int nextPlayer = (state.getCurrentPlayer() + 1) % state.getNPlayers(); // we increment one more
 
         endPlayerTurn(state, nextPlayer);

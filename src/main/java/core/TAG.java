@@ -1,6 +1,7 @@
 package core;
 
 import evaluation.ExpertIteration;
+import evaluation.MCTSBudgetSweep;
 import evaluation.RunGames;
 import evaluation.tournaments.SkillLadder;
 import evaluation.optimisation.OneStepDeviations;
@@ -25,7 +26,8 @@ public class TAG {
         ExpertIteration,
         OneStepDeviations,
         SkillLadder,
-        StateRenderer;
+        StateRenderer,
+        MCTSBudgetSweep;
 
         public static Entry find(String name) {
             for (Entry e : Entry.values()) {
@@ -74,6 +76,9 @@ public class TAG {
                 break;
             case StateRenderer:
                 StateRenderer.main(remainingArgs);
+                break;
+            case MCTSBudgetSweep:
+                MCTSBudgetSweep.main(remainingArgs);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + entry);

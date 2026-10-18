@@ -1,10 +1,12 @@
 package evaluation.features;
 
 import core.interfaces.IStateFeatureVector;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import utilities.Pair;
 
+import java.io.File;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -20,6 +22,12 @@ public class AutomatedFeatureRangeCalculations {
     public void setUp() {
         assertEquals(0, estateIndex);
         asf.setBuckets(estateIndex, 3);
+    }
+
+    // processData() writes the converted data to tmp.txt
+    @After
+    public void tearDown() {
+        new File("tmp.txt").delete();
     }
 
     @Test

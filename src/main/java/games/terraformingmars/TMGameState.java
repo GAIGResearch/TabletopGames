@@ -1,10 +1,9 @@
 package games.terraformingmars;
 
-import core.AbstractGameStateWithTurnOrder;
+import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
@@ -23,7 +22,7 @@ import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.CorporationSelect;
 
-public class TMGameState extends AbstractGameStateWithTurnOrder {
+public class TMGameState extends AbstractGameState {
 
     enum TMPhase implements IGamePhase {
         CorporationSelect,
@@ -34,6 +33,9 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     // General state info
     int generation;
+    // Each turn a player takes up to TMGameParameters.nActionsPerPlayer actions, until all players have passed
+    int nActionsTaken, nPassed;
+    boolean[] passed;
     GridBoard board;
     HashSet<TMMapTile> extraTiles;
     HashMap<TMTypes.GlobalParameter, GlobalParameter> globalParameters;
@@ -77,11 +79,6 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         super(gameParameters, nPlayers);
     }
     @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new TMTurnOrder(nPlayers, ((TMGameParameters) gameParameters).nActionsPerPlayer);
-    }
-
-    @Override
     protected GameType _getGameType() {
         return GameType.TerraformingMars;
     }
@@ -118,11 +115,14 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected TMGameState _copy(int playerId) {
         TMGameState copy = new TMGameState(gameParameters.copy(), getNPlayers());
 
         // General public info
         copy.generation = generation;
+        copy.nActionsTaken = nActionsTaken;
+        copy.nPassed = nPassed;
+        copy.passed = passed.clone();
         copy.board = board.emptyCopy();  // Deep copy of board
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
@@ -133,23 +133,23 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
                 }
             }
         }
-        copy.extraTiles = new HashSet<>();
+        copy.extraTiles = new LinkedHashSet<>();
         for (TMMapTile mt : extraTiles) {
             copy.extraTiles.add(mt.copy());
         }
-        copy.globalParameters = new HashMap<>();
+        copy.globalParameters = new LinkedHashMap<>();
         for (TMTypes.GlobalParameter p : globalParameters.keySet()) {
             copy.globalParameters.put(p, globalParameters.get(p).copy());
         }
-        copy.bonuses = new HashSet<>();
+        copy.bonuses = new LinkedHashSet<>();
         for (Bonus b : bonuses) {
             copy.bonuses.add(b.copy());
         }
-        copy.milestones = new HashSet<>();
+        copy.milestones = new LinkedHashSet<>();
         for (Milestone m : milestones) {
             copy.milestones.add(m.copy());
         }
-        copy.awards = new HashSet<>();
+        copy.awards = new LinkedHashSet<>();
         for (Award a : awards) {
             copy.awards.add(a.copy());
         }
@@ -177,16 +177,16 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         copy.playedCards = new Deck[getNPlayers()];
         copy.playerCorporations = new TMCard[getNPlayers()];
         for (int i = 0; i < getNPlayers(); i++) {
-            copy.playerExtraActions[i] = new HashSet<>();
-            copy.playerResourceMap[i] = new HashSet<>();
-            copy.playerPersistingEffects[i] = new HashSet<>();
-            copy.playerDiscountEffects[i] = new HashMap<>();
-            copy.playerResources[i] = new HashMap<>();
-            copy.playerResourceIncreaseGen[i] = new HashMap<>();
-            copy.playerProduction[i] = new HashMap<>();
-            copy.playerCardsPlayedTags[i] = new HashMap<>();
-            copy.playerCardsPlayedTypes[i] = new HashMap<>();
-            copy.playerTilesPlaced[i] = new HashMap<>();
+            copy.playerExtraActions[i] = new LinkedHashSet<>();
+            copy.playerResourceMap[i] = new LinkedHashSet<>();
+            copy.playerPersistingEffects[i] = new LinkedHashSet<>();
+            copy.playerDiscountEffects[i] = new LinkedHashMap<>();
+            copy.playerResources[i] = new LinkedHashMap<>();
+            copy.playerResourceIncreaseGen[i] = new LinkedHashMap<>();
+            copy.playerProduction[i] = new LinkedHashMap<>();
+            copy.playerCardsPlayedTags[i] = new LinkedHashMap<>();
+            copy.playerCardsPlayedTypes[i] = new LinkedHashMap<>();
+            copy.playerTilesPlaced[i] = new LinkedHashMap<>();
             copy.playerCardPoints[i] = playerCardPoints[i].copy();
             copy.playerComplicatedPointCards[i] = playerComplicatedPointCards[i].copy();
             copy.playedCards[i] = playedCards[i].copy();
@@ -263,6 +263,32 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         return copy;
     }
 
+    /**
+     * Records an action that uses one of the player's action points.
+     */
+    public void registerActionTaken(TMAction action, int player) {
+        // Only the turn owner's actions count, and none once their turn is complete (play moves on after this action)
+        if (player != turnOwner || isTurnComplete()) return;
+        nActionsTaken++;
+        if (action.pass && nActionsTaken == 1) {
+            // Passing as the first action of a turn takes the player out for the rest of the generation
+            passed[player] = true;
+            nPassed++;
+        }
+    }
+
+    public boolean isTurnComplete() {
+        return nActionsTaken == ((TMGameParameters) gameParameters).nActionsPerPlayer || passed[turnOwner];
+    }
+
+    public int getNPassed() {
+        return nPassed;
+    }
+
+    public boolean hasPassed(int player) {
+        return passed[player];
+    }
+
     public TMCard drawCard() {
         // Reshuffle discards into draw pile if empty
         if (projectCards.getSize() == 0) {
@@ -292,6 +318,9 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         if (!(o instanceof TMGameState)) return false;
         TMGameState that = (TMGameState) o;
         return generation == that.generation
+                && nActionsTaken == that.nActionsTaken
+                && nPassed == that.nPassed
+                && Arrays.equals(passed, that.passed)
                 && Objects.equals(board, that.board)
                 && Objects.equals(extraTiles, that.extraTiles)
                 && Objects.equals(globalParameters, that.globalParameters)
@@ -322,8 +351,9 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), generation, board, extraTiles, globalParameters, bonuses,
+        int result = Objects.hash(super.hashCode(), generation, nActionsTaken, nPassed, board, extraTiles, globalParameters, bonuses,
                 projectCards, corpCards, discardCards, milestones, awards, nMilestonesClaimed, nAwardsFunded);
+        result = 31 * result + Arrays.hashCode(passed);
         result = 31 * result + Arrays.hashCode(playerExtraActions);
         result = 31 * result + Arrays.hashCode(playerResourceMap);
         result = 31 * result + Arrays.hashCode(playerDiscountEffects);
@@ -347,7 +377,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         StringBuilder sb = new StringBuilder();
         int result = Objects.hash(gameParameters);
         sb.append(result).append("|");
-        result = Objects.hash(turnOrder);
+        result = Objects.hash(turnOwner, turnCounter, roundCounter, firstPlayer, nActionsTaken, nPassed, Arrays.hashCode(passed));
         sb.append(result).append("|");
         result = Objects.hash(getAllComponents());
         sb.append(result).append("|");
@@ -652,7 +682,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
      * @return all resources that can be transformed into given res
      */
     public HashSet<TMTypes.Resource> canPlayerTransform(int player, TMCard card, TMTypes.Resource from, TMTypes.Resource to) {
-        HashSet<TMTypes.Resource> resources = new HashSet<>();
+        HashSet<TMTypes.Resource> resources = new LinkedHashSet<>();
         for (ResourceMapping resMap : playerResourceMap[player]) {
             if ((from == null || resMap.from == from) && resMap.to == to && (resMap.requirement == null || resMap.requirement.testCondition(card))) {
                 if (playerResources[player].get(resMap.from).getValue() > 0) {
@@ -699,8 +729,8 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
     // if add is false, replace instead
     public void addResourceMappings(HashSet<ResourceMapping> maps, boolean add) {
         int player = getCurrentPlayer();
-        HashSet<ResourceMapping> toRemove = new HashSet<>();
-        HashSet<ResourceMapping> toAdd = new HashSet<>();
+        HashSet<ResourceMapping> toRemove = new LinkedHashSet<>();
+        HashSet<ResourceMapping> toAdd = new LinkedHashSet<>();
         for (ResourceMapping resMapNew : maps) {
             boolean added = false;
             for (ResourceMapping resMap : playerResourceMap[player]) {
@@ -788,13 +818,13 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         if (a.isClaimed()) {
             int best = -1;
             int secondBest = -1;
-            HashSet<Integer> bestPlayer = new HashSet<>();
-            HashSet<Integer> secondBestPlayer = new HashSet<>();
+            HashSet<Integer> bestPlayer = new LinkedHashSet<>();
+            HashSet<Integer> secondBestPlayer = new LinkedHashSet<>();
             for (int i = 0; i < getNPlayers(); i++) {
                 int playerPoints = a.checkProgress(this, i);
                 if (playerPoints >= best) {
                     if (playerPoints > best) {
-                        secondBestPlayer = new HashSet<>(bestPlayer);
+                        secondBestPlayer = new LinkedHashSet<>(bestPlayer);
                         secondBest = best;
                         bestPlayer.clear();
                         bestPlayer.add(i);

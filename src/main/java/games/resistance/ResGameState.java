@@ -117,10 +117,6 @@ public class ResGameState extends AbstractGameState {
 
         copy.voteSuccess = voteSuccess;
         copy.failedVoteCounter = failedVoteCounter;
-        copy.teamChoice = new ArrayList<>();
-        copy.votingChoice = new ResPlayerCards.CardType[getNPlayers()];
-        copy.playerHandCards = new ArrayList<>();
-        copy.finalTeamChoice = new ArrayList<>();
         copy.gameBoardValues = new ArrayList<>(gameBoardValues);
         copy.historicTeams = new ArrayList<>(historicTeams);  // we do not need to copy the sub-lists, as they are immutable
         copy.noVotesPerMission = new ArrayList<>(noVotesPerMission);
@@ -128,48 +124,78 @@ public class ResGameState extends AbstractGameState {
         copy.teamChoice = new ArrayList<>(teamChoice);
         copy.finalTeamChoice = new ArrayList<>(finalTeamChoice);
 
-        if (playerId == -1) {
+        copy.votingChoice = votingChoice.clone();
+        // the decks are shared with the copy; redeterminise() replaces (rather than alters) those it changes
+        copy.playerHandCards = new ArrayList<>(playerHandCards);
+        // Hidden information (the other players' identities if we are not a spy, and their votes this turn) is
+        // dealt with in redeterminise(), which the superclass calls on the copy when appropriate.
+        return copy;
+    }
+
+    @Override
+    public void redeterminise(int playerId) {
+        // A spy knows everyone's identity; a member of the resistance knows only their own, so we reallocate the
+        // spies amongst the other players, consistently with the results of previous missions.
+        boolean isSpy = playerHandCards.get(playerId).get(2).cardType == ResPlayerCards.CardType.SPY;
+        if (!isSpy) {
+            List<Boolean> spyAllocation = ResForwardModel.randomiseSpies(factions[1], this, playerId, redeterminisationRnd);
             for (int i = 0; i < getNPlayers(); i++) {
-                copy.playerHandCards.add(playerHandCards.get(i));
-            }
-            for (int i = 0; i < getNPlayers(); i++) {
-                copy.votingChoice[i] = votingChoice[i];
-            }
-        } else {
-            boolean isSpy = playerHandCards.get(playerId).get(2).cardType == ResPlayerCards.CardType.SPY;
-            // If the player is a spy, then they know everyone's identity
-            // if not, we need to shuffle all the other players
-            LinkedList<Boolean> spyAllocation = new LinkedList<>();
-            if (!isSpy) {
-                spyAllocation = new LinkedList<>(ResForwardModel.randomiseSpies(factions[1], this, playerId, redeterminisationRnd));
-            }
-            for (int i = 0; i < getNPlayers(); i++) {
-                //Knowledge of Own Hand/Votes
-                if (i == playerId) {
-                    copy.playerHandCards.add(playerHandCards.get(i));
-                    //Checking MissionVote Eligibility
-                    copy.votingChoice[i] = votingChoice[i];
-                } else {
-                    //Allowing Spies To Know All Card Types
-                    if (isSpy) {
-                        copy.playerHandCards.add(playerHandCards.get(i)); // refers to whole deck
-                    } else {
-                        PartialObservableDeck<ResPlayerCards> playerHand = playerHandCards.get(i).copy();
-                        ResPlayerCards idCard = new ResPlayerCards(ResPlayerCards.CardType.RESISTANCE);
-                        if (spyAllocation.get(i)) {
-                            idCard = new ResPlayerCards(ResPlayerCards.CardType.SPY);
-                        }
-                        idCard.setOwnerId(i);
-                        playerHand.remove(2);
-                        playerHand.add(idCard, 2);
-                        // the other two cards are the voting YES/NO cards
-                        copy.playerHandCards.add(playerHand);
-                    }
-                }
+                if (i == playerId)
+                    continue;
+                PartialObservableDeck<ResPlayerCards> playerHand = playerHandCards.get(i).copy();
+                ResPlayerCards idCard = new ResPlayerCards(spyAllocation.get(i) ? ResPlayerCards.CardType.SPY : ResPlayerCards.CardType.RESISTANCE);
+                idCard.setOwnerId(i);
+                playerHand.remove(2);
+                playerHand.add(idCard, 2);
+                // the other two cards are the voting YES/NO cards
+                playerHandCards.set(i, playerHand);
             }
         }
-        return copy;
 
+        // Hide the votes the other players have already cast this turn, but keep our own:
+        // getCurrentSimultaneousPlayers() decides who still has to vote from votingChoice, so
+        // losing our own vote here would have us asked to vote a second time.
+        for (int p = 0; p < getNPlayers(); p++)
+            if (p != playerId)
+                votingChoice[p] = null;
+
+        // Everyone still to vote does so at once, so each of them sees themselves as the current player.
+        // This is what the 2-argument computeAvailableActions() reads.
+        if (isNotTerminal() && getPlayersStillToVote().contains(playerId))
+            setTurnOwner(playerId);
+    }
+
+    /**
+     * The players who still have to vote this turn: during TeamSelectionVote everyone who has not yet voted,
+     * and during MissionVote the members of the mission team who have not yet voted.
+     * Empty during LeaderSelectsTeam, which is a decision for the leader alone.
+     */
+    public List<Integer> getPlayersStillToVote() {
+        List<Integer> retValue = new ArrayList<>();
+        if (getGamePhase() == ResGamePhase.TeamSelectionVote) {
+            for (int p = 0; p < getNPlayers(); p++)
+                if (votingChoice[p] == null)
+                    retValue.add(p);
+        } else if (getGamePhase() == ResGamePhase.MissionVote) {
+            for (int p : finalTeamChoice)
+                if (votingChoice[p] == null)
+                    retValue.add(p);
+        }
+        return retValue;
+    }
+
+    @Override
+    public List<Integer> getCurrentSimultaneousPlayers() {
+        if (isActionInProgress() || !isNotTerminal() || getGamePhase() == ResGamePhase.LeaderSelectsTeam) {
+            return super.getCurrentSimultaneousPlayers();
+        }
+        List<Integer> toVote = getPlayersStillToVote();
+        if (toVote.isEmpty()) {
+            // every eligible player has voted, so the forward model should already have
+            // resolved the vote and cleared the choices. Say so loudly rather than return nobody.
+            throw new AssertionError("All players have voted but the vote has not been resolved");
+        }
+        return toVote;
     }
 
     public void clearVoteChoices() {

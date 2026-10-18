@@ -18,12 +18,12 @@ import static org.junit.Assert.*;
 
 public class StateRendererTest {
 
-    static final File G13_FILE = new File("G13/P1_Tick1230.json");
+    static final File XII_Sample_state = new File("src/test/resources/P1_Tick659.json");
 
     @Test
     public void rendersBoardOnlyPng() throws Exception {
         assumeStateFileExists();
-        BufferedImage img = StateRenderer.renderToImage(GameType.XIIScripta, G13_FILE, false);
+        BufferedImage img = StateRenderer.renderToImage(GameType.XIIScripta, XII_Sample_state, false);
         // XIIBoardView is 900x500.
         assertEquals(900, img.getWidth());
         assertEquals(500, img.getHeight());
@@ -33,7 +33,7 @@ public class StateRendererTest {
     @Test
     public void rendersFullPanelPng() throws Exception {
         assumeStateFileExists();
-        BufferedImage img = StateRenderer.renderToImage(GameType.XIIScripta, G13_FILE, true);
+        BufferedImage img = StateRenderer.renderToImage(GameType.XIIScripta, XII_Sample_state, true);
         // Full panel is at least as large as the board view, and taller (info + action panels).
         assertTrue(img.getWidth() >= 900);
         assertTrue(img.getHeight() > 500);
@@ -45,7 +45,7 @@ public class StateRendererTest {
         assumeStateFileExists();
         Path tmpDir = Files.createTempDirectory("staterender");
         File out = new File(tmpDir.toFile(), "state.png");
-        StateRenderer.render(GameType.XIIScripta, G13_FILE, out, false);
+        StateRenderer.render(GameType.XIIScripta, XII_Sample_state, out, false);
         assertTrue(out.exists());
         assertTrue("PNG should be non-trivial in size", out.length() > 1000);
         BufferedImage reloaded = ImageIO.read(out);
@@ -90,7 +90,7 @@ public class StateRendererTest {
     }
 
     private void assumeStateFileExists() {
-        org.junit.Assume.assumeTrue("Test state file " + G13_FILE + " not present", G13_FILE.exists());
+        org.junit.Assume.assumeTrue("Test state file " + XII_Sample_state + " not present", XII_Sample_state.exists());
     }
 
     private static boolean hasMultipleColours(BufferedImage img) {

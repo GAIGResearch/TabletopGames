@@ -168,36 +168,34 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
+    /**
+     * Records the time taken by the Game to calculate things (which is independent of the Agent/Player)
+     */
     public static class ComputationTimes extends AbstractMetric {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<>() {{
-                put("Next (ms)", Double.class);
-                put("Copy (ms)", Double.class);
-                put("Actions Available Compute (ms)", Double.class);
-                put("Agent (ms)", Double.class);
-                put("Agent", String.class);
-                put("Player", Integer.class);
+                put("Next (µs)", Double.class);
+                put("Copy (µs)", Double.class);
+                put("Actions Compute (µs)", Double.class);
             }};
         }
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            // the times are all recorded in nanoseconds, so we convert to milliseconds
-            records.put("Next (ms)", listener.getGame().getNextTime() / 1e6);
-            records.put("Copy (ms)", listener.getGame().getCopyTime() / 1e6);
-            records.put("Actions Available Compute (ms)", listener.getGame().getActionComputeTime() / 1e6);
-            records.put("Agent (ms)", listener.getGame().getAgentTime() / 1e6);
-            records.put("Agent", listener.getGame().getPlayers().get(e.playerID).toString());
-            records.put("Player", e.playerID);
+            // the times are all recorded in nanoseconds, so we convert to microseconds
+            records.put("Next (µs)", listener.getGame().getNextTime() / 1e3);
+            records.put("Copy (µs)", listener.getGame().getCopyTime() / 1e3);
+            records.put("Actions Compute (µs)", listener.getGame().getActionComputeTime() / 1e3);
             return true;
         }
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
-            // ACTION_CHOSEN would be fine except for the recording of the time for 'next'
-            return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
+            // We record the total time divided by events, so this is the average over a game
+            // This is because timing on nanoseconds is innately a little inaccurate (especially with garbage collection)
+            return Collections.singleton(GAME_OVER);
         }
     }
 
@@ -375,8 +373,6 @@ public class GameMetrics implements IMetricsCollection {
             return columns;
         }
     }
-
-
 
     public static class Winner extends AbstractMetric {
         public Winner() {

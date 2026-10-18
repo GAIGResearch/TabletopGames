@@ -314,21 +314,22 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
     /**
      * Sanity check on the tree after a search. The root player's own actions at the root are fixed,
-     * so a fresh tree cannot have more children than that action count at a sequential root, or
+     * so a fresh tree should have more children than that action count at a sequential root, or
      * than the product of the acting players' action counts at a multi-actor root, where the
-     * children are joint actions. Three times that is the tolerance. Not applied under MCGS
-     * (transpositions) or tree reuse (the root was not built from this state).
+     * children are joint actions. We add a tolerance of 3x to account for differences between open loop states.
+     * Not applied under MCGS (transpositions) or tree reuse (the root was not built from this state).
      */
     protected void checkRootChildCount(SingleTreeNode root, List<AbstractAction> actions, AbstractGameState gameState) {
         if (root instanceof MCGSNode || getParameters().reuseTree)
             return;
-        // Long-standing guard: the check runs only when this player's action space differs from the game's.
+        // The check on action space size runs only when this player's action space differs from the game's.
         if (getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             return;
-        int expected = root.isMultiActor() ? root.jointActionSpaceSize() : actions.size();
-        if (root.children.size() > 3 * expected)
+        int expectedBound = 3 * (root.isMultiActor() ? root.jointActionSpaceSize() : actions.size());
+        if (expectedBound < 0) expectedBound = Integer.MAX_VALUE;  // to catch the rare case of overflow
+        if (root.children.size() > expectedBound)
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d%s",
-                    root.children.size(), expected,
+                    root.children.size(), expectedBound,
                     root.isMultiActor() ? " (joint actions over players " + root.getActingPlayers() + ")" : ""));
     }
 

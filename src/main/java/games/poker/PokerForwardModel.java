@@ -97,14 +97,18 @@ public class PokerForwardModel extends StandardForwardModel {
         } else {
             new Bet(pgs.bigId, params.bigBlind).execute(pgs);
         }
-        // It is then possible that the round ends immediately
-        // if there are 2 players left, and one went AllIn on the blind
-        if (pgs.isRoundOver()) {
-            roundEnd(pgs);
-        }
-
         pgs.setGamePhase(Preflop);
         pgs.setBet(false);
+
+        // The first player acts first, unless they went AllIn on a blind; then the next player who can act does.
+        // If only one player can act (2 players left, and one went AllIn on the blind), they still take a turn
+        // (to Call or Fold if the AllIn is the bigger bet, or just Check), and the round ends after that action.
+        // Otherwise one action could end several rounds in a row.
+        int actor = pgs.getNextActingPlayer(pgs.getFirstPlayer() - 1, 1);
+        if (actor == -1)
+            roundEnd(pgs);  // no-one can act (all remaining players went AllIn on the blinds)
+        else
+            pgs.setTurnOwner(actor);
     }
 
     private void drawCardsToPlayers(PokerGameState pgs) {
@@ -372,6 +376,12 @@ public class PokerForwardModel extends StandardForwardModel {
 
         if (pgs.playerFold[player] || pgs.getPlayerResults()[player] == LOSE_GAME || pgs.playerAllIn[player]) {
             throw new AssertionError("Player should not be able to act if they have Folded / are AllIn / out of the game");
+        }
+
+        if (othersAllIn && biggestBet <= pgs.getPlayerBet()[player].getValue()) {
+            // Everyone else is AllIn (on the blinds), and this player has already matched them: nothing to decide
+            actions.add(new Check(player));
+            return actions;
         }
 
         if (pgs.playerNeedsToCall[player]) {

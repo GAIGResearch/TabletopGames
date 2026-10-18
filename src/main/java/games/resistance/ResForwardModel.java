@@ -95,11 +95,20 @@ public class ResForwardModel extends StandardForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, gameState.getCurrentPlayer());
+    }
+
+    /**
+     * The votes are simultaneous: during TeamSelectionVote every player votes at once, and during MissionVote
+     * every member of the team does. So the actions are computed for the given player, who need not be the
+     * turn owner (see ResGameState.getCurrentSimultaneousPlayers).
+     */
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int currentPlayer) {
 
         ResGameState resgs = (ResGameState) gameState;
 
         List<AbstractAction> actions = new ArrayList<>();
-        int currentPlayer = resgs.getCurrentPlayer();
 
         if (resgs.getGamePhase() == LeaderSelectsTeam) {
 
@@ -154,12 +163,12 @@ public class ResForwardModel extends StandardForwardModel {
             if (resgs.teamChoice.isEmpty()) {
                 throw new AssertionError("Team Choice Size is Zero");
             }
-            // Now we have to check if all players have voted
-            for (int i = 0; i < resgs.getNPlayers(); i++) {
-                if (resgs.votingChoice[i] == null) {
-                    endPlayerTurn(resgs, i);
-                    return;
-                }
+            // Now we have to check if all players have voted; the votes may arrive one at a time, or all
+            // together as a single SimultaneousAction, and both reach the same state.
+            List<Integer> stillToVote = resgs.getPlayersStillToVote();
+            if (!stillToVote.isEmpty()) {
+                endPlayerTurn(resgs, stillToVote.get(0));
+                return;
             }
             // If we reach this point, then all players have voted
             revealCards(resgs);
@@ -176,7 +185,6 @@ public class ResForwardModel extends StandardForwardModel {
                 resgs.setGamePhase(MissionVote);
                 endPlayerTurn(resgs, resgs.finalTeamChoice.get(0));
             } else {
-;
                 resgs.clearTeamChoices();
 
                 // CHANGE LEADER
@@ -189,13 +197,11 @@ public class ResForwardModel extends StandardForwardModel {
             if (resgs.finalTeamChoice.isEmpty()) {
                 throw new AssertionError("Final Team Choice Size is Zero");
             }
-            // Now we have to check if all players have voted
-            for (int i = 0; i < resgs.finalTeamChoice.size(); i++) {
-                int p = resgs.finalTeamChoice.get(i);
-                if (resgs.votingChoice[p] == null) {
-                    endPlayerTurn(resgs, p);
-                    return;
-                }
+            // Now we have to check if all members of the team have voted
+            List<Integer> stillToVote = resgs.getPlayersStillToVote();
+            if (!stillToVote.isEmpty()) {
+                endPlayerTurn(resgs, stillToVote.get(0));
+                return;
             }
             // If we reach this point, then all players have voted
             revealCards(resgs);
@@ -271,51 +277,53 @@ public class ResForwardModel extends StandardForwardModel {
     }
 
     public static List<Boolean> randomiseSpies(int spies, ResGameState state, int playerID, Random rnd) {
-        // We want to randomly assign the number of spies across the total number of players
-        // and return a boolean[] with length of total, and spies number of true values
-        // we also need to ensure that there is at least one spy per historically failed mission
-        boolean valid = true;
+        // We want to randomly assign the number of spies across the total number of players (excluding playerID)
+        // and return a List<Boolean> of length total, with spies number of true values
+        // we also need to ensure that each historically failed mission had at least as many spies as No votes.
+        // With 10 players there are at most C(9, 4) = 126 allocations, so we enumerate all the valid ones and pick
+        // one uniformly (rejection sampling can fail to find the few valid allocations late in a game).
         int total = state.getNPlayers();
-        boolean[] retValue;
-        int count = 0;
-        do {
-            retValue = new boolean[state.getNPlayers()];
-            for (int i = 0; i < spies; i++) {
-                boolean done = false;
-
-                while (!done) {
-                    int rndIndex = rnd.nextInt(total);
-                    if (!retValue[rndIndex] && rndIndex != playerID) {
-                        retValue[rndIndex] = true;
-                        done = true;
-                    }
-                }
-            }
-            // now check constraints
-            valid = true;
-            for (int previousMission = 1; previousMission <= state.getMissionsSoFar(); previousMission++) {
-                int noVotes = state.getHistoricNoVotes(previousMission);
-                if (noVotes == 0)
-                    continue;
-                List<Integer> failedMission = state.getHistoricTeam(previousMission);
-                boolean[] finalRetValue = retValue;
-                int spiesOnMission = failedMission.stream()
-                        .mapToInt(p -> finalRetValue[p] ? 1 : 0)
-                        .sum();
-                if (spiesOnMission < noVotes)
-                    valid = false;
-                if (!valid)
-                    break;
-            }
-            count++;
-            if (count > 200)
-                throw new AssertionError(String.format("Infinite loop allocating %d spies amongst %d players", spies, total));
-        } while (!valid);
+        List<Integer> candidates = new ArrayList<>();
+        for (int p = 0; p < total; p++)
+            if (p != playerID)
+                candidates.add(p);
+        List<boolean[]> validAllocations = new ArrayList<>();
+        addValidAllocations(spies, state, candidates, 0, new boolean[total], validAllocations);
+        if (validAllocations.isEmpty())
+            throw new AssertionError(String.format("No valid allocation of %d spies amongst %d players (excluding player %d)", spies, total, playerID));
+        boolean[] retValue = validAllocations.get(rnd.nextInt(validAllocations.size()));
         List<Boolean> RV = new ArrayList<>();
-        for (
-                boolean b : retValue) {
+        for (boolean b : retValue) {
             RV.add(b);
         }
         return RV;
+    }
+
+    private static void addValidAllocations(int spiesLeft, ResGameState state, List<Integer> candidates, int from,
+                                            boolean[] allocation, List<boolean[]> validAllocations) {
+        if (spiesLeft == 0) {
+            if (isConsistentWithMissions(allocation, state))
+                validAllocations.add(allocation.clone());
+            return;
+        }
+        for (int i = from; i <= candidates.size() - spiesLeft; i++) {
+            allocation[candidates.get(i)] = true;
+            addValidAllocations(spiesLeft - 1, state, candidates, i + 1, allocation, validAllocations);
+            allocation[candidates.get(i)] = false;
+        }
+    }
+
+    private static boolean isConsistentWithMissions(boolean[] allocation, ResGameState state) {
+        for (int previousMission = 1; previousMission <= state.getMissionsSoFar(); previousMission++) {
+            int noVotes = state.getHistoricNoVotes(previousMission);
+            if (noVotes == 0)
+                continue;
+            int spiesOnMission = (int) state.getHistoricTeam(previousMission).stream()
+                    .filter(p -> allocation[p])
+                    .count();
+            if (spiesOnMission < noVotes)
+                return false;
+        }
+        return true;
     }
 }

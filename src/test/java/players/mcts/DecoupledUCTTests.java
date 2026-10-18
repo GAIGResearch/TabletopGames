@@ -270,7 +270,7 @@ public class DecoupledUCTTests {
     @Test
     public void nonMonteCarloBackupChangesTheTree() {
         // every node here is multi-actor, so this only holds once the Lambda, MaxLambda and MaxMC
-        // policies apply at multi-actor nodes (see MaxBackupAtSimultaneousNodes.md); the exact
+        // policies apply at multi-actor nodes (see DecoupledUCT.md §7.2); the exact
         // arithmetic is checked by DecoupledBackupTests
         String plain = summary(p -> {
         });
