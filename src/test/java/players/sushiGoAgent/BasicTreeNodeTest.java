@@ -48,7 +48,7 @@ public class BasicTreeNodeTest {
         game.reset(List.of(new RandomPlayer(), new RandomPlayer(), new RandomPlayer()));
 
         for (int seat = 0; seat < 3; seat++) {
-            BasicMCTSPlayer player = new BasicMCTSPlayer(params(40));
+            SushiGoMCTSPlayer player = new SushiGoMCTSPlayer(params(40));
             player.setPlayerID(seat);
             AbstractForwardModel forwardModel = spy(game.getForwardModel());
             player.setForwardModel(forwardModel);
@@ -117,7 +117,7 @@ public class BasicTreeNodeTest {
         params.rolloutLength = 0;
         params.epsilon = 0;
         params.heuristic = (state, playerId) -> 0.0;
-        BasicMCTSPlayer player = new BasicMCTSPlayer(params);
+        SushiGoMCTSPlayer player = new SushiGoMCTSPlayer(params);
         player.setPlayerID(0);
         AbstractForwardModel forwardModel = mock(AbstractForwardModel.class);
         player.setForwardModel(forwardModel);
@@ -182,10 +182,10 @@ public class BasicTreeNodeTest {
         game.reset(List.of(new RandomPlayer(), new RandomPlayer(), new RandomPlayer()));
         BasicMCTSParams params = params(15);
         params.setRandomSeed(4711);
-        BasicMCTSPlayer player = new BasicMCTSPlayer(params);
+        SushiGoMCTSPlayer player = new SushiGoMCTSPlayer(params);
         player.setStateHeuristic((state, playerId) -> state.getGameScore(playerId));
 
-        for (BasicMCTSPlayer candidate : List.of(player, player.copy())) {
+        for (SushiGoMCTSPlayer candidate : List.of(player, player.copy())) {
             candidate.setPlayerID(2);
             candidate.setForwardModel(game.getForwardModel());
             AbstractGameState observation = game.getGameState().copy(2);
@@ -202,7 +202,7 @@ public class BasicTreeNodeTest {
                 PlayerConstants.BUDGET_COPY_CALLS, PlayerConstants.BUDGET_FMANDCOPY_CALLS)) {
             BasicMCTSParams params = params(12);
             params.budgetType = budgetType;
-            BasicMCTSPlayer player = new BasicMCTSPlayer(params);
+            SushiGoMCTSPlayer player = new SushiGoMCTSPlayer(params);
             player.setPlayerID(0);
             player.setForwardModel(game.getForwardModel());
             AbstractGameState observation = game.getGameState().copy(0);
@@ -223,8 +223,8 @@ public class BasicTreeNodeTest {
     @Test(timeout = 10000)
     public void completesSushiGoGameWithAllSeatsUsingIsmcts() {
         Game game = GameType.SushiGo.createGameInstance(3, 404);
-        game.reset(List.of(new BasicMCTSPlayer(params(12)),
-                new BasicMCTSPlayer(params(12)), new BasicMCTSPlayer(params(12))));
+        game.reset(List.of(new SushiGoMCTSPlayer(params(12)),
+                new SushiGoMCTSPlayer(params(12)), new SushiGoMCTSPlayer(params(12))));
         game.run();
         assertFalse(game.getGameState().isNotTerminal());
     }
@@ -235,7 +235,7 @@ public class BasicTreeNodeTest {
         game.reset(List.of(new RandomPlayer(), new RandomPlayer(), new RandomPlayer()));
         BasicMCTSParams params = params(20);
         params.budgetType = PlayerConstants.BUDGET_TIME;
-        BasicMCTSPlayer player = new BasicMCTSPlayer(params);
+        SushiGoMCTSPlayer player = new SushiGoMCTSPlayer(params);
         player.setPlayerID(1);
         player.setForwardModel(game.getForwardModel());
         AbstractGameState observation = game.getGameState().copy(1);

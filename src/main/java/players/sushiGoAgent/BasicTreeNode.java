@@ -23,7 +23,7 @@ class BasicTreeNode {
     private int nVisits;
     private int fmCallsCount;
     private int copyCallsCount;
-    private final BasicMCTSPlayer player;
+    private final SushiGoMCTSPlayer player;
     private final Random rnd;
     private final RandomPlayer randomPlayer;
 
@@ -32,7 +32,7 @@ class BasicTreeNode {
     private List<AbstractAction> legalActions;
     private final Map<AbstractAction, Integer> availabilityCounts = new HashMap<>();
 
-    protected BasicTreeNode(BasicMCTSPlayer player, BasicTreeNode parent, AbstractGameState state, Random rnd) {
+    protected BasicTreeNode(SushiGoMCTSPlayer player, BasicTreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.parent = parent;
         this.root = parent == null ? this : parent.root;
@@ -168,9 +168,10 @@ class BasicTreeNode {
 
     private double rollOut() {
         AbstractGameState rolloutState = state.copy();
+        int rolloutRound = state.getRoundCounter();
         root.copyCallsCount++;
         int rolloutDepth = 0;
-        while (!finishRollout(rolloutState, rolloutDepth)) {
+        while (!finishRollout(rolloutState, rolloutDepth, rolloutRound)) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(
                     rolloutState, player.getParameters().actionSpace);
             if (actions.isEmpty())
@@ -185,7 +186,7 @@ class BasicTreeNode {
         return value;
     }
 
-    private boolean finishRollout(AbstractGameState rollerState, int rolloutDepth) {
+    private boolean finishRollout(AbstractGameState rollerState, int rolloutDepth, int rolloutRound) {
         return rolloutDepth >= player.getParameters().rolloutLength || !rollerState.isNotTerminal();
     }
 

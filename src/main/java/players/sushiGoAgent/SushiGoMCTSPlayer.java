@@ -14,13 +14,13 @@ import java.util.Random;
  * It strips out some of the additional configuration of MCTSPlayer. It uses BasicTreeNode in place of
  * SingleTreeNode.
  */
-public class BasicMCTSPlayer extends AbstractPlayer {
+public class SushiGoMCTSPlayer extends AbstractPlayer {
 
-    public BasicMCTSPlayer() {
+    public SushiGoMCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
-    public BasicMCTSPlayer(long seed) {
+    public SushiGoMCTSPlayer(long seed) {
         super(new BasicMCTSParams(), "Basic MCTS");
         // for clarity we create a new set of parameters here, but we could just use the default parameters
         parameters.setRandomSeed(seed);
@@ -35,7 +35,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
 
     }
 
-    public BasicMCTSPlayer(BasicMCTSParams params) {
+    public SushiGoMCTSPlayer(BasicMCTSParams params) {
         super(params, "Basic MCTS");
         rnd = new Random(params.getRandomSeed());
     }
@@ -68,8 +68,8 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public BasicMCTSPlayer copy() {
-        BasicMCTSPlayer retValue = new BasicMCTSPlayer((BasicMCTSParams) parameters.copy());
+    public SushiGoMCTSPlayer copy() {
+        SushiGoMCTSPlayer retValue = new SushiGoMCTSPlayer((BasicMCTSParams) parameters.copy());
         retValue.setName(toString());
         return retValue;
     }

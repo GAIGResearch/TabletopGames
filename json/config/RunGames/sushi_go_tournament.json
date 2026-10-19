@@ -6,6 +6,6 @@
   "matchups" : 100,
   "verbose" : true,
   "listener" : "json/listeners/GameResultsListener.json",
-  "destDir" : "SushiGo_Tournament_3P",
+  "destDir" : ".SushiGo_Tournament_3P",
   "seed" : 740234
 }
