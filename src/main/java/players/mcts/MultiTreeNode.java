@@ -25,6 +25,8 @@ public class MultiTreeNode extends SingleTreeNode {
     AbstractAction[] lastAction;
     boolean[] nodeExpanded;
     boolean[] maxDepthReached;
+    boolean rolloutStarted;
+    int lastActorInIteration;
     MCTSPlayer mctsPlayer;
 
     public MultiTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
@@ -79,6 +81,9 @@ public class MultiTreeNode extends SingleTreeNode {
         actionsInTree = new ArrayList<>();
         currentNodeTrajectory = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
+        rolloutStarted = false;
+        rolloutStartTick = 0;
+        lastActorInIteration = decisionPlayer;
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
             if (debug)
@@ -94,6 +99,10 @@ public class MultiTreeNode extends SingleTreeNode {
                 currentLocation[currentActor] = pseudoRoot;
             }
             updateCurrentLocation(currentActor, currentState);
+            // if the decision player has just expanded a node, the rollout clock starts before their first rollout action
+            // (so that, as in SingleTree, a rolloutLength of 0 evaluates the state at the expanded node)
+            if (checkRolloutStart(currentState) && finishRollout(currentState))
+                break;
 
             if (nodeExpanded[currentActor] || maxDepthReached[currentActor]) {
                 // all actions after the expansion for a player are rollout actions
@@ -125,8 +134,12 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
             }
+            lastActorInIteration = currentActor;
             // we terminate if the game is over, or if we have exceeded our rollout count
-        } while (currentState.isNotTerminal() && !finishRollout(currentState));
+            // The rollout clock only starts once the decision player has left their tree; after that it counts
+            // rollout actions by all players. (Otherwise opponents' rollout actions, or a rolloutLength of 0,
+            // could end the iteration while we are still descending our own tree.)
+        } while (currentState.isNotTerminal() && !(checkRolloutStart(currentState) && finishRollout(currentState)));
 
         // Evaluate final state and return normalised score
         double[] finalValues = new double[state.getNPlayers()];
@@ -157,6 +170,33 @@ public class MultiTreeNode extends SingleTreeNode {
         root.updateMASTStatistics(actionsInTree, actionsInRollout, finalValues);
     }
 
+
+    /**
+     * Starts the rollout clock the first time the decision player is found to have left their tree. From then on
+     * rollout length (and turn/round termination) is measured from this point.
+     *
+     * @return true if the rollout clock has started
+     */
+    private boolean checkRolloutStart(AbstractGameState state) {
+        if (!rolloutStarted && decisionPlayerOutOfTree(state)) {
+            rolloutStarted = true;
+            rolloutStartTick = actionsInRollout.size();
+            turnAtStartOfRollout = state.getTurnCounter();
+            roundAtStartOfRollout = state.getRoundCounter();
+            lastTurnInRollout = state.getTurnCounter();
+            lastRoundInRollout = state.getRoundCounter();
+            lastActorInRollout = lastActorInIteration;
+        }
+        return rolloutStarted;
+    }
+
+    /**
+     * The decision player has left their tree once they have expanded a node or reached the maximum tree depth
+     * (or if the state is terminal for them, so that they will not act again)
+     */
+    protected boolean decisionPlayerOutOfTree(AbstractGameState state) {
+        return nodeExpanded[decisionPlayer] || maxDepthReached[decisionPlayer] || !state.isNotTerminalForPlayer(decisionPlayer);
+    }
 
     private void updateCurrentLocation(int playerId, AbstractGameState state) {
         if (lastAction[playerId] != null && !nodeExpanded[playerId]) { // we have a previous action and are not yet in rollout

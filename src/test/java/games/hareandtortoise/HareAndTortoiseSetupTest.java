@@ -1,12 +1,13 @@
 package games.hareandtortoise;
 
 import games.hareandtortoise.components.HareCard;
+import games.hareandtortoise.components.HareCardType;
 import org.junit.Test;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-import static games.hareandtortoise.components.HareCard.Type.*;
+import static games.hareandtortoise.components.HareCardType.*;
 import static org.junit.Assert.*;
 
 public class HareAndTortoiseSetupTest {
@@ -36,10 +37,10 @@ public class HareAndTortoiseSetupTest {
     @Test
     public void hareDeckHasTheTwelveRavensburgerCardsAllUnseen() {
         HareAndTortoiseGameState state = setUp(new HareAndTortoiseParameters(), 4);
-        Map<HareCard.Type, Integer> counts = new EnumMap<>(HareCard.Type.class);
+        Map<HareCardType, Integer> counts = new EnumMap<>(HareCardType.class);
         for (HareCard c : state.getHareDeck().getComponents())
             counts.merge(c.type, 1, Integer::sum);
-        Map<HareCard.Type, Integer> expected = new EnumMap<>(HareCard.Type.class);
+        Map<HareCardType, Integer> expected = new EnumMap<>(HareCardType.class);
         expected.put(FALL_BACK_ONE_POSITION, 2);
         expected.put(LAST_TURN_FREE, 2);
         expected.put(DRAW_OR_DISCARD, 2);

@@ -1,5 +1,7 @@
 package games.hareandtortoise;
 
+import games.hareandtortoise.components.SquareType;
+
 import java.util.function.IntPredicate;
 
 import static games.hareandtortoise.HareAndTortoiseParameters.HOME_SQUARE;
