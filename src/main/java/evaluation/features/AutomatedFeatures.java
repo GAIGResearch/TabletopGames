@@ -7,6 +7,7 @@ import core.interfaces.IStateFeatureVector;
 import core.interfaces.IToJSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import players.learners.AbstractLearner;
 import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.Triple;
@@ -319,7 +320,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             Object value = underlyingVectorData[underlyingIndex];
             switch (featureTypes.get(i)) {
                 case RAW:
-                    featureVector[i] = ((Number) value).doubleValue();
+                    featureVector[i] = value instanceof Boolean b ? (b ? 1.0 : 0.0) : ((Number) value).doubleValue();
                     break;
                 case ENUM:
                     Enum<?> enumValue = (Enum<?>) value;
@@ -631,7 +632,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                         for (int index : newIndices) {
                             Object valueObj = newDataColumns.get(index).get(j);
                             double value = valueObj instanceof Number ? ((Number) valueObj).doubleValue() :
-                                    valueObj instanceof String ? Double.parseDouble((String) valueObj) : 0;
+                                    valueObj instanceof Boolean b ? (b ? 1.0 : 0.0) :
+                                    valueObj instanceof String ? AbstractLearner.parseValue((String) valueObj) : 0;
                             interactionValue *= value;
                         }
                         interactionData.add(interactionValue);
