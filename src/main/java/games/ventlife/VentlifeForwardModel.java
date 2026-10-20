@@ -119,21 +119,7 @@ public class VentlifeForwardModel extends StandardForwardModel {
                         return true;
             return false;
         }
-        if (covered < 3)
-            return false;
-        // plateau formation: Smoker on a Black Smoker, all three at one level, over more than one tile
-        HexCell under = state.field.get(smoker);
-        if (under.terrain() != Terrain.BLACK_SMOKER)
-            return false;
-        boolean differentTiles = false;
-        for (Hex h : hexes) {
-            HexCell cell = state.field.get(h);
-            if (cell.level() != under.level())
-                return false;
-            if (cell.tileId() != under.tileId())
-                differentTiles = true;
-        }
-        return differentTiles;
+        return covered == 3 && VentlifeUtils.isPlateauPlacement(state, smoker, orientation);
     }
 
     @Override

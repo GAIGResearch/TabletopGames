@@ -164,7 +164,7 @@ public enum Species {
             if (e.getValue().species() == EELPOUT_FISH && e.getValue().owner() == player)
                 fish.add(e.getKey());
         int score = 0;
-        for (Set<Hex> shoal : connectedGroups(fish))
+        for (Set<Hex> shoal : VentlifeUtils.connectedGroups(fish))
             score += state.getParams().shoalScore(shoal.size());
         return score;
     }
@@ -173,57 +173,23 @@ public enum Species {
      * The player's score for their Yeti Crabs on the Elevated Plateaus.
      */
     private static int plateauScore(VentlifeGameState state, int player) {
-        // an Elevated Plateau is a connected group of covered positions of one level, 2 or more
-        Map<Integer, Set<Hex>> byLevel = new HashMap<>();
-        for (Map.Entry<Hex, HexCell> e : state.getField().entrySet())
-            if (e.getValue().level() >= 2)
-                byLevel.computeIfAbsent(e.getValue().level(), k -> new HashSet<>()).add(e.getKey());
         int score = 0;
-        for (Set<Hex> sameLevel : byLevel.values())
-            for (Set<Hex> plateau : connectedGroups(sameLevel)) {
-                int[] crabs = new int[state.getNPlayers()];
-                for (Hex h : plateau) {
-                    Creature c = state.getCreature(h);
-                    if (c != null && c.species() == YETI_CRAB)
-                        crabs[c.owner()] += c.count();
-                }
-                if (crabs[player] == 0)
-                    continue;
-                int most = Arrays.stream(crabs).max().orElse(0);
-                long nMost = Arrays.stream(crabs).filter(n -> n == most).count();
-                // the most Crabs score the size; the second most half of it, rounded down, unless the most is tied
-                if (crabs[player] == most)
-                    score += plateau.size();
-                else if (nMost == 1) {
-                    int second = Arrays.stream(crabs).filter(n -> n < most).max().orElse(0);
-                    if (crabs[player] == second)
-                        score += plateau.size() / 2;
-                }
-            }
-        return score;
-    }
-
-    /**
-     * The positions split into groups connected by adjacency.
-     */
-    private static List<Set<Hex>> connectedGroups(Set<Hex> positions) {
-        List<Set<Hex>> retValue = new ArrayList<>();
-        Set<Hex> seen = new HashSet<>();
-        for (Hex start : positions) {
-            if (!seen.add(start))
+        for (Set<Hex> plateau : VentlifeUtils.plateaus(state)) {
+            int[] crabs = VentlifeUtils.crabsOn(state, plateau);
+            if (crabs[player] == 0)
                 continue;
-            Set<Hex> group = new HashSet<>();
-            Deque<Hex> open = new ArrayDeque<>(List.of(start));
-            while (!open.isEmpty()) {
-                Hex h = open.pop();
-                group.add(h);
-                for (Hex n : h.neighbours())
-                    if (positions.contains(n) && seen.add(n))
-                        open.push(n);
+            int most = Arrays.stream(crabs).max().orElse(0);
+            long nMost = Arrays.stream(crabs).filter(n -> n == most).count();
+            // the most Crabs score the size; the second most half of it, rounded down, unless the most is tied
+            if (crabs[player] == most)
+                score += plateau.size();
+            else if (nMost == 1) {
+                int second = Arrays.stream(crabs).filter(n -> n < most).max().orElse(0);
+                if (crabs[player] == second)
+                    score += plateau.size() / 2;
             }
-            retValue.add(group);
         }
-        return retValue;
+        return score;
     }
 
     /**
