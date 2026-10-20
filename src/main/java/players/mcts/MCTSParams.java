@@ -126,7 +126,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("pUCTTemperature", 10001.0);
         addTunableParameter("initialiseVisits", 0);
         addTunableParameter("actionHeuristicRecalculation", 20);
-        addTunableParameter("actionHeuristicRecalculation", 2);
         addTunableParameter("useActionHeuristicForMoveOrdering", true);
         addTunableParameter("reuseTree", false);
         addTunableParameter("backupPolicy", MCTSEnums.BackupPolicy.MonteCarlo, Arrays.asList(MCTSEnums.BackupPolicy.values()));
@@ -214,10 +213,13 @@ public class MCTSParams extends PlayerParameters {
             useMAST = true;
             MAST = Both;
             }
+        // MCTSPlayer points this at the statistics of each new root
+        if (useMASTAsActionHeuristic)
+            actionHeuristic = new MASTActionHeuristic(MASTActionKey, MASTDefaultValue);
         useActionHeuristicForMoveOrdering = (boolean) getParameterValue("useActionHeuristicForMoveOrdering");
         // We use the action heuristic anyway if FPU or pUCT or pruning is switched on
         useActionHeuristicForMoveOrdering = useActionHeuristicForMoveOrdering || useMASTAsActionHeuristic ||
-                ((firstPlayUrgency < 1_000_000 || pUCTTemperature < 10000.0 || progressiveWideningConstant > 1.0) && actionHeuristic != IActionHeuristic.nullReturn);
+                ((firstPlayUrgency < 1_000_000 || pUCTTemperature < 10000.0 || progressiveWideningConstant > 1.0) && hasActionHeuristic());
         numDeterminizations = (int) getParameterValue("numDeterminizations");
         perfectInformationPolicy = (MCTSEnums.PerfectInformationPolicy) getParameterValue("perfectInformationPolicy");
         if (numDeterminizations > 1) {
@@ -231,6 +233,23 @@ public class MCTSParams extends PlayerParameters {
             // other than OneTree assumes one actor per node.
             decoupled = false;
         }
+    }
+
+    public boolean hasActionHeuristic() {
+        return actionHeuristic != null && actionHeuristic != IActionHeuristic.nullReturn
+                && !(actionHeuristic instanceof NullActionHeuristic);
+    }
+
+    /**
+     * pUCT, progressive widening, progressive bias and initialiseVisits all work from the action heuristic.
+     */
+    public boolean needsActionHeuristic() {
+        return pUCTTemperature <= 10000.0 || progressiveWideningConstant > 1.0 || progressiveBias > 0 || initialiseVisits > 0;
+    }
+
+    public void checkActionHeuristic() {
+        if (needsActionHeuristic() && !hasActionHeuristic())
+            throw new AssertionError("pUCT, progressive widening, progressive bias and initialiseVisits need an actionHeuristic");
     }
 
     @Override
@@ -300,6 +319,7 @@ public class MCTSParams extends PlayerParameters {
         if (!useMAST && (useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST)) {
             throw new AssertionError("MAST data not being collected, but MAST is being used as the rollout policy or as the action heuristic. Set MAST parameter.");
         }
+        checkActionHeuristic();
         if (instantiationClass == null || instantiationClass == MCTSPlayer.class)
             return new MCTSPlayer((MCTSParams) this.copy());
         else {

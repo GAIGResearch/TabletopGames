@@ -65,9 +65,8 @@ public class SequentialMCTSGoldenTests {
             (gs, playerId) -> (((gs.getGameTick() * 37 + playerId * 11) % 23) / 23.0) - 0.5;
 
     /**
-     * Several parameters (pUCT, progressive bias/widening, initialiseVisits) are silently switched
-     * off in setActionsFromOpenLoopState when the action heuristic is nullReturn, so exercising them
-     * at all requires a real one.
+     * Several parameters (pUCT, progressive bias/widening, initialiseVisits) fail without an action
+     * heuristic, so exercising them at all requires a real one.
      */
     private static final IActionHeuristic NAME_HEURISTIC =
             (action, state, contextActions) -> (Math.abs(action.toString().hashCode()) % 11) / 11.0;
@@ -373,17 +372,17 @@ public class SequentialMCTSGoldenTests {
         EXPECTED.put("lmr.backupMaxMC",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=ae656bccdc814390|rnd=-3582349705094124591");
         EXPECTED.put("lmr.progressiveWidening",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=f96b6b2aa83a0f4b|rnd=5149955473058966674");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=7f37eb6af27e939b|rnd=593923753161084039");
         EXPECTED.put("lmr.progressiveWideningTight",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=139|fm=3450|copies=201|rollout=2000|digest=eaa173664a2914f7|rnd=-6993690106722028079");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=139|fm=3450|copies=201|rollout=2000|digest=d2c97eeef35f5ab4|rnd=1593670086026938253");
         EXPECTED.put("lmr.progressiveBias",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=b3b36948bfe90bac|rnd=-3582349705094124591");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=383077a66882e59f|rnd=8148085011479300758");
         EXPECTED.put("lmr.initialiseVisits",
-                "type=SingleTreeNode|roots=1|visits=209|nodes=201|fm=2841|copies=201|rollout=2000|digest=cd3b0fd992e28982|rnd=-8545389348336959084");
+                "type=SingleTreeNode|roots=1|visits=209|nodes=201|fm=2841|copies=201|rollout=2000|digest=81e254b21498a317|rnd=1420251489928114627");
         EXPECTED.put("lmr.pUCT",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=caf88d002eb206c1|rnd=-3582349705094124591");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=2a7ba32a70494fe3|rnd=-2816744293914277965");
         EXPECTED.put("lmr.moveOrdering",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=99208fada037db8e|rnd=-3582349705094124591");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=b17c1a6290749155|rnd=-1707737303460813992");
         EXPECTED.put("dominion.oneTree",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2747|copies=201|rollout=2000|rnd=-4001477402015030767");
         EXPECTED.put("dominion.selfOnly",
