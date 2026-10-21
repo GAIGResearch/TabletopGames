@@ -83,13 +83,13 @@ public class MCTSParams extends PlayerParameters {
     double DDAGameThreshold = 1_000_000.0; // If our projected result is higher than this, then we play badly
     double DDAMoveThreshold = 0.0; // When playing badly, we will take actions up to this amount less than the best action
 
-    // Time management over a whole game (Baier & Winands, 2016); see MCTSTimeManager.
-    // The semi-dynamic strategies (EXP, OPEN, MID) only apply with budgetType BUDGET_GAME_SECONDS. The dynamic
-    // strategies (BEHIND, UNST, CLOSE, STOP) also work with a fixed BUDGET_TIME or BUDGET_ITERATIONS per move.
-    public double expectedDecisions = 30.0;  // EXP: expected remaining own decisions, if there is no decisionTable
-    public String decisionTable = "";  // EXP-MOVES: file of expected remaining own decisions, by decisions made
+    // Time management (see MCTSTimeManager)
+    public double expectedDecisions = 30.0;  // EXP: expected own decisions left, if there is no decisionTable
+    // EXP-MOVES: file of the expected own decisions left, by decisions made; "" for none, and "default" for
+    // data/timeManagement/<GameType>_<n>p.txt if there is one
+    public String decisionTable = "default";
     public double timeFactor = 1.0;  // multiplies every allocation (f_opening for OPEN, f_earlystop for STOP)
-    public double midHeight = 0.0, midCentre = 15.0, midWidth = 10.0;  // MID: a, b, c of the Gaussian over decision number
+    public double midHeight = 0.0, midCentre = 15.0, midWidth = 10.0;  // MID: a, b, c of the bonus by decision number
     public double behindThreshold = 0.5, behindFactor = 1.0;  // BEHIND: v_behind (a win rate) and f_behind
     public int behindLoops = 0;  // BEHIND: 0 is off, 1 is BEHIND, more than 1 is BEHIND-L with l_behind loops
     public double unstableFactor = 1.0;  // UNST: f_unstable
@@ -155,7 +155,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("DDAGameThreshold", 1_000_000.0);
         addTunableParameter("DDAMoveThreshold", 0.0);
         addTunableParameter("expectedDecisions", 30.0);
-        addTunableParameter("decisionTable", "");
+        addTunableParameter("decisionTable", "default");
         addTunableParameter("timeFactor", 1.0, Arrays.asList(1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0));
         addTunableParameter("midHeight", 0.0, Arrays.asList(0.0, 0.5, 1.0, 1.5, 2.0, 2.5));
         addTunableParameter("midCentre", 15.0);

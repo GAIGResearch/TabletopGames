@@ -36,7 +36,7 @@ public class MCTSTimeManagerTest {
 
     private static MCTSTimeManager manager(MCTSParams params) {
         MCTSTimeManager tm = new MCTSTimeManager(params);
-        tm.newGame();
+        tm.newGame(GameType.TicTacToe.createGameInstance(2, 1).getGameState());
         return tm;
     }
 
@@ -122,7 +122,7 @@ public class MCTSTimeManagerTest {
             assertEquals(m, tm.expectedRemainingDecisions(), 1e-9);
             tm.endDecision();
         }
-        tm.newGame();
+        tm.newGame(GameType.TicTacToe.createGameInstance(2, 1).getGameState());
         assertEquals(20, tm.expectedRemainingDecisions(), 1e-9);
         Files.delete(file);
     }
@@ -192,10 +192,10 @@ public class MCTSTimeManagerTest {
 
     @Test
     public void extensionsAddFactorTimesPlannedBudgetPerLoop() {
-        // a threshold above every win rate, or any visit gap, always triggers the extension
+        // BEHIND with a threshold above any win rate, and CLOSE with one above any relative visit gap, always extend
         assertEquals(400 + 3 * 200, iterationsWith("behindLoops", "behindThreshold", 1.1, 0.5, 3));
         assertEquals(400 + 2 * 400, iterationsWith("closeLoops", "closeThreshold", 1.01, 1.0, 2));
-        // and a threshold of zero never does
+        // and with a threshold of zero they never do
         assertEquals(400, iterationsWith("behindLoops", "behindThreshold", 0.0, 0.5, 3));
         assertEquals(400, iterationsWith("closeLoops", "closeThreshold", 0.0, 1.0, 2));
     }

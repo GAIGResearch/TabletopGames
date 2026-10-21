@@ -9,7 +9,6 @@
   "rolloutType": "RANDOM",
   "rolloutLength": 1000,
   "maxTreeDepth": 1000,
-  "decisionTable": "json/players/timeManagement/connect4/decisions.txt",
   "midHeight": 2.5,
   "midCentre": 15.5,
   "midWidth": 10.0

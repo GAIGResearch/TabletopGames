@@ -198,9 +198,9 @@ public class MCTSMetrics implements IMetricsCollection {
     }
 
     /**
-     * One record per search by an MCTS player with time management: how the time was planned and spent, and the
-     * game clock left. This gives the distribution of time over a game (as in Figs. 1-8 of Baier and Winands), and
-     * a check that the game budget was respected.
+     * One record per search by an MCTS player with time management: the time planned and spent, and the game clock
+     * left. This gives the distribution of time over a game (Figs. 1-8 of Baier and Winands), and shows whether the
+     * game budget was kept to.
      */
     public static class TimeManagement extends AbstractMetric {
 

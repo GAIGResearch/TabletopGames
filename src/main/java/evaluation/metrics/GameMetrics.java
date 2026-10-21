@@ -232,11 +232,14 @@ public class GameMetrics implements IMetricsCollection {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            return new HashMap<>() {{
-                put("ActionsPerTurn (Sum)", Integer.class);
-                put("Decisions", Integer.class);
-                put("DecisionPoints (Mean)", Double.class);
-            }};
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("ActionsPerTurn (Sum)", Integer.class);
+            columns.put("Decisions", Integer.class);
+            columns.put("DecisionPoints (Mean)", Double.class);
+            // decisions (with more than one action) made by each player
+            for (int p = 0; p < nPlayersPerGame; p++)
+                columns.put("Decisions-P" + p, Integer.class);
+            return columns;
         }
 
         @Override
@@ -254,6 +257,12 @@ public class GameMetrics implements IMetricsCollection {
             records.put("ActionsPerTurn (Sum)", listener.getGame().getNActionsPerTurn());
             records.put("Decisions", statsDecisions.n());
             records.put("DecisionPoints (Mean)", statsDecisions.n() * 1.0 / statsDecisionsAll.n());
+            int[] playerDecisions = new int[e.state.getNPlayers()];
+            for (Pair<Integer, Integer> record : actionSpaceRecord)
+                if (record.b > 1)
+                    playerDecisions[record.a]++;
+            for (int p = 0; p < playerDecisions.length; p++)
+                records.put("Decisions-P" + p, playerDecisions[p]);
             return true;
         }
 

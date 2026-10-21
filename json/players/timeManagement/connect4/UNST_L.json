@@ -9,7 +9,6 @@
   "rolloutType": "RANDOM",
   "rolloutLength": 1000,
   "maxTreeDepth": 1000,
-  "decisionTable": "json/players/timeManagement/connect4/decisions.txt",
   "unstableFactor": 1.0,
   "unstableLoops": 2
 }

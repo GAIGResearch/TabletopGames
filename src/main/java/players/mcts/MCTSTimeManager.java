@@ -1,5 +1,6 @@
 package players.mcts;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import utilities.ElapsedCpuChessTimer;
 
@@ -14,39 +15,37 @@ import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 
 /**
- * Time management for MCTS, following Baier and Winands, "Time Management for Monte Carlo Tree Search",
+ * Time management for MCTS, from Baier and Winands, "Time Management for Monte Carlo Tree Search",
  * IEEE TCIAIG 8(3), 2016. Only the domain-independent strategies are implemented.
  * <p>
- * Semi-dynamic strategies set the time for a search before it starts, from the player's game timer
- * (budgetType BUDGET_GAME_SECONDS):
+ * The semi-dynamic strategies set the time for each search from the player's game timer (BUDGET_GAME_SECONDS):
  * <ul>
- * <li>EXP: remaining time / m, where m is the expected number of remaining own decisions. m is either the constant
- * expectedDecisions, or (EXP-MOVES) is looked up in decisionTable by the number of decisions already made.</li>
- * <li>OPEN: EXP multiplied by timeFactor (f_opening).</li>
- * <li>MID: EXP multiplied by (1 + a.exp(-(x - b)^2 / 2c^2)), where x is the decision number (1 for the first
- * decision of the game), and a, b, c are midHeight, midCentre and midWidth.</li>
+ * <li>EXP: the time left divided by the expected number of own decisions left (expectedDecisions, or decisionTable
+ * for EXP-MOVES)</li>
+ * <li>OPEN: EXP times timeFactor</li>
+ * <li>MID: EXP with a bonus that peaks at decision midCentre (midHeight, midWidth)</li>
  * </ul>
- * Dynamic strategies act while the search runs. All but STOP continue the search once the planned search is over,
- * for the planned search time (or iterations) times a factor, up to the given number of loops:
+ * The dynamic strategies act during the search. BEHIND, UNST and CLOSE continue the search for a multiple of the
+ * planned budget, up to their number of loops:
  * <ul>
- * <li>BEHIND: if the win rate of the most-visited action is below behindThreshold.</li>
- * <li>UNST: if the most-visited action is not the highest-valued.</li>
- * <li>CLOSE: if the visits of the two most-visited actions differ by less than closeThreshold, relative to the
- * most-visited.</li>
- * <li>STOP: stop as soon as the second-most-visited action can no longer catch up with the most-visited in
- * earlyStopP times the expected remaining iterations (equation 9). The time saved is moved to earlier decisions by
- * timeFactor (f_earlystop). STOP_A is earlyStopP = 1 and timeFactor = 1; STOP_B is earlyStopP = 1.</li>
+ * <li>BEHIND: while the win rate of the most-visited action is below behindThreshold</li>
+ * <li>UNST: while the most-visited action is not the highest-valued</li>
+ * <li>CLOSE: while the visits of the two most-visited actions differ by less than closeThreshold of the most-visited</li>
+ * <li>STOP: stops the search once the most-visited action cannot be overtaken (relaxed by earlyStopP), with
+ * timeFactor moving the time saved to earlier decisions. STOP_A is earlyStopP = 1 and timeFactor = 1; STOP_B is
+ * earlyStopP = 1.</li>
  * </ul>
- * The dynamic strategies also work with a fixed BUDGET_TIME or BUDGET_ITERATIONS per decision. There is then no
- * clock, so an extension simply spends more than the budget.
+ * The dynamic strategies also work with a fixed BUDGET_TIME or BUDGET_ITERATIONS per decision; an extension then
+ * spends more than the budget.
  * <p>
- * The game timer is the single source of truth for the time left. It is debited (by AbstractPlayer) with all the
- * time spent in each decision, so any overrun is corrected by later allocations.
+ * Each allocation is made from the time left on the game timer, so an overrun is made up by later decisions.
  */
 public class MCTSTimeManager {
 
     private final MCTSParams params;
-    private final double[] decisionTable;
+    public static final String DEFAULT_TABLE = "default";
+    public static final String DEFAULT_TABLE_DIRECTORY = "data/timeManagement";
+    private double[] decisionTable;
     private ElapsedCpuChessTimer gameTimer;
     private int decisionsMade;
 
@@ -59,12 +58,10 @@ public class MCTSTimeManager {
     public MCTSTimeManager(MCTSParams params) {
         this.params = params;
         validate(params);
-        decisionTable = params.decisionTable.isEmpty() ? null : loadDecisionTable(params.decisionTable);
+        if (!params.decisionTable.isEmpty() && !params.decisionTable.equals(DEFAULT_TABLE))
+            decisionTable = loadDecisionTable(params.decisionTable);
     }
 
-    /**
-     * @return true if any time management is needed for these parameters
-     */
     public static boolean isUsed(MCTSParams params) {
         return params.budgetType == BUDGET_GAME_SECONDS || params.earlyStopP > 0.0 || params.behindLoops > 0
                 || params.unstableLoops > 0 || params.closeLoops > 0;
@@ -85,8 +82,8 @@ public class MCTSTimeManager {
     }
 
     /**
-     * The file holds the expected number of remaining own decisions (including the current one), indexed by the
-     * number of decisions already made in the game. Values are separated by commas or white space.
+     * The file holds the expected number of own decisions left (including the current one), indexed by the number
+     * of decisions already made, separated by commas or white space.
      */
     public static double[] loadDecisionTable(String file) {
         try {
@@ -107,8 +104,13 @@ public class MCTSTimeManager {
     /**
      * Called at the start of each game.
      */
-    public void newGame() {
+    public void newGame(AbstractGameState state) {
         decisionsMade = 0;
+        if (params.decisionTable.equals(DEFAULT_TABLE)) {
+            // The table for the game and player count, if there is one; otherwise expectedDecisions is used
+            Path file = Path.of(DEFAULT_TABLE_DIRECTORY, state.getGameType().name() + "_" + state.getNPlayers() + "p.txt");
+            decisionTable = Files.exists(file) ? loadDecisionTable(file.toString()) : null;
+        }
     }
 
     /**
@@ -119,7 +121,7 @@ public class MCTSTimeManager {
     }
 
     /**
-     * The expected number of remaining own decisions, including the current one (at least 1).
+     * The expected number of own decisions left, including the current one
      */
     public double expectedRemainingDecisions() {
         double m;
@@ -162,6 +164,7 @@ public class MCTSTimeManager {
         double share = available / expectedRemainingDecisions();
         share *= params.timeFactor;
         if (params.midHeight != 0.0) {
+            // (1 + a.exp(-(x - b)^2 / 2c^2)), where x is 1 for the first decision of the game
             double x = decisionsMade + 1;
             share *= 1.0 + params.midHeight * Math.exp(-Math.pow(x - params.midCentre, 2)
                     / (2.0 * params.midWidth * params.midWidth));
@@ -194,7 +197,7 @@ public class MCTSTimeManager {
     }
 
     /**
-     * The dynamic strategies that continue the search (BEHIND, UNST and CLOSE), checked once a search segment ends.
+     * BEHIND, UNST and CLOSE, checked each time the search budget is used up.
      *
      * @return the budget of the extension (milliseconds for a time budget, iterations otherwise), or 0 for none
      */
@@ -217,6 +220,8 @@ public class MCTSTimeManager {
         } else {
             return 0;
         }
+        // The paper extends by the "previously used search time"; we use the planned budget, so that each loop
+        // adds the same amount
         long budget = (long) (factor * plannedBudget);
         if (params.budgetType == BUDGET_GAME_SECONDS) {
             long available = gameTimer.remainingTimeMillis() - gameTimer.elapsedMillis() - params.clockReserveMS;
@@ -228,8 +233,7 @@ public class MCTSTimeManager {
     }
 
     /**
-     * The mean value of the action, rescaled from the heuristic's range to [0, 1] (so with -1 for a loss,
-     * 0 for a draw and 1 for a win, a draw counts as half a win).
+     * The mean value of the action rescaled from the heuristic's range to [0, 1], so a draw counts as half a win
      */
     double winRate(SingleTreeNode root, AbstractAction action) {
         double min = params.heuristic.minValue(), max = params.heuristic.maxValue();

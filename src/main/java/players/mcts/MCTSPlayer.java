@@ -69,7 +69,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         getParameters().getRolloutStrategy().initializePlayer(state);
         getParameters().getOpponentModel().initializePlayer(state);
         if (getTimeManager() != null)
-            timeManager.newGame();
+            timeManager.newGame(state);
         super.initializePlayer(state);
     }
 
@@ -373,8 +373,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     }
 
     /**
-     * @return the time manager, or null if the parameters do not use time management. It is created on first use,
-     * and again if the parameters object is replaced.
+     * Created on first use, and again if the parameters object is replaced
      */
     public MCTSTimeManager getTimeManager() {
         if (!MCTSTimeManager.isUsed(getParameters()))

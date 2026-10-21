@@ -499,7 +499,7 @@ public class SingleTreeNode {
     }
 
     /**
-     * The root whose statistics decide the action to take; a MultiTreeNode delegates to the decision player's tree.
+     * The root whose statistics decide the action to take
      */
     protected SingleTreeNode decisionRoot() {
         return this;
