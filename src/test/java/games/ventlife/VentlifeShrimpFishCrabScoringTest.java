@@ -117,8 +117,8 @@ public class VentlifeShrimpFishCrabScoringTest {
 
     /**
      * Crabs on the standard field at 3 players (Smokers open to Crabs, so every plateau hex may hold one). Elevated
-     * Plateaus: level 3 {(0,0) S, (-1,1) M, (0,1) D} size 3; level 2 {(1,0)} size 1 (its neighbours (0,0), (0,1) are
-     * level 3, the others level 1 or uncovered); level 2 {(-1,0), (-2,1)} size 2 (adjacent; their other neighbours
+     * Plateaus: level 3 {(0,0) S, (-1,1) M, (0,1) D} size 3; level 2 {(-1,0), (-2,1)} size 2. The level-2 hex (1,0)
+     * is on its own (its neighbours (0,0), (0,1) are level 3, the others level 1 or uncovered), so not a plateau (adjacent; their other neighbours
      * level 1, 3 or uncovered).
      */
     @Test
@@ -134,18 +134,18 @@ public class VentlifeShrimpFishCrabScoringTest {
         putCreature(state, hex(-1, 0), CRAB, 2, 1);
         putCreature(state, hex(-2, 1), CRAB, 2, 1);
         // level-3 plateau (size 3): player 0 has 2 -> first, 3; player 1 has 1 -> second, floor(3 / 2) = 1
-        // (1,0) (size 1): player 1 alone -> 1
+        // (1,0) (a single hex): not a plateau -> nothing for player 1's crab there
         // {(-1,0), (-2,1)} (size 2): player 2 has 2 -> 2
         assertEquals(3, state.speciesScore(0, CRAB));
-        assertEquals(1 + 1, state.speciesScore(1, CRAB));
+        assertEquals(1, state.speciesScore(1, CRAB));
         assertEquals(2, state.speciesScore(2, CRAB));
         assertEquals(2, state.getGameScore(2), 0);
     }
 
     /**
      * Crabs at 3 players on a field written cell by cell: level 2 at (q, 0) for q = 0..6 (D, M, S, B, D, M, B - one
-     * plateau of size 7, its Smoker included); level 3 Microbial Mat at (7,0) (a plateau of size 1); level 1 Diffuse
-     * Vents at (-1,0) (not a plateau).
+     * plateau of size 7, its Smoker included); level 3 Microbial Mat at (7,0) (a single raised hex, not a plateau);
+     * level 1 Diffuse Vents at (-1,0) (not a plateau).
      */
     private void crabStrip() {
         state = newState(3, 42);
@@ -189,10 +189,19 @@ public class VentlifeShrimpFishCrabScoringTest {
         crabStrip();
         putCreature(state, hex(7, 0), CRAB, 0, 1);
         putCreature(state, hex(0, 0), CRAB, 1, 1);
-        // player 0 alone on the level-3 plateau (7,0) of size 1 -> 1; player 1 alone on the level-2 plateau of size
-        // 7 -> 7; the two are adjacent at (6,0)-(7,0) but at different levels
-        assertEquals(1, state.speciesScore(0, CRAB));
+        // player 0 alone on the single level-3 hex (7,0), which is not a plateau -> 0; player 1 alone on the level-2
+        // plateau of size 7 -> 7; the two are adjacent at (6,0)-(7,0) but at different levels
+        assertEquals(0, state.speciesScore(0, CRAB));
         assertEquals(7, state.speciesScore(1, CRAB));
         assertEquals(0, state.speciesScore(2, CRAB));
+    }
+
+    @Test
+    public void aSingleRaisedHexIsNotAPlateau() {
+        crabStrip();
+        putCreature(state, hex(7, 0), CRAB, 0, 1);
+        // a plateau is 2 or more connected hexes of the same level: the lone level-3 hex scores nothing
+        assertEquals(0, state.speciesScore(0, CRAB));
+        assertTrue(VentlifeUtils.plateaus(state).stream().allMatch(p -> p.size() >= 2));
     }
 }
