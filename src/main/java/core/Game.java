@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
@@ -452,13 +453,16 @@ public class Game {
             if (action == null)
                 throw new AssertionError("We have a NULL action in the Game loop");
 
-            // check timeout
-            if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-                action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
-            }
-
-            // end timer for this player
+            // end timer for this player, and check for timeout before any increment is added
             gameState.playerTimer[activePlayer].pause();
+            if (gameState.playerTimer[activePlayer].exceededMaxTime()) {
+                if (gameState.coreGameParameters.disqualifyPlayerOnTimeout) {
+                    forwardModel.disqualify(gameState, activePlayer);
+                    action = new DoNothing();
+                } else {
+                    action = forwardModel.takeRandomAction(gameState, activePlayer);
+                }
+            }
             gameState.playerTimer[activePlayer].incrementAction();
 
             if (gameState.coreGameParameters.verbose)

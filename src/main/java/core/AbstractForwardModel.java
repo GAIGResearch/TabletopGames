@@ -34,7 +34,7 @@ public abstract class AbstractForwardModel {
         firstState.gamePhase = CoreConstants.DefaultGamePhase.Main;
         firstState.playerTimer = new ElapsedCpuChessTimer[firstState.getNPlayers()];
         for (int i = 0; i < firstState.getNPlayers(); i++) {
-            firstState.playerTimer[i] = new ElapsedCpuChessTimer(firstState.gameParameters.thinkingTimeMins,
+            firstState.playerTimer[i] = new ElapsedCpuChessTimer(firstState.gameParameters.thinkingTimeMillis,
                     firstState.gameParameters.incrementActionS, firstState.gameParameters.incrementTurnS,
                     firstState.gameParameters.incrementRoundS, firstState.gameParameters.incrementMilestoneS);
         }
@@ -98,26 +98,36 @@ public abstract class AbstractForwardModel {
      * @param action    - action played
      */
     protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
-        disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnIllegalActionPlayed, gameState);
+        if (gameState.coreGameParameters.disqualifyPlayerOnIllegalActionPlayed) {
+            disqualify(gameState, gameState.getCurrentPlayer());
+        } else {
+            AbstractAction rndAction = takeRandomAction(gameState, gameState.getCurrentPlayer());
+            next(gameState, rndAction);
+        }
     }
 
     /**
-     * Either disqualify (automatic loss and no more playing), or play a random action for the player instead.
+     * Either disqualify (automatic loss and no more playing), or pick a random action for the player instead.
+     * The random action is returned, not applied: the caller applies it.
      *
-     * @param flag      - boolean to check if player should be disqualified, or random action should be played
      * @param gameState - current game state
+     * @param player    - the player who is disqualified, or for whom a random action is chosen
      */
-    protected final AbstractAction disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
-        if (flag) {
-            gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
-            endPlayerTurn(gameState);
-            return new DoNothing();
-        } else {
-            List<AbstractAction> possibleActions = computeAvailableActions(gameState);
-            int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(possibleActions.size());
-            next(gameState, possibleActions.get(randomAction));
-            return possibleActions.get(randomAction);
-        }
+    protected final AbstractAction takeRandomAction(AbstractGameState gameState, int player) {
+        List<AbstractAction> possibleActions = computeAvailableActions(gameState, gameState.coreGameParameters.actionSpace, player);
+        // seeded by tick so that successive replacements differ, without consuming the game's own random stream
+        Random rnd = new Random(gameState.getGameParameters().getRandomSeed() + gameState.getGameTick());
+        return possibleActions.get(rnd.nextInt(possibleActions.size()));
+    }
+
+    /**
+     * Disqualify the player
+     * @param gameState
+     * @param player
+     */
+    protected final void disqualify(AbstractGameState gameState, int player) {
+        gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, player);
+        endPlayerTurn(gameState);
     }
 
     /* ###### Public API for AI players ###### */

@@ -19,8 +19,8 @@ public abstract class AbstractParameters {
     // If this is reached then we set the GameResult (and player results) to be TIMEOUT
     int timeoutRounds = -1;
 
-    // Player thinking time for the entire game, in minutes. Default max value.
-    long thinkingTimeMins = 90;
+    // Player thinking time for the entire game, in milliseconds. Default 90 minutes.
+    long thinkingTimeMillis = 90 * 60_000;
     // Increment in seconds, added after a common milestone: action, turn, round. Default 0.
     long incrementActionS = 0, incrementTurnS = 0, incrementRoundS = 0;
     // Increment in seconds, added after a custom milestone (to be added manually in game implementation). Default 0.
@@ -64,8 +64,8 @@ public abstract class AbstractParameters {
         this.randomSeed = randomSeed;
     }
 
-    public void setThinkingTimeMins(long thinkingTimeMins) {
-        this.thinkingTimeMins = thinkingTimeMins;
+    public void setThinkingTimeMillis(long thinkingTimeMillis) {
+        this.thinkingTimeMillis = thinkingTimeMillis;
     }
 
     public void setMaxRounds(int max) {
@@ -76,12 +76,12 @@ public abstract class AbstractParameters {
     }
 
     /**
-     * Retrieve total thinking time for the game, in minutes
+     * Retrieve total thinking time for the game, in milliseconds
      *
      * @return - thinking time.
      */
-    public long getThinkingTimeMins() {
-        return thinkingTimeMins;
+    public long getThinkingTimeMillis() {
+        return thinkingTimeMillis;
     }
 
     /**
@@ -148,6 +148,13 @@ public abstract class AbstractParameters {
     public AbstractParameters copy() {
         AbstractParameters copy = _copy();
         copy.randomSeed = System.currentTimeMillis();
+        copy.maxRounds = maxRounds;
+        copy.timeoutRounds = timeoutRounds;
+        copy.thinkingTimeMillis = thinkingTimeMillis;
+        copy.incrementActionS = incrementActionS;
+        copy.incrementTurnS = incrementTurnS;
+        copy.incrementRoundS = incrementRoundS;
+        copy.incrementMilestoneS = incrementMilestoneS;
         return copy;
     }
 
@@ -186,7 +193,7 @@ public abstract class AbstractParameters {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AbstractParameters that)) return false;
-        return thinkingTimeMins == that.thinkingTimeMins &&
+        return thinkingTimeMillis == that.thinkingTimeMillis &&
                 incrementActionS == that.incrementActionS &&
                 incrementTurnS == that.incrementTurnS &&
                 incrementRoundS == that.incrementRoundS &&
@@ -197,7 +204,7 @@ public abstract class AbstractParameters {
 
     @Override
     public int hashCode() {
-        return Objects.hash(thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS, maxRounds, timeoutRounds);
+        return Objects.hash(thinkingTimeMillis, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS, maxRounds, timeoutRounds);
     }
 
     static public AbstractParameters createFromFile(GameType game, String fileName) {
