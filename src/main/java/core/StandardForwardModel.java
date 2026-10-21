@@ -4,8 +4,6 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 
-import java.util.Arrays;
-
 import static core.CoreConstants.GameResult.*;
 import static evaluation.metrics.Event.GameEvent.*;
 
@@ -72,7 +70,6 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
         int currentPlayer = gs.getCurrentPlayer();
-        gs.getPlayerTimer()[currentPlayer].incrementTurn();
         gs.listeners.forEach(l -> l.onEvent(Event.createEvent(TURN_OVER, gs, currentPlayer)));
         if (gs.getCoreGameParameters().recordEventHistory) {
             gs.recordHistory(TURN_OVER.name());
@@ -122,7 +119,6 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
         int currentPlayer = gs.getCurrentPlayer();
-        gs.getPlayerTimer()[currentPlayer].incrementRound();
         gs.listeners.forEach(l -> l.onEvent(Event.createEvent(ROUND_OVER, gs, currentPlayer)));
         if (gs.getCoreGameParameters().recordEventHistory) {
             gs.recordHistory(ROUND_OVER.name());
@@ -135,7 +131,8 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
             gs.setGameStatus(TIMEOUT);
             endGame(gs);
             gs.setGameStatus(TIMEOUT);
-            Arrays.fill(gs.playerResults, TIMEOUT);
+            for (int p = 0; p < gs.getNPlayers(); p++)
+                gs.setPlayerResult(TIMEOUT, p);
         } else {
             gs.turnCounter = 0;
             gs.turnOwner = firstPlayerOfNextRound;

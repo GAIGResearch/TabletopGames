@@ -26,7 +26,6 @@ public class ElapsedCpuChessTimer extends ElapsedCpuTimer {
     private ElapsedCpuChessTimer(ElapsedCpuChessTimer other) {
         this.maxTime = other.maxTime;
         this.oldTime = other.oldTime;
-        this.bean = other.bean;
         this.nIters = other.nIters;
         this.incrementAction = other.incrementAction;
         this.incrementTurn = other.incrementTurn;

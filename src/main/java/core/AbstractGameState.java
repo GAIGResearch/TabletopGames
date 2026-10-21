@@ -12,7 +12,6 @@ import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import utilities.ElapsedCpuChessTimer;
 import utilities.JSONUtils;
 import utilities.Pair;
 
@@ -74,8 +73,8 @@ public abstract class AbstractGameState {
      * coreGameParameters deals with competition disqualification and non-standard action spaces. If could be serialized straightforwardly if needed
      * but for the moment any reload will just pick up the defaults
      * <p>
-     * gameListeners and playerTimers are also not considered part of the 'real' game state, much like CoreParameters. If these are
-     * important then they will need to be set up post reload
+     * gameListeners are also not considered part of the 'real' game state, much like CoreParameters. If these are
+     * important then they will need to be set up post reload (the players' game clocks are held by Game)
      * <p>
      * random number generators are excluded deliberately. Any future need to rerun a game multiple times with the same seed is not currently supported (but would not be difficult)
      */
@@ -96,9 +95,6 @@ public abstract class AbstractGameState {
     // Stack for extended actions
     Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
-
-    // Timers for all players
-    protected ElapsedCpuChessTimer[] playerTimer;
 
     // rnd is used for all random number generation in the game - for events within the game
     protected Random rnd;
@@ -129,7 +125,6 @@ public abstract class AbstractGameState {
         Arrays.fill(playerResults, GAME_ONGOING);
         history = new ArrayList<>();
         historyText = new ArrayList<>();
-        playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
         tick = 0;
         turnOwner = 0;
         turnCounter = 0;
@@ -197,9 +192,6 @@ public abstract class AbstractGameState {
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
-    public final ElapsedCpuChessTimer[] getPlayerTimer() {
-        return playerTimer;
-    }
     public final GameType getGameType() {
         return gameType;
     }
@@ -234,8 +226,12 @@ public abstract class AbstractGameState {
     public final void setGameStatus(CoreConstants.GameResult status) {
         this.gameStatus = status;
     }
+    /**
+     * Once a player is disqualified, their result is not changed (e.g. by the game ending normally later).
+     */
     public final void setPlayerResult(CoreConstants.GameResult result, int playerIdx) {
-        this.playerResults[playerIdx] = result;
+        if (playerResults[playerIdx] != DISQUALIFY)
+            this.playerResults[playerIdx] = result;
     }
     public final void setGamePhase(IGamePhase gamePhase) {
         this.gamePhase = gamePhase;
@@ -278,6 +274,26 @@ public abstract class AbstractGameState {
 
     public final boolean isNotTerminalForPlayer(int player) {
         return playerResults[player] == GAME_ONGOING && gameStatus == GAME_ONGOING;
+    }
+
+    public final boolean isDisqualified(int player) {
+        return playerResults != null && playerResults[player] == DISQUALIFY;
+    }
+
+    /**
+     * @return true if a player has been disqualified, and the players left in the game are all on one team (or
+     * there are none). The disqualification then decides the game.
+     */
+    public final boolean isDecidedByDisqualification() {
+        boolean anyDisqualified = false;
+        Set<Integer> teamsLeft = new HashSet<>();
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (isDisqualified(p))
+                anyDisqualified = true;
+            else
+                teamsLeft.add(getTeam(p));
+        }
+        return anyDisqualified && teamsLeft.size() <= 1;
     }
     public final int getGameTick() {return tick;}
     public final Component getComponentById(int id) {
@@ -369,10 +385,6 @@ public abstract class AbstractGameState {
                 a -> s.actionsInProgress.push(a.copy())
         );
 
-        s.playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
-        for (int i = 0; i < getNPlayers(); i++) {
-            s.playerTimer[i] = playerTimer[i].copy();
-        }
 
         if (playerId != -1 && coreGameParameters.partialObservable) {
             s.redeterminise(playerId);
@@ -546,14 +558,20 @@ public abstract class AbstractGameState {
      * If a Game does not have a score, but does have the concept of player position (e.g. in a race)
      * then this method should be overridden.
      * This may also apply for games with important tie-breaking rules not visible in the raw score.
+     * Disqualified players are placed below all the others, whatever their score.
      *
      * @param playerId player ID
      * @return The ordinal position of the player; 1 is 1st, 2 is 2nd and so on.
      */
     public int getOrdinalPosition(int playerId, Function<Integer, Double> scoreFunction, BiFunction<Integer, Integer, Double> tiebreakFunction) {
         int ordinal = 1;
+        boolean disqualified = isDisqualified(playerId);
         double playerScore = scoreFunction.apply(playerId);
         for (int i = 0, n = getNPlayers(); i < n; i++) {
+            if (isDisqualified(i) != disqualified) {
+                if (disqualified) ordinal++;
+                continue;
+            }
             double otherScore = scoreFunction.apply(i);
             if (otherScore > playerScore)
                 ordinal++;

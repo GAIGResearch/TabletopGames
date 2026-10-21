@@ -31,6 +31,19 @@ public class ElapsedCpuChessTimerTest {
     }
 
     @Test
+    public void timeAsleepCountsOnlyOnWindows() throws InterruptedException {
+        ElapsedCpuChessTimer timer = new ElapsedCpuChessTimer(20_000, 0, 0, 0, 0);
+        timer.resume();
+        Thread.sleep(50);
+        timer.pause();
+        long used = 20_000 - timer.remainingTimeMillis();
+        if (ElapsedCpuTimer.CPU_TIME)
+            assertTrue("used " + used, used < 20);
+        else
+            assertTrue("used " + used, used >= 45);
+    }
+
+    @Test
     public void incrementsAreGivenInSeconds() {
         ElapsedCpuChessTimer timer = new ElapsedCpuChessTimer(1_000, 1.5, 2, 3, 0.25);
         timer.incrementAction();

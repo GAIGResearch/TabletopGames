@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.GameType;
+import games.loveletter.LoveLetterParameters;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -106,7 +107,54 @@ public class GameClockTest {
     public void playerClocksStartAtTheConfiguredThinkingTime() {
         Game game = ticTacToe(2_500, new RandomPlayer(new Random(1)), new RandomPlayer(new Random(2)));
         for (int p = 0; p < 2; p++)
-            assertEquals(2_500, game.getGameState().getPlayerTimer()[p].remainingTimeMillis());
+            assertEquals(2_500, game.getPlayerClock(p).remainingTimeMillis());
+    }
+
+    @Test
+    public void turnIncrementIsAddedOnlyWhenTheRealGameEndsATurn() {
+        AbstractParameters params = new TicTacToeGameParameters();
+        params.setThinkingTimeMillis(2_500);
+        params.incrementTurnS = 1;
+        Game game = new Game(GameType.TicTacToe, List.of(new RandomPlayer(new Random(1)), new RandomPlayer(new Random(2))),
+                new TicTacToeForwardModel(), new TicTacToeGameState(params, 2));
+
+        // ending a turn on a copy (as in a search) does not reach the clocks
+        AbstractGameState copy = game.getGameState().copy();
+        AbstractForwardModel fm = game.getForwardModel();
+        fm.next(copy, fm.computeAvailableActions(copy).get(0));
+        assertEquals(1, copy.getCurrentPlayer());
+        assertEquals(2_500, game.getPlayerClock(0).remainingTimeMillis());
+
+        game.oneAction();
+        long remaining = game.getPlayerClock(0).remainingTimeMillis();
+        assertTrue("remaining " + remaining, remaining > 3_400 && remaining <= 3_500);
+        assertEquals(2_500, game.getPlayerClock(1).remainingTimeMillis());
+    }
+
+    @Test
+    public void roundIncrementIsAddedToEveryClock() {
+        AbstractParameters params = new LoveLetterParameters();
+        params.setThinkingTimeMillis(2_500);
+        params.incrementRoundS = 10;
+        Game game = GameType.LoveLetter.createGameInstance(3, 1, params);
+        game.reset(List.of(new RandomPlayer(new Random(1)), new RandomPlayer(new Random(2)), new RandomPlayer(new Random(3))));
+        game.run();
+
+        int rounds = game.getGameState().getRoundCounter();
+        assertTrue(rounds > 1);
+        for (int p = 0; p < 3; p++) {
+            long remaining = game.getPlayerClock(p).remainingTimeMillis();
+            assertTrue("rounds " + rounds + ", remaining " + remaining,
+                    remaining > 2_500 + 10_000L * rounds - 500 && remaining <= 2_500 + 10_000L * rounds);
+        }
+    }
+
+    @Test
+    public void resetToAGivenStateGivesFullClocks() {
+        Game game = ticTacToe(2_500, new RandomPlayer(new Random(1)), new RandomPlayer(new Random(2)));
+        game.reset(game.getGameState().copy());
+        for (int p = 0; p < 2; p++)
+            assertEquals(2_500, game.getPlayerClock(p).remainingTimeMillis());
     }
 
     @Test
@@ -114,7 +162,7 @@ public class GameClockTest {
         Game game = ticTacToe(10_000, new SlowPlayer(20), new SlowPlayer(20));
         game.run();
         for (int p = 0; p < 2; p++) {
-            long remaining = game.getGameState().getPlayerTimer()[p].remainingTimeMillis();
+            long remaining = game.getPlayerClock(p).remainingTimeMillis();
             assertTrue("player " + p + " remaining " + remaining, remaining > 0 && remaining <= 10_000 - 15);
         }
     }
@@ -133,7 +181,7 @@ public class GameClockTest {
 
             Event first = recorder.taken.get(0);
             assertEquals(0, first.playerID);
-            assertTrue(game.getGameState().getPlayerTimer()[0].exceededMaxTime());
+            assertTrue(game.getPlayerClock(0).exceededMaxTime());
             replaced = !slow.chosen.get(0).equals(first.action);
         }
         assertTrue("first move should have been replaced", replaced);

@@ -1,7 +1,6 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
@@ -19,6 +18,7 @@ import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
+import utilities.ElapsedCpuChessTimer;
 import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.Utils;
@@ -45,6 +45,9 @@ public class Game {
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
     private List<IGameListener> listeners = new ArrayList<>();
+    // The game clock of each player. Turn and round increments are added when the forward model announces them.
+    private ElapsedCpuChessTimer[] playerClocks;
+    private final IGameListener clockListener = new ClockListener();
 
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
@@ -198,6 +201,7 @@ public class Game {
         if (debug) System.out.println("Game Seed: " + newRandomSeed);
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
+        setUpClocks();
 
         // set forward models for all players
         for (AbstractPlayer player : players) {
@@ -228,6 +232,7 @@ public class Game {
             for (AbstractPlayer player : this.players) {
                 // Give player their ID
                 player.playerID = id++;
+                player.resetGameTimer();
                 // Create initial state observation
                 AbstractGameState observation = gameState.copy(player.playerID);
                 // Allow player to initialize
@@ -238,7 +243,50 @@ public class Game {
 
     public void reset(AbstractGameState gameState) {
         this.gameState = gameState;
+        setUpClocks();
         resetStats();
+    }
+
+    /**
+     * Gives every player a full game clock.
+     */
+    private void setUpClocks() {
+        AbstractParameters params = gameState.getGameParameters();
+        playerClocks = new ElapsedCpuChessTimer[gameState.getNPlayers()];
+        for (int i = 0; i < playerClocks.length; i++) {
+            playerClocks[i] = new ElapsedCpuChessTimer(params.thinkingTimeMillis, params.incrementActionS,
+                    params.incrementTurnS, params.incrementRoundS, params.incrementMilestoneS);
+        }
+        gameState.addListener(clockListener);
+    }
+
+    /**
+     * Adds the turn increment to the clock of the player whose turn has ended, and the round increment to all clocks.
+     * Copies of the game state have no listeners, so a search on a copy does not reach the clocks.
+     */
+    private class ClockListener implements IGameListener {
+        @Override
+        public void onEvent(Event event) {
+            if (event.type == Event.GameEvent.TURN_OVER) {
+                playerClocks[event.playerID].incrementTurn();
+            } else if (event.type == Event.GameEvent.ROUND_OVER) {
+                for (ElapsedCpuChessTimer clock : playerClocks)
+                    clock.incrementRound();
+            }
+        }
+
+        @Override
+        public void report() {
+        }
+
+        @Override
+        public void setGame(Game game) {
+        }
+
+        @Override
+        public Game getGame() {
+            return Game.this;
+        }
     }
 
     /**
@@ -374,7 +422,8 @@ public class Game {
         Map<Integer, List<AbstractAction>> availableActions = new HashMap<>();
 
         for (int activePlayer : activePlayers) {
-            if (!gameState.isNotTerminalForPlayer(activePlayer))
+            boolean disqualified = gameState.isDisqualified(activePlayer);
+            if (!disqualified && !gameState.isNotTerminalForPlayer(activePlayer))
                 throw new AssertionError("Player " + activePlayer + " is not allowed to move");
 
             AbstractPlayer currentPlayer = players.get(activePlayer);
@@ -425,8 +474,14 @@ public class Game {
             if (observation instanceof IPrintable && gameState.coreGameParameters.verbose)
                 ((IPrintable) observation).printToConsole();
 
+            if (disqualified) {
+                // the game still needs the player to act, but the player makes no more decisions
+                actionsChosen.put(activePlayer, forwardModel.takeRandomAction(gameState, activePlayer));
+                continue;
+            }
+
             // start timer for this player
-            gameState.playerTimer[activePlayer].resume();
+            playerClocks[activePlayer].resume();
 
             AbstractAction action;
             if (observedActions.size() == 1 && !currentPlayer.considerSingletonActions) {
@@ -454,16 +509,19 @@ public class Game {
                 throw new AssertionError("We have a NULL action in the Game loop");
 
             // end timer for this player, and check for timeout before any increment is added
-            gameState.playerTimer[activePlayer].pause();
-            if (gameState.playerTimer[activePlayer].exceededMaxTime()) {
+            playerClocks[activePlayer].pause();
+            if (playerClocks[activePlayer].exceededMaxTime()) {
                 if (gameState.coreGameParameters.disqualifyPlayerOnTimeout) {
                     forwardModel.disqualify(gameState, activePlayer);
-                    action = new DoNothing();
-                } else {
-                    action = forwardModel.takeRandomAction(gameState, activePlayer);
+                    if (!gameState.isNotTerminal()) {
+                        // the disqualification has decided the game, so no action is taken
+                        playerToMove = -1;
+                        return null;
+                    }
                 }
+                action = forwardModel.takeRandomAction(gameState, activePlayer);
             }
-            gameState.playerTimer[activePlayer].incrementAction();
+            playerClocks[activePlayer].incrementAction();
 
             if (gameState.coreGameParameters.verbose)
                 System.out.println(action);
@@ -514,8 +572,9 @@ public class Game {
             ((IPrintable) gameState).printToConsole();
         }
 
-        // Perform any end of game computations as required by the game
-        forwardModel.endGame(gameState);
+        // Perform any end of game computations as required by the game (unless a disqualification decided it)
+        if (!gameState.isDecidedByDisqualification())
+            forwardModel.endGame(gameState);
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, gameState)));
         if (gameState.coreGameParameters.recordEventHistory) {
             gameState.recordHistory(Event.GameEvent.GAME_OVER.name());
@@ -540,6 +599,13 @@ public class Game {
      */
     public final AbstractGameState getGameState() {
         return gameState;
+    }
+
+    /**
+     * @return the game clock of the player
+     */
+    public final ElapsedCpuChessTimer getPlayerClock(int player) {
+        return playerClocks[player];
     }
 
     /**
@@ -657,6 +723,7 @@ public class Game {
     public void clearListeners() {
         listeners.clear();
         getGameState().clearListeners();
+        getGameState().addListener(clockListener);
     }
 
     public void setSavedStatesDirectory(String dir) {

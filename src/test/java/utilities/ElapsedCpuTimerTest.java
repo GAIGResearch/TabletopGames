@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 
 public class ElapsedCpuTimerTest {
 
-    // Busy-waits rather than sleeping: on Linux the timers measure thread CPU time, which a sleep does not use
+    // Busy-waits rather than sleeping: except on Windows the timers measure thread CPU time, which a sleep does not use
     public static void spin(long millis) {
         long end = System.nanoTime() + millis * 1_000_000;
         while (System.nanoTime() < end) {
@@ -20,6 +20,17 @@ public class ElapsedCpuTimerTest {
         spin(50);
         long elapsed = timer.elapsedMillis();
         assertTrue("elapsed " + elapsed, elapsed >= 40 && elapsed < 1000);
+    }
+
+    @Test
+    public void timeAsleepCountsOnlyOnWindows() throws InterruptedException {
+        ElapsedCpuTimer timer = new ElapsedCpuTimer();
+        Thread.sleep(50);
+        long elapsed = timer.elapsedMillis();
+        if (ElapsedCpuTimer.CPU_TIME)
+            assertTrue("elapsed " + elapsed, elapsed < 20);
+        else
+            assertTrue("elapsed " + elapsed, elapsed >= 45);
     }
 
     @Test

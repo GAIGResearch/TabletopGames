@@ -2,11 +2,9 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
-import core.actions.DoNothing;
 import core.actions.SimultaneousAction;
 import core.interfaces.IPlayerDecorator;
 import utilities.ActionTreeNode;
-import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -32,12 +30,6 @@ public abstract class AbstractForwardModel {
         firstState.playerResults = new CoreConstants.GameResult[firstState.getNPlayers()];
         Arrays.fill(firstState.playerResults, CoreConstants.GameResult.GAME_ONGOING);
         firstState.gamePhase = CoreConstants.DefaultGamePhase.Main;
-        firstState.playerTimer = new ElapsedCpuChessTimer[firstState.getNPlayers()];
-        for (int i = 0; i < firstState.getNPlayers(); i++) {
-            firstState.playerTimer[i] = new ElapsedCpuChessTimer(firstState.gameParameters.thinkingTimeMillis,
-                    firstState.gameParameters.incrementActionS, firstState.gameParameters.incrementTurnS,
-                    firstState.gameParameters.incrementRoundS, firstState.gameParameters.incrementMilestoneS);
-        }
 
         _setup(firstState);
         firstState.addAllComponents();
@@ -107,11 +99,10 @@ public abstract class AbstractForwardModel {
     }
 
     /**
-     * Either disqualify (automatic loss and no more playing), or pick a random action for the player instead.
-     * The random action is returned, not applied: the caller applies it.
+     * Picks a random action for the player. The action is returned, not applied: the caller applies it.
      *
      * @param gameState - current game state
-     * @param player    - the player who is disqualified, or for whom a random action is chosen
+     * @param player    - the player for whom a random action is chosen
      */
     protected final AbstractAction takeRandomAction(AbstractGameState gameState, int player) {
         List<AbstractAction> possibleActions = computeAvailableActions(gameState, gameState.coreGameParameters.actionSpace, player);
@@ -121,13 +112,21 @@ public abstract class AbstractForwardModel {
     }
 
     /**
-     * Disqualify the player
-     * @param gameState
-     * @param player
+     * Disqualify the player: they lose, whatever happens later in the game.
+     * If this leaves players from only one team, the game ends and they win.
+     * Otherwise the game continues; the disqualified player makes no more decisions, and Game picks random actions
+     * for them whenever the game needs them to act (this keeps the game's own rules and turn order intact).
+     *
+     * @param gameState - current game state
+     * @param player    - the player to disqualify
      */
     protected final void disqualify(AbstractGameState gameState, int player) {
-        gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, player);
-        endPlayerTurn(gameState);
+        gameState.setPlayerResult(DISQUALIFY, player);
+        if (gameState.isDecidedByDisqualification()) {
+            gameState.setGameStatus(GAME_END);
+            for (int p = 0; p < gameState.getNPlayers(); p++)
+                gameState.setPlayerResult(WIN_GAME, p);  // does not change the disqualified players
+        }
     }
 
     /* ###### Public API for AI players ###### */

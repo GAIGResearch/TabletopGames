@@ -458,6 +458,8 @@ public class SingleTreeNode {
                 stop = copyCount > params.budget || numIters > params.budget;
             } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
                 stop = (copyCount + fmCallsCount) > params.budget || numIters > params.budget;
+            } else {
+                throw new AssertionError("Unsupported budget type for MCTS: " + budgetType);
             }
         }
         timeTaken = elapsedTimer.elapsedMillis();

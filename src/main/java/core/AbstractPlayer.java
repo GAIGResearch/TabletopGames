@@ -3,7 +3,9 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IPlayerDecorator;
 import evaluation.metrics.Event;
+import players.PlayerConstants;
 import players.PlayerParameters;
+import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;
 
@@ -18,6 +20,8 @@ public abstract class AbstractPlayer {
     public PlayerParameters parameters;
     protected List<IPlayerDecorator> decorators;
     protected boolean considerSingletonActions = false;
+    // Thinking time remaining for the game; only used (non-null) when budgetType is BUDGET_GAME_SECONDS
+    private ElapsedCpuChessTimer gameTimer;
 
     public AbstractPlayer(PlayerParameters parameters, String name) {
         this.parameters = parameters != null ? parameters : new PlayerParameters();
@@ -52,6 +56,26 @@ public abstract class AbstractPlayer {
     }
 
     /**
+     * Restores the full game budget at the start of a game. Called by Game.reset().
+     * If budgetType is not BUDGET_GAME_SECONDS then there is no game timer.
+     */
+    public final void resetGameTimer() {
+        long budgetMillis = parameters.getGameBudgetMillis();
+        gameTimer = budgetMillis >= 0 ? new ElapsedCpuChessTimer(budgetMillis, 0, 0, 0, 0) : null;
+    }
+
+    /**
+     * The player's own record of thinking time remaining in the game (see remainingTimeMillis()).
+     * This is paused outside _getAction(), so within _getAction() the time spent so far on the current
+     * decision is gameTimer.elapsedMillis().
+     *
+     * @return - the timer, or null if budgetType is not BUDGET_GAME_SECONDS
+     */
+    public final ElapsedCpuChessTimer getGameTimer() {
+        return gameTimer;
+    }
+
+    /**
      * First of all this applies any decorators to the list of possible actions.
      * Then we choose one (delegating to the _getAction() implemented by the AbstractPlayer subclass)
      * Then we apply any decorators to the chosen action.
@@ -66,7 +90,12 @@ public abstract class AbstractPlayer {
             default -> {
                 // we then use our Random for any random choices
                 gameState.rnd = this.rnd;
-                yield _getAction(gameState, observedActions);
+                if (gameTimer == null && parameters.budgetType == PlayerConstants.BUDGET_GAME_SECONDS)
+                    resetGameTimer();
+                if (gameTimer != null) gameTimer.resume();
+                AbstractAction chosen = _getAction(gameState, observedActions);
+                if (gameTimer != null) gameTimer.pause();
+                yield chosen;
             }
         };
         for (IPlayerDecorator decorator : decorators) {
