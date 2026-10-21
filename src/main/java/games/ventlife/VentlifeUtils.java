@@ -107,7 +107,9 @@ public class VentlifeUtils {
                 byLevel.computeIfAbsent(e.getValue().level(), k -> new HashSet<>()).add(e.getKey());
         List<Set<Hex>> retValue = new ArrayList<>();
         for (Set<Hex> sameLevel : byLevel.values())
-            retValue.addAll(connectedGroups(sameLevel));
+            for (Set<Hex> group : connectedGroups(sameLevel))
+                if (group.size() >= 2)
+                    retValue.add(group);
         return retValue;
     }
 
