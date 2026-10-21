@@ -84,7 +84,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         // we then always add the underlying features as RAW features; these will always occupy the first |s| + |a| features
         for (int i = 0; i < underlyingNames.length; i++) {
             Class<?> type = underlyingTypes[i];
-            if (type == Double.class || type == double.class || type == Integer.class || type == int.class)
+            if (type == Double.class || type == double.class || type == Integer.class || type == int.class
+                    || type == Boolean.class || type == boolean.class)
                 addFeature(new AutomatedFeatures.ColumnDetails(underlyingNames[i], AutomatedFeatures.featureType.RAW,
                         null, null, i, type, null));
         }
