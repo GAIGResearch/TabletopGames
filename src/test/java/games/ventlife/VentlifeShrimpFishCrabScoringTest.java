@@ -117,9 +117,9 @@ public class VentlifeShrimpFishCrabScoringTest {
 
     /**
      * Crabs on the standard field at 3 players (Smokers open to Crabs, so every plateau hex may hold one). Elevated
-     * Plateaus: level 3 {(0,0) S, (-1,1) M, (0,1) D} size 3; level 2 {(-1,0), (-2,1)} size 2. The level-2 hex (1,0)
-     * is on its own (its neighbours (0,0), (0,1) are level 3, the others level 1 or uncovered), so not a plateau (adjacent; their other neighbours
-     * level 1, 3 or uncovered).
+     * Plateaus: level 3 {(0,0) S, (-1,1) M, (0,1) D} size 3; level 2 {(-1,0), (-2,1)} size 2 (adjacent; their other
+     * neighbours level 1, 3 or uncovered). The level-2 hex (1,0) is on its own (its neighbours (0,0), (0,1) are level
+     * 3, the others level 1 or uncovered), so not a plateau.
      */
     @Test
     public void crabsScoreEachElevatedPlateauOfOneConnectedLevel() {
