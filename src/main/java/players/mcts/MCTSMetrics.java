@@ -196,4 +196,54 @@ public class MCTSMetrics implements IMetricsCollection {
             return cols;
         }
     }
+
+    /**
+     * One record per search by an MCTS player with time management: how the time was planned and spent, and the
+     * game clock left. This gives the distribution of time over a game (as in Figs. 1-8 of Baier and Winands), and
+     * a check that the game budget was respected.
+     */
+    public static class TimeManagement extends AbstractMetric {
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            AbstractPlayer player = listener.getGame().getPlayers().get(e.playerID);
+            if (!(player instanceof MCTSPlayer mctsPlayer) || !mctsPlayer.searched) return false;
+            MCTSTimeManager tm = mctsPlayer.timeManager;
+            if (tm == null) return false;
+            SingleTreeNode root = mctsPlayer.root.decisionRoot();
+            records.put("PlayerType", mctsPlayer.toString());
+            records.put("PlayerID", e.playerID);
+            records.put("Decision", tm.decisionsMade());
+            records.put("Planned", (int) tm.plannedBudget());
+            records.put("SearchMS", mctsPlayer.root.timeTaken);
+            records.put("Iterations", root.getVisits() - root.inheritedVisits);
+            records.put("StoppedEarly", tm.stoppedEarly());
+            records.put("Extensions", tm.extensions());
+            long clockAfter = mctsPlayer.getGameTimer() == null ? -1 : mctsPlayer.getGameTimer().remainingTimeMillis();
+            records.put("DecisionMS", (int) (tm.clockAtStart() < 0 ? -1 : tm.clockAtStart() - clockAfter));
+            records.put("ClockMS", (int) clockAfter);
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<>(Collections.singletonList(Event.GameEvent.ACTION_CHOSEN));
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> cols = new HashMap<>();
+            cols.put("PlayerType", String.class);
+            cols.put("PlayerID", Integer.class);
+            cols.put("Decision", Integer.class);  // 1 for the first decision searched in the game
+            cols.put("Planned", Integer.class);  // before any extension (ms, or iterations for BUDGET_ITERATIONS)
+            cols.put("SearchMS", Double.class);
+            cols.put("Iterations", Integer.class);
+            cols.put("StoppedEarly", Boolean.class);
+            cols.put("Extensions", Integer.class);
+            cols.put("DecisionMS", Integer.class);  // all the time charged to the game clock for the decision
+            cols.put("ClockMS", Integer.class);  // left on the game clock after the decision
+            return cols;
+        }
+    }
 }

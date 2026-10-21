@@ -63,6 +63,10 @@ public class ElapsedCpuTimer {
         return (long) (diff / 1000000.0);
     }
 
+    public long remainingTimeNanos() {
+        return maxTime - elapsed();
+    }
+
     public boolean exceededMaxTime() {
         return elapsed() > maxTime;
     }
