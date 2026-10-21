@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState implements IPrintable {
 
-    Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
+    Map<CardType, Integer> cardsIncludedInGame = new EnumMap<>(CardType.class);  // EnumMap so that iteration order does not vary between JVM runs
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
     PartialObservableDeck<DominionCard>[] playerDrawPiles;

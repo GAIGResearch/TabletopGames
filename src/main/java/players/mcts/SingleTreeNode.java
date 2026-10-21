@@ -318,7 +318,7 @@ public class SingleTreeNode {
             // Generally if using pUCT we would expect FPU to also be used to give effective pruning, rather than the
             // explicit pruning of Progressive Widening.
             double[] pdf;
-            pds.actionPDFEstimates = new HashMap<>();
+            pds.actionPDFEstimates = new LinkedHashMap<>();
             double[] heuristicScores = new double[pds.actionsFromOpenLoopState.size()];
             if (params.pUCTTemperature > 0.0) {
                 // in this case we construct a Boltzmann
