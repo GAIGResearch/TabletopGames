@@ -18,6 +18,14 @@ import static org.junit.Assert.assertEquals;
 
 public class VentlifeFastEvalTest {
 
+    private static VentlifeHeuristic heuristic(double oppMax, double oppMean, double exposure, double oppExposure,
+                                               double risk, double oppRisk) {
+        VentlifeHeuristic h = heuristic(oppMax, oppMean, exposure, oppExposure);
+        h.setParameterValue("risk", risk);
+        h.setParameterValue("oppRisk", oppRisk);
+        return h;
+    }
+
     private static VentlifeHeuristic heuristic(double oppMax, double oppMean, double exposure, double oppExposure) {
         VentlifeHeuristic h = new VentlifeHeuristic();
         h.setParameterValue("oppMaxWeight", oppMax);
@@ -33,7 +41,7 @@ public class VentlifeFastEvalTest {
     public void placementValuesMatchHeuristicAfterPlacement() {
         Random rnd = new Random(3);
         List<VentlifeHeuristic> heuristics = List.of(heuristic(0, 1, 0.7, -1), heuristic(0.5, 0.5, 1.0, 0.3),
-                heuristic(1, 0, 0, -1));
+                heuristic(1, 0, 0, -1), heuristic(0, 1.2, 0, -1, 1.0, 0.4), heuristic(0.2, 1, 0.3, 0.1, 0.8, -1));
         int checked = 0;
         for (int nPlayers = 2; nPlayers <= 4; nPlayers++) {
             VentlifeParameters params = new VentlifeParameters();

@@ -27,6 +27,7 @@ public class VentlifeTileEval {
     private final double[] expWeight, riskWeight;
     // the tiles left once the tile is placed
     private final int tilesLeft;
+    private final int riskModel;
     // the adjusted scores, and each creature's term in them, as they will be valued once a tile is placed
     private final double[] adjusted;
     private final Map<Hex, Double> terms = new HashMap<>();
@@ -43,6 +44,7 @@ public class VentlifeTileEval {
         moveFactor = h.exposureMoveFactor;
         crabValue = h.exposureCrabValue;
         tilesLeft = CoverageModel.tilesLeft(state) - 1;
+        riskModel = h.riskModel;
         double scale = h.endScaling ? Math.min(1.0, (double) tilesLeft / n) : 1.0;
         double oppExp = h.oppExposure < 0 ? h.exposure : h.oppExposure;
         double oppR = h.oppRisk < 0 ? h.risk : h.oppRisk;
@@ -163,7 +165,7 @@ public class VentlifeTileEval {
         if (expWeight[owner] != 0 && bits != 0 && (c.species() != Species.TUBE_WORM || (bits & 1) != 0))
             t -= expWeight[owner] * loss;
         if (riskWeight[owner] != 0)
-            t -= riskWeight[owner] * loss * CoverageModel.probability(Board.features(b, hex, c.species(), bits, tilesLeft), c.species());
+            t -= riskWeight[owner] * loss * CoverageModel.probability(Board.features(b, hex, c.species(), bits, tilesLeft), c.species(), riskModel);
         return t;
     }
 
@@ -242,7 +244,7 @@ public class VentlifeTileEval {
                     if (b.level(nb) == level && seen.add(nb))
                         open.push(nb);
             }
-            // VentlifeUtils.plateaus, which the game scores by, includes single hexes
+            if (size < 2) continue;
             int most = 0, nMost = 0, second = 0;
             for (int c : crabs) most = Math.max(most, c);
             if (most == 0) continue;

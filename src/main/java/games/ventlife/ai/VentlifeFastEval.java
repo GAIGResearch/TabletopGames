@@ -20,6 +20,9 @@ public class VentlifeFastEval {
     private final Map<Hex, Integer> exposed;
     private final double[] adjusted;
     private final double[] expWeight;
+    private final double[] riskWeight;
+    private final int tilesLeft;
+    private final int riskModel;
     private final double oppMaxWeight, oppMeanWeight, moveFactor, crabValue;
 
     public VentlifeFastEval(VentlifeGameState state, int perspective, VentlifeHeuristic h) {
@@ -41,18 +44,30 @@ public class VentlifeFastEval {
         expWeight = new double[n];
         for (int p = 0; p < n; p++)
             expWeight[p] = scale * (p == perspective ? h.exposure : oppExp);
+        double oppR = h.oppRisk < 0 ? h.risk : h.oppRisk;
+        riskWeight = new double[n];
+        for (int p = 0; p < n; p++)
+            riskWeight[p] = p == perspective ? h.risk : oppR;
+        tilesLeft = CoverageModel.tilesLeft(state);
+        riskModel = h.riskModel;
         int[] scores = VentlifeScorer.scores(state);
         adjusted = new double[n];
-        boolean anyExposure = false;
+        boolean anyExposure = false, anyRisk = false;
         for (int p = 0; p < n; p++) {
             adjusted[p] = scores[p];
             anyExposure |= expWeight[p] != 0;
+            anyRisk |= riskWeight[p] != 0;
         }
-        exposed = anyExposure ? VentlifeScorer.exposedPositions(state) : Map.of();
+        exposed = anyExposure || anyRisk ? VentlifeScorer.exposedPositions(state) : Map.of();
         if (anyExposure) {
-            double[] ev = VentlifeScorer.exposedValue(state, moveFactor, crabValue);
+            double[] ev = VentlifeScorer.exposedValue(state, exposed, moveFactor, crabValue);
             for (int p = 0; p < n; p++)
                 adjusted[p] -= expWeight[p] * ev[p];
+        }
+        if (anyRisk) {
+            double[] rv = VentlifeScorer.riskValue(state, exposed, moveFactor, crabValue, riskModel);
+            for (int p = 0; p < n; p++)
+                adjusted[p] -= riskWeight[p] * rv[p];
         }
     }
 
@@ -77,6 +92,11 @@ public class VentlifeFastEval {
         double[] d = adjusted.clone();
         Map<Hex, Creature> creatures = state.getCreatures();
         boolean hexExposed = isExposed(hex, species);
+        if (riskWeight[player] != 0) {
+            double loss = VentlifeScorer.lossIfCovered(state, hex, new Creature(species, player, count), moveFactor, crabValue);
+            if (loss != 0)
+                d[player] -= riskWeight[player] * loss * risk(hex, species);
+        }
         switch (species) {
             case EELPOUT_FISH -> {
                 // the shoals next to the hex merge with the new Fish
@@ -89,8 +109,12 @@ public class VentlifeFastEval {
                     if (f == null || f.species() != Species.EELPOUT_FISH || f.owner() != player) continue;
                     anyNeighbour = true;
                     // a neighbouring Fish with no other Fish beside it becomes worth losing
-                    if (expWeight[player] != 0 && isExposed(nb, Species.EELPOUT_FISH) && ownFishNeighbours(nb, player) == 0)
-                        d[player] -= expWeight[player] * moveFactor * params.shoalPoints;
+                    if (ownFishNeighbours(nb, player) == 0) {
+                        if (expWeight[player] != 0 && isExposed(nb, Species.EELPOUT_FISH))
+                            d[player] -= expWeight[player] * moveFactor * params.shoalPoints;
+                        if (riskWeight[player] != 0)
+                            d[player] -= riskWeight[player] * moveFactor * params.shoalPoints * risk(nb, Species.EELPOUT_FISH);
+                    }
                     if (seen.contains(nb)) continue;
                     int size = shoal(nb, player, seen);
                     merged += size;
@@ -139,9 +163,15 @@ public class VentlifeFastEval {
                 d[o.owner()] += params.octopusPointsPerSpecies;
                 if (isExposed(nb, Species.OCTOPUS))
                     d[o.owner()] -= expWeight[o.owner()] * moveFactor * params.octopusPointsPerSpecies;
+                if (riskWeight[o.owner()] != 0)
+                    d[o.owner()] -= riskWeight[o.owner()] * moveFactor * params.octopusPointsPerSpecies * risk(nb, Species.OCTOPUS);
             }
         }
         return VentlifeHeuristic.value(player, d, oppMaxWeight, oppMeanWeight);
+    }
+
+    private double risk(Hex hex, Species species) {
+        return CoverageModel.probability(state, hex, species, exposed, tilesLeft, riskModel);
     }
 
     private int ownFishNeighbours(Hex hex, int player) {
