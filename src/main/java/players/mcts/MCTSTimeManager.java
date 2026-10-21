@@ -148,7 +148,7 @@ public class MCTSTimeManager {
             clockAtStart = gameTimer.remainingTimeMillis();
             plannedBudget = allocate(clockAtStart - gameTimer.elapsedMillis());
         } else {
-            clockAtStart = -1;
+            clockAtStart = 0;
             plannedBudget = params.budget;
         }
     }
@@ -274,7 +274,7 @@ public class MCTSTimeManager {
     }
 
     /**
-     * @return the game clock (in milliseconds) at the start of the last decision, or -1 if there is no game timer
+     * @return the game clock (in milliseconds) at the start of the last decision, if there is a game timer
      */
     public long clockAtStart() {
         return clockAtStart;

@@ -219,9 +219,14 @@ public class MCTSMetrics implements IMetricsCollection {
             records.put("Iterations", root.getVisits() - root.inheritedVisits);
             records.put("StoppedEarly", tm.stoppedEarly());
             records.put("Extensions", tm.extensions());
-            long clockAfter = mctsPlayer.getGameTimer() == null ? -1 : mctsPlayer.getGameTimer().remainingTimeMillis();
-            records.put("DecisionMS", (int) (tm.clockAtStart() < 0 ? -1 : tm.clockAtStart() - clockAfter));
-            records.put("ClockMS", (int) clockAfter);
+            if (mctsPlayer.getGameTimer() == null) {
+                records.put("DecisionMS", -1);
+                records.put("ClockMS", -1);
+            } else {
+                long clockAfter = mctsPlayer.getGameTimer().remainingTimeMillis();
+                records.put("DecisionMS", (int) (tm.clockAtStart() - clockAfter));
+                records.put("ClockMS", (int) clockAfter);
+            }
             return true;
         }
 
