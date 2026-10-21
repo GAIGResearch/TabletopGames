@@ -121,7 +121,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MCGSStateKey", IStateKey.class);
         addTunableParameter("MCGSExpandAfterClash", true);
         addTunableParameter("FPU", 1_000_000.0);
-        addTunableParameter("actionHeuristic", IActionHeuristic.class,  IActionHeuristic.nullReturn);
+        addTunableParameter("actionHeuristic", IActionHeuristic.class,  new NullActionHeuristic());
         addTunableParameter("progressiveBias", 0.0);
         addTunableParameter("pUCTTemperature", 10001.0);
         addTunableParameter("initialiseVisits", 0);
@@ -236,8 +236,7 @@ public class MCTSParams extends PlayerParameters {
     }
 
     public boolean hasActionHeuristic() {
-        return actionHeuristic != null && actionHeuristic != IActionHeuristic.nullReturn
-                && !(actionHeuristic instanceof NullActionHeuristic);
+        return actionHeuristic != null && !(actionHeuristic instanceof NullActionHeuristic);
     }
 
     /**
