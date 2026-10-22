@@ -101,7 +101,8 @@ public class PerudoGUIManager extends AbstractGUIManager {
         table.add(playersWrapper, BorderLayout.CENTER);
 
         JPanel infoPanel = createGameStateInfoPanel("Perudo", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, ACTION_PANEL_HEIGHT, false);
+        // the opening bid can offer every quantity on every face; the standard panel wraps the buttons into rows that scroll
+        JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, ACTION_PANEL_HEIGHT, false);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(table, BorderLayout.CENTER);
@@ -113,31 +114,6 @@ public class PerudoGUIManager extends AbstractGUIManager {
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
-    }
-
-    /**
-     * The opening bid can offer every quantity on every face, so the buttons are laid out in rows that scroll
-     * vertically.
-     */
-    @Override
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        JPanel actionPanel = new JPanel(new GridLayout(0, Math.max(4, width / 110), 4, 2));
-        actionPanel.setOpaque(false);
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            actionButtons[i] = new ActionButton(ac, highlights);
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton button : actionButtons)
-            button.informAllActionButtons(actionButtons);
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return pane;
     }
 
     @Override
