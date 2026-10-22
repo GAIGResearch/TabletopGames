@@ -178,11 +178,11 @@ public class MCTSTimeManager {
     }
 
     /**
-     * The time that can be spent on the current search: the clock less the reserve, the overhead of this decision,
-     * and the least that each later decision will need (its minimum search and overhead), so that the clock is not
-     * overrun when the game lasts as long as expected.
+     * The time that can be spent on the current search
      */
     private long availableMillis(long remainingMillis) {
+        // keep back the reserve, this decision's overhead, and the minimum search and overhead of each later decision,
+        // so that the clock is not overrun when the game lasts as long as expected
         double later = (expectedRemainingDecisions() - 1) * (params.minMoveTimeMS + overheadMillis);
         return (long) (remainingMillis - params.clockReserveMS - overheadMillis - later);
     }

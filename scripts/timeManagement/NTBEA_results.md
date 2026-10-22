@@ -70,9 +70,15 @@ Win rate over all games (draws count half), 95% confidence interval; then the re
 ## Clock overruns, and the fix
 In the tournaments some players overran the 10 s clock: by up to 0.4 s in Can't Stop (a player that extended 98% of
 searches) and up to 0.9 s in Dominion, including EXP itself. Once the clock was low, every decision still took the
-minimum search (10 ms) plus the time spent outside the search, over many more decisions than expected. Commit 94f1792
-reserves, for each expected later decision, the minimum search plus the mean overhead per decision. The tournaments
-above were run before that fix. Under a game clock that disqualifies on timeout these overruns would lose games.
+minimum search (10 ms), over many more decisions than expected. Two changes fix this:
+- 94f1792: each allocation keeps back, for every expected later decision, the minimum search plus the mean time a
+  decision takes outside its search (about 1 ms here).
+- e493468: the minimum search is only allowed while the clock above the reserve can pay for it; after that a search
+  has a single iteration. Without this, a player that front-loads time (NTBEA_73, f = 3) still overran by 0.2 s in a
+  game that outlasted the decision table's expectation.
+
+With both, 96 Dominion games of EXP against NTBEA_73 had no overrun (at least 27 ms left). The tournaments above were
+run before these fixes.
 
 ## Further points
 - Thread CPU time does not include garbage collection on other threads. In Dots and Boxes a game took about 44 s of
