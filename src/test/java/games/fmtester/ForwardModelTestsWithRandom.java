@@ -23,6 +23,7 @@ import games.leducpoker.LeducPokerParameters;
 import games.toads.ToadParameters;
 import games.ventlife.VentlifeParameters;
 import games.crazyeights.CZEParameters;
+import games.perudo.PerudoParameters;
 import games.cribbage.CribbageParameters;
 import games.pitch.PitchParameters;
 import games.president.PresidentParameters;
@@ -223,6 +224,16 @@ public class ForwardModelTestsWithRandom {
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=3");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=4");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=5");
+    }
+
+    @Test
+    public void testPerudo() {
+        new ForwardModelTester("game=Perudo", "nGames=2", "nPlayers=2");
+        new ForwardModelTester("game=Perudo", "nGames=2", "nPlayers=6");
+        PerudoParameters params = new PerudoParameters();
+        params.setParameterValue("palifico", true);
+        params.setParameterValue("calza", true);
+        new ForwardModelTester(params, "game=Perudo", "nGames=3", "nPlayers=4");
     }
 
     @Test

@@ -255,6 +255,10 @@ import games.pickomino.PickominoForwardModel;
 import games.pickomino.PickominoGUIManager;
 import games.pickomino.PickominoGameState;
 import games.pickomino.PickominoParameters;
+import games.perudo.PerudoForwardModel;
+import games.perudo.gui.PerudoGUIManager;
+import games.perudo.PerudoGameState;
+import games.perudo.PerudoParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import llm.DocumentSummariser;
@@ -510,6 +514,8 @@ public enum GameType {
     Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling),
             PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class,
             PickominoGUIManager.class),
+    Perudo(2, 6, Arrays.asList(Dice, Bluffing), List.of(),
+            PerudoGameState.class, PerudoForwardModel.class, PerudoParameters.class, PerudoGUIManager.class),
     Spades(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement, TakeThat),
             SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class),
