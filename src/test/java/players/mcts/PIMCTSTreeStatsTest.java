@@ -5,6 +5,9 @@ import core.interfaces.IStateKey;
 import evaluation.metrics.Event;
 import evaluation.metrics.MetricsTestRunner;
 import games.GameType;
+import games.gofish.metrics.GoFishTightInfoKey;
+import games.scopa.metrics.ScopaTightInfoKey;
+import games.whist.metrics.WhistTightInfoKey;
 import org.junit.Test;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
@@ -24,9 +27,6 @@ public class PIMCTSTreeStatsTest {
             "MeanLeafDepth", "MeanNodeDepth", "Nodes", "NodesTotal", "LeafNodes", "MeanActionsAtNode",
             "MaxActionsAtNode", "MeanActionsExpanded", "RolloutLength", "maxVisitProportion", "fmCalls", "time");
 
-    // a stand-in for a game's information-state key: the acting player and the actions so far
-    static final IStateKey HISTORY_KEY = (state, playerId) -> List.of(playerId, state.getHistory());
-
     static MCTSPlayer agent(String name, Map<String, Object> settings) {
         MCTSParams params = new MCTSParams();
         params.setParameterValue("budgetType", PlayerConstants.BUDGET_ITERATIONS);
@@ -35,12 +35,12 @@ public class PIMCTSTreeStatsTest {
         return new MCTSPlayer(params, name);
     }
 
-    static List<MCTSPlayer> agents() {
+    static List<MCTSPlayer> agents(IStateKey tightInfoKey) {
         return List.of(
                 agent("ISMCTS", Map.of()),
                 agent("FlatMC", Map.of("numDeterminizations", 3, "maxTreeDepth", 1)),
                 agent("PIMCTS", Map.of("numDeterminizations", 3)),
-                agent("MCGS", Map.of("opponentTreePolicy", MCTSEnums.OpponentTreePolicy.MCGS, "MCGSStateKey", HISTORY_KEY)));
+                agent("MCGS", Map.of("opponentTreePolicy", MCTSEnums.OpponentTreePolicy.MCGS, "MCGSStateKey", tightInfoKey)));
     }
 
     /**
@@ -60,8 +60,8 @@ public class PIMCTSTreeStatsTest {
         return rows;
     }
 
-    static void checkTreeStats(GameType gameType, int nPlayers, boolean byTeam) throws Exception {
-        for (MCTSPlayer agent : agents()) {
+    static void checkTreeStats(GameType gameType, int nPlayers, boolean byTeam, IStateKey tightInfoKey) throws Exception {
+        for (MCTSPlayer agent : agents(tightInfoKey)) {
             String context = gameType + " " + agent;
             List<Map<String, String>> rows = treeStats(gameType, nPlayers, byTeam, agent);
             assertFalse(context, rows.isEmpty());
@@ -84,16 +84,16 @@ public class PIMCTSTreeStatsTest {
 
     @Test
     public void whist() throws Exception {
-        checkTreeStats(GameType.Whist, 4, true);
+        checkTreeStats(GameType.Whist, 4, true, new WhistTightInfoKey());
     }
 
     @Test
     public void goFish() throws Exception {
-        checkTreeStats(GameType.GoFish, 3, false);
+        checkTreeStats(GameType.GoFish, 3, false, new GoFishTightInfoKey());
     }
 
     @Test
     public void scopa() throws Exception {
-        checkTreeStats(GameType.Scopa, 2, false);
+        checkTreeStats(GameType.Scopa, 2, false, new ScopaTightInfoKey());
     }
 }
