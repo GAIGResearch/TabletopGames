@@ -51,10 +51,8 @@ public class VentlifeGUIManager extends AbstractGUIManager {
         VentlifeGameState state = (VentlifeGameState) gameState;
         int nPlayers = state.getNPlayers();
         String[] agentNames = new String[nPlayers];
-        for (int i = 0; i < nPlayers; i++) {
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
-        }
+        for (int i = 0; i < nPlayers; i++)
+            agentNames[i] = game.getPlayers().get(i).toString();
 
         fieldView = new VentlifeFieldView();
         playersView = new VentlifePlayersView(agentNames, this::showHiddenInfo);

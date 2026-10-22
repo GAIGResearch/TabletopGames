@@ -48,14 +48,28 @@ public class PerudoForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         PerudoGameState state = (PerudoGameState) gameState;
-        int nFaces = state.getParams().nFaces;
+        PerudoParameters params = state.getParams();
         int totalDice = state.getTotalDice();
+        // the range of quantities that may be bid on each face (none when from > to)
+        int[] from = new int[params.nFaces + 1], to = new int[params.nFaces + 1];
+        for (int face = 1; face <= params.nFaces; face++) {
+            int lowest = lowestBid(state, face);
+            if (lowest < 0) continue;
+            int floor = totalDice * params.minBidPercent / 100;
+            int band = totalDice * params.maxBidPercent / 100;
+            // a Paco is wild, and so worth two dice of another face, as the raises to and from Pacos have it
+            if (face == PACO && !state.isPalificoRound()) {
+                floor = (floor + 1) / 2;
+                band = (band + 1) / 2;
+            }
+            from[face] = Math.max(lowest, floor);
+            // no bid may be for more dice than are on the table
+            to[face] = Math.min(totalDice, Math.max(lowest + params.maxRaise, band));
+        }
         List<AbstractAction> actions = new ArrayList<>();
-        // no bid may be for more dice than are on the table
         for (int quantity = 1; quantity <= totalDice; quantity++) {
-            for (int face = 1; face <= nFaces; face++) {
-                // only a Palifico round may open on Pacos
-                if (state.hasBid() ? isRaise(state, quantity, face) : face != PACO || state.isPalificoRound())
+            for (int face = 1; face <= params.nFaces; face++) {
+                if (quantity >= from[face] && quantity <= to[face])
                     actions.add(new Bid(quantity, face));
             }
         }
@@ -68,20 +82,23 @@ public class PerudoForwardModel extends StandardForwardModel {
     }
 
     /**
-     * Whether the bid raises the current one.
+     * The fewest dice that may be bid on the face, or -1 if no bid on it is legal.
      */
-    private boolean isRaise(PerudoGameState state, int quantity, int face) {
+    private int lowestBid(PerudoGameState state, int face) {
+        // only a Palifico round may open on Pacos
+        if (!state.hasBid())
+            return face != PACO || state.isPalificoRound() ? 1 : -1;
         int bidQuantity = state.getBidQuantity();
         // in a Palifico round the face is fixed
         if (state.isPalificoRound())
-            return face == state.getBidFace() && quantity > bidQuantity;
+            return face == state.getBidFace() ? bidQuantity + 1 : -1;
         // from Pacos: more Pacos, or more than twice as many dice of another face
         if (state.getBidFace() == PACO)
-            return face == PACO ? quantity > bidQuantity : quantity >= 2 * bidQuantity + 1;
+            return face == PACO ? bidQuantity + 1 : 2 * bidQuantity + 1;
         // to Pacos: at least half as many, rounded up
         if (face == PACO)
-            return quantity >= (bidQuantity + 1) / 2;
-        return quantity > bidQuantity || (quantity == bidQuantity && face > state.getBidFace());
+            return (bidQuantity + 1) / 2;
+        return face > state.getBidFace() ? bidQuantity : bidQuantity + 1;
     }
 
     @Override

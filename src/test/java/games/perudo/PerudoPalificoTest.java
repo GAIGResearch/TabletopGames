@@ -26,7 +26,7 @@ public class PerudoPalificoTest {
     AbstractForwardModel fm;
 
     private void start(int nPlayers, PerudoParameters params) {
-        Game g = params == null ? newGame(nPlayers, 21) : newGame(nPlayers, 21, params);
+        Game g = newGame(nPlayers, 21, params);
         state = (PerudoGameState) g.getGameState();
         fm = g.getForwardModel();
     }
@@ -75,7 +75,7 @@ public class PerudoPalificoTest {
 
     @Test
     public void withPalificoOffADropToOneDieStartsANormalRound() {
-        start(3, null);
+        start(3, allBidsParams());
         dropPlayer0ToOneDie();
         assertEquals(1, state.getNDice(0));
         assertEquals(0, state.getCurrentPlayer());

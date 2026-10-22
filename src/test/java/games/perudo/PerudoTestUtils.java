@@ -36,14 +36,22 @@ class PerudoTestUtils {
         return g;
     }
 
-    static PerudoParameters palificoParams() {
+    /** Parameters that offer every legal bid, with no limit on the quantities. */
+    static PerudoParameters allBidsParams() {
         PerudoParameters params = new PerudoParameters();
+        params.setParameterValue("minBidPercent", 0);
+        params.setParameterValue("maxRaise", 100);
+        return params;
+    }
+
+    static PerudoParameters palificoParams() {
+        PerudoParameters params = allBidsParams();
         params.setParameterValue("palifico", true);
         return params;
     }
 
     static PerudoParameters calzaParams() {
-        PerudoParameters params = new PerudoParameters();
+        PerudoParameters params = allBidsParams();
         params.setParameterValue("calza", true);
         return params;
     }
@@ -54,9 +62,9 @@ class PerudoTestUtils {
         return params;
     }
 
-    /** A state set up directly (no Game) with default parameters and the given seed. */
+    /** A state set up directly (no Game) with every legal bid offered and the given seed. */
     static PerudoGameState newState(int nPlayers, long seed) {
-        PerudoParameters params = new PerudoParameters();
+        PerudoParameters params = allBidsParams();
         params.setRandomSeed(seed);
         return newState(params, nPlayers);
     }
