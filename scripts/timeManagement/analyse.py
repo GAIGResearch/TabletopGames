@@ -1,5 +1,5 @@
 """
-Win rates and time use from run_matchup.py output directories.
+Win rates and time use from run_matchup.py or run_tournament.py output directories (two-player games).
 
 usage: python3 analyse.py OUTDIR [OUTDIR ...]
 """
@@ -7,8 +7,12 @@ import csv, glob, math, os, sys
 from collections import defaultdict
 
 
+def output_files(outdir, name):
+    return glob.glob(os.path.join(outdir, "run*", name)) + glob.glob(os.path.join(outdir, "chunk*", name))
+
+
 def games(outdir):
-    for f in glob.glob(os.path.join(outdir, "run*", "GAME_OVER.csv")):
+    for f in output_files(outdir, "GAME_OVER.csv"):
         for row in csv.DictReader(open(f)):
             types = [row["PlayerType(PlayerType-%d)" % p] for p in (0, 1)]
             ranks = [int(row["OrdinalPosition(Player-%d)" % p]) for p in (0, 1)]
@@ -16,22 +20,26 @@ def games(outdir):
 
 
 def decisions(outdir):
-    for f in glob.glob(os.path.join(outdir, "run*", "ACTION_CHOSEN.csv")):
+    for f in output_files(outdir, "ACTION_CHOSEN.csv"):
         yield from csv.DictReader(open(f))
 
 
 def analyse(outdir):
-    score, n, first = defaultdict(float), defaultdict(int), defaultdict(float)
+    score, n, first, n_first = defaultdict(float), defaultdict(int), defaultdict(float), defaultdict(int)
+    pair_score, pair_n = defaultdict(float), defaultdict(int)
     for types, ranks in games(outdir):
         for p in (0, 1):
             s = 0.5 if ranks[0] == ranks[1] else (1.0 if ranks[p] < ranks[1 - p] else 0.0)
             score[types[p]] += s
             n[types[p]] += 1
+            pair_score[(types[p], types[1 - p])] += s
+            pair_n[(types[p], types[1 - p])] += 1
             if p == 0:
                 first[types[p]] += s
+                n_first[types[p]] += 1
     names = sorted(n)
-    if len(names) != 2:
-        print(outdir, "unexpected players", names)
+    if not names:
+        print(outdir, "no games")
         return
     rows = list(decisions(outdir))
     per_game = defaultdict(lambda: defaultdict(int))
@@ -55,7 +63,12 @@ def analyse(outdir):
         totals = list(per_game[t].values())
         st = stats[t]
         print("%-9s win %.1f%% (95%% CI %.1f-%.1f) over %d games; as first player %.1f%%" %
-              (t, 100 * w, 100 * (w - 1.96 * se), 100 * (w + 1.96 * se), games_played, 200 * first[t] / games_played))
+              (t, 100 * w, 100 * (w - 1.96 * se), 100 * (w + 1.96 * se), games_played,
+               100 * first[t] / max(n_first[t], 1)))
+        if len(names) > 2:
+            print("          against: " + ", ".join("%s %.1f%% (%d)" % (o, 100 * pair_score[(t, o)] / pair_n[(t, o)],
+                                                                       pair_n[(t, o)])
+                                                  for o in names if pair_n[(t, o)] > 0))
         print("          clock used per game: mean %.0f ms, max %d ms; min clock left %d ms; decisions/game %.1f;"
               " stopped early %.0f%%, extended %.0f%%; iterations/s %.0f" %
               (sum(totals) / len(totals), max(totals), st["minClock"], st["decisions"] / len(totals),
