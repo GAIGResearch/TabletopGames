@@ -233,10 +233,15 @@ public class MCTSTimeManager {
     }
 
     /**
-     * The mean value of the action rescaled from the heuristic's range to [0, 1], so a draw counts as half a win
+     * The mean value of the action rescaled to [0, 1], so with rewards of -1, 0 and 1 a draw counts as half a win
      */
     double winRate(SingleTreeNode root, AbstractAction action) {
-        double min = params.heuristic.minValue(), max = params.heuristic.maxValue();
+        // the range of rewards seen in the search (as used to normalise UCB), or else the heuristic's range
+        double min = root.lowReward, max = root.highReward;
+        if (!(max > min)) {
+            min = params.heuristic.minValue();
+            max = params.heuristic.maxValue();
+        }
         return (root.meanActionValue(action) - min) / (max - min);
     }
 

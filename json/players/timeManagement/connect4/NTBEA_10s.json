@@ -1,0 +1,23 @@
+{
+  "class": "players.mcts.MCTSParams",
+  "budgetType": "BUDGET_GAME_SECONDS",
+  "budget": 10,
+  "treePolicy": "UCB_Tuned",
+  "K": 1.3,
+  "selectionPolicy": "ROBUST",
+  "information": "Closed_Loop",
+  "rolloutType": "RANDOM",
+  "rolloutLength": 1000,
+  "maxTreeDepth": 1000,
+  "timeFactor": 3.0,
+  "earlyStopP": 0.4,
+  "midCentre": 9.0,
+  "midWidth": 2.0,
+  "behindLoops": 1,
+  "behindFactor": 1.5,
+  "unstableLoops": 2,
+  "unstableFactor": 0.75,
+  "closeLoops": 1,
+  "closeThreshold": 0.8,
+  "closeFactor": 0.5
+}
