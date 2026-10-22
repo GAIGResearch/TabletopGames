@@ -52,7 +52,7 @@ public class DominionForwardModel extends StandardForwardModel {
         state.defenceStatus = new boolean[state.getNPlayers()];  // defaults to false
 
         int victoryCards = params.VICTORY_CARDS_PER_PLAYER[state.getNPlayers()];
-        state.cardsIncludedInGame = new HashMap<>(16);
+        state.cardsIncludedInGame = new EnumMap<>(CardType.class);
         state.cardsIncludedInGame.put(CardType.PROVINCE, victoryCards);
         state.cardsIncludedInGame.put(CardType.DUCHY, victoryCards);
         state.cardsIncludedInGame.put(CardType.ESTATE, victoryCards);
