@@ -21,9 +21,14 @@ def games(outdir):
 
 def decisions(outdir):
     for f in output_files(outdir, "ACTION_CHOSEN.csv"):
+        seen = set()
         for row in csv.DictReader(open(f)):
             row["file"] = f  # game IDs restart in each output directory
-            yield row
+            # before fb92401 the metric could record a search a second time (after a decision with one action)
+            key = (row["GameID"], row["TimeManagement(PlayerID)"], row["TimeManagement(Decision)"])
+            if key not in seen:
+                seen.add(key)
+                yield row
 
 
 def analyse(outdir):
