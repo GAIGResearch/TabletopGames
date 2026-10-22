@@ -13,6 +13,7 @@ import utilities.JSONUtils;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 
 import static core.CoreConstants.VisibilityMode;
 
@@ -41,7 +42,9 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     public Deck(String name, int ownerId, VisibilityMode visibility) {
         super(CoreConstants.ComponentType.DECK, name);
-        this.components = new LinkedList<>();   // we always add new components to element 0...so an ArrayList is inefficient
+        // Most access is by index (get, peek, pick, iteration), but the top of the deck is index 0, so we need a list
+        // with constant-time indexed access that is also fast at the front (unlike an ArrayList or a LinkedList).
+        this.components = new CircularArrayList<>();
         this.ownerId = ownerId;
         this.capacity = -1;
         this.visibility = visibility;
@@ -49,7 +52,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     protected Deck(String name, int ownerId, int ID, VisibilityMode visibility) {
         super(CoreConstants.ComponentType.DECK, name, ID);
-        this.components = new LinkedList<>();
+        this.components = new CircularArrayList<>();
         this.capacity = -1;
         this.ownerId = ownerId;
         this.visibility = visibility;
@@ -62,7 +65,8 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
 
-    // Iterator implementation
+    // Iterator implementation. This works by index (rather than using components.iterator()) so that it does not
+    // throw a ConcurrentModificationException if the deck is changed during iteration.
     private class DeckIterator implements Iterator<T> {
         private int currentIndex = 0;
 
@@ -276,9 +280,6 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      * @return true if within capacity, false otherwise.
      */
     public boolean add(T c) {
-        if (c != null) {
-            c.setOwnerId(ownerId);
-        }
         return add(c, 0);
     }
 
@@ -334,6 +335,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         return capacity == -1 || components.size() <= capacity;
     }
 
+    // add(Deck, int) does not delegate to add(Collection, int), as PartialObservableDeck overrides both
     public boolean add(Collection<T> d) {
         return this.add(d, 0);
     }
@@ -438,7 +440,8 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      * @param components - new components for the deck, overrides old content.
      */
     public void setComponents(List<T> components) {
-        this.components = components;
+        // copied into the list type we need (see constructor)
+        this.components = new CircularArrayList<>(components);
         for (T comp : components) {
             comp.setOwnerId(ownerId);
         }
@@ -508,25 +511,19 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         return dp;
     }
 
-    @SuppressWarnings("unchecked")
     protected void copyTo(Deck<T> deck) {
-        List<T> newComponents = new LinkedList<>();
-        for (T c : components) {
-            newComponents.add((T) c.copy());
-        }
-        deck.components = newComponents;
-        deck.capacity = capacity;
-
-        //copy type and component.
-        copyComponentTo(deck);
+        copyTo(deck, Component::copy);
     }
 
+    protected void copyTo(Deck<T> deck, int playerId) {
+        copyTo(deck, c -> c.copy(playerId));
+    }
 
     @SuppressWarnings("unchecked")
-    protected void copyTo(Deck<T> deck, int playerId) {
-        List<T> newComponents = new LinkedList<>();
+    private void copyTo(Deck<T> deck, Function<Component, Component> copier) {
+        List<T> newComponents = new CircularArrayList<>(components.size());
         for (T c : components) {
-            newComponents.add((T) c.copy(playerId));
+            newComponents.add((T) copier.apply(c));
         }
         deck.components = newComponents;
         deck.capacity = capacity;

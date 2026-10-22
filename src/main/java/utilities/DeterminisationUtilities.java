@@ -3,7 +3,6 @@ package utilities;
 import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -207,38 +206,9 @@ public class DeterminisationUtilities {
     private static <C extends Component> List<Slot<C>> hiddenSlots(int player, List<Deck<C>> decks, Predicate<C> lambda) {
         List<Slot<C>> retValue = new ArrayList<>();
         for (Deck<C> d : decks) {
-            int length = d.getSize();
-            if (d instanceof PartialObservableDeck<C> pod) {
-                for (int i = 0; i < length; i++) {
-                    if (!pod.getVisibilityForPlayer(i, player) && lambda.test(pod.get(i)))
-                        retValue.add(new Slot<>(d, i));
-                }
-            } else {
-                switch (d.getVisibilityMode()) {
-                    case VISIBLE_TO_ALL:
-                        // don't shuffle
-                        break;
-                    case VISIBLE_TO_OWNER:
-                        if (d.getOwnerId() == player)
-                            break;
-                    case HIDDEN_TO_ALL:
-                        for (int i = 0; i < length; i++)
-                            if (lambda.test(d.get(i)))
-                                retValue.add(new Slot<>(d, i));
-                        break;
-                    case TOP_VISIBLE_TO_ALL:
-                        for (int i = 1; i < length; i++)
-                            if (lambda.test(d.get(i)))
-                                retValue.add(new Slot<>(d, i));
-                        break;
-                    case BOTTOM_VISIBLE_TO_ALL:
-                        for (int i = 0; i < length - 1; i++)
-                            if (lambda.test(d.get(i)))
-                                retValue.add(new Slot<>(d, i));
-                        break;
-                    case MIXED_VISIBILITY:
-                        throw new AssertionError("Not supported : MIXED_VISIBILITTY");
-                }
+            for (int i = 0; i < d.getSize(); i++) {
+                if (!d.isVisibleTo(i, player) && lambda.test(d.get(i)))
+                    retValue.add(new Slot<>(d, i));
             }
         }
         return retValue;

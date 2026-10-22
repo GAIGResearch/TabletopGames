@@ -18,10 +18,15 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     protected boolean[] deckVisibility;
 
     // Visibility of each component in the deck, order corresponds to order of elements in the deck;
-    protected List<boolean[]> elementVisibility = new LinkedList<>();
+    protected List<boolean[]> elementVisibility = new CircularArrayList<>();
 
     public boolean getVisibilityForPlayer(int elementIdx, int playerID) {
         return elementVisibility.get(elementIdx)[playerID];
+    }
+
+    @Override
+    public boolean isVisibleTo(int index, int playerId) {
+        return getVisibilityForPlayer(index, playerId);
     }
 
     public boolean[] getVisibilityOfComponent(int elementIdx) {
@@ -109,7 +114,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      */
     public void setComponents(List<T> components, List<boolean[]> visibilityPerPlayer) {
         super.setComponents(components);
-        this.elementVisibility = visibilityPerPlayer;
+        this.elementVisibility = new CircularArrayList<>(visibilityPerPlayer);
     }
 
 
@@ -319,8 +324,8 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * @return - both lists shuffled, keeping the mapping from component to visibility at the same index.
      */
     private Pair<List<T>, List<boolean[]>> shuffleLists(List<T> comps, List<boolean[]> vis, Random rnd) {
-        List<T> tmp_components = new LinkedList<>();
-        List<boolean[]> tmp_visibility = new LinkedList<>();
+        List<T> tmp_components = new CircularArrayList<>();
+        List<boolean[]> tmp_visibility = new CircularArrayList<>();
 
         List<Integer> indexList = new ArrayList<>(comps.size());
         for (int i = 0; i < comps.size(); i++)
@@ -409,7 +414,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         deck.visibility = VisibilityMode.valueOf((String) json.get("visibility"));
         deck.capacity = ((Number) json.get("capacity")).intValue();
         populateComponents(deck, json);
-        List<boolean[]> elementVisibility = new LinkedList<>();
+        List<boolean[]> elementVisibility = new CircularArrayList<>();
         for (Object o : (JSONArray) json.get("elementVisibility"))
             elementVisibility.add(JSONUtils.booleanArrayFromJSON((JSONArray) o));
         deck.elementVisibility = elementVisibility;
@@ -437,7 +442,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         dp.visibility = visibility;
         dp.deckVisibility = deckVisibility.clone();
 
-        ArrayList<boolean[]> newVisibility = new ArrayList<>();
+        List<boolean[]> newVisibility = new CircularArrayList<>(elementVisibility.size());
         for (boolean[] visibility : elementVisibility) {
             newVisibility.add(visibility.clone());
         }
