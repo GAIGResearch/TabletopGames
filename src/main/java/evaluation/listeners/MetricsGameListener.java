@@ -138,7 +138,7 @@ public class MetricsGameListener implements IGameListener {
             for (IGameEvent event : eventsOfInterest) {
                 List<AbstractMetric> eventMetrics = new ArrayList<>();
                 for (AbstractMetric metric : metrics.values()) {
-                    if (metric.listens(event)) {
+                    if (metric.recordsDataFor(event)) {
                         eventMetrics.add(metric);
                     }
                 }

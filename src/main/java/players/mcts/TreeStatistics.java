@@ -27,6 +27,10 @@ public class TreeStatistics {
     public int oneActionNodes;
 
 
+    /**
+     * Nodes are the entries in the transposition map. A node's depth is that at which it was first inserted (one more
+     * than the node it was expanded from), not its shortest distance from the root.
+     */
     public void mcgsStats(MCGSNode root) {
         Map<Object, MCGSNode> transpositionMap = root.getTranspositionMap();
         totalNodes = transpositionMap.size();
@@ -48,7 +52,7 @@ public class TreeStatistics {
 
         // totalTerminalNodes = (int) transpositionMap.values().stream().filter(n -> !n.state.isNotTerminal()).count();
         leafDistribution = IntStream.range(0, depthReached + 1)
-                .mapToDouble(i -> byDepth.getOrDefault(i, new ArrayList<>()).stream().filter(n -> n.nVisits == 0).count() / (double) totalLeaves)
+                .mapToDouble(i -> byDepth.getOrDefault(i, new ArrayList<>()).stream().filter(n -> n.nVisits <= root.params.initialiseVisits).count() / (double) totalLeaves)
                 .toArray();
         meanLeafDepth = totalLeaves > 0 ? IntStream.range(0, depthReached + 1).mapToDouble(i -> i * leafDistribution[i]).sum() : 0;
         meanNodeDepth = IntStream.range(0, depthReached + 1).mapToDouble(i -> i * nodeDistribution[i]).sum();

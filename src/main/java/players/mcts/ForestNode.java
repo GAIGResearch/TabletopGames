@@ -77,6 +77,13 @@ public class ForestNode extends SingleTreeNode {
         };
     }
 
+    /**
+     * The root of each determinisation's tree; null for any not yet searched.
+     */
+    public List<SingleTreeNode> getRoots() {
+        return Collections.unmodifiableList(Arrays.asList(roots));
+    }
+
     @Override
     public double getValue(AbstractAction action) {
         // we average over the value for all roots

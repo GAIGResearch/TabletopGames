@@ -185,6 +185,14 @@ public abstract class AbstractMetric {
     }
 
     /**
+     * @return true if this metric records rows for the given game event type. A metric may listen to an event only to
+     * accumulate data that it records on another event; it is then left out of that event's raw data file.
+     */
+    public boolean recordsDataFor(IGameEvent eventType) {
+        return listens(eventType);
+    }
+
+    /**
      * @return true if this metric should filter data in table by event type when reporting, creating several
      * tables of separate relevant data instead of one. Default behaviour is true. May override to return false
      * if the metric is not event-specific or would like to keep all data together.
