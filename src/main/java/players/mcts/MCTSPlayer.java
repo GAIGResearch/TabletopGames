@@ -301,8 +301,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         root.timeManager = tm;
         root.mctsSearch(timeTaken / 1000000);
         lastSearchTick = gameState.getGameTick();
-        if (tm != null)
-            tm.endDecision();
 
         if (getParameters().actionHeuristic instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().actionHeuristic).process(root);
@@ -323,6 +321,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
         checkRootChildCount(root, actions, gameState);
         lastAction = Pair.of(gameState.getCurrentPlayer(), root.bestAction());
+        if (tm != null)
+            tm.endDecision(root.timeTaken);
         return lastAction.b.copy();
     }
 

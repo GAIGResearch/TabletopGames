@@ -48,6 +48,8 @@ public class MCTSTimeManager {
     private double[] decisionTable;
     private ElapsedCpuChessTimer gameTimer;
     private int decisionsMade;
+    // moving average of the time charged to a decision outside its search (milliseconds)
+    private double overheadMillis;
 
     // Statistics on the current (or last) decision
     private long plannedBudget;
@@ -160,7 +162,7 @@ public class MCTSTimeManager {
      * @return the search time in milliseconds
      */
     long allocate(long remainingMillis) {
-        long available = remainingMillis - params.clockReserveMS;
+        long available = availableMillis(remainingMillis);
         double share = available / expectedRemainingDecisions();
         share *= params.timeFactor;
         if (params.midHeight != 0.0) {
@@ -170,6 +172,16 @@ public class MCTSTimeManager {
                     / (2.0 * params.midWidth * params.midWidth));
         }
         return (long) Math.max(params.minMoveTimeMS, Math.min(share, available));
+    }
+
+    /**
+     * The time that can be spent on the current search: the clock less the reserve, the overhead of this decision,
+     * and the least that each later decision will need (its minimum search and overhead), so that the clock is not
+     * overrun when the game lasts as long as expected.
+     */
+    private long availableMillis(long remainingMillis) {
+        double later = (expectedRemainingDecisions() - 1) * (params.minMoveTimeMS + overheadMillis);
+        return (long) (remainingMillis - params.clockReserveMS - overheadMillis - later);
     }
 
     /**
@@ -224,7 +236,7 @@ public class MCTSTimeManager {
         // adds the same amount
         long budget = (long) (factor * plannedBudget);
         if (params.budgetType == BUDGET_GAME_SECONDS) {
-            long available = gameTimer.remainingTimeMillis() - gameTimer.elapsedMillis() - params.clockReserveMS;
+            long available = availableMillis(gameTimer.remainingTimeMillis() - gameTimer.elapsedMillis());
             budget = Math.min(budget, available);
             if (budget < params.minMoveTimeMS)
                 return 0;
@@ -264,10 +276,16 @@ public class MCTSTimeManager {
     }
 
     /**
-     * Called after each search.
+     * Called at the end of each decision that was searched.
+     *
+     * @param searchMillis - the time spent in the search
      */
-    public void endDecision() {
+    public void endDecision(double searchMillis) {
         decisionsMade++;
+        if (gameTimer != null) {
+            double overhead = Math.max(0.0, gameTimer.elapsedMillis() - searchMillis);
+            overheadMillis = overheadMillis == 0.0 ? overhead : 0.8 * overheadMillis + 0.2 * overhead;
+        }
     }
 
     /**

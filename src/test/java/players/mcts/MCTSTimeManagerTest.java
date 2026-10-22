@@ -76,11 +76,12 @@ public class MCTSTimeManagerTest {
     public void expDividesRemainingTimeByExpectedDecisions() {
         MCTSParams params = params(PlayerConstants.BUDGET_GAME_SECONDS, 20);
         MCTSTimeManager tm = manager(params);
-        assertEquals((20_000 - 50) / 30, tm.allocate(20_000));
+        // the reserve, and the minimum search for each of the other 29 decisions, are not shared out
+        assertEquals((20_000 - 50 - 29 * 10) / 30, tm.allocate(20_000));
 
         params.setParameterValue("expectedDecisions", 10.0);
         params.setParameterValue("timeFactor", 2.0);
-        assertEquals(2 * (20_000 - 50) / 10, manager(params).allocate(20_000));
+        assertEquals(2 * (20_000 - 50 - 9 * 10) / 10, manager(params).allocate(20_000));
     }
 
     @Test
@@ -103,11 +104,11 @@ public class MCTSTimeManagerTest {
         params.setParameterValue("midWidth", 1.0);
         MCTSTimeManager tm = manager(params);
         // decision 1 is two widths from the centre
-        assertEquals((long) (1005 * (1 + 2 * Math.exp(-2))), tm.allocate(10_100));
-        tm.endDecision();
-        tm.endDecision();
+        assertEquals((long) (996 * (1 + 2 * Math.exp(-2))), tm.allocate(10_100));
+        tm.endDecision(0);
+        tm.endDecision(0);
         // decision 3 is at the centre
-        assertEquals(3 * 1005, tm.allocate(10_100));
+        assertEquals(3 * 996, tm.allocate(10_100));
     }
 
     @Test
@@ -120,7 +121,7 @@ public class MCTSTimeManagerTest {
         double[] expected = {20, 19.5, 4, 2.5, 2.5};
         for (double m : expected) {
             assertEquals(m, tm.expectedRemainingDecisions(), 1e-9);
-            tm.endDecision();
+            tm.endDecision(0);
         }
         tm.newGame(GameType.TicTacToe.createGameInstance(2, 1).getGameState());
         assertEquals(20, tm.expectedRemainingDecisions(), 1e-9);
