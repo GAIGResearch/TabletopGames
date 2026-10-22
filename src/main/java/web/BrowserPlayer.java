@@ -107,10 +107,11 @@ class BrowserPlayer extends HumanGUIPlayer {
             return null;
         }
         for (Iterator<AbstractAction> it = planned.iterator(); it.hasNext(); ) {
-            AbstractAction a = it.next();
-            if (actions.contains(a)) {
+            int i = actions.indexOf(it.next());
+            if (i >= 0) {
                 it.remove();
-                return a;
+                // the forward model's own action: carrying it out leaves the planned one as it was planned
+                return actions.get(i);
             }
         }
         AbstractAction fallback = planner.fallback(observation, actions);

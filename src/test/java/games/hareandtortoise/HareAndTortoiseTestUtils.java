@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import games.GameType;
 import games.hareandtortoise.actions.Move;
 import games.hareandtortoise.components.HareCard;
+import games.hareandtortoise.components.HareCardType;
 import players.simple.RandomPlayer;
 
 import java.util.ArrayList;
@@ -106,10 +107,10 @@ final class HareAndTortoiseTestUtils {
      * Reorders the existing 12 hare cards so that the given types are at the top (index 0 first) in that order; the
      * other cards follow in their current order. Conserves the cards: fails if a type is not available.
      */
-    static void stackHareDeck(HareAndTortoiseGameState state, HareCard.Type... top) {
+    static void stackHareDeck(HareAndTortoiseGameState state, HareCardType... top) {
         List<HareCard> rest = new ArrayList<>(state.hareDeck.getComponents());
         List<HareCard> ordered = new ArrayList<>();
-        for (HareCard.Type type : top) {
+        for (HareCardType type : top) {
             HareCard found = null;
             for (HareCard c : rest)
                 if (c.type == type) {
@@ -129,8 +130,8 @@ final class HareAndTortoiseTestUtils {
     /**
      * The types of the hare cards, top (index 0) first.
      */
-    static List<HareCard.Type> hareTypes(HareAndTortoiseGameState state) {
-        List<HareCard.Type> types = new ArrayList<>();
+    static List<HareCardType> hareTypes(HareAndTortoiseGameState state) {
+        List<HareCardType> types = new ArrayList<>();
         for (HareCard c : state.hareDeck.getComponents())
             types.add(c.type);
         return types;

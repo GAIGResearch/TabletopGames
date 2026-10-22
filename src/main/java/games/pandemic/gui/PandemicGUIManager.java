@@ -55,6 +55,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
     PandemicCardView[] playerCards;
     JLabel[][] playerHandCardCounts;
     ArrayList<PandemicCardView>[] playerHands;
+    // each player's hand, laid out handColumns cards to a row
+    JPanel[] handPanels;
+    static final int handColumns = 4, roleCardHeight = 56, sideWidth = 600;
+    // shown only while it holds cards
+    JScrollPane bufferArea;
     ArrayList<PandemicCardView> bufferDeck;
     PandemicBoardView boardView;
     PandemicCounterView cY, cR, cB, cK;
@@ -64,14 +69,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
     int nPlayers;
     int maxCards;
     int maxBufferCards = 50;
-    int panelWidth;
 
     ArrayList<Integer>[] handCardHighlights;
     HashSet<Integer> playerHighlights;
     ArrayList<Integer> bufferHighlights;
 
-    // Game state info
-    JLabel gameTurnStep;
 
     public PandemicGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
@@ -101,27 +103,23 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
         boardView.setPlayerHighlights(playerHighlights);
         boardView.setCardHandHighlights(handCardHighlights);
 
-        gameTurnStep = new JLabel();
-        JPanel gameStateInfo = createGameStateInfoPanel(gameState);
+        JPanel gameStateInfo = createGameStateInfoPanel("Pandemic", gameState, sideWidth, defaultInfoPanelHeight);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
         JComponent actionPanel = createActionPanel(new IScreenHighlight[]{this}, 300, 80, this::bufferReset);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
-        side.add(gameStateInfo);
-        side.add(playerAreas);
-        side.add(actionPanel);
+        for (JComponent c : new JComponent[]{gameStateInfo, playerAreas, actionPanel}) {
+            c.setAlignmentX(Component.LEFT_ALIGNMENT);
+            side.add(c);
+        }
+        side.add(Box.createVerticalGlue());
 
 
         parent.setLayout(new BorderLayout());
         parent.add(side, BorderLayout.EAST);
         parent.add(boardView, BorderLayout.CENTER);
         parent.add(counterArea, BorderLayout.SOUTH);
-
-        Dimension boardSize = boardView.getPreferredSize();
-        parent.setPreferredSize(new Dimension((int)(boardSize.getWidth() + panelWidth),
-                Math.max((int)boardSize.getHeight(),
-                        defaultInfoPanelHeight*2+nPlayers*cardHeight+nPlayers*offset*4) + defaultItemSize + offset));
 
         parent.revalidate();
         parent.setVisible(true);
@@ -137,32 +135,35 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
         for (PandemicCardView pcv: bufferDeck) {
             pcv.setVisible(false);
         }
+        bufferArea.setVisible(false);
     }
 
+    /**
+     * Each player's role card and counts of the cards they hold by colour, and their hand in full, a few cards to a
+     * row; then the area that shows the cards of a deck being looked through.
+     */
     private JPanel createPlayerAreas() {
         JPanel cardAreas = new JPanel();
         cardAreas.setLayout(new BoxLayout(cardAreas, BoxLayout.Y_AXIS));
         playerCards = new PandemicCardView[nPlayers];
         playerHands = new ArrayList[nPlayers];
+        handPanels = new JPanel[nPlayers];
         playerHandCardCounts = new JLabel[nPlayers][];
 
-        JPanel playerAreas = new JPanel();
-        playerAreas.setLayout(new BoxLayout(playerAreas, BoxLayout.Y_AXIS));
-        JPanel[] playerDefs = new JPanel[nPlayers];
-
-        Dimension size = new Dimension(cardWidth * 3+offset, cardHeight+offset*2);
-        Dimension size2 = new Dimension((int)(cardWidth * 4.5), cardHeight*4+offset*2);
-
         for (int i = 0; i < nPlayers; i++) {
-            playerDefs[i] = new JPanel();
-            playerDefs[i].setLayout(new BoxLayout(playerDefs[i], BoxLayout.Y_AXIS));
-            JPanel playerDef = new JPanel();
-            playerDef.setLayout(new BoxLayout(playerDef, BoxLayout.X_AXIS));
-            playerDefs[i].add(new JLabel("Player " + i + " [" + game.getPlayers().get(i).toString() + "]"));
-            playerDefs[i].add(playerDef);
+            JPanel playerArea = new JPanel();
+            playerArea.setLayout(new BoxLayout(playerArea, BoxLayout.Y_AXIS));
+            playerArea.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+            playerArea.setAlignmentX(Component.LEFT_ALIGNMENT);
+            JLabel name = new JLabel("Player " + i + " [" + game.getPlayers().get(i).toString() + "]");
+            name.setFont(name.getFont().deriveFont(Font.BOLD));
+            // room to spare: text drawn scaled (as the web server draws the GUI) can come out wider than measured
+            name.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+            name.setAlignmentX(Component.LEFT_ALIGNMENT);
+            playerArea.add(name);
 
             Card playerCard = (Card) gameState.getComponent(PandemicConstants.playerCardHash, i);
-            PandemicCardView cv = new PandemicCardView(playerCard);
+            PandemicCardView cv = new PandemicCardView(playerCard, cardWidth, roleCardHeight);
             int player = i;
             cv.addMouseListener(new MouseAdapter() {
                 @Override
@@ -177,58 +178,47 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                 }
             });
             playerCards[i] = cv;
-            JPanel wrapInfo = new JPanel();
-            wrapInfo.setPreferredSize(new Dimension(cardWidth, (int)(cardHeight*1.5)+offset));
-            wrapInfo.setLayout(new BoxLayout(wrapInfo, BoxLayout.Y_AXIS));
-            wrapInfo.add(cv);
-            String[] txts = new String[colors.length/2+1];
-            txts[txts.length-1] = "event: 0";
-            int idx = -1;
-            for (int c = 0; c < colors.length; c++) {
-                if (c % 2 == 0) idx++;
-                if (txts[idx] == null) txts[idx] = "";
-                txts[idx] += colors[c] + ": 0; ";
+            JPanel counts = new JPanel();
+            counts.setLayout(new BoxLayout(counts, BoxLayout.Y_AXIS));
+            JLabel[] countLabels = new JLabel[colors.length / 2 + 1];
+            for (int c = 0; c < countLabels.length; c++) {
+                countLabels[c] = new JLabel(" ");
+                countLabels[c].setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+                counts.add(countLabels[c]);
             }
-            JLabel[] counts = new JLabel[txts.length];
-            for (int c = 0; c < txts.length; c++) {
-                counts[c] = new JLabel(txts[c]);
-                wrapInfo.add(counts[c]);
-            }
-            playerHandCardCounts[i] = counts;
-            playerDef.add(Box.createRigidArea(new Dimension(5,0)));
-            playerDef.add(wrapInfo);
+            playerHandCardCounts[i] = countLabels;
+            JPanel role = new JPanel();
+            role.setLayout(new BoxLayout(role, BoxLayout.Y_AXIS));
+            cv.setAlignmentX(Component.LEFT_ALIGNMENT);
+            counts.setAlignmentX(Component.LEFT_ALIGNMENT);
+            role.add(cv);
+            role.add(counts);
+            // wide enough for the counts at their longest, so that the column does not change width as they change
+            Dimension roleSize = new Dimension(Math.max(cardWidth + offset,
+                    new JLabel("yellow: 00; red: 00; ").getPreferredSize().width + 10), role.getPreferredSize().height);
+            role.setPreferredSize(roleSize);
+            role.setMinimumSize(roleSize);
+            role.setMaximumSize(roleSize);
 
-            JPanel hand = new JPanel();
-            hand.setLayout(new BoxLayout(hand, BoxLayout.X_AXIS));
-            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(playerHandHash, i);
+            handPanels[i] = new JPanel(new GridLayout(0, handColumns, 3, 3));
             playerHands[i] = new ArrayList<>();
-            for (int k = 0; k < maxCards; k++) {
-                Card c = null;
-                if (k < playerHand.getSize()) {
-                    c = playerHand.peek(k);
-                }
-                PandemicCardView cv2 = getCardView(i, c, k);
-                hand.add(cv2);
-            }
-            JScrollPane scrollPane = new JScrollPane(hand);
-            scrollPane.setPreferredSize(size);
-            scrollPane.setMinimumSize(size);
-            scrollPane.setMaximumSize(size);
-            scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-            scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
-            playerDef.add(scrollPane);
-            playerDef.add(Box.createRigidArea(new Dimension(5,0)));
-            playerAreas.add(playerDefs[i]);
-        }
+            Deck<Card> playerHand = (Deck<Card>) gameState.getComponent(playerHandHash, i);
+            for (int k = 0; k < maxCards; k++)
+                getCardView(i, k < playerHand.getSize() ? playerHand.peek(k) : null, k);
+            layOutHand(i, playerHand.getSize());
 
-        JScrollPane scrollPane1 = new JScrollPane(playerAreas);
-        scrollPane1.setPreferredSize(size2);
-        scrollPane1.setMinimumSize(size2);
-        scrollPane1.setMaximumSize(size2);
-        scrollPane1.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane1.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-        cardAreas.add(scrollPane1);
-//        cardAreas.add(playerAreas);
+            JPanel row = new JPanel();
+            row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+            role.setAlignmentY(Component.TOP_ALIGNMENT);
+            handPanels[i].setAlignmentY(Component.TOP_ALIGNMENT);
+            row.add(role);
+            row.add(Box.createRigidArea(new Dimension(8, 0)));
+            row.add(handPanels[i]);
+            row.setAlignmentX(Component.LEFT_ALIGNMENT);
+            playerArea.add(row);
+            playerArea.setMaximumSize(new Dimension(Integer.MAX_VALUE, playerArea.getPreferredSize().height));
+            cardAreas.add(playerArea);
+        }
 
         // Buffer deck space
         JPanel bufferDeckArea = new JPanel();
@@ -254,15 +244,31 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
             bufferDeckArea.add(cv);
         }
 
-        JScrollPane scrollPane = new JScrollPane(bufferDeckArea);
-        scrollPane.setMaximumSize(size);
-        scrollPane.setMinimumSize(size);
-        scrollPane.setPreferredSize(size);
-        scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
-        scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-        cardAreas.add(scrollPane);
+        bufferArea = new JScrollPane(bufferDeckArea);
+        Dimension size = new Dimension(sideWidth, cardHeight + offset * 2 + 15);
+        bufferArea.setMaximumSize(size);
+        bufferArea.setPreferredSize(size);
+        bufferArea.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
+        bufferArea.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
+        bufferArea.setAlignmentX(Component.LEFT_ALIGNMENT);
+        bufferArea.setVisible(false);
+        cardAreas.add(bufferArea);
 
         return cardAreas;
+    }
+
+    /**
+     * Shows the first nCards views of the player's hand, keeping room for at least two rows of cards so that the
+     * layout does not move as the hand changes.
+     */
+    private void layOutHand(int player, int nCards) {
+        JPanel hand = handPanels[player];
+        int slots = Math.max(nCards, 2 * handColumns);
+        while (playerHands[player].size() < slots) getCardView(player, null, playerHands[player].size());
+        if (hand.getComponentCount() == slots) return;
+        hand.removeAll();
+        for (int k = 0; k < slots; k++) hand.add(playerHands[player].get(k));
+        hand.revalidate();
     }
 
     private PandemicCardView getCardView(int player, Card c, int cardIdx) {
@@ -284,41 +290,10 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
         return cv2;
     }
 
-    protected JPanel createGameStateInfoPanel(AbstractGameState gameState) {
-
-        JPanel gameInfo = new JPanel();
-        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
-        gameInfo.add(new JLabel("<html><h1>Pandemic</h1></html>"));
-
-        updateGameStateInfo(gameState);
-
-        gameInfo.add(gameStatus);
-        gameInfo.add(gamePhase);
-        gameInfo.add(turn);
-        gameInfo.add(currentPlayer);
-        gameInfo.add(gameTurnStep);
-
-        gameInfo.setPreferredSize(new Dimension(220, defaultInfoPanelHeight+5));
-        panelWidth = 220;
-
-        JPanel wrapper = new JPanel();
-        wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.X_AXIS));
-        wrapper.add(gameInfo);
-
-        historyInfo.setEditable(false);
-        historyContainer = new JScrollPane(historyInfo);
-        historyContainer.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-        historyContainer.setPreferredSize(new Dimension(300, 30));
-        panelWidth += 300 + offset;
-        wrapper.add(historyContainer);
-
-        return wrapper;
-    }
-
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
         PandemicGameState pgs = (PandemicGameState) gameState;
-        gameTurnStep.setText("Turn step: " + ((PandemicTurnOrder)pgs.getTurnOrder()).getTurnStep());
+        turn.setText(turn.getText() + "; Turn step: " + ((PandemicTurnOrder) pgs.getTurnOrder()).getTurnStep());
     }
 
     private JPanel createCounterArea() {
@@ -374,14 +349,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
             int[] colourCount = new int[colors.length];
             int eventCount = 0;
 
+            layOutHand(i, nCards);
             for (int j = 0; j < nCards; j++) {
                 Card c = playerHand.peek(j);
-                if (j < playerHands[i].size()) {
-                    playerHands[i].get(j).updateComponent(c);
-                    playerHands[i].get(j).setVisible(true);
-                } else {
-                    getCardView(i, c, j);
-                }
+                playerHands[i].get(j).updateComponent(c);
+                playerHands[i].get(j).setVisible(true);
                 if (c.getProperty(colorHash) != null) {
                     colourCount[Utils.indexOf(colors, ((PropertyColor) c.getProperty(colorHash)).valueStr)]++;
                 } else {
@@ -390,7 +362,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
             }
             for (int j = nCards; j < playerHands[i].size(); j++) {
                 playerHands[i].get(j).updateComponent(null);
-                playerHands[i].get(j).setVisible(j == 0);
+                playerHands[i].get(j).setVisible(false);
             }
 
             // Update count of cards of colour in hand
@@ -487,12 +459,12 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                     if (c.getProperty(effectHash) == null || bnHighlights.contains(((MovePlayer) action).getDestination()) &&
                                 (pIdx == id || playerTokenHighlights.contains(pIdx))) {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                     }
                 } else if (bnHighlights.contains(((MovePlayer) action).getDestination()) &&
                         (pIdx == id || playerTokenHighlights.contains(pIdx))) {
                     actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                 }
             } else if (action instanceof AddResearchStation) {
                 Card playerRole = (Card) this.gameState.getComponentActingPlayer(playerCardHash);
@@ -505,17 +477,17 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                             if (!(action instanceof AddResearchStationWithCardFrom) ||
                                     isCardHighlighted(((AddResearchStationWithCardFrom)action).getCard(gameState), id)) {
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                             }
                         }
                     } else {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                     }
                 }
             } else if (actions.size() > 0 && action instanceof DoNothing || action instanceof TreatDisease) {
                 actionButtons[k].setVisible(true);
-                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
             } else if (action instanceof CureDisease) {
                 ArrayList<Integer> cards = ((CureDisease) action).getCards();
                 boolean allSelected = true;
@@ -527,11 +499,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                 }
                 if (allSelected) {
                     actionButtons[k].setVisible(true);
-                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                    actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                 }
             } else if (action instanceof QuietNight || action instanceof Forecast) {  // Event
                 actionButtons[k].setVisible(true);
-                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
             } else if (action instanceof RearrangeDeckOfCards) {  // Event
                 Card eventCard = ((RearrangeDeckOfCards)action).getCard(gameState);
                 int[] cardOrder = ((RearrangeDeckOfCards) action).getNewCardOrder();
@@ -609,17 +581,17 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                                 // Give card
                                 // card in hand selected and other player, show this action as available
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                             } else if (id == receiverID) {
                                 //Take card
                                 // A card from another player selected
                                 actionButtons[k].setVisible(true);
-                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                                actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                             }
                         }
                     } else {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState));
+                        actionButtons[k++].setButtonAction(action, actionLabel(action, gameState, id));
                     }
                 }
             } else {
@@ -632,9 +604,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
         for (int i = 0; i < deck.getSize(); i++) {
             if (i < maxBufferCards) {
                 Card c = deck.get(i);
-                if (c != null && (bufferDeck.get(i).getComponent() == null || !bufferDeck.get(i).getComponent().equals(c))) {
-                    bufferDeck.get(i).updateComponent(c);
+                if (c != null) {
+                    if (bufferDeck.get(i).getComponent() == null || !bufferDeck.get(i).getComponent().equals(c))
+                        bufferDeck.get(i).updateComponent(c);
                     bufferDeck.get(i).setVisible(true);
+                    bufferArea.setVisible(true);
                 }
             } else {
 //                System.out.println("More cards in deck that are not displayed");
@@ -705,9 +679,8 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
      * The actions in words: how a move gets there and the card it costs, what a cure or a station costs.
      */
     @Override
-    public String actionLabel(AbstractAction action, AbstractGameState state) {
+    public String actionLabel(AbstractAction action, AbstractGameState state, int acting) {
         PandemicGameState s = (PandemicGameState) state;
-        int acting = s.getTurnOrder().getCurrentPlayer(s);
         if (action instanceof MovePlayer m) {
             String to = m.getDestination();
             String card = m instanceof MovePlayerWithCard c ? cardName(c.getCard(s)) : null;
@@ -740,7 +713,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
             return k.getGiver() == acting ? "Give " + card + " to Player " + k.getReceiver() + " (" + role(k.getReceiver()) + ")"
                     : "Take " + card + " from Player " + k.getGiver() + " (" + role(k.getGiver()) + ")";
         }
-        return super.actionLabel(action, state);
+        return super.actionLabel(action, state, acting);
     }
 
     /**

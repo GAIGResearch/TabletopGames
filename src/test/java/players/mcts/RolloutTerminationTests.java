@@ -56,18 +56,6 @@ public class RolloutTerminationTests {
         return game;
     }
 
-    public Game createMTGame(MCTSParams params, GameType gameType) {
-        mctsPlayer = new TestMCTSPlayer(params, STNRollout::new);
-        mctsPlayer.setDebug(false);
-        List<AbstractPlayer> players = new ArrayList<>();
-        players.add(mctsPlayer);
-        players.add(new RandomPlayer(new Random(3023)));
-        players.add(new RandomPlayer(new Random(244)));
-        Game game = gameType.createGameInstance(3, 3302345);
-        game.reset(players);
-        return game;
-    }
-
     @Test
     public void test_MaxN_DEFAULT() {
         params.rolloutTermination = MCTSEnums.RolloutTermination.EXACT;
@@ -185,7 +173,43 @@ public class RolloutTerminationTests {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
-            Game game = createMTGame(params, gt);
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+    @Test
+    public void test_MultiTree_EXACT_noRollout() {
+        params.rolloutLength = 0;
+        params.rolloutTermination = MCTSEnums.RolloutTermination.EXACT;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        for (GameType gt : gamesToTest) {
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+    @Test
+    public void test_MultiTree_END_TURN_noRollout() {
+        params.rolloutLength = 0;
+        params.rolloutTermination = MCTSEnums.RolloutTermination.END_TURN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        for (GameType gt : gamesToTest) {
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+    @Test
+    public void test_MultiTree_END_ACTION_noRollout() {
+        params.rolloutLength = 0;
+        params.rolloutTermination = MCTSEnums.RolloutTermination.END_ACTION;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        for (GameType gt : gamesToTest) {
+            Game game = createGame(params, gt);
             System.out.println("Running " + gt.name());
             game.run();
         }
@@ -197,7 +221,7 @@ public class RolloutTerminationTests {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
-            Game game = createMTGame(params, gt);
+            Game game = createGame(params, gt);
             System.out.println("Running " + gt.name());
             game.run();
         }
@@ -208,7 +232,7 @@ public class RolloutTerminationTests {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
-            Game game = createMTGame(params, gt);
+            Game game = createGame(params, gt);
             System.out.println("Running " + gt.name());
             game.run();
         }
@@ -220,7 +244,7 @@ public class RolloutTerminationTests {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
-            Game game = createMTGame(params, gt);
+            Game game = createGame(params, gt);
             System.out.println("Running " + gt.name());
             game.run();
         }
@@ -256,7 +280,7 @@ public class RolloutTerminationTests {
         params.rolloutTermination = MCTSEnums.RolloutTermination.END_TURN;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
-            Game game = createMTGame(params, gt);
+            Game game = createGame(params, gt);
             System.out.println("Running " + gt.name());
             game.run();
         }

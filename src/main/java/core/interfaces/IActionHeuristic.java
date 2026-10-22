@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface IActionHeuristic{
-    IActionHeuristic nullReturn = (action, state, actions) -> 0;
 
     /**
      * Returns a score for the action in the context of a state that should be maximised by the player (the bigger, the better).

@@ -431,7 +431,7 @@ body.play {
 }
 
 .panel {
-    flex: none;
+    flex: 0 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -446,6 +446,28 @@ body.play {
 .panel.grow {
     flex: 1;
     border-bottom: 0;
+}
+
+/* however much the other panels hold, the history keeps room to be read */
+#history-panel {
+    min-height: 180px;
+}
+
+#info-panel {
+    overflow-y: auto;
+}
+
+.sidebar.history-expanded > .panel:not(#history-panel) {
+    display: none;
+}
+
+.head-buttons {
+    display: flex;
+    gap: 2px;
+}
+
+.head-buttons button[aria-pressed="true"] {
+    color: var(--accent);
 }
 
 #actions-panel {
@@ -536,6 +558,22 @@ body.play {
 
 .history li::marker {
     color: var(--muted);
+}
+
+.history.grouped {
+    padding-left: 0;
+    list-style: none;
+}
+
+.history li.round > details > summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: 2px 0;
+}
+
+.history li.round ol {
+    margin: 0;
+    padding: 0 0 0 22px;
 }
 
 #insight-panel {

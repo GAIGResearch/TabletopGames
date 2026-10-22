@@ -4,7 +4,7 @@ import core.Game;
 import core.actions.AbstractAction;
 import games.hareandtortoise.actions.ChewLettuce;
 import games.hareandtortoise.actions.Move;
-import games.hareandtortoise.components.HareCard;
+import games.hareandtortoise.components.HareCardType;
 import org.junit.Test;
 
 import java.util.List;
@@ -208,7 +208,7 @@ public class HareAndTortoiseGameFlowTest {
             HareAndTortoiseGameState state = stateOf(game);
             HareAndTortoiseForwardModel fm = fmOf(game);
             Random rnd = new Random(seed);
-            Map<HareCard.Type, Long> cardCounts = countTypes(state);
+            Map<HareCardType, Long> cardCounts = countTypes(state);
             int lastUnseen = state.getNUnseenHareCards();
             int steps = 0;
             while (state.isNotTerminal() && steps++ < 20000) {
@@ -250,7 +250,7 @@ public class HareAndTortoiseGameFlowTest {
         }
     }
 
-    private static Map<HareCard.Type, Long> countTypes(HareAndTortoiseGameState state) {
+    private static Map<HareCardType, Long> countTypes(HareAndTortoiseGameState state) {
         return hareTypes(state).stream().collect(Collectors.groupingBy(t -> t, Collectors.counting()));
     }
 }

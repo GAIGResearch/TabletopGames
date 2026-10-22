@@ -3,7 +3,7 @@ package games.hareandtortoise;
 import core.actions.AbstractAction;
 import games.hareandtortoise.actions.ChewCarrot;
 import games.hareandtortoise.actions.Move;
-import games.hareandtortoise.components.HareCard;
+import games.hareandtortoise.components.HareCardType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import static games.hareandtortoise.HareAndTortoiseTestUtils.*;
-import static games.hareandtortoise.components.HareCard.Type.*;
+import static games.hareandtortoise.components.HareCardType.*;
 import static org.junit.Assert.*;
 
 /**
@@ -34,7 +34,7 @@ public class HareAndTortoiseHareCardTest {
     @Test
     public void aPaidForwardMoveOntoAHareSquareDrawsTheTopCardAndPutsItAtTheBottom() {
         stackHareDeck(state, LAST_TURN_FREE);
-        List<HareCard.Type> before = hareTypes(state);
+        List<HareCardType> before = hareTypes(state);
 
         play(fm, state, new Move(0, 1));
         assertEquals(topToBottom(before, 1), hareTypes(state));
@@ -48,7 +48,7 @@ public class HareAndTortoiseHareCardTest {
     @Test
     public void theUnseenCountFallsByOnePerDrawAndStopsAtZero() {
         stackHareDeck(state, LAST_TURN_FREE, LAST_TURN_FREE);
-        List<HareCard.Type> before = hareTypes(state);
+        List<HareCardType> before = hareTypes(state);
         state.nUnseenHareCards = 1;
 
         play(fm, state, new Move(0, 1));   // p0
@@ -60,7 +60,7 @@ public class HareAndTortoiseHareCardTest {
 
     @Test
     public void aMoveOntoAnyOtherSquareDrawsNoCard() {
-        List<HareCard.Type> before = hareTypes(state);
+        List<HareCardType> before = hareTypes(state);
         play(fm, state, new Move(0, 2));   // carrot square
         play(fm, state, new Move(0, 4));   // p1, "3" square
         play(fm, state, new Move(0, 7));   // p2, lettuce square
@@ -89,7 +89,7 @@ public class HareAndTortoiseHareCardTest {
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(65 - 1, state.getCarrots(0));
         assertEquals(Set.<AbstractAction>of(new ChewCarrot(true), new ChewCarrot(false)), actions(fm, state));
-        List<HareCard.Type> afterDraw = hareTypes(state);
+        List<HareCardType> afterDraw = hareTypes(state);
         assertEquals(DRAW_OR_DISCARD, afterDraw.get(11));
         assertEquals(11, state.getNUnseenHareCards());
 
@@ -200,7 +200,7 @@ public class HareAndTortoiseHareCardTest {
     @Test
     public void aCardMoveOntoAHareSquareDrawsNoFurtherCard() {
         stackHareDeck(state, LEAP_AHEAD_ONE_POSITION, DRAW_OR_DISCARD);
-        List<HareCard.Type> before = hareTypes(state);
+        List<HareCardType> before = hareTypes(state);
         place(state, 0, 13, 30, 3);
         place(state, 1, 24, 30, 3);
         play(fm, state, new Move(13, 14));

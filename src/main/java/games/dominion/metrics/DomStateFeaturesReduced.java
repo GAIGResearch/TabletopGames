@@ -54,16 +54,7 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
 
         retValue[11] = fm.computeAvailableActions(state).size();
 
-        double bestScoreOfOtherPlayers = 0.0;
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            if (i != playerId) {
-                double score = state.getGameScore(i);
-                if (score > bestScoreOfOtherPlayers) {
-                    bestScoreOfOtherPlayers = score;
-                }
-            }
-        }
-        retValue[12] = retValue[0] - bestScoreOfOtherPlayers;
+        retValue[12] = state.getLead(playerId);
 
         retValue[13] = state.cardsOfType(CardType.PROVINCE, -1, DominionConstants.DeckType.SUPPLY);
 

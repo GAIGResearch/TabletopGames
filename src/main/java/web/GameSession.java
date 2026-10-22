@@ -360,7 +360,7 @@ public class GameSession {
         AbstractGameState waiting = browser.waitingOn();
         if (plan != null && plan.decision() != waiting) endPlan();
         if (plan == null && waiting != null && !browser.isSending() && planner.plans(waiting, config.seat()))
-            plan = new MovePlan(planner, waiting, config.seat(), gui::actionLabel);
+            plan = new MovePlan(planner, waiting, config.seat(), (action, state) -> gui.actionLabel(action, state, config.seat()));
     }
 
     private void endPlan() {

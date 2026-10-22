@@ -129,6 +129,10 @@ import games.lawnandorder.LawnAndOrderForwardModel;
 import games.lawnandorder.LawnAndOrderGameState;
 import games.lawnandorder.gui.LawnAndOrderGUIManager;
 import games.lawnandorder.LawnAndOrderParameters;
+import games.ventlife.VentlifeForwardModel;
+import games.ventlife.VentlifeGameState;
+import games.ventlife.VentlifeParameters;
+import games.ventlife.gui.VentlifeGUIManager;
 import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
@@ -367,6 +371,10 @@ public enum GameType {
             Arrays.asList(Animals, Strategy),
             Arrays.asList(Race, LoseATurn, MovementPoints),
             HareAndTortoiseGameState.class, HareAndTortoiseForwardModel.class, HareAndTortoiseParameters.class, HareAndTortoiseGUIManager.class),
+    Ventlife(2, 4,
+            Arrays.asList(Strategy, Abstract, Animals),
+            Arrays.asList(TilePlacement, HexagonGrid, PatternBuilding),
+            VentlifeGameState.class, VentlifeForwardModel.class, VentlifeParameters.class, VentlifeGUIManager.class),
     Risk(3, 6,
             Arrays.asList(Strategy, Wargame, TerritoryBuilding, Dice),
             Arrays.asList(DiceRolling, AreaMovement, PlayerElimination, SetCollection, HandManagement, VariableSetup),

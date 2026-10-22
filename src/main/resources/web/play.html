@@ -49,8 +49,8 @@
     <aside class="sidebar" id="sidebar" hidden>
         <section class="panel" id="summary-panel" hidden>
             <div class="panel-head">
-                <h2>Since your last move</h2>
-                <button class="close" id="summary-close" title="Dismiss">×</button>
+                <h2>Since your last move <span class="muted" id="summary-count"></span></h2>
+                <button class="close" id="summary-toggle" title="Hide the list">▾</button>
             </div>
             <ol class="summary" id="summary"></ol>
         </section>
@@ -87,10 +87,19 @@
             <dl class="info" id="info"></dl>
         </section>
         <section class="panel grow" id="history-panel" hidden>
-            <div class="panel-head"><h2>History</h2></div>
+            <div class="panel-head">
+                <h2>History</h2>
+                <span class="head-buttons">
+                    <button class="close" id="history-rounds" title="Open or close every round" hidden>±</button>
+                    <button class="close" id="history-expand" title="Show the history in the whole side panel">⤢</button>
+                    <button class="close" id="history-column-toggle"
+                            title="Show the history in its own column beside the side panel">◫</button>
+                </span>
+            </div>
             <ol class="history" id="history"></ol>
         </section>
     </aside>
+    <aside class="sidebar history-column" id="history-column" hidden></aside>
 </div>
 <div id="tooltip" hidden></div>
 <div id="region-menu" role="menu" hidden></div>

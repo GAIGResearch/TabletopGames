@@ -3,13 +3,13 @@ package games.hareandtortoise;
 import core.Game;
 import games.hareandtortoise.actions.ChewCarrot;
 import games.hareandtortoise.actions.Move;
-import games.hareandtortoise.components.HareCard;
+import games.hareandtortoise.components.HareCardType;
 import org.junit.Test;
 
 import java.util.List;
 
 import static games.hareandtortoise.HareAndTortoiseTestUtils.*;
-import static games.hareandtortoise.components.HareCard.Type.*;
+import static games.hareandtortoise.components.HareCardType.*;
 import static org.junit.Assert.*;
 
 /**
@@ -24,7 +24,7 @@ public class HareAndTortoiseHareCardFlowTest {
         HareAndTortoiseGameState state = stateOf(game);
         HareAndTortoiseForwardModel fm = fmOf(game);
         stackHareDeck(state, ANOTHER_TURN, DRAW_OR_DISCARD, MISS_A_TURN, PREVIOUS_CARROT_SQUARE);
-        List<HareCard.Type> start = hareTypes(state);
+        List<HareCardType> start = hareTypes(state);
 
         play(fm, state, new Move(0, 1));             // p0: hare, ANOTHER_TURN
         assertEquals(65 - 1, state.getCarrots(0));

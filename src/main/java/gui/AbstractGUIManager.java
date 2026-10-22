@@ -41,6 +41,8 @@ public abstract class AbstractGUIManager {
     protected JScrollPane historyContainer;
     protected Set<Integer> historyPerspective = new HashSet<>();
     protected List<String> history = new ArrayList<>();
+    // the round of each line of history, when it comes from the game's events (added before its line)
+    private final List<Integer> historyRounds = new ArrayList<>();
 
     private int actionsAtLastUpdate;
     // the actions to offer instead of the forward model's, or null (see offerInstead)
@@ -100,7 +102,7 @@ public abstract class AbstractGUIManager {
             clickable.offer(gameState, actions, player.getPlayerID());
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
-                actionButtons[i].setButtonAction(actions.get(i), actionLabel(actions.get(i), gameState));
+                actionButtons[i].setButtonAction(actions.get(i), actionLabel(actions.get(i), gameState, player.getPlayerID()));
                 actionButtons[i].setBackground(Color.white);
             }
             for (int i = actions.size(); i < actionButtons.length; i++) {
@@ -114,8 +116,9 @@ public abstract class AbstractGUIManager {
      * The text of the button offering the action: by default the action's getString. A GUI may add what the player
      * should know to choose it (the odds of a battle, say).
      */
-    public String actionLabel(AbstractAction action, AbstractGameState gameState) {
-        return action.getString(gameState);
+    public String actionLabel(AbstractAction action, AbstractGameState gameState, int playerID) {
+        // the buttons are seen by the player choosing, so may show what only they know
+        return action.getString(gameState, playerID);
     }
 
     /**
@@ -297,10 +300,21 @@ public abstract class AbstractGUIManager {
      * The action history shown in the history panel.
      */
     public List<String> getHistory() {
+        return copyOf(history);
+    }
+
+    /**
+     * The round of each line of getHistory(), read after it, or an empty list if the rounds are not known.
+     */
+    public List<Integer> getHistoryRounds() {
+        return historyPerspective.isEmpty() ? List.of() : copyOf(historyRounds);
+    }
+
+    private static <T> List<T> copyOf(List<T> list) {
         // the history is added to by a game listener on the game's thread, so copying it may meet a change
         for (int attempt = 0; ; attempt++) {
             try {
-                return new ArrayList<>(history);
+                return new ArrayList<>(list);
             } catch (ConcurrentModificationException e) {
                 if (attempt == 5) throw e;
             }
@@ -373,11 +387,14 @@ public abstract class AbstractGUIManager {
                 @Override
                 public void onEvent(Event event) {
                     if (event.type == Event.GameEvent.ACTION_CHOSEN) {
+                        historyRounds.add(event.state.getRoundCounter());
                         history.add("Player " + event.playerID + " : " + event.action.getString(game.getGameState(), perspectiveSet));
                     } else if (event.type == Event.GameEvent.GAME_EVENT) {
+                        historyRounds.add(event.state.getRoundCounter());
                         history.add(event.action.toString());
                     } else if (event.type == Event.GameEvent.GAME_OVER) {
                         for (int i = 0; i < event.state.getNPlayers(); i++) {
+                            historyRounds.add(event.state.getRoundCounter());
                             history.add(String.format("Player %d finishes at position %d with score: %.0f", i, event.state.getOrdinalPosition(i), event.state.getGameScore(i)));
                         }
                     }

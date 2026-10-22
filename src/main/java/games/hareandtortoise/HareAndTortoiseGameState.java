@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import games.GameType;
 import games.hareandtortoise.components.HareCard;
+import games.hareandtortoise.components.SquareType;
 
 import java.util.ArrayList;
 import java.util.Arrays;

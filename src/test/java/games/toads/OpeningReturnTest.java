@@ -55,6 +55,21 @@ public class OpeningReturnTest {
         assertEquals(ToadParameters.SecondRoundStart.TWO, p.secondRoundStart);
     }
 
+    @Test
+    public void returnedAndRecycledCardsAreNamedOnlyToTheirOwner() {
+        state = newState(params, fm);
+        ToadCard card = state.getPlayerHand(0).get(0);
+        for (AbstractAction action : List.of(new ReturnCardToDeck(card), new RecycleCard(card))) {
+            assertFalse(action.getString(state).contains(card.toString()));
+            assertFalse(action.getString(state, 1).contains(card.toString()));
+            assertFalse(action.getString(state, Set.of(1)).contains(card.toString()));
+            assertTrue(action.getString(state, 0).contains(card.toString()));
+            assertTrue(action.getString(state, Set.of(0)).contains(card.toString()));
+            assertTrue(action.toString().contains(card.toString()));
+        }
+        assertEquals("Recycle nothing", new RecycleCard(null).getString(state));
+    }
+
     // ---------------------------------------------------------------- War 1
 
     @Test

@@ -197,7 +197,7 @@ public class RiskGUIManager extends AbstractGUIManager {
         }
         JPopupMenu menu = new JPopupMenu();
         for (AbstractAction a : actions) {
-            JMenuItem item = new JMenuItem(actionLabel(a, shown));
+            JMenuItem item = new JMenuItem(actionLabel(a, shown, 0));
             item.addActionListener(x -> submit(a));
             menu.add(item);
         }
@@ -241,7 +241,7 @@ public class RiskGUIManager extends AbstractGUIManager {
      * attacking until it falls; for a roll, the chance of each number of armies lost.
      */
     @Override
-    public String actionLabel(AbstractAction action, AbstractGameState gameState) {
+    public String actionLabel(AbstractAction action, AbstractGameState gameState, int playerID) {
         RiskGameState s = (RiskGameState) gameState;
         RiskParameters params = (RiskParameters) s.getGameParameters();
         if (action instanceof PlaceArmy p)
@@ -275,7 +275,7 @@ public class RiskGUIManager extends AbstractGUIManager {
             return "End attacks";
         if (action instanceof EndTurn)
             return "End turn";
-        return super.actionLabel(action, gameState);
+        return super.actionLabel(action, gameState, playerID);
     }
 
     private static String armies(int n) {
