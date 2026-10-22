@@ -21,7 +21,9 @@ def games(outdir):
 
 def decisions(outdir):
     for f in output_files(outdir, "ACTION_CHOSEN.csv"):
-        yield from csv.DictReader(open(f))
+        for row in csv.DictReader(open(f)):
+            row["file"] = f  # game IDs restart in each output directory
+            yield row
 
 
 def analyse(outdir):
@@ -48,7 +50,7 @@ def analyse(outdir):
     for r in rows:
         t = r["TimeManagement(PlayerType)"]
         ms = int(r["TimeManagement(DecisionMS)"])
-        per_game[t][(r["GameID"], r["GameSeed"])] += ms
+        per_game[t][(r["file"], r["GameID"], r["GameSeed"])] += ms
         by_decision[t][int(r["TimeManagement(Decision)"])].append(ms)
         stats[t]["decisions"] += 1
         stats[t]["stopped"] += r["TimeManagement(StoppedEarly)"] == "true"
