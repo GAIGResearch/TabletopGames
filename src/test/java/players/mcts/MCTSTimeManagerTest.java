@@ -91,8 +91,11 @@ public class MCTSTimeManagerTest {
         params.setParameterValue("timeFactor", 5.0);
         MCTSTimeManager tm = manager(params);
         assertEquals(1000 - 50, tm.allocate(1000));
-        assertEquals(10, tm.allocate(30));
-        assertEquals(10, tm.allocate(-500));
+        assertEquals(100 - 50, tm.allocate(100));
+        // below the reserve, there is no minimum search
+        assertEquals(5, tm.allocate(55));
+        assertEquals(0, tm.allocate(30));
+        assertEquals(0, tm.allocate(-500));
     }
 
     @Test

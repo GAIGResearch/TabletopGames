@@ -171,7 +171,10 @@ public class MCTSTimeManager {
             share *= 1.0 + params.midHeight * Math.exp(-Math.pow(x - params.midCentre, 2)
                     / (2.0 * params.midWidth * params.midWidth));
         }
-        return (long) Math.max(params.minMoveTimeMS, Math.min(share, available));
+        // the minimum search is only allowed while the clock above the reserve can pay for it; after that a search
+        // has a single iteration
+        long minimum = Math.min(params.minMoveTimeMS, remainingMillis - params.clockReserveMS - (long) overheadMillis);
+        return (long) Math.max(Math.max(minimum, 0), Math.min(share, available));
     }
 
     /**
