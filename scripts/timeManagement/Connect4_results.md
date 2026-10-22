@@ -58,9 +58,18 @@ whole game, so it acts as an OPEN with f of about 2-3.
 - STOP_A stops early in 89% of searches but saves only about 6% of the search time (the paper: 31%).
 - CLOSE with d 0.8 extends every search, and BEHIND with v 0.6 two thirds of them.
 
+## NTBEA at 10 s per game
+Four NTBEA runs (`Connect4_TM.json`, 400 trials of one game against EXP, 100 games to evaluate each recommendation)
+recommended scattered settings (f from 1.5 to 7, p 0.2-0.4), with estimates of 45-55%. The best estimate (55%; f 3,
+p 0.4, UNST twice, CLOSE and BEHIND once; `NTBEA_10s.json`) then won only **44.2% (39.4-49.1)** of 400 games against
+EXP: it spends 2.4 s of 10 s on the first decision and plays from decision 12 at the 10 ms minimum.
+One game per trial is too noisy for effects of a few percent over 17 parameters. A smaller search space that also
+allows f < 1 (more time for the endgame), with both seats per trial (StableNTBEA), is in `Connect4_TM_small.json`.
+
 ## Conclusions
 - The paper's results do not reproduce with its Connect4 parameters. No strategy differs significantly from EXP at
   5 s, and STOP is at 50.9% at 20 s.
 - The parameters depend on game length and engine speed, as the paper itself found across games. Scaling f to TAG's
   game length moves STOP in the paper's direction (54.6%), but not significantly.
-- The parameters should therefore be tuned for TAG (NTBEA, `json/SearchSpaces/TimeManagement/Connect4_TM.json`).
+- Moving time to the opening does not help in TAG's Connect4, and moving a lot of it hurts (STOP with f 5 at 5 s,
+  and the 10 s NTBEA recommendation).
