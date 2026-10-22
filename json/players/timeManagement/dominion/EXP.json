@@ -6,7 +6,7 @@
   "heuristic": {
     "class": "players.heuristics.PureScoreHeuristic"
   },
-  "K": 1,
+  "K": 1.0,
   "exploreEpsilon": 0.3,
   "treePolicy": "UCB_Tuned",
   "MAST": "Both",
