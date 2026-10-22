@@ -84,9 +84,10 @@ public class MCTSParams extends PlayerParameters {
     double DDAMoveThreshold = 0.0; // When playing badly, we will take actions up to this amount less than the best action
 
     // Time management (see MCTSTimeManager)
-    public double expectedDecisions = 30.0;  // EXP: expected own decisions left, if there is no decisionTable
+    // EXP: expected own decisions left in the game (or round, with BUDGET_ROUND_SECONDS), if there is no decisionTable
+    public double expectedDecisions = 30.0;
     // EXP-MOVES: file of the expected own decisions left, by decisions made; "" for none, and "default" for
-    // data/timeManagement/<GameType>_<n>p.txt if there is one
+    // data/timeManagement/<GameType>_<n>p.txt (<GameType>_<n>p_round.txt with BUDGET_ROUND_SECONDS) if there is one
     public String decisionTable = "default";
     public double timeFactor = 1.0;  // multiplies every allocation (f_opening for OPEN, f_earlystop for STOP)
     public double midHeight = 0.0, midCentre = 15.0, midWidth = 10.0;  // MID: a, b, c of the bonus by decision number

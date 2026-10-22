@@ -39,6 +39,9 @@ import static players.mcts.MCTSEnums.TreePolicy.*;
  * spends more than the budget.
  * <p>
  * Each allocation is made from the time left on the game timer, so an overrun is made up by later decisions.
+ * <p>
+ * With BUDGET_ROUND_SECONDS the timer is for the round, and each round is managed as a game of its own: decisions are
+ * counted from the start of the round, and the decision table gives the decisions left in the round.
  */
 public class MCTSTimeManager {
 
@@ -47,7 +50,9 @@ public class MCTSTimeManager {
     public static final String DEFAULT_TABLE_DIRECTORY = "data/timeManagement";
     private double[] decisionTable;
     private ElapsedCpuChessTimer gameTimer;
+    // in the game, or in the round with BUDGET_ROUND_SECONDS
     private int decisionsMade;
+    private int round;  // of the last decision
     // moving average of the time charged to a decision outside its search (milliseconds)
     private double overheadMillis;
 
@@ -65,15 +70,14 @@ public class MCTSTimeManager {
     }
 
     public static boolean isUsed(MCTSParams params) {
-        return params.budgetType == BUDGET_GAME_SECONDS || params.earlyStopP > 0.0 || params.behindLoops > 0
+        return params.budgetType.isClock() || params.earlyStopP > 0.0 || params.behindLoops > 0
                 || params.unstableLoops > 0 || params.closeLoops > 0;
     }
 
     private static void validate(MCTSParams params) {
         if (params.numDeterminizations > 1)
             throw new IllegalArgumentException("Time management is not supported with numDeterminizations > 1");
-        if (params.budgetType != BUDGET_GAME_SECONDS && params.budgetType != BUDGET_TIME
-                && params.budgetType != BUDGET_ITERATIONS)
+        if (!params.budgetType.isClock() && params.budgetType != BUDGET_TIME && params.budgetType != BUDGET_ITERATIONS)
             throw new IllegalArgumentException("Time management is not supported with " + params.budgetType);
         if ((params.earlyStopP > 0.0 || params.closeLoops > 0) && (params.selectionPolicy != ROBUST
                 || params.treePolicy == EXP3 || params.treePolicy == RegretMatching || params.treePolicy == NoAveragingRM))
@@ -108,15 +112,17 @@ public class MCTSTimeManager {
      */
     public void newGame(AbstractGameState state) {
         decisionsMade = 0;
+        round = state.getRoundCounter();
         if (params.decisionTable.equals(DEFAULT_TABLE)) {
             // The table for the game and player count, if there is one; otherwise expectedDecisions is used
-            Path file = Path.of(DEFAULT_TABLE_DIRECTORY, state.getGameType().name() + "_" + state.getNPlayers() + "p.txt");
+            String suffix = params.budgetType == BUDGET_ROUND_SECONDS ? "p_round.txt" : "p.txt";
+            Path file = Path.of(DEFAULT_TABLE_DIRECTORY, state.getGameType().name() + "_" + state.getNPlayers() + suffix);
             decisionTable = Files.exists(file) ? loadDecisionTable(file.toString()) : null;
         }
     }
 
     /**
-     * @return the number of decisions searched so far in this game
+     * @return the number of decisions searched so far in this game (or round, with BUDGET_ROUND_SECONDS)
      */
     public int decisionsMade() {
         return decisionsMade;
@@ -137,16 +143,20 @@ public class MCTSTimeManager {
     /**
      * Called before each search.
      *
-     * @param timer - the player's game timer (null unless budgetType is BUDGET_GAME_SECONDS). It is running, and
+     * @param timer - the player's game timer (null unless the budget is a clock). It is running, and
      *              elapsedMillis() is the time spent on this decision so far.
      */
-    public void startDecision(ElapsedCpuChessTimer timer) {
-        if (params.budgetType == BUDGET_GAME_SECONDS && timer == null)
-            throw new AssertionError("BUDGET_GAME_SECONDS needs a game timer");
+    public void startDecision(AbstractGameState state, ElapsedCpuChessTimer timer) {
+        if (params.budgetType.isClock() && timer == null)
+            throw new AssertionError(params.budgetType + " needs a game timer");
+        if (params.budgetType == BUDGET_ROUND_SECONDS && state.getRoundCounter() != round) {
+            round = state.getRoundCounter();
+            decisionsMade = 0;
+        }
         gameTimer = timer;
         behindDone = unstableDone = closeDone = 0;
         stoppedEarly = false;
-        if (params.budgetType == BUDGET_GAME_SECONDS) {
+        if (params.budgetType.isClock()) {
             clockAtStart = gameTimer.remainingTimeMillis();
             plannedBudget = allocate(clockAtStart - gameTimer.elapsedMillis());
         } else {
@@ -166,7 +176,7 @@ public class MCTSTimeManager {
         double share = available / expectedRemainingDecisions();
         share *= params.timeFactor;
         if (params.midHeight != 0.0) {
-            // (1 + a.exp(-(x - b)^2 / 2c^2)), where x is 1 for the first decision of the game
+            // (1 + a.exp(-(x - b)^2 / 2c^2)), where x is 1 for the first decision of the game (or round)
             double x = decisionsMade + 1;
             share *= 1.0 + params.midHeight * Math.exp(-Math.pow(x - params.midCentre, 2)
                     / (2.0 * params.midWidth * params.midWidth));
@@ -194,7 +204,7 @@ public class MCTSTimeManager {
     public long searchBudget(long initialisationTime) {
         if (params.budgetType == BUDGET_ITERATIONS)
             return plannedBudget;
-        if (params.budgetType == BUDGET_GAME_SECONDS)
+        if (params.budgetType.isClock())
             // the initialisation time is already on the game timer
             return Math.max(0, plannedBudget - gameTimer.elapsedMillis());
         return plannedBudget - initialisationTime;
@@ -238,7 +248,7 @@ public class MCTSTimeManager {
         // The paper extends by the "previously used search time"; we use the planned budget, so that each loop
         // adds the same amount
         long budget = (long) (factor * plannedBudget);
-        if (params.budgetType == BUDGET_GAME_SECONDS) {
+        if (params.budgetType.isClock()) {
             long available = availableMillis(gameTimer.remainingTimeMillis() - gameTimer.elapsedMillis());
             budget = Math.min(budget, available);
             if (budget < params.minMoveTimeMS)

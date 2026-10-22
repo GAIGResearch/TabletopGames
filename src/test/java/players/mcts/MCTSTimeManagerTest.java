@@ -8,6 +8,7 @@ import games.GameType;
 import org.junit.Test;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
+import utilities.ElapsedCpuChessTimer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -238,5 +239,56 @@ public class MCTSTimeManagerTest {
         assertTrue("remaining " + remaining, remaining > 0);
         assertTrue("remaining " + remaining, remaining < 2_000);
         assertTrue(mcts.getTimeManager().decisionsMade() > 2);
+    }
+
+    /**
+     * A Sushi Go state at the start of the given round, after random play
+     */
+    private static AbstractGameState sushiGoRound(int round) {
+        Game game = GameType.SushiGo.createGameInstance(2, 9);
+        AbstractForwardModel fm = game.getForwardModel();
+        AbstractGameState state = game.getGameState();
+        Random rnd = new Random(9);
+        while (state.getRoundCounter() < round) {
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            fm.next(state, actions.get(rnd.nextInt(actions.size())));
+        }
+        return state;
+    }
+
+    private static int decisionsMadeAfterNewRound(PlayerConstants budgetType) {
+        MCTSTimeManager tm = new MCTSTimeManager(params(budgetType, 20));
+        AbstractGameState first = sushiGoRound(0);
+        tm.newGame(first);
+        ElapsedCpuChessTimer timer = new ElapsedCpuChessTimer(20_000, 0, 0, 0, 0);
+        for (int i = 0; i < 2; i++) {
+            tm.startDecision(first, timer);
+            tm.endDecision(0);
+        }
+        tm.startDecision(sushiGoRound(1), timer);
+        return tm.decisionsMade();
+    }
+
+    @Test
+    public void roundBudgetCountsDecisionsFromTheStartOfTheRound() {
+        assertEquals(0, decisionsMadeAfterNewRound(PlayerConstants.BUDGET_ROUND_SECONDS));
+        assertEquals(2, decisionsMadeAfterNewRound(PlayerConstants.BUDGET_GAME_SECONDS));
+    }
+
+    @Test
+    public void roundClockIsRespectedInEachRound() {
+        MCTSParams params = params(PlayerConstants.BUDGET_ROUND_SECONDS, 1);
+        params.setParameterValue("decisionTable", "");
+        params.setParameterValue("expectedDecisions", 5.0);
+        MCTSPlayer mcts = new MCTSPlayer(params);
+        Game game = GameType.SushiGo.createGameInstance(2, 42);
+        game.reset(List.of(mcts, new RandomPlayer(new Random(3))));
+        game.run();
+        // the clock is for the last round only, and there are no more than 10 decisions in a round
+        long remaining = mcts.getGameTimer().remainingTimeMillis();
+        assertTrue("remaining " + remaining, remaining > 0);
+        assertTrue("remaining " + remaining, remaining < 1_000);
+        assertTrue(mcts.getTimeManager().decisionsMade() > 2);
+        assertTrue(mcts.getTimeManager().decisionsMade() <= 10);
     }
 }

@@ -272,6 +272,43 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
+    /**
+     * The decisions (with more than one action) made by each player in the round just ended. A round that the game
+     * ends before it is over is not recorded.
+     */
+    public static class RoundDecisions extends AbstractMetric {
+        // where the current round starts in the game's record of action space sizes
+        private int roundStart;
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (int p = 0; p < nPlayersPerGame; p++)
+                columns.put("Decisions-P" + p, Integer.class);
+            return columns;
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            List<Pair<Integer, Integer>> actionSpaceRecord = listener.getGame().getActionSpaceSize();
+            // the round counter is not yet incremented for the round that has ended
+            int start = e.state.getRoundCounter() == 0 ? 0 : roundStart;
+            int[] playerDecisions = new int[e.state.getNPlayers()];
+            for (Pair<Integer, Integer> record : actionSpaceRecord.subList(start, actionSpaceRecord.size()))
+                if (record.b > 1)
+                    playerDecisions[record.a]++;
+            for (int p = 0; p < playerDecisions.length; p++)
+                records.put("Decisions-P" + p, playerDecisions[p]);
+            roundStart = actionSpaceRecord.size();
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(ROUND_OVER);
+        }
+    }
+
     public static class Actions extends AbstractMetric {
         Set<String> playerNames;
         public Actions() {

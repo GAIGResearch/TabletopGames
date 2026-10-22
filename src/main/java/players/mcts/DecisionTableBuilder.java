@@ -15,40 +15,45 @@ import java.util.stream.Stream;
  * to make (including the current one) by a player who has already made k decisions, over all players and games in
  * which k decisions were reached. Only decisions with more than one action are counted, as only those are searched.
  * <p>
- * Usage: DecisionTableBuilder out=data/timeManagement/Connect4_2p.txt in=dir1,dir2,file.csv
- * where each input is a GAME_OVER.csv file, or a directory searched for them.
+ * With event=ROUND_OVER the table is for BUDGET_ROUND_SECONDS, by decisions made in the round, from the ROUND_OVER.csv
+ * files of the GameMetrics$RoundDecisions metric.
+ * <p>
+ * Usage: DecisionTableBuilder out=data/timeManagement/Connect4_2p.txt in=dir1,dir2,file.csv [event=ROUND_OVER]
+ * where each input is a GAME_OVER.csv (or ROUND_OVER.csv) file, or a directory searched for them.
  */
 public class DecisionTableBuilder {
 
     public static void main(String[] args) throws IOException {
-        String out = null, in = null;
+        String out = null, in = null, event = "GAME_OVER";
         for (String arg : args) {
             if (arg.startsWith("out=")) out = arg.substring(4);
             if (arg.startsWith("in=")) in = arg.substring(3);
+            if (arg.startsWith("event=")) event = arg.substring(6);
         }
         if (out == null || in == null)
-            throw new IllegalArgumentException("Usage: DecisionTableBuilder out=table.txt in=dir1,dir2,file.csv");
+            throw new IllegalArgumentException("Usage: DecisionTableBuilder out=table.txt in=dir1,dir2,file.csv " +
+                    "[event=ROUND_OVER]");
         List<Integer> decisionCounts = new ArrayList<>();
         for (String input : in.split(","))
-            for (Path file : gameOverFiles(Path.of(input)))
+            for (Path file : eventFiles(Path.of(input), event + ".csv"))
                 decisionCounts.addAll(readDecisionCounts(file));
         double[] table = table(decisionCounts);
-        System.out.printf("%d player-games, mean decisions %.2f%n", decisionCounts.size(),
+        System.out.printf("%d records, mean decisions %.2f%n", decisionCounts.size(),
                 decisionCounts.stream().mapToInt(i -> i).average().orElse(0));
         String content = Arrays.stream(table).mapToObj(v -> String.format("%.3f", v)).collect(Collectors.joining("\n"));
         Files.writeString(Path.of(out), content + "\n");
     }
 
-    private static List<Path> gameOverFiles(Path input) throws IOException {
+    private static List<Path> eventFiles(Path input, String fileName) throws IOException {
         if (!Files.isDirectory(input))
             return List.of(input);
         try (Stream<Path> files = Files.walk(input)) {
-            return files.filter(f -> f.getFileName().toString().equals("GAME_OVER.csv")).toList();
+            return files.filter(f -> f.getFileName().toString().equals(fileName)).toList();
         }
     }
 
     /**
-     * @return the decisions made by each player in each game, from the Decisions-P* columns
+     * @return the decisions made by each player in each game (or round), from the Decisions-P* columns
      */
     static List<Integer> readDecisionCounts(Path file) throws IOException {
         List<String> lines = Files.readAllLines(file);
@@ -71,7 +76,7 @@ public class DecisionTableBuilder {
     }
 
     /**
-     * @param decisionCounts - the number of decisions made by each player in each game
+     * @param decisionCounts - the number of decisions made by each player in each game (or round)
      */
     public static double[] table(List<Integer> decisionCounts) {
         int max = decisionCounts.stream().mapToInt(i -> i).max().orElse(1);

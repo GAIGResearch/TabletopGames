@@ -4,9 +4,9 @@ resumed: a chunk with a GAME_OVER.csv is complete and is not run again, so after
 
 usage: python3 run_tournament.py GAME PLAYER_DIR SECONDS CHUNKS GAMES_PER_CHUNK OUTDIR [--procs N] [--players N]
 
-Every config's budget is set to SECONDS (with BUDGET_GAME_SECONDS). In 'exhaustive' mode each chunk plays every
-ordering of players, so GAMES_PER_CHUNK should be a multiple of the number of orderings. Run from the TabletopGames
-root, after mvn compile, with TAG_CP naming a file that holds the Maven dependency classpath.
+Every config's budget is set to SECONDS (with SECONDS 0, each config keeps its own). In 'exhaustive' mode each chunk
+plays every ordering of players, so GAMES_PER_CHUNK should be a multiple of the number of orderings. Run from the
+TabletopGames root, after mvn compile, with TAG_CP naming a file that holds the Maven dependency classpath.
 """
 import argparse, os, subprocess, time
 

@@ -413,7 +413,7 @@ public class SingleTreeNode {
         long remaining;
         int remainingLimit = params.breakMS;
         PlayerConstants budgetType = params.budgetType;
-        boolean timeBudget = budgetType == BUDGET_TIME || budgetType == BUDGET_GAME_SECONDS;
+        boolean timeBudget = budgetType == BUDGET_TIME || budgetType.isClock();
         // milliseconds for a time budget; otherwise iterations, or FM/copy calls
         long budget = params.budget;
         if (timeManager != null)

@@ -42,8 +42,12 @@ public class PlayerGameBudgetTest {
     }
 
     private static PlayerParameters gameSecondsParams(int seconds) {
+        return clockParams(PlayerConstants.BUDGET_GAME_SECONDS, seconds);
+    }
+
+    private static PlayerParameters clockParams(PlayerConstants budgetType, int seconds) {
         PlayerParameters params = new PlayerParameters();
-        params.setParameterValue("budgetType", PlayerConstants.BUDGET_GAME_SECONDS);
+        params.setParameterValue("budgetType", budgetType);
         params.setParameterValue("budget", seconds);
         return params;
     }
@@ -57,11 +61,12 @@ public class PlayerGameBudgetTest {
 
     @Test
     public void gameBudgetIsConvertedFromSecondsToMillis() {
-        assertEquals(5_000, gameSecondsParams(5).getGameBudgetMillis());
+        assertEquals(5_000, gameSecondsParams(5).getClockBudgetMillis());
+        assertEquals(3_000, clockParams(PlayerConstants.BUDGET_ROUND_SECONDS, 3).getClockBudgetMillis());
         PlayerParameters timeParams = new PlayerParameters();
         timeParams.setParameterValue("budgetType", PlayerConstants.BUDGET_TIME);
         timeParams.setParameterValue("budget", 5);
-        assertEquals(-1, timeParams.getGameBudgetMillis());
+        assertEquals(-1, timeParams.getClockBudgetMillis());
     }
 
     @Test
@@ -101,5 +106,25 @@ public class PlayerGameBudgetTest {
         budgeted.getAction(state, game.getForwardModel().computeAvailableActions(state));
         assertNotNull(budgeted.getGameTimer());
         assertTrue(budgeted.getGameTimer().remainingTimeMillis() < 2_000);
+    }
+
+    @Test
+    public void roundTimerIsResetAtThePlayersFirstDecisionInEachRound() {
+        SlowPlayer budgeted = new SlowPlayer(clockParams(PlayerConstants.BUDGET_ROUND_SECONDS, 2), 20);
+        Game game = ticTacToe(new RandomPlayer(new Random(1)), new RandomPlayer(new Random(2)));
+        AbstractGameState state = game.getGameState();
+        budgeted.setForwardModel(game.getForwardModel());
+        List<AbstractAction> actions = game.getForwardModel().computeAvailableActions(state);
+        budgeted.getAction(state, actions);
+        budgeted.getAction(state, actions);
+        long afterTwo = budgeted.getGameTimer().remainingTimeMillis();
+        assertTrue("remaining " + afterTwo, afterTwo <= 2_000 - 30);
+
+        state.roundCounter = 1;
+        budgeted.getAction(state, actions);
+        long afterThree = budgeted.getGameTimer().remainingTimeMillis();
+        // only the decision in the new round is charged
+        assertTrue("remaining " + afterThree, afterThree > afterTwo);
+        assertTrue("remaining " + afterThree, afterThree <= 2_000 - 15);
     }
 }

@@ -242,7 +242,8 @@ public class MCTSMetrics implements IMetricsCollection {
             Map<String, Class<?>> cols = new HashMap<>();
             cols.put("PlayerType", String.class);
             cols.put("PlayerID", Integer.class);
-            cols.put("Decision", Integer.class);  // 1 for the first decision searched in the game
+            // 1 for the first decision searched in the game (or round, with BUDGET_ROUND_SECONDS)
+            cols.put("Decision", Integer.class);
             cols.put("Planned", Integer.class);  // before any extension (ms, or iterations for BUDGET_ITERATIONS)
             cols.put("SearchMS", Double.class);
             cols.put("Iterations", Integer.class);

@@ -1,0 +1,18 @@
+{
+  "budgetType": "BUDGET_GAME_SECONDS",
+  "rolloutLength": 100,
+  "opponentTreePolicy": "OneTree",
+  "MASTGamma": 0.0,
+  "heuristic": {
+    "class": "players.heuristics.WinOnlyHeuristic"
+  },
+  "K": 1.0,
+  "exploreEpsilon": 0.1,
+  "treePolicy": "UCB_Tuned",
+  "MAST": "Both",
+  "rolloutType": "RANDOM",
+  "information": "Information_Set",
+  "class": "players.mcts.MCTSParams",
+  "budget": 9,
+  "selectionPolicy": "ROBUST"
+}
