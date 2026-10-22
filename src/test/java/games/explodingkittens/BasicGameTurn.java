@@ -127,10 +127,10 @@ public class BasicGameTurn {
         assertEquals(1, state.discardPile.getSize());
         assertEquals(4, state.drawPile.stream().filter(c -> c.cardType == EXPLODING_KITTEN).count());
         assertEquals(EXPLODING_KITTEN, state.drawPile.get(index).cardType);
-        assertTrue(state.drawPile.getVisibilityForPlayer(index, 0));
-        assertFalse(state.drawPile.getVisibilityForPlayer(index, 1));
-        assertFalse(state.drawPile.getVisibilityForPlayer(index, 2));
-        assertFalse(state.drawPile.getVisibilityForPlayer(index, 3));
+        assertTrue(state.drawPile.isVisibleTo(index, 0));
+        assertFalse(state.drawPile.isVisibleTo(index, 1));
+        assertFalse(state.drawPile.isVisibleTo(index, 2));
+        assertFalse(state.drawPile.isVisibleTo(index, 3));
 
         assertEquals(0, state.getActionsInProgress().size());
         assertEquals(1, state.getCurrentPlayer());

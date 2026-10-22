@@ -157,7 +157,7 @@ public class LawnAndOrderUtils {
             remove(u, revealed.get(i));
         PartialObservableDeck<RuleCard> tips = state.getInsiderTips();
         for (int i = 0; i < tips.getSize(); i++) {
-            if (!tips.isComponentVisible(i, player)) continue;
+            if (!tips.isVisibleTo(i, player)) continue;
             RuleCard r = tips.get(i);
             remove(u, r);
             if (r.condemned != null)

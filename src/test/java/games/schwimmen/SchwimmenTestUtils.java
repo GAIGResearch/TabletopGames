@@ -414,13 +414,13 @@ final class SchwimmenTestUtils {
 
     static boolean visibleToAll(PartialObservableDeck<FrenchCard> hand, int idx, int nPlayers) {
         for (int p = 0; p < nPlayers; p++)
-            if (!hand.getVisibilityForPlayer(idx, p)) return false;
+            if (!hand.isVisibleTo(idx, p)) return false;
         return true;
     }
 
     static boolean visibleOnlyToOwner(PartialObservableDeck<FrenchCard> hand, int idx, int nPlayers) {
         for (int p = 0; p < nPlayers; p++)
-            if (hand.getVisibilityForPlayer(idx, p) != (p == hand.getOwnerId())) return false;
+            if (hand.isVisibleTo(idx, p) != (p == hand.getOwnerId())) return false;
         return true;
     }
 

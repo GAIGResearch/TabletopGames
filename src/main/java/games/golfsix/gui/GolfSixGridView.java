@@ -52,7 +52,7 @@ public class GolfSixGridView extends JComponent {
         for (int pos = 0; pos < GRID_SIZE; pos++) {
             Rectangle rect = cardRect(pos);
             // a face-down card is face-down for everyone, its owner included
-            boolean faceUp = grid.isComponentVisible(pos, playerId);
+            boolean faceUp = grid.isVisibleTo(pos, playerId);
             if (faceUp || showFaceDown)
                 CardArt.drawCardAt(g2, grid.get(pos), rect);
             else
@@ -110,8 +110,8 @@ public class GolfSixGridView extends JComponent {
     static int faceUpScore(PartialObservableDeck<FrenchCard> grid, int playerId, GolfSixParameters params) {
         int score = 0;
         for (int column = 0; column < COLUMNS; column++) {
-            boolean topUp = grid.isComponentVisible(column, playerId);
-            boolean bottomUp = grid.isComponentVisible(column + COLUMNS, playerId);
+            boolean topUp = grid.isVisibleTo(column, playerId);
+            boolean bottomUp = grid.isVisibleTo(column + COLUMNS, playerId);
             FrenchCard top = grid.get(column), bottom = grid.get(column + COLUMNS);
             if (topUp && bottomUp && top.number == bottom.number)
                 continue;

@@ -90,7 +90,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                 if (i != playerId) {
                     PartialObservableDeck<LoveLetterCard> deck = llgs.playerHandCards.get(i);
                     for (int j = 0; j < deck.getSize(); j++) {
-                        if (!deck.getVisibilityForPlayer(j, playerId)) {
+                        if (!deck.isVisibleTo(j, playerId)) {
                             // Hide!
                             llgs.drawPile.add(deck.get(j));
                         }
@@ -103,7 +103,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                     // New random cards
                     PartialObservableDeck<LoveLetterCard> deck = llgs.playerHandCards.get(i);
                     for (int j = 0; j < deck.getSize(); j++) {
-                        if (!deck.getVisibilityForPlayer(j, playerId)) {
+                        if (!deck.isVisibleTo(j, playerId)) {
                             llgs.playerHandCards.get(i).setComponent(j, llgs.drawPile.draw());
                         }
                     }

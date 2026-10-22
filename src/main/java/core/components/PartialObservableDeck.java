@@ -20,13 +20,18 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     // Visibility of each component in the deck, order corresponds to order of elements in the deck;
     protected List<boolean[]> elementVisibility = new CircularArrayList<>();
 
-    public boolean getVisibilityForPlayer(int elementIdx, int playerID) {
-        return elementVisibility.get(elementIdx)[playerID];
-    }
-
+    /**
+     * Returns true if the component queried is visible to the given player, otherwise false.
+     *
+     * @param index    - index of component to check visibility for.
+     * @param playerId - ID of player.
+     * @return - true if visible, false otherwise.
+     */
     @Override
     public boolean isVisibleTo(int index, int playerId) {
-        return getVisibilityForPlayer(index, playerId);
+        if (playerId < 0 || playerId >= deckVisibility.length)
+            throw new IllegalArgumentException("playerID " + playerId + " needs to be in range [0," + (deckVisibility.length - 1) + "]");
+        return elementVisibility.get(index)[playerId];
     }
 
     public boolean[] getVisibilityOfComponent(int elementIdx) {
@@ -82,19 +87,6 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
                 visibleComponents.add(i, null);
         }
         return visibleComponents;
-    }
-
-    /**
-     * Returns true if the component queried is visible to the given player, otherwise false.
-     *
-     * @param idx      - index of component to check visibility for.
-     * @param playerID - ID of player.
-     * @return - true if visible, false otherwise.
-     */
-    public boolean isComponentVisible(int idx, int playerID) {
-        if (playerID < 0 || playerID >= deckVisibility.length)
-            throw new IllegalArgumentException("playerID " + playerID + " needs to be in range [0," + (deckVisibility.length - 1) + "]");
-        return elementVisibility.get(idx)[playerID];
     }
 
 
@@ -454,7 +446,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     public String toString(AbstractGameState gs, int playerID) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < components.size(); i++) {
-            if (!isComponentVisible(i, playerID) && gs.getCoreGameParameters().partialObservable)
+            if (!isVisibleTo(i, playerID) && gs.getCoreGameParameters().partialObservable)
                 sb.append("UNKNOWN");
             else
                 sb.append(components.get(i).toString());

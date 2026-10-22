@@ -64,9 +64,6 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         return new DeckIterator();
     }
 
-
-    // Iterator implementation. This works by index (rather than using components.iterator()) so that it does not
-    // throw a ConcurrentModificationException if the deck is changed during iteration.
     private class DeckIterator implements Iterator<T> {
         private int currentIndex = 0;
 

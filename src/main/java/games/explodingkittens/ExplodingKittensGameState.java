@@ -105,7 +105,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IToJ
                     // Take all cards the player can't see from other players and put them in the draw pile.
                     ArrayList<ExplodingKittensCard> cs = new ArrayList<>();
                     for (int j = 0; j < ekgs.playerHandCards.get(i).getSize(); j++) {
-                        if (!ekgs.playerHandCards.get(i).isComponentVisible(j, playerId)) {
+                        if (!ekgs.playerHandCards.get(i).isVisibleTo(j, playerId)) {
                             ExplodingKittensCard c = ekgs.playerHandCards.get(i).get(j);
                             ekgs.drawPile.add(c, ekgs.playerHandCards.get(i).getVisibilityOfComponent(j).clone());
                             cs.add(c);
@@ -124,12 +124,12 @@ public class ExplodingKittensGameState extends AbstractGameState implements IToJ
                 if (i != playerId) {
                     for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
                         // Add back random cards for all components not visible to this player
-                        if (playerHandCards.get(i).isComponentVisible(j, playerId)) continue;
+                        if (playerHandCards.get(i).isVisibleTo(j, playerId)) continue;
                         boolean added = false;
                         int cardIndex = 0;
                         while (!added) {
                             // if the card is visible to the player we cannot move it somewhere else
-                            if (ekgs.drawPile.getVisibilityForPlayer(cardIndex, playerId)) {
+                            if (ekgs.drawPile.isVisibleTo(cardIndex, playerId)) {
                                 cardIndex++;
                                 continue;
                             }
