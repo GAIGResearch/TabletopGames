@@ -30,8 +30,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     protected List<Object> recentlyRemovedKeys = new ArrayList<>();
     // null unless the parameters use time management
     protected MCTSTimeManager timeManager;
-    // true if the last call to _getAction() ran a search
-    protected boolean searched;
+    // the game tick of the last search (-1 before the first search of a game)
+    protected int lastSearchTick = -1;
     public MCTSPlayer() {
         this(new MCTSParams());
     }
@@ -70,6 +70,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         getParameters().getOpponentModel().initializePlayer(state);
         if (getTimeManager() != null)
             timeManager.newGame(state);
+        lastSearchTick = -1;
         super.initializePlayer(state);
     }
 
@@ -287,7 +288,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        searched = false;
         if (actions.size() == 1)
             return actions.getFirst();  // take the only action available
         long currentTimeNano = System.nanoTime();
@@ -300,7 +300,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
         root.timeManager = tm;
         root.mctsSearch(timeTaken / 1000000);
-        searched = true;
+        lastSearchTick = gameState.getGameTick();
         if (tm != null)
             tm.endDecision();
 

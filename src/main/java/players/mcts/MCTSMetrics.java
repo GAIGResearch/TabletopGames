@@ -207,7 +207,9 @@ public class MCTSMetrics implements IMetricsCollection {
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             AbstractPlayer player = listener.getGame().getPlayers().get(e.playerID);
-            if (!(player instanceof MCTSPlayer mctsPlayer) || !mctsPlayer.searched) return false;
+            // a decision with a single action is not searched
+            if (!(player instanceof MCTSPlayer mctsPlayer) || mctsPlayer.lastSearchTick != e.state.getGameTick())
+                return false;
             MCTSTimeManager tm = mctsPlayer.timeManager;
             if (tm == null) return false;
             SingleTreeNode root = mctsPlayer.root.decisionRoot();
