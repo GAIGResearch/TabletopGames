@@ -24,8 +24,9 @@ def decisions(outdir):
         seen = set()
         for row in csv.DictReader(open(f)):
             row["file"] = f  # game IDs restart in each output directory
-            # before fb92401 the metric could record a search a second time (after a decision with one action)
-            key = (row["GameID"], row["TimeManagement(PlayerID)"], row["TimeManagement(Decision)"])
+            # before fb92401 the metric could record a search a second time (after a decision with one action);
+            # with BUDGET_ROUND_SECONDS decisions are numbered within the round
+            key = (row["GameID"], row["Round"], row["TimeManagement(PlayerID)"], row["TimeManagement(Decision)"])
             if key not in seen:
                 seen.add(key)
                 yield row
@@ -51,12 +52,14 @@ def analyse(outdir):
     rows = list(decisions(outdir))
     per_game = defaultdict(lambda: defaultdict(int))
     by_decision = defaultdict(lambda: defaultdict(list))
+    by_round = defaultdict(lambda: defaultdict(int))
     stats = defaultdict(lambda: defaultdict(float))
     for r in rows:
         t = r["TimeManagement(PlayerType)"]
         ms = int(r["TimeManagement(DecisionMS)"])
         per_game[t][(r["file"], r["GameID"], r["GameSeed"])] += ms
         by_decision[t][int(r["TimeManagement(Decision)"])].append(ms)
+        by_round[t][int(r["Round"])] += ms
         stats[t]["decisions"] += 1
         stats[t]["stopped"] += r["TimeManagement(StoppedEarly)"] == "true"
         stats[t]["extended"] += int(r["TimeManagement(Extensions)"]) > 0
@@ -84,6 +87,9 @@ def analyse(outdir):
         dist = by_decision[t]
         print("          mean ms by decision: " + " ".join(
             "%d:%.0f" % (d, sum(dist[d]) / len(dist[d])) for d in sorted(dist) if len(dist[d]) >= 10))
+        if 1 < len(by_round[t]) <= 10:
+            print("          mean ms per game in each round: " + " ".join(
+                "%d:%.0f" % (rnd, ms / len(totals)) for rnd, ms in sorted(by_round[t].items())))
 
 
 for d in sys.argv[1:]:
