@@ -19,6 +19,7 @@ import games.leducpoker.LeducPokerParameters;
 import games.toads.ToadParameters;
 import games.catan.CatanParameters;
 import games.crazyeights.CZEParameters;
+import games.perudo.PerudoParameters;
 import games.cribbage.CribbageParameters;
 import games.descent2e.DescentParameters;
 import games.pitch.PitchParameters;
@@ -163,6 +164,16 @@ public class ForwardModelTestsWithMCTS {
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=5", "agent=json\\players\\mcts.json");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=6", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testPerudo() {
+        new ForwardModelTester("game=Perudo", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+        PerudoParameters params = new PerudoParameters();
+        params.setParameterValue("palifico", true);
+        params.setParameterValue("calza", true);
+        params.setParameterValue("nDicePerPlayer", 3);
+        new ForwardModelTester(params, "game=Perudo", "nGames=1", "nPlayers=2", "agent=json\\players\\mcts.json");
     }
 
     @Test
