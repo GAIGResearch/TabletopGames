@@ -35,7 +35,7 @@ procs = []
 for i in range(args.procs):
     dest = os.path.join(args.outdir, "run%d" % i)
     log = open(os.path.join(args.outdir, "run%d.log" % i), "w")
-    cmd = ["java", "-cp", cp, "evaluation.RunGames", "game=Connect4", "nPlayers=2", "mode=exhaustive",
+    cmd = ["java", "-Xmx2g", "-cp", cp, "evaluation.RunGames", "game=Connect4", "nPlayers=2", "mode=exhaustive",
            "playerDirectory=" + players, "matchups=%d" % (args.games // args.procs),
            "listener=metrics/timeManagement.json", "destDir=" + dest, "seed=%d" % (1000 + 7919 * i)]
     procs.append(subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT))
