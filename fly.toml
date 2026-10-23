@@ -3,6 +3,7 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
+# For a private deployment, change this to your own app's name (or override it with fly deploy -a <app>)
 app = 'tag-games'
 primary_region = 'lhr'
 
