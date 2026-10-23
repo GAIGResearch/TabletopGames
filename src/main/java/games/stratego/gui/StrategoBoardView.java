@@ -83,7 +83,7 @@ public class StrategoBoardView extends ComponentView {
             for (int j = 0; j < gridSize; j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + i * defaultItemSize;
-                drawCell(g, (Piece) gridBoard.get(j, i), xC, yC);
+                drawCell(g, (Piece) gridBoard.getElement(j, i), xC, yC);
 
                 // Save rect where cell is drawn
                 int idx = i * gridSize + j;

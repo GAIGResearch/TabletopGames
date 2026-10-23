@@ -81,7 +81,7 @@ public class TileBuildGUI extends AbstractGUIManager {
             int maxY = 0;
             for (int i = 0; i < tile.getHeight(); i++) {
                 for (int j = 0; j < tile.getWidth(); j++) {
-                    if (tile.get(j, i) != null && DescentTypes.TerrainType.isInsideTerrain(tile.get(j, i).getComponentName())) {
+                    if (tile.getElement(j, i) != null && DescentTypes.TerrainType.isInsideTerrain(tile.getElement(j, i).getComponentName())) {
                         if (j < minX) minX = j;
                         if (i < minY) minY = i;
                         if (i > maxY) maxY = i;
@@ -116,10 +116,10 @@ public class TileBuildGUI extends AbstractGUIManager {
             for (int i = 0; i < tile.getHeight(); i++) {
                 gridValues += "\n[";
                 for (int j = 0; j < tile.getWidth(); j++) {
-                    if (tile.get(j, i) == null) {
-                        gridValues += "\"" + tile.get(j, i) + "\", ";
+                    if (tile.getElement(j, i) == null) {
+                        gridValues += "\"" + tile.getElement(j, i) + "\", ";
                     } else {
-                        gridValues += "\"" + tile.get(j, i).getComponentName() + "\", ";
+                        gridValues += "\"" + tile.getElement(j, i).getComponentName() + "\", ";
                     }
                 }
                 gridValues = gridValues.substring(0, gridValues.length()-2);
@@ -155,8 +155,8 @@ public class TileBuildGUI extends AbstractGUIManager {
         getPath.addActionListener(e -> {
             // Compute path from oldHighlight to highlight
             if (view.oldHighlight != null && view.highlight != null) {
-                BoardNode node1 = dgs.tile.get(view.oldHighlight.getX(), view.oldHighlight.getY());
-                BoardNode node2 = dgs.tile.get(view.highlight.getX(), view.highlight.getY());
+                BoardNode node1 = dgs.tile.getElement(view.oldHighlight.getX(), view.oldHighlight.getY());
+                BoardNode node2 = dgs.tile.getElement(view.highlight.getX(), view.highlight.getY());
                 if (node1 != null && node2 != null) {
                     Path p = dgs.pathfinder.getPath(dgs, node1.getComponentID(), node2.getComponentID());
                     ArrayList<Vector2D> points = new ArrayList<>();

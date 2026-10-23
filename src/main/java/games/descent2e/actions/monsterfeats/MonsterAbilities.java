@@ -62,7 +62,7 @@ public class MonsterAbilities {
 
                         Vector2D currentLocation = actingFigure.getPosition();
                         GridBoard board = dgs.getMasterBoard();
-                        BoardNode anchorTile = board.get(currentLocation);
+                        BoardNode anchorTile = board.getElement(currentLocation);
 
                         if (size.a > 1 || size.b > 1) {
                             attackingTiles.addAll(getAttackingTiles(actingFigure.getComponentID(), anchorTile, attackingTiles));

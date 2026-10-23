@@ -64,7 +64,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         this(nodes[0].length, nodes.length);
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
-                set(x, y, nodes[y][x]);
+                setElement(x, y, nodes[y][x]);
     }
 
     public int getWidth() {
@@ -93,7 +93,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         for (Map.Entry<SquareCoord, BoardNode> e : old.entrySet()) {
             int x = e.getKey().x() + offsetX, y = e.getKey().y() + offsetY;
             if (inBounds(x, y))
-                set(x, y, e.getValue());
+                setElement(x, y, e.getValue());
         }
     }
 
@@ -104,35 +104,36 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     /**
      * The node at (x, y), or null if the square is empty or off the board.
      */
-    public BoardNode get(int x, int y) {
+    public BoardNode getElement(int x, int y) {
         return grid.get(new SquareCoord(x, y));
     }
 
-    public BoardNode get(SquareCoord pos) {
+    public BoardNode getElement(SquareCoord pos) {
         return grid.get(pos);
     }
 
-    public BoardNode get(Vector2D pos) {
-        return get(pos.getX(), pos.getY());
+    public BoardNode getElement(Vector2D pos) {
+        return getElement(pos.getX(), pos.getY());
     }
 
     /**
      * Puts the node at (x, y), or empties the square if it is null.
      *
-     * @throws IllegalArgumentException if (x, y) is off the board
+     * @return true, or false (changing nothing) if (x, y) is off the board
      */
-    public void set(int x, int y, BoardNode value) {
+    public boolean setElement(int x, int y, BoardNode value) {
         if (!inBounds(x, y))
-            throw new IllegalArgumentException("(" + x + ", " + y + ") is off the " + width + " by " + height + " board " + componentName);
+            return false;
         grid.set(new SquareCoord(x, y), value);
+        return true;
     }
 
-    public void set(SquareCoord pos, BoardNode value) {
-        set(pos.x(), pos.y(), value);
+    public boolean setElement(SquareCoord pos, BoardNode value) {
+        return setElement(pos.x(), pos.y(), value);
     }
 
-    public void set(Vector2D pos, BoardNode value) {
-        set(pos.getX(), pos.getY(), value);
+    public boolean setElement(Vector2D pos, BoardNode value) {
+        return setElement(pos.getX(), pos.getY(), value);
     }
 
     public boolean contains(int x, int y) {
@@ -237,7 +238,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         StringBuilder s = new StringBuilder();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                BoardNode t = get(x, y);
+                BoardNode t = getElement(x, y);
                 if (t != null) s.append(t.getComponentName()).append(" ");
             }
             s.append("\n");
@@ -310,9 +311,9 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         for (Object o : row) {
             // TODO FIX THIS
             if (o instanceof String name)
-                set(x, y, new BoardNode(-1, name));
+                setElement(x, y, new BoardNode(-1, name));
             else
-                set(x, y, (BoardNode) o);
+                setElement(x, y, (BoardNode) o);
             x++;
         }
     }

@@ -105,7 +105,7 @@ public class StrategoGameState extends AbstractGameState{
      * The piece at the position, or null if there is none.
      */
     public Piece getPiece(Vector2D position) {
-        return (Piece) gridBoard.get(position);
+        return (Piece) gridBoard.getElement(position);
     }
 
     /**
@@ -123,7 +123,7 @@ public class StrategoGameState extends AbstractGameState{
      * Puts the piece at the position, or empties it if the piece is null.
      */
     public void setPiece(Vector2D position, Piece piece) {
-        gridBoard.set(position, piece);
+        gridBoard.setElement(position, piece);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
      * This returns the player id of the token at the given position. Or -1 if this is empty.
      */
     public int getPlayerAt(int x, int y) {
-        BoardNode token = gridBoard.get(x, y);
+        BoardNode token = gridBoard.getElement(x, y);
         return token == null ? -1 : token.getOwnerId();
     }
 
@@ -111,7 +111,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
                 if (y != 0 || x != 0) {
                     sb.append(",");
                 }
-                BoardNode t = gridBoard.get(x, y);
+                BoardNode t = gridBoard.getElement(x, y);
                 sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"")
                         .append(t == null ? Connect4Constants.emptyCell : t.getComponentName()).append("\"");
             }
@@ -131,11 +131,11 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     }
 
     public int getWidth() {
-        return ((Connect4GameParameters) gameParameters).width;
+        return gridBoard.getWidth();
     }
 
     public int getHeight() {
-        return ((Connect4GameParameters) gameParameters).height;
+        return gridBoard.getHeight();
     }
 
     @Override
@@ -143,7 +143,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
-                BoardNode t = gridBoard.get(x, y);
+                BoardNode t = gridBoard.getElement(x, y);
                 sb.append(t == null ? Connect4Constants.emptyCell : t.getComponentName()).append(" ");
             }
             sb.append(System.lineSeparator());

@@ -22,7 +22,7 @@ public class TicTacToeStateVector implements IStateFeatureVector {
         double[] retValue = new double[state.getGridSize() * state.getGridSize()];
         for (int y = 0; y < state.getGridSize(); y++) {
             for (int x = 0; x < state.getGridSize(); x++) {
-                BoardNode c = state.gridBoard.get(x, y);
+                BoardNode c = state.gridBoard.getElement(x, y);
                 if (c == null) {
                     retValue[y * state.getGridSize() + x] = 0.0;
                 } else if (c.getComponentName().equals(playerChar)) {

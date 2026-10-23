@@ -33,7 +33,7 @@ public class StrategoBoardTest {
     @Before
     public void emptyTheBoard() {
         for (SquareCoord pos : new ArrayList<>(state.getGridBoard().asMap().keySet()))
-            state.getGridBoard().set(pos, null);
+            state.getGridBoard().setElement(pos, null);
         // a flag each, out of the way, so that the game goes on
         place(FLAG, RED, 0, 0);
         place(FLAG, BLUE, 9, 9);

@@ -47,7 +47,7 @@ public class DescentHelper {
         List<BoardNode> attackingTiles = new ArrayList<>();
 
         Vector2D currentLocation = f.getPosition();
-        BoardNode anchorTile = dgs.masterBoard.get(currentLocation.getX(), currentLocation.getY());
+        BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
 
         if (size.a > 1 || size.b > 1)
         {
@@ -111,7 +111,7 @@ public class DescentHelper {
         List<BoardNode> attackingTiles = new ArrayList<>();
 
         Vector2D currentLocation = f.getPosition();
-        BoardNode anchorTile = dgs.masterBoard.get(currentLocation.getX(), currentLocation.getY());
+        BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
         attackingTiles.add(anchorTile);
 
         if (size.a > 1 || size.b > 1)
@@ -195,10 +195,10 @@ public class DescentHelper {
 
         ArrayList<Vector2D> containedPoints = LineOfSight.bresenhamsLineAlgorithm(startPoint, endPoint);
 
-        BoardNode startTile = dgs.masterBoard.get(startPoint.getX(), startPoint.getY());
+        BoardNode startTile = dgs.masterBoard.getElement(startPoint.getX(), startPoint.getY());
         int start = ((PropertyInt) startTile.getProperty(playersHash)).value;
 
-        BoardNode targetTile = dgs.masterBoard.get(endPoint.getX(), endPoint.getY());
+        BoardNode targetTile = dgs.masterBoard.getElement(endPoint.getX(), endPoint.getY());
         int target = ((PropertyInt) targetTile.getProperty(playersHash)).value;
 
         // For each coordinate in the line, check:
@@ -212,7 +212,7 @@ public class DescentHelper {
             Vector2D point = containedPoints.get(i);
 
             // Check 1) Does the board node exist at this coordinate
-            BoardNode currentTile = dgs.masterBoard.get(point.getX(), point.getY());
+            BoardNode currentTile = dgs.masterBoard.getElement(point.getX(), point.getY());
             if (currentTile == null){
                 hasLineOfSight = false;
                 break;
@@ -228,7 +228,7 @@ public class DescentHelper {
             }
 
             // Check 3) Is the board node connected to previous board node
-            BoardNode previousTile = dgs.masterBoard.get(previousPoint.getX(), previousPoint.getY());
+            BoardNode previousTile = dgs.masterBoard.getElement(previousPoint.getX(), previousPoint.getY());
             if (!previousTile.getNeighbours().containsKey(currentTile)){
                 hasLineOfSight = false;
                 break;
@@ -291,7 +291,7 @@ public class DescentHelper {
 
         //For every point of interest find neighbours that are empty and add then as potential move spots
         for (Vector2D point : pointsOfInterest){
-            BoardNode figureNode = dgs.masterBoard.get(point.getX(), point.getY());
+            BoardNode figureNode = dgs.masterBoard.getElement(point.getX(), point.getY());
             Set<BoardNode> neighbours = figureNode.getNeighbours().keySet();
             for (BoardNode neighbourNode : neighbours){
                 PropertyInt figureOnLocation = (PropertyInt) neighbourNode.getProperty(playersHash);
@@ -312,7 +312,7 @@ public class DescentHelper {
 
     private static HashMap<Vector2D, Pair<Double,List<Vector2D>>> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
         Vector2D figureLocation = figure.getPosition();
-        BoardNode figureNode = dgs.getMasterBoard().get(figureLocation.getX(), figureLocation.getY());
+        BoardNode figureNode = dgs.getMasterBoard().getElement(figureLocation.getX(), figureLocation.getY());
         String figureType = figure.getTokenType();
 
         //<Board Node, Cost to get there>
@@ -427,19 +427,19 @@ public class DescentHelper {
 
                             // If the space is not a neighbour of the current position, then it is not a legal move
                             if (i == 1 || j == 1) {
-                                BoardNode target = dgs.getMasterBoard().get(topLeftCorner);
+                                BoardNode target = dgs.getMasterBoard().getElement(topLeftCorner);
                                 if (target == null) {
                                     legal = false;
                                     break;
                                 }
                                 Set<BoardNode> neighbours = target.getNeighbours().keySet();
-                                if (!neighbours.contains(dgs.getMasterBoard().get(space))) {
+                                if (!neighbours.contains(dgs.getMasterBoard().getElement(space))) {
                                     legal = false;
                                     break;
                                 }
                             }
 
-                            BoardNode spaceOccupied = dgs.getMasterBoard().get(space.getX(), space.getY());
+                            BoardNode spaceOccupied = dgs.getMasterBoard().getElement(space.getX(), space.getY());
 
                             if (spaceOccupied != null)
                             {
@@ -599,7 +599,7 @@ public class DescentHelper {
         GridBoard board = dgs.getMasterBoard();
 
         // Ensure that both start and end points are valid
-        if (board.get(start) == null || board.get(end) == null)
+        if (board.getElement(start) == null || board.getElement(end) == null)
             return -1;
 
         boolean[][] visited = new boolean[board.getWidth()][board.getHeight()];
@@ -607,7 +607,7 @@ public class DescentHelper {
 
         // Distance from the source cell is initialized to 0
         Queue<Pair<BoardNode, Integer>> queue = new LinkedList<>();
-        queue.add(new Pair<BoardNode, Integer>((BoardNode) board.get(start), 0));
+        queue.add(new Pair<BoardNode, Integer>((BoardNode) board.getElement(start), 0));
 
         // BFS starting from start cell
         while (!queue.isEmpty())

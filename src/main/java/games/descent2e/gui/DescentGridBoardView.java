@@ -350,13 +350,13 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
-                drawCell(g, gridBoard.get(j, i), j, i, gridBoard.getWidth(), gridBoard.getHeight(), x, y);
+                drawCell(g, gridBoard.getElement(j, i), j, i, gridBoard.getWidth(), gridBoard.getHeight(), x, y);
             }
         }
         // Draw connectivity graph
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
-                drawNeighbourConnections(g, gridBoard.get(j, i), j, i, x, y);
+                drawNeighbourConnections(g, gridBoard.getElement(j, i), j, i, x, y);
             }
         }
 

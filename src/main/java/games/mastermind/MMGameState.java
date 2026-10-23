@@ -66,7 +66,7 @@ public class MMGameState extends AbstractGameState {
         for (int i = 0; i < activeRow; i++) {
             List<Integer> result = checkGuessAgainstAnswer(answerCode, i);
             for (int j = 0; j < mmp.boardWidth; j++) {
-                if (!MMConstants.resultColours.get(result.get(j)).equals(resultBoard.get(j, i))) {
+                if (!MMConstants.resultColours.get(result.get(j)).equals(resultBoard.getElement(j, i))) {
                     return false;
                 }
             }
@@ -136,7 +136,7 @@ public class MMGameState extends AbstractGameState {
 
         for (int i = mmp.boardWidth - 1; i >= 0; i--) {
             // If a guess peg is the correct colour in the correct place, add a 0 to the returned list
-            if (guessBoard.get(i, activeRow).getComponentName().equals(answerCode.get(i).getComponentName())) {
+            if (guessBoard.getElement(i, activeRow).getComponentName().equals(answerCode.get(i).getComponentName())) {
                 result.set(i, 0);
                 copyAnswerCode.remove(i);
             }
@@ -148,7 +148,7 @@ public class MMGameState extends AbstractGameState {
                 boolean found = false;
                 BoardNode toRemove = null;
                 for (BoardNode BoardNode : copyAnswerCode) {
-                    if (guessBoard.get(i, activeRow).getComponentName().equals(BoardNode.getComponentName())) {
+                    if (guessBoard.getElement(i, activeRow).getComponentName().equals(BoardNode.getComponentName())) {
                         result.set(i, 1);
                         toRemove = BoardNode;
                         found = true;

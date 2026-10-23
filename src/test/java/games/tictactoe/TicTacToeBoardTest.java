@@ -37,7 +37,7 @@ public class TicTacToeBoardTest {
             squares.add(s.getX() + "," + s.getY());
         }
         assertEquals(List.of("0,0", "0,1", "0,2", "1,0", "1,1", "1,2", "2,1", "2,2"), squares);
-        assertEquals(TicTacToeConstants.playerMapping.get(0), state.getGridBoard().get(2, 0));
+        assertEquals(TicTacToeConstants.playerMapping.get(0), state.getGridBoard().getElement(2, 0));
     }
 
     @Test
@@ -89,9 +89,9 @@ public class TicTacToeBoardTest {
     }
     @Test
     public void aCopyKeepsTheBoardSize() {
-        // set as a tunable value, as a copy of the parameters keeps only those
+        // set on the field, which a copy of the parameters loses (it keeps only the tunable values)
         TicTacToeGameParameters params = new TicTacToeGameParameters();
-        params.setParameterValue("gridSize", 4);
+        params.gridSize = 4;
         Game big = GameType.TicTacToe.createGameInstance(2, params);
         TicTacToeGameState copy = (TicTacToeGameState) big.getGameState().copy();
         assertEquals(4, copy.getGridSize());

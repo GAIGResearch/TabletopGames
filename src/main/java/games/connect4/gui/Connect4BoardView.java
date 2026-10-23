@@ -95,7 +95,7 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
             for (int j = 0; j < gridWidth; j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + (i+1) * defaultItemSize;
-                drawCell(g, gridBoard.get(j, i), xC, yC);
+                drawCell(g, gridBoard.getElement(j, i), xC, yC);
 
             }
         }

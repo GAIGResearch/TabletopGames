@@ -77,7 +77,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
             String lastToken = null;
             winning.clear();
             for (int y = gameState.getHeight() - 1; y >= 0; y--) {
-                BoardNode c = gridBoard.get(x, y);
+                BoardNode c = gridBoard.getElement(x, y);
                 if (c == null) {
                     count = 0;
                     lastToken = null;
@@ -108,7 +108,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
             String lastToken = null;
             winning.clear();
             for (int x = 0; x < gameState.getWidth(); x++) {
-                BoardNode c = gridBoard.get(x, y);
+                BoardNode c = gridBoard.getElement(x, y);
                 if (c == null) {
                     count = 0;
                     lastToken = null;
@@ -172,7 +172,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
 
         for (int x = xStart, y = yStart; x < gameState.getWidth() && y >=0; x++, y--) {
-            BoardNode c = gridBoard.get(x, y);
+            BoardNode c = gridBoard.getElement(x, y);
 
             if (c == null) {
                 count = 0;
@@ -205,7 +205,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
 
         for (int x = xStart, y = yStart; x >= 0 && y >= 0; x--, y--) {
-            BoardNode c = gridBoard.get(x, y);
+            BoardNode c = gridBoard.getElement(x, y);
 
             if (c == null) {
                 count = 0;

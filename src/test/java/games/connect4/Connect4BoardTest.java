@@ -46,9 +46,9 @@ public class Connect4BoardTest {
             squares.add(((SetGridValueAction) a).getX() + "," + ((SetGridValueAction) a).getY());
         // column 3 is full
         assertEquals(List.of("0,4", "1,5", "2,5", "4,5", "5,5", "6,5"), squares);
-        assertEquals(Connect4Constants.playerMapping.get(0), state.getGridBoard().get(0, 5));
-        assertEquals(Connect4Constants.playerMapping.get(1), state.getGridBoard().get(3, 5));
-        assertEquals(Connect4Constants.playerMapping.get(0), state.getGridBoard().get(3, 0));
+        assertEquals(Connect4Constants.playerMapping.get(0), state.getGridBoard().getElement(0, 5));
+        assertEquals(Connect4Constants.playerMapping.get(1), state.getGridBoard().getElement(3, 5));
+        assertEquals(Connect4Constants.playerMapping.get(0), state.getGridBoard().getElement(3, 0));
     }
 
     @Test
@@ -124,10 +124,10 @@ public class Connect4BoardTest {
 
     @Test
     public void aCopyKeepsTheBoardSize() {
-        // set as tunable values, as a copy of the parameters keeps only those
+        // set on the fields, which a copy of the parameters loses (it keeps only the tunable values)
         Connect4GameParameters params = new Connect4GameParameters();
-        params.setParameterValue("width", 5);
-        params.setParameterValue("height", 4);
+        params.width = 5;
+        params.height = 4;
         Connect4GameState copy = (Connect4GameState) newGame(params).copy();
         assertEquals(5, copy.getWidth());
         assertEquals(4, copy.getHeight());

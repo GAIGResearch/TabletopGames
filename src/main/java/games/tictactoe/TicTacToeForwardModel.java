@@ -76,11 +76,11 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
         lines.add(new int[]{n - 1, 0, -1, 1});
 
         for (int[] line : lines) {
-            BoardNode c = gridBoard.get(line[0], line[1]);
+            BoardNode c = gridBoard.getElement(line[0], line[1]);
             if (c == null) continue;
             boolean win = true;
             for (int i = 1; i < n && win; i++)
-                win = c.equals(gridBoard.get(line[0] + i * line[2], line[1] + i * line[3]));
+                win = c.equals(gridBoard.getElement(line[0] + i * line[2], line[1] + i * line[3]));
             if (win) {
                 registerWinner(gameState, c);
                 return true;

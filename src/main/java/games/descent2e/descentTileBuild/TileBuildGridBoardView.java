@@ -74,7 +74,7 @@ public class TileBuildGridBoardView extends ComponentView implements IScreenHigh
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
-                drawCell((Graphics2D)g, gridBoard.get(j, i), j, i, gridBoard.getWidth(), gridBoard.getHeight(), 0, 0);
+                drawCell((Graphics2D)g, gridBoard.getElement(j, i), j, i, gridBoard.getWidth(), gridBoard.getHeight(), 0, 0);
             }
         }
 

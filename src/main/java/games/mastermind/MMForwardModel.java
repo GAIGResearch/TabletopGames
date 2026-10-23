@@ -50,8 +50,8 @@ public class MMForwardModel extends StandardForwardModel {
             if (win) {
                 mmgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 0);
                 // Fill the resultBoard's last row with 'correct'
-                for (int i=0; i<mmp.boardWidth; i++) {
-                    mmgs.resultBoard.set(i, mmgs.activeRow, MMConstants.resultColours.get(0));
+                for (int i=0; i<mmgs.resultBoard.getWidth(); i++) {
+                    mmgs.resultBoard.setElement(i, mmgs.activeRow, MMConstants.resultColours.get(0));
                 }
             } else {
                 mmgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 0);
@@ -68,7 +68,7 @@ public class MMForwardModel extends StandardForwardModel {
 
             // Update result board with respectively coloured pegs
             for (int i=0; i<rowResult.size(); i++) {
-                mmgs.resultBoard.set(i, mmgs.activeRow, MMConstants.resultColours.get(rowResult.get(i)));
+                mmgs.resultBoard.setElement(i, mmgs.activeRow, MMConstants.resultColours.get(rowResult.get(i)));
             }
 
             // Reset row and column markers, ready for the next row
@@ -84,7 +84,7 @@ public class MMForwardModel extends StandardForwardModel {
         boolean gameEnd = true;
 
         for (int i=0; i<mmp.boardWidth; i++) {
-            BoardNode guess = gameState.guessBoard.get(i, gameState.activeRow);
+            BoardNode guess = gameState.guessBoard.getElement(i, gameState.activeRow);
             if (guess == null || !guess.getComponentName().equals(gameState.answerCode.get(i).getComponentName())) {
                 win = false;
                 gameEnd = false;

@@ -41,7 +41,7 @@ public class Connect4StateJSON {
         for (int y = 0; y < board.getHeight(); y++) {
             JSONArray row = new JSONArray();
             for (int x = 0; x < board.getWidth(); x++) {
-                BoardNode cell = board.get(x, y);
+                BoardNode cell = board.getElement(x, y);
                 JSONObject cellJSON = new JSONObject();
                 cellJSON.put("name", cell == null ? Connect4Constants.emptyCell : cell.getComponentName());
                 row.add(cellJSON);
@@ -76,7 +76,7 @@ public class Connect4StateJSON {
             JSONArray row = (JSONArray) rows.get(y);
             for (int x = 0; x < width; x++) {
                 String name = (String) ((JSONObject) row.get(x)).get("name");
-                grid.set(x, y, marker(name));
+                grid.setElement(x, y, marker(name));
             }
         }
         state.gridBoard = grid;

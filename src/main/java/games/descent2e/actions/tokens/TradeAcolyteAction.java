@@ -55,7 +55,7 @@ public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implemen
             GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
-                BoardNode bn = board.get(n.getX(), n.getY());
+                BoardNode bn = board.getElement(n.getX(), n.getY());
                 if (bn != null) {
                     PropertyInt figureAtNode = ((PropertyInt) bn.getProperty(playersHash));
                     if (figureAtNode != null && figureAtNode.value != -1) {
@@ -114,7 +114,7 @@ public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implemen
             GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
-                BoardNode bn = board.get(n.getX(), n.getY());
+                BoardNode bn = board.getElement(n.getX(), n.getY());
                 if (bn != null) {
                     PropertyInt figureAtNode = ((PropertyInt) bn.getProperty(playersHash));
                     if (figureAtNode != null && figureAtNode.value != -1) {

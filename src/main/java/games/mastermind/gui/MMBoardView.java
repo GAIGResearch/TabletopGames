@@ -70,7 +70,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
             for (int j = 0; j < gridWidth; j++) {
                 int xC = x + j * scaledDefaultItemSize;
                 int yC = y + i * scaledDefaultItemSize;
-                drawCell(g, gridBoard.get(j, i), xC, yC);
+                drawCell(g, gridBoard.getElement(j, i), xC, yC);
 
                 // Save rect where cell is drawn
                 int idx = i * gridWidth + j;

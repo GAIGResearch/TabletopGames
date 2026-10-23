@@ -77,7 +77,7 @@ public class Move extends AbstractAction {
         Figure f = (Figure) dgs.getComponentById(this.f);
         // We should not finish on the same space that we started on
         Vector2D finalPosition = positionsTraveled.get(positionsTraveled.size()-1);
-        BoardNode node = dgs.getMasterBoard().get(finalPosition.getX(), finalPosition.getY());
+        BoardNode node = dgs.getMasterBoard().getElement(finalPosition.getX(), finalPosition.getY());
 
         // We can only end our movement on a space that is not occupied by another figure
         // This is not important if we are considered off the map
@@ -175,7 +175,7 @@ public class Move extends AbstractAction {
 //            }
             place(dgs, f, position, orientation);
         } else {
-            BoardNode destinationTile = dgs.getMasterBoard().get(position.getX(), position.getY());
+            BoardNode destinationTile = dgs.getMasterBoard().getElement(position.getX(), position.getY());
             DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
             if (terrain != null) {
                 for (Map.Entry<Figure.Attribute, Integer> e : terrain.getMoveCosts().entrySet()) {
@@ -201,7 +201,7 @@ public class Move extends AbstractAction {
         //System.out.println(oldTopLeftAnchor);
         PropertyInt emptySpace = new PropertyInt("players", -1);
 
-        BoardNode baseSpace = dgs.getMasterBoard().get(oldTopLeftAnchor.getX(), oldTopLeftAnchor.getY());
+        BoardNode baseSpace = dgs.getMasterBoard().getElement(oldTopLeftAnchor.getX(), oldTopLeftAnchor.getY());
         PropertyBoolean temporary = (PropertyBoolean) baseSpace.getProperty("tempPlacement");
         if (temporary != null && temporary.value) {
             // Only remove figure from this tile
@@ -223,7 +223,7 @@ public class Move extends AbstractAction {
             if (oldOrientation.ordinal() % 2 == 1) sizeOld.swap();
             for (int i = 0; i < sizeOld.b; i++) {
                 for (int j = 0; j < sizeOld.a; j++) {
-                    BoardNode currentTile = dgs.getMasterBoard().get(oldTopLeftAnchor.getX() + j, oldTopLeftAnchor.getY() + i);
+                    BoardNode currentTile = dgs.getMasterBoard().getElement(oldTopLeftAnchor.getX() + j, oldTopLeftAnchor.getY() + i);
                     currentTile.setProperty(emptySpace);
                     if (currentTile.getComponentName().equalsIgnoreCase("pit")) {
                         f.setAttributeToMin(Figure.Attribute.MovePoints);
@@ -243,7 +243,7 @@ public class Move extends AbstractAction {
 
         Vector2D position = f.getPosition();
 
-        BoardNode baseSpace = dgs.getMasterBoard().get(position.getX(), position.getY());
+        BoardNode baseSpace = dgs.getMasterBoard().getElement(position.getX(), position.getY());
         // If the original space is empty, or is occupied by this figure, we can just place the figure there
         int player = ((PropertyInt) baseSpace.getProperty("players")).value;
 
@@ -266,7 +266,7 @@ public class Move extends AbstractAction {
             for (Vector2D neighbour : neighbours) {
                 if (!checked.contains(neighbour) && !toCheck.contains(neighbour)) {
                     toCheck.add(neighbour);
-                    BoardNode node = board.get(neighbour.getX(), neighbour.getY());
+                    BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
                     if (node != null) {
                         // Check if there are no other figures on the space, and that it is walkable
                         player = ((PropertyInt) node.getProperty("players")).value;
@@ -316,7 +316,7 @@ public class Move extends AbstractAction {
         DescentTypes.TerrainType minTerrain = null;
         for (int i = 0; i < size.b; i++) {
             for (int j = 0; j < size.a; j++) {
-                BoardNode destinationTile = dgs.getMasterBoard().get(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
+                BoardNode destinationTile = dgs.getMasterBoard().getElement(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
                 PropertyInt placeFigureOnTile = new PropertyInt("players", f.getComponentID());
                 destinationTile.setProperty(placeFigureOnTile);
 

@@ -169,7 +169,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
             // Tell the board there's a hero there
             PropertyInt prop = new PropertyInt("players", figure.getComponentID());
-            dgs.masterBoard.get(position.getX(), position.getY()).setProperty(prop);
+            dgs.masterBoard.getElement(position.getX(), position.getY()).setProperty(prop);
 
             // This starting position no longer an option (one hero per space)
             heroStartingPositions.remove(position);
@@ -538,7 +538,7 @@ public class DescentForwardModel extends StandardForwardModel {
             while (!tileCoords.isEmpty()) {
                 Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
                 tileCoords.remove(option);
-                BoardNode position = dgs.masterBoard.get(option.getX(), option.getY());
+                BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
                 if (position.getComponentName().equals("plain") &&
                         ((PropertyInt) position.getProperty(playersHash)).value == -1) {
                     //if (position.getComponentName().equals("plain") && !Move.checkCollision(dgs, monster, option)) {
@@ -549,7 +549,7 @@ public class DescentForwardModel extends StandardForwardModel {
                         for (int j = 0; j < w; j++) {
                             if (i == 0 && j == 0) continue;
                             Vector2D thisTile = new Vector2D(option.getX() + j, option.getY() + i);
-                            BoardNode tile = dgs.masterBoard.get(thisTile.getX(), thisTile.getY());
+                            BoardNode tile = dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY());
                             if (tile == null || !tile.getComponentName().equals("plain") ||
                                     !tileCoords.contains(thisTile) ||
                                     ((PropertyInt) tile.getProperty(playersHash)).value != -1) {
@@ -562,7 +562,7 @@ public class DescentForwardModel extends StandardForwardModel {
                         PropertyInt prop = new PropertyInt("players", monster.getComponentID());
                         for (int i = 0; i < h; i++) {
                             for (int j = 0; j < w; j++) {
-                                dgs.masterBoard.get(option.getX() + j, option.getY() + i).setProperty(prop);
+                                dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
                             }
                         }
                         if (canSpawnMaster) {
@@ -1266,7 +1266,7 @@ public class DescentForwardModel extends StandardForwardModel {
             // Init each node (cell) properties - not occupied ("players" int property), and its position in the master grid
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    BoardNode bn = dgs.masterBoard.get(j, i);
+                    BoardNode bn = dgs.masterBoard.getElement(j, i);
                     if (bn != null) {
                         bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
                         bn.setProperty(new PropertyInt("players", -1));
@@ -1281,8 +1281,8 @@ public class DescentForwardModel extends StandardForwardModel {
         // Pathfinder utility (TEST).
 //        dgs.addAllComponents();
 //        Pathfinder pf = new Pathfinder(dgs.masterBoard);
-//        int orig = dgs.masterBoard.get(10,3).getComponentID();
-//        int dest = dgs.masterBoard.get(10,5).getComponentID();
+//        int orig = dgs.masterBoard.getElement(10,3).getComponentID();
+//        int dest = dgs.masterBoard.getElement(10,5).getComponentID();
 //        Path p = pf.getPath(dgs, orig, dest);
 //
 //        System.out.println(p.toString());
@@ -1875,7 +1875,7 @@ public class DescentForwardModel extends StandardForwardModel {
         while (tileCoords.size() > 0) {
             Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
             tileCoords.remove(option);
-            BoardNode position = dgs.masterBoard.get(option.getX(), option.getY());
+            BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
             if (position.getComponentName().equals("plain") &&
                     ((PropertyInt) position.getProperty(playersHash)).value == -1) {
                 // TODO: some monsters want to spawn in lava/water.
@@ -1885,7 +1885,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     for (int j = 0; j < w; j++) {
                         if (i == 0 && j == 0) continue;
                         Vector2D thisTile = new Vector2D(option.getX() + j, option.getY() + i);
-                        BoardNode tile = dgs.masterBoard.get(thisTile.getX(), thisTile.getY());
+                        BoardNode tile = dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY());
                         if (tile == null || !tile.getComponentName().equals("plain") ||
                                 !tileCoords.contains(thisTile) ||
                                 ((PropertyInt) tile.getProperty(playersHash)).value != -1) {
@@ -1898,7 +1898,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     PropertyInt prop = new PropertyInt("players", monster.getComponentID());
                     for (int i = 0; i < h; i++) {
                         for (int j = 0; j < w; j++) {
-                            dgs.masterBoard.get(option.getX() + j, option.getY() + i).setProperty(prop);
+                            dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
                         }
                     }
                     break;

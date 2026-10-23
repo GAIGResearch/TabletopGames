@@ -42,15 +42,15 @@ public class TestMastermind {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(mmgs);
             forwardModel.next(mmgs, actions.get(0));
             if (i != mmp.boardWidth-1) {
-                assertNull(mmgs.resultBoard.get(0, 0));
-                assertNull(mmgs.resultBoard.get(1, 0));
-                assertNull(mmgs.resultBoard.get(2, 0));
-                assertNull(mmgs.resultBoard.get(3, 0));
+                assertNull(mmgs.resultBoard.getElement(0, 0));
+                assertNull(mmgs.resultBoard.getElement(1, 0));
+                assertNull(mmgs.resultBoard.getElement(2, 0));
+                assertNull(mmgs.resultBoard.getElement(3, 0));
             } else {
-                assertNotNull(mmgs.resultBoard.get(0, 0));
-                assertNotNull(mmgs.resultBoard.get(1, 0));
-                assertNotNull(mmgs.resultBoard.get(2, 0));
-                assertNotNull(mmgs.resultBoard.get(3, 0));
+                assertNotNull(mmgs.resultBoard.getElement(0, 0));
+                assertNotNull(mmgs.resultBoard.getElement(1, 0));
+                assertNotNull(mmgs.resultBoard.getElement(2, 0));
+                assertNotNull(mmgs.resultBoard.getElement(3, 0));
             }
         }
     }

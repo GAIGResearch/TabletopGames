@@ -27,8 +27,8 @@ public class TileBuildGame {
 
         //dgs.addAllComponents();
         Pathfinder pf = new Pathfinder(tbs.tile);
-        int orig = tbs.tile.get(1,1).getComponentID();
-        int dest = tbs.tile.get(3,3).getComponentID();
+        int orig = tbs.tile.getElement(1,1).getComponentID();
+        int dest = tbs.tile.getElement(3,3).getComponentID();
         Path p = pf.getPath(tbs, orig, dest);
 
         //System.out.println(p.toString());

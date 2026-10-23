@@ -32,7 +32,7 @@ public class GridBoardView extends ComponentView {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + i * defaultItemSize;
-                drawCell(g, gridBoard.get(j, i), xC, yC);
+                drawCell(g, gridBoard.getElement(j, i), xC, yC);
             }
         }
     }
@@ -48,7 +48,7 @@ public class GridBoardView extends ComponentView {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
                 int x = rect.x + j * defaultItemSize;
                 int y = rect.y + i * defaultItemSize;
-                drawCell(g, gridBoard.get(j, i), x, y);
+                drawCell(g, gridBoard.getElement(j, i), x, y);
             }
         }
     }

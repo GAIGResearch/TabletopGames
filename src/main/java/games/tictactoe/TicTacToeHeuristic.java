@@ -69,7 +69,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
     private Pair<Integer, Integer> countColumns(TicTacToeGameState ttgs, int column, BoardNode playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int y = 0; y < ttgs.getGridSize(); y++) {
-            checkChar(count, playerChar, ttgs.gridBoard.get(column, y));
+            checkChar(count, playerChar, ttgs.gridBoard.getElement(column, y));
         }
         return count;
     }
@@ -77,7 +77,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
     private Pair<Integer, Integer> countRows(TicTacToeGameState ttgs, int row, BoardNode playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.getGridSize(); x++) {
-            checkChar(count, playerChar, ttgs.gridBoard.get(x, row));
+            checkChar(count, playerChar, ttgs.gridBoard.getElement(x, row));
         }
         return count;
     }
@@ -85,7 +85,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
     private Pair<Integer, Integer> countPrimaryDiagonal(TicTacToeGameState ttgs, BoardNode playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.getGridSize(); x++) {
-            checkChar(count, playerChar, ttgs.gridBoard.get(x, x));
+            checkChar(count, playerChar, ttgs.gridBoard.getElement(x, x));
         }
         return count;
     }
@@ -93,7 +93,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
     private Pair<Integer, Integer> countSecondaryDiagonal(TicTacToeGameState ttgs, BoardNode playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.getGridSize(); x++) {
-            checkChar(count, playerChar, ttgs.gridBoard.get(ttgs.getGridSize()-1-x, x));
+            checkChar(count, playerChar, ttgs.gridBoard.getElement(ttgs.getGridSize()-1-x, x));
         }
         return count;
     }

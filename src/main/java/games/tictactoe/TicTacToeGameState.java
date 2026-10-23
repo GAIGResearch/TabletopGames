@@ -62,7 +62,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
      * This returns the player id of the token at the given position. Or -1 if this is empty.
      */
     public int getPlayerAt(int x, int y) {
-        BoardNode token = gridBoard.get(x, y);
+        BoardNode token = gridBoard.getElement(x, y);
         return token == null ? -1 : token.getOwnerId();
     }
 
@@ -94,7 +94,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
      * The number of squares along each side of the board.
      */
     public int getGridSize() {
-        return ((TicTacToeGameParameters) gameParameters).gridSize;
+        return gridBoard.getWidth();
     }
 
     @Override
@@ -102,7 +102,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable 
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < getGridSize(); y++) {
             for (int x = 0; x < getGridSize(); x++) {
-                BoardNode token = gridBoard.get(x, y);
+                BoardNode token = gridBoard.getElement(x, y);
                 sb.append(token == null ? TicTacToeConstants.emptyCell : token.getComponentName()).append(" ");
             }
             sb.append("\n");
