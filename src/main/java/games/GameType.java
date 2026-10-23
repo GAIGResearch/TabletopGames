@@ -113,10 +113,26 @@ import games.hareandtortoise.HareAndTortoiseForwardModel;
 import games.hareandtortoise.HareAndTortoiseGameState;
 import games.hareandtortoise.HareAndTortoiseParameters;
 import games.hareandtortoise.gui.HareAndTortoiseGUIManager;
+import games.risk.RiskForwardModel;
+import games.risk.RiskGameState;
+import games.risk.RiskParameters;
+import games.risk.gui.RiskGUIManager;
+import games.diplomacy.DiplomacyForwardModel;
+import games.diplomacy.DiplomacyGameState;
+import games.diplomacy.DiplomacyParameters;
+import games.diplomacy.gui.DiplomacyGUIManager;
+import games.monopoly.MonopolyForwardModel;
+import games.monopoly.MonopolyGameState;
+import games.monopoly.MonopolyParameters;
+import games.monopoly.gui.MonopolyGUIManager;
 import games.lawnandorder.LawnAndOrderForwardModel;
 import games.lawnandorder.LawnAndOrderGameState;
 import games.lawnandorder.gui.LawnAndOrderGUIManager;
 import games.lawnandorder.LawnAndOrderParameters;
+import games.ventlife.VentlifeForwardModel;
+import games.ventlife.VentlifeGameState;
+import games.ventlife.VentlifeParameters;
+import games.ventlife.gui.VentlifeGUIManager;
 import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
@@ -239,6 +255,10 @@ import games.pickomino.PickominoForwardModel;
 import games.pickomino.PickominoGUIManager;
 import games.pickomino.PickominoGameState;
 import games.pickomino.PickominoParameters;
+import games.perudo.PerudoForwardModel;
+import games.perudo.gui.PerudoGUIManager;
+import games.perudo.PerudoGameState;
+import games.perudo.PerudoParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import llm.DocumentSummariser;
@@ -355,6 +375,22 @@ public enum GameType {
             Arrays.asList(Animals, Strategy),
             Arrays.asList(Race, LoseATurn, MovementPoints),
             HareAndTortoiseGameState.class, HareAndTortoiseForwardModel.class, HareAndTortoiseParameters.class, HareAndTortoiseGUIManager.class),
+    Ventlife(2, 4,
+            Arrays.asList(Strategy, Abstract, Animals),
+            Arrays.asList(TilePlacement, HexagonGrid, PatternBuilding),
+            VentlifeGameState.class, VentlifeForwardModel.class, VentlifeParameters.class, VentlifeGUIManager.class),
+    Risk(3, 6,
+            Arrays.asList(Strategy, Wargame, TerritoryBuilding, Dice),
+            Arrays.asList(DiceRolling, AreaMovement, PlayerElimination, SetCollection, HandManagement, VariableSetup),
+            RiskGameState.class, RiskForwardModel.class, RiskParameters.class, RiskGUIManager.class),
+    Diplomacy(7, 7,
+            Arrays.asList(Strategy, Wargame, TerritoryBuilding),
+            Arrays.asList(SimultaneousActionSelection, AreaMovement, AreaMajority, PlayerElimination),
+            DiplomacyGameState.class, DiplomacyForwardModel.class, DiplomacyParameters.class, DiplomacyGUIManager.class),
+    Monopoly(2, 8,
+            Arrays.asList(Dice, Banking),
+            Arrays.asList(DiceRolling, RollAndMove, Auction, PlayerElimination, SetCollection, LoseATurn),
+            MonopolyGameState.class, MonopolyForwardModel.class, MonopolyParameters.class, MonopolyGUIManager.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
@@ -478,6 +514,8 @@ public enum GameType {
     Pickomino(2, 7, Collections.singletonList(Dice), Collections.singletonList(DiceRolling),
             PickominoGameState.class, PickominoForwardModel.class, PickominoParameters.class,
             PickominoGUIManager.class),
+    Perudo(2, 6, Arrays.asList(Dice, Bluffing), List.of(),
+            PerudoGameState.class, PerudoForwardModel.class, PerudoParameters.class, PerudoGUIManager.class),
     Spades(4, 4, Arrays.asList(Cards, Strategy),
             Arrays.asList(TrickTaking, HandManagement, TakeThat),
             SpadesGameState.class, SpadesForwardModel.class, SpadesParameters.class, SpadesGUIManager.class),
@@ -870,7 +908,7 @@ public enum GameType {
         CommandCards,
         MoveThroughDeck,
         TrickTaking,
-        RoleSelection, ClosedDrafting, NeighbourScope, ActionRetrieval, AreaMajority, AreaMovement, Race, SuddenDeathEnding, MultiUseCards, Negotiation, VariableSetup, NetworkAndRouteBuilding, RandomProduction;
+        RoleSelection, ClosedDrafting, NeighbourScope, ActionRetrieval, AreaMajority, AreaMovement, Race, SuddenDeathEnding, MultiUseCards, Negotiation, VariableSetup, NetworkAndRouteBuilding, RandomProduction, Auction, RollAndMove;
 
         /**
          * @return a list of all games using this mechanic.

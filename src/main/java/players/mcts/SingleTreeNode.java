@@ -3,7 +3,6 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import core.actions.SimultaneousAction;
-import core.interfaces.IActionHeuristic;
 import players.PlayerConstants;
 import utilities.*;
 
@@ -97,10 +96,6 @@ public class SingleTreeNode {
         retValue.MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             retValue.MASTStatistics.add(new HashMap<>());
-        if (retValue.params.useMASTAsActionHeuristic) {
-            retValue.params.actionHeuristic = new MASTActionHeuristic(retValue.params.MASTActionKey, retValue.params.MASTDefaultValue);
-            ((MASTActionHeuristic) retValue.params.actionHeuristic).setMASTStats(retValue.MASTStatistics);
-        }
         retValue.instantiate(null, null, state);
         return retValue;
     }
@@ -279,9 +274,9 @@ public class SingleTreeNode {
         if (new HashSet<>(pds.actionsFromOpenLoopState).size() != pds.actionsFromOpenLoopState.size())
             throw new AssertionError("Duplicate actions found in action list: " +
                     pds.actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-        if ((params.useActionHeuristicForMoveOrdering && nVisits < pds.actionsFromOpenLoopState.size())
-                || params.pUCTTemperature <= 10000.0 || params.progressiveWideningConstant > 1.0
-                || params.progressiveBias > 0 || params.initialiseVisits > 0) {
+        params.checkActionHeuristic();
+        if (params.hasActionHeuristic() && ((params.useActionHeuristicForMoveOrdering && nVisits < pds.actionsFromOpenLoopState.size())
+                || params.needsActionHeuristic())) {
             // We only need to calculate actionValueEstimates if we are going to be using the data in one of these variants
             // If not, then we can save processing time by not calculating them
             // actionHeuristicRecalculationThreshold defines how often we recalculate the action values
@@ -289,26 +284,19 @@ public class SingleTreeNode {
             // if, like MAST, the actionHeuristic is dynamic, then this should be set to a lower value as estimates may
             // change over the course of the search. Setting it to 1 will update it on every visit; but possibly
             // at a high additional computational cost.
-            if (params.actionHeuristic != IActionHeuristic.nullReturn) {
-                if (pds.actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
-                    // in this case we initialise all action values
-                    double[] heuristicScores = params.actionHeuristic.evaluateAllActions(pds.actionsFromOpenLoopState, actionState);
-                    for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
-                        pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i), heuristicScores[i]);
-                    }
-                } else {
-                    // we just initialise the new actions
-                    for (AbstractAction action : pds.actionsFromOpenLoopState) {
-                        if (!pds.actionValueEstimates.containsKey(action)) {
-                            pds.actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState, pds.actionsFromOpenLoopState));
-                        }
-                    }
+            if (pds.actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
+                // in this case we initialise all action values
+                double[] heuristicScores = params.actionHeuristic.evaluateAllActions(pds.actionsFromOpenLoopState, actionState);
+                for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
+                    pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i), heuristicScores[i] + rnd.nextDouble() * 0.00001);
                 }
             } else {
-                params.pUCTTemperature = 10001.0;
-                params.progressiveBias = 0.0;
-                params.initialiseVisits = 0;
-                params.progressiveWideningConstant = 0.0;
+                // we just initialise the new actions
+                for (AbstractAction action : pds.actionsFromOpenLoopState) {
+                    if (!pds.actionValueEstimates.containsKey(action)) {
+                        pds.actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState, pds.actionsFromOpenLoopState));
+                    }
+                }
             }
         }
         if (params.pUCTTemperature < 10000.0) {
@@ -829,11 +817,13 @@ public class SingleTreeNode {
                 case UCB, AlphaGo, UCB_Tuned -> {
                     // These take the max
                     // Find child with highest UCB value
+                    // Unvisited actions all score the FPU, so with move ordering the action heuristic breaks the tie
                     AbstractAction bestAction = null;
                     double bestValue = -Double.MAX_VALUE;
                     for (AbstractAction availableAction : availableActions) {
                         double uctValue = ucbValue(pds, availableAction);
-                        if (uctValue > bestValue) {
+                        if (uctValue > bestValue || (uctValue == bestValue && params.useActionHeuristicForMoveOrdering &&
+                                pds.actionValueEstimates.getOrDefault(availableAction, 0.0) > pds.actionValueEstimates.getOrDefault(bestAction, 0.0))) {
                             bestValue = uctValue;
                             bestAction = availableAction;
                         }

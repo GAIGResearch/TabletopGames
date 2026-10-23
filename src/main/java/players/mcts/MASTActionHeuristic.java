@@ -48,6 +48,9 @@ public class MASTActionHeuristic extends TunableParameters<MASTActionHeuristic> 
 
     @Override
     public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
+        // no statistics until the first search has started
+        if (state.getCurrentPlayer() >= MASTStatistics.size())
+            return defaultValue;
         Object key = actionKey == null ? action : actionKey.key(action);
         Map<Object, Pair<Integer, Double>> MAST = MASTStatistics.get(state.getCurrentPlayer());
         if (MAST.containsKey(key)) {

@@ -23,6 +23,15 @@ public class HeartsParameters extends TunableParameters<HeartsParameters> implem
     public final FrenchCard startingCard = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2);
     public final int queenOfSpades = 13;
     public final int cardsPassedPerRound = 3;
+
+    /**
+     * The points a card scores for the player who takes it in a trick.
+     */
+    public int cardPoints(FrenchCard card) {
+        if (card.suite == FrenchCard.Suite.Hearts)
+            return heartCard;
+        return card.equals(qosCard) ? queenOfSpades : 0;
+    }
     // The game ends at the end of the first hand (round) in which any player has at least this many points
     public int matchScore = 100;
     // If true then a player who fails to follow suit is remembered as being void in it, and

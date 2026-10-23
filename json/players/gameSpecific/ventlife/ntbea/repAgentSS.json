@@ -1,0 +1,18 @@
+{
+  "class": "games.ventlife.ai.VentlifeGreedyParams",
+  "opponentReplies": true,
+  "tileLookahead": [6, 8, 12],
+  "creatureAlternatives": [1, 2, 3],
+  "creatureLookahead": [4, 8],
+  "replySeafloorSample": [10, 20, 40],
+  "heuristic": {
+    "class": "games.ventlife.ai.VentlifeHeuristic",
+    "oppMaxWeight": 0.0,
+    "exposure": [0.0, 0.25],
+    "risk": [1.0, 1.5, 2.0, 2.5],
+    "oppRisk": [0.25, 0.5, 0.75],
+    "oppMeanWeight": [1.0, 1.25, 1.5],
+    "exposureMoveFactor": [0.5, 0.75, 1.0],
+    "exposureCrabValue": [2.0, 4.0, 6.0]
+  }
+}

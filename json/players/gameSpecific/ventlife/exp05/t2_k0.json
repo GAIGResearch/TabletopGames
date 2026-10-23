@@ -1,0 +1,1 @@
+{"class": "games.ventlife.ai.VentlifeGreedyParams", "tileLookahead": 0, "heuristic": {"class": "games.ventlife.ai.VentlifeHeuristic", "exposureCrabValue": 4.0, "oppMaxWeight": 0.25, "exposure": 1.0, "endScaling": true, "fishSeed": 2.0, "oppMeanWeight": 1.25, "oppExposure": 0.5, "exposureMoveFactor": 0.75}}

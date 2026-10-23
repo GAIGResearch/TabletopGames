@@ -156,6 +156,33 @@ public abstract class DeckView<T extends Component> extends ComponentView {
     }
 
     /**
+     * The deck index of the topmost card drawn at point p, or -1 if there is none (as last drawn).
+     */
+    public int cardIndexAt(Point p) {
+        return cardAt(p, -1);
+    }
+
+    /**
+     * The part of the card at this deck index that was left showing when the deck was last drawn: its rectangle less
+     * the cards drawn on top of it. Null if it was not drawn.
+     */
+    public Shape visibleCardShape(int index) {
+        if (rects == null || index < 0 || index >= rects.length || rects[index] == null) return null;
+        java.awt.geom.Area shape = new java.awt.geom.Area(rects[index]);
+        int pos = -1;
+        for (int n = 0; n < drawnOrder.length; n++)
+            if (drawnOrder[n] == index) pos = n;
+        // the cards drawn after this one, which overlap it
+        for (int n = 0; n < drawnOrder.length; n++) {
+            boolean onTop = rightmostOnTop ? n > pos : n < pos;
+            int other = drawnOrder[n];
+            if (onTop && other < rects.length && rects[other] != null)
+                shape.subtract(new java.awt.geom.Area(rects[other]));
+        }
+        return shape;
+    }
+
+    /**
      * Lay out the cards in this order when the deck is face-up (e.g. {@link FrenchCard#HAND_DISPLAY_ORDER} for a
      * hand). Null for deck order. This affects display only.
      */
