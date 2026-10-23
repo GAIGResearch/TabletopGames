@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public class ChessGameState extends AbstractGameState {
 
-    // the ChessPieces by (file, rank): x = 0 is the a-file, y = 0 is White's back rank
+    // the pieces by (x, y), where x = 0 is the a-file and y = 0 is White's back rank
     GridBoard board = new GridBoard(8, 8, "ChessBoard");
     //List of white pieces
     List<ChessPiece> whitePieces = new ArrayList<>();
@@ -140,7 +140,7 @@ public class ChessGameState extends AbstractGameState {
         return board;
     }
 
-    // puts the piece on the square (or empties it if null), and tells the piece where it is
+    // also sets the piece's own position
     private void placePiece(int x, int y, ChessPiece piece) {
         board.setElement(x, y, piece);
         if (piece != null)

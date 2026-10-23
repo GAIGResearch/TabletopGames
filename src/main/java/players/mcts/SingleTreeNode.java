@@ -291,8 +291,7 @@ public class SingleTreeNode {
                 if (pds.actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                     // in this case we initialise all action values
                     double[] heuristicScores = params.actionHeuristic.evaluateAllActions(pds.actionsFromOpenLoopState, actionState);
-                    // random noise breaks ties when pruning; a NullActionHeuristic does not need it, and drawing it
-                    // would change the random sequence of every search that has no action heuristic
+                    // no noise for a NullActionHeuristic, so that a search without one draws no extra random numbers
                     boolean tieBreak = !(params.actionHeuristic instanceof NullActionHeuristic);
                     for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
                         pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i),

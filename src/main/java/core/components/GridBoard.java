@@ -117,9 +117,9 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     }
 
     /**
-     * Puts the node at (x, y), or empties the square if it is null.
+     * A null value empties the square.
      *
-     * @return true, or false (changing nothing) if (x, y) is off the board
+     * @return false (and changes nothing) if (x, y) is off the board
      */
     public boolean setElement(int x, int y, BoardNode value) {
         if (!inBounds(x, y))

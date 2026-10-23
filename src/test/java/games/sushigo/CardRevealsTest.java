@@ -31,7 +31,7 @@ public class CardRevealsTest {
 
     @Test
     public void testTwoDumplings() {
-        // every hand, keeping its size, has exactly two dumplings, so whichever hand player 0 is passed still holds one
+        // two dumplings in every hand, so player 0 always has one, whichever hand it is passed
         for (Deck<SGCard> hand : state.getPlayerHands()) {
             int size = hand.getSize();
             List<SGCard> others = new ArrayList<>(hand.stream().filter(c -> c.type != Dumpling).toList());
@@ -42,7 +42,7 @@ public class CardRevealsTest {
             hand.add(new SGCard(Dumpling));
             hand.add(others.subList(0, size - 2));
         }
-        // two rounds of choices: player 0 always plays a dumpling, the others never do
+        // for two rounds, player 0 always plays a dumpling and the others never do
         for (int i = 0; i < 2 * state.getNPlayers(); i++) {
             int player = state.getCurrentPlayer();
             Deck<SGCard> hand = state.getPlayerHands().get(player);

@@ -124,7 +124,7 @@ public class Connect4BoardTest {
 
     @Test
     public void aCopyKeepsTheBoardSize() {
-        // set on the fields, which a copy of the parameters loses (it keeps only the tunable values)
+        // set on the fields, which a copy of the parameters does not keep
         Connect4GameParameters params = new Connect4GameParameters();
         params.width = 5;
         params.height = 4;
