@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.components.Component;
-import games.chess.components.ChessBoard;
+import core.components.GridBoard;
 import games.GameType;
 import games.chess.actions.MovePiece;
 import games.chess.components.ChessPiece;
@@ -18,7 +18,8 @@ import java.util.Objects;
 
 public class ChessGameState extends AbstractGameState {
 
-    ChessBoard board = new ChessBoard();
+    // the ChessPieces by (file, rank): x = 0 is the a-file, y = 0 is White's back rank
+    GridBoard board = new GridBoard(8, 8, "ChessBoard");
     //List of white pieces
     List<ChessPiece> whitePieces = new ArrayList<>();
     //List of black pieces
@@ -55,7 +56,7 @@ public class ChessGameState extends AbstractGameState {
         copy.blackPieces.addAll(blackPieces.stream().map(ChessPiece::copy).toList());
         copy.gameStateCounts = new HashMap<>(gameStateCounts);
         copy.halfMoveClock = halfMoveClock;
-        copy.board = (ChessBoard) board.copy();
+        copy.board = board.copy();
         return copy;
     }
 
@@ -135,12 +136,19 @@ public class ChessGameState extends AbstractGameState {
         return Objects.hash(super.hashCode(), halfMoveClock, whitePieces, blackPieces, gameStateCounts, board);
     }
 
-    public ChessBoard getBoard() {
+    public GridBoard getBoard() {
         return board;
     }
 
+    // puts the piece on the square (or empties it if null), and tells the piece where it is
+    private void placePiece(int x, int y, ChessPiece piece) {
+        board.setElement(x, y, piece);
+        if (piece != null)
+            piece.setPosition(x, y);
+    }
+
     public void setPiece(int x, int y, ChessPiece piece) {
-        board.setPiece(x, y, piece);
+        placePiece(x, y, piece);
         if (piece != null) {
             if (piece.getOwnerId() == 0) {
                 whitePieces.add(piece);
@@ -152,7 +160,7 @@ public class ChessGameState extends AbstractGameState {
         }
     }
     public ChessPiece getPiece(int x, int y) {
-        return board.getPiece(x, y);
+        return (ChessPiece) board.getElement(x, y);
     }
     public List<ChessPiece> getPlayerPieces(int playerId) {
         if (playerId == 0) {
@@ -169,7 +177,7 @@ public class ChessGameState extends AbstractGameState {
             throw new IllegalArgumentException("Trying to delete a null piece");
         }
         int[] position = piece.getPosition();
-        board.setPiece(position[0], position[1], null); // Remove the piece from the board
+        placePiece(position[0], position[1], null); // Remove the piece from the board
         if (piece.getOwnerId() == 0) {
             whitePieces.remove(piece);
         } else if (piece.getOwnerId() == 1) {
@@ -336,12 +344,11 @@ public class ChessGameState extends AbstractGameState {
 
     public String getBoardString() {
         StringBuilder sb = new StringBuilder();
-        ChessPiece[][] boardArray = board.getBoard();
-        for (int i = 0; i < boardArray.length; i++) {
+        for (int i = 0; i < board.getHeight(); i++) {
             sb.append(8-i).append(" ");
-            for (int j = 0; j < boardArray[i].length; j++) {
-                if (boardArray[j][7-i] != null) {
-                    sb.append(boardArray[j][7-i].toString()).append(" ");
+            for (int j = 0; j < board.getWidth(); j++) {
+                if (getPiece(j, 7-i) != null) {
+                    sb.append(getPiece(j, 7-i).toString()).append(" ");
                 } else {
                     sb.append("-- ");
                 }
@@ -384,7 +391,7 @@ public class ChessGameState extends AbstractGameState {
         for (ChessPiece piece : getPlayerPieces(getCurrentPlayer())){
             if (piece.getChessPieceType() == ChessPiece.ChessPieceType.PAWN) {
                 piece.setEnPassant(false); // Reset en passant for all pawns
-                board.setPiece(piece.getPosition()[0], piece.getPosition()[1], piece); // Update the board with the new piece state
+                placePiece(piece.getPosition()[0], piece.getPosition()[1], piece); // Update the board with the new piece state
             }
         }
     }
