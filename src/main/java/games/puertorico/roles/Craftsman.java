@@ -35,7 +35,7 @@ public class Craftsman extends PuertoRicoRole<Craftsman> {
             Map<PuertoRicoConstants.Crop, Long> production = pb.getPlantations().stream()
                     .filter(Plantation::isOccupied)
                     .map(p -> p.crop)
-                    .collect(groupingBy(c -> c, counting()));
+                    .collect(groupingBy(c -> c, () -> new EnumMap<>(PuertoRicoConstants.Crop.class), counting()));
             int cropsHarvested = 0;
             for (PuertoRicoConstants.Crop crop : production.keySet()) {
                 if (crop == PuertoRicoConstants.Crop.QUARRY) continue;

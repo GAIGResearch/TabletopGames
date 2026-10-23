@@ -1,0 +1,27 @@
+{
+  "id": "Mission test map",
+  "type": "graph",
+  "verticesKey": "name",
+  "neighboursKey": "neighbours",
+  "maxNeighbours": -1,
+  "continents": [
+    {"name": "North", "bonus": 4},
+    {"name": "South", "bonus": 1}
+  ],
+  "missions": [],
+  "backupTerritories": 3,
+  "nodes": [
+    {"name": ["String", "A"], "continent": ["String", "North"], "symbol": ["String", "Infantry"],
+     "neighbours": ["String[]", ["B", "C"]]},
+    {"name": ["String", "B"], "continent": ["String", "North"], "symbol": ["String", "Cavalry"],
+     "neighbours": ["String[]", ["A", "C"]]},
+    {"name": ["String", "C"], "continent": ["String", "North"], "symbol": ["String", "Artillery"],
+     "neighbours": ["String[]", ["A", "B", "D"]]},
+    {"name": ["String", "D"], "continent": ["String", "South"], "symbol": ["String", "Infantry"],
+     "neighbours": ["String[]", ["C", "E"]]},
+    {"name": ["String", "E"], "continent": ["String", "South"], "symbol": ["String", "Cavalry"],
+     "neighbours": ["String[]", ["D", "F"]]},
+    {"name": ["String", "F"], "continent": ["String", "South"], "symbol": ["String", "Artillery"],
+     "neighbours": ["String[]", ["E"]]}
+  ]
+}

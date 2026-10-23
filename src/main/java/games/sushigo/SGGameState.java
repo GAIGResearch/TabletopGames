@@ -92,9 +92,9 @@ public class SGGameState extends AbstractGameState {
         for (int i = 0; i < getNPlayers(); i++) {
             copy.playedCards.add(playedCards.get(i).copy());
             copy.playerScore[i] = playerScore[i].copy();
-            copy.playedCardTypes[i] = new HashMap<>();
-            copy.playedCardTypesAllGame[i] = new HashMap<>();
-            copy.pointsPerCardType[i] = new HashMap<>();
+            copy.playedCardTypes[i] = new LinkedHashMap<>();
+            copy.playedCardTypesAllGame[i] = new LinkedHashMap<>();
+            copy.pointsPerCardType[i] = new LinkedHashMap<>();
             for (SGCard.SGCardType ct : playedCardTypes[i].keySet()) {
                 copy.playedCardTypes[i].put(ct, playedCardTypes[i].get(ct).copy());
                 copy.playedCardTypesAllGame[i].put(ct, playedCardTypesAllGame[i].get(ct).copy());

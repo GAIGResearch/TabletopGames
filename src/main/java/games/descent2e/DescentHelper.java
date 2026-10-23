@@ -65,7 +65,7 @@ public class DescentHelper {
             // Reach attacks can target up to two spaces away
             if (reach)
             {
-                Set<BoardNode> neighboursOfNeighbours = new HashSet<>();
+                Set<BoardNode> neighboursOfNeighbours = new LinkedHashSet<>();
                 for (BoardNode neighbour : currentTile.getNeighbours().keySet()) {
                     neighboursOfNeighbours.addAll(neighbour.getNeighbours().keySet());
                 }
@@ -130,7 +130,7 @@ public class DescentHelper {
 
                 for (BoardNode possibleTarget : startTargets) {
                     // Collects all possible neighbours of neighbours, and adds them to the list of potential target locations
-                    Set<BoardNode> newTargets = new HashSet<>(possibleTarget.getNeighbours().keySet());
+                    Set<BoardNode> newTargets = new LinkedHashSet<>(possibleTarget.getNeighbours().keySet());
                     newTargets.addAll(rangedTargets);
                     rangedTargets = newTargets;
                 }
@@ -182,7 +182,7 @@ public class DescentHelper {
             }
         }
 
-        Set<BoardNode> tempSet = new HashSet<>(newTiles);
+        Set<BoardNode> tempSet = new LinkedHashSet<>(newTiles);
         newTiles.clear();
         newTiles.addAll(tempSet);
 
@@ -269,7 +269,7 @@ public class DescentHelper {
     private static Map<Vector2D, Pair<Double,List<Vector2D>>> getAllPointOfInterests(DescentGameState dgs, Figure figure){
 
         ArrayList<Vector2D> pointsOfInterest = new ArrayList<>();
-        Map<Vector2D, Pair<Double,List<Vector2D>>> movePointOfInterest = new HashMap<>();
+        Map<Vector2D, Pair<Double,List<Vector2D>>> movePointOfInterest = new LinkedHashMap<>();
         if (figure.getTokenType().equals("Monster")) {
             for (Hero h : dgs.heroes) {
                 pointsOfInterest.add(h.getPosition());
@@ -316,9 +316,9 @@ public class DescentHelper {
         String figureType = figure.getTokenType();
 
         //<Board Node, Cost to get there>
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> expandedBoardNodes = new HashMap<>();
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> nodesToBeExpanded = new HashMap<>();
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> allAdjacentNodes = new HashMap<>();
+        HashMap<BoardNode, Pair<Double,List<Vector2D>>> expandedBoardNodes = new LinkedHashMap<>();
+        HashMap<BoardNode, Pair<Double,List<Vector2D>>> nodesToBeExpanded = new LinkedHashMap<>();
+        HashMap<BoardNode, Pair<Double,List<Vector2D>>> allAdjacentNodes = new LinkedHashMap<>();
 
         nodesToBeExpanded.put(figureNode, new Pair<>(0.0, new ArrayList<>()));
         while (!nodesToBeExpanded.isEmpty()){
@@ -390,7 +390,7 @@ public class DescentHelper {
         }
 
         //Return list of coordinates
-        HashMap<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentLocations = new HashMap<>();
+        HashMap<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentLocations = new LinkedHashMap<>();
         for (BoardNode boardNode : allAdjacentNodes.keySet()){
             Vector2D loc = ((PropertyVector2D) boardNode.getProperty(coordinateHash)).values;
             allAdjacentLocations.put(loc, allAdjacentNodes.get(boardNode));
@@ -402,7 +402,7 @@ public class DescentHelper {
     // Pair<final position, final orientation> -> pair<movement cost to get there, list of positions to travel through to get there>
     private static Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> getPossibleRotationsForMoveActions(Map<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentNodes, DescentGameState dgs, Figure figure){
 
-        Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> possibleRotations = new HashMap<>();
+        Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> possibleRotations = new LinkedHashMap<>();
 
         // Go through all adjacent nodes
         for (Map.Entry<Vector2D, Pair<Double,List<Vector2D>>> e : allAdjacentNodes.entrySet()) {
@@ -518,7 +518,7 @@ public class DescentHelper {
 
     public static int reroll(DescentGameState dgs, DescentDice dice) {
         DiceType type = dice.getColour();
-        DicePool roll = DicePool.constructDicePool(new HashMap<DiceType, Integer>() {{
+        DicePool roll = DicePool.constructDicePool(new LinkedHashMap<DiceType, Integer>() {{
             put(type, 1);
         }});
         roll.roll((dgs.getRnd()));

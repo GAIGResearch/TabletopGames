@@ -25,25 +25,25 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
     public GraphBoard(String name)
     {
         super(CoreConstants.ComponentType.BOARD, name);
-        boardNodes = new HashMap<>();
+        boardNodes = new LinkedHashMap<>();
     }
 
     public GraphBoard()
     {
         super(CoreConstants.ComponentType.BOARD);
-        boardNodes = new HashMap<>();
+        boardNodes = new LinkedHashMap<>();
     }
 
     public GraphBoard(String name, int ID)
     {
         super(CoreConstants.ComponentType.BOARD, name, ID);
-        boardNodes = new HashMap<>();
+        boardNodes = new LinkedHashMap<>();
     }
 
     GraphBoard(int ID)
     {
         super(CoreConstants.ComponentType.BOARD, ID);
-        boardNodes = new HashMap<>();
+        boardNodes = new LinkedHashMap<>();
     }
 
     /**
@@ -54,7 +54,7 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
     public GraphBoard copy()
     {
         GraphBoard b = new GraphBoard(componentName, componentID);
-        HashMap<Integer, BoardNode> nodeCopies = new HashMap<>();
+        HashMap<Integer, BoardNode> nodeCopies = new LinkedHashMap<>();
         // Copy board nodes
         for (BoardNode bn: boardNodes.values()) {
             BoardNode bnCopy = new BoardNode(bn.getMaxNeighbours(), "", bn.getComponentID());

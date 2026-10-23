@@ -79,7 +79,7 @@ public class RootParameters extends AbstractParameters {
         Ruins,
     }
 
-    HashMap<Integer, Integer> catBuildingCost = new HashMap<>(){
+    HashMap<Integer, Integer> catBuildingCost = new LinkedHashMap<>(){
         {
             put(6,0);
             put(5,1);
@@ -90,7 +90,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Integer, Integer> catDrawingBonus = new HashMap<>(){
+    public HashMap<Integer, Integer> catDrawingBonus = new LinkedHashMap<>(){
         {
             put(6,0);
             put(5,0);
@@ -102,7 +102,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Integer, Integer> eyrieDrawingBonus = new HashMap<>(){
+    public HashMap<Integer, Integer> eyrieDrawingBonus = new LinkedHashMap<>(){
         {
             put(7,0);
             put(6,0);
@@ -117,7 +117,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    HashMap<BuildingType, Integer> buildingCount = new HashMap<>() {
+    HashMap<BuildingType, Integer> buildingCount = new LinkedHashMap<>() {
         {
             put(BuildingType.Roost, 7);
             put(BuildingType.FoxBase, 1);
@@ -131,7 +131,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Integer, Integer> sawmillPoints = new HashMap<>(){
+    public HashMap<Integer, Integer> sawmillPoints = new LinkedHashMap<>(){
         {
             put(6,0);
             put(5,1);
@@ -142,7 +142,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Integer, Integer> workshopPoints = new HashMap<>(){
+    public HashMap<Integer, Integer> workshopPoints = new LinkedHashMap<>(){
         {
             put(6,0);
             put(5,2);
@@ -153,7 +153,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Integer, Integer> recruiterPoints = new HashMap<>(){
+    public HashMap<Integer, Integer> recruiterPoints = new LinkedHashMap<>(){
         {
             put(6,0);
             put(5,1);
@@ -164,7 +164,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Integer, Integer> roostPoints = new HashMap<>(){
+    public HashMap<Integer, Integer> roostPoints = new LinkedHashMap<>(){
         {
             put(7,0);
             put(6,0);
@@ -177,7 +177,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Integer, Integer> sympathyPoints = new HashMap<>(){
+    public HashMap<Integer, Integer> sympathyPoints = new LinkedHashMap<>(){
         {
             put(10,0);
             put(9,1);
@@ -192,7 +192,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Item.ItemType, Integer> startingItems = new HashMap<>(){
+    public HashMap<Item.ItemType, Integer> startingItems = new LinkedHashMap<>(){
         {
             put(Item.ItemType.boot, 1);
             put(Item.ItemType.torch,1);
@@ -204,7 +204,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Item.ItemType, Integer> craftableItems = new HashMap<>(){
+    public HashMap<Item.ItemType, Integer> craftableItems = new LinkedHashMap<>(){
         {
             put(Item.ItemType.sword,2);
             put(Item.ItemType.boot,2);
@@ -217,7 +217,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Item.ItemType, Integer> ruinItems = new HashMap<>(){
+    public HashMap<Item.ItemType, Integer> ruinItems = new LinkedHashMap<>(){
         {
             put(Item.ItemType.bag,1);
             put(Item.ItemType.hammer,1);
@@ -226,7 +226,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<Item.ItemType, Integer> itemCraftPoints = new HashMap<>(){
+    public HashMap<Item.ItemType, Integer> itemCraftPoints = new LinkedHashMap<>(){
         {
             put(Item.ItemType.sword,2);
             put(Item.ItemType.bag,1);
@@ -239,7 +239,7 @@ public class RootParameters extends AbstractParameters {
     };
 
 
-    public HashMap<EyrieRulers.CardType, Boolean[]> eyrieRulers = new HashMap<>() {
+    public HashMap<EyrieRulers.CardType, Boolean[]> eyrieRulers = new LinkedHashMap<>() {
         {
             put(EyrieRulers.CardType.Despot, new Boolean[]{false, true, false, true});
             put(EyrieRulers.CardType.Builder, new Boolean[]{true, true, false, false});
@@ -255,7 +255,7 @@ public class RootParameters extends AbstractParameters {
         Build
     }
 
-    public HashMap<Integer, DecreeAction> decreeInitializer = new HashMap<>() {
+    public HashMap<Integer, DecreeAction> decreeInitializer = new LinkedHashMap<>() {
         {
             put(0, DecreeAction.Recruit);
             put(1, DecreeAction.Move);
@@ -264,7 +264,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<VagabondCharacter.CardType, List<Item.ItemType>> vagabondCharacterInitializer = new HashMap<>() {
+    public HashMap<VagabondCharacter.CardType, List<Item.ItemType>> vagabondCharacterInitializer = new LinkedHashMap<>() {
         {
             ArrayList<Item.ItemType> thiefItems = new ArrayList<>();
             thiefItems.add(Item.ItemType.boot);
@@ -289,7 +289,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    HashMap<RootQuestCard.CardType, ClearingTypes[]> questCardInitializer = new HashMap<>() {
+    HashMap<RootQuestCard.CardType, ClearingTypes[]> questCardInitializer = new LinkedHashMap<>() {
         {
             put(RootQuestCard.CardType.Errand, new ClearingTypes[]{ClearingTypes.Fox, ClearingTypes.Rabbit});
             put(RootQuestCard.CardType.Escort, new ClearingTypes[]{ClearingTypes.Mouse});
@@ -303,7 +303,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<String, String> cornerPairs = new HashMap<>() {
+    public HashMap<String, String> cornerPairs = new LinkedHashMap<>() {
         {
             put("Top Left", "Bottom Right");
             put("Bottom Left", "Top Right");
@@ -312,7 +312,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<RootCard.CardType, Integer> birdCards = new HashMap<>() {
+    public HashMap<RootCard.CardType, Integer> birdCards = new LinkedHashMap<>() {
         {
             put(RootCard.CardType.Armorers, 2);
             put(RootCard.CardType.Sappers, 2);
@@ -328,7 +328,7 @@ public class RootParameters extends AbstractParameters {
 
     };
 
-    public HashMap<RootCard.CardType, Integer> rabbitCards = new HashMap<>() {
+    public HashMap<RootCard.CardType, Integer> rabbitCards = new LinkedHashMap<>() {
         {
             put(RootCard.CardType.BetterBurrowBank, 2);
             put(RootCard.CardType.Cobbler, 2);
@@ -343,7 +343,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<RootCard.CardType, Integer> mouseCards = new HashMap<>() {
+    public HashMap<RootCard.CardType, Integer> mouseCards = new LinkedHashMap<>() {
         {
             put(RootCard.CardType.Codebreakers, 2);
             put(RootCard.CardType.ScoutingParty, 2);
@@ -359,7 +359,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    public HashMap<RootCard.CardType, Integer> foxCards = new HashMap<>() {
+    public HashMap<RootCard.CardType, Integer> foxCards = new LinkedHashMap<>() {
         {
             put(RootCard.CardType.StandAndDeliver, 2);
             put(RootCard.CardType.TaxCollector,3);
@@ -390,7 +390,7 @@ public class RootParameters extends AbstractParameters {
         Vagabond,
     }
 
-    public HashMap<Integer, Integer> sympathyDiscardCost = new HashMap<>() {
+    public HashMap<Integer, Integer> sympathyDiscardCost = new LinkedHashMap<>() {
         {
             put(10, 1);
             put(9, 1);
@@ -404,14 +404,14 @@ public class RootParameters extends AbstractParameters {
             put(1, 3);
         }
     };
-    public HashMap<Factions, Integer> factionIndexes = new HashMap<>() {{
+    public HashMap<Factions, Integer> factionIndexes = new LinkedHashMap<>() {{
         put(Factions.MarquiseDeCat, 1);
         put(Factions.EyrieDynasties, 2);
         put(Factions.WoodlandAlliance, 3);
         put(Factions.Vagabond, 4);
     }};
 
-    public HashMap<Factions, Integer> maxWarriors = new HashMap<>() {{
+    public HashMap<Factions, Integer> maxWarriors = new LinkedHashMap<>() {{
         put(Factions.MarquiseDeCat, 25);
         put(Factions.EyrieDynasties, 20);
         put(Factions.WoodlandAlliance, 10);

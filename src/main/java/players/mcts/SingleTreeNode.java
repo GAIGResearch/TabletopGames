@@ -294,7 +294,7 @@ public class SingleTreeNode {
                     // in this case we initialise all action values
                     double[] heuristicScores = params.actionHeuristic.evaluateAllActions(pds.actionsFromOpenLoopState, actionState);
                     for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
-                        pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i), heuristicScores[i]);
+                        pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i), heuristicScores[i] + rnd.nextDouble() * 0.00001);
                     }
                 } else {
                     // we just initialise the new actions

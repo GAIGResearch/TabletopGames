@@ -1,0 +1,11 @@
+{
+  "label": "SelfOnly, 5 sec",
+  "class": "players.mcts.MCTSParams",
+  "budgetType": "BUDGET_TIME",
+  "opponentTreePolicy" : "SelfOnly",
+  "rolloutLength": 30,
+  "heuristic" : {
+    "class": "players.heuristics.ScoreHeuristic"
+  },
+  "budget": 5000
+}

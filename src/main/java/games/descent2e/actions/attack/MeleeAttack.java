@@ -82,7 +82,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     public String result = "";
 
-    Set<Surge> surgesUsed = new HashSet<>();
+    Set<Surge> surgesUsed = new LinkedHashSet<>();
 
     public MeleeAttack(int attackingFigure, int defendingFigure) {
         super(ACTION_POINT_SPEND);
@@ -422,7 +422,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.extraDefence = extraDefence;
         retValue.mending = mending;
         retValue.fatigueHeal = fatigueHeal;
-        retValue.surgesUsed = new HashSet<>(surgesUsed);
+        retValue.surgesUsed = new LinkedHashSet<>(surgesUsed);
         retValue.pierce = pierce;
         retValue.isDiseasing = isDiseasing;
         retValue.isImmobilizing = isImmobilizing;
@@ -562,7 +562,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             retValue.add(new EndCurrentPhase());
         }
         // Remove any duplicate actions from the return list
-        return new ArrayList<>(new HashSet<>(retValue));
+        return new ArrayList<>(new LinkedHashSet<>(retValue));
     }
 
     @Override

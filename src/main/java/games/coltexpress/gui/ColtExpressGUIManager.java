@@ -1,15 +1,18 @@
 package games.coltexpress.gui;
 
+import gui.GUIMessages;
 import gui.AbstractGUIManager;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IGamePhase;
+import games.GameType;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
 import gui.IScreenHighlight;
 import gui.GamePanel;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -66,11 +69,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 JPanel main = new JPanel();
                 main.setOpaque(false);
                 main.setLayout(new BorderLayout());
-                JPanel rules = new JPanel();
                 pane.add("Main", main);
-                pane.add("Rules", rules);
-                JLabel ruleText = new JLabel(getRuleText());
-                rules.add(ruleText);
 
                 ColtExpressGameState cegs = (ColtExpressGameState) gameState;
                 ColtExpressParameters cep = (ColtExpressParameters) gameState.getGameParameters();
@@ -87,7 +86,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 int nPlayers = gameState.getNPlayers();
                 this.width = trainCarWidth*3/2*(train.size()+1) + playerAreaWidth;
                 this.height = Math.max(playerAreaHeight * (nPlayers+1), trainView.height + ceCardHeight + 50 + roundView.height) + defaultInfoPanelHeight + defaultActionPanelHeight;
-                ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
+                RulesView.addTabs(pane, GameType.ColtExpress, cep, height*2/3+100);
 
                 parent.setBackground(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"));
 
@@ -115,8 +114,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                     ColtExpressPlayerView playerHand = new ColtExpressPlayerView(i, cep.getDataPath(), cegs.getPlayerCharacters());
                     playerHand.setOpaque(false);
                     // Get agent name
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
+                    String agentName = game.getPlayers().get(i).toString();
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(
@@ -133,7 +131,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true, null, null, null);
                 actionPanel.setOpaque(false);
 
                 main.add(infoPanel, BorderLayout.NORTH);
@@ -188,34 +186,6 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
         return wrapper;
     }
 
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setOpaque(false);
-        if (boxLayout) {
-            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
-        }
-
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights);
-            actionButtons[i] = ab;
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.informAllActionButtons(actionButtons);
-        }
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
-        return pane;
-    }
-
     IGamePhase currentGamePhase;
 
     @Override
@@ -226,9 +196,9 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
             }
             if (currentGamePhase == null || currentGamePhase != gameState.getGamePhase()) {
                 if (gameState.getGamePhase() == ExecuteActions) {
-                    JOptionPane.showMessageDialog(parent, "Planning phase over, execute actions!");
+                    GUIMessages.show(parent, "Planning phase over, execute actions!");
                 } else {
-                    JOptionPane.showMessageDialog(parent, "New round! Time to plan actions!");
+                    GUIMessages.show(parent, "New round! Time to plan actions!");
                 }
             }
             currentGamePhase = gameState.getGamePhase();
@@ -248,10 +218,9 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 }
             }
             plannedActions.updateComponent(cegs.getPlannedActions());
-            int activePlayer = player != null? (gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer ||
-                    gameState.getCoreGameParameters().alwaysDisplayFullObservable? player.getPlayerID():
-                    humanPlayerIds.contains(player.getPlayerID())? player.getPlayerID():-1) : -1;
-            plannedActions.informActivePlayer(activePlayer);
+            // planned cards are drawn as the viewing (human) player sees them, or all in full-observability mode
+            plannedActions.informActivePlayer(viewingPlayer(gameState));
+            plannedActions.setFront(gameState.getCoreGameParameters().alwaysDisplayFullObservable);
 
             // Show planned actions from the first played
             plannedActions.setFirstOnTop(gameState.getGamePhase() == ExecuteActions);
@@ -261,34 +230,5 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
             roundView.update(cegs);
 
         }
-    }
-
-    private String getRuleText() {
-        String rules = "<html><center><h1>Colt Express</h1></center><br/><hr><br/>";
-        rules += "<p>You are part of a group of bandits aiming to become the richest in the Old West. Your goal is to earn" +
-                " as much money as possible by collecting loot bags (of variable worth), jewels (worth $500 each) and " +
-                "stronghold boxes (worth $1000) each.</p><br/>";
-        rules += "<p>The game is played over several rounds, each with 2 phases: planning and then executing actions.</p><br/>";
-        rules += "<p>In the <b>PLANNING</b> phase (Schemin'), players take turns playing cards from their hands (or drawing up to 3 at a time from their deck)," +
-                " according to the turn rules in each round, which can be: playing the card normally, playing it face down, " +
-                "double turn (each player takes 2 actions in a row), or reversed turn (player order is reversed). All cards " +
-                "played are stacked on top of each other.</p><br/>";
-        rules += "<p><b>CARD</b> actions are fixed for all players and they are: " +
-                "<ul><li>move left/right: distance 1 inside the train, and up to 3 on top of the train.</li>" +
-                "<li>move up/down</li>" +
-                "<li>collect loot: no effect if there is no loot in player's location, the player chooses later what type of loot they collect if more than 1 available in their location</li>" +
-                "<li>move Marshal: The Marshal only moves inside the train, 1  car at a time, and shoots neutral bullets to all players it encounters, forcing them to move to the top of the train.</li>" +
-                "<li>shoot: Shooting adds a bullet card into the target's deck; a player has 6 bullet cards to spend, shooting more has no effect;  the player who shot most bullets earns 1000 bonus points at the end (if tied, all tied receive the bonus).</li>" +
-                "<li>punch: Punching causes the target player to drop loot (type being the puncher's choice) and moves target player 1 car horizontally.</li>" +
-                "</ul></p><br/>";
-        rules += "<p>In the <b>ACTION EXECUTING</b> phase (Stealin'), the actions on the cards played in the first phase are " +
-                "actually executed, in the order they were played. Invalid actions have no effect and are skipped.</p><br/>";
-        rules += "<p>There are some rounds which have special events at the end, hover mouse over the round cards to see details. " +
-                "The characters have special powers, hover mouse over the player's area to find out what they do.</p><br/>";
-        rules += "<p>WIN: The player with most money (points) at the end wins. If tied, the player with least bullets received wins (if still tied, all tied players win).</p>";
-        rules += "<hr><p><b>INTERFACE: </b> Find actions available at any time at the bottom of the screen. If icons/text " +
-                "on the train and/or round cards are too small, you can zoom and pan around with the middle mouse button (wheel).</p>";
-        rules += "</html>";
-        return rules;
     }
 }

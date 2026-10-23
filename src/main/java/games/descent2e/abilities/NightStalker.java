@@ -7,13 +7,14 @@ import utilities.Vector2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedHashMap;
 
 import static games.descent2e.components.DiceType.BROWN;
 
 // This monster gains an extra Brown defence die when its attacker is not adjacent to it
 public class NightStalker {
 
-    public static HashMap<DiceType, Integer> nightStalkerDice = new HashMap<DiceType, Integer>() {{
+    public static HashMap<DiceType, Integer> nightStalkerDice = new LinkedHashMap<DiceType, Integer>() {{
         put(BROWN, 1);
     }};
 

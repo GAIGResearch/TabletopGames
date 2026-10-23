@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class BoardNode extends Component {
 
@@ -18,15 +19,15 @@ public class BoardNode extends Component {
     public BoardNode(int maxNeighbours, String name) {
         super(CoreConstants.ComponentType.BOARD_NODE, name);
         this.maxNeighbours = maxNeighbours;
-        this.neighbours = new HashMap<>();
-        this.neighbourSideMapping = new HashMap<>();
+        this.neighbours = new LinkedHashMap<>();
+        this.neighbourSideMapping = new LinkedHashMap<>();
     }
 
     public BoardNode(String name) {
         super(CoreConstants.ComponentType.BOARD_NODE, name);
         this.maxNeighbours = -1;
-        this.neighbours = new HashMap<>();
-        this.neighbourSideMapping = new HashMap<>();
+        this.neighbours = new LinkedHashMap<>();
+        this.neighbourSideMapping = new LinkedHashMap<>();
     }
 
     /**
@@ -36,16 +37,16 @@ public class BoardNode extends Component {
     public BoardNode(String name, int componentID) {
         super(CoreConstants.ComponentType.BOARD_NODE, name, componentID);
         this.maxNeighbours = -1;
-        this.neighbours = new HashMap<>();
-        this.neighbourSideMapping = new HashMap<>();
+        this.neighbours = new LinkedHashMap<>();
+        this.neighbourSideMapping = new LinkedHashMap<>();
     }
 
     // Copy constructor of properties (incl. other component ID)
     public BoardNode(BoardNode other) {
         super(CoreConstants.ComponentType.BOARD_NODE, other.componentName, other.componentID);
         this.maxNeighbours = other.maxNeighbours;
-        this.neighbours = new HashMap<>();
-        this.neighbourSideMapping = new HashMap<>();
+        this.neighbours = new LinkedHashMap<>();
+        this.neighbourSideMapping = new LinkedHashMap<>();
         other.copyComponentTo(this);
     }
 
@@ -56,8 +57,8 @@ public class BoardNode extends Component {
     protected BoardNode(int maxNeighbours, String name, int ID) {
         super(CoreConstants.ComponentType.BOARD_NODE, name, ID);
         this.maxNeighbours = maxNeighbours;
-        this.neighbours = new HashMap<>();
-        this.neighbourSideMapping = new HashMap<>();
+        this.neighbours = new LinkedHashMap<>();
+        this.neighbourSideMapping = new LinkedHashMap<>();
     }
 
     /**

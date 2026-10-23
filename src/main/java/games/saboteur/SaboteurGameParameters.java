@@ -7,7 +7,7 @@ import games.saboteur.components.PathCard;
 import utilities.Pair;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -27,8 +27,8 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
     public int rockfallCardsInDeck = 3;
 
     //map combination of specific cards to number of cards in that deck
-    public Map<Pair<PathCard.PathCardType, boolean[]>, Integer> pathCardDeck = new HashMap<>();
-    public Map<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> toolCards = new HashMap<>();
+    public Map<Pair<PathCard.PathCardType, boolean[]>, Integer> pathCardDeck = new LinkedHashMap<>();
+    public Map<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> toolCards = new LinkedHashMap<>();
 
 
     //All RolesCards in a deck depending on number of players
@@ -118,10 +118,10 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
         sgp.minersForPlayerCount = minersForPlayerCount.clone();
         sgp.goldSupply = goldSupply.clone();
         sgp.cardsPerPlayer = cardsPerPlayer.clone();
-        sgp.pathCardDeck = new HashMap<>();
+        sgp.pathCardDeck = new LinkedHashMap<>();
         for (Map.Entry<Pair<PathCard.PathCardType, boolean[]>, Integer> entry : pathCardDeck.entrySet())
             sgp.pathCardDeck.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
-        sgp.toolCards = new HashMap<>();
+        sgp.toolCards = new LinkedHashMap<>();
         for (Map.Entry<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> entry : toolCards.entrySet())
             sgp.toolCards.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
         return sgp;

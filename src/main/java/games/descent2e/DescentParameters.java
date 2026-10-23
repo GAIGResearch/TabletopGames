@@ -14,10 +14,10 @@ public class DescentParameters extends AbstractParameters {
     public DescentTypes.Campaign campaign = HeirsOfBlood;
 
     public int nActionsPerFigure = 2;
-    public Map<DiceType, Integer> reviveDice = new HashMap<>() {{
+    public Map<DiceType, Integer> reviveDice = new LinkedHashMap<>() {{
         put(RED, 2);
     }};
-    public Map<DiceType, Integer> healDice = new HashMap<>() {{
+    public Map<DiceType, Integer> healDice = new LinkedHashMap<>() {{
         put(RED, 1);
     }};
 

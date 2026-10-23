@@ -1,13 +1,16 @@
 package games.poker.gui;
 
+import gui.GUIMessages;
 import core.*;
 import gui.AbstractGUIManager;
+import games.GameType;
 import games.poker.PokerForwardModel;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
 import games.poker.components.MoneyPot;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 import utilities.Pair;
@@ -69,12 +72,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 JPanel main = new JPanel();
                 main.setOpaque(false);
                 main.setLayout(new BorderLayout());
-                JPanel rules = new JPanel();
                 pane.add("Main", main);
-                pane.add("Rules", rules);
-                JLabel ruleText = new JLabel(getRuleText());
-                rules.add(ruleText);
-                rules.setBackground(new Color(43, 108, 25, 111));
 
                 potMoney = new JLabel();
                 currentBets = new JLabel();
@@ -92,7 +90,6 @@ public class PokerGUIManager extends AbstractGUIManager {
                 pgs = (PokerGameState) gameState.copy();
                 pfm = (PokerForwardModel) game.getForwardModel();
                 PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
-                ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
                 parent.setBackground(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"));
 
@@ -116,8 +113,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                     playerHand.setOpaque(false);
 
                     // Get agent name
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
+                    String agentName = game.getPlayers().get(i).toString();
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(
@@ -168,7 +164,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Poker", gameState, width, defaultInfoPanelHeight +15);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
                 main.add(mainGameArea, BorderLayout.CENTER);
@@ -176,7 +172,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 main.add(actionPanel, BorderLayout.SOUTH);
 
                 pane.add("Main", main);
-                pane.add("Rules", rules);
+                RulesView.addTabs(pane, GameType.Poker, pgp, height*2/3+100);
 
                 parent.setLayout(new BorderLayout());
                 parent.add(pane, BorderLayout.CENTER);
@@ -241,34 +237,6 @@ public class PokerGUIManager extends AbstractGUIManager {
         return wrapper;
     }
 
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setOpaque(false);
-        if (boxLayout) {
-            actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
-        }
-
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights);
-            actionButtons[i] = ab;
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.informAllActionButtons(actionButtons);
-        }
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
-        return pane;
-    }
-
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
@@ -306,7 +274,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                     }
                 }
                 winnerString = winnerString.replace(",}", "}");
-                JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winnerString + ". Next round begins!");
+                GUIMessages.show(parent, "Round over! Winners: " + winnerString + ". Next round begins!");
             }
 
             // Update player
@@ -345,16 +313,5 @@ public class PokerGUIManager extends AbstractGUIManager {
             communityPile.setFocusable(true);
 
         }
-    }
-
-
-    private String getRuleText() {
-        String rules = "<html><center><h1>Poker</h1></center><br/><hr><br/>";
-        rules += "<p>Coming soon ...</p>";
-
-
-        rules += "<hr><p><b>INTERFACE: </b> Choose action at the bottom of the screen.</p>";
-        rules += "</html>";
-        return rules;
     }
 }

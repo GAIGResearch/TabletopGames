@@ -107,7 +107,7 @@ public class Quest {
         Quest q = new Quest();
         if (boards != null) q.boards = new ArrayList<>(boards);
         if (startingLocations != null) {
-            q.startingLocations = new HashMap<>();
+            q.startingLocations = new LinkedHashMap<>();
             for (Map.Entry<String, List<Vector2D>> e : startingLocations.entrySet()) {
                 q.startingLocations.put(e.getKey(), new ArrayList<>(e.getValue()));
             }

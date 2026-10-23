@@ -42,9 +42,9 @@ public class Settler extends PuertoRicoRole<Settler> {
         }
         haciendaStep[currentPlayer] = false;
 
-        Set<PuertoRicoConstants.Crop> uniqueVisibleCrops = state.getAvailablePlantations().stream()
-                .map(p -> p.crop).collect(toSet());
-        List<AbstractAction> retValue = uniqueVisibleCrops.stream().map(DrawPlantation::new).collect(toList());
+        // distinct() keeps the crops in the order the plantations are visible (a Set of enums would iterate in hash order)
+        List<AbstractAction> retValue = state.getAvailablePlantations().stream()
+                .map(p -> p.crop).distinct().map(DrawPlantation::new).collect(toList());
         if (state.getQuarriesLeft() > 0 && (currentPlayer == roleOwner || state.hasActiveBuilding(currentPlayer, CONSTRUCTION_HUT)))
             retValue.add(new BuildQuarry());
         retValue.add(new DoNothing()); // we can always choose not pick a plantation

@@ -26,7 +26,7 @@ public class DescentDice extends Component {
 
     public DescentDice(){
         super(CoreConstants.ComponentType.DICE);
-        this.sides = new HashMap<>();
+        this.sides = new LinkedHashMap<>();
     }
 
     private DescentDice(int ID){
@@ -74,7 +74,7 @@ public class DescentDice extends Component {
         for (int i = 1; i <= nSides; i++) {
             String diceDescriptor = (String) ((JSONArray) dice.get("colour")).get(1);
             this.colour = DiceType.valueOf(diceDescriptor.toUpperCase(Locale.ROOT));
-            Map<String, Integer> sideMap = new HashMap<>();
+            Map<String, Integer> sideMap = new LinkedHashMap<>();
             JSONArray diceArray = (JSONArray) ((JSONArray) dice.get(Integer.toString(i))).get(1);
             Long tempDamage = (Long) diceArray.get(2);
             Long tempRange = (Long) diceArray.get(0);
@@ -119,9 +119,9 @@ public class DescentDice extends Component {
         copy.damage = this.damage;
         copy.surge = this.surge;
         copy.range = this.range;
-        copy.sides = new HashMap<>();
+        copy.sides = new LinkedHashMap<>();
         for (Map.Entry<Integer, Map<String, Integer>> i: sides.entrySet()) {
-            Map<String, Integer> m = new HashMap<>(i.getValue());
+            Map<String, Integer> m = new LinkedHashMap<>(i.getValue());
             copy.sides.put(i.getKey(), m);
         }
         copyComponentTo(copy);

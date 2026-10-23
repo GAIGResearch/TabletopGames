@@ -27,9 +27,13 @@ public class PandemicCardView extends CardView {
     public static final int cardHeight = 80;
 
     public PandemicCardView(Card c) {
+        this(c, cardWidth, cardHeight);
+    }
+
+    public PandemicCardView(Card c, int width, int height) {
         super(c);
-        width = cardWidth;
-        height = cardHeight;
+        this.width = width;
+        this.height = height;
         setCard(c);
     }
 
@@ -192,5 +196,11 @@ public class PandemicCardView extends CardView {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(width + offset/2, height + offset/2);
+    }
+
+    // ComponentView's maximum is the default card size, smaller than these cards
+    @Override
+    public Dimension getMaximumSize() {
+        return getPreferredSize();
     }
 }
