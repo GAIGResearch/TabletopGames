@@ -338,21 +338,20 @@ public class CatanActionFactory {
         if (canBuySettlement || canBuyCity) {
             Set<Building> settlementsAdded = new HashSet<>();
             for (CatanTile tile : gs.getTiles()) {
+                // every vertex that can be built on, and so every settlement, touches a resource tile
+                if (tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                    continue;
                 for (int i = 0; i < HEX_SIDES; i++) {
                     Building settlement = gs.getBuilding(tile, i);
-                    if (settlementsAdded.contains(settlement)) continue;
-                    settlementsAdded.add(settlement);
+                    if (!settlementsAdded.add(settlement)) continue;
 
                     if (canBuyCity && settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
                         actions.add(new BuildCity(tile.hex, i, player));
                     }
 
-                    if (canBuySettlement && settlement.getOwnerId() == -1) {  // cannot build on top of existing settlement
-                        // legal to place?
-                        if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                                && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                            actions.add(new BuildSettlement(tile.hex, i, player, false));
-                        }
+                    // cannot build on top of an existing settlement
+                    if (canBuySettlement && settlement.getOwnerId() == -1 && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
+                        actions.add(new BuildSettlement(tile.hex, i, player, false));
                     }
                 }
             }

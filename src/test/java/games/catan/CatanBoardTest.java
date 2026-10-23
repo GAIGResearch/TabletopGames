@@ -2,9 +2,11 @@ package games.catan;
 
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
+import core.components.Counter;
 import core.components.Edge;
 import core.components.grid.HexCoord;
 import core.components.grid.HexVertex;
+import games.catan.actions.build.BuildSettlement;
 import games.catan.actions.robber.MoveRobber;
 import games.catan.actions.robber.MoveRobberAndSteal;
 import games.catan.actions.setup.DeepPlaceSettlementThenRoad;
@@ -195,6 +197,25 @@ public class CatanBoardTest {
         assertTrue(state.isActionInProgress());
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(expectedGain(before, new HexVertex(place.hex, place.vertex)), resources(player));
+    }
+
+    @Test
+    public void everyVertexTouchingAResourceTileIsOfferedForASettlement() {
+        // in setup a settlement needs no road, so all of these are legal
+        int player = state.getCurrentPlayer();
+        for (Counter c : state.getPlayerResources(player).values())
+            c.setValue(5);
+        Set<Integer> expected = new HashSet<>();
+        for (CatanTile tile : state.getTiles())
+            if (tile.getTileType() != SEA && tile.getTileType() != DESERT)
+                for (int v = 0; v < 6; v++)
+                    expected.add(state.getBuilding(tile, v).getComponentID());
+        Set<Integer> offered = new HashSet<>();
+        for (AbstractAction a : CatanActionFactory.getBuySettlementActions(state, player)) {
+            BuildSettlement build = (BuildSettlement) a;
+            assertTrue("offered twice: " + build, offered.add(state.getBuilding(state.getTile(build.hex), build.vertex).getComponentID()));
+        }
+        assertEquals(expected, offered);
     }
 
     /**
