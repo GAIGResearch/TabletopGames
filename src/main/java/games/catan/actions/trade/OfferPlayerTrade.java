@@ -58,8 +58,9 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Trade (p%d to p%d : %d %s for %d %s)", offeringPlayerID, otherPlayerID,
-                nOffered, resourceOffered, nRequested, resourceRequested);
+        // no String.format, which is slow, as the history records this text for every offer made in a search
+        return "Trade (p" + offeringPlayerID + " to p" + otherPlayerID + " : " + nOffered + " " + resourceOffered +
+                " for " + nRequested + " " + resourceRequested + ")";
     }
 
     @Override

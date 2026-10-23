@@ -9,6 +9,11 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     // List of nodes in the board graph, mapping component ID to object reference
     protected Map<Integer, BoardNodeWithEdges> boardNodes;
 
+    // boardNodes by componentID - minNodeID, so getNodeByID needs no boxing (null if the IDs are too spread out)
+    private BoardNodeWithEdges[] nodeIndex;
+    private int minNodeID;
+    private boolean nodeIndexBuilt;
+
     private static final int initialCapacity = 256;
 
     public GraphBoardWithEdges(String name)
@@ -102,8 +107,37 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
      * @param key - ID of node to search for.
      * @return - node matching ID.
      */
-    public BoardNodeWithEdges getNodeByID(Integer key) {
-        return boardNodes.get(key);
+    public BoardNodeWithEdges getNodeByID(int key) {
+        if (!nodeIndexBuilt)
+            buildNodeIndex();
+        if (nodeIndex == null)
+            return boardNodes.get(key);
+        int i = key - minNodeID;
+        return i >= 0 && i < nodeIndex.length ? nodeIndex[i] : null;
+    }
+
+    private void buildNodeIndex() {
+        nodeIndexBuilt = true;
+        nodeIndex = null;
+        if (boardNodes.isEmpty())
+            return;
+        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        for (int id : boardNodes.keySet()) {
+            min = Math.min(min, id);
+            max = Math.max(max, id);
+        }
+        long range = (long) max - min + 1;
+        if (range > 4L * boardNodes.size() + 64)
+            return;
+        minNodeID = min;
+        nodeIndex = new BoardNodeWithEdges[(int) range];
+        for (Map.Entry<Integer, BoardNodeWithEdges> e : boardNodes.entrySet())
+            nodeIndex[e.getKey() - min] = e.getValue();
+    }
+
+    private void nodesChanged() {
+        nodeIndexBuilt = false;
+        nodeIndex = null;
     }
 
     /**
@@ -114,17 +148,21 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
         for (BoardNodeWithEdges bn: boardNodes) {
             this.boardNodes.put(bn.getComponentID(), bn);
         }
+        nodesChanged();
     }
     public void setBoardNodes(Map<Integer, BoardNodeWithEdges> boardNodes) {
         this.boardNodes = boardNodes;
+        nodesChanged();
     }
 
     public void addBoardNode(BoardNodeWithEdges bn) {
         this.boardNodes.put(bn.getComponentID(), bn);
+        nodesChanged();
     }
 
     public void removeBoardNode(BoardNodeWithEdges bn) {
         this.boardNodes.remove(bn.getComponentID());
+        nodesChanged();
     }
 
     public void breakConnection(BoardNodeWithEdges bn1, BoardNodeWithEdges bn2, Edge edge) {
@@ -149,6 +187,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
             }
         }
         if (!inBoard) boardNodes.remove(bn2.getComponentID());
+        nodesChanged();
     }
 
     public Edge addConnection(BoardNodeWithEdges bn1, BoardNodeWithEdges bn2) {
@@ -189,10 +228,6 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     @Override
     public List<BoardNodeWithEdges> getComponents() {
         return new ArrayList<>(getBoardNodes());
-    }
-
-    public Map<Integer, BoardNodeWithEdges> getBoardNodeMap() {
-        return boardNodes;
     }
 
     @Override

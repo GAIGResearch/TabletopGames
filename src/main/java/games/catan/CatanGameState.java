@@ -22,6 +22,8 @@ import static games.catan.stats.CatanMetrics.CatanEvent.LargestArmySteal;
 public class CatanGameState extends AbstractGameState {
     protected SparseGrid<HexCoord, CatanTile> board;
     protected HexCoord robber; // the hex the robber is on
+    // the board's tiles in order of position, or null until getTiles is called
+    private List<CatanTile> tiles;
     protected GraphBoardWithEdges catanGraph;
     protected int[] scores; // score for each player
     protected int[] victoryPoints; // secret points from victory cards
@@ -126,6 +128,7 @@ public class CatanGameState extends AbstractGameState {
 
     public void setBoard(SparseGrid<HexCoord, CatanTile> board) {
         this.board = board;
+        tiles = null;
     }
 
     public SparseGrid<HexCoord, CatanTile> getBoard() {
@@ -143,14 +146,20 @@ public class CatanGameState extends AbstractGameState {
      * Every tile, in order of position.
      */
     public List<CatanTile> getTiles() {
-        List<CatanTile> retValue = new ArrayList<>(board.size());
-        for (HexCoord hex : board.sortedPositions())
-            retValue.add(board.get(hex));
-        return retValue;
+        // stale if the board changes after setup
+        if (tiles == null) {
+            List<CatanTile> retValue = new ArrayList<>(board.size());
+            for (HexCoord hex : board.sortedPositions())
+                retValue.add(board.get(hex));
+            tiles = Collections.unmodifiableList(retValue);
+        }
+        return tiles;
     }
 
     public void setGraph(GraphBoardWithEdges graph) {
         this.catanGraph = graph;
+        // setup has replaced the tiles with ones holding the graph's IDs
+        tiles = null;
     }
 
     public GraphBoardWithEdges getGraph() {
@@ -422,6 +431,7 @@ public class CatanGameState extends AbstractGameState {
         CatanGameState copy = new CatanGameState(getGameParameters().copy(), getNPlayers());
         copy.gamePhase = gamePhase;
         copy.board = board.copy();
+        copy.tiles = tiles; // the tiles are immutable
         copy.robber = robber;
         copy.catanGraph = catanGraph.copy();
 
