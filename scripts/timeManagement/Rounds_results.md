@@ -7,7 +7,7 @@
 - `MCTSTimeManager` manages each round as a game of its own: decisions are counted from the start of the round (for
   the decision table and MID), and the default decision table is `data/timeManagement/<Game>_<n>p_round.txt`.
 - `GameMetrics$RoundDecisions` records each player's decisions in each round (on ROUND_OVER), and
-  `DecisionTableBuilder ... event=ROUND_OVER` builds the round table from it. `MCTSSweepListener.json` now includes it.
+  `DecisionTableBuilder ... table=round` builds the round table from it. `MCTSSweepListener.json` now includes it.
 - Tables from MCTSBudgetSweep self-play at 100 ms per move (100 games each):
   - Sushi Go, 2 players: 27.5 decisions per game, 9.2 per round.
   - Love Letter, 2 players: 20.8 decisions per game, over 10.8 rounds; 1.9 per player per round.

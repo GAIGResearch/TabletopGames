@@ -273,8 +273,9 @@ public class GameMetrics implements IMetricsCollection {
     }
 
     /**
-     * The decisions (with more than one action) made by each player in the round just ended. A round that the game
-     * ends before it is over is not recorded.
+     * The decisions (with more than one action) made by each player in the round just ended, and the number of rounds
+     * played so far. At GAME_OVER the round is the last one if it did not end with a ROUND_OVER (as when the game ends
+     * mid-round, or a game ends without ending its last round), and is empty otherwise.
      */
     public static class RoundDecisions extends AbstractMetric {
         // where the current round starts in the game's record of action space sizes
@@ -285,27 +286,32 @@ public class GameMetrics implements IMetricsCollection {
             Map<String, Class<?>> columns = new HashMap<>();
             for (int p = 0; p < nPlayersPerGame; p++)
                 columns.put("Decisions-P" + p, Integer.class);
+            columns.put("Rounds", Integer.class);
             return columns;
         }
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             List<Pair<Integer, Integer>> actionSpaceRecord = listener.getGame().getActionSpaceSize();
-            // the round counter is not yet incremented for the round that has ended
-            int start = e.state.getRoundCounter() == 0 ? 0 : roundStart;
+            // the round counter is not yet incremented for the round that has ended, so in round 0 there has been no
+            // earlier ROUND_OVER in this game
+            int round = e.state.getRoundCounter();
+            int start = round == 0 ? 0 : roundStart;
             int[] playerDecisions = new int[e.state.getNPlayers()];
             for (Pair<Integer, Integer> record : actionSpaceRecord.subList(start, actionSpaceRecord.size()))
                 if (record.b > 1)
                     playerDecisions[record.a]++;
             for (int p = 0; p < playerDecisions.length; p++)
                 records.put("Decisions-P" + p, playerDecisions[p]);
+            boolean unfinishedRound = start < actionSpaceRecord.size();
+            records.put("Rounds", e.type == ROUND_OVER || unfinishedRound ? round + 1 : round);
             roundStart = actionSpaceRecord.size();
             return true;
         }
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
-            return Collections.singleton(ROUND_OVER);
+            return new HashSet<>(Arrays.asList(ROUND_OVER, GAME_OVER));
         }
     }
 

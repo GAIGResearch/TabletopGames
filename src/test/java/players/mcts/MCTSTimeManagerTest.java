@@ -284,11 +284,75 @@ public class MCTSTimeManagerTest {
         Game game = GameType.SushiGo.createGameInstance(2, 42);
         game.reset(List.of(mcts, new RandomPlayer(new Random(3))));
         game.run();
-        // the clock is for the last round only, and there are no more than 10 decisions in a round
+        // the clock is for the last round only; a round has about 9 decisions (more with chopsticks), and a game 27
         long remaining = mcts.getGameTimer().remainingTimeMillis();
         assertTrue("remaining " + remaining, remaining > 0);
         assertTrue("remaining " + remaining, remaining < 1_000);
-        assertTrue(mcts.getTimeManager().decisionsMade() > 2);
-        assertTrue(mcts.getTimeManager().decisionsMade() <= 10);
+        int decisions = mcts.getTimeManager().decisionsMade();
+        assertTrue("decisions " + decisions, decisions > 2 && decisions < 15);
+    }
+
+    private static MCTSParams roundAllocationParams() {
+        MCTSParams params = params(PlayerConstants.BUDGET_GAME_SECONDS, 20);
+        params.setParameterValue("roundAllocation", true);
+        params.setParameterValue("decisionTable", "");
+        params.setParameterValue("roundTable", "");
+        params.setParameterValue("expectedDecisions", 5.0);
+        params.setParameterValue("expectedRounds", 4.0);
+        return params;
+    }
+
+    @Test
+    public void roundAllocationSharesClockOverRoundsThenDecisionsInTheRound() {
+        MCTSTimeManager tm = new MCTSTimeManager(roundAllocationParams());
+        tm.newGame(sushiGoRound(0));
+        // the minimum search of each of the 3 * 5 decisions in later rounds is kept back
+        assertEquals((20_000 - 50 - 15 * 10) / 4, tm.allocateRound(20_000));
+
+        tm.startDecision(sushiGoRound(1), new ElapsedCpuChessTimer(10_000, 0, 0, 0, 0));
+        long roundBudget = (10_000 - 50 - 15 * 10) / 4;
+        assertEquals(roundBudget, tm.roundBudget(), 2);
+        assertEquals(roundBudget / 5, tm.plannedBudget(), 2);
+        // after 1000 ms of the round, the rest of its allocation is shared out over the decisions left in it
+        assertEquals((roundBudget - 1000) / 5, tm.allocate(10_000 - 1000), 2);
+        // and a round that has used its allocation gets the minimum search
+        assertEquals(10, tm.allocate(10_000 - roundBudget - 100), 2);
+    }
+
+    @Test
+    public void roundTableIsIndexedByRoundsPlayed() throws IOException {
+        Path file = Files.createTempFile("rounds", ".txt");
+        Files.writeString(file, "6\n5.5\n1.2");
+        MCTSParams params = roundAllocationParams();
+        params.setParameterValue("roundTable", file.toString());
+        MCTSTimeManager tm = new MCTSTimeManager(params);
+        tm.newGame(sushiGoRound(0));
+        ElapsedCpuChessTimer timer = new ElapsedCpuChessTimer(20_000, 0, 0, 0, 0);
+        tm.startDecision(sushiGoRound(0), timer);
+        assertEquals(6.0, tm.expectedRemainingRounds(), 1e-9);
+        tm.startDecision(sushiGoRound(2), timer);
+        assertEquals(1.2, tm.expectedRemainingRounds(), 1e-9);
+        Files.delete(file);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void roundAllocationNeedsGameSeconds() {
+        MCTSParams params = params(PlayerConstants.BUDGET_ROUND_SECONDS, 2);
+        params.setParameterValue("roundAllocation", true);
+        new MCTSTimeManager(params);
+    }
+
+    @Test
+    public void roundAllocationKeepsToTheGameClock() {
+        MCTSParams params = params(PlayerConstants.BUDGET_GAME_SECONDS, 2);
+        params.setParameterValue("roundAllocation", true);
+        MCTSPlayer mcts = new MCTSPlayer(params);
+        Game game = GameType.LoveLetter.createGameInstance(2, 42);
+        game.reset(List.of(mcts, new RandomPlayer(new Random(3))));
+        game.run();
+        long remaining = mcts.getGameTimer().remainingTimeMillis();
+        assertTrue("remaining " + remaining, remaining > 0);
+        assertTrue("remaining " + remaining, remaining < 2_000);
+        assertTrue(game.getGameState().getRoundCounter() > 1);
     }
 }

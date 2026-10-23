@@ -84,11 +84,20 @@ public class MCTSParams extends PlayerParameters {
     double DDAMoveThreshold = 0.0; // When playing badly, we will take actions up to this amount less than the best action
 
     // Time management (see MCTSTimeManager)
-    // EXP: expected own decisions left in the game (or round, with BUDGET_ROUND_SECONDS), if there is no decisionTable
+    // EXP: expected own decisions left in the game (or round, with BUDGET_ROUND_SECONDS or roundAllocation), if there
+    // is no decisionTable
     public double expectedDecisions = 30.0;
     // EXP-MOVES: file of the expected own decisions left, by decisions made; "" for none, and "default" for
-    // data/timeManagement/<GameType>_<n>p.txt (<GameType>_<n>p_round.txt with BUDGET_ROUND_SECONDS) if there is one
+    // data/timeManagement/<GameType>_<n>p.txt (<GameType>_<n>p_round.txt with BUDGET_ROUND_SECONDS or roundAllocation)
+    // if there is one
     public String decisionTable = "default";
+    // With BUDGET_GAME_SECONDS: give each round a share of the game clock, and each decision a share of its round's
+    public boolean roundAllocation = false;
+    public double expectedRounds = 5.0;  // roundAllocation: expected rounds left, if there is no roundTable
+    // roundAllocation: file of the expected rounds left, by rounds played; "" for none, and "default" for
+    // data/timeManagement/<GameType>_<n>p_rounds.txt if there is one
+    public String roundTable = "default";
+    public double roundTimeFactor = 1.0;  // roundAllocation: multiplies every round's allocation
     public double timeFactor = 1.0;  // multiplies every allocation (f_opening for OPEN, f_earlystop for STOP)
     public double midHeight = 0.0, midCentre = 15.0, midWidth = 10.0;  // MID: a, b, c of the bonus by decision number
     public double behindThreshold = 0.5, behindFactor = 1.0;  // BEHIND: v_behind (a win rate) and f_behind
@@ -157,6 +166,10 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("DDAMoveThreshold", 0.0);
         addTunableParameter("expectedDecisions", 30.0);
         addTunableParameter("decisionTable", "default");
+        addTunableParameter("roundAllocation", false);
+        addTunableParameter("expectedRounds", 5.0);
+        addTunableParameter("roundTable", "default");
+        addTunableParameter("roundTimeFactor", 1.0, Arrays.asList(0.5, 0.75, 1.0, 1.25, 1.5, 2.0));
         addTunableParameter("timeFactor", 1.0, Arrays.asList(1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0));
         addTunableParameter("midHeight", 0.0, Arrays.asList(0.0, 0.5, 1.0, 1.5, 2.0, 2.5));
         addTunableParameter("midCentre", 15.0);
@@ -263,6 +276,10 @@ public class MCTSParams extends PlayerParameters {
         DDAMoveThreshold = (double) getParameterValue("DDAMoveThreshold");
         expectedDecisions = (double) getParameterValue("expectedDecisions");
         decisionTable = (String) getParameterValue("decisionTable");
+        roundAllocation = (boolean) getParameterValue("roundAllocation");
+        expectedRounds = (double) getParameterValue("expectedRounds");
+        roundTable = (String) getParameterValue("roundTable");
+        roundTimeFactor = (double) getParameterValue("roundTimeFactor");
         timeFactor = (double) getParameterValue("timeFactor");
         midHeight = (double) getParameterValue("midHeight");
         midCentre = (double) getParameterValue("midCentre");

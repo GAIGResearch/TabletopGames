@@ -42,17 +42,25 @@ import static players.mcts.MCTSEnums.TreePolicy.*;
  * <p>
  * With BUDGET_ROUND_SECONDS the timer is for the round, and each round is managed as a game of its own: decisions are
  * counted from the start of the round, and the decision table gives the decisions left in the round.
+ * <p>
+ * With roundAllocation (and BUDGET_GAME_SECONDS) the allocation has two levels. At the player's first decision in a
+ * round, the round is given the time left on the game timer divided by the expected rounds left (expectedRounds, or
+ * roundTable), times roundTimeFactor. Each decision is then given the time left in the round's allocation divided by
+ * the expected decisions left in the round, as with BUDGET_ROUND_SECONDS. Time a round does not use stays on the game
+ * timer, and is shared out over the later rounds.
  */
 public class MCTSTimeManager {
 
     private final MCTSParams params;
     public static final String DEFAULT_TABLE = "default";
     public static final String DEFAULT_TABLE_DIRECTORY = "data/timeManagement";
-    private double[] decisionTable;
+    private double[] decisionTable, roundTable;
     private ElapsedCpuChessTimer gameTimer;
-    // in the game, or in the round with BUDGET_ROUND_SECONDS
+    // in the game, or in the round with BUDGET_ROUND_SECONDS or roundAllocation
     private int decisionsMade;
     private int round;  // of the last decision
+    // roundAllocation: the time allocated to the current round, and the game clock at its start (milliseconds)
+    private long roundBudget, clockAtRoundStart;
     // moving average of the time charged to a decision outside its search (milliseconds)
     private double overheadMillis;
 
@@ -67,6 +75,8 @@ public class MCTSTimeManager {
         validate(params);
         if (!params.decisionTable.isEmpty() && !params.decisionTable.equals(DEFAULT_TABLE))
             decisionTable = loadDecisionTable(params.decisionTable);
+        if (!params.roundTable.isEmpty() && !params.roundTable.equals(DEFAULT_TABLE))
+            roundTable = loadDecisionTable(params.roundTable);
     }
 
     public static boolean isUsed(MCTSParams params) {
@@ -85,6 +95,8 @@ public class MCTSTimeManager {
                     "ROBUST selectionPolicy (and a treePolicy that is not EXP3 or regret matching)");
         if (params.earlyStopInterval < 1)
             throw new IllegalArgumentException("earlyStopInterval must be at least 1");
+        if (params.roundAllocation && params.budgetType != BUDGET_GAME_SECONDS)
+            throw new IllegalArgumentException("roundAllocation needs BUDGET_GAME_SECONDS");
     }
 
     /**
@@ -112,17 +124,31 @@ public class MCTSTimeManager {
      */
     public void newGame(AbstractGameState state) {
         decisionsMade = 0;
-        round = state.getRoundCounter();
-        if (params.decisionTable.equals(DEFAULT_TABLE)) {
-            // The table for the game and player count, if there is one; otherwise expectedDecisions is used
-            String suffix = params.budgetType == BUDGET_ROUND_SECONDS ? "p_round.txt" : "p.txt";
-            Path file = Path.of(DEFAULT_TABLE_DIRECTORY, state.getGameType().name() + "_" + state.getNPlayers() + suffix);
-            decisionTable = Files.exists(file) ? loadDecisionTable(file.toString()) : null;
-        }
+        round = -1;
+        // The tables for the game and player count, if there are any; otherwise expectedDecisions and expectedRounds
+        // are used
+        if (params.decisionTable.equals(DEFAULT_TABLE))
+            decisionTable = defaultTable(state, byRound() ? "_round" : "");
+        if (params.roundTable.equals(DEFAULT_TABLE))
+            roundTable = defaultTable(state, "_rounds");
+    }
+
+    private static double[] defaultTable(AbstractGameState state, String suffix) {
+        Path file = Path.of(DEFAULT_TABLE_DIRECTORY,
+                state.getGameType().name() + "_" + state.getNPlayers() + "p" + suffix + ".txt");
+        return Files.exists(file) ? loadDecisionTable(file.toString()) : null;
     }
 
     /**
-     * @return the number of decisions searched so far in this game (or round, with BUDGET_ROUND_SECONDS)
+     * @return true if decisions are counted from the start of each round
+     */
+    private boolean byRound() {
+        return params.budgetType == BUDGET_ROUND_SECONDS || params.roundAllocation;
+    }
+
+    /**
+     * @return the number of decisions searched so far in this game (or round, with BUDGET_ROUND_SECONDS or
+     * roundAllocation)
      */
     public int decisionsMade() {
         return decisionsMade;
@@ -141,7 +167,37 @@ public class MCTSTimeManager {
     }
 
     /**
+     * The expected number of rounds left, including the current one (for roundAllocation)
+     */
+    public double expectedRemainingRounds() {
+        double r;
+        if (roundTable == null)
+            r = params.expectedRounds;
+        else
+            r = roundTable[Math.min(Math.max(round, 0), roundTable.length - 1)];
+        return Math.max(1.0, r);
+    }
+
+    /**
+     * The expected number of own decisions left in the game after the current one
+     */
+    private double expectedLaterDecisions() {
+        double later = expectedRemainingDecisions() - 1;
+        if (params.roundAllocation)
+            later += (expectedRemainingRounds() - 1) * decisionsPerRound();
+        return later;
+    }
+
+    /**
+     * The expected number of own decisions in a round (for roundAllocation)
+     */
+    private double decisionsPerRound() {
+        return decisionTable == null ? params.expectedDecisions : decisionTable[0];
+    }
+
+    /**
      * Called before each search.
+     *
      *
      * @param timer - the player's game timer (null unless the budget is a clock). It is running, and
      *              elapsedMillis() is the time spent on this decision so far.
@@ -149,11 +205,15 @@ public class MCTSTimeManager {
     public void startDecision(AbstractGameState state, ElapsedCpuChessTimer timer) {
         if (params.budgetType.isClock() && timer == null)
             throw new AssertionError(params.budgetType + " needs a game timer");
-        if (params.budgetType == BUDGET_ROUND_SECONDS && state.getRoundCounter() != round) {
+        gameTimer = timer;
+        if (byRound() && state.getRoundCounter() != round) {
             round = state.getRoundCounter();
             decisionsMade = 0;
+            if (params.roundAllocation) {
+                clockAtRoundStart = gameTimer.remainingTimeMillis() - gameTimer.elapsedMillis();
+                roundBudget = allocateRound(clockAtRoundStart);
+            }
         }
-        gameTimer = timer;
         behindDone = unstableDone = closeDone = 0;
         stoppedEarly = false;
         if (params.budgetType.isClock()) {
@@ -173,7 +233,11 @@ public class MCTSTimeManager {
      */
     long allocate(long remainingMillis) {
         long available = availableMillis(remainingMillis);
-        double share = available / expectedRemainingDecisions();
+        double share;
+        if (params.roundAllocation)
+            share = Math.max(0, roundBudget - (clockAtRoundStart - remainingMillis)) / expectedRemainingDecisions();
+        else
+            share = available / expectedRemainingDecisions();
         share *= params.timeFactor;
         if (params.midHeight != 0.0) {
             // (1 + a.exp(-(x - b)^2 / 2c^2)), where x is 1 for the first decision of the game (or round)
@@ -188,12 +252,25 @@ public class MCTSTimeManager {
     }
 
     /**
+     * The first level of roundAllocation: the time for the round that starts now.
+     *
+     * @param remainingMillis - the time left on the game clock
+     */
+    long allocateRound(long remainingMillis) {
+        // the minimum search and overhead of each decision in later rounds is kept back
+        double laterRounds = (expectedRemainingRounds() - 1) * decisionsPerRound()
+                * (params.minMoveTimeMS + overheadMillis);
+        double share = (remainingMillis - params.clockReserveMS - laterRounds) / expectedRemainingRounds();
+        return (long) Math.max(0, share * params.roundTimeFactor);
+    }
+
+    /**
      * The time that can be spent on the current search
      */
     private long availableMillis(long remainingMillis) {
         // keep back the reserve, this decision's overhead, and the minimum search and overhead of each later decision,
         // so that the clock is not overrun when the game lasts as long as expected
-        double later = (expectedRemainingDecisions() - 1) * (params.minMoveTimeMS + overheadMillis);
+        double later = expectedLaterDecisions() * (params.minMoveTimeMS + overheadMillis);
         return (long) (remainingMillis - params.clockReserveMS - overheadMillis - later);
     }
 
@@ -299,6 +376,13 @@ public class MCTSTimeManager {
             double overhead = Math.max(0.0, gameTimer.elapsedMillis() - searchMillis);
             overheadMillis = overheadMillis == 0.0 ? overhead : 0.8 * overheadMillis + 0.2 * overhead;
         }
+    }
+
+    /**
+     * @return the time allocated to the current round with roundAllocation (milliseconds), otherwise 0
+     */
+    public long roundBudget() {
+        return params.roundAllocation ? roundBudget : 0;
     }
 
     /**

@@ -217,6 +217,7 @@ public class MCTSMetrics implements IMetricsCollection {
             records.put("PlayerID", e.playerID);
             records.put("Decision", tm.decisionsMade());
             records.put("Planned", (int) tm.plannedBudget());
+            records.put("RoundPlanned", (int) tm.roundBudget());
             records.put("SearchMS", mctsPlayer.root.timeTaken);
             records.put("Iterations", root.getVisits() - root.inheritedVisits);
             records.put("StoppedEarly", tm.stoppedEarly());
@@ -242,9 +243,10 @@ public class MCTSMetrics implements IMetricsCollection {
             Map<String, Class<?>> cols = new HashMap<>();
             cols.put("PlayerType", String.class);
             cols.put("PlayerID", Integer.class);
-            // 1 for the first decision searched in the game (or round, with BUDGET_ROUND_SECONDS)
+            // 1 for the first decision searched in the game (or round, with BUDGET_ROUND_SECONDS or roundAllocation)
             cols.put("Decision", Integer.class);
             cols.put("Planned", Integer.class);  // before any extension (ms, or iterations for BUDGET_ITERATIONS)
+            cols.put("RoundPlanned", Integer.class);  // the round's allocation with roundAllocation (ms), otherwise 0
             cols.put("SearchMS", Double.class);
             cols.put("Iterations", Integer.class);
             cols.put("StoppedEarly", Boolean.class);
