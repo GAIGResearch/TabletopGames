@@ -12,7 +12,6 @@
         "selectionPolicy" : "SIMPLE",
         "information" : "Open_Loop",
         "treePolicy" : "UCB_Tuned",
-        "rolloutTermination" : "DEFAULT",
         "opponentTreePolicy" : "OneTree",
         "budget" : 40,
         "heuristic" : {
