@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.actions.SimultaneousAction;
 import core.interfaces.IActionHeuristic;
 import players.PlayerConstants;
+import players.heuristics.NullActionHeuristic;
 import utilities.*;
 
 import java.util.*;
@@ -293,8 +294,11 @@ public class SingleTreeNode {
                 if (pds.actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                     // in this case we initialise all action values
                     double[] heuristicScores = params.actionHeuristic.evaluateAllActions(pds.actionsFromOpenLoopState, actionState);
+                    // no noise for a NullActionHeuristic, so that a search without one draws no extra random numbers
+                    boolean tieBreak = !(params.actionHeuristic instanceof NullActionHeuristic);
                     for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
-                        pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i), heuristicScores[i]);
+                        pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i),
+                                heuristicScores[i] + (tieBreak ? rnd.nextDouble() * 0.00001 : 0.0));
                     }
                 } else {
                     // we just initialise the new actions

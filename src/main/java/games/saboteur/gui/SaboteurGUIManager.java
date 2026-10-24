@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import core.components.grid.SquareCoord;
+import games.GameType;
 import games.saboteur.SaboteurForwardModel;
 import games.saboteur.SaboteurGameParameters;
 import games.saboteur.SaboteurGameState;
@@ -15,6 +17,7 @@ import games.saboteur.components.ActionCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -34,6 +37,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
     final static int boardSize = 400;
 
     SaboteurGameState gs;
+    SaboteurBoardView boardView;
     SaboteurForwardModel fm;
     SaboteurGameParameters params;
 
@@ -71,11 +75,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 JPanel main = new JPanel();
                 main.setOpaque(false);
                 main.setLayout(new BorderLayout());
-                JPanel rules = new JPanel();
                 pane.add("Main", main);
-                pane.add("Rules", rules);
-                JLabel ruleText = new JLabel(getRuleText());
-                rules.add(ruleText);
 
                 // Initialise active player
                 activePlayer = gameState.getCurrentPlayer();
@@ -86,7 +86,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 int nVertAreas = 2;
                 this.width = playerAreaWidth * nHorizAreas;
                 this.height = (playerAreaHeight * nVertAreas) + boardSize;
-                ruleText.setPreferredSize(new Dimension(width + 50, height + defaultInfoPanelHeight));
+                RulesView.addTabs(pane, GameType.Saboteur, params, height + defaultInfoPanelHeight);
 
                 parent.setBackground(ImageIO.GetInstance().getImage("data/loveletter/bg.png"));
 
@@ -107,8 +107,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                     SaboteurPlayerView playerHand = new SaboteurPlayerView(this, gs, i, humanID);
 
                     // Get agent name
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
+                    String agentName = game.getPlayers().get(i).toString();
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(
@@ -134,7 +133,8 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 }
 
                 mainGameArea.add(top);
-                mainGameArea.add(new SaboteurBoardView(this, gs));
+                boardView = new SaboteurBoardView(this, gs);
+                mainGameArea.add(boardView);
                 mainGameArea.add(bottom);
 
                 // Add GUI listener
@@ -144,7 +144,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 JPanel infoPanel = createGameStateInfoPanel("Saboteur", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, false, this::onActionSelected, this::onMouseEnter, this::onMouseExit);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, this::onActionSelected, this::onMouseEnter, this::onMouseExit);
                 actionPanel.setOpaque(false);
 
                 main.add(infoPanel, BorderLayout.NORTH);
@@ -168,7 +168,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
         actionCardHighlight = null;
     }
 
-    Point gridHighlight = null;
+    SquareCoord gridHighlight = null;
     int componentIDHighlight = -1;
     int cardIdxHighlight = -1;
     ActionCard.ActionCardType actionCardHighlight = null;
@@ -176,10 +176,10 @@ public class SaboteurGUIManager extends AbstractGUIManager {
     protected void onMouseEnter(ActionButton actionButton) {
         AbstractAction action = actionButton.getButtonAction();
         if (action instanceof PlacePathCard ppc) {
-            gridHighlight = new Point(ppc.getX(), ppc.getY());
-            componentIDHighlight = ppc.getValueID();
+            gridHighlight = ppc.getPosition();
+            componentIDHighlight = ppc.getPathCardID();
         } else if (action instanceof PlayMapCard pmc) {
-            gridHighlight = new Point(pmc.getPosition().getX(), pmc.getPosition().getY());
+            gridHighlight = pmc.getPosition();
             actionCardHighlight = ActionCard.ActionCardType.Map;
         } else if (action instanceof PlayRockFallCard) {
             actionCardHighlight = ActionCard.ActionCardType.RockFall;
@@ -246,11 +246,10 @@ public class SaboteurGUIManager extends AbstractGUIManager {
             }
 
             // Update decks and visibility
+            boardView.viewer = viewingPlayer(gameState);
+            boardView.showAll = gameState.getCoreGameParameters().alwaysDisplayFullObservable;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || humanPlayerIds.contains(i)
-                        || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
-                playerHands[i].update(front);
+                playerHands[i].update(showHiddenInfo(gameState, i));
 
                 // Highlight active player
                 if (i == gameState.getCurrentPlayer()) {
@@ -260,14 +259,5 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 }
             }
         }
-    }
-
-
-    private String getRuleText() {
-        String rules = "<html><center><h1>Saboteur</h1></center><br/><hr><br/>";
-        rules += "<p>Rules.</p><br/>";
-        rules += "<hr><p><b>INTERFACE: </b> Find actions available at any time at the bottom of the screen. </p>";
-        rules += "</html>";
-        return rules;
     }
 }

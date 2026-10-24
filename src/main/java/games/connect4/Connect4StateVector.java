@@ -1,11 +1,9 @@
 package games.connect4;
 import core.AbstractGameState;
 import core.components.BoardNode;
-import core.components.Token;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateKey;
 
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class Connect4StateVector implements IStateFeatureVector, IStateKey {
@@ -19,16 +17,21 @@ public class Connect4StateVector implements IStateFeatureVector, IStateKey {
         Connect4GameState state = (Connect4GameState) gs;
         String playerChar = Connect4Constants.playerMapping.get(playerID).getComponentName();
 
-        return Arrays.stream(state.gridBoard.flattenGrid()).mapToDouble(c -> {
-            String pos = c.getComponentName();
-            if (pos.equals(playerChar)) {
-                return 1.0;
-            } else if (pos.equals(Connect4Constants.emptyCell)) {
-                return 0.0;
-            } else { // opponent's piece
-                return -1.0;
+        // row by row
+        double[] retValue = new double[state.getWidth() * state.getHeight()];
+        for (int y = 0; y < state.getHeight(); y++) {
+            for (int x = 0; x < state.getWidth(); x++) {
+                BoardNode c = state.getGridBoard().getElement(x, y);
+                if (c == null) {
+                    retValue[y * state.getWidth() + x] = 0.0;
+                } else if (c.getComponentName().equals(playerChar)) {
+                    retValue[y * state.getWidth() + x] = 1.0;
+                } else { // opponent's piece
+                    retValue[y * state.getWidth() + x] = -1.0;
+                }
             }
-        }).toArray();
+        }
+        return retValue;
     }
 
     @Override

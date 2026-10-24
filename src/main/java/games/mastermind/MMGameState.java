@@ -10,6 +10,7 @@ import java.util.*;
 public class MMGameState extends AbstractGameState {
 
     PartialObservableDeck<BoardNode> answerCode;
+    // the guess and result pegs, each row a turn; a square with no peg is empty
     GridBoard guessBoard;
     GridBoard resultBoard;
     int activeRow;
@@ -61,10 +62,11 @@ public class MMGameState extends AbstractGameState {
 
     private boolean satisfiesPreviousHints(PartialObservableDeck<BoardNode> answerCode) {
         MMParameters mmp = (MMParameters) getGameParameters();
-        for (int i = 0; i < activeRow - 1; i++) {
+        // every row before the active one has its results
+        for (int i = 0; i < activeRow; i++) {
             List<Integer> result = checkGuessAgainstAnswer(answerCode, i);
             for (int j = 0; j < mmp.boardWidth; j++) {
-                if (!MMConstants.resultColours.get(result.get(j)).getComponentName().equals(resultBoard.getElement(j, i).getComponentName())) {
+                if (!MMConstants.resultColours.get(result.get(j)).equals(resultBoard.getElement(j, i))) {
                     return false;
                 }
             }
@@ -80,10 +82,8 @@ public class MMGameState extends AbstractGameState {
         BoardNodeToScoreMap.put(MMConstants.resultColours.get(1), 1.0);
         BoardNodeToScoreMap.put(MMConstants.resultColours.get(2), 0.0);
 
-        List<BoardNode> resultsBoardNode = resultBoard.getComponents();
-
         double score = 0.0;
-        for (BoardNode BoardNode : resultsBoardNode) {
+        for (BoardNode BoardNode : resultBoard.asMap().values()) {
             score += BoardNodeToScoreMap.getOrDefault(BoardNode, 0.0);
         }
 

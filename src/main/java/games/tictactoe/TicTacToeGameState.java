@@ -5,7 +5,6 @@ import core.AbstractParameters;
 import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
-import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import games.GameType;
 
@@ -14,8 +13,9 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable {
 
+    // the x and o tokens of TicTacToeConstants.playerMapping; a square with none is empty
     GridBoard gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
@@ -86,14 +86,28 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
                 Objects.hash(gridBoard);
     }
 
-    @Override
     public GridBoard getGridBoard() {
         return gridBoard;
     }
 
+    /**
+     * The number of squares along each side of the board.
+     */
+    public int getGridSize() {
+        return gridBoard.getWidth();
+    }
+
     @Override
     public void printToConsole() {
-        System.out.println(gridBoard.toString());
+        StringBuilder sb = new StringBuilder();
+        for (int y = 0; y < getGridSize(); y++) {
+            for (int x = 0; x < getGridSize(); x++) {
+                BoardNode token = gridBoard.getElement(x, y);
+                sb.append(token == null ? TicTacToeConstants.emptyCell : token.getComponentName()).append(" ");
+            }
+            sb.append("\n");
+        }
+        System.out.print(sb);
     }
 
 }

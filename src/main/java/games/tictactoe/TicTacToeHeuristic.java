@@ -35,19 +35,19 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
         }
 
         // Count how many lines of player characters + rest empty, the more player characters the better
-        int[] nPlayer = new int[ttgs.gridBoard.getWidth()];
-        int[] nOpponent = new int[ttgs.gridBoard.getWidth()];
+        int[] nPlayer = new int[ttgs.getGridSize()];
+        int[] nOpponent = new int[ttgs.getGridSize()];
 
         double nTotalCount = nPlayer.length * 2 + 2;  // N rows + N columns + 2 diagonals
 
         BoardNode playerChar = TicTacToeConstants.playerMapping.get(playerId);
 
         // Check columns
-        for (int x = 0; x < ttgs.gridBoard.getWidth(); x++){
+        for (int x = 0; x < ttgs.getGridSize(); x++){
             addCounts(countColumns(ttgs, x, playerChar), nPlayer, nOpponent);
         }
         // Check rows
-        for (int y = 0; y < ttgs.gridBoard.getHeight(); y++){
+        for (int y = 0; y < ttgs.getGridSize(); y++){
             addCounts(countRows(ttgs, y, playerChar), nPlayer, nOpponent);
         }
         // Check diagonals
@@ -68,7 +68,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
 
     private Pair<Integer, Integer> countColumns(TicTacToeGameState ttgs, int column, BoardNode playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
-        for (int y = 0; y < ttgs.gridBoard.getHeight(); y++) {
+        for (int y = 0; y < ttgs.getGridSize(); y++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(column, y));
         }
         return count;
@@ -76,7 +76,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
 
     private Pair<Integer, Integer> countRows(TicTacToeGameState ttgs, int row, BoardNode playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
-        for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
+        for (int x = 0; x < ttgs.getGridSize(); x++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(x, row));
         }
         return count;
@@ -84,7 +84,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
 
     private Pair<Integer, Integer> countPrimaryDiagonal(TicTacToeGameState ttgs, BoardNode playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
-        for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
+        for (int x = 0; x < ttgs.getGridSize(); x++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(x, x));
         }
         return count;
@@ -92,16 +92,16 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
 
     private Pair<Integer, Integer> countSecondaryDiagonal(TicTacToeGameState ttgs, BoardNode playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
-        for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
-            checkChar(count, playerChar, ttgs.gridBoard.getElement(ttgs.gridBoard.getWidth()-1-x, x));
+        for (int x = 0; x < ttgs.getGridSize(); x++) {
+            checkChar(count, playerChar, ttgs.gridBoard.getElement(ttgs.getGridSize()-1-x, x));
         }
         return count;
     }
 
     private void checkChar(Pair<Integer, Integer> count, BoardNode playerChar, BoardNode c) {
-        if (c.equals(playerChar)) {
+        if (playerChar.equals(c)) {
             count.a ++;
-        } else if (!c.getComponentName().equals(" ")) {
+        } else if (c != null) {
             count.b ++;
         }
     }

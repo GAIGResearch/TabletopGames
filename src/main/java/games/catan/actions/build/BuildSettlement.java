@@ -3,6 +3,7 @@ package games.catan.actions.build;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
+import core.components.grid.HexCoord;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.Building;
@@ -15,15 +16,13 @@ import java.util.Objects;
 import static games.catan.stats.CatanMetrics.CatanEvent.PortSettle;
 
 public class BuildSettlement extends AbstractAction {
-    public final int x;
-    public final int y;
+    public final HexCoord hex;
     public final int vertex;
     public final int playerID;
     public final boolean free;
 
-    public BuildSettlement(int x, int y, int vertex, int playerID, boolean free){
-        this.x = x;
-        this.y = y;
+    public BuildSettlement(HexCoord hex, int vertex, int playerID, boolean free){
+        this.hex = hex;
         this.vertex = vertex;
         this.playerID = playerID;
         this.free = free;
@@ -32,10 +31,9 @@ public class BuildSettlement extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        CatanTile[][] board = cgs.getBoard();
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
-        Building settlement = cgs.getBuilding(board[x][y], vertex);
+        Building settlement = cgs.getBuilding(cgs.getTile(hex), vertex);
         if (settlement != null && settlement.getOwnerId() == -1) {
             if (!free) {
                 if (!cgs.spendResourcesIfPossible(cp.costMapping.get(BuyAction.BuyType.Settlement), playerID)) {
@@ -76,19 +74,19 @@ public class BuildSettlement extends AbstractAction {
     public boolean equals(Object other) {
         if (other instanceof BuildSettlement){
             BuildSettlement otherAction = (BuildSettlement)other;
-            return x == otherAction.x && y == otherAction.y && vertex == otherAction.vertex && playerID == otherAction.playerID && free == otherAction.free;
+            return hex.equals(otherAction.hex) && vertex == otherAction.vertex && playerID == otherAction.playerID && free == otherAction.free;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, vertex, playerID, free);
+        return Objects.hash(hex, vertex, playerID, free);
     }
 
     @Override
     public String toString() {
-        return "p" + playerID + " Buy:Settlement (x= " + x + " y= " + y + " vertex= " + vertex + ")";
+        return "p" + playerID + " Buy:Settlement (hex= " + hex + " vertex= " + vertex + ")";
     }
 
     @Override

@@ -3,7 +3,8 @@ package games.battlelore;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
-import core.components.GridBoard;
+import core.components.grid.HexCoord;
+import core.components.grid.SparseGrid;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.battlelore.components.MapTile;
@@ -29,7 +30,8 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     int[] playerScores;
-    GridBoard gameBoard;
+    // the tiles, by their hexes
+    SparseGrid<HexCoord, MapTile> gameBoard;
     List<Unit> unitTypes;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
@@ -62,9 +64,11 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public void AddUnit(int locX, int locY, Unit unit) {
-        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
+        MapTile tile = getTile(locX, locY);
         if (tile != null) {
-            tile.AddUnit(unit);
+            List<Unit> units = tile.GetUnits() == null ? new ArrayList<>() : new ArrayList<>(tile.GetUnits());
+            units.add(unit);
+            setTile(tile.withUnits(units));
         }
     }
 
@@ -73,25 +77,72 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public void SetUnitsAsOrderable(int locX, int locY) {
-        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
-        if (tile != null) {
-            tile.SetAsOrderable();
+        SetUnitOrders(getTile(locX, locY), true, true);
+    }
+
+    /**
+     * Replaces the units on the tile with ones that may or may not still move and attack.
+     */
+    public void SetUnitOrders(MapTile tile, boolean canMove, boolean canAttack) {
+        if (tile != null && tile.GetUnits() != null) {
+            List<Unit> units = new ArrayList<>();
+            for (Unit unit : tile.GetUnits()) {
+                units.add(unit.withOrders(canMove, canAttack));
+            }
+            setTile(tile.withUnits(units));
         }
     }
 
     public void RemoveUnit(int locX, int locY) {
-        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
-        if (tile != null) {
-            tile.RemoveUnit();
+        MapTile tile = getTile(locX, locY);
+        if (tile != null && tile.GetUnits() != null) {
+            List<Unit> units = new ArrayList<>(tile.GetUnits());
+            units.remove(units.size() - 1);
+            setTile(tile.withUnits(units));
         }
+    }
+
+    /**
+     * The tile at the offset position on the board, whose odd rows are shifted right; null if it is off the board.
+     */
+    public MapTile getTile(int locX, int locY) {
+        return gameBoard.get(HexCoord.fromOffset(locX, locY, HexCoord.Offset.ODD_R));
+    }
+
+    /**
+     * The tile with the componentID, as it now is.
+     */
+    public MapTile getTile(int componentID) {
+        // not getComponentById, which may hold an earlier version of the tile
+        for (MapTile tile : gameBoard.asMap().values()) {
+            if (tile.getComponentID() == componentID) {
+                return tile;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Puts the tile on the board, in place of the one at its position.
+     */
+    public void setTile(MapTile tile) {
+        gameBoard.set(tile.getHex(), tile);
+    }
+
+    public int getWidth() {
+        return ((BattleloreGameParameters) gameParameters).hexWidth;
+    }
+
+    public int getHeight() {
+        return ((BattleloreGameParameters) gameParameters).hexHeight;
     }
 
     public ArrayList<MapTile> GetMoveableUnitsFromTile(Unit.Faction faction) {
         ArrayList<MapTile> tiles = new ArrayList<MapTile>();
 
-        for (int x = 0; x < gameBoard.getWidth(); x++) {
-            for (int y = 0; y < gameBoard.getHeight(); y++) {
-                MapTile tile = (MapTile) gameBoard.getElement(x, y);
+        for (int x = 0; x < getWidth(); x++) {
+            for (int y = 0; y < getHeight(); y++) {
+                MapTile tile = getTile(x, y);
                 if (tile.GetUnits() != null && tile.GetFaction() == faction &&
                         tile.GetUnits().get(0).CanMove()) {
                     tiles.add(tile);
@@ -103,9 +154,9 @@ public class BattleloreGameState extends AbstractGameState {
 
     public ArrayList<MapTile> GetReadyForAttackUnitsFromTile(Unit.Faction faction) {
         ArrayList<MapTile> tiles = new ArrayList<MapTile>();
-        for (int x = 0; x < gameBoard.getWidth(); x++) {
-            for (int y = 0; y < gameBoard.getHeight(); y++) {
-                MapTile tile = (MapTile) gameBoard.getElement(x, y);
+        for (int x = 0; x < getWidth(); x++) {
+            for (int y = 0; y < getHeight(); y++) {
+                MapTile tile = getTile(x, y);
                 if (tile.GetUnits() != null && tile.GetFaction() == faction &&
                         tile.GetUnits().get(0).CanAttack()) {
                     tiles.add(tile);
@@ -115,64 +166,55 @@ public class BattleloreGameState extends AbstractGameState {
         return tiles;
     }
 
-    public int[][] GetPossibleLocationsForUnits(MapTile tile) {
-        int[][] possibleLocations = new int[gameBoard.getWidth()][2];
-        GetPossibleLocations(tile, possibleLocations, false);
-        if (possibleLocations.length == 0) {
-            GetPossibleLocations(tile, possibleLocations, true);
+    /**
+     * The empty tiles the units on the tile can move to.
+     */
+    public List<MapTile> GetPossibleLocationsForUnits(MapTile tile) {
+        // within their move range, or anywhere if no tile in range is empty
+        List<MapTile> possibleLocations = GetPossibleLocations(tile, false);
+        if (possibleLocations.isEmpty()) {
+            possibleLocations = GetPossibleLocations(tile, true);
         }
         return possibleLocations;
     }
 
-    private void GetPossibleLocations(MapTile tile, int[][] possibleLocations, boolean isMovementFlexible) {
+    private List<MapTile> GetPossibleLocations(MapTile tile, boolean isMovementFlexible) {
         int moveRange = tile.GetUnits().get(0).moveRange;
-        int counter = 0;
-        for (int x = 0; x < gameBoard.getWidth(); x++) {
-            for (int y = 0; y < gameBoard.getHeight(); y++) {
-                possibleLocations[x][0] = -1;
-                possibleLocations[x][1] = -1;
-
-                MapTile possibleTile = (MapTile) gameBoard.getElement(x, y);
-                if (possibleTile.GetUnits() == null) {
-                    double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - tile.getLocationX()), 2) +
-                            Math.pow(Math.abs(possibleTile.getLocationY() - tile.getLocationY()), 2));
-                    if (distance <= moveRange || isMovementFlexible) {
-                        possibleLocations[counter][0] = possibleTile.getLocationX();
-                        possibleLocations[counter][1] = possibleTile.getLocationY();
-                        counter++;
-                    }
+        List<MapTile> possibleLocations = new ArrayList<>();
+        for (int x = 0; x < getWidth(); x++) {
+            for (int y = 0; y < getHeight(); y++) {
+                MapTile possibleTile = getTile(x, y);
+                if (possibleTile.GetUnits() == null
+                        && (possibleTile.getHex().distance(tile.getHex()) <= moveRange || isMovementFlexible)) {
+                    possibleLocations.add(possibleTile);
                 }
             }
         }
+        return possibleLocations;
     }
 
-    public int[][] GetPossibleTargetUnits(MapTile attackUnit) {
-        int[][] possibleLocations = new int[gameBoard.getWidth()][nPlayers];
+    /**
+     * The tiles with enemy units within range of the units on the tile.
+     */
+    public List<MapTile> GetPossibleTargetUnits(MapTile attackUnit) {
         boolean isMelee = attackUnit.GetUnits().get(0).isMelee;
         BattleloreGameParameters parameters = (BattleloreGameParameters) gameParameters;
         int range = parameters.getTroopRange(isMelee);
-        int counter = 0;
+        List<MapTile> possibleLocations = new ArrayList<>();
 
-        for (int x = 0; x < gameBoard.getWidth(); x++) {
-            for (int y = 0; y < gameBoard.getHeight(); y++) {
-                possibleLocations[x][0] = -1;
-                possibleLocations[x][1] = -1;
-                MapTile possibleTile = (MapTile) gameBoard.getElement(x, y);
-                if (possibleTile.GetUnits() != null && possibleTile.GetFaction() != attackUnit.GetFaction()) {
-                    double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - attackUnit.getLocationX()), 2) +
-                            Math.pow(Math.abs(possibleTile.getLocationY() - attackUnit.getLocationY()), 2));
-                    if (distance <= range) {
-                        possibleLocations[counter][0] = possibleTile.getLocationX();
-                        possibleLocations[counter][1] = possibleTile.getLocationY();
-                        counter++;
-                    }
+        for (int x = 0; x < getWidth(); x++) {
+            for (int y = 0; y < getHeight(); y++) {
+                MapTile possibleTile = getTile(x, y);
+                if (possibleTile.GetUnits() != null && possibleTile.GetFaction() != attackUnit.GetFaction()
+                        && possibleTile.getHex().distance(attackUnit.getHex()) <= range) {
+                    possibleLocations.add(possibleTile);
                 }
             }
         }
         return possibleLocations;
     }
 
-    public GridBoard getBoard() {
+    public SparseGrid<HexCoord, MapTile> getBoard() {
         return gameBoard;
     }
 
@@ -186,12 +228,6 @@ public class BattleloreGameState extends AbstractGameState {
         BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
 
         state.gameBoard = gameBoard.copy();
-
-        for (int x = 0; x < gameBoard.getWidth(); x++) {
-            for(int y = 0; y < gameBoard.getHeight(); y++) {
-                state.gameBoard.setElement(x, y, gameBoard.getElement(x,y).copy());
-            }
-        }
         state.unitTypes = unitTypes; // immutable
         System.arraycopy(playerScores, 0, state.playerScores, 0, playerScores.length);
 
@@ -221,7 +257,6 @@ public class BattleloreGameState extends AbstractGameState {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BattleloreGameState that)) return false;
-        if (!super.equals(o)) return false;
         return Arrays.equals(playerScores, that.playerScores) && Objects.equals(gameBoard, that.gameBoard) && Objects.equals(unitTypes, that.unitTypes);
     }
 

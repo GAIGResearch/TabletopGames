@@ -1,5 +1,6 @@
 package games.terraformingmars.gui;
 
+import gui.GUIMessages;
 import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -63,6 +64,8 @@ public class TMGUI extends AbstractGUIManager {
 
     public TMGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
+        // start on a human player's own cards
+        focusPlayer = humanPlayerIds.stream().min(Integer::compare).orElse(0);
         if (game == null) return;
 
         // Make backgroundImage the content pane.
@@ -225,7 +228,7 @@ public class TMGUI extends AbstractGUIManager {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(fontColor);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null, null, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false, null, null, null);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
@@ -444,7 +447,7 @@ public class TMGUI extends AbstractGUIManager {
                         if (a instanceof PlaceTile) {
                             TMAction fullLegalAction = getFullLegalAction(a, legalActions);
 
-                            TMMapTile mt = (TMMapTile) gs.getComponentById(((PlaceTile) a).mapTileID);
+                            TMMapTile mt = gs.getMapTile(((PlaceTile) a).mapTileID);
                             if (mt != null && code.contains("grid")) {
                                 // a grid location, trim actions to place tile here
                                 int x = Integer.parseInt(code.split("-")[1]);
@@ -528,14 +531,16 @@ public class TMGUI extends AbstractGUIManager {
                             + "</td><td>" + board + "</td><td>" + cards + "</td><td>" + total + "</td></tr>";
                 }
                 displayText += "</table><hr>Winner(s): " + win + "</html>";
-                JOptionPane.showConfirmDialog(parent, displayText, "Terraforming Mars: Game Over", OK_CANCEL_OPTION, INFORMATION_MESSAGE);
+                GUIMessages.showConfirm(parent, displayText, "Terraforming Mars: Game Over", OK_CANCEL_OPTION, INFORMATION_MESSAGE);
             }
 
             if (player instanceof HumanGUIPlayer) {
-                TMAction action = (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1).b;
-                if (!action.equals(lastAction) || gs.getGameTick() != lastTick) {
+                // no action yet when a human player moves first
+                TMAction action = gameState.getHistory().isEmpty() ? null
+                        : (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1).b;
+                if (!Objects.equals(action, lastAction) || gs.getGameTick() != lastTick) {
                     createActionMenu(player, (TMGameState) gameState);
-                    this.lastAction = action.copy();
+                    this.lastAction = action == null ? null : action.copy();
                     this.lastTick = gs.getGameTick();
                 }
             } else {
@@ -551,10 +556,17 @@ public class TMGUI extends AbstractGUIManager {
 
             view.update(gs);
             playerView.update(gs);
-            playerHand.update(gs.getPlayerHands()[focusPlayer], false);
+            // another player's hand and card choice are hidden (shown as a count) unless allowed
+            boolean showHand = showHiddenInfo(gs, focusPlayer);
+            Deck<TMCard> hand = gs.getPlayerHands()[focusPlayer];
             Deck<TMCard> deck = gs.getPlayerCardChoice()[focusPlayer];
+            playerHand.update(showHand ? hand : hiddenDeck(), false);
+            paneHand.setToolTipText(showHand ? null : "Player " + focusPlayer + "'s hand is hidden: " + hand.getSize() + " cards");
             playerCardChoice.clearHighlights();
-            playerCardChoice.update(deck, gs.allCorpChosen() && deck.getSize() > 0);
+            playerCardChoice.update(showHand ? deck : hiddenDeck(), showHand && gs.allCorpChosen() && deck.getSize() > 0);
+            paneCardChoice.setToolTipText(showHand ? null : "Player " + focusPlayer + "'s card choice is hidden: " + deck.getSize() + " cards");
+            focusPlayerButton.setText("Current player: " + currentPlayerIdx
+                    + (showHand ? "" : "  (p" + focusPlayer + " hand hidden: " + hand.getSize() + " cards)"));
 
             // Display points and resource cards, + most recent card played
             if (gs.getPlayedCards()[focusPlayer].getSize() > 0) {
@@ -569,6 +581,10 @@ public class TMGUI extends AbstractGUIManager {
 
         }
         parent.repaint();
+    }
+
+    private static Deck<TMCard> hiddenDeck() {
+        return new Deck<>("Hidden", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
     }
 
     private Image getScaledImage(Image srcImg, int w, int h){

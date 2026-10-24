@@ -23,11 +23,11 @@ public class BattleloreGUI extends AbstractGUIManager {
         }
 
         BattleloreGameState gameState = (BattleloreGameState) game.getGameState();
-        view = new BattleloreBoardView(gameState.getBoard());
+        view = new BattleloreBoardView(gameState.getBoard(), gameState.getWidth(), gameState.getHeight());
 
         // Set width/height of display
-        this.width = Math.max(defaultDisplayWidth, defaultItemSize *  gameState.getBoard().getWidth() * 2);
-        this.height = defaultItemSize * gameState.getBoard().getHeight() * 2;
+        this.width = Math.max(defaultDisplayWidth, defaultItemSize *  gameState.getWidth() * 2);
+        this.height = defaultItemSize * gameState.getHeight() * 2;
 
 
         JPanel infoPanel = createGameStateInfoPanel("Battlelore", gameState, width, defaultInfoPanelHeight);

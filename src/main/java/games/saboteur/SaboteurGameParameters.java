@@ -67,17 +67,17 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
 
         pathCardDeck.put(new Pair<>(edge, new boolean[]{false, true, false, false}), 1);
         pathCardDeck.put(new Pair<>(edge, new boolean[]{false, false, true, false}), 1);
-        pathCardDeck.put(new Pair<>(edge, new boolean[]{true, true, false, false}), 1);
-        pathCardDeck.put(new Pair<>(edge, new boolean[]{false, false, true, true}), 1);
         pathCardDeck.put(new Pair<>(edge, new boolean[]{false, true, false, true}), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{true, false, true, false}), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{true, true, false, false}), 1);
         pathCardDeck.put(new Pair<>(edge, new boolean[]{false, true, true, false}), 1);
         pathCardDeck.put(new Pair<>(edge, new boolean[]{true, true, false, true}), 1);
         pathCardDeck.put(new Pair<>(edge, new boolean[]{true, false, true, true}), 1);
         pathCardDeck.put(new Pair<>(edge, new boolean[]{true, true, true, true}), 1);
 
-        pathCardDeck.put(new Pair<>(path, new boolean[]{true, true, false, false}), 4);
-        pathCardDeck.put(new Pair<>(path, new boolean[]{false, false, true, true}), 3);
         pathCardDeck.put(new Pair<>(path, new boolean[]{false, true, false, true}), 4);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{true, false, true, false}), 3);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{true, true, false, false}), 4);
         pathCardDeck.put(new Pair<>(path, new boolean[]{false, true, true, false}), 5);
         pathCardDeck.put(new Pair<>(path, new boolean[]{true, true, false, true}), 5);
         pathCardDeck.put(new Pair<>(path, new boolean[]{true, false, true, true}), 5);
@@ -95,6 +95,16 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
 
     }
 
+
+    public int boardWidth() {
+        // the start, the goals goalSpacingX to its right, and horizontalPadding beyond each
+        return goalSpacingX + 2 + horizontalPadding * 2;
+    }
+
+    public int boardHeight() {
+        // the goals with goalSpacingY between them, and verticalPadding above and below
+        return (goalSpacingY + 1) * nGoals + verticalPadding * 2;
+    }
 
     @Override
     public void _reset() {

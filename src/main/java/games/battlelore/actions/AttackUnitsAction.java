@@ -11,6 +11,7 @@ import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -37,10 +38,10 @@ public class AttackUnitsAction extends AbstractAction {
             return false;
         }
         else {
-            MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
-            MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
-            ArrayList<Unit> attackerUnits = ((MapTile)state.getBoard().getElement(attacker.getLocationX(), attacker.getLocationY())).GetUnits();
-            ArrayList<Unit> defenderUnits = ((MapTile)state.getBoard().getElement(defender.getLocationX(), defender.getLocationY())).GetUnits();
+            MapTile attacker = state.getTile(attackingUnitsTileID);
+            MapTile defender = state.getTile(targetTileID);
+            List<Unit> attackerUnits = attacker.GetUnits();
+            List<Unit> defenderUnits = new ArrayList<>(defender.GetUnits());
 
             //COMBAT SEQUENCE: Roll a dice
             int defeatedEnemyCount = 0;
@@ -65,26 +66,24 @@ public class AttackUnitsAction extends AbstractAction {
                     state.AddScore(playerID, 1);
                 }
             }
-            if (defenderUnits.isEmpty()) {
-                state.RemoveUnit(defender.getLocationX(), defender.getLocationY());
-            }
-            else {
-                ((MapTile)state.getBoard().getElement(defender.getLocationX(), defender.getLocationY())).SetUnits(defenderUnits);
-            }
+            state.setTile(defender.withUnits(defenderUnits));
 
+            // the attackers have used their attack
+            List<Unit> attacked = new ArrayList<>();
             for (Unit unit : attackerUnits) {
-                unit.SetCanAttack(false);
+                attacked.add(unit.withOrders(unit.CanMove(), false));
             }
+            state.setTile(attacker.withUnits(attacked));
             return true;
         }
     }
 
     public MapTile GetAttacker(AbstractGameState gameState) {
-        return (MapTile) gameState.getComponentById(attackingUnitsTileID);
+        return ((BattleloreGameState) gameState).getTile(attackingUnitsTileID);
     }
 
     public MapTile GetDefender(AbstractGameState gameState) {
-        return (MapTile) gameState.getComponentById(targetTileID);
+        return ((BattleloreGameState) gameState).getTile(targetTileID);
     }
 
     public Unit.Faction GetFaction() {
@@ -114,8 +113,8 @@ public class AttackUnitsAction extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
-        MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
+        MapTile attacker = GetAttacker(gameState);
+        MapTile defender = GetDefender(gameState);
         return playerFaction.name() + " units in " + attacker.getLocationX() + ":" +
                 attacker.getLocationY() + " attacks to " + defender.getLocationX()+ ":" + defender.getLocationY();
     }

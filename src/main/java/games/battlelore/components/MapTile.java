@@ -1,14 +1,19 @@
 package games.battlelore.components;
 
 import core.components.BoardNode;
+import core.components.grid.HexCoord;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+/**
+ * A hex of the board and the units on it. Immutable, as the values of a SparseGrid must be: when the units change,
+ * the tile is replaced on the board by a new one with the same componentID.
+ */
 public class MapTile extends BoardNode {
 
-    protected int locationX, locationY;
-    private ArrayList<Unit> units;
+    protected final int locationX, locationY;
+    private final List<Unit> units;
 
     public enum TileArea {
         NA, left, mid, right;
@@ -22,32 +27,32 @@ public class MapTile extends BoardNode {
         return locationY;
     }
 
-    public MapTile(int locationX, int locationY, ArrayList<Unit> units) {
+    /**
+     * The hex of the tile on the board, whose odd rows are shifted right.
+     */
+    public HexCoord getHex() {
+        return HexCoord.fromOffset(locationX, locationY, HexCoord.Offset.ODD_R);
+    }
+
+    public MapTile(int locationX, int locationY, List<Unit> units) {
         super(-1, "MapTile");
         this.locationX = locationX;
         this.locationY = locationY;
-        this.units = units;
+        this.units = List.copyOf(units);
     }
 
-
-    public MapTile() {
-        super(-1, "MapTile");
-        this.locationX = -1;
-        this.locationY = -1;
-        this.units = new ArrayList<Unit>();
-    }
-
-    //Used by copy constructor only
-    private MapTile(int componentID, int locationX, int locationY, ArrayList<Unit> units) {
+    private MapTile(int componentID, int locationX, int locationY, List<Unit> units) {
         super(-1, "MapTile", componentID);
         this.locationX = locationX;
         this.locationY = locationY;
-        this.units = units;
+        this.units = List.copyOf(units);
     }
 
-    public Boolean SetUnits(ArrayList<Unit> newUnits) {
-            units = newUnits;
-            return true;
+    /**
+     * This tile with the units on it.
+     */
+    public MapTile withUnits(List<Unit> newUnits) {
+        return new MapTile(componentID, locationX, locationY, newUnits);
     }
 
     public Unit.Faction GetFaction() {
@@ -70,26 +75,10 @@ public class MapTile extends BoardNode {
         }
     }
 
-    public void AddUnit(Unit unit) {
-            units.add(unit);
-    }
-
-    public void SetAsOrderable() {
-        if (!units.isEmpty()) {
-            for (Unit unit : units) {
-                unit.SetCanMove(true);
-                unit.SetCanAttack(true);
-            }
-        }
-    }
-
-    public void RemoveUnit() {
-        if (!units.isEmpty()) {
-            units.remove(units.size()-1);
-        }
-    }
-
-    public ArrayList<Unit> GetUnits() {
+    /**
+     * The units on the tile, or null if there are none.
+     */
+    public List<Unit> GetUnits() {
         if (!units.isEmpty()) {
             return units;
         }
@@ -120,13 +109,7 @@ public class MapTile extends BoardNode {
 
     @Override
     public MapTile copy() {
-        ArrayList<Unit> clonedUnits = new ArrayList<>();
-        for (Unit i : units) {
-            clonedUnits.add((Unit)i.copy());
-        }
-
-        MapTile copy = new MapTile(componentID, locationX, locationY, clonedUnits);
-        return copy;
+        return this;
     }
 
     @Override
@@ -138,7 +121,7 @@ public class MapTile extends BoardNode {
         return ownerId == mapTile.ownerId
                 && locationX == mapTile.locationX
                 && locationY == mapTile.locationY
-                && units == mapTile.units
+                && units.equals(mapTile.units)
                 && type == mapTile.type
                 && componentID == mapTile.componentID;
     }

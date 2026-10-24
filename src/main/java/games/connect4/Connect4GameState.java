@@ -5,8 +5,6 @@ import core.AbstractParameters;
 import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
-import core.components.Token;
-import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.interfaces.IToJSON;
 import evaluation.optimisation.TunableParameters;
@@ -19,8 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState, IToJSON {
+public class Connect4GameState extends AbstractGameState implements IPrintable, IToJSON {
 
+    // the x and o tokens of Connect4Constants.playerMapping; a square with none is empty. y is 0 at the top
     GridBoard gridBoard;
     LinkedList<Pair<Integer, Integer>> winnerCells;
 
@@ -107,13 +106,14 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
         StringBuilder sb = new StringBuilder();
         sb.append("{");
 
-        for (int y = 0; y < gridBoard.getHeight(); y++) {
-            for (int x = 0; x < gridBoard.getWidth(); x++) {
+        for (int y = 0; y < getHeight(); y++) {
+            for (int x = 0; x < getWidth(); x++) {
                 if (y != 0 || x != 0) {
                     sb.append(",");
                 }
                 BoardNode t = gridBoard.getElement(x, y);
-                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"").append(t.getComponentName()).append("\"");
+                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"")
+                        .append(t == null ? Connect4Constants.emptyCell : t.getComponentName()).append("\"");
             }
         }
 
@@ -126,14 +126,29 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
         return Objects.hash(super.hashCode(), gridBoard);
     }
 
-    @Override
     public GridBoard getGridBoard() {
         return gridBoard;
     }
 
+    public int getWidth() {
+        return gridBoard.getWidth();
+    }
+
+    public int getHeight() {
+        return gridBoard.getHeight();
+    }
+
     @Override
     public void printToConsole() {
-        System.out.println(gridBoard.toString());
+        StringBuilder sb = new StringBuilder();
+        for (int y = 0; y < getHeight(); y++) {
+            for (int x = 0; x < getWidth(); x++) {
+                BoardNode t = gridBoard.getElement(x, y);
+                sb.append(t == null ? Connect4Constants.emptyCell : t.getComponentName()).append(" ");
+            }
+            sb.append(System.lineSeparator());
+        }
+        System.out.print(sb);
     }
 
     void registerWinningCells(LinkedList<Pair<Integer, Integer>> winnerCells) {

@@ -1,6 +1,7 @@
 package games.stratego.gui;
 
 import core.components.GridBoard;
+import games.stratego.StrategoParams;
 import games.stratego.StrategoConstants;
 import games.stratego.StrategoGameState;
 import games.stratego.components.Piece;
@@ -20,11 +21,13 @@ public class StrategoBoardView extends ComponentView {
     ArrayList<Rectangle> highlight;
     StrategoGameState gs;
     HashSet<Integer> humanPlayerID;
+    final int gridSize;
 
     public StrategoBoardView(StrategoGameState gs) {
-        super(gs.getGridBoard(), gs.getGridBoard().getWidth() * defaultItemSize,
-                gs.getGridBoard().getHeight() * defaultItemSize);
-        rects = new Rectangle[gs.getGridBoard().getWidth() * gs.getGridBoard().getHeight()];
+        super(gs.getGridBoard(), ((StrategoParams) gs.getGameParameters()).gridSize * defaultItemSize,
+                ((StrategoParams) gs.getGameParameters()).gridSize * defaultItemSize);
+        gridSize = ((StrategoParams) gs.getGameParameters()).gridSize;
+        rects = new Rectangle[gridSize * gridSize];
         highlight = new ArrayList<>();
         this.gs = gs;
         humanPlayerID = new HashSet<>();
@@ -50,7 +53,9 @@ public class StrategoBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
+        @SuppressWarnings("unchecked")
+        GridBoard gridBoard = (GridBoard) component;
+        drawGridBoard((Graphics2D)g, gridBoard, 0, 0);
 
         if (highlight.size() > 0) {
             g.setColor(Color.green);
@@ -65,8 +70,8 @@ public class StrategoBoardView extends ComponentView {
     }
 
     public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
-        int width = gridBoard.getWidth() * defaultItemSize;
-        int height = gridBoard.getHeight() * defaultItemSize;
+        int width = gridSize * defaultItemSize;
+        int height = gridSize * defaultItemSize;
 
         // Draw background
         g.setColor(Color.lightGray);
@@ -74,14 +79,14 @@ public class StrategoBoardView extends ComponentView {
         g.setColor(Color.black);
 
         // Draw cells
-        for (int i = 0; i < gridBoard.getHeight(); i++) {
-            for (int j = 0; j < gridBoard.getWidth(); j++) {
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + i * defaultItemSize;
                 drawCell(g, (Piece) gridBoard.getElement(j, i), xC, yC);
 
                 // Save rect where cell is drawn
-                int idx = i * gridBoard.getWidth() + j;
+                int idx = i * gridSize + j;
                 if (rects[idx] == null) {
                     rects[idx] = new Rectangle(xC, yC, defaultItemSize, defaultItemSize);
                 }

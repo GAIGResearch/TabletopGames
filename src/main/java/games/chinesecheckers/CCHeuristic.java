@@ -5,10 +5,9 @@ import core.AbstractParameters;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
-import games.chinesecheckers.components.CCNode;
 import games.chinesecheckers.components.Peg;
+import games.chinesecheckers.components.StarBoard;
 
-import java.util.List;
 
 public class CCHeuristic extends TunableParameters implements IStateHeuristic {
 
@@ -39,15 +38,16 @@ public class CCHeuristic extends TunableParameters implements IStateHeuristic {
 
 
         double score = 0;
-        List<CCNode> nodes = state.getStarBoard().getBoardNodes();
-        for (CCNode node : nodes) {
-            if (node.isNodeOccupied() && node.getOccupiedPeg().getColour() == playercolour) {
-                if (node.getBaseColour() == playercolour)
+        StarBoard board = state.getStarBoard();
+        for (int node = 0; node < board.nNodes(); node++) {
+            Peg peg = board.getPeg(node);
+            if (peg != null && peg.colour() == playercolour) {
+                if (board.getBaseColour(node) == playercolour)
                     score += 1.0;
-                else if (node.getBaseColour() == oppositeColour)
+                else if (board.getBaseColour(node) == oppositeColour)
                     score -= 1.0;
                 else {
-                    int distanceToTarget = state.starBoard.distanceBetween(node.getID(), referenceNode);
+                    int distanceToTarget = board.distanceBetween(node, referenceNode);
                     score += (Math.max(0, 10 - distanceToTarget)) / 10.0; // closer to target node gives more points
                 }
             }

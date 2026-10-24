@@ -52,8 +52,10 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
             } else if (action instanceof Forecast) {
                 pgs.setGamePhase(PandemicGameState.PandemicGamePhase.Forecast);
             } else if (action instanceof MovePlayer) {
-                // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
-                Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
+                // if the player moved is the Medic (by any player) and a disease has been cured, then it should
+                // remove all cubes when entering the city
+                Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash,
+                        ((MovePlayer) action).getPlayerToMove());
                 String roleString = ((PropertyString) playerCard.getProperty(nameHash)).value;
 
                 if (roleString.equals("Medic")) {

@@ -3,7 +3,7 @@ package games.battlelore;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import core.components.GridBoard;
+import core.components.grid.SparseGrid;
 import games.battlelore.actions.AttackUnitsAction;
 import games.battlelore.actions.MoveUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
@@ -34,14 +34,14 @@ public class BattleloreForwardModel extends StandardForwardModel {
         int hexWidth = gameParams.hexWidth;
 
         //Game Area Initialization
-        gameState.gameBoard = new GridBoard(hexWidth, hexHeight);
+        gameState.gameBoard = new SparseGrid<>("Battlelore Board");
         gameState.unitTypes = new ArrayList<>();
         gameState.unitTypes = _data.getUnits();
         gameState.playerScores = new int[gameState.getNPlayers()];
 
-        for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
-            for (int y = 0; y < gameState.gameBoard.getHeight(); y++) {
-                gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<>()));
+        for (int x = 0; x < hexWidth; x++) {
+            for (int y = 0; y < hexHeight; y++) {
+                gameState.setTile(new MapTile(x, y, new ArrayList<>()));
             }
         }
 
@@ -127,16 +127,11 @@ public class BattleloreForwardModel extends StandardForwardModel {
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep) {
             List<MapTile> moveableUnitTiles = state.GetMoveableUnitsFromTile(playerFaction);
-            int[][] possibleLocations;
 
             if (!moveableUnitTiles.isEmpty()) {
                 for (MapTile tile : moveableUnitTiles) {
-                    possibleLocations = state.GetPossibleLocationsForUnits(tile);
-                    //check possible locations size
-                    for (int i = 0; i < state.getBoard().getWidth(); i++) {
-                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
-                            actions.add(new MoveUnitsAction(tile.getComponentID(), playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
-                        }
+                    for (MapTile to : state.GetPossibleLocationsForUnits(tile)) {
+                        actions.add(new MoveUnitsAction(tile.getComponentID(), playerFaction, to.getLocationX(), to.getLocationY(), player));
                     }
                     if (actions.isEmpty()) {
                         actions.add(new SkipTurnAction(tile.getComponentID(), playerFaction, true, false, player));
@@ -147,17 +142,12 @@ public class BattleloreForwardModel extends StandardForwardModel {
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.AttackStep) {
             ArrayList<MapTile> readyToAttackUnits = state.GetReadyForAttackUnitsFromTile(playerFaction);
-            int[][] possibleLocations;
 
             if (!readyToAttackUnits.isEmpty()) {
                 for (MapTile attacker : readyToAttackUnits) {
-                    possibleLocations = state.GetPossibleTargetUnits(attacker);
-
-                    for (int i = 0; i < state.getBoard().getWidth(); i++) {
-                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
-                            actions.add(new AttackUnitsAction(attacker.getComponentID(), state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]).getComponentID(),
-                                    attacker.GetFaction(), player));
-                        }
+                    for (MapTile target : state.GetPossibleTargetUnits(attacker)) {
+                        actions.add(new AttackUnitsAction(attacker.getComponentID(), target.getComponentID(),
+                                attacker.GetFaction(), player));
                     }
                     if (actions.isEmpty()) {
                         actions.add(new SkipTurnAction(attacker.getComponentID(), playerFaction, false, true, player));
@@ -176,9 +166,9 @@ public class BattleloreForwardModel extends StandardForwardModel {
         boolean allyUnitsRemainInArea = false;
         boolean enemyUnitsRemainInArea = false;
 
-        for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
-            for (int y = 0; y < gameState.gameBoard.getHeight(); y++) {
-                MapTile tile = (MapTile) gameState.gameBoard.getElement(x, y);
+        for (int x = 0; x < gameState.getWidth(); x++) {
+            for (int y = 0; y < gameState.getHeight(); y++) {
+                MapTile tile = gameState.getTile(x, y);
                 Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
                 if (tile != null && tile.GetUnits() != null && tile.GetUnits().size() > 0 && tile.IsInArea(area)) {

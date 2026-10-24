@@ -1,0 +1,7 @@
+{
+  "label": "MCTS, 1 s per decision",
+  "default": true,
+  "class": "players.mcts.MCTSParams",
+  "budgetType": "BUDGET_TIME",
+  "budget": 1000
+}

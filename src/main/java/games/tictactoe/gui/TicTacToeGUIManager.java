@@ -28,15 +28,15 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
         if (game == null) return;
 
         TicTacToeGameState gameState = (TicTacToeGameState) game.getGameState();
-        view = new TTTBoardView(gameState.getGridBoard());
+        view = new TTTBoardView(gameState.getGridBoard(), gameState.getGridSize());
 
         // Set width/height of display
-        this.width = Math.max(defaultDisplayWidth, defaultItemSize * gameState.getGridBoard().getWidth());
-        this.height = defaultItemSize * gameState.getGridBoard().getHeight();
+        this.width = Math.max(defaultDisplayWidth, defaultItemSize * gameState.getGridSize());
+        this.height = defaultItemSize * gameState.getGridSize();
 
         JPanel infoPanel = createGameStateInfoPanel("Tic Tac Toe", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
-                width, defaultActionPanelHeight, true);
+                width, defaultActionPanelHeight);
 
         parent.setLayout(new BorderLayout());
         parent.add(view, BorderLayout.CENTER);

@@ -3,8 +3,11 @@ package games.terraformingmars;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
+import core.components.grid.HexCoord;
+import core.components.grid.SparseGrid;
 import core.interfaces.IGamePhase;
 import games.GameType;
+import games.terraformingmars.actions.ModifyGlobalParameter;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.*;
@@ -36,8 +39,10 @@ public class TMGameState extends AbstractGameState {
     // Each turn a player takes up to TMGameParameters.nActionsPerPlayer actions, until all players have passed
     int nActionsTaken, nPassed;
     boolean[] passed;
-    GridBoard board;
-    HashSet<TMMapTile> extraTiles;
+    // the spaces on Mars, by their hexes, the odd rows shifted right
+    SparseGrid<HexCoord, TMMapTile> board;
+    // the spaces off Mars
+    List<TMMapTile> extraTiles;
     HashMap<TMTypes.GlobalParameter, GlobalParameter> globalParameters;
     HashSet<Bonus> bonuses;
     Deck<TMCard> projectCards, corpCards, discardCards;  // Face-down decks
@@ -123,20 +128,8 @@ public class TMGameState extends AbstractGameState {
         copy.nActionsTaken = nActionsTaken;
         copy.nPassed = nPassed;
         copy.passed = passed.clone();
-        copy.board = board.emptyCopy();  // Deep copy of board
-        for (int i = 0; i < board.getHeight(); i++) {
-            for (int j = 0; j < board.getWidth(); j++) {
-                if (board.getElement(j, i) != null) {
-                    copy.board.setElement(j, i, board.getElement(j, i).copy());
-                } else {
-                    copy.board.setElement(j, i, null);
-                }
-            }
-        }
-        copy.extraTiles = new LinkedHashSet<>();
-        for (TMMapTile mt : extraTiles) {
-            copy.extraTiles.add(mt.copy());
-        }
+        copy.board = board.copy();
+        copy.extraTiles = new ArrayList<>(extraTiles);
         copy.globalParameters = new LinkedHashMap<>();
         for (TMTypes.GlobalParameter p : globalParameters.keySet()) {
             copy.globalParameters.put(p, globalParameters.get(p).copy());
@@ -449,8 +442,88 @@ public class TMGameState extends AbstractGameState {
         return playerResources;
     }
 
-    public GridBoard getBoard() {
+    public SparseGrid<HexCoord, TMMapTile> getBoard() {
         return board;
+    }
+
+    /**
+     * The number of rows of the map, and of spaces in its longest rows.
+     */
+    public int getBoardSize() {
+        return ((TMGameParameters) gameParameters).getBoardSize();
+    }
+
+    /**
+     * The space on Mars at the offset position, the odd rows shifted right; null if there is none.
+     */
+    public TMMapTile getTile(int x, int y) {
+        return board.get(HexCoord.fromOffset(x, y, HexCoord.Offset.ODD_R));
+    }
+
+    /**
+     * The space, on Mars or off it, with the componentID, as it now is.
+     */
+    public TMMapTile getMapTile(int componentID) {
+        // not getComponentById, which may hold an earlier version of the space
+        for (TMMapTile mt : board.asMap().values()) {
+            if (mt.getComponentID() == componentID) return mt;
+        }
+        for (TMMapTile mt : extraTiles) {
+            if (mt.getComponentID() == componentID) return mt;
+        }
+        return null;
+    }
+
+    /**
+     * Puts the space in place of the one with its componentID.
+     */
+    public void setMapTile(TMMapTile mt) {
+        if (mt.getX() >= 0) {
+            board.set(HexCoord.fromOffset(mt.getX(), mt.getY(), HexCoord.Offset.ODD_R), mt);
+        } else {
+            for (int i = 0; i < extraTiles.size(); i++) {
+                if (extraTiles.get(i).getComponentID() == mt.getComponentID()) {
+                    extraTiles.set(i, mt);
+                }
+            }
+        }
+    }
+
+    /**
+     * Places the tile on the space for the current player, who gains the resources printed there, and owns the tile
+     * if it can be owned.
+     */
+    public void setTilePlaced(TMMapTile mt, TMTypes.Tile which) {
+        int player = getCurrentPlayer();
+        setMapTile(mt.withTilePlaced(which, player));
+
+        if (player >= 0 && player < getNPlayers()) {
+            playerTilesPlaced[player].get(which).increment(1);
+
+            // Current player gets resources
+            for (TMTypes.Resource res : mt.getResources()) {
+                playerResources[player].get(res).increment(1);
+                playerResourceIncreaseGen[player].put(res, true);
+            }
+        }
+    }
+
+    /**
+     * Places the tile on the space, if it has none, as setTilePlaced, and raises the global parameter the tile
+     * raises (unless it is at its maximum). Returns false if the space had a tile.
+     */
+    public boolean placeTile(TMMapTile mt, TMTypes.Tile which) {
+        if (mt.getTilePlaced() == null) {
+            TMTypes.GlobalParameter gp = which.getGlobalParameterToIncrease();
+            setTilePlaced(mt, which);
+            if (gp != null) {
+                // Increase global parameter, unless already at maximum (e.g. greenery placed when oxygen is maxed)
+                ModifyGlobalParameter increase = new ModifyGlobalParameter(gp, 1, true);
+                if (increase.canBePlayed(this)) return increase.execute(this);
+            }
+            return true;
+        }
+        return false;
     }
 
     public HashSet<Bonus> getBonuses() {
@@ -461,7 +534,7 @@ public class TMGameState extends AbstractGameState {
         return globalParameters;
     }
 
-    public HashSet<TMMapTile> getExtraTiles() {
+    public List<TMMapTile> getExtraTiles() {
         return extraTiles;
     }
 
@@ -856,9 +929,9 @@ public class TMGameState extends AbstractGameState {
         // Greeneries
         points += playerTilesPlaced[player].get(TMTypes.Tile.Greenery).getValue();
         // Add cities on board
-        for (int i = 0; i < board.getHeight(); i++) {
-            for (int j = 0; j < board.getWidth(); j++) {
-                TMMapTile mt = (TMMapTile) board.getElement(j, i);
+        for (int i = 0; i < getBoardSize(); i++) {
+            for (int j = 0; j < getBoardSize(); j++) {
+                TMMapTile mt = getTile(j, i);
                 if (mt != null && mt.getTilePlaced() == TMTypes.Tile.City) {
                     // Count adjacent greeneries
                     points += PlaceTile.nAdjacentTiles(this, mt, TMTypes.Tile.Greenery);
@@ -892,10 +965,10 @@ public class TMGameState extends AbstractGameState {
                 } else if (card.pointsTile != null) {
                     if (card.pointsTileAdjacent && card.mapTileIDTilePlaced >= 0) {  // TODO: mapTileIDPlaced should have been set in this case, bug
                         // only adjacent tiles count
-                        TMMapTile mt = (TMMapTile) getComponentById(card.mapTileIDTilePlaced);
+                        TMMapTile mt = getMapTile(card.mapTileIDTilePlaced);
                         List<Vector2D> neighbours = PlaceTile.getNeighbours(new Vector2D(mt.getX(), mt.getY()));
                         for (Vector2D n : neighbours) {
-                            TMMapTile e = (TMMapTile) board.getElement(n.getX(), n.getY());
+                            TMMapTile e = getTile(n.getX(), n.getY());
                             if (e != null && e.getTilePlaced() == card.pointsTile) {
                                 points += card.nPoints;
                             }
@@ -906,7 +979,7 @@ public class TMGameState extends AbstractGameState {
                 } else if (card.getComponentName().equalsIgnoreCase("capital")) {
                     // x VP per Ocean adjacent
                     int position = card.mapTileIDTilePlaced;
-                    TMMapTile mt = (TMMapTile) getComponentById(position);
+                    TMMapTile mt = getMapTile(position);
                     points += card.nPoints * PlaceTile.nAdjacentTiles(this, mt, TMTypes.Tile.Ocean);
                 }
             }

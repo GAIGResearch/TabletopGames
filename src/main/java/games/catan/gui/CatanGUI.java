@@ -6,6 +6,9 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.Counter;
+import core.components.grid.HexCoord;
+import core.components.grid.HexSide;
+import core.components.grid.HexVertex;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.actions.build.BuildCity;
@@ -23,7 +26,6 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import players.human.ActionController;
-import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,7 +72,7 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         boardView = new CatanBoardView(gs);
 
         // Bottom area will show actions available
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{boardView, this}, 800, defaultActionPanelHeight, false, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{boardView, this}, 800, defaultActionPanelHeight, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, null);
         actionFilterTooltips = new JLabel("Filtering: " + filterActions);
         JPanel bottomWrap = new JPanel();
         bottomWrap.setLayout(new BoxLayout(bottomWrap, BoxLayout.X_AXIS));
@@ -157,43 +159,22 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         javax.swing.SwingUtilities.invokeLater(() -> actionScrollPane.getVerticalScrollBar().setValue(0));
     }
 
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout,
-                                           boolean opaque,
+    @Override
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean opaque,
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setPreferredSize(new Dimension(width, height*10));
-        actionPanel.setOpaque(false);
-
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights, onActionSelected, onMouseEnter, onMouseExit);
-            actionButtons[i] = ab;
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.informAllActionButtons(actionButtons);
-        }
-
-        actionScrollPane = new JScrollPane(actionPanel);
-        actionScrollPane.setOpaque(false);
-        actionScrollPane.getViewport().setOpaque(false);
-        actionScrollPane.setPreferredSize(new Dimension(width, height));
+        // kept to scroll back to the top when the actions change
+        actionScrollPane = (JScrollPane) super.createActionPanel(highlights, width, height, opaque, onActionSelected,
+                onMouseEnter, onMouseExit);
         actionScrollPane.setMaximumSize(new Dimension(width, height));
-        actionScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        actionScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
-        if (boxLayout) {
-            actionScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
         return actionScrollPane;
     }
 
     public enum Filter {
-        Vertex(Pair.class, "Select vertex on map"), // <Point, Integer>
-        Edge(Pair.class, "Select edge on map"),  // <Point, Integer>
-        Tile(Point.class, "Select hex tile on map"),
+        Vertex(HexVertex.class, "Select vertex on map"),
+        Edge(HexSide.class, "Select edge on map"),
+        Tile(HexCoord.class, "Select hex tile on map"),
         Resource(CatanParameters.Resource[].class, "Select resource(s) in player panel"),
         Player(Integer.class, "Select target player name in player panel");
         final Class<?> type;
@@ -238,22 +219,22 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
                     if (aa instanceof DeepPlaceSettlementThenRoad) {
                         DeepPlaceSettlementThenRoad a = (DeepPlaceSettlementThenRoad) aa;
                         Filter f = Filter.Vertex;
-                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        f.ref = new HexVertex(a.hex, a.vertex);
                         filtersAvailable.add(f);
                     } else if (aa instanceof BuildRoad) {
                         BuildRoad a = (BuildRoad) aa;
                         Filter f = Filter.Edge;
-                        f.ref = new Pair<>(new Point(a.x, a.y), a.edge);
+                        f.ref = new HexSide(a.hex, a.edge);
                         filtersAvailable.add(f);
                     } else if (aa instanceof BuildCity) {
                         BuildCity a = (BuildCity) aa;
                         Filter f = Filter.Vertex;
-                        f.ref = new Pair<>(new Point(a.col, a.row), a.vertex);
+                        f.ref = new HexVertex(a.hex, a.vertex);
                         filtersAvailable.add(f);
                     } else if (aa instanceof BuildSettlement) {
                         BuildSettlement a = (BuildSettlement) aa;
                         Filter f = Filter.Vertex;
-                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        f.ref = new HexVertex(a.hex, a.vertex);
                         filtersAvailable.add(f);
                     } else if (aa instanceof MoveRobberAndSteal) {
                         MoveRobberAndSteal a = (MoveRobberAndSteal) aa;
@@ -261,20 +242,20 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
                         f1.ref = a.targetPlayer;
                         filtersAvailable.add(f1);
                         Filter f2 = Filter.Tile;
-                        f2.ref = new Point(a.x, a.y);
+                        f2.ref = a.hex;
                         filtersAvailable.add(f2);
                     } else if (aa instanceof MoveRobber) {
                         MoveRobber a = (MoveRobber) aa;
                         Filter f2 = Filter.Tile;
-                        f2.ref = new Point(a.x, a.y);
+                        f2.ref = a.hex;
                         filtersAvailable.add(f2);
                     } else if (aa instanceof PlaceSettlementWithRoad) {
                         PlaceSettlementWithRoad a = (PlaceSettlementWithRoad) aa;
                         Filter f = Filter.Vertex;
-                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        f.ref = new HexVertex(a.hex, a.vertex);
                         filtersAvailable.add(f);
                         Filter f2 = Filter.Edge;
-                        f2.ref = new Pair<>(new Point(a.x, a.y), a.edge);
+                        f2.ref = new HexSide(a.hex, a.edge);
                         filtersAvailable.add(f2);
                     } else if (aa instanceof DiscardResources) {
                         DiscardResources a = (DiscardResources) aa;
@@ -362,7 +343,7 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         resourcePool = new JLabel("Resource pool: " + resourcePrint(gs.getResourcePool(), (CatanParameters) gs.getGameParameters()));
 
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            playerPanels[i]._update((CatanGameState) gameState);
+            playerPanels[i]._update((CatanGameState) gameState, showHiddenInfo(gameState, i) || !gameState.isNotTerminal());
         }
 
         String s = "<html><h3>Filtering actions? " + filterActions + "." + (filterActions? " Filters available:" : "") +"</h3><hr>";

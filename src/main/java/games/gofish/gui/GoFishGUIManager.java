@@ -3,14 +3,19 @@ package games.gofish.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.components.FrenchCard;
+import core.components.PartialObservableDeck;
 import games.gofish.GoFishGameState;
 import games.gofish.GoFishParameters;
+import games.gofish.actions.GoFishAsk;
 import games.tricktaking.gui.CardArt;
 import games.tricktaking.gui.FrenchCardDeckView;
 import games.tricktaking.gui.PlayerHandView;
 import gui.AbstractGUIManager;
+import gui.ClickRegion;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
@@ -20,12 +25,16 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.TreeSet;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
+import java.util.List;
 
 /**
  * <p>GUI for Go Fish: one area per player, in two rows round the table, and the draw deck in the centre.</p>
+ *
+ * <p>A human player asks by clicking: a card in their hand for its rank, then the player to ask (see
+ * {@link gui.ClickableActions}). The action buttons stay as well.</p>
  *
  * <p>This is a view only - it holds no rules and never changes the state. It is repainted for every player,
  * human or not, so a hand is only shown face-up when the viewer is entitled to see it (see showHand). A hidden hand
@@ -45,6 +54,12 @@ public class GoFishGUIManager extends AbstractGUIManager {
     String[] agentNames;
 
     final Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
+    static final Color askable = new Color(255, 210, 0), chosen = new Color(60, 220, 60);
+    final Border highlightAskable = BorderFactory.createLineBorder(chosen, 3);
+
+    // the state last shown, and the rank a human player has clicked in their hand (-1 for none)
+    GoFishGameState shown;
+    int chosenRank = -1;
 
     public GoFishGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
@@ -74,7 +89,7 @@ public class GoFishGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml((GoFishParameters) state.getGameParameters()), height));
+        RulesView.addTabs(tabs, GameType.GoFish, state.getGameParameters(), height);
 
         playerViews = new PlayerHandView[nPlayers];
         playerViewBorders = new Border[nPlayers];
@@ -90,8 +105,7 @@ public class GoFishGUIManager extends AbstractGUIManager {
             PlayerHandView playerView = new PlayerHandView(state.getPlayerHands().get(i), (i + 1) % nPlayers,
                     playerAreaWidth);
             playerView.setOpaque(false);
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
             TitledBorder title = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i,
                     TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
@@ -100,6 +114,14 @@ public class GoFishGUIManager extends AbstractGUIManager {
             playerViewBorders[i] = title;
             playerView.setBorder(title);
             playerViews[i] = playerView;
+            int seat = i;
+            playerView.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    clicked(seat, e);
+                }
+            });
+            playerView.setToolTips(e -> toolTip(seat, e));
         }
         for (int i = nPlayers - 1; i >= bottomRow; i--)
             top.add(playerViews[i]);
@@ -125,7 +147,7 @@ public class GoFishGUIManager extends AbstractGUIManager {
 
         JPanel infoPanel = createGameStateInfoPanel("Go Fish", gameState, width, defaultInfoPanelHeight);
         // a vertical list, as there can be many asks (see getMaxActionSpace)
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);
@@ -149,19 +171,181 @@ public class GoFishGUIManager extends AbstractGUIManager {
     }
 
     @Override
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions) {
+        super.update(player, gameState, showActions);
+        // after the actions are offered (or withdrawn) for this state
+        showClickable();
+    }
+
+    @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (!(gameState instanceof GoFishGameState state)) return;
-        int currentPlayer = state.getCurrentPlayer();
+        shown = state;
         for (int i = 0; i < playerViews.length; i++) {
             playerViews[i].update(state.getPlayerHands().get(i), showHand(state, i), Set.of(), statusText(state, i));
             playerTitles[i].setTitle("Player " + i + " [" + agentNames[i] + "]");
-            playerViews[i].setBorder(i == currentPlayer && state.isNotTerminal()
-                    ? BorderFactory.createCompoundBorder(highlightActive, playerViewBorders[i])
-                    : playerViewBorders[i]);
         }
         drawDeckView.updateComponent(state.getDrawDeck());
         centreText.setText(centreText(state));
         parent.repaint();
+    }
+
+    @Override
+    public List<ClickRegion> getClickRegions() {
+        int asker = clickable.player();
+        if (shown == null || asker < 0 || asker >= playerViews.length) return List.of();
+        // a region for each card in the asker's hand of a rank they may ask for, offering an ask of each player who
+        // may be asked for it
+        PartialObservableDeck<FrenchCard> hand = shown.getPlayerHands().get(asker);
+        List<ClickRegion> regions = new ArrayList<>();
+        for (int c = 0; c < hand.getSize(); c++) {
+            int rank = hand.get(c).number;
+            List<GoFishAsk> asks = clickable.matching(GoFishAsk.class, a -> a.rank == rank);
+            Shape shape = playerViews[asker].cardShape(c);
+            if (!asks.isEmpty() && shape != null)
+                regions.add(new ClickRegion(playerViews[asker], shape, asks));
+        }
+        return regions;
+    }
+
+    /**
+     * A click on a player's area. In the clicking player's own hand it chooses the rank of the card clicked (and
+     * asks at once if only one player can be asked for it); on another player's area it asks them for the chosen
+     * rank. Any other button than the left clears the choice.
+     */
+    private void clicked(int seat, MouseEvent e) {
+        if (!clickable.isOffered() || shown == null) return;
+        if (e.getButton() != MouseEvent.BUTTON1) {
+            chosenRank = -1;
+        } else if (seat == clickable.player()) {
+            int index = playerViews[seat].cardIndexAt(e.getPoint());
+            if (index < 0) return;
+            int rank = shown.getPlayerHands().get(seat).get(index).number;
+            List<GoFishAsk> asks = clickable.matching(GoFishAsk.class, a -> a.rank == rank);
+            if (asks.size() == 1)
+                clickable.submit(asks.get(0));
+            else if (!asks.isEmpty())
+                chosenRank = rank == chosenRank ? -1 : rank;
+        } else if (chosenRank != -1) {
+            List<GoFishAsk> asks = clickable.matching(GoFishAsk.class,
+                    a -> a.rank == chosenRank && a.targetPlayer == seat);
+            if (asks.size() == 1)
+                clickable.submit(asks.get(0));
+        }
+        showClickable();
+    }
+
+    /**
+     * The outlines and borders that show what may be clicked: the asking player's cards of a rank they can ask for,
+     * in green for the chosen rank, and the players who can be asked for it. Without a human player to act, just the
+     * current player's border.
+     */
+    private void showClickable() {
+        if (shown == null) return;
+        if (!clickable.isOffered())
+            chosenRank = -1;
+        int asker = clickable.player();
+        Set<Integer> ranks = new HashSet<>(), targets = new HashSet<>();
+        for (GoFishAsk a : clickable.matching(GoFishAsk.class, a -> true)) {
+            ranks.add(a.rank);
+            if (a.rank == chosenRank) targets.add(a.targetPlayer);
+        }
+        for (int i = 0; i < playerViews.length; i++) {
+            Map<Integer, Color> outlines = new HashMap<>();
+            if (i == asker) {
+                PartialObservableDeck<FrenchCard> hand = shown.getPlayerHands().get(i);
+                for (int c = 0; c < hand.getSize(); c++)
+                    if (ranks.contains(hand.get(c).number))
+                        outlines.put(c, hand.get(c).number == chosenRank ? chosen : askable);
+            }
+            playerViews[i].setOutlines(outlines);
+            Border border = playerViewBorders[i];
+            if (targets.contains(i))
+                border = BorderFactory.createCompoundBorder(highlightAskable, border);
+            else if (i == shown.getCurrentPlayer() && shown.isNotTerminal())
+                border = BorderFactory.createCompoundBorder(highlightActive, border);
+            playerViews[i].setBorder(border);
+        }
+    }
+
+    /**
+     * What a click at this point of the player's area would do, and what would follow.
+     */
+    private String toolTip(int seat, MouseEvent e) {
+        if (shown == null) return null;
+        GoFishParameters params = (GoFishParameters) shown.getGameParameters();
+        if (!clickable.isOffered())
+            return "Player " + seat + ": " + shown.getPlayerHands().get(seat).getSize() + " cards";
+        int asker = clickable.player();
+        if (seat == asker) {
+            int index = playerViews[seat].cardIndexAt(e.getPoint());
+            if (index < 0) return "Your hand: click a card to ask for its rank";
+            int rank = shown.getPlayerHands().get(seat).get(index).number;
+            List<GoFishAsk> asks = clickable.matching(GoFishAsk.class, a -> a.rank == rank);
+            if (asks.isEmpty()) return "You cannot ask for " + rankName(rank) + "s now";
+            int held = count(seat, rank);
+            String holding = "You hold " + held + " " + rankName(rank) + (held == 1 ? "" : "s");
+            if (asks.size() == 1)
+                return html("Click to ask Player " + asks.get(0).targetPlayer + " for " + rankName(rank) + "s",
+                        holding, knowledge(asker, asks.get(0).targetPlayer, rank), consequence(params, rank));
+            return html(rank == chosenRank ? "Click again to choose another rank"
+                    : "Click to ask for " + rankName(rank) + "s, then click the player to ask", holding);
+        }
+        if (chosenRank == -1)
+            return "Player " + seat + ": first click a card in your hand for the rank to ask for";
+        List<GoFishAsk> asks = clickable.matching(GoFishAsk.class,
+                a -> a.rank == chosenRank && a.targetPlayer == seat);
+        if (asks.isEmpty()) return "You cannot ask Player " + seat;
+        return html("Click to ask Player " + seat + " for " + rankName(chosenRank) + "s",
+                knowledge(asker, seat, chosenRank), consequence(params, chosenRank));
+    }
+
+    private int count(int player, int rank) {
+        int n = 0;
+        for (FrenchCard c : shown.getPlayerHands().get(player).getComponents())
+            if (c.number == rank) n++;
+        return n;
+    }
+
+    /**
+     * What the asker knows about whether the target holds the rank: cards of it shown to the table, or the rank
+     * known to be missing from their hand.
+     */
+    private String knowledge(int asker, int target, int rank) {
+        PartialObservableDeck<FrenchCard> hand = shown.getPlayerHands().get(target);
+        int seen = 0;
+        for (int i = 0; i < hand.getSize(); i++)
+            if (hand.get(i).number == rank && hand.isComponentVisible(i, asker)) seen++;
+        if (seen > 0)
+            return "Player " + target + " has shown " + seen + " " + rankName(rank) + (seen == 1 ? "" : "s");
+        if (shown.getKnownVoids().get(target).contains(rank))
+            return "Player " + target + " is known to have no " + rankName(rank) + "s";
+        return "Player " + target + " holds " + hand.getSize() + " cards";
+    }
+
+    private String consequence(GoFishParameters params, int rank) {
+        String success = "If they have any, they give you all of them"
+                + (params.continueOnSuccess ? " and you ask again." : ".");
+        int deck = shown.getDrawDeck().getSize();
+        String fish = deck == 0
+                ? "If not, the draw deck is empty and your turn ends."
+                : "If not, you draw from the deck (" + deck + " cards)"
+                + (params.continueOnDrawingSameRank ? ", and ask again if you draw a " + rankName(rank) + "." : ".");
+        return success + " " + fish;
+    }
+
+    private static String html(String... lines) {
+        return "<html>" + String.join("<br>", lines) + "</html>";
+    }
+
+    private static String rankName(int rank) {
+        return switch (rank) {
+            case 11 -> "Jack";
+            case 12 -> "Queen";
+            case 13 -> "King";
+            case 14 -> "Ace";
+            default -> String.valueOf(rank);
+        };
     }
 
     /**
@@ -208,42 +392,5 @@ public class GoFishGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(GoFishParameters params) {
-        String given = params.continueOnSuccess
-                ? "they must give you all of them, face up, and you ask again."
-                : "they must give you all of them, face up, and the turn passes to the next player.";
-        String drawn = params.continueOnDrawingSameRank
-                ? "If it is the rank you asked for, you show it and ask again. Otherwise the turn passes to the " +
-                "next player."
-                : "The turn then passes to the next player.";
-        String end = params.playUntilAllBooks
-                ? "<p><b>The end.</b> Play goes on after a hand or the draw deck is empty. A player whose turn " +
-                "starts with an empty hand draws a card, or is skipped if the draw deck is empty. You may ask " +
-                "only a player who holds cards. The game ends when the player to ask has nobody to ask.</p>"
-                : "<p><b>The end.</b> The game ends as soon as any player's hand or the draw deck is empty.</p>";
-        return "<h2>Go Fish</h2>" +
-                "<p>Collect books. A book is all four cards of a rank. The player with the most books wins, and " +
-                "players tied for the most books share first place.</p>" +
-                "<p><b>The deal.</b> Each player is dealt " + params.startingHandSize + " cards (" +
-                params.twoPlayerHandSize + " each with 2 players). The rest form the draw deck. Player 0 asks " +
-                "first.</p>" +
-                "<p><b>Each turn</b> you ask another player for a rank that you hold. Asking shows everyone one of " +
-                "your cards of that rank.</p><ul>" +
-                "<li>If they have any cards of that rank, " + given + "</li>" +
-                "<li>If they have none, they say Go fish, and you draw the top card of the draw deck. " + drawn +
-                "</li></ul>" +
-                "<p>As soon as you hold all four cards of a rank, they are laid down as a book.</p>" +
-                end +
-                "<h3>Interface</h3>" +
-                "<p>The players' hands are in two rows, each titled with the player's number and agent. The current " +
-                "player's hand has a blue border. In a hidden hand, the cards shown to the table are face up. The " +
-                "line under a hand shows the number of cards, the ranks of the player's books, and the ranks the " +
-                "player is known not to hold (\"has no\"). A player is known not to hold a rank after saying Go " +
-                "fish or giving those cards away, until they next draw. J, Q, K and A stand for Jack, Queen, King " +
-                "and Ace.</p>" +
-                "<p>The centre shows the draw deck with its number of cards, when the game will end, and the " +
-                "player to ask. Each action button is an ask, such as \"Ask P1 for Kings\".</p>";
     }
 }

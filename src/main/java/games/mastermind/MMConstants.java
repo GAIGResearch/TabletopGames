@@ -21,8 +21,6 @@ public class MMConstants {
         add(new BoardNode("V"));
     }};
 
-    static String emptyPeg = ".";
-
     protected static ArrayList<BoardNode> copyGuessColours() {
         ArrayList<BoardNode> copy = new ArrayList<>();
         for (BoardNode t : guessColours) {

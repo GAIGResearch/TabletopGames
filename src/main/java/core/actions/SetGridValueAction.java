@@ -8,6 +8,9 @@ import core.components.GridBoard;
 
 import java.util.Objects;
 
+/**
+ * Puts a BoardNode at (x, y) on a GridBoard.
+ */
 public class SetGridValueAction extends AbstractAction implements IPrintable {
 
     private final int gridBoard;
@@ -31,7 +34,8 @@ public class SetGridValueAction extends AbstractAction implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         BoardNode value = (BoardNode) gs.getComponentById(valueID);
-        return ((GridBoard)gs.getComponentById(gridBoard)).setElement(x, y, value);
+        ((GridBoard) gs.getComponentById(gridBoard)).setElement(x, y, value);
+        return true;
     }
 
     @Override

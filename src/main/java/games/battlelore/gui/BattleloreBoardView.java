@@ -1,6 +1,7 @@
 package games.battlelore.gui;
 
-import core.components.GridBoard;
+import core.components.grid.HexCoord;
+import core.components.grid.SparseGrid;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
@@ -14,18 +15,22 @@ public class BattleloreBoardView extends ComponentView {
     BattleloreGameState gameState;
     Image background;
 
-    public BattleloreBoardView(GridBoard hexBoard) {
-        super(hexBoard, hexBoard.getWidth() * defaultItemSize, hexBoard.getHeight() * defaultItemSize);
+    final int gridWidth, gridHeight;
+
+    public BattleloreBoardView(SparseGrid<HexCoord, MapTile> hexBoard, int gridWidth, int gridHeight) {
+        super(hexBoard, gridWidth * defaultItemSize, gridHeight * defaultItemSize);
+        this.gridWidth = gridWidth;
+        this.gridHeight = gridHeight;
         background = ImageIO.GetInstance().getImage("data/battlelore/board.png");
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, SparseGrid<HexCoord, MapTile> gridBoard, int x, int y) {
         int offSetX = 25;
         int offSetY = 60;
 
         // Draw hexes
-        for (int i = 0; i < gridBoard.getHeight(); i++) {
-            for (int j = 0; ((i % 2 == 0 && j < gridBoard.getWidth()) || (i % 2 == 1 && j < gridBoard.getWidth()-1)); j++) {
+        for (int i = 0; i < gridHeight; i++) {
+            for (int j = 0; ((i % 2 == 0 && j < gridWidth) || (i % 2 == 1 && j < gridWidth-1)); j++) {
 
                 int xC = x + 35 + j * defaultItemSize;
                 int yC = (int) (y + offSetY + i * Math.round(defaultItemSize / 1.2));
@@ -34,7 +39,7 @@ public class BattleloreBoardView extends ComponentView {
                     xC += offSetX;
                 }
 
-                drawCell(g, (MapTile) gridBoard.getElement(j, i), xC, yC);
+                drawCell(g, gridBoard.get(HexCoord.fromOffset(j, i, HexCoord.Offset.ODD_R)), xC, yC);
             }
         }
 
@@ -63,7 +68,9 @@ public class BattleloreBoardView extends ComponentView {
     @Override
     protected void paintComponent(Graphics g1) {
         Graphics2D g = (Graphics2D) g1;
-        drawGridBoard(g, (GridBoard) component, 0, 0);
+        @SuppressWarnings("unchecked")
+        SparseGrid<HexCoord, MapTile> gridBoard = (SparseGrid<HexCoord, MapTile>) component;
+        drawGridBoard(g, gridBoard, 0, 0);
     }
 
     private void drawCell(Graphics2D g, MapTile tile, int x, int y) {

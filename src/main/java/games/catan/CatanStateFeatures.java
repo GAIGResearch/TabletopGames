@@ -98,10 +98,7 @@ public class CatanStateFeatures implements IStateFeatureVector {
         retValue[9] = Math.max(0, retValue[8] - 7);
         // income for each resource is the expected value of that resource per roll
         // there is no access to CatanTile from BoardNode, so we have to iterate over all tiles
-        List<CatanTile> allTiles = new ArrayList<>(50);
-        for (int i = 0; i < catanState.getBoard().length; i++) {
-            allTiles.addAll(Arrays.asList(catanState.getBoard()[i]));
-        }
+        List<CatanTile> allTiles = catanState.getTiles();
         double[] resourceIncome = new double[]{0.0, 0.0, 0.0, 0.0};
         for (CatanTile tile : allTiles) {
             if (tile.getNumber() == 0) continue; // DESERT, SEA
@@ -140,7 +137,7 @@ public class CatanStateFeatures implements IStateFeatureVector {
                     }
                 }
 
-                if (tile.hasRobber()) {
+                if (catanState.hasRobber(tile)) {
                     if (b.getOwnerId() == playerID) {
                         // our loss
                         retValue[18] += income;

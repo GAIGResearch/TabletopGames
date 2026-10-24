@@ -2,6 +2,7 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -16,7 +17,7 @@ import java.util.*;
 
 import static games.terraformingmars.TMTypes.Tile.City;
 import static games.terraformingmars.TMTypes.Tile.Greenery;
-import static games.terraformingmars.TMTypes.neighbor_directions;
+import static core.components.grid.HexCoord.Offset.ODD_R;
 
 public class PlaceTile extends TMAction implements TMExtendedSequence {
     public boolean respectingAdjacency = true;
@@ -131,8 +132,8 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
     @Override
     public boolean _execute(TMGameState gs) {
         if (mapTileID != -1 && tile != null) {
-            TMMapTile mt = (TMMapTile)gs.getComponentById(mapTileID);
-            boolean success = mt.placeTile(tile, gs);
+            TMMapTile mt = gs.getMapTile(mapTileID);
+            boolean success = gs.placeTile(mt, tile);
             if (success && onMars) {
                 if (getCardID() != -1) {
                     // Save location of tile placed on card
@@ -160,7 +161,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
                     HashSet<Integer> adjacentOwners = new LinkedHashSet<>();
                     List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
                     for (Vector2D n : neighbours) {
-                        TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
+                        TMMapTile other = gs.getTile(n.getX(), n.getY());
                         if (other != null && other.getTilePlaced() != null) {
                             adjacentOwners.add(other.getOwnerId());
                         }
@@ -220,7 +221,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
             TMGameState gs = (TMGameState) state;
             if (legalPositions != null) {
                 for (Integer pos : legalPositions) {
-                    TMMapTile mt = (TMMapTile) gs.getComponentById(pos);
+                    TMMapTile mt = gs.getMapTile(pos);
                     if (mt != null && mt.getTilePlaced() == null) {
                         actions.add(new PlaceTile(player, pos, tile, respectingAdjacency, onMars, tileName, mapType,
                                 legalPositions, resourcesGainedRestriction, volcanicRestriction, adjacencyRequirement, true));
@@ -228,9 +229,9 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
                 }
             } else {
                 if (onMars) {
-                    for (int i = 0; i < gs.getBoard().getHeight(); i++) {
-                        for (int j = 0; j < gs.getBoard().getWidth(); j++) {
-                            TMMapTile mt = (TMMapTile) gs.getBoard().getElement(j, i);
+                    for (int i = 0; i < gs.getBoardSize(); i++) {
+                        for (int j = 0; j < gs.getBoardSize(); j++) {
+                            TMMapTile mt = gs.getTile(j, i);
 
                             // Check if we can place tile here
                             if (mt == null || mt.getTilePlaced() != null) continue;
@@ -310,7 +311,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        TMMapTile mt = (TMMapTile) gameState.getComponentById(mapTileID);
+        TMMapTile mt = ((TMGameState) gameState).getMapTile(mapTileID);
         if (mt != null) {
             return "Place " + (tileName != null? tileName : (tile.name() + " on " + mt.getTileType()));  // TODO restrictions and stuff
         } else {
@@ -329,7 +330,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
             boolean playerTileNeighbour = false;
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             for (Vector2D n : neighbours) {
-                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = gs.getTile(n.getX(), n.getY());
                 if (other != null && other.getOwnerId() == player) {
                     playerTileNeighbour = true;
                     break;
@@ -346,7 +347,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             int count = 0;
             for (Vector2D n : neighbours) {
-                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = gs.getTile(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() != null) {
                     return true;
                 }
@@ -362,7 +363,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
         if (placedAnyTiles) {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             for (Vector2D n : neighbours) {
-                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = gs.getTile(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() != null) {
                     count++;
                 }
@@ -377,7 +378,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             int count = 0;
             for (Vector2D n : neighbours) {
-                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = gs.getTile(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() == t) {
                     return true;
                 }
@@ -393,7 +394,7 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
         if (placedAnyTiles) {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             for (Vector2D n : neighbours) {
-                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = gs.getTile(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() == t) {
                     count++;
                 }
@@ -402,12 +403,13 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
         return count;
     }
 
+    /**
+     * The cells next to the cell on the board, whose odd rows are shifted right; some may be off the board.
+     */
     public static List<Vector2D> getNeighbours(Vector2D cell) {
         ArrayList<Vector2D> neighbors = new ArrayList<>();
-        int parity = Math.abs(cell.getY() % 2);
-        for (Vector2D v: neighbor_directions[parity]) {
-            neighbors.add(cell.add(v));
-        }
+        for (HexCoord n : HexCoord.fromOffset(cell.getX(), cell.getY(), ODD_R).neighbours())
+            neighbors.add(new Vector2D(n.offsetCol(ODD_R), n.r()));
         return neighbors;
     }
 
