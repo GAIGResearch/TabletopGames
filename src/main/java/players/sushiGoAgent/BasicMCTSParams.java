@@ -47,8 +47,8 @@ public class BasicMCTSParams extends PlayerParameters {
     }
 
     @Override
-    public SushiGoMCTSPlayer instantiate() {
-        return new SushiGoMCTSPlayer((BasicMCTSParams) this.copy());
+    public BasicMCTSPlayer instantiate() {
+        return new BasicMCTSPlayer((BasicMCTSParams) this.copy());
     }
 
 }

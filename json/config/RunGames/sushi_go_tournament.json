@@ -3,7 +3,7 @@
   "nPlayers" : 4,
   "playerDirectory" : "json/players/sushiGoPlayers",
   "mode" : "exhaustive",
-  "matchups" : 100,
+  "matchups" : 500,
   "verbose" : true,
   "listener" : "json/listeners/GameResultsListener.json",
   "destDir" : ".SushiGo_Tournament_3P",
