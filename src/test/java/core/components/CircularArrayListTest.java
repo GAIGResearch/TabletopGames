@@ -99,4 +99,67 @@ public class CircularArrayListTest {
             }
         }
     }
+
+    @Test
+    public void searchesBulkAddsAndIterationBehaveLikeAnArrayList() {
+        Random rnd = new Random(42);
+        for (int trial = 0; trial < 50; trial++) {
+            List<Integer> expected = new ArrayList<>();
+            // a small capacity, so that the backing array wraps round and grows
+            List<Integer> actual = new CircularArrayList<>(rnd.nextInt(8));
+            for (int op = 0; op < 500; op++) {
+                int size = expected.size();
+                switch (rnd.nextInt(8)) {
+                    case 0, 1 -> {
+                        int i = rnd.nextInt(size + 1), value = rnd.nextInt(30);
+                        expected.add(i, value);
+                        actual.add(i, value);
+                    }
+                    case 2 -> {
+                        int i = rnd.nextInt(size + 1);
+                        List<Integer> added = new ArrayList<>();
+                        for (int k = rnd.nextInt(6); k > 0; k--) added.add(rnd.nextInt(30));
+                        expected.addAll(i, added);
+                        actual.addAll(i, added);
+                    }
+                    case 3 -> {
+                        Integer value = rnd.nextInt(30);
+                        assertEquals(expected.indexOf(value), actual.indexOf(value));
+                        assertEquals(expected.lastIndexOf(value), actual.lastIndexOf(value));
+                        assertEquals(expected.contains(value), actual.contains(value));
+                        assertEquals(expected.remove(value), actual.remove(value));
+                    }
+                    case 4 -> {
+                        if (size > 0) {
+                            int i = rnd.nextInt(size);
+                            assertEquals(expected.remove(i), actual.remove(i));
+                        }
+                    }
+                    case 5 -> {
+                        Iterator<Integer> e = expected.iterator(), a = actual.iterator();
+                        int removeAt = rnd.nextInt(size + 1);
+                        for (int i = 0; e.hasNext(); i++) {
+                            assertEquals(e.next(), a.next());
+                            if (i == removeAt) {
+                                e.remove();
+                                a.remove();
+                            }
+                        }
+                        assertFalse(a.hasNext());
+                    }
+                    case 6 -> {
+                        assertArrayEquals(expected.toArray(), actual.toArray());
+                        assertArrayEquals(expected.toArray(new Integer[0]), actual.toArray(new Integer[0]));
+                    }
+                    case 7 -> {
+                        if (rnd.nextInt(10) == 0) {
+                            expected.clear();
+                            actual.clear();
+                        }
+                    }
+                }
+                assertEquals(expected, actual);
+            }
+        }
+    }
 }
