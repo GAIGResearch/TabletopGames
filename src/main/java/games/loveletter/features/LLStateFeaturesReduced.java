@@ -58,7 +58,7 @@ public class LLStateFeaturesReduced implements IStateFeatureVector {
         for (int player = 0; player < llgs.getNPlayers(); player++) {
             if (player != playerId) {
                 PartialObservableDeck<LoveLetterCard> deck = llgs.getPlayerHandCards().get(player);
-                visibleCards += (int) IntStream.range(0, deck.getSize()).filter(i -> deck.getVisibilityForPlayer(i, playerId)).count();
+                visibleCards += (int) IntStream.range(0, deck.getSize()).filter(i -> deck.isVisibleTo(i, playerId)).count();
             }
         }
         retValue[10] = visibleCards / (llgs.getNPlayers() - 1.0);

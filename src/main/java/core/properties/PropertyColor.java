@@ -3,7 +3,6 @@ package core.properties;
 import utilities.Utils;
 
 import java.awt.*;
-import java.util.Objects;
 
 public class PropertyColor extends Property
 {

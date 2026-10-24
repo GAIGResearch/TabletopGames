@@ -241,7 +241,7 @@ final class GolfSixTestUtils {
      */
     static boolean visibleToAll(PartialObservableDeck<FrenchCard> deck, int idx, int nPlayers) {
         for (int o = 0; o < nPlayers; o++)
-            if (!deck.getVisibilityForPlayer(idx, o)) return false;
+            if (!deck.isVisibleTo(idx, o)) return false;
         return true;
     }
 
@@ -250,7 +250,7 @@ final class GolfSixTestUtils {
      */
     static boolean visibleToNone(PartialObservableDeck<FrenchCard> deck, int idx, int nPlayers) {
         for (int o = 0; o < nPlayers; o++)
-            if (deck.getVisibilityForPlayer(idx, o)) return false;
+            if (deck.isVisibleTo(idx, o)) return false;
         return true;
     }
 

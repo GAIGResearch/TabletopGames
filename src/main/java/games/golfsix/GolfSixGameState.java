@@ -97,7 +97,7 @@ public class GolfSixGameState extends AbstractGameState {
 
     public boolean isFaceUp(int playerId, int position) {
         // a face-up card is visible to every player and a face-down card to none, so the owner's view is enough
-        return grids.get(playerId).isComponentVisible(position, playerId);
+        return grids.get(playerId).isVisibleTo(position, playerId);
     }
 
     public int faceUpCount(int playerId) {

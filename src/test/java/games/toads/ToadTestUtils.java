@@ -168,7 +168,7 @@ class ToadTestUtils {
         PartialObservableDeck<ToadCard> hand = state.getPlayerHand(owner);
         int count = 0;
         for (int i = 0; i < hand.getSize(); i++)
-            if (hand.isComponentVisible(i, viewer)) count++;
+            if (hand.isVisibleTo(i, viewer)) count++;
         return count;
     }
 

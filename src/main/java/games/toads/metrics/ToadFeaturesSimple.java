@@ -115,7 +115,7 @@ public class ToadFeaturesSimple implements IStateFeatureVector {
         PartialObservableDeck<ToadCard> oppHand = state.getPlayerHand(opp);
         int known = 0;
         for (int i = 0; i < oppHand.getSize(); i++)
-            if (oppHand.isComponentVisible(i, playerID))
+            if (oppHand.isVisibleTo(i, playerID))
                 known++;
         retValue[8] = known;
         ToadCard casualty = state.getTieBreaker(playerID);

@@ -95,11 +95,11 @@ public class CardRecycling {
         assertEquals(card, state.getPlayerDeck(0).get(state.getPlayerDeck(0).getSize() - 1));
         for (int i = 0; i < state.getPlayerDeck(0).getSize(); i++) {
             if (i == state.getPlayerDeck(0).getSize() - 1) {
-                assertTrue(state.getPlayerDeck(0).isComponentVisible(i, 0));
+                assertTrue(state.getPlayerDeck(0).isVisibleTo(i, 0));
             } else {
-                assertFalse(state.getPlayerDeck(0).isComponentVisible(i, 0));
+                assertFalse(state.getPlayerDeck(0).isVisibleTo(i, 0));
             }
-            assertFalse(state.getPlayerDeck(0).isComponentVisible(i, 1));
+            assertFalse(state.getPlayerDeck(0).isVisibleTo(i, 1));
         }
     }
 }
