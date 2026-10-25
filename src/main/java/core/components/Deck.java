@@ -42,9 +42,9 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     public Deck(String name, int ownerId, VisibilityMode visibility) {
         super(CoreConstants.ComponentType.DECK, name);
-        // Most access is by index (get, peek, pick, iteration), but the top of the deck is index 0, so we need a list
-        // with constant-time indexed access that is also fast at the front (unlike an ArrayList or a LinkedList).
-        this.components = new CircularArrayList<>();
+        // Most access is by index (get, peek, pick, iteration), so we need constant-time indexed access. Adding or
+        // drawing at the top (index 0) is O(n) in an ArrayList, but decks are small enough that this costs little.
+        this.components = new ArrayList<>();
         this.ownerId = ownerId;
         this.capacity = -1;
         this.visibility = visibility;
@@ -52,7 +52,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     protected Deck(String name, int ownerId, int ID, VisibilityMode visibility) {
         super(CoreConstants.ComponentType.DECK, name, ID);
-        this.components = new CircularArrayList<>();
+        this.components = new ArrayList<>();
         this.capacity = -1;
         this.ownerId = ownerId;
         this.visibility = visibility;
@@ -438,7 +438,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      */
     public void setComponents(List<T> components) {
         // copied into the list type we need (see constructor)
-        this.components = new CircularArrayList<>(components);
+        this.components = new ArrayList<>(components);
         for (T comp : components) {
             comp.setOwnerId(ownerId);
         }
@@ -518,7 +518,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     @SuppressWarnings("unchecked")
     private void copyTo(Deck<T> deck, Function<Component, Component> copier) {
-        List<T> newComponents = new CircularArrayList<>(components.size());
+        List<T> newComponents = new ArrayList<>(components.size());
         for (T c : components) {
             newComponents.add((T) copier.apply(c));
         }
