@@ -222,7 +222,7 @@ final class GoFishTestUtils {
         PartialObservableDeck<FrenchCard> hand = state.playerHands.get(p);
         int idx = indexInHand(state, p, card);
         for (int q = 0; q < state.getNPlayers(); q++)
-            if (!hand.isComponentVisible(idx, q)) return false;
+            if (!hand.isVisibleTo(idx, q)) return false;
         return true;
     }
 
@@ -240,7 +240,7 @@ final class GoFishTestUtils {
         PartialObservableDeck<FrenchCard> hand = state.playerHands.get(p);
         int idx = indexInHand(state, p, card);
         for (int q = 0; q < state.getNPlayers(); q++)
-            assertEquals(card + " in the hand of " + p + ", visible to " + q, q == p, hand.isComponentVisible(idx, q));
+            assertEquals(card + " in the hand of " + p + ", visible to " + q, q == p, hand.isVisibleTo(idx, q));
     }
 
     /**

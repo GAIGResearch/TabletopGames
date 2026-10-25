@@ -173,7 +173,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
 
     public boolean componentVisibility(Deck<T> deck, int index) {
         if (deck instanceof PartialObservableDeck && humanId != -1) {
-            return ((PartialObservableDeck<T>) deck).isComponentVisible(index, humanId);
+            return ((PartialObservableDeck<T>) deck).isVisibleTo(index, humanId);
         }
         return false; //
     }

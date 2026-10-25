@@ -174,10 +174,10 @@ public class TestPartialObservabilityCopy {
 
     private void checkVisibilityExpectations(PartialObservableDeck<DominionCard> playerHand) {
         for (int p = 0; p < 4; p++) {
-            assertTrue(playerHand.getVisibilityForPlayer(0, p));
+            assertTrue(playerHand.isVisibleTo(0, p));
             for (int j = 1; j < 4; j++)
                 if (p != 0)
-                    assertFalse(playerHand.getVisibilityForPlayer(j, p));
+                    assertFalse(playerHand.isVisibleTo(j, p));
         }
         assertEquals(MOAT, playerHand.peek(0).cardType());
     }
@@ -185,7 +185,7 @@ public class TestPartialObservabilityCopy {
     private void checkVisibilityExpectations(PartialObservableDeck<DominionCard> deck, int cardIndex, boolean[] visibility, CardType card) {
         for (int p = 0; p < 4; p++) {
           //  System.out.printf("Player: %d, index: %d\n", p, cardIndex);
-            assertEquals(visibility[p], deck.getVisibilityForPlayer(cardIndex, p));
+            assertEquals(visibility[p], deck.isVisibleTo(cardIndex, p));
             if (visibility[p] && card!= null)
                 assertEquals(card, deck.peek(cardIndex).cardType());
         }

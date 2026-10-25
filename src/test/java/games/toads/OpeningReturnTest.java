@@ -103,12 +103,12 @@ public class OpeningReturnTest {
         state = newState(params, fm);
         fm.next(state, new ReturnCardToDeck(state.getPlayerHand(0).get(0)));
         PartialObservableDeck<ToadCard> deck = state.getPlayerDeck(0);
-        assertTrue(deck.getVisibilityForPlayer(4, 0));
-        assertFalse(deck.getVisibilityForPlayer(4, 1));
+        assertTrue(deck.isVisibleTo(4, 0));
+        assertFalse(deck.isVisibleTo(4, 1));
         // the undrawn cards above it stay hidden from both
         for (int i = 0; i < 4; i++) {
-            assertFalse(deck.getVisibilityForPlayer(i, 0));
-            assertFalse(deck.getVisibilityForPlayer(i, 1));
+            assertFalse(deck.isVisibleTo(i, 0));
+            assertFalse(deck.isVisibleTo(i, 1));
         }
     }
 
@@ -226,8 +226,8 @@ public class OpeningReturnTest {
         assertEquals(4, state.getPlayerHand(1).getSize());
         assertEquals(4, state.getPlayerDeck(1).getSize());
         assertSame(returned1, state.getPlayerDeck(1).get(3));
-        assertTrue(state.getPlayerDeck(1).getVisibilityForPlayer(3, 1));
-        assertFalse(state.getPlayerDeck(1).getVisibilityForPlayer(3, 0));
+        assertTrue(state.getPlayerDeck(1).isVisibleTo(3, 1));
+        assertFalse(state.getPlayerDeck(1).isVisibleTo(3, 0));
         assertEquals(OPENING_RETURN, state.getGamePhase());
         assertEquals(0, state.getCurrentPlayer());
 
@@ -266,8 +266,8 @@ public class OpeningReturnTest {
             PartialObservableDeck<ToadCard> deck = copy.getPlayerDeck(0);
             assertEquals(5, deck.getSize());
             assertEquals("copy " + i, returned, deck.get(4));
-            assertTrue("copy " + i, deck.getVisibilityForPlayer(4, 0));
-            assertFalse("copy " + i, deck.getVisibilityForPlayer(4, 1));
+            assertTrue("copy " + i, deck.isVisibleTo(4, 0));
+            assertFalse("copy " + i, deck.isVisibleTo(4, 1));
         }
     }
 
@@ -284,7 +284,7 @@ public class OpeningReturnTest {
             PartialObservableDeck<ToadCard> deck = copy.getPlayerDeck(0);
             assertEquals(5, deck.getSize());
             for (int j = 0; j < 5; j++)
-                assertFalse("copy " + i + " card " + j, deck.getVisibilityForPlayer(j, 1));
+                assertFalse("copy " + i + " card " + j, deck.isVisibleTo(j, 1));
             if (!deck.get(4).equals(returned)) moved = true;
         }
         assertTrue(moved);
@@ -303,7 +303,7 @@ public class OpeningReturnTest {
             PartialObservableDeck<ToadCard> deck = copy.getPlayerDeck(1);
             assertEquals(4, deck.getSize());
             assertEquals("copy " + i, returned1, deck.get(3));
-            assertTrue("copy " + i, deck.getVisibilityForPlayer(3, 1));
+            assertTrue("copy " + i, deck.isVisibleTo(3, 1));
             if (!casualties[0].equals(copy.getTieBreaker(0))) casualtyHidden = true;
         }
         // 1 Casualty among 4 unknown cards: (1/4)^20 to stay put every time

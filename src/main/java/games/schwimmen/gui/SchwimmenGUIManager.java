@@ -172,7 +172,7 @@ public class SchwimmenGUIManager extends AbstractGUIManager {
 
     private static boolean seenByAll(PartialObservableDeck<FrenchCard> hand, int i, int nPlayers) {
         for (int p = 0; p < nPlayers; p++)
-            if (!hand.getVisibilityForPlayer(i, p))
+            if (!hand.isVisibleTo(i, p))
                 return false;
         return true;
     }
@@ -184,7 +184,7 @@ public class SchwimmenGUIManager extends AbstractGUIManager {
         if (!state.isNotTerminal() || state.getCoreGameParameters().alwaysDisplayFullObservable)
             return true;
         for (int h : humanPlayerIds)
-            if (hand.getVisibilityForPlayer(i, h))
+            if (hand.isVisibleTo(i, h))
                 return true;
         return state.getCoreGameParameters().alwaysDisplayCurrentPlayer && p == state.getCurrentPlayer();
     }

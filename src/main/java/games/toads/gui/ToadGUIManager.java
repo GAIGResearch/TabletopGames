@@ -216,7 +216,7 @@ public class ToadGUIManager extends AbstractGUIManager {
     }
 
     private static boolean canSee(Set<Integer> viewers, PartialObservableDeck<ToadCard> deck, int index) {
-        return viewers.stream().anyMatch(v -> deck.isComponentVisible(index, v));
+        return viewers.stream().anyMatch(v -> deck.isVisibleTo(index, v));
     }
 
     /**

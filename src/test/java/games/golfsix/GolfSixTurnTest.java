@@ -56,9 +56,9 @@ public class GolfSixTurnTest {
         assertFalse(state.isDrawnFromDiscard());
         assertEquals(drawDeckSize - 1, state.getDrawDeck().getSize());
         assertEquals(List.of(card("8C")), state.getDiscardPile().getComponents());
-        assertTrue(state.getDrawnCardDeck().getVisibilityForPlayer(0, 0));
-        assertFalse(state.getDrawnCardDeck().getVisibilityForPlayer(0, 1));
-        assertFalse(state.getDrawnCardDeck().getVisibilityForPlayer(0, 2));
+        assertTrue(state.getDrawnCardDeck().isVisibleTo(0, 0));
+        assertFalse(state.getDrawnCardDeck().isVisibleTo(0, 1));
+        assertFalse(state.getDrawnCardDeck().isVisibleTo(0, 2));
         assertEquals("the player still has to place it", 0, state.getCurrentPlayer());
         assertAllCardsPresent(state);
     }

@@ -27,7 +27,7 @@ public class LawnAndOrderInsiderTipsTest {
         for (int i = 0; i < n; i++)
             for (int p = 0; p < n; p++)
                 assertEquals("tip " + i + " seen by player " + p + " (" + n + " players)",
-                        p == i || p == (i + 1) % n, state.insiderTips.getVisibilityForPlayer(i, p));
+                        p == i || p == (i + 1) % n, state.insiderTips.isVisibleTo(i, p));
     }
 
     /** The 16 Rule cards less the named ones, in a fixed order (for an arranged agenda). */
@@ -47,7 +47,7 @@ public class LawnAndOrderInsiderTipsTest {
         assertTipsSeenByNeighbours(state);
         for (int i = 0; i < 2; i++)
             for (int p = 0; p < 2; p++)
-                assertTrue(state.insiderTips.getVisibilityForPlayer(i, p));
+                assertTrue(state.insiderTips.isVisibleTo(i, p));
     }
 
     @Test
@@ -55,9 +55,9 @@ public class LawnAndOrderInsiderTipsTest {
         LawnAndOrderGameState state = newState(3, 3);
         assertTipsSeenByNeighbours(state);
         // player 0 sees tips 0 (between 0 and 1) and 2 (between 2 and 0), not tip 1 (between 1 and 2)
-        assertTrue(state.insiderTips.getVisibilityForPlayer(0, 0));
-        assertFalse(state.insiderTips.getVisibilityForPlayer(1, 0));
-        assertTrue(state.insiderTips.getVisibilityForPlayer(2, 0));
+        assertTrue(state.insiderTips.isVisibleTo(0, 0));
+        assertFalse(state.insiderTips.isVisibleTo(1, 0));
+        assertTrue(state.insiderTips.isVisibleTo(2, 0));
     }
 
     @Test
@@ -65,9 +65,9 @@ public class LawnAndOrderInsiderTipsTest {
         LawnAndOrderGameState state = newState(6, 3);
         assertTipsSeenByNeighbours(state);
         // tip 5 lies between players 5 and 0
-        assertTrue(state.insiderTips.getVisibilityForPlayer(5, 0));
-        assertTrue(state.insiderTips.getVisibilityForPlayer(5, 5));
-        assertFalse(state.insiderTips.getVisibilityForPlayer(5, 3));
+        assertTrue(state.insiderTips.isVisibleTo(5, 0));
+        assertTrue(state.insiderTips.isVisibleTo(5, 5));
+        assertFalse(state.insiderTips.isVisibleTo(5, 3));
     }
 
     @Test
