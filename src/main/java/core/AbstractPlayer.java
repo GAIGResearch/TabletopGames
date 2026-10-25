@@ -20,8 +20,10 @@ public abstract class AbstractPlayer {
     public PlayerParameters parameters;
     protected List<IPlayerDecorator> decorators;
     protected boolean considerSingletonActions = false;
-    // Thinking time remaining for the game; only used (non-null) when budgetType is BUDGET_GAME_SECONDS
+    // Thinking time remaining for the game (BUDGET_GAME_SECONDS) or the round (BUDGET_ROUND_SECONDS); otherwise null
     private ElapsedCpuChessTimer gameTimer;
+    // the round the timer is for, with BUDGET_ROUND_SECONDS
+    private int timerRound = -1;
 
     public AbstractPlayer(PlayerParameters parameters, String name) {
         this.parameters = parameters != null ? parameters : new PlayerParameters();
@@ -56,20 +58,22 @@ public abstract class AbstractPlayer {
     }
 
     /**
-     * Restores the full game budget at the start of a game. Called by Game.reset().
-     * If budgetType is not BUDGET_GAME_SECONDS then there is no game timer.
+     * Restores the full budget at the start of a game. Called by Game.reset().
+     * If budgetType is not BUDGET_GAME_SECONDS or BUDGET_ROUND_SECONDS then there is no game timer.
      */
     public final void resetGameTimer() {
-        long budgetMillis = parameters.getGameBudgetMillis();
+        long budgetMillis = parameters.getClockBudgetMillis();
         gameTimer = budgetMillis >= 0 ? new ElapsedCpuChessTimer(budgetMillis, 0, 0, 0, 0) : null;
+        timerRound = -1;
     }
 
     /**
-     * The player's own record of thinking time remaining in the game (see remainingTimeMillis()).
+     * The player's own record of thinking time remaining in the game, or in the round with BUDGET_ROUND_SECONDS
+     * (see remainingTimeMillis()).
      * This is paused outside _getAction(), so within _getAction() the time spent so far on the current
      * decision is gameTimer.elapsedMillis().
      *
-     * @return - the timer, or null if budgetType is not BUDGET_GAME_SECONDS
+     * @return - the timer, or null if budgetType is not BUDGET_GAME_SECONDS or BUDGET_ROUND_SECONDS
      */
     public final ElapsedCpuChessTimer getGameTimer() {
         return gameTimer;
@@ -90,8 +94,13 @@ public abstract class AbstractPlayer {
             default -> {
                 // we then use our Random for any random choices
                 gameState.rnd = this.rnd;
-                if (gameTimer == null && parameters.budgetType == PlayerConstants.BUDGET_GAME_SECONDS)
+                if (gameTimer == null && parameters.budgetType.isClock())
                     resetGameTimer();
+                if (parameters.budgetType == PlayerConstants.BUDGET_ROUND_SECONDS
+                        && gameState.getRoundCounter() != timerRound) {
+                    resetGameTimer();
+                    timerRound = gameState.getRoundCounter();
+                }
                 if (gameTimer != null) gameTimer.resume();
                 AbstractAction chosen = _getAction(gameState, observedActions);
                 if (gameTimer != null) gameTimer.pause();

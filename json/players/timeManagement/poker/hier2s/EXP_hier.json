@@ -1,0 +1,14 @@
+{
+  "budgetType": "BUDGET_GAME_SECONDS",
+  "rolloutLength": 0,
+  "heuristic": {
+    "class": "players.heuristics.WinOnlyHeuristic"
+  },
+  "FPU": 100.0,
+  "treePolicy": "UCB_Tuned",
+  "information": "Information_Set",
+  "class": "players.mcts.MCTSParams",
+  "budget": 2,
+  "selectionPolicy": "ROBUST",
+  "roundAllocation": true
+}

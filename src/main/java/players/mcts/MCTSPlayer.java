@@ -28,6 +28,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
     protected Map<Object, Integer> oldGraphKeys = new HashMap<>();
     protected List<Object> recentlyRemovedKeys = new ArrayList<>();
+    // null unless the parameters use time management
+    protected MCTSTimeManager timeManager;
+    // the game tick of the last search (-1 before the first search of a game)
+    protected int lastSearchTick = -1;
     public MCTSPlayer() {
         this(new MCTSParams());
     }
@@ -64,6 +68,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         oldGraphKeys = new HashMap<>();
         getParameters().getRolloutStrategy().initializePlayer(state);
         getParameters().getOpponentModel().initializePlayer(state);
+        if (getTimeManager() != null)
+            timeManager.newGame(state);
+        lastSearchTick = -1;
         super.initializePlayer(state);
     }
 
@@ -284,11 +291,16 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         if (actions.size() == 1)
             return actions.getFirst();  // take the only action available
         long currentTimeNano = System.nanoTime();
+        MCTSTimeManager tm = getTimeManager();
+        if (tm != null)
+            tm.startDecision(gameState, getGameTimer());
         // creating the root node also sets the Forward Model (and wraps it in any decorators)
         createRootNode(gameState);
         long timeTaken = System.nanoTime() - currentTimeNano;
 
+        root.timeManager = tm;
         root.mctsSearch(timeTaken / 1000000);
+        lastSearchTick = gameState.getGameTick();
 
         if (getParameters().actionHeuristic instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().actionHeuristic).process(root);
@@ -309,6 +321,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
 
         checkRootChildCount(root, actions, gameState);
         lastAction = Pair.of(gameState.getCurrentPlayer(), root.bestAction());
+        if (tm != null)
+            tm.endDecision(root.timeTaken);
         return lastAction.b.copy();
     }
 
@@ -356,6 +370,17 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     }
     public SingleTreeNode getRoot() {
         return root;
+    }
+
+    /**
+     * Created on first use, and again if the parameters object is replaced
+     */
+    public MCTSTimeManager getTimeManager() {
+        if (!MCTSTimeManager.isUsed(getParameters()))
+            timeManager = null;
+        else if (timeManager == null || timeManager.params() != getParameters())
+            timeManager = new MCTSTimeManager(getParameters());
+        return timeManager;
     }
 
     @Override

@@ -83,6 +83,34 @@ public class MCTSParams extends PlayerParameters {
     double DDAGameThreshold = 1_000_000.0; // If our projected result is higher than this, then we play badly
     double DDAMoveThreshold = 0.0; // When playing badly, we will take actions up to this amount less than the best action
 
+    // Time management (see MCTSTimeManager)
+    // EXP: expected own decisions left in the game (or round, with BUDGET_ROUND_SECONDS or roundAllocation), if there
+    // is no decisionTable
+    public double expectedDecisions = 30.0;
+    // EXP-MOVES: file of the expected own decisions left, by decisions made; "" for none, and "default" for
+    // data/timeManagement/<GameType>_<n>p.txt (<GameType>_<n>p_round.txt with BUDGET_ROUND_SECONDS or roundAllocation)
+    // if there is one
+    public String decisionTable = "default";
+    // With BUDGET_GAME_SECONDS: give each round a share of the game clock, and each decision a share of its round's
+    public boolean roundAllocation = false;
+    public double expectedRounds = 5.0;  // roundAllocation: expected rounds left, if there is no roundTable
+    // roundAllocation: file of the expected rounds left, by rounds played; "" for none, and "default" for
+    // data/timeManagement/<GameType>_<n>p_rounds.txt if there is one
+    public String roundTable = "default";
+    public double roundTimeFactor = 1.0;  // roundAllocation: multiplies every round's allocation
+    public double timeFactor = 1.0;  // multiplies every allocation (f_opening for OPEN, f_earlystop for STOP)
+    public double midHeight = 0.0, midCentre = 15.0, midWidth = 10.0;  // MID: a, b, c of the bonus by decision number
+    public double behindThreshold = 0.5, behindFactor = 1.0;  // BEHIND: v_behind (a win rate) and f_behind
+    public int behindLoops = 0;  // BEHIND: 0 is off, 1 is BEHIND, more than 1 is BEHIND-L with l_behind loops
+    public double unstableFactor = 1.0;  // UNST: f_unstable
+    public int unstableLoops = 0;  // UNST: as behindLoops
+    public double closeThreshold = 0.5, closeFactor = 1.0;  // CLOSE: d_close and f_close
+    public int closeLoops = 0;  // CLOSE: as behindLoops
+    public double earlyStopP = 0.0;  // STOP: p_earlystop; 0 is off, and 1 never changes the move chosen (STOP_A)
+    public int earlyStopInterval = 50;  // STOP: iterations between checks
+    public int clockReserveMS = 50;  // never allocated from the game clock
+    public int minMoveTimeMS = 10;  // the least time allocated to any search
+
     public MCTSParams() {
         addTunableParameter("K", 1.0, Arrays.asList(0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0));
         addTunableParameter("MASTBoltzmann", 0.1);
@@ -136,6 +164,28 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("numDeterminizations", 1, Arrays.asList(1, 10, 30, 100, 300, 1000));
         addTunableParameter("DDAGameThreshold", 1_000_000.0);
         addTunableParameter("DDAMoveThreshold", 0.0);
+        addTunableParameter("expectedDecisions", 30.0);
+        addTunableParameter("decisionTable", "default");
+        addTunableParameter("roundAllocation", false);
+        addTunableParameter("expectedRounds", 5.0);
+        addTunableParameter("roundTable", "default");
+        addTunableParameter("roundTimeFactor", 1.0, Arrays.asList(0.5, 0.75, 1.0, 1.25, 1.5, 2.0));
+        addTunableParameter("timeFactor", 1.0, Arrays.asList(1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0));
+        addTunableParameter("midHeight", 0.0, Arrays.asList(0.0, 0.5, 1.0, 1.5, 2.0, 2.5));
+        addTunableParameter("midCentre", 15.0);
+        addTunableParameter("midWidth", 10.0);
+        addTunableParameter("behindThreshold", 0.5, Arrays.asList(0.3, 0.4, 0.5, 0.6));
+        addTunableParameter("behindFactor", 1.0, Arrays.asList(0.25, 0.5, 0.75, 1.0, 1.5));
+        addTunableParameter("behindLoops", 0, Arrays.asList(0, 1, 2, 3, 4));
+        addTunableParameter("unstableFactor", 1.0, Arrays.asList(0.25, 0.5, 0.75, 1.0, 1.5));
+        addTunableParameter("unstableLoops", 0, Arrays.asList(0, 1, 2, 3, 4));
+        addTunableParameter("closeThreshold", 0.5, Arrays.asList(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8));
+        addTunableParameter("closeFactor", 1.0, Arrays.asList(0.25, 0.5, 0.75, 1.0, 1.5));
+        addTunableParameter("closeLoops", 0, Arrays.asList(0, 1, 2, 3, 4));
+        addTunableParameter("earlyStopP", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0));
+        addTunableParameter("earlyStopInterval", 50);
+        addTunableParameter("clockReserveMS", 50);
+        addTunableParameter("minMoveTimeMS", 10);
     }
 
     @Override
@@ -224,6 +274,28 @@ public class MCTSParams extends PlayerParameters {
         }
         DDAGameThreshold = (double) getParameterValue("DDAGameThreshold");
         DDAMoveThreshold = (double) getParameterValue("DDAMoveThreshold");
+        expectedDecisions = (double) getParameterValue("expectedDecisions");
+        decisionTable = (String) getParameterValue("decisionTable");
+        roundAllocation = (boolean) getParameterValue("roundAllocation");
+        expectedRounds = (double) getParameterValue("expectedRounds");
+        roundTable = (String) getParameterValue("roundTable");
+        roundTimeFactor = (double) getParameterValue("roundTimeFactor");
+        timeFactor = (double) getParameterValue("timeFactor");
+        midHeight = (double) getParameterValue("midHeight");
+        midCentre = (double) getParameterValue("midCentre");
+        midWidth = (double) getParameterValue("midWidth");
+        behindThreshold = (double) getParameterValue("behindThreshold");
+        behindFactor = (double) getParameterValue("behindFactor");
+        behindLoops = (int) getParameterValue("behindLoops");
+        unstableFactor = (double) getParameterValue("unstableFactor");
+        unstableLoops = (int) getParameterValue("unstableLoops");
+        closeThreshold = (double) getParameterValue("closeThreshold");
+        closeFactor = (double) getParameterValue("closeFactor");
+        closeLoops = (int) getParameterValue("closeLoops");
+        earlyStopP = (double) getParameterValue("earlyStopP");
+        earlyStopInterval = (int) getParameterValue("earlyStopInterval");
+        clockReserveMS = (int) getParameterValue("clockReserveMS");
+        minMoveTimeMS = (int) getParameterValue("minMoveTimeMS");
         decoupled = (boolean) getParameterValue("decoupled");
         if (decoupled && (opponentTreePolicy != OneTree || numDeterminizations > 1)) {
             // Decoupling only ever engages on a simultaneous turn, and every opponent tree policy

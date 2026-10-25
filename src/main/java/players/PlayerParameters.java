@@ -78,11 +78,11 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
     }
 
     /**
-     * @return total thinking time for the game in milliseconds if budgetType is BUDGET_GAME_SECONDS
-     * (when budget is a number of seconds), otherwise -1
+     * @return total thinking time for the game (BUDGET_GAME_SECONDS) or for each round (BUDGET_ROUND_SECONDS) in
+     * milliseconds, otherwise -1
      */
-    public long getGameBudgetMillis() {
-        return budgetType == PlayerConstants.BUDGET_GAME_SECONDS ? budget * 1000L : -1;
+    public long getClockBudgetMillis() {
+        return budgetType.isClock() ? budget * 1000L : -1;
     }
 
     @Override

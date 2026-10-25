@@ -10,6 +10,7 @@
 
       {"class": "evaluation.metrics.GameMetrics$ActionsReduced" },
       {"class": "evaluation.metrics.GameMetrics$Decisions" },
+      {"class": "evaluation.metrics.GameMetrics$RoundDecisions" },
       {"class": "players.mcts.MCTSMetrics$TreeStats" },
       {"class": "evaluation.metrics.GameMetrics$ComputationTimes"}
     ]]

@@ -223,6 +223,11 @@ public class MultiTreeNode extends SingleTreeNode {
     }
 
     @Override
+    protected SingleTreeNode decisionRoot() {
+        return roots[decisionPlayer];
+    }
+
+    @Override
     public double getValue(AbstractAction action) {
         // delegate to the root for the decision player
         return roots[decisionPlayer].getValue(action);
