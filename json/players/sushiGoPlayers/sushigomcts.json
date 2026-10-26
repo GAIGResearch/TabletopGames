@@ -3,6 +3,7 @@
 	"K" : 10,
 	"rolloutLength" : 100,
 	"maxTreeDepth" : 5,
+	"restrictToCurrentRound" : true,
 	"heuristic" : {
 		"class" : "players.heuristics.ScoreHeuristic"
 	},

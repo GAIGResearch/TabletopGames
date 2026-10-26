@@ -1,6 +1,6 @@
 {
 	"class" : "players.basicMCTS.BasicMCTSParams",
-	"K" : 1.4,
+	"K" : 10,
 	"rolloutLength" : 100,
 	"maxTreeDepth" : 20,
 	"heuristic" : {

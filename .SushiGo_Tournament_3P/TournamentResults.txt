@@ -610,3 +610,71 @@ osla: Win rate 0.01 +/- 0.010	Mean Ordinal 3.44 +/- 0.07
 
 ---- Alpha Rank ----  
 
+Game: SushiGo, Players: 4, Mode: EXHAUSTIVE, TotalGames: 480, GamesPerMatchup: 20
+basicmcts got 92.83 points. basicmcts won 20.0% of the 480 games of the tournament. basicmcts won 20.0% of the 480 games it played during the tournament.
+basicmcts got a mean score of 36.14.
+basicmcts won 19.8% of the 480 games against osla.
+basicmcts won 20.0% of the 480 games against random.
+basicmcts won 18.8% of the 480 games against sushigomcts.
+
+osla got 3.83 points. osla won 1.0% of the 480 games of the tournament. osla won 1.0% of the 480 games it played during the tournament.
+osla got a mean score of 22.87.
+osla won 0.8% of the 480 games against basicmcts.
+osla won 1.0% of the 480 games against random.
+osla won 0.6% of the 480 games against sushigomcts.
+
+random got 2.50 points. random won 0.6% of the 480 games of the tournament. random won 0.6% of the 480 games it played during the tournament.
+random got a mean score of 23.07.
+random won 0.6% of the 480 games against basicmcts.
+random won 0.6% of the 480 games against osla.
+random won 0.4% of the 480 games against sushigomcts.
+
+sushigomcts got 380.83 points. sushigomcts won 80.2% of the 480 games of the tournament. sushigomcts won 80.2% of the 480 games it played during the tournament.
+sushigomcts got a mean score of 42.05.
+sushigomcts won 79.0% of the 480 games against basicmcts.
+sushigomcts won 79.8% of the 480 games against osla.
+sushigomcts won 80.0% of the 480 games against random.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+sushigomcts: Win rate 0.79 +/- 0.018	Mean Ordinal 1.20 +/- 0.02
+basicmcts: Win rate 0.19 +/- 0.018	Mean Ordinal 1.88 +/- 0.02
+osla: Win rate 0.01 +/- 0.004	Mean Ordinal 3.46 +/- 0.03
+random: Win rate 0.01 +/- 0.003	Mean Ordinal 3.41 +/- 0.03
+
+
+---- Alpha Rank ----  
+
+Game: SushiGo, Players: 4, Mode: EXHAUSTIVE, TotalGames: 480, GamesPerMatchup: 20
+basicmcts got 206.00 points. basicmcts won 43.5% of the 480 games of the tournament. basicmcts won 43.5% of the 480 games it played during the tournament.
+basicmcts got a mean score of 39.39.
+basicmcts won 43.5% of the 480 games against osla.
+basicmcts won 43.5% of the 480 games against random.
+basicmcts won 42.3% of the 480 games against sushigomcts.
+
+osla got 2.00 points. osla won 0.4% of the 480 games of the tournament. osla won 0.4% of the 480 games it played during the tournament.
+osla got a mean score of 22.91.
+osla won 0.4% of the 480 games against basicmcts.
+osla won 0.4% of the 480 games against random.
+osla won 0.4% of the 480 games against sushigomcts.
+
+random got 2.00 points. random won 0.4% of the 480 games of the tournament. random won 0.4% of the 480 games it played during the tournament.
+random got a mean score of 23.39.
+random won 0.4% of the 480 games against basicmcts.
+random won 0.4% of the 480 games against osla.
+random won 0.4% of the 480 games against sushigomcts.
+
+sushigomcts got 270.00 points. sushigomcts won 56.9% of the 480 games of the tournament. sushigomcts won 56.9% of the 480 games it played during the tournament.
+sushigomcts got a mean score of 40.17.
+sushigomcts won 55.6% of the 480 games against basicmcts.
+sushigomcts won 56.9% of the 480 games against osla.
+sushigomcts won 56.9% of the 480 games against random.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+sushigomcts: Win rate 0.56 +/- 0.022	Mean Ordinal 1.46 +/- 0.03
+basicmcts: Win rate 0.43 +/- 0.022	Mean Ordinal 1.61 +/- 0.03
+random: Win rate 0.00 +/- 0.003	Mean Ordinal 3.40 +/- 0.03
+osla: Win rate 0.00 +/- 0.003	Mean Ordinal 3.50 +/- 0.03
+
+
+---- Alpha Rank ----  
+
