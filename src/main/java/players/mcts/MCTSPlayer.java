@@ -9,7 +9,6 @@ import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
 import llm.IHasStateHeuristic;
 import players.IAnyTimePlayer;
-import players.PlayerConstants;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -374,7 +373,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     }
 
     /**
-     * Created on first use, and again if the parameters object is replaced
+     * Created on first use, if the budget is a clock (otherwise null)
      */
     public MCTSTimeManager getTimeManager() {
         if (timeManager == null && getParameters().budgetType.isClock()) {

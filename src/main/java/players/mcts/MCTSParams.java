@@ -99,6 +99,7 @@ public class MCTSParams extends PlayerParameters {
     public double closeThreshold = 0.5, closeFactor = 1.0;
     public int closeLoops = 0;
     public double earlyStopP = 0.0;
+    public double stopConfidence = 0.95, closeConfidence = 0.9;  // SIMPLE only: 1 - alpha for STOP and CLOSE
     public int earlyStopInterval = 10;
     public int clockReserveMS = 50;
     public int minMoveTimeMS = 10;
@@ -175,7 +176,9 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("closeFactor", 1.0);
         addTunableParameter("closeLoops", 0);
         addTunableParameter("earlyStopP", 0.0);
-        addTunableParameter("earlyStopInterval", 50);
+        addTunableParameter("stopConfidence", 0.95);
+        addTunableParameter("closeConfidence", 0.9);
+        addTunableParameter("earlyStopInterval", 10);
         addTunableParameter("clockReserveMS", 50);
         addTunableParameter("minMoveTimeMS", 10);
     }
@@ -285,6 +288,8 @@ public class MCTSParams extends PlayerParameters {
         closeFactor = (double) getParameterValue("closeFactor");
         closeLoops = (int) getParameterValue("closeLoops");
         earlyStopP = (double) getParameterValue("earlyStopP");
+        stopConfidence = (double) getParameterValue("stopConfidence");
+        closeConfidence = (double) getParameterValue("closeConfidence");
         earlyStopInterval = (int) getParameterValue("earlyStopInterval");
         clockReserveMS = (int) getParameterValue("clockReserveMS");
         minMoveTimeMS = (int) getParameterValue("minMoveTimeMS");

@@ -417,7 +417,7 @@ public class SingleTreeNode {
         // milliseconds for a time budget; otherwise iterations, or FM/copy calls
         long budget = params.budget;
         if (timeManager != null)
-            budget = timeManager.searchBudget(initialisationTime);
+            budget = timeManager.searchBudget();
         else if (budgetType == BUDGET_TIME)
             budget -= initialisationTime;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
@@ -471,28 +471,20 @@ public class SingleTreeNode {
             } else {
                 throw new AssertionError("Unsupported budget type for MCTS: " + budgetType);
             }
-            if (timeManager != null) { // we have a potentially dynamic decision budget that may be extended or stopped early
+            if (timeManager != null) { // a clock budget, which may be extended or stopped early
                 if (stop) {
                     // BEHIND, UNST and CLOSE may continue the search
                     long extension = timeManager.extension(this);
                     if (extension > 0) {
                         budget += extension;
-                        if (timeBudget)
-                            elapsedTimer.setMaxTimeMillis(budget);
+                        elapsedTimer.setMaxTimeMillis(budget);
                         stop = false;
                     }
                 } else if (params.earlyStopP > 0.0 && numIters % params.earlyStopInterval == 0) {
                     // STOP: the iterations left are estimated from the rate so far
-                    // TODO: This currently uses the visit count. To adapt to SIMPLE we can consider a
-                    // TODO: t-test for difference in means, with some threshold (plus correction for the number of available actions)
-                    double remainingIters;
-                    if (timeBudget) {
-                        long elapsed = elapsedTimer.elapsedNanos();
-                        remainingIters = elapsed <= 0 ? Double.POSITIVE_INFINITY
-                                : numIters * (double) Math.max(0, elapsedTimer.remainingTimeNanos()) / elapsed;
-                    } else {
-                        remainingIters = budget - numIters;
-                    }
+                    long elapsed = elapsedTimer.elapsedNanos();
+                    double remainingIters = elapsed <= 0 ? Double.POSITIVE_INFINITY
+                            : numIters * (double) Math.max(0, elapsedTimer.remainingTimeNanos()) / elapsed;
                     stop = timeManager.bestActionSettled(this, remainingIters);
                 }
             }
@@ -505,60 +497,6 @@ public class SingleTreeNode {
      */
     protected SingleTreeNode decisionRoot() {
         return this;
-    }
-
-    /**
-     * @return the root actions that bestAction() chooses between (when the tree policy is not EXP3 or regret matching)
-     */
-    protected List<AbstractAction> rootActionsToConsider() {
-        return actionsToConsider(statsFor(decisionPlayer).actionsFromOpenLoopState);
-        // TODO: Not sure why this is needed as a new method on SingleTreeNode - as it os only used by MCTSTimeManager
-        // TODO: Therefore make it a helper method there...*OR*... refactor other parts of code to use it if they need it
-    }
-
-    /**
-     * @return the visit counts of the most-visited and second-most-visited of the actions (0 if there are none)
-     */
-    protected int[] topTwoVisits(List<AbstractAction> actions) {
-        int first = 0, second = 0;
-        for (AbstractAction action : actions) {
-            int visits = actionVisits(action);
-            if (visits > first) {
-                second = first;
-                first = visits;
-            } else if (visits > second) {
-                second = visits;
-            }
-        }
-        return new int[]{first, second};
-    }
-
-    /**
-     * @return the most-visited of the actions (the first of any tied), or null if none has been visited
-     */
-    protected AbstractAction mostVisitedAction(List<AbstractAction> actions) {
-        // TODO: This should not be needed just for MCTSTimeManager. What is wrong with using an existing bestAction() method?
-        // TODO: If there is genuinely a spcial case, then make this a helper method on MCTSTimeManager
-        AbstractAction best = null;
-        int bestVisits = 0;
-        for (AbstractAction action : actions) {
-            int visits = actionVisits(action);
-            if (visits > bestVisits) {
-                bestVisits = visits;
-                best = action;
-            }
-        }
-        return best;
-    }
-
-    /**
-     * @return the mean value to the decision player of the action, or NaN if it has not been visited
-     */
-    protected double meanActionValue(AbstractAction action) {
-        ActionStats stats = statsFor(decisionPlayer).actionValues.get(action);
-        if (stats == null || stats.nVisits == 0)
-            return Double.NaN;
-        return stats.totValue[decisionPlayer] / stats.nVisits;
     }
 
     /**

@@ -3,6 +3,7 @@ package players.mcts;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import utilities.ElapsedCpuChessTimer;
+import utilities.Utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static players.PlayerConstants.*;
-import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
+import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 
 /**
@@ -28,13 +29,17 @@ import static players.mcts.MCTSEnums.TreePolicy.*;
  * The dynamic strategies act during the search. BEHIND, UNST and CLOSE continue the search for a multiple of the
  * planned budget, up to their number of loops:
  * <ul>
- * <li>BEHIND: while the win rate of the most-visited action is below behindThreshold</li>
+ * <li>BEHIND: while the win rate of the action that would be played is below behindThreshold</li>
  * <li>UNST: while the most-visited action is not the highest-valued</li>
  * <li>CLOSE: while the visits of the two most-visited actions differ by less than closeThreshold of the most-visited</li>
  * <li>STOP: stops the search once the most-visited action cannot be overtaken (relaxed by earlyStopP), with
  * timeFactor moving the time saved to earlier decisions. STOP_A is earlyStopP = 1 and timeFactor = 1; STOP_B is
  * earlyStopP = 1.</li>
  * </ul>
+ * These are as in the paper for a ROBUST selectionPolicy. With SIMPLE, CLOSE and STOP instead test whether the
+ * highest-valued action stays ahead (see leaderSettled()): CLOSE continues the search while we have less than
+ * closeConfidence that it is truly the best, and STOP stops it once we have stopConfidence that it is still ahead
+ * after earlyStopP times the remaining iterations.
  * <p>
  * Each allocation is made from the time left on the game timer, so an overrun is made up by later decisions.
  * With BUDGET_SECONDS this calculation is over the game as a whole.
@@ -82,12 +87,15 @@ public class MCTSTimeManager {
     private static void validate(MCTSParams params) {
         if (params.numDeterminizations > 1)
             throw new IllegalArgumentException("Time management is not supported with numDeterminizations > 1");
-        if (!params.budgetType.isClock() && params.budgetType != BUDGET_TIME && params.budgetType != BUDGET_ITERATIONS)
-            throw new IllegalArgumentException("Time management is not supported with " + params.budgetType);
-        if ((params.earlyStopP > 0.0 || params.closeLoops > 0) && (params.selectionPolicy != ROBUST
-                || params.treePolicy == EXP3 || params.treePolicy == RegretMatching || params.treePolicy == NoAveragingRM))
-            throw new IllegalArgumentException("STOP and CLOSE need the most-visited action to be played: use a " +
-                    "ROBUST selectionPolicy (and a treePolicy that is not EXP3 or regret matching)");
+        if (!params.budgetType.isClock())
+            throw new IllegalArgumentException("Time management needs a clock budget, not " + params.budgetType);
+        if ((params.earlyStopP > 0.0 || params.closeLoops > 0) && (params.treePolicy == EXP3
+                || params.treePolicy == RegretMatching || params.treePolicy == NoAveragingRM))
+            throw new IllegalArgumentException("STOP and CLOSE need the most-visited (ROBUST) or highest-valued " +
+                    "(SIMPLE) action to be played: use a treePolicy that is not EXP3 or regret matching");
+        if (!(params.stopConfidence > 0.0 && params.stopConfidence < 1.0
+                && params.closeConfidence > 0.0 && params.closeConfidence < 1.0))
+            throw new IllegalArgumentException("stopConfidence and closeConfidence must be between 0 and 1");
         if (params.earlyStopInterval < 1)
             throw new IllegalArgumentException("earlyStopInterval must be at least 1");
         if (params.roundAllocation && params.budgetType != BUDGET_GAME_SECONDS)
@@ -108,10 +116,6 @@ public class MCTSTimeManager {
         } catch (IOException e) {
             throw new IllegalArgumentException("Could not read decision table " + file, e);
         }
-    }
-
-    MCTSParams params() {
-        return params;
     }
 
     /**
@@ -193,11 +197,11 @@ public class MCTSTimeManager {
     /**
      * Called before each search.
      *
-     * @param timer - the player's game timer (null unless the budget is a clock). It is running, and
-     *              elapsedMillis() is the time spent on this decision so far.
+     * @param timer - the player's game timer. It is running, and elapsedMillis() is the time spent on this
+     *              decision so far.
      */
     public void startDecision(AbstractGameState state, ElapsedCpuChessTimer timer) {
-        if (params.budgetType.isClock() && timer == null)
+        if (timer == null)
             throw new AssertionError(params.budgetType + " needs a game timer");
         gameTimer = timer;
         if (byRound() && state.getRoundCounter() != round) {
@@ -210,13 +214,8 @@ public class MCTSTimeManager {
         }
         behindDone = unstableDone = closeDone = 0;
         stoppedEarly = false;
-        if (params.budgetType.isClock()) {
-            clockAtStart = gameTimer.remainingTimeMillis();
-            plannedBudget = allocate(clockAtStart - gameTimer.elapsedMillis());
-        } else {
-            clockAtStart = 0;
-            plannedBudget = params.budget;
-        }
+        clockAtStart = gameTimer.remainingTimeMillis();
+        plannedBudget = allocate(clockAtStart - gameTimer.elapsedMillis());
     }
 
     /**
@@ -269,52 +268,51 @@ public class MCTSTimeManager {
     }
 
     /**
-     * @param initialisationTime - milliseconds already spent on the decision before the search starts
-     * @return the budget for the planned search (milliseconds for a time budget, iterations otherwise)
+     * @return the time for the planned search in milliseconds, less the time already spent on the decision (which
+     * is on the game timer)
      */
-    public long searchBudget(long initialisationTime) {
-        if (params.budgetType == BUDGET_ITERATIONS)
-            return plannedBudget;
-        if (params.budgetType.isClock())
-            // the initialisation time is already on the game timer
-            return Math.max(0, plannedBudget - gameTimer.elapsedMillis());
-        return plannedBudget - initialisationTime;
+    public long searchBudget() {
+        return Math.max(0, plannedBudget - gameTimer.elapsedMillis());
     }
 
     /**
      * Equation 9 of Baier and Winands: the second-most-visited action cannot catch up with the most-visited one in
      * earlyStopP times the remaining iterations. With earlyStopP = 1 this never changes the action chosen.
+     * With SIMPLE, the highest-valued action stays ahead in earlyStopP times the remaining iterations, with
+     * stopConfidence.
      */
     public boolean bestActionSettled(SingleTreeNode root, double remainingIterations) {
         SingleTreeNode decisionRoot = root.decisionRoot();
-        // TODO: The top two visits should not be a core method on SingleTreeNode. It should be a helper method on this class that takes a SingleTreeNode parameter.
-        int[] topTwo = decisionRoot.topTwoVisits(decisionRoot.rootActionsToConsider());
-        stoppedEarly = topTwo[0] - topTwo[1] > params.earlyStopP * remainingIterations;
+        List<AbstractAction> actions = rootActions(decisionRoot);
+        if (params.selectionPolicy == SIMPLE) {
+            stoppedEarly = leaderSettled(decisionRoot, actions, params.earlyStopP * remainingIterations,
+                    params.stopConfidence);
+        } else {
+            int[] topTwo = topTwoVisits(decisionRoot, actions);
+            stoppedEarly = topTwo[0] - topTwo[1] > params.earlyStopP * remainingIterations;
+        }
         return stoppedEarly;
     }
 
     /**
      * BEHIND, UNST and CLOSE, checked each time the search budget is used up.
      *
-     * @return the budget of the extension (milliseconds for a time budget, iterations otherwise), or 0 for none
+     * @return the time of the extension in milliseconds, or 0 for none
      */
     public long extension(SingleTreeNode root) {
         SingleTreeNode decisionRoot = root.decisionRoot();
-        List<AbstractAction> actions = decisionRoot.rootActionsToConsider();
-        AbstractAction mostVisited = decisionRoot.mostVisitedAction(actions);
+        List<AbstractAction> actions = rootActions(decisionRoot);
+        AbstractAction mostVisited = mostVisited(decisionRoot, actions);
         if (mostVisited == null || actions.size() < 2)
             return 0;
         double factor;
-        if (behindDone < params.behindLoops && winRate(decisionRoot, mostVisited) < params.behindThreshold) {
+        if (behindDone < params.behindLoops && winRate(decisionRoot, decisionRoot.bestAction()) < params.behindThreshold) {
             behindDone++;
             factor = params.behindFactor;
         } else if (unstableDone < params.unstableLoops && !mostVisited.equals(highestValued(decisionRoot, actions))) {
-            // TODO: If we are using SIMPLE, then this can still hold
             unstableDone++;
             factor = params.unstableFactor;
         } else if (closeDone < params.closeLoops && isClose(decisionRoot, actions)) {
-            // TODO: If SIMPLE, then this can use a t-test between the two highest. We want a probability
-            // TODO: (under the assumptions of the test) that the best action is really the best.
             closeDone++;
             factor = params.closeFactor;
         } else {
@@ -323,9 +321,60 @@ public class MCTSTimeManager {
         long budget = (long) (factor * plannedBudget);
         long available = availableMillis(gameTimer.remainingTimeMillis() - gameTimer.elapsedMillis());
         budget = Math.min(budget, available);
-        if (budget < params.minMoveTimeMS)
-            return 0;
-        return Math.max(budget, 0);
+        return budget < params.minMoveTimeMS ? 0 : budget;
+    }
+
+    /**
+     * @return the root actions that bestAction() chooses between (when the tree policy is not EXP3 or regret matching)
+     */
+    static List<AbstractAction> rootActions(SingleTreeNode root) {
+        return root.actionsToConsider(root.getActionsFromOpenLoopState());
+    }
+
+    /**
+     * Unlike bestAction(), this is the most-visited action whatever the selection policy, with no noise to break
+     * ties, as UNST compares it with the highest-valued action
+     *
+     * @return the most-visited of the actions (the first of any tied), or null if none has been visited
+     */
+    static AbstractAction mostVisited(SingleTreeNode root, List<AbstractAction> actions) {
+        AbstractAction best = null;
+        int bestVisits = 0;
+        for (AbstractAction action : actions) {
+            int visits = root.actionVisits(action);
+            if (visits > bestVisits) {
+                bestVisits = visits;
+                best = action;
+            }
+        }
+        return best;
+    }
+
+    /**
+     * @return the visit counts of the most-visited and second-most-visited of the actions (0 if there are none)
+     */
+    static int[] topTwoVisits(SingleTreeNode root, List<AbstractAction> actions) {
+        int first = 0, second = 0;
+        for (AbstractAction action : actions) {
+            int visits = root.actionVisits(action);
+            if (visits > first) {
+                second = first;
+                first = visits;
+            } else if (visits > second) {
+                second = visits;
+            }
+        }
+        return new int[]{first, second};
+    }
+
+    /**
+     * @return the mean value to the decision player of the action, or NaN if it has not been visited
+     */
+    static double meanValue(SingleTreeNode root, AbstractAction action) {
+        ActionStats stats = root.getActionStats(action);
+        if (stats == null || stats.nVisits == 0)
+            return Double.NaN;
+        return stats.totValue[root.decisionPlayer] / stats.nVisits;
     }
 
     /**
@@ -338,14 +387,14 @@ public class MCTSTimeManager {
             min = params.heuristic.minValue();
             max = params.heuristic.maxValue();
         }
-        return (root.meanActionValue(action) - min) / (max - min);
+        return (meanValue(root, action) - min) / (max - min);
     }
 
-    private AbstractAction highestValued(SingleTreeNode root, List<AbstractAction> actions) {
+    static AbstractAction highestValued(SingleTreeNode root, List<AbstractAction> actions) {
         AbstractAction best = null;
         double bestValue = Double.NEGATIVE_INFINITY;
         for (AbstractAction action : actions) {
-            double value = root.meanActionValue(action);
+            double value = meanValue(root, action);
             if (value > bestValue) {
                 bestValue = value;
                 best = action;
@@ -355,8 +404,55 @@ public class MCTSTimeManager {
     }
 
     private boolean isClose(SingleTreeNode root, List<AbstractAction> actions) {
-        int[] topTwo = root.topTwoVisits(actions);
+        if (params.selectionPolicy == SIMPLE)
+            return !leaderSettled(root, actions, Double.POSITIVE_INFINITY, params.closeConfidence);
+        int[] topTwo = topTwoVisits(root, actions);
         return topTwo[0] - topTwo[1] < params.closeThreshold * topTwo[0];
+    }
+
+    /**
+     * For SIMPLE: whether the highest-valued action stays ahead of every other visited action after horizon more
+     * iterations, with the given confidence (1 - alpha). Each action is projected to keep its share of the visits.
+     * With an infinite horizon this is the confidence that the highest-valued action is truly the best.
+     * <p>
+     * Each other action is compared with a z-test on the difference of the means, with the Sidak correction for
+     * the number of comparisons. Unvisited actions are not considered. A difference with no variance (for example
+     * between two actions with one visit each) is settled if the highest-valued action is strictly ahead.
+     */
+    static boolean leaderSettled(SingleTreeNode root, List<AbstractAction> actions, double horizon,
+                                 double confidence) {
+        List<AbstractAction> visited = actions.stream().filter(a -> root.actionVisits(a) > 0).toList();
+        if (visited.size() < 2)
+            return true;
+        AbstractAction leader = highestValued(root, visited);
+        int totalVisits = visited.stream().mapToInt(root::actionVisits).sum();
+        double z = Utils.standardZScore(1.0 - confidence, visited.size() - 1);
+        double leaderMean = meanValue(root, leader);
+        double leaderVariance = meanVariance(root, leader, horizon, totalVisits);
+        for (AbstractAction action : visited) {
+            if (action.equals(leader))
+                continue;
+            double gap = leaderMean - meanValue(root, action);
+            double se = Math.sqrt(leaderVariance + meanVariance(root, action, horizon, totalVisits));
+            if (se == 0.0 ? gap <= 0.0 : gap < z * se)
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * The variance of the change in a visited action's mean after its share of horizon more iterations, which is
+     * s^2.r / (n.(n + r)) for r more visits. With an infinite horizon this is the variance of the mean, s^2 / n.
+     */
+    static double meanVariance(SingleTreeNode root, AbstractAction action, double horizon, int totalVisits) {
+        ActionStats stats = root.getActionStats(action);
+        int n = stats.nVisits;
+        double mean = stats.totValue[root.decisionPlayer] / n;
+        double variance = Math.max(0.0, stats.squaredTotValue[root.decisionPlayer] / n - mean * mean);
+        if (Double.isInfinite(horizon))
+            return variance / n;
+        double r = horizon * n / totalVisits;
+        return variance * r / (n * (n + r));
     }
 
     /**
@@ -380,7 +476,7 @@ public class MCTSTimeManager {
     }
 
     /**
-     * @return the planned budget for the last decision (milliseconds for a time budget, iterations otherwise),
+     * @return the planned search time for the last decision in milliseconds,
      * before any extension
      */
     public long plannedBudget() {
@@ -388,7 +484,7 @@ public class MCTSTimeManager {
     }
 
     /**
-     * @return the game clock (in milliseconds) at the start of the last decision, if there is a game timer
+     * @return the game clock (in milliseconds) at the start of the last decision
      */
     public long clockAtStart() {
         return clockAtStart;
