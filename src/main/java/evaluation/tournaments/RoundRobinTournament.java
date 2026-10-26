@@ -314,7 +314,15 @@ public class RoundRobinTournament extends AbstractTournament {
 
         // create a copy of the player to avoid them sharing the same state
         for (int agentID : agentIDsInThisGame)
-            matchUpPlayers.add(this.agents.get(agentID).copy());
+        {
+            AbstractPlayer original = this.agents.get(agentID);
+            AbstractPlayer copy = original.copy();
+            // PlayerFactory names configured agents from their JSON filenames.
+            // Preserve that identity on copies so TournamentResults uses the
+            // same key when recording games and when reporting the tournament.
+            copy.setName(original.toString());
+            matchUpPlayers.add(copy);
+        }
 
         if (verbose) {
             StringBuffer sb = new StringBuffer();

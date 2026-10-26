@@ -1,0 +1,10 @@
+{
+  "game" : "SushiGo",
+  "nPlayers" : 4,
+  "mode" : "exhaustive",
+  "matchups" : 240,
+  "verbose" : true,
+  "seed" : 740234,
+  "playerDirectory" : "json/players/sushiGoPlayers"
+
+}
