@@ -20,9 +20,9 @@ import static players.mcts.MCTSEnums.TreePolicy.*;
  * <p>
  * The semi-dynamic strategies set the time for each search from the player's game timer (BUDGET_GAME_SECONDS):
  * <ul>
- * <li>EXP: the time left divided by the expected number of own decisions left (expectedDecisions, or decisionTable
+ * <li>EXP: the time left divided by the expected number of decisions left (expectedDecisions, or decisionTable
  * for EXP-MOVES)</li>
- * <li>OPEN: EXP times timeFactor</li>
+ * <li>OPEN: EXP times timeFactor; this allocates more thinking time to the opening moves</li>
  * <li>MID: EXP with a bonus that peaks at decision midCentre (midHeight, midWidth)</li>
  * </ul>
  * The dynamic strategies act during the search. BEHIND, UNST and CLOSE continue the search for a multiple of the
@@ -35,11 +35,9 @@ import static players.mcts.MCTSEnums.TreePolicy.*;
  * timeFactor moving the time saved to earlier decisions. STOP_A is earlyStopP = 1 and timeFactor = 1; STOP_B is
  * earlyStopP = 1.</li>
  * </ul>
- * The dynamic strategies also work with a fixed BUDGET_TIME or BUDGET_ITERATIONS per decision; an extension then
- * spends more than the budget.
  * <p>
  * Each allocation is made from the time left on the game timer, so an overrun is made up by later decisions.
- * <p>
+ * With BUDGET_SECONDS this calculation is over the game as a whole.
  * With BUDGET_ROUND_SECONDS the timer is for the round, and each round is managed as a game of its own: decisions are
  * counted from the start of the round, and the decision table gives the decisions left in the round.
  * <p>
@@ -48,6 +46,8 @@ import static players.mcts.MCTSEnums.TreePolicy.*;
  * roundTable), times roundTimeFactor. Each decision is then given the time left in the round's allocation divided by
  * the expected decisions left in the round, as with BUDGET_ROUND_SECONDS. Time a round does not use stays on the game
  * timer, and is shared out over the later rounds.
+ * <p>
+ * The dynamic strategies will do nothing for any other budget type.
  */
 public class MCTSTimeManager {
 
@@ -77,11 +77,6 @@ public class MCTSTimeManager {
             decisionTable = loadDecisionTable(params.decisionTable);
         if (!params.roundTable.isEmpty() && !params.roundTable.equals(DEFAULT_TABLE))
             roundTable = loadDecisionTable(params.roundTable);
-    }
-
-    public static boolean isUsed(MCTSParams params) {
-        return params.budgetType.isClock() || params.earlyStopP > 0.0 || params.behindLoops > 0
-                || params.unstableLoops > 0 || params.closeLoops > 0;
     }
 
     private static void validate(MCTSParams params) {
@@ -198,7 +193,6 @@ public class MCTSTimeManager {
     /**
      * Called before each search.
      *
-     *
      * @param timer - the player's game timer (null unless the budget is a clock). It is running, and
      *              elapsedMillis() is the time spent on this decision so far.
      */
@@ -293,6 +287,7 @@ public class MCTSTimeManager {
      */
     public boolean bestActionSettled(SingleTreeNode root, double remainingIterations) {
         SingleTreeNode decisionRoot = root.decisionRoot();
+        // TODO: The top two visits should not be a core method on SingleTreeNode. It should be a helper method on this class that takes a SingleTreeNode parameter.
         int[] topTwo = decisionRoot.topTwoVisits(decisionRoot.rootActionsToConsider());
         stoppedEarly = topTwo[0] - topTwo[1] > params.earlyStopP * remainingIterations;
         return stoppedEarly;
@@ -314,23 +309,22 @@ public class MCTSTimeManager {
             behindDone++;
             factor = params.behindFactor;
         } else if (unstableDone < params.unstableLoops && !mostVisited.equals(highestValued(decisionRoot, actions))) {
+            // TODO: If we are using SIMPLE, then this can still hold
             unstableDone++;
             factor = params.unstableFactor;
         } else if (closeDone < params.closeLoops && isClose(decisionRoot, actions)) {
+            // TODO: If SIMPLE, then this can use a t-test between the two highest. We want a probability
+            // TODO: (under the assumptions of the test) that the best action is really the best.
             closeDone++;
             factor = params.closeFactor;
         } else {
             return 0;
         }
-        // The paper extends by the "previously used search time"; we use the planned budget, so that each loop
-        // adds the same amount
         long budget = (long) (factor * plannedBudget);
-        if (params.budgetType.isClock()) {
-            long available = availableMillis(gameTimer.remainingTimeMillis() - gameTimer.elapsedMillis());
-            budget = Math.min(budget, available);
-            if (budget < params.minMoveTimeMS)
-                return 0;
-        }
+        long available = availableMillis(gameTimer.remainingTimeMillis() - gameTimer.elapsedMillis());
+        budget = Math.min(budget, available);
+        if (budget < params.minMoveTimeMS)
+            return 0;
         return Math.max(budget, 0);
     }
 

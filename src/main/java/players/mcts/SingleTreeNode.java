@@ -471,7 +471,7 @@ public class SingleTreeNode {
             } else {
                 throw new AssertionError("Unsupported budget type for MCTS: " + budgetType);
             }
-            if (timeManager != null) {
+            if (timeManager != null) { // we have a potentially dynamic decision budget that may be extended or stopped early
                 if (stop) {
                     // BEHIND, UNST and CLOSE may continue the search
                     long extension = timeManager.extension(this);
@@ -483,6 +483,8 @@ public class SingleTreeNode {
                     }
                 } else if (params.earlyStopP > 0.0 && numIters % params.earlyStopInterval == 0) {
                     // STOP: the iterations left are estimated from the rate so far
+                    // TODO: This currently uses the visit count. To adapt to SIMPLE we can consider a
+                    // TODO: t-test for difference in means, with some threshold (plus correction for the number of available actions)
                     double remainingIters;
                     if (timeBudget) {
                         long elapsed = elapsedTimer.elapsedNanos();
@@ -510,6 +512,8 @@ public class SingleTreeNode {
      */
     protected List<AbstractAction> rootActionsToConsider() {
         return actionsToConsider(statsFor(decisionPlayer).actionsFromOpenLoopState);
+        // TODO: Not sure why this is needed as a new method on SingleTreeNode - as it os only used by MCTSTimeManager
+        // TODO: Therefore make it a helper method there...*OR*... refactor other parts of code to use it if they need it
     }
 
     /**
@@ -533,6 +537,8 @@ public class SingleTreeNode {
      * @return the most-visited of the actions (the first of any tied), or null if none has been visited
      */
     protected AbstractAction mostVisitedAction(List<AbstractAction> actions) {
+        // TODO: This should not be needed just for MCTSTimeManager. What is wrong with using an existing bestAction() method?
+        // TODO: If there is genuinely a spcial case, then make this a helper method on MCTSTimeManager
         AbstractAction best = null;
         int bestVisits = 0;
         for (AbstractAction action : actions) {
