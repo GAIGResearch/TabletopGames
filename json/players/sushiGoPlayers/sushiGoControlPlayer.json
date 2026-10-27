@@ -1,0 +1,11 @@
+{
+  "class" : "players.sushiGoPlayer.SushiGoPlayerMCTSParams",
+  "K" : 3.0,
+  "rolloutLength" : 12,
+  "maxTreeDepth" : 1,
+  "heuristic" : {
+    "class" : "players.heuristics.ScoreHeuristic"
+  },
+  "budgetType" : "BUDGET_TIME",
+  "budget" : 250
+}

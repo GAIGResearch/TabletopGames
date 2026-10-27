@@ -73,21 +73,21 @@ public class CountingCardsHeuristic implements IStateHeuristic {
 
         int R = gameState.getPlayerHands().get(playerId).getSize() - 1;
 
-        for (int i = 0; i < gameState.getPlayerHands().get(playerId).getComponents().size(); i++) {
-            SGCard card = (SGCard) gameState.getPlayerHands().get(playerId).getComponents().get(i);
+        for (int i = 0; i < gameState.getPlayedCards().get(playerId).getComponents().size(); i++) {
+            SGCard card = (SGCard) gameState.getPlayedCards().get(playerId).getComponents().get(i);
 
 
             switch (card.type) {
                 case Tempura:
                     int valueTempura = ((SGParameters) gameState.getGameParameters()).valueTempuraPair;
                     Counter tempuraOnTable = gameState.getPlayedCardTypes(SGCard.SGCardType.Tempura, playerId);
-                    int tempuraNeeded = tempuraOnTable.getValue() % 2 == 0 ? 1 : 0;
+                    int tempuraNeeded = tempuraOnTable.getValue() % 2 == 0 ? 0 : 1;
 
                     if (tempuraNeeded == 0) {
-                        // 5 points from getting the tempura pair
-                        expectedScore.putIfAbsent(SGCard.SGCardType.Tempura, (double) valueTempura);
                         continue;
-                    } else if (tempuraNeeded == 1 && R == 0) {
+                    }
+
+                    if (tempuraNeeded == 1 && R == 0) {
                         expectedScore.putIfAbsent(SGCard.SGCardType.Tempura, 0.0);
                         continue;
                     } else {
@@ -125,19 +125,18 @@ public class CountingCardsHeuristic implements IStateHeuristic {
                     int sashmiNeeded;
 
                     if (sashmiOnTable.getValue() % 3 == 0) {
-                        sashmiNeeded = 2;
-                    } else if (sashmiOnTable.getValue() % 3 == 1) {
-                        sashmiNeeded = 1;
-                    } else {
                         sashmiNeeded = 0;
+                    } else if (sashmiOnTable.getValue() % 3 == 1) {
+                        sashmiNeeded = 2;
+                    } else {
+                        sashmiNeeded = 1;
                     }
 
-
                     if (sashmiNeeded == 0) {
-                        // 10 points from getting the tempura pair
-                        expectedScore.putIfAbsent(SGCard.SGCardType.Sashimi, (double) valueSashmi);
                         break;
-                    } else if ((sashmiNeeded == 1 && R == 0) || (sashmiNeeded == 2 && R <= 1)) {
+                    }
+
+                    if ((sashmiNeeded == 1 && R == 0) || (sashmiNeeded == 2 && R <= 1)) {
                         expectedScore.putIfAbsent(SGCard.SGCardType.Sashimi, 0.0);
                         break;
                     } else {
@@ -174,25 +173,42 @@ public class CountingCardsHeuristic implements IStateHeuristic {
                     }
                     break;
                 case Dumpling:
+                    int dumplingOnTable = gameState.getPlayedCardTypes(SGCard.SGCardType.Dumpling, playerId).getValue();
+
+                    double dumplingLambda = calculateLambdaOfKCardsArriveToMainPlayer(
+                            gameState, playerId, R, 1, SGCard.SGCardType.Dumpling, 0, cardCounter
+                    );
+
+                    int[] valueDumplings = ((SGParameters) gameState.getGameParameters()).valueDumpling;
+
+                    int dumplingIdx = Math.min(dumplingOnTable, valueDumplings.length - 1);
+                    int dumplingExpectedPoints = valueDumplings[dumplingIdx];
+
+                    expectedScore.putIfAbsent(
+                            SGCard.SGCardType.Dumpling,
+                            dumplingExpectedPoints * (1 - Math.exp(-dumplingLambda))
+                    );
                     break;
                 case SquidNigiri:
-                    addNigiriExpectedScore(gameState,playerId, SGCard.SGCardType.SquidNigiri, expectedScore);
-                    break;
                 case SalmonNigiri:
-                    addNigiriExpectedScore(gameState,playerId, SGCard.SGCardType.SalmonNigiri, expectedScore);
-                    break;
                 case EggNigiri:
-                    addNigiriExpectedScore(gameState,playerId, SGCard.SGCardType.EggNigiri, expectedScore);
+                    // Nigiri on the table have already scored in getGameScore (wasabi included)
                     break;
                 case Wasabi:
                     Counter wasabiOnTable = gameState.getPlayedCardTypes(SGCard.SGCardType.Wasabi, playerId);
 
-                    int nigriNeeded = wasabiOnTable.getValue() + 1;
+                    int wasabiOnTableValue = wasabiOnTable.getValue();
+
+                    if (wasabiOnTableValue == 0) {
+                        break;
+                    }
+
+                    int nigriNeeded = 1;
 
                     double wasabiMultiplier = ((SGParameters) gameState.getGameParameters()).multiplierWasabi;
-                    double squidLambda = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.SquidNigiri, 0, cardCounter);
-                    double salmonLambda = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.SalmonNigiri, 0, cardCounter);
-                    double eggLambda = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.EggNigiri, 0, cardCounter);
+                    double squidLambda = calculateLambdaOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.SquidNigiri, 0, cardCounter);
+                    double salmonLambda = calculateLambdaOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.SalmonNigiri, 0, cardCounter);
+                    double eggLambda = calculateLambdaOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.EggNigiri, 0, cardCounter);
 
                     int valueSquid = ((SGParameters) gameState.getGameParameters()).valueSquidNigiri;
                     int valueSalmon = ((SGParameters) gameState.getGameParameters()).valueSalmonNigiri;
@@ -211,29 +227,54 @@ public class CountingCardsHeuristic implements IStateHeuristic {
                     // handle Chopsticks
                     break;
                 case Pudding:
-                    // handle Pudding
+                    int myPudding = gameState.getPlayedCardTypes(SGCard.SGCardType.Pudding, playerId).getValue();
+
+                    int fewestOpponentPudding = Integer.MAX_VALUE;
+                    for (int p = 0; p < numberOfPlayers; p++) {
+                        if (p == playerId) continue;
+                        fewestOpponentPudding = Math.min(fewestOpponentPudding,
+                                gameState.getPlayedCardTypes(SGCard.SGCardType.Pudding, p).getValue());
+                    }
+
+                    int valuePuddingLeast = ((SGParameters) gameState.getGameParameters()).valuePuddingLeast; // -6
+                    if (myPudding < fewestOpponentPudding) {
+                        expectedScore.putIfAbsent(SGCard.SGCardType.Pudding, (double) valuePuddingLeast);
+                    } else if (myPudding == fewestOpponentPudding) {
+                        expectedScore.putIfAbsent(SGCard.SGCardType.Pudding, valuePuddingLeast / 2.0);
+                    }
                     break;
                 case Maki:
-                    switch (card.count) {
-                        case 1:
-                            // handle Maki1
-                            break;
-                        case 2:
-                            // handle Maki2
-                            break;
-                        case 3:
-                            // handle Maki3
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected Maki count: " + card.count);
+                    int myMaki = gameState.getPlayedCardTypes(SGCard.SGCardType.Maki, playerId).getValue();
+
+                    int opponentsWithMaki = 0;
+                    int bestOpponentMaki = 0;
+                    for (int p = 0; p < numberOfPlayers; p++) {
+                        if (p == playerId) continue;
+                        int opponentMaki = gameState.getPlayedCardTypes(SGCard.SGCardType.Maki, p).getValue();
+                        if (opponentMaki > 0) {
+                            opponentsWithMaki++;
+                        }
+                        bestOpponentMaki = Math.max(bestOpponentMaki, opponentMaki);
                     }
+
+                    double chanceOfMostMaki;
+                    if (opponentsWithMaki == 0) {
+                        chanceOfMostMaki = 1.0;
+                    } else {
+                        chanceOfMostMaki = (double) myMaki / (myMaki + bestOpponentMaki);
+                    }
+
+                    int valueMakiMost = ((SGParameters) gameState.getGameParameters()).valueMakiMost;
+                    expectedScore.putIfAbsent(SGCard.SGCardType.Maki, valueMakiMost * chanceOfMostMaki);
                     break;
                 default:
                     throw new IllegalStateException("Unexpected card type: " + card.type);
             }
         }
 
-        double sumExpectedScores = expectedScore.values().stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+        double sumExpectedScores = expectedScore.values().stream().mapToDouble(Double::doubleValue).sum();
+
+//        System.out.println(sumExpectedScores);
 
         double score = gs.getGameScore(playerId);
         if (gs.getPlayerResults()[playerId] == CoreConstants.GameResult.WIN_GAME)
@@ -243,7 +284,7 @@ public class CountingCardsHeuristic implements IStateHeuristic {
         return score + sumExpectedScores;
     }
 
-    private double calculateProbabilityOfKCardsArriveToMainPlayer(SGGameState gameState, int playerId, int R, int cardsNeeded, SGCard.SGCardType cardType, int cardCount, CardCounter cardCounter) {
+    private double calculateLambdaOfKCardsArriveToMainPlayer(SGGameState gameState, int playerId, int R, int cardsNeeded, SGCard.SGCardType cardType, int cardCount, CardCounter cardCounter) {
         double lambda = 0;
 
         if (cardsNeeded <= 0) {
