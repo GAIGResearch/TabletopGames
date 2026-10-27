@@ -1,0 +1,11 @@
+{
+  "class" : "players.observers.GameAdviser",
+  "args" : [
+    "AdviserJSON/3D_34_Adviser.json",
+    {
+      "class" : "players.observers.PlayerNameAdviser",
+      "args" :  ["Player_A", 0.05]
+    },
+    "Player_A_Adviser.txt"
+  ]
+}

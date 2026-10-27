@@ -139,6 +139,12 @@ public class GTGameState extends AbstractGameState {
     // public Random getRnd() returns a Random number generator for the game. This will be derived from the seed
     // in game parameters, and will be updated correctly on a reset
 
+
+    // TODO: If the game supports simultaneous play, then you may consider implementing this (optional) facility
+    // TODO: If you do, then you also need to implement the player-specific versions of _computeAvailableActions in the forward model
+    // TODO: For the simplest example of simultaneous play implementation, see Diamant
+    // public List<Integer> getCurrentSimultaneousPlayers(){}
+
     // Ths following provide access to the id of the current player; the first player in the Round (if that is relevant to a game)
     // and the current Turn and Round numbers.
     // public int getCurrentPlayer()

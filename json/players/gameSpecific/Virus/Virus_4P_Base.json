@@ -1,0 +1,72 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "rolloutTermination" : "END_TURN",
+  "rolloutLength" : 1,
+  "MASTGamma" : 0.200,
+  "heuristic" : {
+    "features" : {
+      "features" : [
+        {
+          "name" : "HealthyOrgans_B0",
+          "range" : "[-Infinity, 1.0]",
+          "index" : 9,
+          "type" : "RANGE"
+        },
+        {
+          "name" : "HealthyOrgans_B1",
+          "range" : "[1.0, 2.0]",
+          "index" : 9,
+          "type" : "RANGE"
+        },
+        {
+          "name" : "HealthyOrgans_B2",
+          "range" : "[2.0, 3.0]",
+          "index" : 9,
+          "type" : "RANGE"
+        },
+        {
+          "name" : "HealthyOrgans_B3",
+          "range" : "[3.0, 4.0]",
+          "index" : 9,
+          "type" : "RANGE"
+        },
+        {
+          "name" : "HealthyOrgans_B4",
+          "range" : "[4.0, Infinity]",
+          "index" : 9,
+          "type" : "RANGE"
+        }                       ],
+      "defaultBuckets" : 1,
+      "underlyingState" : {
+        "class" : "games.virus.metrics.VirusStateFeatures"
+      },
+      "class" : "evaluation.features.AutomatedFeatures"
+    },
+    "coefficients" : {
+      "LeaderMargin" : 0.426,
+      "HealthyOrgans_B3" : -0.0871,
+      "HealthyOrgans_B2" : -0.308,
+      "BIAS" : -0.909,
+      "RequiredOrgansInHand" : 0.113,
+      "HealthyOrgans_B4" : 1.01,
+      "HealthyOrgans" : 0.117,
+      "HealthyOrgans_B1" : -0.142,
+      "OrganThief" : 0.163,
+      "HealthyOrgans_B0" : 0.150,
+      "MedicalError" : 0.260
+    },
+    "class" : "players.heuristics.LinearStateHeuristic",
+    "defaultHeuristic" : {
+      "class" : "players.heuristics.LeaderHeuristic"
+    }
+  },
+  "maxTreeDepth" : 1,
+  "treePolicy" : "UCB_Tuned",
+  "backupPolicy" : "MaxMC",
+  "MAST" : "Both",
+  "rolloutType" : "MAST",
+  "maxBackupThreshold" : 3,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : -999
+}

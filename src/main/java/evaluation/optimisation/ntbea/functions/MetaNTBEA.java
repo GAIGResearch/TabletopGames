@@ -6,14 +6,8 @@ import evaluation.optimisation.NTBEAParameters;
 import evaluation.optimisation.ntbea.NTBEAEvaluator;
 import evaluation.optimisation.ntbea.NTupleBanditEA;
 import evaluation.optimisation.ntbea.NTupleSystem;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import utilities.Pair;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -24,24 +18,8 @@ import static evaluation.RunArg.*;
 public class MetaNTBEA {
 
     public static void main(String[] args) {
-        // Config
+        // Config (parseConfig already merges any config= file with CLI overrides, CLI taking precedence)
         Map<RunArg, Object> config = parseConfig(args, Collections.singletonList(Usage.ParameterSearch));
-
-        String setupFile = config.getOrDefault(RunArg.config, "").toString();
-        if (!setupFile.isEmpty()) {
-            // Read from file instead
-            try {
-                FileReader reader = new FileReader(setupFile);
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(reader);
-                config = parseConfig(json, Usage.ParameterSearch, true);
-            } catch (FileNotFoundException ignored) {
-                throw new AssertionError("Config file not found : " + setupFile);
-                //    parseConfig(runGames, args);
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
         config.put(game, "TicTacToe");
         NTBEAParameters params = new NTBEAParameters(config);

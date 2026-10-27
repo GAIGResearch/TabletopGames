@@ -1,0 +1,6 @@
+{
+  "class": "games.agram.AgramParameters",
+  "nCardsPerPlayer": 6,
+  "nDeals": 1,
+  "rememberVoids": true
+}

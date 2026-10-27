@@ -87,13 +87,12 @@ public class ActionFeatureListener extends FeatureListener {
     }
 
     @Override
-    public void processState(AbstractGameState state, AbstractAction action) {
+    public void processState(AbstractGameState state, AbstractAction action, List<AbstractAction> availableActions, int currentPlayer) {
         // we override this from FeatureListener, because we want to record the feature vector for each action
         // we record this once, and cache the results for all actions
         if (action == null) return; // we do not record data for the GAME_OVER event
         cachedPhi = null;  // relevant phi cache will be recomputed on the first call to the relevant method
         cachedObjectPhi = null;
-        List<AbstractAction> availableActions = game.getForwardModel().computeAvailableActions(state);
         if (availableActions.size() == 1) {
             // only one action available, so no decision to take
             return;

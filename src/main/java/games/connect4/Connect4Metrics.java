@@ -38,7 +38,9 @@ public class Connect4Metrics implements IMetricsCollection {
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             Connect4GameParameters params = (Connect4GameParameters) e.state.getGameParameters();
-            records.put("gridSize", params.gridSize);
+            // Upstream replaced the single square gridSize with an explicit width/height board
+            records.put("width", params.width);
+            records.put("height", params.height);
             records.put("winCount", params.winCount);
             return true;
         }
@@ -51,7 +53,8 @@ public class Connect4Metrics implements IMetricsCollection {
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
-            columns.put("gridSize", Integer.class);
+            columns.put("width", Integer.class);
+            columns.put("height", Integer.class);
             columns.put("winCount", Integer.class);
             return columns;
         }

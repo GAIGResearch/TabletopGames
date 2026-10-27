@@ -20,7 +20,7 @@ import players.simple.RandomPlayer;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class MultiTreeMCTSTests {
     TestMCTSPlayer mctsPlayer;
@@ -51,7 +51,7 @@ public class MultiTreeMCTSTests {
                     ).sum();
 
     private final Predicate<SingleTreeNode> actionVisitsAddUp = node ->
-            node.getVisits() == node.actionValues.values().stream().mapToInt(s -> s.nVisits).sum();
+            node.getVisits() == node.getActionValues().values().stream().mapToInt(s -> s.nVisits).sum();
 
     @Before
     public void setup() {

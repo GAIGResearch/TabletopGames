@@ -1,0 +1,58 @@
+{
+  "cards": [
+    {
+      "name": "Assassin",
+      "value": 1,
+      "special": "Assassin",
+      "count": 1
+    },
+    {
+      "name": "Scout",
+      "value": 2,
+      "special": "Scout",
+      "count": 1
+    },
+    {
+      "name": "Saboteur",
+      "value": 3,
+      "special": "SaboteurII",
+      "count": 1
+    },
+    {
+      "name": "Trickster",
+      "value": 4,
+      "special": "Trickster",
+      "count": 1
+    },
+    {
+      "name": "Berserker",
+      "value": 5,
+      "special": "Berserker",
+      "count": 1
+    },
+    {
+      "name": "Icon Bearer",
+      "value": 6,
+      "special": "IconBearer",
+      "count": 1
+    },
+    {
+      "name": "General One",
+      "value": 7,
+      "special": "GeneralOne",
+      "count": 1
+    },
+    {
+      "name": "General Two",
+      "value": 7,
+      "special": "GeneralTwo",
+      "count": 1
+    },
+    {
+      "name": "Assault Cannon",
+      "value": 0,
+      "special": "AssaultCannon",
+      "count": 1
+    }
+  ]
+}

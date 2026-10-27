@@ -1,0 +1,10 @@
+{
+  "budgetType": "BUDGET_TIME",
+  "rolloutLength": 30,
+  "heuristic": {
+    "class": "players.heuristics.LeaderHeuristic"
+  },
+  "class": "players.mcts.MCTSParams",
+  "decoupled" : true,
+  "budget": 40
+}

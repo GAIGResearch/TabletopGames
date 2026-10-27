@@ -56,7 +56,7 @@ public class PowerGridParameters extends AbstractParameters{
 
     public static final int[] uraniumPrice = new int[] {1,2,3,4,5,6,7,7,8,8,9,9};
 
-    public static final int[] INCOME_TRACK = {10,22,33,44,54,64,73,82,90,98,105,112,118,124,129,134,138,42,145,148,150};
+    public static final int[] INCOME_TRACK = {10,22,33,44,54,64,73,82,90,98,105,112,118,124,129,134,138,142,145,148,150};
     
     public static final int MAX_INCOME = 150;
     public static final int MAX_CARD= 50;

@@ -1,0 +1,36 @@
+name: Attach PyTAG jar to release
+
+# Runs when a maintainer publishes a GitHub Release (as has always been done for
+# this repo's v1.0/v2.0/... tags). Builds the project and attaches the slim
+# PyTAG runtime jar (target/TAG-pytag.jar, see src/assembly/pytag-jar.xml) to
+# that same release as an asset named TAG.jar - the exact filename and URL
+# shape (.../releases/latest/download/TAG.jar) that PyTAG's jar_setup.py
+# expects (github.com/martinballa/PyTAG).
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build
+        run: mvn -B package
+
+      - name: Upload TAG-pytag.jar as TAG.jar release asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            target/TAG-pytag.jar#TAG.jar --clobber

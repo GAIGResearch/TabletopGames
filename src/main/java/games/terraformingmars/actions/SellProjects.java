@@ -3,7 +3,6 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -13,8 +12,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.LinkedHashSet;
 
-public class SellProjects extends TMAction implements IExtendedSequence {
+public class SellProjects extends TMAction implements TMExtendedSequence {
     HashSet<Integer> cardIDsSold;
     boolean complete;
 
@@ -23,7 +23,7 @@ public class SellProjects extends TMAction implements IExtendedSequence {
     public SellProjects(int player) {
         super(player, false);
         actionType = TMTypes.ActionType.StandardProject;
-        cardIDsSold = new HashSet<>();
+        cardIDsSold = new LinkedHashSet<>();
     }
     public SellProjects(int player, int cardID) {
         super(player, true);
@@ -59,7 +59,7 @@ public class SellProjects extends TMAction implements IExtendedSequence {
             }
         }
         if (!cardIDsSold.isEmpty()) {
-            actions.add(new TMAction(player));  // Pass to stop the action, unless you haven't picked any card yet
+            actions.add(TMAction.passInSequence(player));  // Pass to stop the action, unless you haven't picked any card yet
         }
         return actions;
     }
@@ -71,8 +71,9 @@ public class SellProjects extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        if (((TMAction)action).pass) complete = true;
-        else cardIDsSold.add(((SellProjects)action).getCardID());
+        if (TMExtendedSequence.isPass(action)) complete = true;
+        else if (action instanceof SellProjects sell) cardIDsSold.add(sell.getCardID());
+        else throw unexpectedAction(action);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class SellProjects extends TMAction implements IExtendedSequence {
         SellProjects copy = new SellProjects(player, getCardID());
         copy.complete = complete;
         if (cardIDsSold != null) {
-            copy.cardIDsSold = new HashSet<>(cardIDsSold);
+            copy.cardIDsSold = new LinkedHashSet<>(cardIDsSold);
         }
         return copy;
     }

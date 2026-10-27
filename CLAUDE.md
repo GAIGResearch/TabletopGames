@@ -1,0 +1,1 @@
+Load AGENTS.ms instead of CLAUDE.md

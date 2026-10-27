@@ -18,7 +18,7 @@ public class PenteTests {
 
     @Before
     public void setUp() {
-        parameters = new PenteParameters();
+        parameters = new PenteParameters();  // should pick up the defaults for Schaedler's rules
         gameState = new PenteGameState(parameters, 2);
         forwardModel = new PenteForwardModel();
         forwardModel.setup(gameState);
@@ -47,7 +47,7 @@ public class PenteTests {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
 
             if (die == 1) {
-                // Only move from 1 to 2 should be possible
+                // Only move from 1 to 2 should be possible (i.e. on to Sacred Line)
                 assertTrue(actions.contains(new PenteMoveAction(1, 2)));
                 assertEquals(1, actions.size());
             } else if (die == 2) {
@@ -141,8 +141,22 @@ public class PenteTests {
         assertEquals(1, actions.size());
         assertEquals(new DoNothing(), actions.get(0));
         gameState.setDieValue(1);
+    }
 
+    @Test
+    public void testZugZwang() {
+        // If the only move is off the sacred line, then so be it
+        // we move all but one of player 0's pieces to (7)
+        // we leave the remining one at (3)
+        (new PenteMoveAction(0, 7)).execute(gameState);
+        (new PenteMoveAction(1, 7)).execute(gameState);
+        (new PenteMoveAction(2, 7)).execute(gameState);
+        (new PenteMoveAction(4, 7)).execute(gameState);
 
+        gameState.setDieValue(3);
+        List<AbstractAction> actions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(1, actions.size());
+        assertEquals(new PenteMoveAction(7, 0), actions.get(0));
     }
 
     @Test

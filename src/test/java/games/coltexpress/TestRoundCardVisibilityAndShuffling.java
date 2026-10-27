@@ -55,13 +55,13 @@ public class TestRoundCardVisibilityAndShuffling {
             if (event.type == ROUND_OVER) {
                 ColtExpressGameState state = (ColtExpressGameState) event.state;
                 long visibleRoundCards = state.getRounds().getVisibleComponents(0).stream().filter(Objects::nonNull).count();
-                System.out.printf("End of Round: %d, Turn %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), state.getTurnOrder().getTurnCounter(), visibleRoundCards);
-                for (int i = 0; i < state.getTurnOrder().getRoundCounter(); i++)
+                System.out.printf("End of Round: %d, Turn %d, Visible Cards: %d%n", state.getRoundCounter(), state.getTurnCounter(), visibleRoundCards);
+                // ROUND_OVER is published before the round counter is incremented, and after the card for the next
+                // round (if any) has been revealed. So 2 cards are visible at the end of Round 0, and so on.
+                int expectedVisible = Math.min(state.getRoundCounter() + 2, state.getRounds().getSize());
+                for (int i = 0; i < expectedVisible; i++)
                     assertTrue(state.getRounds().getVisibilityForPlayer(i, 0));
-                assertEquals(visibleRoundCards, state.getTurnOrder().getRoundCounter() + 1);
-                // Added knowledge of 'hack' that for Colt Express the Round counter is one less than it shoudl be at ROUND_OVER
-
-                // 1 card visible at end of Round 0, and so on.
+                assertEquals(expectedVisible, visibleRoundCards);
 
                 int matches = 0, nonMatches = 0;
                 List<String> visibleCards = state.getRounds().getVisibleComponents(0).stream()
@@ -71,7 +71,7 @@ public class TestRoundCardVisibilityAndShuffling {
 
                 for (int loop = 0; loop < 30; loop++) {
                     ColtExpressGameState copyState = (ColtExpressGameState) state.copy(0);
-                    assertEquals(visibleRoundCards, copyState.getTurnOrder().getRoundCounter() + 1);
+                    assertEquals(expectedVisible, Math.min(copyState.getRoundCounter() + 2, copyState.getRounds().getSize()));
 
                     // this relies on the fact that the visible cards occur first, followed by the invisible ones
                     for (int i = 0; i < copyState.getRounds().getSize(); i++) {

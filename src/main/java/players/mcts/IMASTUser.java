@@ -8,4 +8,6 @@ import java.util.Map;
 public interface IMASTUser {
 
     void setMASTStats(List<Map<Object, Pair<Integer, Double>>> MASTStats);
+
+    List<Map<Object, Pair<Integer, Double>>> getMASTStats();
 }

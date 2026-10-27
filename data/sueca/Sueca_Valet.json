@@ -1,0 +1,7 @@
+{
+  "class": "games.sueca.SuecaParameters",
+  "handSize": 10,
+  "playRubber": false,
+  "targetGames": 4,
+  "rememberVoids": true
+}

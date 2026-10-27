@@ -1,0 +1,8 @@
+{
+  "class": "games.gofish.GoFishParameters",
+  "startingHandSize": 5,
+  "twoPlayerHandSize": 5,
+  "continueOnSuccess": true,
+  "continueOnDrawingSameRank": true,
+  "playUntilAllBooks": false
+}

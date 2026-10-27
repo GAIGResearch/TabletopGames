@@ -224,7 +224,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         }
 
         // Then we check all the parameters in the JSON file are valid for the ITunableParameters
-        // If any have values that are not the same as the searchspace values (or do not
+        // If any have values that are not the same as the searchSpace values (or do not
         // match the default value for that parameter), then we throw an error
         // This is recursive as needed over any nested ITunableParameters in the JSON
         for (Object key : json.keySet()) {
@@ -236,7 +236,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
             // we do not check recursively here (possible future enhancement)
             if (value instanceof JSONObject)
                 continue;
-            // slightly awkward...TunableParameters has a rawJSON set of data that should be used to provide local overrides to the
+            // TunableParameters has a rawJSON set of data that should be used to provide local overrides to the
             // global defaults specific to the main parameter definition
             Object defaultValue = itp instanceof TunableParameters<?> tp ? tp.getDefaultOverride(keyName) : itp.getDefaultParameterValue(keyName);
             if (!JSONUtils.areValuesEqual(value, defaultValue)) {
@@ -246,7 +246,6 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         return settings;
     }
 
-
     public JSONObject constructAgentJSON(int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
         setTo(settings);
@@ -254,12 +253,23 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         return itp.instanceToJSON(true, settingsMap);
     }
 
-    @SuppressWarnings("unchecked")
-    public void writeAgentJSON(int[] settings, String fileName) {
+    /*
+    This is subtly different from the above method in that it will write the JSON to a file.
+    This means that it needs to use the defaults from the underlying classes, and not from the search space
+    This is because for those items with no setting (i.e. fixed in search space), we need to pick up this as the default during search
+    BUT - the default is elided when we write to file is not in settings
+     */
+    public JSONObject constructAgentJSONToWriteToFile(int[] settings) {
         JSONObject json = constructAgentJSON(settings);
         int budget = (int) itp.getParameterValue("budget");
         if (budget > 0)
             json.put("budget", budget);
+        return json;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void writeAgentJSON(int[] settings, String fileName) {
+        JSONObject json = constructAgentJSONToWriteToFile(settings);
         JSONUtils.writeJSON(json, fileName);
     }
 

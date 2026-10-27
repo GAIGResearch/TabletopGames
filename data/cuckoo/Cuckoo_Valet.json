@@ -1,0 +1,5 @@
+{
+  "class": "games.cuckoo.CuckooParameters",
+  "nLives": 1,
+  "maxDeals": 1
+}

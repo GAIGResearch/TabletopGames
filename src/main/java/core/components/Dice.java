@@ -3,13 +3,14 @@ package core.components;
 import java.util.*;
 
 import core.CoreConstants;
+import core.interfaces.IToJSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 
 import static core.components.Dice.Type.*;
 
-public class Dice extends Component {
+public class Dice extends Component implements IToJSON {
     public enum Type{
         d3(3),
         d4(4),
@@ -58,11 +59,8 @@ public class Dice extends Component {
         this.nSides = pdf.length;
         this.diceType = sidesToType(nSides);
     }
-    public Dice(String json) {
-        super(CoreConstants.ComponentType.DICE);
-        JSONObject data = JSONUtils.loadJSONFile(json);
-        this.nSides = ((Long) data.get("nSides")).intValue();
-        this.diceType = sidesToType(nSides);
+    public Dice(JSONObject data) {
+        this(((Number) data.get("nSides")).intValue());
         Object pdfObj = data.get("pdf");
         if (pdfObj != null) {
             JSONArray arr = (JSONArray) pdfObj;
@@ -71,9 +69,33 @@ public class Dice extends Component {
                 pdf[i] = ((Number) arr.get(i)).doubleValue();
             }
             double total = Arrays.stream(pdf).sum();
-            if (Math.abs(total - 1.0) > 0.000001)
+            // The standard JSON format stores numbers to 3 sig fig.
+            // We may therefore need to adjust to make sure the PDF sums to 1
+            if (Math.abs(total - 1.0) > 0.01)
                 throw new IllegalArgumentException("Invalid PDF in Dice: " + Arrays.toString(pdf));
+            else if (Math.abs(total - 1.0) > 1e-6) {
+                for (int i = 0; i < pdf.length; i++) {
+                    pdf[i] /= total;
+                }
+            }
         }
+        if (data.containsKey("value")) {
+            this.value = ((Number) data.get("value")).intValue();
+        }
+        if (data.containsKey("id")) {
+            int id = ((Number) data.get("id")).intValue();
+            try {
+                java.lang.reflect.Field f = Component.class.getDeclaredField("componentID");
+                f.setAccessible(true);
+                f.set(this, id);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public Dice(String json) {
+        this(JSONUtils.loadJSONFile(json));
     }
 
     private Dice(Type diceType, int nSides, int value, int ID) {
@@ -143,4 +165,19 @@ public class Dice extends Component {
     public final int hashCode() {
         return componentID;
     }
+
+    @Override
+    public JSONObject toJSON() {
+        JSONObject dJSON = new JSONObject();
+        dJSON.put("value", value);
+        dJSON.put("nSides", nSides);
+        if (pdf != null && pdf.length > 0) {
+            JSONArray pdfArray = new JSONArray();
+            for (double p : pdf) pdfArray.add(p);
+            dJSON.put("pdf", pdfArray);
+        }
+        dJSON.put("id", componentID);
+        return dJSON;
+    }
+
 }

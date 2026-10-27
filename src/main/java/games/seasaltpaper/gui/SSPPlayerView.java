@@ -6,6 +6,7 @@ import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Set;
 
 import static games.seasaltpaper.gui.SSPGUIManager.playerAreaHeight;
 import static games.seasaltpaper.gui.SSPGUIManager.playerAreaWidth;
@@ -25,15 +26,16 @@ public class SSPPlayerView extends JPanel {
 
     SeaSaltPaperGameState gs;
 
-    public SSPPlayerView(SeaSaltPaperGameState gameState, Deck<SeaSaltPaperCard> playerHand, Deck<SeaSaltPaperCard> playerDiscard, int playerId, String dataPath)
+    public SSPPlayerView(SeaSaltPaperGameState gameState, Deck<SeaSaltPaperCard> playerHand, Deck<SeaSaltPaperCard> playerDiscard, int playerId, String dataPath, Set<Integer> human)
     {
         this.gs = gameState;
         this.width = playerAreaWidth + border*20;
         this.height = playerAreaHeight*2 + borderBottom + border + borderBottom;
         this.playerId = playerId;
 
-        this.playerHandView = new SSPDeckView(playerId, playerHand, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));  // todo only visible if player is human or always fully observable
-        this.playerDiscardView = new SSPDeckView(playerId, playerDiscard, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
+        int humanId = human.stream().findFirst().orElse(-1);
+        this.playerHandView = new SSPDeckView(humanId, playerHand, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));  // todo only visible if player is human or always fully observable
+        this.playerDiscardView = new SSPDeckView(humanId, playerDiscard, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
         this.pointsText = new JLabel(0 + " points");
         this.pointsText.setOpaque(false);
 

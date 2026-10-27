@@ -80,9 +80,6 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState state, AbstractAction action) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) state;
-        if (ekgs.isActionInProgress())
-            return;
-
         // We may have some special statuses to be aware of:
         // - If a player has skipped, they skip the draw card
 

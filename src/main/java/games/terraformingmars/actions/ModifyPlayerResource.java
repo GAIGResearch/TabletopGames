@@ -3,7 +3,6 @@ package games.terraformingmars.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
@@ -13,8 +12,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.LinkedHashSet;
 
-public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSequence {
+public class ModifyPlayerResource extends TMModifyCounter implements TMExtendedSequence {
     public TMTypes.Resource resource;
     public boolean production;
     public int targetPlayer;
@@ -224,7 +224,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         ModifyPlayerResource copy = new ModifyPlayerResource(player, targetPlayer, change, resource, production, tagToCount, tileToCount, any, opponents, onMars, counterResource, counterResourceProduction, freeActionPoint);
         copy.counterID = counterID;
         if (targetPlayerOptions != null) {
-            copy.targetPlayerOptions = new HashSet<>(targetPlayerOptions);
+            copy.targetPlayerOptions = new LinkedHashSet<>(targetPlayerOptions);
         }
         copy.complete = complete;
         return copy;
@@ -247,7 +247,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
             if (targetPlayerOptions != null) {
                 for (int i: targetPlayerOptions) {
                     if (i == -1) {
-                        actions.add(new TMAction(player));  // Pass
+                        actions.add(TMAction.passInSequence(player));  // Pass
                         continue;
                     }
                     if (!production && change < 0) {
@@ -296,7 +296,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         }
 
         if (actions.size() == 0) {
-            actions.add(new TMAction(player)); // Should not happen
+            actions.add(TMAction.passInSequence(player)); // Should not happen
         }
 
         return actions;
@@ -318,6 +318,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (!(action instanceof ModifyPlayerResource) && !TMExtendedSequence.isPass(action)) throw unexpectedAction(action);
         complete = true;  // Only 1 step
     }
 

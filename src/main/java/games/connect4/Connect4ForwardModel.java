@@ -19,9 +19,8 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         Connect4GameParameters c4gp = (Connect4GameParameters) firstState.getGameParameters();
-        int gridSize = c4gp.gridSize;
         Connect4GameState state = (Connect4GameState) firstState;
-        state.gridBoard = new GridBoard(gridSize, gridSize, new BoardNode(Connect4Constants.emptyCell));
+        state.gridBoard = new GridBoard(c4gp.width, c4gp.height, new BoardNode(Connect4Constants.emptyCell));
         state.winnerCells = new LinkedList<>();
     }
 

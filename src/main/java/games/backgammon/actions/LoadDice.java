@@ -25,7 +25,8 @@ public class LoadDice extends AbstractAction {
     static LoadDice getPermanentShift(int die, double[] newPDF, double detectionChance) {
         return new LoadDice(die, newPDF, false, detectionChance);
     }
-    static LoadDice getOneOffShift(int die,  double[] newPDF, double detectionChance) {
+
+    static LoadDice getOneOffShift(int die, double[] newPDF, double detectionChance) {
         return new LoadDice(die, newPDF, true, detectionChance);
     }
 
@@ -39,7 +40,6 @@ public class LoadDice extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         BGGameState state = (BGGameState) gs;
-        BGParameters params = (BGParameters) gs.getGameParameters();
 
         double[] originalPDF = state.getDicePdf(die);
         state.setDicePdf(die, newPDF);
@@ -48,6 +48,7 @@ public class LoadDice extends AbstractAction {
             // reset pdf
             state.setDicePdf(die, originalPDF);
         }
+        state.incrementCheatCount(state.getCurrentPlayer());
 
         // then check for cheating detection
         if (rnd.nextDouble() < detectionChance) {
@@ -64,6 +65,13 @@ public class LoadDice extends AbstractAction {
         double[] copy = new double[newPDF.length];
         System.arraycopy(newPDF, 0, copy, 0, newPDF.length);
         return copy;
+    }
+
+    public double getDetectionChance() {
+        return detectionChance;
+    }
+    public int getDieNumber() {
+        return die;
     }
 
     @Override

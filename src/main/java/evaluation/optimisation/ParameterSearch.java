@@ -2,13 +2,7 @@ package evaluation.optimisation;
 
 import evaluation.RunArg;
 import games.GameType;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 import static evaluation.RunArg.*;
@@ -23,24 +17,9 @@ public class ParameterSearch {
             return;
         }
 
-        // Config
+        // Config (parseConfig already merges any config= file with CLI overrides, CLI taking precedence)
         Map<RunArg, Object> config = parseConfig(args, Collections.singletonList(RunArg.Usage.ParameterSearch));
 
-        String setupFile = config.getOrDefault(RunArg.config, "").toString();
-        if (!setupFile.isEmpty()) {
-            // Read from file instead
-            try {
-                FileReader reader = new FileReader(setupFile);
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(reader);
-                config = parseConfig(json, RunArg.Usage.ParameterSearch, true);
-            } catch (FileNotFoundException ignored) {
-                throw new AssertionError("Config file not found : " + setupFile);
-                //    parseConfig(runGames, args);
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }
         if (config.get(RunArg.game).equals("all")) {
             System.out.println("No game provided. Please provide a game.");
             return;

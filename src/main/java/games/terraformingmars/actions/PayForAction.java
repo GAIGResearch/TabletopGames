@@ -2,17 +2,18 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
+import core.components.Counter;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.requirements.PlayableActionRequirement;
+import games.terraformingmars.rules.requirements.Requirement;
 
 import java.util.*;
 
 // Wrapper class for actions that need to be paid with resources before execution
-public class PayForAction extends TMAction implements IExtendedSequence {
+public class PayForAction extends TMAction implements TMExtendedSequence {
     public TMAction action;
 
     int costPaid;
@@ -55,6 +56,16 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         stage = 0;
         costPaid = 0;
 
+        if (cost <= 0) {
+            // Discounts cover the whole cost, so there is nothing to pay: just execute the action
+            setCost(0);
+            this.action.player = player;
+            this.action.requirements.remove(this.action.costRequirement);
+            boolean s = this.action.execute(gs);
+            stage = resourcesToPayWith.length;
+            return s;
+        }
+
         if (stage == resourcesToPayWith.length-1) {
             List<AbstractAction> actions = _computeAvailableActions(gs);
             if (actions.size() == 1) {
@@ -89,7 +100,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
         TMTypes.Resource res = resourcesToPayWith[stage];
         // Find minimum that must be spent of this resource so that the card is still payable with remaining resources
-        HashSet<TMTypes.Resource> resourcesRemaining = new HashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
+        HashSet<TMTypes.Resource> resourcesRemaining = new LinkedHashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
 
         TMCard card = (TMCard) gs.getComponentById(getPlayCardID());
         double rate = gs.getResourceMapRate(res, getCostResource());
@@ -98,9 +109,16 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         int min = Math.max(0, (int)(Math.ceil(remaining/rate)));
         int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((getCost() - costPaid)/rate)));
 
-        // Can pay between min and max of this resource
+        // Can pay between min and max of this resource, as long as this does not stop the action being played
+        // (e.g. Helion paying with heat that the card itself then needs)
         for (int i = min; i <= max; i++) {
-            actions.add(new ModifyPlayerResource(player, -i, res, false));
+            if (actionPlayableAfterPaying(gs, res, i))
+                actions.add(new ModifyPlayerResource(player, -i, res, false));
+        }
+        if (actions.isEmpty()) {
+            for (int i = min; i <= max; i++) {
+                actions.add(new ModifyPlayerResource(player, -i, res, false));
+            }
         }
 
         if (actions.size() == 0) {
@@ -110,6 +128,23 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         return actions;
     }
 
+    private boolean actionPlayableAfterPaying(TMGameState gs, TMTypes.Resource res, int amount) {
+        if (amount == 0 || action.requirements == null) return true;
+        Counter counter = gs.getPlayerResources()[player].get(res);
+        int before = counter.getValue();
+        counter.setValue(before - amount);
+        boolean playable = true;
+        for (Requirement<TMGameState> r : action.requirements) {
+            // The cost itself is covered by this payment
+            if (!r.equals(action.costRequirement) && !r.testCondition(gs)) {
+                playable = false;
+                break;
+            }
+        }
+        counter.setValue(before);
+        return playable;
+    }
+
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
         return player;
@@ -117,12 +152,12 @@ public class PayForAction extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (executionComplete(state)) throw unexpectedAction(action);
         if (! (action instanceof ModifyPlayerResource)) {
-            // Shouldn't happen
+            if (action.getClass() != this.action.getClass()) throw unexpectedAction(action);
+            // Shouldn't happen: the fallback in _computeAvailableActions offered the action itself, which the
+            // forward model has now executed (so we must not execute it again)
             stage = resourcesToPayWith.length;
-            this.action.player = player;
-            this.action.requirements.remove(costRequirement);
-            this.action.execute(state);
             return;
         }
         TMGameState gs = (TMGameState) state;
@@ -132,7 +167,7 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         if (costPaid >= getCost()) {
             // Action paid for, execute
             this.action.player = player;
-            this.action.requirements.remove(costRequirement);
+            this.action.requirements.remove(this.action.costRequirement);
             this.action.execute(state);
             stage = resourcesToPayWith.length;
         }

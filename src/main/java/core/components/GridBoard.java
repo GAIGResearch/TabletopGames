@@ -55,7 +55,11 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         this.grid = grid;
     }
 
-    protected GridBoard(BoardNode[][] grid, int ID) {
+    /**
+     * Rebuilds a GridBoard from an existing grid with a specific componentID. Used when reloading a
+     * serialized game state, so that the restored board keeps the same identity as the original.
+     */
+    public GridBoard(BoardNode[][] grid, int ID) {
         super(CoreConstants.ComponentType.BOARD, ID);
         this.width = grid[0].length;
         this.height = grid.length;

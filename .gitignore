@@ -41,5 +41,17 @@ src/main/java/META-INF/MANIFEST.MF
 
 src/pytag/env/
 metrics/out/*
+outputdir/*
 treeRecorder*
 .vscode/*
+
+# game run output
+outputdir/
+
+# private experiment config, not for the main codebase
+json/experiments/Lab3_Connect4.json
+
+# local experiment scratch
+sgrun/
+cp.txt
+/claude_game_creator/

@@ -1,13 +1,15 @@
 package games.explodingkittens.cards;
 
 import core.components.Card;
+import core.interfaces.IToJSON;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.actions.ChoiceOfCardToGive;
+import org.json.simple.JSONObject;
 
 import java.util.function.BiConsumer;
 
 
-public class ExplodingKittensCard extends Card {
+public class ExplodingKittensCard extends Card implements IToJSON {
 
     public static int SEE_THE_FUTURE_CARDS = 3;
     public static int ADDITIONAL_TURNS = 2;
@@ -95,6 +97,21 @@ public class ExplodingKittensCard extends Card {
     public ExplodingKittensCard(CardType cardType, int ID) {
         super(cardType.toString(), ID);
         this.cardType = cardType;
+    }
+
+    /** Reconstructs a card (with its original componentID) from JSON produced by {@link #toJSON}.
+     * Required so that a serialized {@link core.components.Deck} of these can recurse to recreate them. */
+    public ExplodingKittensCard(JSONObject json) {
+        this(CardType.valueOf((String) json.get("cardType")), ((Number) json.get("id")).intValue());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("cardType", cardType.name());
+        json.put("id", componentID);
+        return json;
     }
 
     @Override

@@ -4,7 +4,7 @@ import games.dominion.cards.CardType;
 
 public interface IDominionReaction {
 
-    public CardType getCardType();
-    public int getPlayer();
+    CardType getCardType();
+    int getPlayer();
 
 }

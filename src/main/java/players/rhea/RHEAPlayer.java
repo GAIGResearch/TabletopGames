@@ -44,6 +44,7 @@ public class RHEAPlayer extends AbstractPlayer implements IAnyTimePlayer {
         for (int i = 0; i < state.getNPlayers(); i++)
             MASTStatistics.add(new HashMap<>());
         population = new ArrayList<>();
+        super.initializePlayer(state);
     }
 
     @Override

@@ -398,6 +398,7 @@ public class TMTypes {
 //                        card = TMCard.loadCardHTML((JSONObject) o);
                         card = TMCard.loadCardJSON((JSONObject) o);
                     }
+                    card.setCardActionCosts();
                     deck.add(card);
                 }
             } catch (IOException ignored) {

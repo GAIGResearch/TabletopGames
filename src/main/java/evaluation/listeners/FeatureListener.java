@@ -2,9 +2,11 @@ package evaluation.listeners;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
+import players.heuristics.LeaderHeuristic;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -27,10 +29,15 @@ public abstract class FeatureListener implements IGameListener {
     protected double sampleRate = 1.0; // what proportion of events to record
     protected Random rnd = new Random();
     protected boolean recordEndGameState = true;
+    protected IStateHeuristic heuristic;
 
     protected FeatureListener(Event.GameEvent frequency, boolean currentPlayerOnly) {
         this.currentPlayerOnly = currentPlayerOnly;
         this.frequency = frequency;
+    }
+    protected FeatureListener(Event.GameEvent frequency, boolean currentPlayerOnly, IStateHeuristic heuristic) {
+        this(frequency, currentPlayerOnly);
+        this.heuristic = heuristic;
     }
 
     public FeatureListener setLogger(IStatisticLogger logger) {
@@ -44,6 +51,11 @@ public abstract class FeatureListener implements IGameListener {
     public FeatureListener setSampleRate(double rate) {
         if (rate <= 0 || rate > 1.0) throw new IllegalArgumentException("Sample rate must be in the range (0,1]");
         sampleRate = rate;
+        return this;
+    }
+
+    public FeatureListener setStateHeuristic(IStateHeuristic heuristic) {
+        this.heuristic = heuristic;
         return this;
     }
 
@@ -73,13 +85,13 @@ public abstract class FeatureListener implements IGameListener {
             if (rnd.nextDouble() > sampleRate) {
                 return;
             }
-            processState(event.state, event.action);
+            processState(event.state, event.action, event.actions, event.playerID);
         }
 
         if (event.type == Event.GameEvent.GAME_OVER) {
             // first we record a final state for each player
             if (recordEndGameState)
-                processState(event.state, null);
+                processState(event.state, null, Collections.emptyList(), event.playerID);
 
             // now we can update the result
             writeDataWithStandardHeaders(event.state);
@@ -125,6 +137,13 @@ public abstract class FeatureListener implements IGameListener {
             if (!data.containsKey("Win")) {
                 data.put("Win", winLoss[record.player]);
             }
+            double heuristicScore = heuristic == null ?
+                    state.getHeuristicScore(record.player) :
+                    heuristic.evaluateState(state, record.player);
+            data.put("Heuristic", heuristicScore);
+            if (!data.containsKey("FinalHeuristic")) {
+                data.put("FinalHeuristic", heuristicScore);
+            }
             data.put("ActualOrdinal", ordinal[record.player]);
             if (!data.containsKey("Ordinal")) {
                 data.put("Ordinal", ordinal[record.player]);
@@ -133,10 +152,9 @@ public abstract class FeatureListener implements IGameListener {
             if (!data.containsKey("FinalScore")) {
                 data.put("FinalScore", finalScores[record.player]);
             }
-            double bestOtherScore = IntStream.range(0, totP)
-                    .filter(p -> p != record.player)
-                    .mapToDouble(i -> finalScores[i])
-                    .max().orElse(0);
+            double bestOtherScore = LeaderHeuristic.bestOtherTeamScore(state, record.player);
+            if (bestOtherScore == Double.NEGATIVE_INFINITY)
+                bestOtherScore = 0;  // no opponents (e.g. a solo game)
             data.put("ActualScoreAdv", finalScores[record.player] - bestOtherScore);
             if (!data.containsKey("FinalScoreAdv")) {
                 data.put("FinalScoreAdv", finalScores[record.player] - bestOtherScore);
@@ -175,19 +193,21 @@ public abstract class FeatureListener implements IGameListener {
     public void preProcessing(AbstractGameState state, AbstractAction action) {
         // for extension in sub-classes
     }
-    public void processState(AbstractGameState state, AbstractAction action) {
+    public void processState(AbstractGameState state, AbstractAction action, List<AbstractAction> allActions, int currentPlayer) {
         // we record one state for each player after each relevant event occurs
         // we first determine if the data is double[] or Object[]
         preProcessing(state, action);
+        boolean endOfGame = state.isGameOver();
+        if (endOfGame)
+            currentPlayer = state.getCurrentPlayer(); // instead of -1
         boolean isDouble = true;
-        int currentPlayer = state.getCurrentPlayer();
         double[] doubleData = new double[0];
         try {
             doubleData = extractDoubleVector(action, state, currentPlayer);
         } catch (UnsupportedOperationException e) {
             isDouble = false;
         }
-        if (currentPlayerOnly && state.isNotTerminalForPlayer(currentPlayer)) {
+        if (currentPlayerOnly && (endOfGame || state.isNotTerminalForPlayer(currentPlayer))) {
             if (isDouble) {
                 currentData.add(LocalDataWrapper.factory(currentPlayer, doubleData, names(), state, new HashMap<>()));
             } else {
@@ -196,7 +216,7 @@ public abstract class FeatureListener implements IGameListener {
             }
         } else {
             for (int p = 0; p < state.getNPlayers(); p++) {
-                if (state.isNotTerminalForPlayer(p)) {
+                if (endOfGame || state.isNotTerminalForPlayer(p)) {
                     if (isDouble) {
                         double[] phi = p == currentPlayer ? doubleData : extractDoubleVector(action, state, p);
                         currentData.add(LocalDataWrapper.factory(p, phi, names(), state, new HashMap<>()));

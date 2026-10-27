@@ -42,7 +42,11 @@ public class ParetoAnalysis implements IResultsAnalysis {
                 if (results.getWins(agent, otherAgent) > results.getWins(otherAgent, agent)) continue; // if agent beats otherAgent, then otherAgent cannot dominate agent, so skip
                 if (results.getAllAgentNames().stream()
                         .filter(a -> !(a.equals(otherAgent) || a.equals(agent)))
-                        .allMatch(a -> results.getWinRate(otherAgent, a) >= results.getWinRate(agent, a))) {
+                        .allMatch(a -> results.getWinRate(otherAgent, a) >= results.getWinRate(agent, a)) &&
+                        (results.getWins(otherAgent, agent) > results.getWins(agent, otherAgent) ||
+                                results.getAllAgentNames().stream()
+                                        .filter(a -> !(a.equals(otherAgent) || a.equals(agent)))
+                                        .anyMatch(a -> results.getWinRate(otherAgent, a) > results.getWinRate(agent, a)))) {
                     paretoFront.remove(agent); // another agent dominates this agent, so remove it from the Pareto front
                     break;
                 }

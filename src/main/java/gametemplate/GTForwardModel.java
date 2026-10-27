@@ -47,6 +47,10 @@ public class GTForwardModel extends StandardForwardModel {
         return actions;
     }
 
+    // TODO: If, and only if, you implement getSimultaneousPlayers in game state, then you must also implement this version of
+    // TODO: computeAvailableActions (as it might be called for any one of the possible players)
+    // protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int activePlayer) {
+
     /**
      * This is a method hook for any game-specific functionality that should run before an Action is executed
      * by the forward model
@@ -58,6 +62,7 @@ public class GTForwardModel extends StandardForwardModel {
         // override if needed
         // TODO: implement any game-specific functionality that should run before an Action is executed
         // TODO: (This is actually quite rare, and if not needed then remove this method)
+        // TODO: It is not called while an IExtendedSequence is in control (that is told instead)
     }
 
     /**
@@ -72,6 +77,8 @@ public class GTForwardModel extends StandardForwardModel {
         // TODO: Unlike _beforeAction, this is almost always implemented
         // TODO: This generally does things like checking for end of turn or round or game (and then doing the
         // TODO: appropriate actions).
+        // TODO: It is not called while an IExtendedSequence is in control; only once the last one on the stack has
+        // TODO: completed, and then with the decision that completed it.
     }
 
 

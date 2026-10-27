@@ -15,10 +15,7 @@ import utilities.JSONUtils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 import static utilities.JSONUtils.parser;
@@ -83,12 +80,16 @@ public class PlayerFactory {
         List<AbstractPlayer> retValue = new ArrayList<>();
         File od = new File(opponentDescriptor);
         if (od.exists() && od.isDirectory()) {
-            for (String fileName : Objects.requireNonNull(od.list())) {
-                if (!fileName.endsWith(".json"))
-                    continue;
-                AbstractPlayer player = PlayerFactory.createPlayer(od.getAbsolutePath() + File.separator + fileName);
-                retValue.add(player);
-                player.setName(fileName.substring(0, fileName.indexOf(".")));
+            String[] files = od.list();
+            if (files != null) {
+                Arrays.sort(files);
+                for (String fileName : files) {
+                    if (!fileName.endsWith(".json"))
+                        continue;
+                    AbstractPlayer player = PlayerFactory.createPlayer(od.getAbsolutePath() + File.separator + fileName);
+                    retValue.add(player);
+                    player.setName(fileName.substring(0, fileName.indexOf(".")));
+                }
             }
         } else {
             return Collections.singletonList(createPlayer(opponentDescriptor));

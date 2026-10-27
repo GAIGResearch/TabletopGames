@@ -105,8 +105,9 @@ public class TMMapTile extends BoardNode {
             TMTypes.GlobalParameter gp = which.getGlobalParameterToIncrease();
             setTilePlaced(which, gs);
             if (gp != null) {
-                // Increase global parameter
-                return new ModifyGlobalParameter(gp, 1, true).execute(gs);
+                // Increase global parameter, unless already at maximum (e.g. greenery placed when oxygen is maxed)
+                ModifyGlobalParameter increase = new ModifyGlobalParameter(gp, 1, true);
+                if (increase.canBePlayed(gs)) return increase.execute(gs);
             }
             return true;
         }

@@ -35,8 +35,8 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
         this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.VISIBLE_TO_ALL);
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
-        playersInsideCompartment = new HashSet<>();
-        playersOnTopOfCompartment = new HashSet<>();
+        playersInsideCompartment = new LinkedHashSet<>();
+        playersOnTopOfCompartment = new LinkedHashSet<>();
         containsMarshal = false;
     }
 
@@ -46,13 +46,13 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
         this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.HIDDEN_TO_ALL);
         this.nPlayers = nPlayers;
         this.compartmentID = compartmentID;
-        playersInsideCompartment = new HashSet<>();
-        playersOnTopOfCompartment = new HashSet<>();
+        playersInsideCompartment = new LinkedHashSet<>();
+        playersOnTopOfCompartment = new LinkedHashSet<>();
         containsMarshal = false;
 
         // Loot distribution setup
-        pickedCount = new HashMap<>();
-        stillAvailableIdx = new HashMap<>();
+        pickedCount = new LinkedHashMap<>();
+        stillAvailableIdx = new LinkedHashMap<>();
         for (ColtExpressTypes.LootType t: ColtExpressTypes.LootType.values()) {
             stillAvailableIdx.put(t, new ArrayList<>());
             pickedCount.put(t, new ArrayList<>());
@@ -135,8 +135,8 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
         newCompartment.containsMarshal = containsMarshal;
         newCompartment.playersOnTopOfCompartment.addAll(playersOnTopOfCompartment);
         newCompartment.playersInsideCompartment.addAll(playersInsideCompartment);
-        newCompartment.pickedCount = new HashMap<>();  // Copies never need to know this information
-        newCompartment.stillAvailableIdx = new HashMap<>();  // Copies never need to know this information
+        newCompartment.pickedCount = new LinkedHashMap<>();  // Copies never need to know this information
+        newCompartment.stillAvailableIdx = new LinkedHashMap<>();  // Copies never need to know this information
         return newCompartment;
     }
 

@@ -1,5 +1,6 @@
 package evaluation.tournaments;
 
+import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import evaluation.RunArg;
@@ -157,7 +158,7 @@ public class RoundRobinTournament extends AbstractTournament {
             gameTracker.init(game, nPlayers, agentNames);
             game.addListener(gameTracker);
         }
-        game.setActionValidation((boolean) config.getOrDefault(RunArg.validateActionInGame, true));
+        game.setSavedStatesDirectory(config.getOrDefault(RunArg.destDir, "").toString() + File.separator + "SavedStates");
 
         LinkedList<Integer> matchUp = new LinkedList<>();
         // add outer loop if we have tournamentSeeds enabled; if not this will just run once
@@ -337,6 +338,12 @@ public class RoundRobinTournament extends AbstractTournament {
             // if tournamentSeeds > 0, then we are running this many tournaments, each with a different random seed fixed for the whole tournament
             // so we override the standard random seeds
             game.reset(matchUpPlayers, seeds.get(i));
+
+            // if we are starting from a specific state, load it and reset the game
+            if (!((String) config.getOrDefault(RunArg.gameState, "")).isEmpty()) {
+                AbstractGameState startState = JSONUtils.loadClassFromFile((String) config.get(RunArg.gameState));
+                game.reset(startState);
+            }
 
             // Randomize parameters
             if (randomGameParams) {

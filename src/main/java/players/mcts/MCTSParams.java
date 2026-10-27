@@ -1,11 +1,12 @@
 package players.mcts;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
 import org.jetbrains.annotations.NotNull;
 import players.PlayerParameters;
+import players.heuristics.GameDefaultHeuristic;
+import players.heuristics.NullActionHeuristic;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
 
@@ -38,15 +39,17 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.SelectionPolicy selectionPolicy = SIMPLE;  // In general better than ROBUST
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
+    // Decoupled UCT on simultaneous-move turns: every player who moves at once decides at the same node
+    public boolean decoupled = false;
     public boolean paranoid = false;
     public MCTSEnums.RolloutIncrement rolloutIncrementType = TICK;
     public MCTSEnums.Strategies rolloutType = RANDOM;
     public MCTSEnums.Strategies oppModelType = MCTSEnums.Strategies.DEFAULT;  // Default is to use the same as rolloutType
     public String rolloutClass, oppModelClass = "";
     public AbstractPlayer rolloutPolicy;
-    public ITunableParameters rolloutPolicyParams;
+    public ITunableParameters<? extends AbstractPlayer> rolloutPolicyParams;
     public AbstractPlayer opponentModel;
-    public ITunableParameters opponentModelParams;
+    public ITunableParameters<? extends AbstractPlayer> opponentModelParams;
     public double exploreEpsilon = 0.1;
     public int omaVisits = 30;
     public boolean normaliseRewards = true;  // This will automatically normalise rewards to be in the range [0,1]
@@ -55,12 +58,12 @@ public class MCTSParams extends PlayerParameters {
     public boolean maintainMasterState = false;
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = EXACT;
-    public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    public IStateHeuristic heuristic = new GameDefaultHeuristic();
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
     public double firstPlayUrgency = 1e6;
-    @NotNull public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
+    @NotNull public IActionHeuristic actionHeuristic = new NullActionHeuristic();
     public boolean useActionHeuristicForMoveOrdering = true;
     public boolean useMASTAsActionHeuristic = false;
     public int actionHeuristicRecalculationThreshold = 20;
@@ -77,6 +80,8 @@ public class MCTSParams extends PlayerParameters {
     public Class<?> instantiationClass;
     public int numDeterminizations = 1;
     public MCTSEnums.PerfectInformationPolicy perfectInformationPolicy = AverageValue;
+    double DDAGameThreshold = 1_000_000.0; // If our projected result is higher than this, then we play badly
+    double DDAMoveThreshold = 0.0; // When playing badly, we will take actions up to this amount less than the best action
 
     public MCTSParams() {
         addTunableParameter("K", 1.0, Arrays.asList(0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0));
@@ -98,8 +103,9 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("selectionPolicy", SIMPLE, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
+        addTunableParameter("decoupled", false, Arrays.asList(false, true));
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", IStateHeuristic.class, AbstractGameState::getHeuristicScore);
+        addTunableParameter("heuristic", IStateHeuristic.class, new GameDefaultHeuristic());
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
@@ -128,6 +134,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("instantiationClass", "players.mcts.MCTSPlayer");
         addTunableParameter("perfectInformationPolicy", AverageValue, Arrays.asList(MCTSEnums.PerfectInformationPolicy.values()));
         addTunableParameter("numDeterminizations", 1, Arrays.asList(1, 10, 30, 100, 300, 1000));
+        addTunableParameter("DDAGameThreshold", 1_000_000.0);
+        addTunableParameter("DDAMoveThreshold", 0.0);
     }
 
     @Override
@@ -178,7 +186,7 @@ public class MCTSParams extends PlayerParameters {
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
         MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");
-        rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
+        rolloutPolicyParams = (TunableParameters<AbstractPlayer>) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
         // we then null those elements of params which are constructed (lazily) from the above
         firstPlayUrgency = (double) getParameterValue("FPU");
@@ -214,6 +222,14 @@ public class MCTSParams extends PlayerParameters {
         if (numDeterminizations > 1) {
             budget = budget / numDeterminizations;
         }
+        DDAGameThreshold = (double) getParameterValue("DDAGameThreshold");
+        DDAMoveThreshold = (double) getParameterValue("DDAMoveThreshold");
+        decoupled = (boolean) getParameterValue("decoupled");
+        if (decoupled && (opponentTreePolicy != OneTree || numDeterminizations > 1)) {
+            // Decoupling only ever engages on a simultaneous turn, and every opponent tree policy
+            // other than OneTree assumes one actor per node.
+            decoupled = false;
+        }
     }
 
     @Override
@@ -227,14 +243,18 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer getOpponentModel() {
         if (opponentModel == null) {
             if (oppModelType == PARAMS)
-                opponentModel = (AbstractPlayer) opponentModelParams.instantiate();
+                opponentModel = opponentModelParams.instantiate();
             else if (oppModelType == MCTSEnums.Strategies.DEFAULT)
                 opponentModel = getRolloutStrategy();
             else
                 opponentModel = constructStrategy(oppModelType, oppModelClass);
-            opponentModel.getParameters().actionSpace = actionSpace;  // TODO makes sense?
+            opponentModel.getParameters().actionSpace = actionSpace;
         }
         return opponentModel;
+    }
+
+    public void setOpponentModel(AbstractPlayer opponentModel) {
+        this.opponentModel = opponentModel;
     }
 
     public AbstractPlayer getRolloutStrategy() {
@@ -243,13 +263,18 @@ public class MCTSParams extends PlayerParameters {
                 if (rolloutPolicyParams == null) {
                     throw new AssertionError("Rollout policy parameters have not been set");
                 }
-                rolloutPolicy = (AbstractPlayer) rolloutPolicyParams.instantiate();
+                rolloutPolicy = rolloutPolicyParams.instantiate();
             } else {
                 rolloutPolicy = constructStrategy(rolloutType, rolloutClass);
             }
-            rolloutPolicy.getParameters().actionSpace = actionSpace;  // TODO makes sense?
+            rolloutPolicy.getParameters().actionSpace = actionSpace;
         }
         return rolloutPolicy;
+    }
+
+    // this is primarily intended for testing
+    public void setRolloutPolicy(AbstractPlayer rolloutPolicy) {
+        this.rolloutPolicy = rolloutPolicy;
     }
 
     private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {

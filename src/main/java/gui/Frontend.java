@@ -7,16 +7,21 @@ import evaluation.optimisation.TunableParameters;
 import evaluation.metrics.Event;
 import games.GameType;
 import gui.models.AITableModel;
+import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.PlayerType;
 import players.human.ActionController;
+import utilities.JSONUtils;
 
 import javax.swing.Timer;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Frontend extends GUI {
     private final int nMaxPlayers = 20;
@@ -28,6 +33,8 @@ public class Frontend extends GUI {
     private Game gameRunning;
     private boolean showAll, paused, started, showAIWindow;
     private ActionController humanInputQueue;
+    // The most recently loaded game state (from a saved JSON file), or null if none has been loaded
+    private AbstractGameState loadedGameState;
 
     public Frontend() {
 
@@ -46,40 +53,31 @@ public class Frontend extends GUI {
 
         JPanel gameSelect = new JPanel(new BorderLayout(5, 5));
         gameSelect.add(BorderLayout.WEST, new JLabel("  Game type:"));
-        String[] gameNames = new String[GameType.values().length];
+        // listed alphabetically, not in enum order; every per-game array below is indexed by position in this list
+        GameType[] gameTypes = Arrays.stream(GameType.values())
+                .sorted(Comparator.comparing(gt -> gt.name().toLowerCase()))
+                .toArray(GameType[]::new);
+        String[] gameNames = new String[gameTypes.length];
         TunableParameters[] gameParameters = new TunableParameters[GameType.values().length];
         gameParameterEditWindow = new JFrame[GameType.values().length];
+        // Keep a handle on the parameter combo-boxes per game, so a loaded game state can update them
+        @SuppressWarnings("unchecked")
+        HashMap<String, JComboBox<Object>>[] gameParamValueOptions = new HashMap[GameType.values().length];
         for (int i = 0; i < gameNames.length; i++) {
-            gameNames[i] = GameType.values()[i].name();
-            AbstractParameters params = GameType.values()[i].createParameters(0);
+            gameNames[i] = gameTypes[i].name();
+            AbstractParameters params = gameTypes[i].createParameters(0);
             if (params instanceof TunableParameters) {
                 gameParameters[i] = (TunableParameters) params;
                 gameParameterEditWindow[i] = new JFrame();
                 gameParameterEditWindow[i].getContentPane().setLayout(new BoxLayout(gameParameterEditWindow[i].getContentPane(), BoxLayout.Y_AXIS));
 
-                List<String> paramNames = gameParameters[i].getParameterNames();
-                HashMap<String, JComboBox<Object>> paramValueOptions = createParameterWindow(paramNames, gameParameters[i], gameParameterEditWindow[i]);
-
                 int idx = i;
-                JButton submit = new JButton("Submit");
-                submit.addActionListener(e -> {
-                    for (String param : paramNames) {
-                        gameParameters[idx].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
-                    }
-                    gameParameterEditWindow[idx].dispose();
-                });
-                JButton reset = new JButton("Reset");
-                reset.addActionListener(e -> {
-                    gameParameters[idx].reset();
-                    for (String param : paramNames) {
-                        paramValueOptions.get(param).setSelectedItem(gameParameters[idx].getDefaultParameterValue(param));
-                    }
-                });
-                JPanel buttons = new JPanel();
-                buttons.add(submit);
-                buttons.add(reset);
-
-                gameParameterEditWindow[i].getContentPane().add(buttons);
+                gameParamValueOptions[i] = buildParameterEditWindow(gameParameters[i], gameParameterEditWindow[i],
+                        options -> {
+                            for (String param : options.keySet())
+                                gameParameters[idx].setParameterValue(param, options.get(param).getSelectedItem());
+                        },
+                        param -> gameParameters[idx].getDefaultParameterValue(param));
             }
         }
         GameType firstGameType = GameType.valueOf(gameNames[0]);
@@ -94,6 +92,8 @@ public class Frontend extends GUI {
 
             GameType gameType = GameType.valueOf((String) gameOptions.getSelectedItem());
             nPlayersText.setText("  # players (min " + gameType.getMinPlayers() + ", max " + gameType.getMaxPlayers() + "):");
+            // Changing the game type invalidates any loaded saved state (it belongs to a different game)
+            loadedGameState = null;
             pack();
         });
         gameSelect.add(BorderLayout.EAST, gameParameterEdit);
@@ -138,11 +138,7 @@ public class Frontend extends GUI {
             paramButtonPanel.add(paramButton);
             paramButtonPanel.add(fileButton);
 
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setAcceptAllFileFilterUsed(false);
-            fileChooser.addChoosableFileFilter(
-                    new FileNameExtensionFilter("JSON files only", "json")
-            );
+            JFileChooser fileChooser = jsonFileChooser();
 
             fileButton.addActionListener(e -> {
                         int retVal = fileChooser.showOpenDialog(this);
@@ -164,24 +160,27 @@ public class Frontend extends GUI {
             playerParameterEditWindow[i] = new JFrame();
             playerParameterEditWindow[i].getContentPane().setLayout(new BoxLayout(playerParameterEditWindow[i].getContentPane(), BoxLayout.Y_AXIS));
 
+            // The Edit button opens the parameter window for whichever agent is currently selected.
+            // Attached once here (rather than inside the combo listener) so it does not accumulate a
+            // fresh listener - and so open a window per past selection - every time the agent changes.
+            paramButton.addActionListener(f -> {
+                int agentIndex = playerOptionsChoice[playerIdx].getSelectedIndex();
+                initialisePlayerParameterWindow(playerIdx, agentIndex);
+                playerParameterEditWindow[playerIdx].setTitle("Edit parameters " + playerOptionsChoice[playerIdx].getSelectedItem());
+                playerParameterEditWindow[playerIdx].pack();
+                playerParameterEditWindow[playerIdx].setVisible(true);
+                playerParameterEditWindow[playerIdx].setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            });
+
             playerOptionsChoice[i].addActionListener(e -> {
                 int agentIndex = playerOptionsChoice[playerIdx].getSelectedIndex();
-                // set Edit button visible if we have parameters to edit; else make it invisible
-                paramButton.setVisible(agentParameters[agentIndex] != null);
-                fileButton.setVisible(agentParameters[agentIndex] != null);
+                // show the Edit/Load buttons only if this agent type has parameters to edit
+                boolean hasParams = agentParameters[agentIndex] != null;
+                paramButton.setVisible(hasParams);
+                fileButton.setVisible(hasParams);
                 // set up the player parameters with the current saved default for that agent type
-
-                paramButton.removeAll();
-                try {
+                if (hasParams)
                     playerParameters[playerIdx] = (PlayerParameters) agentParameters[agentIndex].copy();
-                    paramButton.addActionListener(f -> {
-                        initialisePlayerParameterWindow(playerIdx, agentIndex);
-                        playerParameterEditWindow[playerIdx].setTitle("Edit parameters " + playerOptionsChoice[playerIdx].getSelectedItem());
-                        playerParameterEditWindow[playerIdx].pack();
-                        playerParameterEditWindow[playerIdx].setVisible(true);
-                        playerParameterEditWindow[playerIdx].setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                    });
-                } catch (Exception ignored) {}
                 pack();
             });
             playerOptions[i].add(BorderLayout.CENTER, playerOptionsChoice[i]);
@@ -190,9 +189,11 @@ public class Frontend extends GUI {
         }
         JButton updateNPlayers = new JButton("Update");
         updateNPlayers.addActionListener(e -> {
+            // Changing the number of players invalidates any loaded saved state (its player count is fixed)
+            loadedGameState = null;
             if (!nPlayerField.getText().isEmpty()) {
                 int nP = Integer.parseInt(nPlayerField.getText());
-                if (nP > 0 && nP < nMaxPlayers) {
+                if (nP > 0 && nP <= nMaxPlayers) {
                     for (int i = 0; i < nP; i++) {
                         playerOptions[i].setVisible(true);
                     }
@@ -202,33 +203,73 @@ public class Frontend extends GUI {
                     pack();
                 } else {
                     JOptionPane.showMessageDialog(null,
-                            "Error: Please enter number bigger than 0 and less than " + nMaxPlayers, "Error Message",
+                            "Error: Please enter a number between 1 and " + nMaxPlayers, "Error Message",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
         nPlayers.add(BorderLayout.EAST, updateNPlayers);
 
+        // Load a saved game state from a JSON file. If one is selected, the game state is instantiated
+        // from the file and the game type, number of players and game parameters are read from it and
+        // applied to the controls above. This requires the game state to implement IToJSON and to provide
+        // a constructor taking a JSONObject (currently only Backgammon / XII Scripta do so).
+        JButton loadStateButton = new JButton("Load JSON");
+        JPanel loadStatePanel = labelledRow("  Load game state:", null, loadStateButton);
+        JFileChooser stateFileChooser = jsonFileChooser();
+        loadStateButton.addActionListener(e -> {
+            if (stateFileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
+                return;
+            File stateFile = stateFileChooser.getSelectedFile();
+            try {
+                LoadedGameState loaded = loadGameStateFromFile(stateFile);
+                int gameIdx = Arrays.asList(gameNames).indexOf(loaded.gameType().name());
+
+                // Apply to the GUI: game type first (its listener resets the player count limits)...
+                gameOptions.setSelectedIndex(gameIdx);
+
+                // ...then the game parameters read from the loaded state...
+                if (gameParameters[gameIdx] != null && loaded.state().getGameParameters() instanceof TunableParameters loadedParams) {
+                    List<String> paramNames = gameParameters[gameIdx].getParameterNames();
+                    for (String param : paramNames) {
+                        Object value = loadedParams.getParameterValue(param);
+                        gameParameters[gameIdx].setParameterValue(param, value);
+                        if (gameParamValueOptions[gameIdx] != null && gameParamValueOptions[gameIdx].containsKey(param))
+                            gameParamValueOptions[gameIdx].get(param).setSelectedItem(value);
+                    }
+                }
+
+                // ...and the number of players (doClick refreshes the per-player rows).
+                nPlayerField.setText("" + loaded.nPlayers());
+                updateNPlayers.doClick();
+
+                // Remember the loaded state last: setting the game type and player count above both
+                // clear loadedGameState (as a guard against a stale state), so we record it afterwards.
+                // The game will now start from this state until the game type or player count changes.
+                loadedGameState = loaded.state();
+
+                System.out.println("Loaded " + loaded.gameType().name() + " game state ("
+                        + loaded.nPlayers() + " players) from " + stateFile.getName());
+            } catch (Throwable loadingException) {
+                JOptionPane.showMessageDialog(this,
+                        "Could not load game state: " + loadingException.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         // Select visuals on/off
-        JPanel visualSelect = new JPanel(new BorderLayout(5, 5));
-        visualSelect.add(BorderLayout.WEST, new JLabel("  Visuals ON/OFF:"));
         JComboBox<Boolean> visualOptions = new JComboBox<>(new Boolean[]{false, true}); // index here is visuals on/off
         visualOptions.setSelectedItem(true);
-        visualSelect.add(BorderLayout.EAST, visualOptions);
+        JPanel visualSelect = labelledRow("  Visuals ON/OFF:", null, visualOptions);
 
-        JPanel turnPause = new JPanel(new BorderLayout(5, 5));
-        turnPause.add(BorderLayout.WEST, new JLabel("  Pause between turns (ms):"));
         JTextField turnPauseValue = new JTextField("    200");
-        turnPause.add(BorderLayout.EAST, turnPauseValue);
+        JPanel turnPause = labelledRow("  Pause between turns (ms):", null, turnPauseValue);
 
         // Select random seed
-        JPanel seedSelect = new JPanel(new BorderLayout(5, 5));
-        seedSelect.add(BorderLayout.WEST, new JLabel("  Seed:"));
-        JTextField seedOption = new JTextField("" + System.currentTimeMillis());  // integer of this is seed
+        JTextField seedOption = new JTextField("" + System.currentTimeMillis());  // parsed as the random seed
         JButton seedRefresh = new JButton("Refresh");
         seedRefresh.addActionListener(e -> seedOption.setText("" + System.currentTimeMillis()));
-        seedSelect.add(BorderLayout.CENTER, seedOption);
-        seedSelect.add(BorderLayout.EAST, seedRefresh);
+        JPanel seedSelect = labelledRow("  Seed:", seedOption, seedRefresh);
 
         // Game run core parameters select
         CoreParameters coreParameters = new CoreParameters();
@@ -303,6 +344,11 @@ public class Frontend extends GUI {
                 if (gameRunning != null) {
                     // Reset game instance, passing the players for this game
                     gameRunning.reset(players);
+                    // If a saved state was loaded, start the game from it rather than a fresh setup.
+                    // A copy is used so the loaded state survives intact for a subsequent replay.
+                    if (loadedGameState != null) {
+                        gameRunning.reset(loadedGameState.copy());
+                    }
                     try {
                         gameRunning.setTurnPause(Integer.parseInt(turnPauseValue.getText().trim()));
                     } catch (NumberFormatException notAnInteger) {
@@ -340,7 +386,6 @@ public class Frontend extends GUI {
                 if (guiUpdater != null)
                     guiUpdater.stop();
                 gameThread.interrupt();
-                guiUpdater.stop();
             }
         };
 
@@ -404,6 +449,7 @@ public class Frontend extends GUI {
         JPanel gameOptionFullPanel = new JPanel();
         gameOptionFullPanel.setLayout(new BoxLayout(gameOptionFullPanel, BoxLayout.Y_AXIS));
         gameOptionFullPanel.add(leftJustify(gameSelect));
+        gameOptionFullPanel.add(leftJustify(loadStatePanel));
         gameOptionFullPanel.add(leftJustify(playerSelect));
         gameOptionFullPanel.add(leftJustify(visualSelect));
         gameOptionFullPanel.add(leftJustify(turnPause));
@@ -449,34 +495,68 @@ public class Frontend extends GUI {
         new Frontend();
     }
 
+    /**
+     * The result of loading a saved game-state JSON file: the resolved game type, the number of
+     * players and the instantiated game state.
+     */
+    public record LoadedGameState(GameType gameType, int nPlayers, AbstractGameState state) {}
+
+    /**
+     * Loads a saved game state from a JSON file. The file is expected to have a top-level "class"
+     * naming the {@link AbstractGameState} subclass and an "abstractGameState" object holding the
+     * number of players and the game parameters (see {@link core.interfaces.IToJSON}).
+     * <p>
+     * The {@link GameType} is resolved by matching the state class and (where present) the
+     * parameters class. Matching on the parameters class is required to disambiguate games that
+     * share a state class - e.g. Backgammon and XII Scripta both use {@code BGGameState}, whose
+     * {@code _getGameType()} always reports Backgammon.
+     *
+     * @param file the JSON file to load
+     * @return the resolved game type, player count and instantiated state
+     * @throws IllegalArgumentException if no game matches the state/parameters classes in the file
+     */
+    public static LoadedGameState loadGameStateFromFile(File file) {
+        JSONObject json = JSONUtils.loadJSONFile(file.getPath());
+        String stateClassName = (String) json.get("class");
+        JSONObject abstractGS = (JSONObject) json.get("abstractGameState");
+        int nPlayers = ((Number) abstractGS.get("nPlayers")).intValue();
+        JSONObject gameParamsJSON = (JSONObject) abstractGS.get("gameParams");
+        String paramsClassName = gameParamsJSON == null ? null : (String) gameParamsJSON.get("class");
+
+        GameType gameType = null;
+        for (GameType gt : GameType.values()) {
+            if (gt.getGameStateClass() == null || !gt.getGameStateClass().getName().equals(stateClassName))
+                continue;
+            if (paramsClassName == null ||
+                    (gt.getParameterClass() != null && gt.getParameterClass().getName().equals(paramsClassName))) {
+                gameType = gt;
+                break;
+            }
+        }
+        if (gameType == null)
+            throw new IllegalArgumentException("No game matches state class " + stateClassName
+                    + (paramsClassName == null ? "" : " with parameters " + paramsClassName));
+
+        // Instantiate the game state from the file (this also validates that the file is loadable)
+        AbstractGameState state = JSONUtils.loadClassFromJSON(json);
+        return new LoadedGameState(gameType, nPlayers, state);
+    }
+
     private void initialisePlayerParameterWindow(int playerIndex, int agentIndex) {
         if (playerParameters[playerIndex] != null) {
-            List<String> paramNames = playerParameters[playerIndex].getParameterNames();
-            HashMap<String, JComboBox<Object>> paramValueOptions = createParameterWindow(paramNames, playerParameters[playerIndex], playerParameterEditWindow[playerIndex]);
-
-            JButton submit = new JButton("Submit");
-            submit.addActionListener(e -> {
-                for (String param : paramNames) {
-                    playerParameters[playerIndex].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
-                    agentParameters[agentIndex].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
-                    // we also update the central copy, so this change is inherited by future new players
-                }
-                playerParameterEditWindow[playerIndex].dispose();
-            });
-            JButton reset = new JButton("Reset");
-            reset.addActionListener(e -> {
-                playerParameters[playerIndex].reset();
-                PlayerParameters defaultParams = PlayerType.values()[agentIndex].createParameterSet();
-                if (defaultParams != null)
-                    for (String param : paramNames) {
-                        paramValueOptions.get(param).setSelectedItem(defaultParams.getDefaultParameterValue(param));
-                    }
-            });
-            JPanel buttons = new JPanel();
-            buttons.add(submit);
-            buttons.add(reset);
-
-            playerParameterEditWindow[playerIndex].getContentPane().add(buttons);
+            PlayerParameters defaultParams = PlayerType.values()[agentIndex].createParameterSet();
+            buildParameterEditWindow(playerParameters[playerIndex], playerParameterEditWindow[playerIndex],
+                    options -> {
+                        for (String param : options.keySet()) {
+                            Object value = options.get(param).getSelectedItem();
+                            playerParameters[playerIndex].setParameterValue(param, value);
+                            // also update the central copy, so this change is inherited by future new players
+                            agentParameters[agentIndex].setParameterValue(param, value);
+                        }
+                    },
+                    param -> defaultParams != null
+                            ? defaultParams.getDefaultParameterValue(param)
+                            : playerParameters[playerIndex].getDefaultParameterValue(param));
         }
     }
 
@@ -486,6 +566,58 @@ public class Frontend extends GUI {
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         b.add(Box.createHorizontalGlue());
         return b;
+    }
+
+    /**
+     * A standard settings row: a label on the left, an optional stretchable control in the centre,
+     * and an optional control (typically a button) on the right.
+     */
+    private static JPanel labelledRow(String label, JComponent centre, JComponent east) {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.add(BorderLayout.WEST, new JLabel(label));
+        if (centre != null) panel.add(BorderLayout.CENTER, centre);
+        if (east != null) panel.add(BorderLayout.EAST, east);
+        return panel;
+    }
+
+    /** A file chooser restricted to JSON files. */
+    private static JFileChooser jsonFileChooser() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.addChoosableFileFilter(new FileNameExtensionFilter("JSON files only", "json"));
+        return chooser;
+    }
+
+    /**
+     * Populates a parameter-edit window with one combo-box per parameter plus a Submit/Reset button pair.
+     * Submit hands the combo-boxes to {@code onSubmit} (which writes the chosen values back to the relevant
+     * parameter object(s)) and closes the window; Reset restores each parameter to the value supplied by
+     * {@code resetDefault}. The map of parameter name to combo-box is returned so callers can drive the
+     * controls later (e.g. when a saved game state is loaded).
+     */
+    private HashMap<String, JComboBox<Object>> buildParameterEditWindow(
+            TunableParameters params, JFrame window,
+            Consumer<HashMap<String, JComboBox<Object>>> onSubmit,
+            Function<String, Object> resetDefault) {
+        List<String> paramNames = params.getParameterNames();
+        HashMap<String, JComboBox<Object>> paramValueOptions = createParameterWindow(paramNames, params, window);
+
+        JButton submit = new JButton("Submit");
+        submit.addActionListener(e -> {
+            onSubmit.accept(paramValueOptions);
+            window.dispose();
+        });
+        JButton reset = new JButton("Reset");
+        reset.addActionListener(e -> {
+            params.reset();
+            for (String param : paramNames)
+                paramValueOptions.get(param).setSelectedItem(resetDefault.apply(param));
+        });
+        JPanel buttons = new JPanel();
+        buttons.add(submit);
+        buttons.add(reset);
+        window.getContentPane().add(buttons);
+        return paramValueOptions;
     }
 
     private void listenForDecisions() {
@@ -540,8 +672,7 @@ public class Frontend extends GUI {
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
         AbstractGameState gameState = gameRunning.getGameState().copy();
-        int currentPlayer = gameState.getCurrentPlayer();
-        AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
+        AbstractPlayer player = gameRunning.getPlayers().get(gameRunning.getPlayerToMove());
         if (gui != null) {
             gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
             if (!gameRunning.isHumanToMove() && paused && showAll) {

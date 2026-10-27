@@ -7,6 +7,7 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class AITableModel extends AbstractTableModel {
 
@@ -21,7 +22,10 @@ public class AITableModel extends AbstractTableModel {
             Map<String, Object> localData = data.get(action);
             List<Object> actionValues = new ArrayList<>(localData.size());
             for (String dataType : localData.keySet()) {
-                Object datum = localData.get(dataType);
+                // Scalars (Integer/Double/String) display in their own right; anything else - notably
+                // the per-player double[] values MCTS reports - is rendered as text so the table can
+                // still be shown rather than throwing.
+                Object datum = displayValue(localData.get(dataType));
                 int index = columnNames.indexOf(dataType);
                 if (index > -1) {
                     actionValues.add(index, datum);
@@ -32,10 +36,8 @@ public class AITableModel extends AbstractTableModel {
                         klass = Integer.class;
                     } else if (datum instanceof Double) {
                         klass = Double.class;
-                    } else if (datum instanceof String) {
-                        klass = String.class;
                     } else {
-                        throw new AssertionError("Unknown class for " + datum);
+                        klass = String.class;
                     }
                     actionValues.add(columnNames.size(), datum);
                     columnNames.add(dataType);
@@ -44,6 +46,23 @@ public class AITableModel extends AbstractTableModel {
             }
             dataValues.add(actionValues);
         }
+    }
+
+    /**
+     * Keeps scalar values (Integer/Double/String) as-is so they sort and render naturally, and turns
+     * everything else into a readable string. Per-player {@code double[]} stats are formatted to two
+     * decimal places, e.g. {@code [0.52, 0.48]}.
+     */
+    private static Object displayValue(Object datum) {
+        if (datum instanceof Integer || datum instanceof Double || datum instanceof String)
+            return datum;
+        if (datum instanceof double[] doubles) {
+            StringJoiner joiner = new StringJoiner(", ", "[", "]");
+            for (double d : doubles)
+                joiner.add(String.format("%.2f", d));
+            return joiner.toString();
+        }
+        return String.valueOf(datum);
     }
 
     @Override

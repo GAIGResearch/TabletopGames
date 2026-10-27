@@ -3,9 +3,6 @@ package games.pentegrammai;
 import core.AbstractGameState;
 import core.components.Token;
 import core.interfaces.IStateFeatureVector;
-import games.backgammon.BGGameState;
-import games.backgammon.BGParameters;
-import games.root.actions.PassGamePhase;
 
 import java.util.List;
 
@@ -105,8 +102,8 @@ public class PGStateFeatures implements IStateFeatureVector {
         features[12] = (double) sum[1 - playerID] / params.boardSize / 2;
         features[13] = dieToHoly[playerID];
         features[14] = dieToHoly[1 - playerID];
-        features[15] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == playerID).count();
-        features[16] = pgState.offBoard.stream().filter(t -> t.getOwnerId() == 1 - playerID).count();
+        features[15] = pgState.tokensToStart.stream().filter(t -> t.getOwnerId() == playerID).count();
+        features[16] = pgState.tokensToStart.stream().filter(t -> t.getOwnerId() == 1 - playerID).count();
 
         features[17] = fm.computeAvailableActions(pgState).size();
         return features;

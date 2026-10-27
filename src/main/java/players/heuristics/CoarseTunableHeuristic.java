@@ -17,7 +17,7 @@ import evaluation.optimisation.TunableParameters;
  * - SCORE_PLUS: the raw score, plus 50% if you won; -50% if you lost
  * - LEADER: the difference of your score to the next best player (+/-50% if you won/lost)
  */
-public class CoarseTunableHeuristic extends TunableParameters implements IStateHeuristic {
+public class CoarseTunableHeuristic extends TunableParameters<CoarseTunableHeuristic> implements IStateHeuristic {
 
     HeuristicType heuristicType;
     public enum HeuristicType {

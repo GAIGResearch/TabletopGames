@@ -22,9 +22,12 @@ public class TestVisibility {
     @Before
     public void setUp() {
         params = new ToadParameters();
+        params.setParameterValue("cardFile", "cards_005.json"); // the legacy deck: these tests encode the legacy Tactics
         params.setRandomSeed(933);
-        params.useTactics = false;
-        params.discardOption = false;
+        params.setParameterValue("useTactics", false);
+        params.setParameterValue("discardOption", false);
+        params.setParameterValue("openingReturn", false); // 4-card deals, straight to PLAY
+        params.setParameterValue("secondRoundStart", ToadParameters.SecondRoundStart.WINNER);
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);
@@ -32,11 +35,7 @@ public class TestVisibility {
     }
 
     private void playCards(ToadCard... cardsInOrder) {
-        for (int i = 0; i < cardsInOrder.length; i++) {
-            //   state.getPlayerHand(state.getCurrentPlayer()).add(cardsInOrder[i]);
-            AbstractAction action = i % 2 == 0 ? new PlayFieldCard(cardsInOrder[i]) : new PlayFlankCard(cardsInOrder[i]);
-            fm.next(state, action);
-        }
+        ToadTestUtils.playFromHand(state, fm, cardsInOrder);
     }
 
 

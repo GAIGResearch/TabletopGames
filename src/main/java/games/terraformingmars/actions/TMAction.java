@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import games.terraformingmars.TMGameState;
-import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.effects.Effect;
@@ -14,9 +13,13 @@ import games.terraformingmars.rules.requirements.ResourceRequirement;
 import utilities.Pair;
 import utilities.Utils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 public class TMAction extends AbstractAction {
     public boolean freeActionPoint;
@@ -42,7 +45,7 @@ public class TMAction extends AbstractAction {
         this.freeActionPoint = free;
         this.pass = false;
         this.actionType = actionType;
-        this.requirements = new HashSet<>();
+        this.requirements = new LinkedHashSet<>();
     }
 
     public TMAction(TMTypes.StandardProject project, int player, boolean free) {
@@ -51,7 +54,7 @@ public class TMAction extends AbstractAction {
         this.pass = false;
         this.actionType = TMTypes.ActionType.StandardProject;
         this.standardProject = project;
-        this.requirements = new HashSet<>();
+        this.requirements = new LinkedHashSet<>();
     }
 
     public TMAction(TMTypes.BasicResourceAction basicResourceAction, int player, boolean free) {
@@ -60,35 +63,45 @@ public class TMAction extends AbstractAction {
         this.pass = false;
         this.actionType = TMTypes.ActionType.BasicResourceAction;
         this.basicResourceAction = basicResourceAction;
-        this.requirements = new HashSet<>();
+        this.requirements = new LinkedHashSet<>();
     }
 
     public TMAction(int player) {
         this.player = player;
         this.freeActionPoint = false;
         this.pass = true;
-        this.requirements = new HashSet<>();
+        this.requirements = new LinkedHashSet<>();
+    }
+
+    /**
+     * A pass offered within a sequence (to stop, or when there is no legal choice). Like the sequence's other decisions
+     * it does not use an action point, so it does not count as the player passing for the generation.
+     */
+    public static TMAction passInSequence(int player) {
+        TMAction pass = new TMAction(player);
+        pass.freeActionPoint = true;
+        return pass;
     }
 
     public TMAction(int player, boolean free) {
         this.player = player;
         this.freeActionPoint = free;
         this.pass = false;
-        this.requirements = new HashSet<>();
+        this.requirements = new LinkedHashSet<>();
     }
 
     public TMAction(int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
         this.freeActionPoint = free;
         this.pass = false;
-        this.requirements = new HashSet<>(requirement);
+        this.requirements = new LinkedHashSet<>(requirement);
     }
 
     public TMAction(TMTypes.ActionType actionType, int player, boolean free, HashSet<Requirement<TMGameState>> requirement) {
         this.player = player;
         this.freeActionPoint = free;
         this.pass = false;
-        this.requirements = new HashSet<>(requirement);
+        this.requirements = new LinkedHashSet<>(requirement);
         this.actionType = actionType;
     }
 
@@ -96,7 +109,7 @@ public class TMAction extends AbstractAction {
         this.player = player;
         this.freeActionPoint = free;
         this.pass = false;
-        this.requirements = new HashSet<>(requirement);
+        this.requirements = new LinkedHashSet<>(requirement);
         this.actionType = TMTypes.ActionType.StandardProject;
         this.standardProject = project;
     }
@@ -105,7 +118,7 @@ public class TMAction extends AbstractAction {
         this.player = player;
         this.freeActionPoint = free;
         this.pass = false;
-        this.requirements = new HashSet<>(requirement);
+        this.requirements = new LinkedHashSet<>(requirement);
         this.actionType = TMTypes.ActionType.BasicResourceAction;
         this.basicResourceAction = basicResourceAction;
     }
@@ -118,9 +131,18 @@ public class TMAction extends AbstractAction {
         this.requirements.add(costRequirement);
     }
 
+    /**
+     * @return true if this is the action of card cardID (so it is limited to once per generation). Card actions cost an
+     * action; free actions with a cardID are effects, or refer to a card being bought, discarded, sold or targeted.
+     * PlayCard also costs an action, but its cardID is the card being played.
+     */
+    private boolean isActionOfCard() {
+        return !freeActionPoint && !(this instanceof PlayCard);
+    }
+
     public boolean canBePlayed(TMGameState gs) {
         boolean played = false;
-        if (getCardID() != -1) {
+        if (getCardID() != -1 && isActionOfCard()) {
             TMCard c = (TMCard) gs.getComponentById(getCardID());
             if (c != null && c.actionPlayed) played = true;
         }
@@ -141,7 +163,13 @@ public class TMAction extends AbstractAction {
         gs.getAllComponents();  // Force recalculate components
         if (player == -1) player = gameState.getCurrentPlayer();
         if (!canBePlayed(gs)) {
-            throw new AssertionError("Card cannot be played " + this);
+            StringBuilder failed = new StringBuilder();
+            if (requirements != null) {
+                for (Requirement<TMGameState> r : requirements) {
+                    if (!r.testCondition(gs)) failed.append(" [").append(r.getReasonForFailure(gs)).append("]");
+                }
+            }
+            throw new AssertionError("Card cannot be played " + this + (failed.length() > 0 ? ", failed:" + failed : ""));
         }
         boolean s = _execute(gs);
         postExecute(gs);
@@ -153,9 +181,9 @@ public class TMAction extends AbstractAction {
         if (player == -1) player = gs.getCurrentPlayer();
         if (player < 0 || player >= gs.getNPlayers()) return;
         if (!freeActionPoint) {
-            ((TMTurnOrder)gs.getTurnOrder()).registerActionTaken(gs, this, player);
+            gs.registerActionTaken(this, player);
         }
-        if (getCardID() != -1 && !(this instanceof BuyCard) && !(this instanceof PlayCard) && !(this instanceof DiscardCard)) {
+        if (getCardID() != -1 && isActionOfCard()) {
             TMCard c = (TMCard) gs.getComponentById(getCardID());
             if (c != null) {
                 if (!c.firstActionExecuted && c.firstAction != null) {
@@ -207,7 +235,7 @@ public class TMAction extends AbstractAction {
             action.costRequirement = costRequirement.copy();
         }
         if (requirements != null) {
-            action.requirements = new HashSet<>();
+            action.requirements = new LinkedHashSet<>();
             for (Requirement r : requirements) {
                 action.requirements.add(r.copy());
             }
@@ -231,7 +259,7 @@ public class TMAction extends AbstractAction {
             action.costRequirement = costRequirement.copy();
         }
         if (requirements != null){ // && requirements.size() > 0) {
-            action.requirements = new HashSet<>();
+            action.requirements = new LinkedHashSet<>();
             for (Requirement r : requirements) {
                 action.requirements.add(r.copy());
             }
@@ -254,14 +282,19 @@ public class TMAction extends AbstractAction {
         return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass &&
                 cost == tmAction.cost && playCardID == tmAction.playCardID && cardID == tmAction.cardID &&
                 Objects.equals(costRequirement, tmAction.costRequirement) &&
-                Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType &&
+                Objects.equals(requirementsOrEmpty(), tmAction.requirementsOrEmpty()) && actionType == tmAction.actionType &&
                 standardProject == tmAction.standardProject && basicResourceAction == tmAction.basicResourceAction &&
                 costResource == tmAction.costResource;
     }
 
+    // Actions loaded from card data have null requirements, but their copies have an empty set
+    private Set<Requirement<TMGameState>> requirementsOrEmpty() {
+        return requirements == null ? Collections.emptySet() : requirements;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(freeActionPoint, player, pass, costRequirement, requirements, actionType, standardProject, basicResourceAction, cost, costResource, playCardID, cardID);
+        return Objects.hash(freeActionPoint, player, pass, costRequirement, requirementsOrEmpty(), actionType, standardProject, basicResourceAction, cost, costResource, playCardID, cardID);
     }
 
     @Override
@@ -507,7 +540,7 @@ public class TMAction extends AbstractAction {
                     ((PlaceTile) effect).removeResourcesProd = split3[2].contains("prod");
                 } else {
                     // Adjacent to some types, make hashmap
-                    HashMap<TMTypes.Tile, Integer> types = new HashMap<>();
+                    HashMap<TMTypes.Tile, Integer> types = new LinkedHashMap<>();
                     String[] split3 = split2[4].split("-");
                     for (String s: split3) {
                         TMTypes.Tile t = TMTypes.Tile.valueOf(s);

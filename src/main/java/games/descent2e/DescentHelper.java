@@ -330,7 +330,7 @@ public class DescentHelper {
             nodesToBeExpanded.remove(expandingNode);
 
             // Go through all the neighbour nodes
-            HashMap<BoardNode, Double> neighbours = expandingNode.getNeighbours();
+            Map<BoardNode, Double> neighbours = expandingNode.getNeighbours();
             for (BoardNode neighbour : neighbours.keySet()){
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
 

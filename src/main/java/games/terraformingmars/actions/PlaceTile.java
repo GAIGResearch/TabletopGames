@@ -2,13 +2,13 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.AdjacencyRequirement;
+import games.terraformingmars.rules.requirements.CounterRequirement;
 import utilities.Group;
 import utilities.Vector2D;
 
@@ -18,7 +18,7 @@ import static games.terraformingmars.TMTypes.Tile.City;
 import static games.terraformingmars.TMTypes.Tile.Greenery;
 import static games.terraformingmars.TMTypes.neighbor_directions;
 
-public class PlaceTile extends TMAction implements IExtendedSequence {
+public class PlaceTile extends TMAction implements TMExtendedSequence {
     public boolean respectingAdjacency = true;
     public boolean onMars = true;
     public String tileName;  // to be used with locations not on mars
@@ -101,6 +101,10 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         this.mapType = mapTile;
         this.mapTileID = -1;
         this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);
+        if (tile == TMTypes.Tile.Ocean) {
+            // Can't pay for an ocean that can no longer be placed
+            requirements.add(new CounterRequirement(TMTypes.GlobalParameter.OceanTiles.name(), -1, true));
+        }
     }
 
     public PlaceTile(TMTypes.BasicResourceAction basicResourceAction, int cost, int player, TMTypes.Tile tile, TMTypes.MapTileType mapTile) {
@@ -115,7 +119,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         this.tile = tile;
         if (tile == City && name == null) {
             // Cities can't be adjacent to other cities, unless named
-            adjacencyRequirement = new AdjacencyRequirement(new HashMap<TMTypes.Tile, Integer>() {{ put(City, 1);}});
+            adjacencyRequirement = new AdjacencyRequirement(new LinkedHashMap<TMTypes.Tile, Integer>() {{ put(City, 1);}});
             adjacencyRequirement.reversed = true;
         } else if (tile == Greenery) {
             // Greeneries must be adjacent to other owned tiles
@@ -144,7 +148,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                 if (resourcesGainedRestriction != null) {
                     // Production of each resource type gained increased by 1
                     TMTypes.Resource[] gained = mt.getResources();
-                    HashSet<TMTypes.Resource> typesAdded = new HashSet<>();
+                    HashSet<TMTypes.Resource> typesAdded = new LinkedHashSet<>();
                     for (TMTypes.Resource r : gained) {
                         if (contains(resourcesGainedRestriction, r) && !typesAdded.contains(r)) {
                             gs.getPlayerProduction()[player].get(r).increment(1);
@@ -153,7 +157,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     }
                 }
                 if (removeResourcesAdjacentOwner) {
-                    HashSet<Integer> adjacentOwners = new HashSet<>();
+                    HashSet<Integer> adjacentOwners = new LinkedHashSet<>();
                     List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
                     for (Vector2D n : neighbours) {
                         TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
@@ -171,6 +175,10 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             }
             return success && super._execute(gs);
         }
+        if (tile == TMTypes.Tile.Ocean && onMars && gs.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles).isMaximum()) {
+            // All oceans have been placed, so any further ones (e.g. from a card) are simply not placed
+            return true;
+        }
         gs.setActionInProgress(this);
         return true;
     }
@@ -183,7 +191,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         copy.placed = placed;
         HashSet<Integer> copyPos = null;
         if (legalPositions != null) {
-            copyPos = new HashSet<>(legalPositions);
+            copyPos = new LinkedHashSet<>(legalPositions);
         }
         copy.legalPositions = copyPos;
         if (adjacencyRequirement != null) {
@@ -259,11 +267,11 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             }
             if (actions.size() == 0) {
                 impossible = true;
-                actions.add(new TMAction(player));
+                actions.add(TMAction.passInSequence(player));
             }
         } else {
             impossible = true;
-            actions.add(new TMAction(player));
+            actions.add(TMAction.passInSequence(player));
         }
         return actions;
     }
@@ -275,6 +283,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (!(action instanceof PlaceTile) && !TMExtendedSequence.isPass(action)) throw unexpectedAction(action);
         placed = true;
     }
 

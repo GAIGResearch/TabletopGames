@@ -4,6 +4,8 @@ import core.components.Card;
 import games.toads.ToadConstants.ToadCardType;
 import games.toads.abilities.ToadAbility;
 
+import java.util.Objects;
+
 public class ToadCard extends Card {
 
     public final int value;
@@ -40,14 +42,14 @@ public class ToadCard extends Card {
         if (this == other) return true;
         if (!(other instanceof ToadCard otherCard)) return false;
         return super.equals(otherCard) && this.value == otherCard.value &&
-                this.ability.equals(otherCard.ability) &&
-                this.tactics.equals(otherCard.tactics) && this.type.equals(otherCard.type);
+                Objects.equals(this.ability, otherCard.ability) &&
+                Objects.equals(this.tactics, otherCard.tactics) && this.type == otherCard.type;
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode() + value + (ability != null ? ability.hashCode()  * 31 : 0) +
-                (tactics != null ? tactics.hashCode() * 31 : 0) + (type != null ? type.hashCode() * 31 : 0);
+        // the abilities are left out: they have identity hash codes, which differ between runs
+        return 31 * super.hashCode() + value + (type != null ? type.ordinal() * 31 : 0);
     }
 
 

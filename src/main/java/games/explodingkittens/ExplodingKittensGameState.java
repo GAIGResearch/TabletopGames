@@ -6,15 +6,18 @@ import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IToJSON;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class ExplodingKittensGameState extends AbstractGameState {
+public class ExplodingKittensGameState extends AbstractGameState implements IToJSON {
 
     // Cards in each player's hand, index corresponds to player ID
     List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards;
@@ -31,6 +34,29 @@ public class ExplodingKittensGameState extends AbstractGameState {
 
     public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+    }
+
+    /**
+     * Reconstructs a game state from JSON produced by {@link #toJSON}. As for {@code BGGameState}, we
+     * first build a default state (so that all transient fields are initialised), reload the tunable
+     * parameters, run a fresh setup, and then overwrite the game-specific state from the JSON.
+     */
+    public ExplodingKittensGameState(JSONObject json) {
+        this(new ExplodingKittensParameters(),
+                ((Number) ((JSONObject) json.get("abstractGameState")).get("nPlayers")).intValue());
+        JSONObject abstractGameStateJSON = (JSONObject) json.get("abstractGameState");
+        JSONObject gameParamsJSON = (JSONObject) abstractGameStateJSON.get("gameParams");
+        if (gameParamsJSON != null) {
+            this.gameParameters = TunableParameters.loadFromJSON(new ExplodingKittensParameters(), gameParamsJSON);
+        }
+        reset();
+        new ExplodingKittensForwardModel().setup(this);
+        ExplodingKittensStateJSON.loadFromJSON(this, json);
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        return ExplodingKittensStateJSON.toJSON(this);
     }
 
     @Override

@@ -97,7 +97,7 @@ public class LearnFromData {
 
         AutomatedFeatures asf = new AutomatedFeatures(stateFeatures, actionFeatures);
         // construct the output file by adding _ASF before the suffix (which can be anything)
-        List<List<Object>> convertedData = asf.processData(convertedDataFile, maxRecords, dataFiles);
+        List<List<Object>> convertedData = asf.processData(convertedDataFile, maxRecords, true, dataFiles);
 
         // this will have created the raw data from which we now learn
         // whichever of state/action features is not null will prompt the type of Heuristic learned
@@ -172,17 +172,8 @@ public class LearnFromData {
         AutomatedFeatures bestFeatures;
         FeatureAnalysisResult bestResult = null;
 
-        // we check for any zero coefficients in startingHeuristic
-        // and exclude those features from the search
-        for (int i = 0; i < asf.names().length; i++) {
-            if (Math.abs(startingHeuristic.coefficients()[i + 1]) < 0.00001) {
-                excludedFeatures.add(asf.names()[i]);
-            }
-        }
-        if (!excludedFeatures.isEmpty()) {
-            System.out.println("Excluding features with zero coefficients: " + excludedFeatures);
-            removeExcludedFeatures(excludedFeatures, asf);
-        }
+        // TODO Test with Dominion to check correct dealing with ENUMs from Card Types.
+        // TODO: ....and the specifically why State heuristic seems fine, but Action heuristic leaves in all the State features?
 
         do {
             bestFeatures = null;
@@ -319,7 +310,7 @@ public class LearnFromData {
             // We then also need to set up the data file to be used as the baseline for the next iteration
             if (bestFeatures != null) {
                 String newFileName = dataDirectory + File.separator + "ImproveModel_Iter_" + iteration + ".txt";
-                bestFeatures.processData(newFileName, maxRecords, rawData);
+                bestFeatures.processData(newFileName, maxRecords, false, rawData);
                 // then remove excluded features from the bestFeatures (these are always in the file so it always contains the original raw data)
                 removeExcludedFeatures(excludedFeatures, bestFeatures);
                 iteration++;
@@ -411,7 +402,7 @@ public class LearnFromData {
         if (rawData != null && rawData.length > 0) {
 //            if (debug)
 //                System.out.println("Processing data for " + localASF + " to file " + outputFile);
-            localASF.processData(outputFile, maxRecords, rawData);
+            localASF.processData(outputFile, maxRecords, false, rawData);
 //            if (debug)
 //                System.out.println("Finished processing data for " + localASF);
         }

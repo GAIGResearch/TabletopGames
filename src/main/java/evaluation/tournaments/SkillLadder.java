@@ -11,18 +11,12 @@ import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import utilities.JSONUtils;
 import utilities.Pair;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 import static evaluation.RunArg.evalGames;
@@ -44,23 +38,8 @@ public class SkillLadder {
             return;
         }
 
-        // Config
+        // Config (parseConfig already merges any config= file with CLI overrides, CLI taking precedence)
         Map<RunArg, Object> config = parseConfig(args, List.of(Usage.ParameterSearch, Usage.SkillLadder));
-
-        String setupFile = config.getOrDefault(RunArg.config, "").toString();
-        if (!setupFile.isEmpty()) {
-            // Read from file instead
-            try {
-                FileReader reader = new FileReader(setupFile);
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(reader);
-                config = parseConfig(json, List.of(Usage.ParameterSearch, Usage.SkillLadder), true);
-            } catch (FileNotFoundException ignored) {
-                throw new AssertionError("Config file not found : " + setupFile);
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
         @SuppressWarnings("unchecked")
         List<String> listenerClasses = (List<String>) config.get(RunArg.listener);

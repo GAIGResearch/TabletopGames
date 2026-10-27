@@ -1,0 +1,16 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "comment" : "Covers MCTS stats (not MultiTree), timing of copy/next and game length",
+  "args":  [
+    {"enum" : "evaluation.metrics.IDataLogger$ReportDestination", "value" : "ToFile"},
+    [
+      {"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "RawDataPerEvent"}
+    ],
+    [
+
+      {"class": "evaluation.metrics.GameMetrics$ActionsReduced" },
+      {"class": "evaluation.metrics.GameMetrics$Decisions" },
+      {"class": "players.mcts.MCTSMetrics$TreeStats" },
+      {"class": "evaluation.metrics.GameMetrics$ComputationTimes"}
+    ]]
+}

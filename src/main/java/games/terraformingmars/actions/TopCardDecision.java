@@ -2,7 +2,6 @@ package games.terraformingmars.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.components.TMCard;
@@ -11,8 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TopCardDecision extends TMAction implements IExtendedSequence {
-    int stage;
+public class TopCardDecision extends TMAction implements TMExtendedSequence {
     int nCardsKept;
 
     public int nCardsLook;
@@ -39,7 +37,6 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
                 break;
             }
         }
-        stage = 0;
         nCardsKept = 0;
         gameState.setActionInProgress(this);
         return true;
@@ -52,14 +49,18 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
         TMGameState gs = (TMGameState) state;
         int cardId = gs.getPlayerCardChoice()[player].get(0).getComponentID();
         if (nCardsLook == 1 || nCardsKept < nCardsKeep) {
+            TMAction keep;
             if (buy) {
                 int cost = ((TMGameParameters)gs.getGameParameters()).getProjectPurchaseCost();
-                actions.add(new PayForAction(player, new BuyCard(player, cardId, cost)));
+                keep = new PayForAction(player, new BuyCard(player, cardId, cost));
             } else {
-                actions.add(new BuyCard(player, cardId, 0));
+                keep = new BuyCard(player, cardId, 0);
             }
+            if (keep.canBePlayed(gs)) actions.add(keep);  // player may not be able to afford it
         }
-        if (nCardsLook == 1 || nCardsLook - stage > nCardsKeep - nCardsKept) {
+        // Can only discard while enough cards remain to still keep the required number
+        int cardsRemaining = gs.getPlayerCardChoice()[player].getSize();
+        if (actions.isEmpty() || nCardsLook == 1 || cardsRemaining > nCardsKeep - nCardsKept) {
             actions.add(new DiscardCard(player, cardId, true));
         }
         return actions;
@@ -72,8 +73,11 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        stage++;
-        if (action instanceof BuyCard) nCardsKept++;
+        if (action instanceof BuyCard || action instanceof PayForAction pay && pay.action instanceof BuyCard) {
+            nCardsKept++;
+        } else if (!(action instanceof DiscardCard)) {
+            throw unexpectedAction(action);
+        }
 
 //        if (nCardsKept == nCardsKeep && stage != nCardsLook) {
 //            TMGameState gs = (TMGameState) state;
@@ -93,7 +97,6 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
     public TopCardDecision _copy() {
         TopCardDecision copy = new TopCardDecision(nCardsLook, nCardsKeep, buy);
         copy.nCardsKept = nCardsKept;
-        copy.stage = stage;
         return copy;
     }
 
@@ -108,12 +111,12 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
         if (!(o instanceof TopCardDecision)) return false;
         if (!super.equals(o)) return false;
         TopCardDecision that = (TopCardDecision) o;
-        return stage == that.stage && nCardsKept == that.nCardsKept && nCardsLook == that.nCardsLook && nCardsKeep == that.nCardsKeep && buy == that.buy;
+        return nCardsKept == that.nCardsKept && nCardsLook == that.nCardsLook && nCardsKeep == that.nCardsKeep && buy == that.buy;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), stage, nCardsKept, nCardsLook, nCardsKeep, buy);
+        return Objects.hash(super.hashCode(), nCardsKept, nCardsLook, nCardsKeep, buy);
     }
 
     @Override

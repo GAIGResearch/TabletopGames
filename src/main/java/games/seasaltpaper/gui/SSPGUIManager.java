@@ -45,7 +45,7 @@ public class SSPGUIManager extends AbstractGUIManager {
         for (int i=0; i<gameState.getNPlayers(); i++) {
             PartialObservableDeck<SeaSaltPaperCard> playerHand = sspgs.getPlayerHands().get(i);
             Deck<SeaSaltPaperCard> playerDiscard = sspgs.getPlayerDiscards().get(i);
-            SSPPlayerView playerView = new SSPPlayerView(sspgs, playerHand, playerDiscard, i, dataPath);
+            SSPPlayerView playerView = new SSPPlayerView(sspgs, playerHand, playerDiscard, i, dataPath, human);
             playerViews[i] = playerView;
 
             playerArea.addTab("Player " + i, playerView);

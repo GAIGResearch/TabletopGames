@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
+import players.heuristics.LeaderHeuristic;
 import utilities.Pair;
 
 import java.util.Arrays;
@@ -46,8 +47,9 @@ public class RolloutStateFeatureListener extends StateFeatureListener {
     @Override
     public String[] names() {
         // we add Value and Ordinal to the list, which will be calculated from the rollouts
-        String[] names = new String[super.names().length + 4];
+        String[] names = new String[super.names().length + 5];
         System.arraycopy(super.names(), 0, names, 0, super.names().length);
+        names[names.length - 5] = "FinalHeuristic";
         names[names.length - 4] = "Win";
         names[names.length - 3] = "FinalScore";
         names[names.length - 2] = "FinalScoreAdv";
@@ -63,24 +65,26 @@ public class RolloutStateFeatureListener extends StateFeatureListener {
     @Override
     public double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         double[] base = super.extractDoubleVector(action, state, perspectivePlayer);
-        double[] retValue = new double[base.length + 4];
+        double[] retValue = new double[base.length + 5];
         System.arraycopy(base, 0, retValue, 0, base.length);
         retValue[base.length] = rolloutResults[0][perspectivePlayer];
         retValue[base.length + 1] = rolloutResults[1][perspectivePlayer];
         retValue[base.length + 2] = rolloutResults[2][perspectivePlayer];
         retValue[base.length + 3] = rolloutResults[3][perspectivePlayer];
+        retValue[base.length + 4] = rolloutResults[4][perspectivePlayer];
         return retValue;
     }
 
     @Override
     public Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         Object[] base = super.extractFeatureVector(action, state, perspectivePlayer);
-        Object[] retValue = new Object[base.length + 4];
+        Object[] retValue = new Object[base.length + 5];
         System.arraycopy(base, 0, retValue, 0, base.length);
         retValue[base.length] = rolloutResults[0][perspectivePlayer];
         retValue[base.length + 1] = rolloutResults[1][perspectivePlayer];
         retValue[base.length + 2] = rolloutResults[2][perspectivePlayer];
         retValue[base.length + 3] = rolloutResults[3][perspectivePlayer];
+        retValue[base.length + 4] = rolloutResults[4][perspectivePlayer];
         return retValue;
     }
 
@@ -95,6 +99,7 @@ public class RolloutStateFeatureListener extends StateFeatureListener {
         double[] totalOrdinal = new double[state.getNPlayers()];
         double[] totalWin = new double[state.getNPlayers()];
         double[] totalLead = new double[state.getNPlayers()];
+        double[] totalHeuristic = new double[state.getNPlayers()];
         for (int i = 0; i < rollouts; i++) {
             // firstly we reset our players (to remove any information they may have from previous rollouts)
             for (AbstractPlayer p : rolloutPlayers) {
@@ -108,13 +113,7 @@ public class RolloutStateFeatureListener extends StateFeatureListener {
             }
             for (int p = 0; p < state.getNPlayers(); p++) {
                 totalScore[p] += copy.getGameScore(p);
-                double bestOtherScore = Double.NEGATIVE_INFINITY;
-                for (int p2 = 0; p2 < copy.getNPlayers(); p2++) {
-                    if (p2 == p) continue;
-                    if (copy.getGameScore(p2) > bestOtherScore)
-                        bestOtherScore = copy.getGameScore(p2);
-                }
-                totalLead[p] += copy.getGameScore(p) - bestOtherScore;
+                totalLead[p] += copy.getGameScore(p) - LeaderHeuristic.bestOtherTeamScore(copy, p);
                 if (copy.getWinners().contains(p)) {
                     if (copy.getWinners().size() == 1) {
                         totalWin[p] += 1.0;
@@ -123,12 +122,15 @@ public class RolloutStateFeatureListener extends StateFeatureListener {
                     }
                 }
                 totalOrdinal[p] += copy.getOrdinalPosition(p);
+                totalHeuristic[p] += heuristic == null ? copy.getHeuristicScore(p) : heuristic.evaluateState(copy, p);
             }
         }
+        Arrays.setAll(totalHeuristic, p -> totalHeuristic[p] / rollouts);
         Arrays.setAll(totalWin, p -> totalWin[p] / rollouts);
         Arrays.setAll(totalScore, p -> totalScore[p] / rollouts);
         Arrays.setAll(totalLead, p -> totalLead[p] / rollouts);
         Arrays.setAll(totalOrdinal, p -> totalOrdinal[p] / rollouts);
-        return new double[][] {totalWin, totalLead, totalScore, totalOrdinal};
+        // this order must match that of the extra columns in names()
+        return new double[][]{totalHeuristic, totalWin, totalScore, totalLead, totalOrdinal};
     }
 }

@@ -47,7 +47,7 @@ public class ChessForwardModel extends StandardForwardModel {
         chessState.setPiece(5, 7, new ChessPiece(ChessPiece.ChessPieceType.BISHOP, 1, 5, 7, ChessPiece.MovedState.NOT_RELEVANT));
         chessState.setPiece(6, 7, new ChessPiece(ChessPiece.ChessPieceType.KNIGHT, 1, 6, 7, ChessPiece.MovedState.NOT_RELEVANT));
         chessState.setPiece(7, 7, new ChessPiece(ChessPiece.ChessPieceType.ROOK, 1, 7, 7, ChessPiece.MovedState.NOT_MOVED));
-        chessState.AddCheckRepetitionCount();
+        chessState.addCheckRepetitionCount();
 
         chessState.halfMoveClock = 0;
     }
@@ -576,8 +576,8 @@ public class ChessForwardModel extends StandardForwardModel {
 
 
         //Check draw by repetition. The game is drawn if a board position is repeated drawByRepetition times. Default is 3, if set to 0, it is disabled.
-        if (chessState.isNotTerminal() && chessParameters.drawByRepetition != 0) {
-            if (chessState.AddCheckRepetitionCount()) {
+        if (chessState.isNotTerminal()) {
+            if (chessState.addCheckRepetitionCount()) {
                 chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, chessState.getCurrentPlayer());
                 chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1 - chessState.getCurrentPlayer());
                 chessState.setGameStatus(CoreConstants.GameResult.GAME_END);

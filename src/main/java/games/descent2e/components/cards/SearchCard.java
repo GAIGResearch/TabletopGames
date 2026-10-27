@@ -49,9 +49,9 @@ public class SearchCard extends Card {
     }
 
     public void loadCard(JSONObject dice) {
-        this.componentName = ((String) ( (JSONArray) dice.get("name")).get(1));
-        this.itemType = ((String) ( (JSONArray) dice.get("type")).get(1));
-        this.value = ((Long) ( (JSONArray) dice.get("value")).get(1)).intValue();
+        this.componentName = (String) dice.get("name");
+        this.itemType = (String) dice.get("tokenType");
+        this.value = ((Number) dice.get("value")).intValue();
         parseComponent(this, dice);
     }
 

@@ -8,6 +8,7 @@ import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class PlayCardEffect extends Effect {
     public HashSet<TMTypes.Tag> tagsOnCard;
@@ -25,18 +26,20 @@ public class PlayCardEffect extends Effect {
                 /* Effect based on card played, e.g. add resource to that card */
                 effectAction.setCardID(action.getPlayCardID());
             }
-            this.effectAction.execute(gs);  // TODO execute multiple times
+            // Effects are optional, and simply do not apply if they cannot be played (e.g. discard a card with an empty hand)
+            if (effectAction.canBePlayed(gs))
+                this.effectAction.execute(gs);  // TODO execute multiple times
         }
     }
 
     @Override
     public Effect copy() {
-        return new PlayCardEffect(mustBeCurrentPlayer, (effectAction != null? effectAction.copy() : null), new HashSet<>(tagsOnCard));
+        return new PlayCardEffect(mustBeCurrentPlayer, (effectAction != null? effectAction.copy() : null), new LinkedHashSet<>(tagsOnCard));
     }
 
     @Override
     public Effect copySerializable() {
-        return new PlayCardEffect(mustBeCurrentPlayer, (effectAction != null? effectAction.copySerializable() : null), (tagsOnCard != null && tagsOnCard.size() > 0 ? new HashSet<>(tagsOnCard) : null));
+        return new PlayCardEffect(mustBeCurrentPlayer, (effectAction != null? effectAction.copySerializable() : null), (tagsOnCard != null && tagsOnCard.size() > 0 ? new LinkedHashSet<>(tagsOnCard) : null));
     }
 
     @Override

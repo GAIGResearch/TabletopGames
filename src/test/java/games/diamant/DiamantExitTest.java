@@ -41,17 +41,18 @@ public class DiamantExitTest {
 
             // Prepare actions: players 0 and 1 exit, 2 and 3 continue
             AbstractAction[] actions = new AbstractAction[4];
-            actions[0] = new ExitFromCave();
-            actions[1] = new ExitFromCave();
-            actions[2] = new ContinueInCave();
-            actions[3] = new ContinueInCave();
+            actions[0] = new ExitFromCave(0);
+            actions[1] = new ExitFromCave(1);
+            actions[2] = new ContinueInCave(2);
+            actions[3] = new ContinueInCave(3);
 
             // Simulate all players submitting their actions
             for (int i = 0; i < 4; i++) {
                 assertEquals(i, state.getCurrentPlayer());
                 fm.next(state, actions[i]);
             }
-            assertEquals(0, state.getCurrentPlayer());
+            // players 0 and 1 have left, so the new turn belongs to player 2, the first still in the cave
+            assertEquals(2, state.getCurrentPlayer());
             assertEquals(5, state.getPath().get(0).getValue());
 
             // After the move, 2 players should have left the cave, 2 remain
@@ -122,7 +123,7 @@ public class DiamantExitTest {
                 lastCard = state.mainDeck.peek();
                 for (int i = 0; i < 4; i++) {
                     if (state.playerInCave.get(i)) {
-                        fm.next(state, new ContinueInCave());
+                        fm.next(state, new ContinueInCave(i));
                     }
                 }
             } while (currentCave == state.nCave);

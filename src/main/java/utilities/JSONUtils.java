@@ -262,11 +262,12 @@ public class JSONUtils {
             return loadClassFromJSON(json);
 
         } catch (ParseException e) {
-            throw new AssertionError("Problem parsing JSON in " + rawData);
+            throw new AssertionError("Problem parsing JSON in " + rawData + "\n" + e.getMessage() + e.getMessage());
         } catch (IOException e) {
-            throw new AssertionError("Problem processing String in " + rawData);
+            throw new AssertionError("Problem processing String in " + rawData + "\n" + e.getMessage() + e.getCause());
         } catch (Exception e) {
-            throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
+            throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData + "\n"
+            + e.getMessage() + e.getCause());
         }
     }
 
@@ -439,25 +440,7 @@ public class JSONUtils {
             if (value instanceof JSONObject subJSON) {
                 sb.append(prettyPrint(subJSON, tabDepth + 1));
             } else if (value instanceof JSONArray array) {
-                sb.append("[\n");
-                tabDepth++;
-                for (int index = 0; index < array.size(); index++) {
-                    Object v = array.get(index);
-                    sb.append("\t".repeat(Math.max(0, tabDepth)));
-                    if (v instanceof JSONObject subJSON) {
-                        sb.append(prettyPrint(subJSON, tabDepth + 1));
-                    } else if (v instanceof String) {
-                        sb.append("\"").append(v).append("\"");
-                    } else if (v instanceof Long || v instanceof Integer || v instanceof Boolean) {
-                        sb.append(v);
-                    } else if (v instanceof Number n) {
-                        sb.append(String.format("%.3g", n.doubleValue()));
-                    }
-                    if (index < array.size() - 1)
-                        sb.append(",").append("\n");
-                }
-                sb.append("\t".repeat(Math.max(0, tabDepth - 1))).append("]");
-                tabDepth--;
+                sb.append(prettyPrintArray(array, tabDepth + 1));
             } else if (value instanceof IToJSON toJSON) {
                 JSONObject subJSON = toJSON.toJSON();
                 sb.append(prettyPrint(subJSON, tabDepth + 1));
@@ -472,7 +455,9 @@ public class JSONUtils {
                 // In this case we just output the full class name
                 System.out.println("Unexpected value type in prettyPrint : " + value);
                 System.out.println("Using raw class name : " + value.getClass().getName());
-                sb.append(value.getClass().getName());
+                JSONObject subJSON = new JSONObject();
+                subJSON.put("class", value.getClass().getName());
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
             }
             if (keyIndex < keys.length - 1)
                 sb.append(",");
@@ -480,6 +465,38 @@ public class JSONUtils {
         }
         sb.append("\t".repeat(Math.max(0, tabDepth - 1)));
         sb.append("}");
+        return sb.toString();
+    }
+
+    // Caller is responsible for adding linefeed/tabs before the start of the array
+    private static String prettyPrintArray(JSONArray array, int tabDepth) {
+        StringBuilder sb = new StringBuilder("[ ");
+        boolean allOnOneLine = true;
+        for (int index = 0; index < array.size(); index++) {
+            Object v = array.get(index);
+            //    sb.append("\t".repeat(Math.max(0, tabDepth)));
+            if (v instanceof JSONObject subJSON) {
+                sb.append("\n").repeat("\t", Math.max(0, tabDepth));
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
+                allOnOneLine = false;
+            } else if (v instanceof JSONArray vArray) {
+                sb.append("\n").repeat("\t", Math.max(0, tabDepth));
+                sb.append(prettyPrintArray(vArray, tabDepth + 1));
+                allOnOneLine = false;
+            } else if (v instanceof String) {
+                sb.append("\"").append(v).append("\"");
+            } else if (v instanceof Long || v instanceof Integer || v instanceof Boolean) {
+                sb.append(v);
+            } else if (v instanceof Number n) {
+                sb.append(String.format("%.3g", n.doubleValue()));
+            }
+            if (index < array.size() - 1)
+                sb.append(", ");
+        }
+        if (allOnOneLine)
+            sb.append(" ]");
+        else
+            sb.append("\n").repeat("\t", Math.max(0, tabDepth - 1)).append(" ]");
         return sb.toString();
     }
 
@@ -549,6 +566,54 @@ public class JSONUtils {
         } else if (possibleValue instanceof IHasName pName && value instanceof IHasName name) {
             return pName.getName().equals(name.getName());
         } else
-            return possibleValue.equals(value);
+            return Objects.equals(possibleValue, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONArray intArrayToJSON(int[] array) {
+        JSONArray res = new JSONArray();
+        if (array != null) {
+            for (int i : array) res.add(i);
+        }
+        return res;
+    }
+
+    public static int[] intArrayFromJSON(JSONArray array) {
+        if (array == null) return null;
+        int[] res = new int[array.size()];
+        for (int i = 0; i < array.size(); i++) res[i] = ((Number) array.get(i)).intValue();
+        return res;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONArray booleanArrayToJSON(boolean[] array) {
+        JSONArray res = new JSONArray();
+        if (array != null) {
+            for (boolean b : array) res.add(b);
+        }
+        return res;
+    }
+
+    public static boolean[] booleanArrayFromJSON(JSONArray array) {
+        if (array == null) return null;
+        boolean[] res = new boolean[array.size()];
+        for (int i = 0; i < array.size(); i++) res[i] = (boolean) array.get(i);
+        return res;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSONArray intMatrixToJSON(int[][] matrix) {
+        JSONArray res = new JSONArray();
+        if (matrix != null) {
+            for (int[] row : matrix) res.add(intArrayToJSON(row));
+        }
+        return res;
+    }
+
+    public static int[][] intMatrixFromJSON(JSONArray array) {
+        if (array == null) return null;
+        int[][] res = new int[array.size()][];
+        for (int i = 0; i < array.size(); i++) res[i] = intArrayFromJSON((JSONArray) array.get(i));
+        return res;
     }
 }

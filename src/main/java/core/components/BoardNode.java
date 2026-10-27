@@ -5,14 +5,14 @@ import core.properties.Property;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-
 import java.util.HashMap;
+import java.util.Map;
 
 public class BoardNode extends Component {
 
     final static double defaultCost = 1.0;
-    private HashMap<BoardNode, Double> neighbours;  // Neighbours of this board node, <component IDs, cost to traverse>
-    private HashMap<BoardNode, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node, component ID -> side idx
+    private Map<BoardNode, Double> neighbours;  // Neighbours of this board node, <component IDs, cost to traverse>
+    private Map<BoardNode, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node, component ID -> side idx
     private int maxNeighbours;  // Maximum number of neighbours for this board node
 
     public BoardNode(int maxNeighbours, String name) {
@@ -24,6 +24,17 @@ public class BoardNode extends Component {
 
     public BoardNode(String name) {
         super(CoreConstants.ComponentType.BOARD_NODE, name);
+        this.maxNeighbours = -1;
+        this.neighbours = new HashMap<>();
+        this.neighbourSideMapping = new HashMap<>();
+    }
+
+    /**
+     * Recreates a BoardNode with a specific componentID. Used when reloading a serialized game
+     * state, so that the restored node has the same identity (componentID) as the original.
+     */
+    public BoardNode(String name, int componentID) {
+        super(CoreConstants.ComponentType.BOARD_NODE, name, componentID);
         this.maxNeighbours = -1;
         this.neighbours = new HashMap<>();
         this.neighbourSideMapping = new HashMap<>();
@@ -131,7 +142,7 @@ public class BoardNode extends Component {
     /**
      * @return the neighbours of this node.
      */
-    public HashMap<BoardNode, Double> getNeighbours() {
+    public Map<BoardNode, Double> getNeighbours() {
         return neighbours;
     }
 
@@ -155,7 +166,7 @@ public class BoardNode extends Component {
     /**
      * @return the neighbours mapping to sides of this node.
      */
-    public HashMap<BoardNode, Integer> getNeighbourSideMapping() {
+    public Map<BoardNode, Integer> getNeighbourSideMapping() {
         return neighbourSideMapping;
     }
 

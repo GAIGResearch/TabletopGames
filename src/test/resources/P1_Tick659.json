@@ -1,0 +1,121 @@
+{
+	"piecesBorneOff" : [ 12, 12 ],
+	"blots" : [ 15, 13 ],
+	"counters" : [ 
+		[ 
+			{
+				"name" : "White",
+				"id" : 62,
+				"ownerId" : 0,
+				"tokenType" : "White"
+			}
+		 ], 
+		[  ], 
+		[ 
+			{
+				"name" : "Black",
+				"id" : 49,
+				"ownerId" : 1,
+				"tokenType" : "Black"
+			}
+		 ], 
+		[ 
+			{
+				"name" : "Black",
+				"id" : 59,
+				"ownerId" : 1,
+				"tokenType" : "Black"
+			}, 
+			{
+				"name" : "Black",
+				"id" : 35,
+				"ownerId" : 1,
+				"tokenType" : "Black"
+			}
+		 ], 
+		[  ], 
+		[ 
+			{
+				"name" : "White",
+				"id" : 40,
+				"ownerId" : 0,
+				"tokenType" : "White"
+			}, 
+			{
+				"name" : "White",
+				"id" : 46,
+				"ownerId" : 0,
+				"tokenType" : "White"
+			}
+		 ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ], 
+		[  ]
+	 ],
+	"abstractGameState" : {
+		"gameType" : "Backgammon",
+		"turnCounter" : 1,
+		"gameTick" : 659,
+		"firstPlayer" : 0,
+		"gameStatus" : "GAME_ONGOING",
+		"gameParams" : {
+			"class" : "games.XIIScripta.XIIParameters"
+		},
+		"playerResults" : [ "GAME_ONGOING", "GAME_ONGOING" ],
+		"gamePhase" : "MovePieces",
+		"nPlayers" : 2,
+		"nTeams" : 2,
+		"roundCounter" : 100,
+		"turnOwner" : 1
+	},
+	"availableDiceValues" : [ 6, 1 ],
+	"dice" : [ 
+		{
+			"pdf" : [ 0.167, 0.167, 0.167, 0.167, 0.167, 0.167 ],
+			"nSides" : 6,
+			"id" : 64,
+			"value" : 6
+		}, 
+		{
+			"pdf" : [ 0.167, 0.167, 0.167, 0.167, 0.167, 0.167 ],
+			"nSides" : 6,
+			"id" : 65,
+			"value" : 1
+		}
+	 ],
+	"movedThisTurn" : [ 62, 49 ],
+	"playerTrackMapping" : [ 
+		[ 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ], 
+		[ 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ]
+	 ],
+	"class" : "games.backgammon.BGGameState",
+	"diceUsed" : [ false, true ]
+}

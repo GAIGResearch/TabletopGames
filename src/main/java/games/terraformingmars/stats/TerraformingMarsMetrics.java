@@ -41,7 +41,7 @@ import java.util.*;
 //
 //        @Override
 //        public Map<String, Class<?>> getColumns(Game game) {
-//            Map<String, Class<?>> columns = new HashMap<>();
+//            Map<String, Class<?>> columns = new LinkedHashMap<>();
 //            columns.put("Parameter Value", Integer.class);
 //            return columns;
 //        }

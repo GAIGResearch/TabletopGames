@@ -52,7 +52,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
             JSONObject rawData = (JSONObject) jsonParser.parse(reader);
             loadFromJSON(params, rawData);
         } catch (Exception e) {
-            throw new AssertionError(e.getClass().toString() + " : " + e.getMessage() + " : problem loading TunableParameters from file " + filename);
+            throw new AssertionError(e.getClass() + " : " + e.getMessage() + " : problem loading TunableParameters from file " + filename);
         }
     }
 
@@ -60,12 +60,11 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
      * Instantiate parameters from a JSONObject
      */
     @SuppressWarnings("unchecked")
-    public static void loadFromJSON(TunableParameters<?> params, JSONObject rawData) {
+    public static TunableParameters<?> loadFromJSON(TunableParameters<?> params, JSONObject rawData) {
         List<String> allParams = params.getParameterNames();
 
         // Static parameter, load from json and exclude from tuning
         // THIS IS UNCHECKED
-        // TODO Add validation once I figure
         for (String pName : params.staticParameters) {
             params.currentValues.put(pName, rawData.getOrDefault(pName, params.getDefaultParameterValue(pName)));
         }
@@ -93,6 +92,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
             }
         }
+        return params;
     }
 
     private Class<?> getParameterType(String pName) {
@@ -186,6 +186,12 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
             } else {
                 tunable.setParameterValue(name, value);
             }
+        }
+        // static parameters (e.g. a card list loaded from JSON) are not tunable, but must still be copied
+        for (String name : staticParameters) {
+            if (!tunable.staticParameters.contains(name))
+                tunable.staticParameters.add(name);
+            tunable.currentValues.put(name, currentValues.get(name));
         }
         tunable.resetOn = true;
         tunable._reset();
@@ -406,7 +412,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
     }
 
     @Override
-    public ITunableParameters instanceFromJSON(JSONObject jsonObject) {
+    public ITunableParameters<T> instanceFromJSON(JSONObject jsonObject) {
         return JSONUtils.loadClassFromJSON(jsonObject);
     }
 
@@ -435,7 +441,8 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                     Map<String, Integer> subSettings = settings.entrySet().stream()
                             .filter(e -> e.getKey().contains("."))
                             .collect(toMap(e -> e.getKey().substring(e.getKey().indexOf(".") + 1), Map.Entry::getValue));
-                    value = tp.instanceToJSON(excludeDefaults, subSettings);
+                    // because all values are hoisted up to the top level in a search space, we do not reliably have all the defaults at lower levels
+                    value = tp.instanceToJSON(false, subSettings);
                 } else {
                     if (value instanceof Enum) {
                         value = value.toString();
@@ -520,11 +527,10 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         if (this == o) return true;
         if (!(o instanceof TunableParameters that)) return false;
         // getRandomSeed() == that.getRandomSeed() && removed, so that equals (and hashcode) covers parameters only
+        // for equality we just check parameter names and current values
         return _equals(o)
                 && that.parameterNames.equals(parameterNames)
-                && that.possibleValues.equals(possibleValues)
-                && that.currentValues.equals(currentValues)
-                && that.defaultValues.equals(defaultValues);
+                && that.currentValues.equals(currentValues);
     }
 
     public boolean allParametersAndValuesEqual(TunableParameters other) {

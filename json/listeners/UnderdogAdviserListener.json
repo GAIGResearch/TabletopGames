@@ -1,0 +1,11 @@
+{
+  "class" : "players.observers.GameAdviser",
+  "args" : [
+    "AdviserJSON/3D_34_Adviser.json",
+    {
+      "class" : "players.observers.UnderdogAdviser",
+      "args" :  ["AdviserJSON/3D_34_StateHeuristic.json", 0.00, 0.05]
+    },
+    "Underdog_Adviser.txt"
+  ]
+}

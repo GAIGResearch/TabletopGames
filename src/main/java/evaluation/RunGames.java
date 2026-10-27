@@ -4,6 +4,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameRunner;
 import evaluation.listeners.IGameListener;
+import evaluation.tournaments.AgentArchiver;
 import evaluation.tournaments.RoundRobinTournament;
 import evaluation.tournaments.SkillGrid;
 import games.GameType;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static evaluation.RunArg.*;
 import static java.util.stream.Collectors.toList;
@@ -40,7 +42,23 @@ public class RunGames implements IGameRunner {
     // Vars for running
     Map<GameType, int[]> gamesAndPlayerCounts;
     private LinkedList<AbstractPlayer> agents;
+    private List<File> agentFiles;
     private String timeDir;
+
+    public RunGames() {
+    }
+
+    /**
+     * For programmatic use: runs the given agents over the games/player counts in config.
+     * Player counts are not capped to the number of default agents (self-play fills any extra seats).
+     */
+    public RunGames(Map<RunArg, Object> config, List<AbstractPlayer> agents) {
+        this.config = config;
+        this.agents = new LinkedList<>(agents);
+        this.agentFiles = new ArrayList<>();
+        this.timeDir = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+        initialiseGamesAndPlayerCount(false);
+    }
 
     /**
      * Main function, creates and runs the tournament with the given settings and players.
@@ -57,14 +75,30 @@ public class RunGames implements IGameRunner {
         RunGames runGames = new RunGames();
         runGames.config = parseConfig(args, Collections.singletonList(Usage.RunGames));
 
-        runGames.initialiseGamesAndPlayerCount();
+        runGames.initialiseGamesAndPlayerCount(runGames.config.get(playerDirectory).equals(""));
         if (!runGames.config.get(RunArg.gameParams).equals("") && runGames.gamesAndPlayerCounts.keySet().size() > 1)
             throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
 
         // 2. Setup
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
+        List<File> agentFiles = new ArrayList<>();
         if (!runGames.config.get(playerDirectory).equals("")) {
-            agents.addAll(PlayerFactory.createPlayers((String) runGames.config.get(playerDirectory)));
+            String pDir = (String) runGames.config.get(playerDirectory);
+            agents.addAll(PlayerFactory.createPlayers(pDir));
+            File folder = new File(pDir);
+            if (folder.exists() && folder.isDirectory()) {
+                String[] files = folder.list();
+                if (files != null) {
+                    Arrays.sort(files);
+                    for (String fileName : files) {
+                        if (!fileName.endsWith(".json"))
+                            continue;
+                        agentFiles.add(new File(folder.getAbsolutePath() + File.separator + fileName));
+                    }
+                }
+            } else if (folder.exists()) {
+                agentFiles.add(folder);
+            }
         } else {
        //     agents.add(new MCTSPlayer());
             agents.add(new BasicMCTSPlayer());
@@ -77,9 +111,14 @@ public class RunGames implements IGameRunner {
         if (!runGames.config.get(focusPlayer).equals("")) {
             // if a focus Player is provided, then this override some other settings
             runGames.config.put(mode, "onevsall");
-            AbstractPlayer fp = PlayerFactory.createPlayer((String) runGames.config.get(focusPlayer));
+            String fpFile = (String) runGames.config.get(focusPlayer);
+            AbstractPlayer fp = PlayerFactory.createPlayer(fpFile);
             agents.add(0, fp);  // convention is that they go first in the list of agents
+            if (new File(fpFile).exists()) {
+                agentFiles.add(0, new File(fpFile));
+            }
         }
+        runGames.agentFiles = agentFiles;
 
         runGames.timeDir = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 
@@ -110,20 +149,14 @@ public class RunGames implements IGameRunner {
                 RoundRobinTournament tournament = new RoundRobinTournament(agents, gameType, playerCount, params, config);
 
                 // Add listeners
+                List<String> directories = outputDirectories(gameType, playerCount);
+
                 //noinspection unchecked
                 for (String listenerClass : ((List<String>) config.get(listener))) {
                     try {
                         IGameListener gameTracker = IGameListener.createListener(listenerClass);
-                    tournament.addListener(gameTracker);
-                    String outputDir = (String) config.get(destDir);
-                    List<String> directories = new ArrayList<>(Arrays.asList(outputDir.split(Pattern.quote(File.separator))));
-                    if (gamesAndPlayerCounts.size() > 1)
-                        directories.add(gameName);
-                    if (gamesAndPlayerCounts.get(gameType).length > 1)
-                        directories.add(playersDir);
-                    if ((boolean) config.get(addTimeStamp))
-                        directories.add(timeDir);
-                    gameTracker.setOutputDirectory(directories.toArray(new String[0]));
+                        tournament.addListener(gameTracker);
+                        gameTracker.setOutputDirectory(directories.toArray(new String[0]));
                     } catch (IllegalArgumentException e) {
                         System.out.println("Error creating listener: " + e.getMessage());
                         // this is not a problem as such, we'll still report win rate information which may be all the user wants
@@ -132,11 +165,31 @@ public class RunGames implements IGameRunner {
 
                 // run tournament
                 tournament.run();
+
+                if (agents.size() > playerCount && !agentFiles.isEmpty() && agents.size() == agentFiles.size()) {
+                    AgentArchiver archiver = new AgentArchiver();
+                    archiver.archive(tournament.getTournamentResults(), agents, agentFiles, String.join(File.separator, directories));
+                }
             }
         }
     }
 
-    private void initialiseGamesAndPlayerCount() {
+    /**
+     * The directory path (as a list of components) to which listeners write results for this game and player count.
+     */
+    protected List<String> outputDirectories(GameType gameType, int playerCount) {
+        String outputDir = (String) config.get(destDir);
+        List<String> directories = new ArrayList<>(Arrays.asList(outputDir.split(Pattern.quote(File.separator))));
+        if (gamesAndPlayerCounts.size() > 1)
+            directories.add(gameType.name());
+        if (gamesAndPlayerCounts.get(gameType).length > 1)
+            directories.add(playerCount + "-players");
+        if ((boolean) config.get(addTimeStamp))
+            directories.add(timeDir);
+        return directories;
+    }
+
+    private void initialiseGamesAndPlayerCount(boolean capToDefaultAgents) {
         String gameArg = config.get(RunArg.game).toString();
         String playerRange = config.get(RunArg.playerRange).toString();
         int np = (int) config.get(RunArg.nPlayers);
@@ -178,7 +231,7 @@ public class RunGames implements IGameRunner {
 
             // Cap max number of players to those available in the framework if no player directory specified
             // (in which case the framework will use 1 of each default players)
-            if (config.get(playerDirectory).equals("") && max > PlayerType.values().length - 2) {
+            if (capToDefaultAgents && max > PlayerType.values().length - 2) {
                 max = PlayerType.values().length - 2;  // Ignore the 2 human players (console, GUI)
             }
 

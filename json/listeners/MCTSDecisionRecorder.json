@@ -1,0 +1,4 @@
+{
+  "class" : "players.observers.MCTSDecisionRecorder",
+  "args" : [ 30, true ]
+}

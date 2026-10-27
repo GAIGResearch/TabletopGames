@@ -175,7 +175,10 @@ public class ActionTests {
     }
     @Test
     public void drawByRepetitionTest() {
+        ChessParameters params = (ChessParameters) game.getGameState().getGameParameters();
+        params.setParameterValue("drawByRepetition", 3);
         ChessGameState state = (ChessGameState) game.getGameState().copy();
+        fm.setup(state);
         //Setup the board for draw by repetition 
         fm.next(state, new MovePiece(1,0, 2, 2)); // Move knight
         fm.next(state, new MovePiece(1,7, 2, 5)); // Move knight

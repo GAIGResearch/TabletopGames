@@ -3,7 +3,10 @@ package core.components;
 import core.AbstractGameState;
 import core.CoreConstants.VisibilityMode;
 import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import utilities.DeterminisationUtilities;
+import utilities.JSONUtils;
 import utilities.Pair;
 
 import java.util.*;
@@ -347,6 +350,72 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         return deckVisibility;
     }
 
+    /**
+     * As Deck.equals, and each component must be visible to the same players, as must the next component added
+     * (deckVisibility).
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        PartialObservableDeck<?> that = (PartialObservableDeck<?>) o;
+        if (!Arrays.equals(deckVisibility, that.deckVisibility)) return false;
+        if (elementVisibility.size() != that.elementVisibility.size()) return false;
+        Iterator<boolean[]> other = that.elementVisibility.iterator();
+        // the arrays are compared by value: each deck holds its own copies
+        for (boolean[] visibility : elementVisibility)
+            if (!Arrays.equals(visibility, other.next())) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 31 * super.hashCode() + Arrays.hashCode(deckVisibility);
+        for (boolean[] visibility : elementVisibility)
+            result = 31 * result + Arrays.hashCode(visibility);
+        return result;
+    }
+
+    /**
+     * Serializes the runtime state of this deck, including the per-deck and per-component visibility
+     * (which is essential to preserve hidden information across a save/load). As for {@link Deck#toJSON}, every component must implement
+     * {@link core.interfaces.IToJSON}. Reconstruct with {@link #loadDeck}.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public JSONObject toJSON() {
+        JSONObject json = super.toJSON();
+        json.put("deckVisibility", JSONUtils.booleanArrayToJSON(deckVisibility));
+        JSONArray elementVis = new JSONArray();
+        for (boolean[] vis : elementVisibility)
+            elementVis.add(JSONUtils.booleanArrayToJSON(vis));
+        json.put("elementVisibility", elementVis);
+        return json;
+    }
+
+    /**
+     * Reconstructs a PartialObservableDeck from JSON produced by {@link #toJSON}, restoring the
+     * components (each via its {@link JSONObject} constructor), the deck visibility and the
+     * per-component visibility exactly.
+     *
+     * @param json - the JSON produced by {@link #toJSON}.
+     */
+    public static <T extends Component> PartialObservableDeck<T> loadDeck(JSONObject json) {
+        boolean[] deckVisibility = JSONUtils.booleanArrayFromJSON((JSONArray) json.get("deckVisibility"));
+        PartialObservableDeck<T> deck = new PartialObservableDeck<>((String) json.get("name"),
+                ((Number) json.get("ownerId")).intValue(), deckVisibility,
+                ((Number) json.get("id")).intValue());
+        // set the visibility mode directly (not via setVisibility, which would re-derive element
+        // visibility) as we restore the exact per-component visibility below
+        deck.visibility = VisibilityMode.valueOf((String) json.get("visibility"));
+        deck.capacity = ((Number) json.get("capacity")).intValue();
+        populateComponents(deck, json);
+        List<boolean[]> elementVisibility = new LinkedList<>();
+        for (Object o : (JSONArray) json.get("elementVisibility"))
+            elementVisibility.add(JSONUtils.booleanArrayFromJSON((JSONArray) o));
+        deck.elementVisibility = elementVisibility;
+        return deck;
+    }
+
     @Override
     public PartialObservableDeck<T> copy() {
         PartialObservableDeck<T> dp = new PartialObservableDeck<>(componentName, ownerId, deckVisibility, componentID);
@@ -364,6 +433,8 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     @NotNull
     private PartialObservableDeck<T> commonCopy(PartialObservableDeck<T> dp) {
+        // the copy constructor sets MIXED_VISIBILITY, whatever this deck's mode is
+        dp.visibility = visibility;
         dp.deckVisibility = deckVisibility.clone();
 
         ArrayList<boolean[]> newVisibility = new ArrayList<>();

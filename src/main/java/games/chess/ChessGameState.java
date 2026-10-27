@@ -29,10 +29,6 @@ public class ChessGameState extends AbstractGameState {
     //Number of moves without a pawn move or capture
     int halfMoveClock = 0;
 
-
-    
-    
-
     public ChessGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
 
@@ -70,47 +66,11 @@ public class ChessGameState extends AbstractGameState {
             // Simple value for each piece on the board, weighted by its type. Find the difference between the two players.
             double playerScore = 0.0; 
             double opponentScore = 0.0;
-            for (ChessPiece piece : getPlayerPieces(1 - playerId)) {   
-                ChessPiece.ChessPieceType type = piece.getChessPieceType();
-                switch (type) {
-                    case PAWN:
-                        opponentScore += 1;
-                        break;
-                    case KNIGHT:
-                    case BISHOP:
-                        opponentScore += 3;
-                        break;
-                    case ROOK:
-                        opponentScore += 5;
-                        break;
-                    case QUEEN:
-                        opponentScore += 9;
-                        break;
-                    case KING:
-                        opponentScore += 0;
-                        break;
-                }
+            for (ChessPiece piece : getPlayerPieces(1 - playerId)) {
+                opponentScore = getChessHeuristic(opponentScore, piece);
             }
             for (ChessPiece piece : getPlayerPieces(playerId)) {
-                ChessPiece.ChessPieceType type = piece.getChessPieceType();
-                switch (type) {
-                    case PAWN:
-                        playerScore += 1;
-                        break;
-                    case KNIGHT:
-                    case BISHOP:
-                        playerScore += 3;
-                        break;
-                    case ROOK:
-                        playerScore += 5;
-                        break;
-                    case QUEEN:
-                        playerScore += 9;
-                        break;
-                    case KING:
-                        playerScore += 0;
-                        break;
-                }
+                playerScore = getChessHeuristic(playerScore, piece);
             }
             //Reward check
             if (isInCheck(1-playerId)) {
@@ -127,12 +87,35 @@ public class ChessGameState extends AbstractGameState {
         }
     }
 
+    private double getChessHeuristic(double currentHeuristic, ChessPiece piece) {
+        ChessPiece.ChessPieceType type = piece.getChessPieceType();
+        switch (type) {
+            case PAWN:
+                currentHeuristic += 1;
+                break;
+            case KNIGHT:
+            case BISHOP:
+                currentHeuristic += 3;
+                break;
+            case ROOK:
+                currentHeuristic += 5;
+                break;
+            case QUEEN:
+                currentHeuristic += 9;
+                break;
+            case KING:
+                currentHeuristic += 0;
+                break;
+        }
+        return currentHeuristic;
+    }
+
     @Override
     public double getGameScore(int playerId) {
         if (isNotTerminal()) {
             return 0;
         } else {
-            return (double) (getPlayerResults()[playerId].value+1) / 2.0;
+            return (getPlayerResults()[playerId].value+1) / 2.0;
         }
     }
 
@@ -374,7 +357,9 @@ public class ChessGameState extends AbstractGameState {
     public void resetHalfMoveClock() {
         halfMoveClock = 0;
     }
-    public boolean AddCheckRepetitionCount() {
+    public boolean addCheckRepetitionCount() {
+        if (((ChessParameters) gameParameters).drawByRepetition == 0)
+            return false;
         // Check if the current board state has been seen before
         int boardHash = Objects.hash(board.hashCode(), getCurrentPlayer());
         if (gameStateCounts.containsKey(boardHash)) {

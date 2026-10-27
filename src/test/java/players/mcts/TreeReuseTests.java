@@ -2,7 +2,6 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.interfaces.IGamePhase;
 import games.GameType;
 import games.cantstop.CantStopForwardModel;
 import games.dominion.DominionConstants;
@@ -13,7 +12,6 @@ import games.dominion.cards.CardType;
 import games.tictactoe.TicTacToeForwardModel;
 import org.junit.Before;
 import org.junit.Test;
-import org.netlib.lapack.Dgetrf;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 

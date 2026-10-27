@@ -12,6 +12,13 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.test.skip>true</maven.test.skip>
         <build.documentation>www.tabletopgames.ai/wiki/maven</build.documentation>
+        <!-- Empty default for the surefire argLine. The surefire <argLine> uses late property
+             expansion (@{argLine}) so that a coverage agent (e.g. jacoco:prepare-agent) can inject
+             its own javaagent at build time. With no such agent configured, this default lets the
+             @{argLine} token resolve to empty rather than the literal "{argLine}" (which the JVM
+             would try to open as an @argfile and crash the forked test VM). IntelliJ ignores this
+             config and runs tests with its own JUnit runner. -->
+        <argLine></argLine>
     </properties>
 
     <groupId>ai.tabletopgames</groupId>
@@ -70,12 +77,12 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.13</artifactId>
-            <version>3.5.5</version>
+            <version>4.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.13</artifactId>
-            <version>3.5.5</version>
+            <version>4.1.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.javaparser</groupId>
@@ -85,7 +92,7 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-mllib_2.13</artifactId>
-            <version>3.5.1</version>
+            <version>4.1.2</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -178,6 +185,15 @@
                 <version>2.22.2</version>
                 <configuration>
                     <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+                    <!-- Run every test class, not just those whose names match the default Test*/*Test/*Tests/*TestCase.
+                         (Classes with no tests are ignored.) The long-running forward model tester suites are excluded. -->
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>games/fmtester/**</exclude>
+                        <exclude>**/*$*</exclude> <!-- inner classes: the surefire default, which is replaced by this list -->
+                    </excludes>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -224,6 +240,38 @@
                             </archive>
                             <finalName>TAG</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
+                            <!-- Without this, this execution replaces the project's main-artifact
+                                 reference with the fat TAG.jar, which the next execution's
+                                 useProjectArtifact would then pick up instead of the plain
+                                 classes-only jar, silently defeating its dependency filtering. -->
+                            <attach>false</attach>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Slim jar for PyTAG (github.com/martinballa/PyTAG): engine + games + players
+                             + GUI/replay, without the Spark/Hadoop ML-learner, tablesaw analytics, or
+                             LLM dependency trees. See src/assembly/pytag-jar.xml for what's excluded. -->
+                        <id>make-pytag-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/pytag-jar.xml</descriptor>
+                            </descriptors>
+                            <archive>
+                                <manifest>
+                                    <mainClass>core.TAG</mainClass>
+                                </manifest>
+                                <manifestEntries>
+                                    <Implementation-Title>TAG-pytag</Implementation-Title>
+                                    <Description>Slim TAG runtime jar for PyTAG (github.com/martinballa/PyTAG): engine, games, players and GUI/replay only, no Spark/Hadoop ML-learner, tablesaw analytics or LLM dependencies.</Description>
+                                </manifestEntries>
+                            </archive>
+                            <finalName>TAG-pytag</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <attach>false</attach>
                         </configuration>
                     </execution>
                 </executions>

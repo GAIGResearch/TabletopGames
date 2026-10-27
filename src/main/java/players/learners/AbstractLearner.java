@@ -3,6 +3,7 @@ package players.learners;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -17,10 +18,12 @@ public abstract class AbstractLearner implements ILearner {
     protected double[][] target;
     protected double[][] currentScore;
     String[] descriptions;
+    String[] sparkDescriptions;
     double gamma;
     Target targetType;
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
+    Optional<IStateHeuristic> heuristic = Optional.empty();
 
     public enum Target {
         WIN("Win", false),  // 0 or 1 for loss/win
@@ -32,6 +35,8 @@ public abstract class AbstractLearner implements ILearner {
         ORD_MEAN("Ordinal", true),  // as ORDINAL, but discounted to middle of the range based on rounds to final result
         ORD_SCALE("Ordinal", false), // as ORDINAL, but scaled to 0 to 1 (for Logistic regression targeting)
         ORD_MEAN_SCALE("Ordinal", true), // as ORD_MEAN, but scaled to 0 to 1 ( for Logistic regression targeting)
+        HEURISTIC("Heuristic", false), // targets a heuristic value (the heuristic needs to be supplied, with game.getHeuristicScore() being the default)
+        FINAL_HEURISTIC("FinalHeuristic", false), // targets the heuristic value at the end of the game (the heuristic needs to be supplied, with game.getHeuristicScore() being the default)
         ACTION_CHOSEN("CHOSEN", false), // targets the probability of the action taken
         ACTION_VISITS("VISIT_PROPORTION", false),
         ACTION_ADV("ADVANTAGE", false), // targets the advantage of the action taken
@@ -54,19 +59,26 @@ public abstract class AbstractLearner implements ILearner {
         this(1.0, Target.ACTION_SCORE, stateFeatureVector, actionFeatureVector);
     }
 
-    public AbstractLearner(){}
+    public AbstractLearner() {
+    }
 
     public AbstractLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector) {
-        this.gamma = gamma;
-        this.targetType = target;
-        this.stateFeatureVector = stateFeatureVector;
+        this(gamma, target, stateFeatureVector, null, null);
     }
 
     public AbstractLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        this(gamma, target, stateFeatureVector, actionFeatureVector, null);
+    }
+
+    public AbstractLearner(double gamma, Target target,
+                           IStateFeatureVector stateFeatureVector,
+                           IActionFeatureVector actionFeatureVector,
+                           IStateHeuristic stateHeuristic) {
         this.gamma = gamma;
         this.targetType = target;
         this.stateFeatureVector = stateFeatureVector;
         this.actionFeatureVector = actionFeatureVector;
+        this.heuristic = stateHeuristic == null ? Optional.empty() : Optional.of(stateHeuristic);
     }
 
     public AbstractLearner setStateFeatureVector(IStateFeatureVector stateFeatureVector) {
@@ -79,17 +91,28 @@ public abstract class AbstractLearner implements ILearner {
         return this;
     }
 
+    public AbstractLearner setHeuristic(IStateHeuristic heuristic) {
+        this.heuristic = Optional.of(heuristic);
+        return this;
+    }
+
     public IActionFeatureVector getActionFeatureVector() {
         return actionFeatureVector;
     }
+
     public IStateFeatureVector getStateFeatureVector() {
         return stateFeatureVector;
+    }
+
+    public IStateHeuristic getHeuristic() {
+        return heuristic.orElse(null);
     }
 
     public AbstractLearner setGamma(double gamma) {
         this.gamma = gamma;
         return this;
     }
+
     public AbstractLearner setTarget(Target target) {
         this.targetType = target;
         return this;
@@ -109,13 +132,16 @@ public abstract class AbstractLearner implements ILearner {
         String[] specialColumns = {"GameID", "Player", "Turn", "Round", "Tick", "CurrentScore", "Win", "Ordinal",
                 "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks",
                 "ActualWin", "ActualOrdinal", "ActualScore", "ActualScoreAdv",
-                "CHOSEN", "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE", "VISIT_PROPORTION"};
+                "CHOSEN", "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE", "VISIT_PROPORTION",
+                "Heuristic", "FinalHeuristic"};
         Map<String, Integer> indexForSpecialColumns = new HashMap<>();
 
         // then set descriptions to the rest of the data
         // and validate that the data matches the feature vector
         descriptions = stateFeatureVector == null ?
                 actionFeatureVector.names() : stateFeatureVector.names();
+        // A colon in squared interaction names can cause issues with Spark (reason not clear, but using an underscore solves the problem)
+        sparkDescriptions = Arrays.stream(descriptions).map(s -> s.replace(":", "_")).toArray(String[]::new);
         List<String> expectedNames = Arrays.stream(descriptions).collect(toList());
         Map<String, Integer> indexForDescriptions = new HashMap<>();
         for (int i = 0; i < header.length; i++) {
@@ -145,9 +171,12 @@ public abstract class AbstractLearner implements ILearner {
         for (int i = 0; i < dataArray.length; i++) {
             List<String> allData = rawData.b.get(i);
             // calculate the number of turns from this point until the end of the game
-            double turns = Double.parseDouble(allData.get(indexForSpecialColumns.get("TotalTurns"))) -
-                    Double.parseDouble(allData.get(indexForSpecialColumns.get("Turn")));
-            double playerCount = Double.parseDouble(allData.get(indexForSpecialColumns.get("PlayerCount")));
+            double turns = 1.0;
+            if (indexForSpecialColumns.get("TotalTurns") != null && indexForSpecialColumns.get("Turn") != null) {
+                turns = Double.parseDouble(allData.get(indexForSpecialColumns.get("TotalTurns"))) -
+                        Double.parseDouble(allData.get(indexForSpecialColumns.get("Turn")));
+            }
+            double playerCount = indexForSpecialColumns.get("PlayerCount") == null ? 2.0 : Double.parseDouble(allData.get(indexForSpecialColumns.get("PlayerCount")));
             int targetIndex = indexForSpecialColumns.getOrDefault(targetType.header, -1);
             if (targetIndex == -1) {
                 throw new IllegalArgumentException("Target " + targetType.header + " not found in data");
@@ -170,7 +199,8 @@ public abstract class AbstractLearner implements ILearner {
             if (targetType == Target.ORD_MEAN_SCALE || targetType == Target.ORD_SCALE)
                 target[i][0] = (playerCount - target[i][0]) / (playerCount - 1.0);  // scale to [0, 1]
 
-            currentScore[i][0] = Double.parseDouble(allData.get(indexForSpecialColumns.get("CurrentScore")));
+            if (indexForSpecialColumns.get("CurrentScore") != null)
+                currentScore[i][0] = Double.parseDouble(allData.get(indexForSpecialColumns.get("CurrentScore")));
             double[] regressionData = new double[descriptions.length + 1];
             regressionData[0] = 1.0; // the bias term
             // then copy the rest of the data into the regression data

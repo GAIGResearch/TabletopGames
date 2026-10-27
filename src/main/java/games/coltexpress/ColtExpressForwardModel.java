@@ -1,7 +1,7 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.actions.DrawCard;
@@ -20,9 +20,11 @@ import utilities.Group;
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
-import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.*;
+import static games.coltexpress.cards.RoundCard.TurnType.DoubleTurn;
 
-public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
+public class ColtExpressForwardModel extends StandardForwardModel {
 
     @Override
     public void _setup(AbstractGameState firstState) {
@@ -31,17 +33,18 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         //       System.out.println("Game " + cegs.getGameID() + ", seed: " + cep.getRandomSeed() + ", rnd: " + cegs.getRnd().nextInt(10000));
 
         cegs.bulletsLeft = new int[cegs.getNPlayers()];
-        cegs.playerCharacters = new HashMap<>();
+        cegs.playerCharacters = new LinkedHashMap<>();
         cegs.playerPlayingBelle = -1;
         cegs.plannedActions = null;
         cegs.trainCompartments = new LinkedList<>();
         cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers(), VisibilityMode.TOP_VISIBLE_TO_ALL);
 
         setupRounds(cegs, cep);
+        initTurn(cegs, cegs.rounds.get(0), 0);
         setupTrain(cegs);
-        cegs.playerCharacters = new HashMap<>();
+        cegs.playerCharacters = new LinkedHashMap<>();
 
-        HashSet<CharacterType> characters = new HashSet<>();
+        HashSet<CharacterType> characters = new LinkedHashSet<>();
         Collections.addAll(characters, CharacterType.values());
 
         cegs.playerDecks = new ArrayList<>(cegs.getNPlayers());
@@ -119,14 +122,125 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
-        ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) cegs.getTurnOrder();
 
         IGamePhase gamePhase = cegs.getGamePhase();
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
             System.out.println("character drafting is not implemented yet");
             throw new UnsupportedOperationException("not implemented yet");
         }
-        ceto.endPlayerTurn(gameState);
+        endTurn(cegs);
+    }
+
+    private void endTurn(ColtExpressGameState cegs) {
+        if (cegs.getGameStatus() != GAME_ONGOING) return;
+        // The turn owner is set below, once the end of round processing has been done
+        endPlayerTurn(cegs, cegs.getTurnOwner());
+
+        if (cegs.getGamePhase() == ExecuteActions) {
+            // The round is over once all the planned actions have been executed
+            if (cegs.plannedActions.getSize() == 0) {
+                endRoundCard(cegs);
+                endRound(cegs);
+                ColtExpressParameters cep = (ColtExpressParameters) cegs.getGameParameters();
+                if (cegs.getRoundCounter() == cep.nMaxRounds)
+                    endGame(cegs);
+                cegs.distributeCards();
+                return;
+            }
+        } else {
+            // When planning, each turn on the round card is played by every player (twice each in a double turn)
+            cegs.subTurnCounter++;
+            int turnsInRound = cegs.currentTurnType == DoubleTurn ? cegs.getNPlayers() * 2 : cegs.getNPlayers();
+            if (cegs.subTurnCounter % turnsInRound == 0) {
+                cegs.fullPlayerTurnCounter++;
+                cegs.subTurnCounter = 0;
+                RoundCard currentRoundCard = cegs.getRounds().get(cegs.getRoundCounter());
+                if (cegs.fullPlayerTurnCounter < currentRoundCard.getTurnTypes().length) {
+                    initTurn(cegs, currentRoundCard, cegs.fullPlayerTurnCounter);
+                    return;
+                } else {
+                    // All the turns on the round card have been played, so the planned actions are executed
+                    cegs.setGamePhase(ExecuteActions);
+                }
+            }
+        }
+        cegs.setTurnOwner(nextPlayer(cegs));
+    }
+
+    /**
+     * Sets up the given turn of the round card, starting with the first player of the round.
+     */
+    private void initTurn(ColtExpressGameState cegs, RoundCard round, int turn) {
+        cegs.currentTurnType = round.getTurnTypes()[turn];
+        cegs.setFirstPlayer(cegs.firstPlayerOfRound);
+        cegs.firstAction = true;
+        switch (cegs.currentTurnType) {
+            case NormalTurn:
+            case DoubleTurn:
+            case HiddenTurn:
+                cegs.direction = 1;
+                break;
+            case ReverseTurn:
+                cegs.direction = -1;
+                break;
+            default:
+                throw new IllegalArgumentException("unknown turn type " + cegs.currentTurnType);
+        }
+    }
+
+    private int nextPlayer(ColtExpressGameState cegs) {
+        int nPlayers = cegs.getNPlayers();
+        int turnOwner = cegs.getTurnOwner();
+        if (cegs.getGamePhase() == DraftCharacter) {
+            return (nPlayers + turnOwner + cegs.direction) % nPlayers;
+        } else if (cegs.getGamePhase() == ExecuteActions) {
+            // The player who planned the next action
+            if (cegs.plannedActions.getSize() > 0) {
+                int idx = cegs.plannedActions.getSize() - 1;
+                int id = cegs.plannedActions.get(idx).playerID;
+
+                // A card with player ID -1 is a bullet, which redeterminisation of a copy can put in the deck.
+                // These are removed.
+                while (id == -1 && idx > 0) {
+                    cegs.plannedActions.remove(idx);
+                    idx--;
+                    id = cegs.plannedActions.get(idx).playerID;
+                    if (id != -1) return id;
+                }
+                return id;
+            }
+            return (nPlayers + turnOwner + cegs.direction) % nPlayers;
+        } else {
+            // In a double turn each player plays twice in a row
+            if (cegs.currentTurnType == DoubleTurn) {
+                if (cegs.firstAction) {
+                    cegs.firstAction = false;
+                    return turnOwner;
+                }
+            }
+
+            cegs.firstAction = true;
+            return (nPlayers + turnOwner + cegs.direction) % nPlayers;
+        }
+    }
+
+    /**
+     * Applies the end of round event of the round card, and sets up the next round if there is one.
+     */
+    private void endRoundCard(ColtExpressGameState cegs) {
+        int roundCounter = cegs.getRoundCounter();
+        cegs.getRounds().get(roundCounter).endRoundCardEvent(cegs);
+        int nextRound = roundCounter + 1;
+        if (nextRound < cegs.getRounds().getSize()) {
+            cegs.firstPlayerOfRound = (cegs.firstPlayerOfRound + 1) % cegs.getNPlayers();
+            cegs.subTurnCounter = 0;
+            cegs.fullPlayerTurnCounter = 0;
+            initTurn(cegs, cegs.getRounds().get(nextRound), 0);
+            cegs.setGamePhase(PlanActions);
+            boolean[] allTrue = new boolean[cegs.getNPlayers()];
+            Arrays.fill(allTrue, true);
+            cegs.rounds.setVisibilityOfComponent(nextRound, allTrue);
+        }
     }
 
     @Override
@@ -169,10 +283,9 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
         ColtExpressParameters cep = (ColtExpressParameters) cegs.getGameParameters();
-        ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) cegs.getTurnOrder();
         int player = cegs.getCurrentPlayer();
 
-        HashSet<ColtExpressCard.CardType> types = new HashSet<>();
+        HashSet<ColtExpressCard.CardType> types = new LinkedHashSet<>();
 
         Deck<ColtExpressCard> playerHand = cegs.playerHandCards.get(player);
         int fromID = playerHand.getComponentID();
@@ -185,8 +298,8 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
                 continue;
 
             // Ghost can play a card hidden during the first turn of a round, otherwise hidden if turn is hidden
-            boolean hidden = ceto.isHiddenTurn() ||
-                    (cegs.playerCharacters.get(player) == CharacterType.Ghost && ceto.getFullPlayerTurnCounter() == 0);
+            boolean hidden = cegs.isHiddenTurn() ||
+                    (cegs.playerCharacters.get(player) == CharacterType.Ghost && cegs.getFullPlayerTurnCounter() == 0);
 
             // Add action
             actions.add(new SchemeAction(fromID, toID, i, hidden));
@@ -266,7 +379,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
                         else if (compartment.playersInsideCompartment.contains(player))
                             availableLoot = compartment.lootInside;
                         if (availableLoot != null && availableLoot.getSize() > 0) {
-                            HashSet<LootType> lootTypes = new HashSet<>();
+                            HashSet<LootType> lootTypes = new LinkedHashSet<>();
                             for (Loot loot : availableLoot.getComponents()) {
                                 lootTypes.add(loot.getLootType());
                             }
@@ -334,7 +447,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
-        Set<Integer> availableTargets = new HashSet<>();
+        Set<Integer> availableTargets = new LinkedHashSet<>();
 
         for (int i = 0; i < cegs.trainCompartments.size(); i++) {
             Compartment compartment = cegs.trainCompartments.get(i);
@@ -379,7 +492,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
                     if (availableLoot.getSize() > 0) {
                         // Punch and make them drop random loot of type
-                        HashSet<LootType> lootTypes = new HashSet<>();
+                        HashSet<LootType> lootTypes = new LinkedHashSet<>();
                         for (Loot loot : availableLoot.getComponents()) {
                             lootTypes.add(loot.getLootType());
                         }
@@ -428,7 +541,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         if (playerCompartment != null) {
 
             int sourceCompID = playerCompartment.getComponentID();
-            HashMap<Integer, Compartment> targets = new HashMap<>();
+            HashMap<Integer, Compartment> targets = new LinkedHashMap<>();
 
             if (playerOnTop) {
                 //shots in rear direction

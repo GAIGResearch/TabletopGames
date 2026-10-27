@@ -237,12 +237,12 @@ public class OMATests {
                                 .collect(toList());
                         // We now need to get weighted value of grandchildren stats
                         double totalValue = grandchildren.stream()
-                                .map(gc -> gc.actionValues.get(childAction))
+                                .map(gc -> gc.getActionValues().get(childAction))
                                 .filter(Objects::nonNull)
                                 .mapToDouble(s -> s.totValue[player])
                                 .sum();
                         int totVisits = grandchildren.stream()
-                                .map(gc -> gc.actionValues.get(childAction))
+                                .map(gc -> gc.getActionValues().get(childAction))
                                 .filter(Objects::nonNull)
                                 .mapToInt(s -> s.nVisits)
                                 .sum();

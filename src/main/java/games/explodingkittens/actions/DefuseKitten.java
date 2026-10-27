@@ -3,14 +3,16 @@ package games.explodingkittens.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
+import core.interfaces.IToJSON;
 import games.explodingkittens.ExplodingKittensGameState;
+import org.json.simple.JSONObject;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
-public class DefuseKitten implements IExtendedSequence {
+public class DefuseKitten implements IExtendedSequence, IToJSON {
 
     boolean executed;
     final int player;
@@ -18,6 +20,21 @@ public class DefuseKitten implements IExtendedSequence {
 
     public DefuseKitten(int player) {
         this.player = player;
+    }
+
+    public DefuseKitten(JSONObject json) {
+        this(((Number) json.get("player")).intValue());
+        this.executed = (boolean) json.get("executed");
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("class", getClass().getName());
+        json.put("player", player);
+        json.put("executed", executed);
+        return json;
     }
 
     @Override

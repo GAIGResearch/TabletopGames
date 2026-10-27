@@ -64,7 +64,7 @@ public class Pathfinder {
      */
     private void initShortestPaths(BoardNode origin)
     {
-        HashMap<BoardNode, Double> nodeNeighbours = origin.getNeighbours();
+        Map<BoardNode, Double> nodeNeighbours = origin.getNeighbours();
         int originID = origin.getComponentID();
 
         for(BoardNode node : nodeNeighbours.keySet()) {
@@ -223,7 +223,7 @@ public class Pathfinder {
             }
 
             //For all connections from the current node...
-            HashMap<BoardNode, Double> conn = currentNode.getNeighbours();
+            Map<BoardNode, Double> conn = currentNode.getNeighbours();
             for(BoardNode connected : conn.keySet())
             {
                 //If it has not been evaluated yet.

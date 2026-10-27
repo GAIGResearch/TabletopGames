@@ -122,6 +122,8 @@ public class March extends AbstractAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         RootGameState gs = (RootGameState) state;
+        // The second move reads the rulers, which the first may have changed
+        gs.getGameMap().updateRulers();
         if (stage == Stage.chooseFrom && action instanceof ChooseNode ca) {
             fromNodeID = ca.nodeID;
             stage = Stage.chooseAmount;

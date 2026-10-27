@@ -1,6 +1,7 @@
 package games.backgammon;
 
 import core.AbstractForwardModel;
+import core.CoreConstants;
 import core.DecoratedForwardModel;
 import core.actions.AbstractAction;
 import core.interfaces.IPlayerDecorator;
@@ -389,7 +390,7 @@ public class CheatingAgentTests {
             AbstractAction actionTaken = decoratedMCTSPlayer.getAction(gameState, forwardModel.computeAvailableActions(gameState));
             // now check the rollout
             SingleTreeNode root = decoratedMCTSPlayer.getRoot();
-            List<Pair<Integer, AbstractAction>> rolloutActions =  root.getActionsInRollout();
+            List<Pair<Integer, AbstractAction>> rolloutActions = root.getActionsInRollout();
             AbstractAction previousAction = null;
             for (Pair<Integer, AbstractAction> pair : rolloutActions) {
                 if (pair.b instanceof RollDice || pair.b instanceof LoadDice) {
@@ -419,7 +420,7 @@ public class CheatingAgentTests {
         assertEquals(1, gameState.getCurrentPlayer());
 
         List<AbstractAction> actions = decoratedMCTSPlayer.getForwardModel().computeAvailableActions(gameState);
-        assertEquals(3,  actions.size());
+        assertEquals(3, actions.size());
         for (int i = 0; i < 10; i++) {
             forwardModel.next(gameState, actions.get(2)); // we take the one-off shift
             assertEquals(1, gameState.availableDiceValues[0]);
@@ -427,8 +428,9 @@ public class CheatingAgentTests {
         }
 
     }
+
     @Test
-    public void cheatingDetectionEndsGame() {
+    public void cheatingDetectionEndsGameWithCheaterLosing() {
         int detections = 0;
         int trials = 100;
 
@@ -445,10 +447,81 @@ public class CheatingAgentTests {
             forwardModel.next(state, loadDice);
             if (state.isGameOver()) {
                 detections++;
+                assertEquals(15.0, state.getGameScore(1), 0.001);
+                assertEquals(0.0, state.getGameScore(0), 0.001);
+                assertEquals(1, state.getOrdinalPosition(1));
+                assertEquals(2, state.getOrdinalPosition(0));
+                assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[0]);
+                assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[1]);
+                assertEquals(Set.of(1), state.getWinners());
             }
         }
 
         // with 10% probability, we expect around 10 detections in 100 trials.
         assertTrue("Detections: " + detections, detections > 3 && detections < 20);
+    }
+
+    @Test
+    public void incrementingCheatCountAndDetectionChance() {
+        parameters = new BGParameters();
+        gameState = new BGGameState(parameters, 2);
+        forwardModel = new BGForwardModel();
+        forwardModel.setup(gameState);
+
+        double baseDetectionChance = 0.05;
+        LoadedDiceDecorator decorator = new LoadedDiceDecorator(6,
+                new double[]{
+                        1.0, 0.0, 0.0, 0.0, 0.0, 0.0
+                }, false, true, baseDetectionChance);
+
+        assertEquals(0, gameState.getCheatCount(0));
+        assertEquals(0, gameState.getCheatCount(1));
+
+        // Initial RollDice phase for Player 0
+        int currentPlayer = gameState.getCurrentPlayer();
+        assertEquals(0, currentPlayer);
+
+        List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gameState);
+        List<AbstractAction> decoratedActions = decorator.actionFilter(gameState, availableActions);
+
+        // Check that LoadDice actions have the correct initial detection chance
+        // chance = baseDetectionChance * (cheatCount + 1) = 0.05 * (0 + 1) = 0.05
+        for (AbstractAction a : decoratedActions) {
+            if (a instanceof LoadDice ld) {
+                assertEquals(baseDetectionChance, ld.getDetectionChance(), 0.001);
+            }
+        }
+
+        // Execute a LoadDice action
+        LoadDice loadDice = (LoadDice) decoratedActions.stream().filter(a -> a instanceof LoadDice).findFirst().get();
+        forwardModel.next(gameState, loadDice);
+
+        // Check cheat count incremented
+        assertEquals(1, gameState.getCheatCount(currentPlayer));
+        assertEquals(0, gameState.getCheatCount(1 - currentPlayer));
+
+        // Now check detection chance for the NEXT time they want to cheat
+        // We need to be in RollDice phase again for the same player (for simplicity of testing)
+        // so roll game forward
+        while (!(gameState.getCurrentPlayer() == currentPlayer && gameState.getGamePhase() == BGGamePhase.RollDice)) {
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).getFirst());
+        }
+
+        // chance = baseDetectionChance * (cheatCount + 1) = 0.05 * (1 + 1) = 0.10
+        double expectedChance = baseDetectionChance * 2;
+
+        decoratedActions = decorator.actionFilter(gameState, forwardModel.computeAvailableActions(gameState));
+        assertTrue(decoratedActions.stream().anyMatch(a -> a instanceof LoadDice));
+        for (AbstractAction a : decoratedActions) {
+            if (a instanceof LoadDice ld) {
+                assertEquals(expectedChance, ld.getDetectionChance(), 0.001);
+            }
+        }
+        forwardModel.next(gameState, decoratedActions.stream().filter(a -> a instanceof LoadDice).findFirst().get());
+        assertEquals(2,  gameState.getCheatCount(currentPlayer));
+
+        forwardModel.setup(gameState);
+        assertEquals(0, gameState.getCheatCount(currentPlayer));
+
     }
 }

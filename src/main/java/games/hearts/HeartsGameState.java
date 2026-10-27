@@ -9,11 +9,17 @@ import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.hearts.heuristics.HeartsHeuristic;
+import games.tricktaking.CardOrder;
+import games.tricktaking.ITrickTakingState;
+import games.tricktaking.KnownVoids;
+import games.tricktaking.Trick;
+import utilities.DeterminisationUtilities;
 
 import java.util.ArrayList;
 import java.util.*;
 
 import java.util.function.*;
+import java.util.stream.IntStream;
 
 
 /**
@@ -24,7 +30,7 @@ import java.util.function.*;
  * <p>Computation may be included in functions here for ease of access, but only if this is querying the game state information.
  * Functions on the game state should never <b>change</b> the state of the game.</p>
  */
-public class HeartsGameState extends AbstractGameState {
+public class HeartsGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite> {
     List<Deck<FrenchCard>> playerDecks;
     Deck<FrenchCard> drawDeck;
     public List<Deck<FrenchCard>> trickDecks;
@@ -32,11 +38,16 @@ public class HeartsGameState extends AbstractGameState {
     public int[] playerTricksTaken;
     public List<List<FrenchCard>> pendingPasses;
     public Map<Integer, Integer> playerPoints;
-    public List<Map.Entry<Integer, FrenchCard>> currentPlayedCards = new ArrayList<>();
-    public FrenchCard.Suite firstCardSuit;
+    public Trick<FrenchCard, FrenchCard.Suite> currentTrick;
+    /**
+     * For each player, the suits that they are publicly known to be void in; i.e. the suits that
+     * were led in a trick this round to which they did not follow suit.
+     */
+    public KnownVoids<FrenchCard.Suite> knownVoids;
 
     public HeartsGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+        currentTrick = new Trick<>("CurrentTrick", nPlayers, 0, CardOrder.STANDARD);
     }
 
     @Override
@@ -53,7 +64,8 @@ public class HeartsGameState extends AbstractGameState {
         retValue.addAll(drawDeck.getComponents());
         retValue.addAll(trickDecks);
         trickDecks.stream().flatMap(e -> e.getComponents().stream()).forEach(retValue::add);
-        currentPlayedCards.forEach(e -> retValue.add(e.getValue()));
+        retValue.add(currentTrick);
+        retValue.addAll(currentTrick.getComponents());
 
         return retValue;
     }
@@ -61,6 +73,45 @@ public class HeartsGameState extends AbstractGameState {
     public enum Phase implements IGamePhase {
         PASSING,
         PLAYING
+    }
+
+    /**
+     * Passing happens one card at a time, all players at once: everyone commits their first card,
+     * then everyone their second, and so on. This is the number of cards committed by the players
+     * who have committed fewest, i.e. the sub-turn the passing phase is currently on.
+     */
+    public int fewestPendingPasses() {
+        return pendingPasses.stream().mapToInt(List::size).min().orElse(0);
+    }
+
+    /**
+     * The players who have not yet committed a card in the current passing sub-turn: those who have
+     * committed only as many cards as the player who has committed fewest. Empty once everyone has
+     * committed all the cards the round requires.
+     */
+    public List<Integer> getPlayersStillToPass() {
+        int fewest = fewestPendingPasses();
+        if (fewest >= ((HeartsParameters) gameParameters).cardsPassedPerRound)
+            return List.of();
+        return IntStream.range(0, getNPlayers())
+                .filter(p -> pendingPasses.get(p).size() == fewest)
+                .boxed()
+                .toList();
+    }
+
+    /**
+     * Passing is simultaneous; trick play is sequential. This is the switch between the two: while
+     * passing, everyone still to commit a card this sub-turn decides at once; otherwise it is just
+     * the current player, as for any sequential game.
+     */
+    @Override
+    public List<Integer> getCurrentSimultaneousPlayers() {
+        if (isActionInProgress() || getGamePhase() != Phase.PASSING)
+            return super.getCurrentSimultaneousPlayers();
+        List<Integer> toDecide = getPlayersStillToPass();
+        if (toDecide.isEmpty())
+            throw new AssertionError("Every player has passed but the passes have not been resolved");
+        return toDecide;
     }
 
     public Deck<FrenchCard> getDrawDeck() {
@@ -72,6 +123,25 @@ public class HeartsGameState extends AbstractGameState {
      */
     public List<Deck<FrenchCard>> getPlayerDecks() {
         return playerDecks;
+    }
+
+    @Override
+    public Deck<FrenchCard> getPlayerHand(int player) {
+        return playerDecks.get(player);
+    }
+
+    @Override
+    public Trick<FrenchCard, FrenchCard.Suite> getCurrentTrick() {
+        return currentTrick;
+    }
+
+    /**
+     * The suits that each player is publicly known to be void in, from having failed to
+     * follow suit earlier in the current round. This is information available to all players.
+     */
+    @Override
+    public KnownVoids<FrenchCard.Suite> getKnownVoids() {
+        return knownVoids;
     }
 
     public void scorePointsAtEndOfRound() {
@@ -152,43 +222,48 @@ public class HeartsGameState extends AbstractGameState {
         copy.playerPoints = new HashMap<>(playerPoints);
 
 
-        // Deep Copy currentRoundCards
-        copy.currentPlayedCards = new ArrayList<>();
-        for (Map.Entry<Integer, FrenchCard> entry : currentPlayedCards) {
-            copy.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().copy()));
-        }
+        copy.currentTrick = currentTrick.copy();
+        copy.knownVoids = knownVoids.copy();
 
-        copy.firstCardSuit = firstCardSuit;
-
-        if (getCoreGameParameters().partialObservable && playerId != -1) {
-            // Now we need to blank out the passed cards that the player cannot see
-            // and these need to go into the draw deck for shuffling
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    copy.drawDeck.add(copy.pendingPasses.get(i));
-                    copy.drawDeck.add(copy.playerDecks.get(i));
-                    copy.playerDecks.get(i).clear();
-                    copy.pendingPasses.get(i).clear();
-                }
-            }
-            copy.drawDeck.shuffle(redeterminisationRnd);
-
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
-                        copy.playerDecks.get(i).add(copy.drawDeck.draw());
-                    }
-                    for (int j = 0; j < pendingPasses.get(i).size(); j++) {
-                        // We put the previously pending cards into the hand
-                        // the agent can then use its opponent model to figure out what was passed
-                        // Passing is all simultaneous
-                        copy.playerDecks.get(i).add(copy.drawDeck.draw());
-                    }
-                }
-            }
-        }
-
+        // Hidden information is dealt with in redeterminise(), which the superclass calls on the
+        // copy when appropriate.
         return copy;
+    }
+
+    @Override
+    public void redeterminise(int playerId) {
+        // We cannot see the cards the other players have committed to pass, but we can see how many.
+        // Put their pending passes back into their hands, reshuffle everything we cannot see, and then
+        // draw the same number of (now unknown) cards back out into their pending passes. Our own
+        // pending passes are kept: getPlayersStillToPass() counts them to decide who is still to pass,
+        // so losing them would have us asked to pass the same card again.
+        int[] pendingCounts = new int[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (i == playerId) continue;
+            pendingCounts[i] = pendingPasses.get(i).size();
+            playerDecks.get(i).add(pendingPasses.get(i));
+            pendingPasses.get(i).clear();
+        }
+
+        // Reshuffle everything we cannot see across the other hands and the draw deck.
+        // A player who has failed to follow suit is known to hold no cards of that suit, so we
+        // must not deal them any (none are recorded if HeartsParameters.rememberVoids is off).
+        List<Deck<FrenchCard>> decksToShuffle = new ArrayList<>(playerDecks);
+        decksToShuffle.add(drawDeck);
+        DeterminisationUtilities.reshuffle(playerId, decksToShuffle, c -> true, redeterminisationRnd,
+                knownVoids.permits(CardOrder.STANDARD));
+
+        for (int i = 0; i < getNPlayers(); i++) {
+            for (int k = 0; k < pendingCounts[i]; k++) {
+                pendingPasses.get(i).add(playerDecks.get(i).draw());
+            }
+        }
+
+        // Passing is simultaneous, so while it lasts every player sees themselves as the current
+        // player; that is what the 2-argument computeAvailableActions() reads. Trick play is
+        // sequential, and there the turn owner is the real current player and must be left alone.
+        if (getGamePhase() == Phase.PASSING)
+            setTurnOwner(playerId);
     }
 
     @Override
@@ -219,6 +294,13 @@ public class HeartsGameState extends AbstractGameState {
         for (Component c : drawDeck.getComponents()) {
             retValue.add(c.getComponentID());
         }
+        // the cards the other players have committed to pass are hidden until the passes resolve
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (p == playerId) continue;
+            for (Component c : pendingPasses.get(p)) {
+                retValue.add(c.getComponentID());
+            }
+        }
         return retValue;
     }
 
@@ -235,15 +317,14 @@ public class HeartsGameState extends AbstractGameState {
                 Objects.equals(trickDecks, that.trickDecks) &&
                 Objects.equals(pendingPasses, that.pendingPasses) &&
                 Objects.equals(playerPoints, that.playerPoints) &&
-                Objects.equals(currentPlayedCards, that.currentPlayedCards) &&
-                Objects.equals(firstCardSuit, that.firstCardSuit);
+                Objects.equals(currentTrick, that.currentTrick) &&
+                Objects.equals(knownVoids, that.knownVoids);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, heartsBroken,
-                firstCardSuit, trickDecks,
-                pendingPasses, playerPoints, currentPlayedCards);
+                trickDecks, pendingPasses, playerPoints, currentTrick, knownVoids);
         result = 31 * result + Arrays.hashCode(playerTricksTaken);
         return result;
     }

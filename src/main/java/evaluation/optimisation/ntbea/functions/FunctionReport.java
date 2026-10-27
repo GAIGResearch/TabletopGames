@@ -4,14 +4,8 @@ import evaluation.RunArg;
 import evaluation.optimisation.*;
 import evaluation.optimisation.ntbea.NTupleBanditEA;
 import evaluation.optimisation.ntbea.NTupleSystem;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import utilities.StatSummary;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 import static evaluation.RunArg.*;
@@ -19,23 +13,8 @@ import static evaluation.RunArg.*;
 public class FunctionReport {
 
     public static void main(String[] args) {
-        // Config
+        // Config (parseConfig already merges any config= file with CLI overrides, CLI taking precedence)
         Map<RunArg, Object> config = parseConfig(args, Collections.singletonList(Usage.ParameterSearch));
-
-        String setupFile = config.getOrDefault(RunArg.config, "").toString();
-        if (!setupFile.isEmpty()) {
-            // Read from file instead
-            try {
-                FileReader reader = new FileReader(setupFile);
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(reader);
-                config = parseConfig(json, Usage.ParameterSearch, true);
-            } catch (FileNotFoundException ignored) {
-                throw new AssertionError("Config file not found : " + setupFile);
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
         config.put(searchSpace, "functionTest");
         config.put(game, "TicTacToe");

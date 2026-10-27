@@ -33,9 +33,10 @@ public class LoveLetterPlayerView extends JPanel {
     public LoveLetterPlayerView(Deck<LoveLetterCard> hand, Deck<LoveLetterCard> discard, int playerId, Set<Integer> humanId, String dataPath) {
         JLabel label1 = new JLabel("Player hand:");
         JLabel label2 = new JLabel("Discards:");
-        handCards = new LoveLetterDeckView(playerId, hand, false, dataPath,
+        int human = humanId.stream().findFirst().orElse(-1);
+        handCards = new LoveLetterDeckView(human, hand, false, dataPath,
                 new Rectangle(0, 0, playerAreaWidth / 2 - border * 2, llCardHeight));
-        discardCards = new LoveLetterDeckView(playerId, discard, true, dataPath,
+        discardCards = new LoveLetterDeckView(human, discard, true, dataPath,
                 new Rectangle(0, 0, playerAreaWidth / 2 - border * 2, llCardHeight));
         JPanel wrap = new JPanel();
         wrap.setLayout(new BoxLayout(wrap, BoxLayout.Y_AXIS));
