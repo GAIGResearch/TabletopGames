@@ -76,7 +76,7 @@ public class CountingCardsHeuristic implements IStateHeuristic {
         for (int i = 0; i < gameState.getPlayerHands().get(playerId).getComponents().size(); i++) {
             SGCard card = (SGCard) gameState.getPlayerHands().get(playerId).getComponents().get(i);
 
-            // TODO:
+
             switch (card.type) {
                 case Tempura:
                     int valueTempura = ((SGParameters) gameState.getGameParameters()).valueTempuraPair;
@@ -174,7 +174,6 @@ public class CountingCardsHeuristic implements IStateHeuristic {
                     }
                     break;
                 case Dumpling:
-
                     break;
                 case SquidNigiri:
                     addNigiriExpectedScore(gameState,playerId, SGCard.SGCardType.SquidNigiri, expectedScore);
@@ -191,13 +190,17 @@ public class CountingCardsHeuristic implements IStateHeuristic {
                     int nigriNeeded = wasabiOnTable.getValue() + 1;
 
                     double wasabiMultiplier = ((SGParameters) gameState.getGameParameters()).multiplierWasabi;
-                    double squidProbability = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.SquidNigiri, 0, cardCounter);
-                    double salmonProbability = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.SalmonNigiri, 0, cardCounter);
-                    double eggProbability = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.EggNigiri, 0, cardCounter);
+                    double squidLambda = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.SquidNigiri, 0, cardCounter);
+                    double salmonLambda = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.SalmonNigiri, 0, cardCounter);
+                    double eggLambda = calculateProbabilityOfKCardsArriveToMainPlayer(gameState, playerId, R, nigriNeeded, SGCard.SGCardType.EggNigiri, 0, cardCounter);
 
                     int valueSquid = ((SGParameters) gameState.getGameParameters()).valueSquidNigiri;
                     int valueSalmon = ((SGParameters) gameState.getGameParameters()).valueSalmonNigiri;
                     int valueEgg = ((SGParameters) gameState.getGameParameters()).valueEggNigiri;
+
+                    double squidProbability = calculateProbabilityByCardsNeededAndLambda(squidLambda, nigriNeeded);
+                    double salmonProbability = calculateProbabilityByCardsNeededAndLambda(salmonLambda, nigriNeeded);
+                    double eggProbability = calculateProbabilityByCardsNeededAndLambda(eggLambda, nigriNeeded);
 
                     double maxEstimatedScore = Math.max(Math.max((wasabiMultiplier - 1) * squidProbability * valueSquid, (wasabiMultiplier - 1) * salmonProbability * valueSalmon)
                             ,(wasabiMultiplier - 1) * eggProbability * valueEgg);
@@ -275,6 +278,10 @@ public class CountingCardsHeuristic implements IStateHeuristic {
 
         lambda = Math.min(R, lambda);
 
+        return lambda;
+    }
+
+    private double calculateProbabilityByCardsNeededAndLambda(double lambda, int cardsNeeded) {
         double term = Math.exp(-lambda);
         double sum = term;
 
