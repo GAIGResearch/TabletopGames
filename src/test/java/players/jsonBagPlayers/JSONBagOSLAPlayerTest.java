@@ -87,6 +87,26 @@ public class JSONBagOSLAPlayerTest {
     }
 
     @Test
+    public void aCopyCarriesSimultaneousMode() {
+        JSONBagOSLAPlayer player = new JSONBagOSLAPlayer(prototypesFor(GameType.Wonders7, 3, 17L),
+                Collections.emptyList(), new Random(21));
+        player.setSimultaneousMode(true);
+
+        JSONBagOSLAPlayer copy = player.copy();
+
+        assertTrue("a copy must keep the simultaneous setting", copy.simultaneousMode);
+        assertTrue(player.simultaneousMode);
+    }
+
+    @Test
+    public void aCopyOfASequentialPlayerStaysSequential() {
+        JSONBagOSLAPlayer player = new JSONBagOSLAPlayer(prototypesFor(GameType.DotsAndBoxes, 2, 5L),
+                Collections.emptyList(), new Random(22));
+
+        assertFalse(player.copy().simultaneousMode);
+    }
+
+    @Test
     public void setFilterListRestrictsTheBag() {
         AbstractGameState gs = GameType.DotsAndBoxes.createGameInstance(2, 5L).getGameState();
         Map<String, Integer> tokens = Tokenizer.tokenize(gs);
