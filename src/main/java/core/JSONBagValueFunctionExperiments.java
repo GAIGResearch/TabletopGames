@@ -28,6 +28,8 @@ public class JSONBagValueFunctionExperiments {
         String gameName = Utils.getArg(args, "game", GameType.Dominion.name());
         int n = Utils.getArg(args, "n", 100);
         int nPlayers = Utils.getArg(args, "nPlayers", 4);
+        int topKFeatures = Utils.getArg(args, "topK", 500);
+        boolean includeNone = Utils.getArg(args, "includeNone", false);
         String defaultExperimentRootPath = "Experiments/valueFuncTest2/" + gameName;
         String experimentRootPath = Utils.getArg(args, "experimentRootPath", defaultExperimentRootPath);
 
@@ -45,8 +47,14 @@ public class JSONBagValueFunctionExperiments {
             throw new IllegalArgumentException("nPlayers must be at least 2");
         }
 
+        System.out.println("Program parameters: gameName=" + gameName
+            + ", n=" + n
+            + ", nPlayers=" + nPlayers
+            + ", topKFeatures=" + topKFeatures
+            + ", includeNone=" + includeNone
+            + ", experimentRootPath=" + experimentRootPath);
+
         int nPrototypes = nPlayers;
-        int topKFeatures = 500;
 
         String csvOutputPath = getOutputCSVPath(experimentRootPath);
 
@@ -67,7 +75,9 @@ public class JSONBagValueFunctionExperiments {
             }
 
             List<String> topFeaturesFolderCandidates = new ArrayList<>(folderNames);
-            topFeaturesFolderCandidates.add("NONE");
+            if (includeNone) {
+                topFeaturesFolderCandidates.add("NONE");
+            }
 
             for (String topFeaturesFolderName : topFeaturesFolderCandidates) {
                 String prototypesPath = experimentRootPath + "/" + prototypesFolderName;
@@ -124,7 +134,7 @@ public class JSONBagValueFunctionExperiments {
                     long experimentStart = System.currentTimeMillis();
                     TAGNumericStatSummary[] stats = Game.runMany(Collections.singletonList(gameTypeTest), players, n, seeds, null, false, null, 0);
                     double experimentDurationSeconds = (System.currentTimeMillis() - experimentStart) / 1000.0;
-                    appendCsvRows(csvOutputPath, gameTypeTest, prototypesFolderName, topFeaturesFolderName, jsonBagOSLAPlayerIndex, stats, experimentDurationSeconds);
+                    appendCsvRows(csvOutputPath, gameTypeTest, prototypesFolderName, topFeaturesFolderName, topKFeatures, jsonBagOSLAPlayerIndex, stats, experimentDurationSeconds);
                 }
             }
         }
@@ -192,7 +202,7 @@ public class JSONBagValueFunctionExperiments {
     }
 
     private static void initialiseCsv(String csvOutputPath) {
-        String header = "game,prototypeFolder,topFeaturesFolder,jsonBagOSLAPlayerIndex,n,mean,sd,min,max,experimentDurationSeconds\n";
+        String header = "game,prototypeFolder,topFeaturesFolder,topKFeatures,jsonBagOSLAPlayerIndex,n,mean,sd,min,max,experimentDurationSeconds\n";
         try {
             Files.writeString(Path.of(csvOutputPath), header);
         } catch (IOException e) {
@@ -204,7 +214,8 @@ public class JSONBagValueFunctionExperiments {
                                       GameType gameType,
                                       String prototypesFolderName,
                                       String topFeaturesFolderName,
-                                      int jsonBagOSLAPlayerIndex,
+                                          int topKFeatures,
+                          int jsonBagOSLAPlayerIndex,
                           TAGNumericStatSummary[] stats,
                           double experimentDurationSeconds) {
         StringBuilder sb = new StringBuilder();
@@ -212,7 +223,8 @@ public class JSONBagValueFunctionExperiments {
         sb.append(gameType.name()).append(',')
                 .append(prototypesFolderName).append(',')
                 .append(topFeaturesFolderName).append(',')
-                .append(jsonBagOSLAPlayerIndex).append(',')
+                            .append(topKFeatures).append(',')
+            .append(jsonBagOSLAPlayerIndex).append(',')
                 .append(s.n()).append(',')
                 .append(s.mean()).append(',')
                 .append(s.sd()).append(',')

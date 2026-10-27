@@ -14,10 +14,16 @@ public class JensenShannonDistance {
         Map<String, Double> result = new HashMap<>(p.size());
         if (p.isEmpty()) return result;
         double total = 0.0;
+        Number sampleValue = null;
         for (Number value : p.values()) {
-            if (value != null) total += value.doubleValue();
+            if (value != null) {
+                total += value.doubleValue();
+                if (sampleValue == null) sampleValue = value;
+            }
         }
-        if (Math.abs(total-1.0) < 0.00001) {  // UGLY OPTIMIZATION TO ALWAYS RETURN p and not having to create a new map
+
+        // Fast-path: if already normalized and values are known to be homogeneous, one sample check is enough.
+        if (Math.abs(total - 1.0) < 0.00001 && sampleValue instanceof Double) {
             @SuppressWarnings("unchecked")
             Map<String, Double> same = (Map<String, Double>) p;
             return same;

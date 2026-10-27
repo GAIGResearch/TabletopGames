@@ -856,7 +856,7 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
         /* Load prototypes */
-        GameType gameTypeTest = GameType.CantStop;
+        GameType gameTypeTest = GameType.Dominion;
         int p_keep = 100;
         int n_keep_interval = 0;
         boolean featureSelectionAllSeg = true;
@@ -872,7 +872,7 @@ public class Game {
         boolean useSeparateTopFeaturesFolder = true;
         int topFeaturesPKeep = 100;
         int topFeaturesNKeepInterval = 0;
-        boolean topFeaturesFeatureSelectionAllSeg = true;
+        boolean topFeaturesFeatureSelectionAllSeg = false;
         int topFeaturesSegNum = 4;
         String topFeaturesSegMode = "cum";
         String topFeaturesSegName;
@@ -904,7 +904,7 @@ public class Game {
         int n_prototypes = 4; // Set number of prototypes to load
         List<Map<String, Integer>> prototypes = Tokenizer.loadPrototypes(prototypesPath, n_prototypes, useSeparateTopFeaturesFolder);
         // Load top_features
-        int topKFeatures = 500;
+        int topKFeatures = 100;
         String filterListPath = topFeaturesFolderPath + "features-top" + topKFeatures + ".json";
         System.out.println("READING TOP FEATURES FROM " + filterListPath);
         List<String> topFeaturesFilterList = Tokenizer.loadStringList(filterListPath);
@@ -942,7 +942,7 @@ public class Game {
 
         /* Run multiple games */
         long t = System.currentTimeMillis();
-        int n = 100;
+        int n = 1000;
         ArrayList<GameType> games = new ArrayList<>();
         games.add(gameTypeTest);
 //        runMany(games, players, 100L, n, false, true, null, turnPause);
