@@ -100,6 +100,42 @@ public class JSONBagOSLAPlayerTest {
         assertEquals(Collections.singleton(keptToken), player.heuristic.currentJSONBag.keySet());
     }
 
+
+    /** The six games used in the JSON-Bag VF paper. */
+    private static final GameType[] PAPER_GAMES = {
+            GameType.Wonders7, GameType.Dominion, GameType.SeaSaltPaper,
+            GameType.CantStop, GameType.Connect4, GameType.DotsAndBoxes
+    };
+
+    private static int paperPlayerCount(GameType gt) {
+        return gt == GameType.Wonders7 ? 3 : 2;
+    }
+
+    @Test
+    public void playsAFullGameOfEveryGameInThePaper() {
+        for (GameType gameType : PAPER_GAMES) {
+            int nPlayers = paperPlayerCount(gameType);
+            List<AbstractPlayer> players = new ArrayList<>();
+            JSONBagOSLAPlayer jsonBagPlayer = new JSONBagOSLAPlayer(
+                    prototypesFor(gameType, nPlayers, 1234L), Collections.emptyList(), new Random(31));
+            if (gameType == GameType.Wonders7)
+                jsonBagPlayer.setSimultaneousMode(true);
+            players.add(jsonBagPlayer);
+            for (int i = 1; i < nPlayers; i++)
+                players.add(new RandomPlayer(new Random(40 + i)));
+
+            Game game = Game.runOne(gameType, null, players, 9876L, false, null, null, 0);
+
+            assertNotNull(gameType + " should have produced a game", game);
+            assertNotEquals(gameType + " should have finished",
+                    CoreConstants.GameResult.GAME_ONGOING, game.getGameState().getGameStatus());
+            assertTrue(gameType + " should have accumulated JSON-Bag tokens",
+                    jsonBagPlayer.heuristic.currentJSONBag.size() > 0);
+            assertEquals(gameType + " should have played a full round count",
+                    nPlayers, game.getGameState().getNPlayers());
+        }
+    }
+
     @Test
     public void simultaneousModeCanBeToggled() {
         JSONBagOSLAPlayer player = new JSONBagOSLAPlayer(prototypesFor(GameType.Wonders7, 3, 17L),
