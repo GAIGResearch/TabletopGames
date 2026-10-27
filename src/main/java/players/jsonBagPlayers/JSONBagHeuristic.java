@@ -96,6 +96,12 @@ public class JSONBagHeuristic implements IStateHeuristic {
             ret[i] = 1.0 - distancesArray[i];
             sum += ret[i];
         }
+        if (!(sum > 0.0)) {
+            throw new IllegalStateException("JSON-Bag value function is degenerate: every prototype is at maximal "
+                    + "Jensen-Shannon distance from the current bag (distances " + Arrays.toString(distancesArray)
+                    + "), so no player can be ranked. The trajectory shares no tokens with any prototype - "
+                    + "check the prototypes and the token filter.");
+        }
         for (int i = 0; i < ret.length; i++) {
             ret[i] /= sum;
         }

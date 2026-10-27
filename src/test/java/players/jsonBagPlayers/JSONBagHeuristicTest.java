@@ -71,6 +71,21 @@ public class JSONBagHeuristicTest {
     }
 
     @Test
+    public void throwsWhenEveryPrototypeIsMaximallyDistant() {
+        Map<String, Integer> disjoint = new HashMap<>();
+        disjoint.put("token.not.in.any.state", 1);
+        JSONBagHeuristic heuristic = new JSONBagHeuristic(Arrays.asList(disjoint, disjoint));
+        heuristic.resetCurrentBag(gameState);
+
+        try {
+            heuristic.evaluateState(gameState, 0);
+            fail("a bag sharing no tokens with any prototype must fail loudly, not return NaN");
+        } catch (IllegalStateException expected) {
+            assertTrue(expected.getMessage().contains("degenerate"));
+        }
+    }
+
+    @Test
     public void resetCurrentBagStartsFromTheGivenState() {
         JSONBagHeuristic heuristic = heuristicWith(stateBag, otherBag);
         heuristic.currentJSONBag.put("stale.token", 5);
