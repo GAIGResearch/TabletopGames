@@ -108,7 +108,11 @@ public class JSONBagHeuristicTest {
 
     @Test
     public void filterSetRestrictsWhichTokensAreRecorded() {
-        String keptToken = stateBag.keySet().iterator().next();
+        // every container records its game type, so this token is stable across state changes and banner refactors
+        String keptToken = stateBag.keySet().stream()
+                .filter(k -> k.startsWith(".gameType"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no .gameType token in " + stateBag.size() + " tokens"));
         JSONBagHeuristic heuristic = new JSONBagHeuristic(Arrays.asList(stateBag, otherBag),
                 Collections.singletonList(keptToken));
 

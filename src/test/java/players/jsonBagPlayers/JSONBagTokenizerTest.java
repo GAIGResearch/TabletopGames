@@ -194,7 +194,20 @@ public class JSONBagTokenizerTest {
     }
 
     @Test
-    public void tokensAreDistinctForDifferentGameStates() {
+    public void tokenisingIsSensitiveToTheStateAndNotJustTheGameType() {
+        // two DotsAndBoxes instances start from the same empty board, so compare one before and after a move
+        core.Game game = GameType.DotsAndBoxes.createGameInstance(2, 1234L);
+        AbstractGameState state = game.getGameState();
+        Map<String, Integer> before = Tokenizer.tokenize(state);
+
+        List<core.actions.AbstractAction> actions = game.getForwardModel().computeAvailableActions(state);
+        game.getForwardModel().next(state, actions.get(0).copy());
+
+        assertNotEquals("a played move must change the token bag", before, Tokenizer.tokenize(state));
+    }
+
+    @Test
+    public void mergingABagWithItselfDoublesEveryCount() {
         AbstractGameState gs = GameType.DotsAndBoxes.createGameInstance(2, 1234L).getGameState();
         Map<String, Integer> bag = Tokenizer.tokenize(gs);
         Map<String, Integer> merged = new HashMap<>(bag);
@@ -202,5 +215,30 @@ public class JSONBagTokenizerTest {
 
         assertEquals(bag.size(), merged.size());
         bag.forEach((token, count) -> assertEquals(2 * count, merged.get(token).intValue()));
+    }
+
+    @Test
+    public void binningRoundsCoordinatesDownToMultiplesOfTwo() {
+        Map<String, Integer> bag = Tokenizer.tokenize("{\"x\":5,\"y\":3}", "", false, "both",
+                false, false, true, false, null, false);
+
+        assertTrue("x should be binned to 4 but got " + bag, bag.containsKey(".x.4"));
+        assertTrue("y should be binned to 2 but got " + bag, bag.containsKey(".y.2"));
+        assertFalse(bag.containsKey(".x.5"));
+        assertFalse(bag.containsKey(".y.3"));
+    }
+
+    @Test
+    public void pairXYEmitsASingleCombinedTokenInsteadOfTheCoordinates() {
+        Map<String, Integer> paired = Tokenizer.tokenize("{\"x\":5,\"y\":3}", "", false, "both",
+                false, false, false, true, null, false);
+        Map<String, Integer> unpaired = Tokenizer.tokenize("{\"x\":5,\"y\":3}", "", false, "both",
+                false, false, false, false, null, false);
+
+        assertTrue("combined token expected but got " + paired, paired.containsKey(".x.5.y.3"));
+        assertFalse(paired.containsKey(".x.5"));
+        assertFalse(paired.containsKey(".y.3"));
+        assertTrue(unpaired.containsKey(".x.5"));
+        assertTrue(unpaired.containsKey(".y.3"));
     }
 }

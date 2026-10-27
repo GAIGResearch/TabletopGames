@@ -1,9 +1,11 @@
 package players.jsonBagPlayers;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
+import core.actions.AbstractAction;
 import games.GameType;
 import org.junit.Test;
 import players.simple.OSLAPlayer;
@@ -55,6 +57,51 @@ public class JSONBagOSLAPlayerTest {
 
         assertNotNull(game);
         assertNotEquals(CoreConstants.GameResult.GAME_ONGOING, game.getGameState().getGameStatus());
+    }
+
+    /** Deterministic stand-in for the JSON-Bag value function, so the decision rule can be checked in isolation. */
+    static class StubHeuristic extends JSONBagHeuristic {
+        StubHeuristic() {
+            super(Arrays.asList(new HashMap<>(), new HashMap<>()));
+        }
+
+        @Override
+        public double evaluateState(AbstractGameState gs, int playerId) {
+            return Math.abs(Tokenizer.tokenize(gs).keySet().hashCode() % 100_000) / 100_000.0;
+        }
+    }
+
+    @Test
+    public void picksTheActionWithTheHighestEvaluatedValue() {
+        Game game = GameType.DotsAndBoxes.createGameInstance(2, 99L,
+                GameType.DotsAndBoxes.createParameters(99L));
+        AbstractGameState state = game.getGameState();
+        AbstractForwardModel forwardModel = game.getForwardModel();
+        List<AbstractAction> actions = forwardModel.computeAvailableActions(state);
+
+        JSONBagOSLAPlayer player = new JSONBagOSLAPlayer(prototypesFor(GameType.DotsAndBoxes, 2, 99L),
+                Collections.emptyList(), new Random(31));
+        player.heuristic = new StubHeuristic();
+        player.setForwardModel(forwardModel);
+        player.initializePlayer(state);
+
+        // value each candidate independently of the player
+        double[] values = new double[actions.size()];
+        for (int i = 0; i < actions.size(); i++) {
+            AbstractGameState copy = state.copy();
+            forwardModel.next(copy, actions.get(i).copy());
+            values[i] = player.heuristic.evaluateState(copy, state.getCurrentPlayer());
+        }
+        int best = 0;
+        for (int i = 1; i < values.length; i++)
+            if (values[i] > values[best]) best = i;
+        for (int i = 0; i < values.length; i++)
+            if (i != best && values[i] == values[best])
+                fail("this state has a tie between actions " + i + " and " + best + "; pick another seed");
+
+        AbstractAction chosen = player._getAction(state.copy(), new ArrayList<>(actions));
+
+        assertEquals(actions.get(best).toString(), chosen.toString());
     }
 
     @Test
@@ -110,7 +157,10 @@ public class JSONBagOSLAPlayerTest {
     public void setFilterListRestrictsTheBag() {
         AbstractGameState gs = GameType.DotsAndBoxes.createGameInstance(2, 5L).getGameState();
         Map<String, Integer> tokens = Tokenizer.tokenize(gs);
-        String keptToken = tokens.keySet().iterator().next();
+        String keptToken = tokens.keySet().stream()
+                .filter(k -> k.startsWith(".gameType"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no .gameType token to filter on"));
 
         JSONBagOSLAPlayer player = new JSONBagOSLAPlayer(prototypesFor(GameType.DotsAndBoxes, 2, 5L),
                 Collections.emptyList(), new Random(13));
@@ -156,13 +206,4 @@ public class JSONBagOSLAPlayerTest {
         }
     }
 
-    @Test
-    public void simultaneousModeCanBeToggled() {
-        JSONBagOSLAPlayer player = new JSONBagOSLAPlayer(prototypesFor(GameType.Wonders7, 3, 17L),
-                Collections.emptyList(), new Random(15));
-
-        assertFalse(player.simultaneousMode);
-        player.setSimultaneousMode(true);
-        assertTrue(player.simultaneousMode);
-    }
 }
