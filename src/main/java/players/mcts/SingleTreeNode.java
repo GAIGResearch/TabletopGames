@@ -1625,23 +1625,6 @@ public class SingleTreeNode {
         return actionsToConsider.get(index);
     }
 
-    protected double[] regretMatchingPolicy() {
-        Map<AbstractAction, Double> regretMatchingAverage = statsFor(decisionPlayer).regretMatchingAverage;
-        List<AbstractAction> actionsFromOpenLoopState = statsFor(decisionPlayer).actionsFromOpenLoopState;
-        double[] potentials = new double[regretMatchingAverage.size()];
-        int count = 0;
-        for (AbstractAction action : regretMatchingAverage.keySet()) {
-            if (actionsFromOpenLoopState.contains(action)) {
-                potentials[count] = regretMatchingAverage.get(action);
-            } else {
-                potentials[count] = 0.0;
-            }
-            count++;
-        }
-        return pdf(potentials);
-    }
-
-
     public int getVisits() {
         return nVisits;
     }
