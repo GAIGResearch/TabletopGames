@@ -2,7 +2,10 @@ package games.connect4;
 
 import core.AbstractParameters;
 import games.GameType;
+import org.junit.Assume;
 import org.junit.Test;
+
+import java.io.File;
 
 import static org.junit.Assert.*;
 
@@ -11,6 +14,8 @@ import static org.junit.Assert.*;
  * {@code width}/{@code height}. They are checked here because the parameter loader only warns about an
  * unknown key and then runs with defaults — a stale {@code gridSize} silently changes the board the
  * experiment runs on.
+ *
+ * <p>The configs are experiment data and are not tracked, so the test only runs where they are present.</p>
  */
 public class Connect4ParameterFileTest {
 
@@ -23,6 +28,8 @@ public class Connect4ParameterFileTest {
 
     @Test
     public void experimentParameterFilesConfigureTheBoardTheyDescribe() {
+        Assume.assumeTrue("Experiments/ is local data and is not checked in",
+                new File("Experiments/Connect4/gameParams").isDirectory());
         for (String[] row : EXPECTED) {
             String path = "Experiments/Connect4/gameParams/" + row[0] + "/connect4Param.json";
             AbstractParameters params = AbstractParameters.createFromFile(GameType.Connect4, path);

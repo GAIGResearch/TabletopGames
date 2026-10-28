@@ -1,7 +1,0 @@
-{
-  "class": "games.wonders7.Wonders7GameParameters",
-  "nCostNeighbourResource": 2,
-  "nCostDiscountedResource": 2,
-  "nCoinsDiscard": 2,
-  "startingCoins": 2
-}

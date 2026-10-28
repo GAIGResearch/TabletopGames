@@ -1,9 +1,0 @@
-{
-  "game": "Wonders7",
-  "playerDirectory" : "Experiments/Wonders7/agents/random/players",
-  "nPlayers" : 4,
-  "matchups" : 500,
-  "verbose"  : false,
-  "listener" : "Experiments/Wonders7/agents/random/wonders7Metric.json",
-  "destDir" : "Experiments/Wonders7/agents/random"
-}

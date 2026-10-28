@@ -1,9 +1,0 @@
-{
-  "game": "CantStop",
-  "playerDirectory" : "Experiments/CantStop/agents/osla/players",
-  "nPlayers" : 4,
-  "matchups" : 500,
-  "verbose"  : false,
-  "listener" : "Experiments/CantStop/agents/osla/cantstopMetric.json",
-  "destDir" : "Experiments/CantStop/agents/osla"
-}

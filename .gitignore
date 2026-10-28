@@ -59,6 +59,5 @@ cp.txt
 # Local working artifacts (reports, council runs, scratch)
 .artifacts/
 
-# JSON-Bag prototype bags and feature lists (generated data, kept local)
-Experiments/valueFuncTest/
-Experiments/valueFuncTest2/
+# Experiment configs, seeds and prototype bags: data, kept local
+Experiments/

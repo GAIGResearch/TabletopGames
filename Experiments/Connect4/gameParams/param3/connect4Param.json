@@ -1,6 +1,0 @@
-{
-  "class": "games.connect4.Connect4GameParameters",
-  "width": 6,
-  "height": 6,
-  "winCount": 4
-}

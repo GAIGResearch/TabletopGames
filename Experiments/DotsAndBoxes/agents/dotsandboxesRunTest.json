@@ -1,8 +1,0 @@
-{
-  "game": "DotsAndBoxes",
-  "playerDirectory" : "Experiments/DotsAndBoxes/agents/agreementTest",
-  "nPlayers" : 2,
-  "mode" : "exhaustive",
-  "matchups" : 200,
-  "verbose"  : true
-}

@@ -1,9 +1,0 @@
-{
-  "game": "Uno",
-  "playerDirectory" : "Experiments/Uno/agents/osla/players",
-  "nPlayers" : 4,
-  "matchups" : 100,
-  "verbose"  : false,
-  "listener" : "Experiments/Uno/agents/osla/unoMetric.json",
-  "destDir" : "Experiments/Uno/agents/osla"
-}

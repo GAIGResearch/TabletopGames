@@ -1,9 +1,0 @@
-{
-  "game": "Dominion",
-  "playerDirectory" : "Experiments/Dominion/agents/mcts2-tuned/players",
-  "nPlayers" : 4,
-  "matchups" : 10,
-  "verbose"  : false,
-  "listener" : "Experiments/Dominion/agents/mcts2-tuned/dominionMetric.json",
-  "destDir" : "Experiments/Dominion/agents/mcts2-tuned"
-}

@@ -1,9 +1,0 @@
-{
-  "game": "Catan",
-  "playerDirectory" : "Experiments/Catan/agents/mcts/players",
-  "nPlayers" : 4,
-  "matchups" : 300,
-  "verbose"  : false,
-  "listener" : "Experiments/Catan/agents/mcts/catanMetric.json",
-  "destDir" : "Experiments/Catan/agents/mcts"
-}

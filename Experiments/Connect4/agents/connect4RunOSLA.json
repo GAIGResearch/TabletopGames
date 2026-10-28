@@ -1,9 +1,0 @@
-{
-  "game": "Connect4",
-  "playerDirectory" : "Experiments/Connect4/agents/osla/players",
-  "nPlayers" : 2,
-  "matchups" : 500,
-  "verbose"  : false,
-  "listener" : "Experiments/Connect4/agents/osla/connect4Metric.json",
-  "destDir" : "Experiments/Connect4/agents/osla"
-}

@@ -1,9 +1,0 @@
-{
-  "game": "Dominion",
-  "playerDirectory" : "Experiments/Dominion/agents/random/players",
-  "nPlayers" : 4,
-  "matchups" : 500,
-  "verbose"  : false,
-  "listener" : "Experiments/Dominion/agents/random/dominionMetric.json",
-  "destDir" : "Experiments/Dominion/agents/random"
-}

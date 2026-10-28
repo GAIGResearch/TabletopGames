@@ -1,9 +1,0 @@
-{
-  "game": "DotsAndBoxes",
-  "playerDirectory" : "Experiments/DotsAndBoxes/agents/mcts2-tuned/players",
-  "nPlayers" : 2,
-  "matchups" : 10,
-  "verbose"  : false,
-  "listener" : "Experiments/DotsAndBoxes/agents/mcts2-tuned/dotsAndBoxesMetric.json",
-  "destDir" : "Experiments/DotsAndBoxes/agents/mcts2-tuned"
-}

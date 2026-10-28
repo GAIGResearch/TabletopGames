@@ -1,9 +1,0 @@
-{
-  "game": "CantStop",
-  "playerDirectory" : "Experiments/CantStop/agents/mcts2-tuned/players",
-  "nPlayers" : 4,
-  "matchups" : 500,
-  "verbose"  : false,
-  "listener" : "Experiments/CantStop/agents/mcts2-tuned/cantstopMetric.json",
-  "destDir" : "Experiments/CantStop/agents/mcts2-tuned"
-}
