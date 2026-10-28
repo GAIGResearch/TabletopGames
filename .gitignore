@@ -4,6 +4,8 @@
 # Log file
 *.log
 
+/overnight-experiments
+
 # Eclipse metadata
 .classpath/
 .project/
