@@ -1,7 +1,7 @@
 {
   "game" : "SushiGo",
-  "nPlayers" : 4,
-  "mode" : "exhaustive",
+  "nPlayers" : 2,
+  "mode" : "random",
   "matchups" : 180,
   "verbose" : true,
   "seed" : 740234,

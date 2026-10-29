@@ -1,4 +1,4 @@
-package players.sushiGoAgent;
+package players.sushiGoDecoupled;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;

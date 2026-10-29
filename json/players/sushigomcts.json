@@ -1,0 +1,12 @@
+{
+	"class" : "players.sushiGoPlayerWithHeuristic.SushiGoPlayerMCTSParams",
+	"K" : 10.0,
+	"rolloutLength" : 1000,
+	"maxTreeDepth" : 10,
+	"restrictToCurrentRound" : true,
+	"heuristic" : {
+		"class" : "players.heuristics.CountingCardsHeuristic"
+	},
+	"budgetType" : "BUDGET_TIME",
+	"budget" : 250
+}

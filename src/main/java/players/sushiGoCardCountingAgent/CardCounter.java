@@ -1,4 +1,4 @@
-package players.sushiGoPlayer;
+package players.sushiGoCardCountingAgent;
 
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
@@ -6,7 +6,6 @@ import games.sushigo.cards.SGCard;
 import utilities.Pair;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class CardCounter {
 

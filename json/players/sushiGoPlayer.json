@@ -1,8 +1,8 @@
 {
-	"class" : "players.basicMCTS.BasicMCTSParams",
-	"K" : 1.0,
-	"rolloutLength" : 30,
-	"maxTreeDepth" : 10,
+	"class" : "players.sushiGoDecoupled.BasicMCTSParams",
+	"K" : 3.0,
+	"rolloutLength" : 100,
+	"maxTreeDepth" : 20,
 	"heuristic" : {
  		"class" : "players.heuristics.ScoreHeuristic"
 	},

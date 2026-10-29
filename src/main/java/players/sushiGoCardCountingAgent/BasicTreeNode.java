@@ -1,4 +1,4 @@
-package players.sushiGoPlayer;
+package players.sushiGoCardCountingAgent;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -32,14 +32,14 @@ class BasicTreeNode {
     // Number of FM calls and State copies up until this node
     private int fmCallsCount;
     // Parameters guiding the search
-    private SushiGoMCTSPlayer player;
+    private BasicMCTSPlayer player;
     private Random rnd;
     private RandomPlayer randomPlayer = new RandomPlayer();
 
     // State in this node (closed loop)
     private AbstractGameState state;
 
-    protected BasicTreeNode(SushiGoMCTSPlayer player, BasicTreeNode parent, AbstractGameState state, Random rnd) {
+    protected BasicTreeNode(BasicMCTSPlayer player, BasicTreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
         this.parent = parent;
@@ -240,8 +240,10 @@ class BasicTreeNode {
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = state.copy();
+
+        int oldRound = rolloutState.getRoundCounter();
         if (player.getParameters().rolloutLength > 0) {
-            while (!finishRollout(rolloutState, rolloutDepth)) {
+            while (!finishRollout(rolloutState, rolloutDepth, oldRound)) {
                 AbstractAction next = randomPlayer.getAction(rolloutState, randomPlayer.getForwardModel().computeAvailableActions(rolloutState, randomPlayer.parameters.actionSpace));
                 advance(rolloutState, next);
                 rolloutDepth++;
@@ -261,9 +263,15 @@ class BasicTreeNode {
      * @param depth       - current depth
      * @return - true if rollout finished, false otherwise
      */
-    private boolean finishRollout(AbstractGameState rollerState, int depth) {
+    private boolean finishRollout(AbstractGameState rollerState, int depth, int oldRound) {
         if (depth >= player.getParameters().rolloutLength)
             return true;
+
+        if (player.getParameters().restrictToCurrentRound) {
+            if (rollerState.getRoundCounter() > oldRound) {
+                return true;
+            }
+        }
 
         // End of game
         return !rollerState.isNotTerminal();

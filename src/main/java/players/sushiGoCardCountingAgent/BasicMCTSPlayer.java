@@ -1,4 +1,4 @@
-package players.sushiGoPlayer;
+package players.sushiGoCardCountingAgent;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
@@ -14,13 +14,13 @@ import java.util.Random;
  * It strips out some of the additional configuration of MCTSPlayer. It uses BasicTreeNode in place of
  * SingleTreeNode.
  */
-public class SushiGoMCTSPlayer extends AbstractPlayer {
+public class BasicMCTSPlayer extends AbstractPlayer {
 
-    public SushiGoMCTSPlayer() {
+    public BasicMCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
-    public SushiGoMCTSPlayer(long seed) {
+    public BasicMCTSPlayer(long seed) {
         super(new SushiGoPlayerMCTSParams(), "Basic MCTS");
         // for clarity we create a new set of parameters here, but we could just use the default parameters
         parameters.setRandomSeed(seed);
@@ -35,7 +35,7 @@ public class SushiGoMCTSPlayer extends AbstractPlayer {
 
     }
 
-    public SushiGoMCTSPlayer(SushiGoPlayerMCTSParams params) {
+    public BasicMCTSPlayer(SushiGoPlayerMCTSParams params) {
         super(params, "Basic MCTS");
         rnd = new Random(params.getRandomSeed());
     }
@@ -43,7 +43,7 @@ public class SushiGoMCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        BasicTreeNode root = new BasicTreeNode(this, null, gameState, rnd);
+        players.sushiGoCardCountingAgent.BasicTreeNode root = new players.sushiGoCardCountingAgent.BasicTreeNode(this, null, gameState, rnd);
 
         // mctsSearch does all of the hard work
         root.mctsSearch();
@@ -68,8 +68,8 @@ public class SushiGoMCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public SushiGoMCTSPlayer copy() {
-        SushiGoMCTSPlayer retValue = new SushiGoMCTSPlayer((SushiGoPlayerMCTSParams) parameters.copy());
+    public BasicMCTSPlayer copy() {
+        BasicMCTSPlayer retValue = new BasicMCTSPlayer((SushiGoPlayerMCTSParams) parameters.copy());
         retValue.setName(toString());
         return retValue;
     }

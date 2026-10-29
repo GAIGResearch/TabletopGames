@@ -1,0 +1,11 @@
+{
+	"class" : "players.sushiGoSushiHeuristicAgent.BasicMCTSParams",
+	"K" : 0.1,
+	"rolloutLength" : 100,
+	"maxTreeDepth" : 20,
+	"heuristic" : {
+ 		"class" : "players.heuristics.SushiGoHeuristic"
+	},
+	"budgetType" : "BUDGET_TIME",
+	"budget" : 250
+}

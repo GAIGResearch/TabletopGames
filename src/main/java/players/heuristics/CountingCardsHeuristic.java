@@ -9,7 +9,7 @@ import core.interfaces.IStateHeuristic;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 import games.sushigo.cards.SGCard;
-import players.sushiGoPlayer.CardCounter;
+import players.sushiGoCardCountingAgent.CardCounter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -355,7 +355,6 @@ public class CountingCardsHeuristic implements IStateHeuristic {
     }
 
 
-    // TODO: 5. Maki is different. The known count and T_Y use icons (card.count), and keyOf(card.type, card.count) only matches one maki variant. It's fine for tempura, but needs a special case when yo do maki.
     private double cardsOutThere(SGGameState gameState, int currentPlayerHolder, int mainPlayer, SGCard.SGCardType cardType, int cardCount, CardCounter cardCounter) {
         Deck<SGCard> holdersDeck = gameState.getPlayerHands().get(currentPlayerHolder);
         if (gameState.isHandKnown(mainPlayer, currentPlayerHolder)) {

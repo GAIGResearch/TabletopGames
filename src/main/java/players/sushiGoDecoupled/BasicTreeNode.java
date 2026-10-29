@@ -1,13 +1,11 @@
-package players.sushiGoAgent;
+package players.sushiGoDecoupled;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import org.apache.arrow.flatbuf.Int;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
 
-import javax.swing.*;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -264,8 +262,9 @@ class BasicTreeNode {
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = state.copy();
+        int currentRound = rolloutState.getRoundCounter();
         if (player.getParameters().rolloutLength > 0) {
-            while (!finishRollout(rolloutState, rolloutDepth)) {
+            while (!finishRollout(rolloutState, rolloutDepth, currentRound)) {
                 AbstractAction next = randomPlayer.getAction(rolloutState, randomPlayer.getForwardModel().computeAvailableActions(rolloutState, randomPlayer.parameters.actionSpace));
                 advance(rolloutState, next);
                 rolloutDepth++;
@@ -291,9 +290,15 @@ class BasicTreeNode {
      * @param depth       - current depth
      * @return - true if rollout finished, false otherwise
      */
-    private boolean finishRollout(AbstractGameState rollerState, int depth) {
+    private boolean finishRollout(AbstractGameState rollerState, int depth, int currentRound) {
         if (depth >= player.getParameters().rolloutLength)
             return true;
+
+        if (player.getParameters().restrictToCurrentRound) {
+            if (rollerState.getRoundCounter() > currentRound) {
+                return true;
+            }
+        }
 
         // End of game
         return !rollerState.isNotTerminal();
