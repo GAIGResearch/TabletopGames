@@ -83,6 +83,27 @@ public class MCTSParams extends PlayerParameters {
     double DDAGameThreshold = 1_000_000.0; // If our projected result is higher than this, then we play badly
     double DDAMoveThreshold = 0.0; // When playing badly, we will take actions up to this amount less than the best action
 
+    // Time management (see MCTSTimeManager)
+    public double expectedDecisions = 30.0;
+    public String decisionTable = "default";
+    public boolean roundAllocation = false;
+    public double expectedRounds = 5.0;
+    public String roundTable = "default";
+    public double roundTimeFactor = 1.0;
+    public double timeFactor = 1.0;
+    public double midHeight = 0.0, midCentre = 15.0, midWidth = 10.0;
+    public double behindThreshold = 0.5, behindFactor = 1.0;
+    public int behindLoops = 0;
+    public double unstableFactor = 1.0;
+    public int unstableLoops = 0;
+    public double closeThreshold = 0.5, closeFactor = 1.0;
+    public int closeLoops = 0;
+    public double earlyStopP = 0.0;
+    public double stopConfidence = 0.95, closeConfidence = 0.9;  // SIMPLE only: 1 - alpha for STOP and CLOSE
+    public int earlyStopInterval = 10;
+    public int clockReserveMS = 50;
+    public int minMoveTimeMS = 10;
+
     public MCTSParams() {
         addTunableParameter("K", 1.0, Arrays.asList(0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0));
         addTunableParameter("MASTBoltzmann", 0.1);
@@ -136,6 +157,30 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("numDeterminizations", 1, Arrays.asList(1, 10, 30, 100, 300, 1000));
         addTunableParameter("DDAGameThreshold", 1_000_000.0);
         addTunableParameter("DDAMoveThreshold", 0.0);
+        addTunableParameter("expectedDecisions", 30.0);
+        addTunableParameter("decisionTable", "default");
+        addTunableParameter("roundAllocation", false);
+        addTunableParameter("expectedRounds", 5.0);
+        addTunableParameter("roundTable", "default");
+        addTunableParameter("roundTimeFactor", 1.0, Arrays.asList(0.5, 0.75, 1.0, 1.25, 1.5, 2.0));
+        addTunableParameter("timeFactor", 1.0, Arrays.asList(1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0));
+        addTunableParameter("midHeight", 0.0, Arrays.asList(0.0, 0.5, 1.0, 1.5, 2.0, 2.5));
+        addTunableParameter("midCentre", 15.0);
+        addTunableParameter("midWidth", 10.0);
+        addTunableParameter("behindThreshold", 0.5);
+        addTunableParameter("behindFactor", 1.0);
+        addTunableParameter("behindLoops", 0);
+        addTunableParameter("unstableFactor", 1.0);
+        addTunableParameter("unstableLoops", 0);
+        addTunableParameter("closeThreshold", 0.5);
+        addTunableParameter("closeFactor", 1.0);
+        addTunableParameter("closeLoops", 0);
+        addTunableParameter("earlyStopP", 0.0);
+        addTunableParameter("stopConfidence", 0.95);
+        addTunableParameter("closeConfidence", 0.9);
+        addTunableParameter("earlyStopInterval", 10);
+        addTunableParameter("clockReserveMS", 50);
+        addTunableParameter("minMoveTimeMS", 10);
     }
 
     @Override
@@ -224,6 +269,30 @@ public class MCTSParams extends PlayerParameters {
         }
         DDAGameThreshold = (double) getParameterValue("DDAGameThreshold");
         DDAMoveThreshold = (double) getParameterValue("DDAMoveThreshold");
+        expectedDecisions = (double) getParameterValue("expectedDecisions");
+        decisionTable = (String) getParameterValue("decisionTable");
+        roundAllocation = (boolean) getParameterValue("roundAllocation");
+        expectedRounds = (double) getParameterValue("expectedRounds");
+        roundTable = (String) getParameterValue("roundTable");
+        roundTimeFactor = (double) getParameterValue("roundTimeFactor");
+        timeFactor = (double) getParameterValue("timeFactor");
+        midHeight = (double) getParameterValue("midHeight");
+        midCentre = (double) getParameterValue("midCentre");
+        midWidth = (double) getParameterValue("midWidth");
+        behindThreshold = (double) getParameterValue("behindThreshold");
+        behindFactor = (double) getParameterValue("behindFactor");
+        behindLoops = (int) getParameterValue("behindLoops");
+        unstableFactor = (double) getParameterValue("unstableFactor");
+        unstableLoops = (int) getParameterValue("unstableLoops");
+        closeThreshold = (double) getParameterValue("closeThreshold");
+        closeFactor = (double) getParameterValue("closeFactor");
+        closeLoops = (int) getParameterValue("closeLoops");
+        earlyStopP = (double) getParameterValue("earlyStopP");
+        stopConfidence = (double) getParameterValue("stopConfidence");
+        closeConfidence = (double) getParameterValue("closeConfidence");
+        earlyStopInterval = (int) getParameterValue("earlyStopInterval");
+        clockReserveMS = (int) getParameterValue("clockReserveMS");
+        minMoveTimeMS = (int) getParameterValue("minMoveTimeMS");
         decoupled = (boolean) getParameterValue("decoupled");
         if (decoupled && (opponentTreePolicy != OneTree || numDeterminizations > 1)) {
             // Decoupling only ever engages on a simultaneous turn, and every opponent tree policy

@@ -5,7 +5,9 @@ import core.CoreConstants;
 import games.GameType;
 import games.XIIScripta.XIIParameters;
 import org.json.simple.JSONObject;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import utilities.JSONUtils;
 
 import java.io.File;
@@ -14,6 +16,10 @@ import java.lang.reflect.InvocationTargetException;
 import static org.junit.Assert.*;
 
 public class JSONTest {
+
+    // deleted after each test, whether it passes or fails
+    @Rule
+    public TemporaryFolder tmp = new TemporaryFolder();
 
     @Test
     public void testJSON() throws Exception {
@@ -65,11 +71,11 @@ public class JSONTest {
         state.setGameStatus(CoreConstants.GameResult.GAME_ONGOING);
 
         JSONObject json = state.toJSON();
-        JSONUtils.writeJSON(json, "testFile.json");
+        File file = tmp.newFile("testFile.json");
+        JSONUtils.writeJSON(json, file.getPath());
 
-        BGGameState loadedState = JSONUtils.loadClassFromJSON(json);
+        BGGameState loadedState = JSONUtils.loadClassFromFile(file.getPath());
 
         assertEquals(state, loadedState);
-        (new File("testFile.json")).delete();
     }
 }

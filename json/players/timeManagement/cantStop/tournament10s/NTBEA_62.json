@@ -1,0 +1,23 @@
+{
+  "budgetType": "BUDGET_GAME_SECONDS",
+  "rolloutLength": 0,
+  "opponentTreePolicy": "SelfOnly",
+  "MASTGamma": 0.0,
+  "heuristic": {
+    "class": "players.heuristics.LeaderHeuristic"
+  },
+  "K": 100.0,
+  "exploreEpsilon": 0.1,
+  "treePolicy": "UCB",
+  "MAST": "Both",
+  "rolloutType": "MAST",
+  "information": "Information_Set",
+  "class": "players.mcts.MCTSParams",
+  "budget": 10,
+  "selectionPolicy": "ROBUST",
+  "earlyStopP": 1.0,
+  "unstableLoops": 2,
+  "closeLoops": 1,
+  "closeThreshold": 0.3,
+  "closeFactor": 0.5
+}

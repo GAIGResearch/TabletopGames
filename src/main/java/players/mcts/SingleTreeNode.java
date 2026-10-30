@@ -57,6 +57,8 @@ public class SingleTreeNode {
     boolean terminalNode;
     double timeTaken;
     double initialisationTimeTaken;
+    // only set at the root, and only when time management is used
+    MCTSTimeManager timeManager;
     protected double highReward = Double.NEGATIVE_INFINITY;
     protected double lowReward = Double.POSITIVE_INFINITY;
     protected int nodeClash;
@@ -318,7 +320,7 @@ public class SingleTreeNode {
             // Generally if using pUCT we would expect FPU to also be used to give effective pruning, rather than the
             // explicit pruning of Progressive Widening.
             double[] pdf;
-            pds.actionPDFEstimates = new HashMap<>();
+            pds.actionPDFEstimates = new LinkedHashMap<>();
             double[] heuristicScores = new double[pds.actionsFromOpenLoopState.size()];
             if (params.pUCTTemperature > 0.0) {
                 // in this case we construct a Boltzmann
@@ -401,6 +403,7 @@ public class SingleTreeNode {
 
     /**
      * Performs full MCTS search, using the defined budget limits.
+     * If there is a time manager, then it sets the budget, and may stop the search early or extend it.
      */
     public void mctsSearch(long initialisationTime) {
         initialiseRootMetrics();
@@ -409,9 +412,17 @@ public class SingleTreeNode {
         double avgTimeTaken;
         long remaining;
         int remainingLimit = params.breakMS;
+        PlayerConstants budgetType = params.budgetType;
+        boolean timeBudget = budgetType == BUDGET_TIME || budgetType.isClock();
+        // milliseconds for a time budget; otherwise iterations, or FM/copy calls
+        long budget = params.budget;
+        if (timeManager != null)
+            budget = timeManager.searchBudget();
+        else if (budgetType == BUDGET_TIME)
+            budget -= initialisationTime;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
-        if (params.budgetType == BUDGET_TIME) {
-            elapsedTimer.setMaxTimeMillis(params.budget - initialisationTime);
+        if (timeBudget) {
+            elapsedTimer.setMaxTimeMillis(budget);
         }
 
         // Tracking number of iterations for iteration budget
@@ -442,25 +453,50 @@ public class SingleTreeNode {
             // Finished iteration
             numIters++;
             // Check stopping condition
-            PlayerConstants budgetType = params.budgetType;
-            if (budgetType == BUDGET_TIME) {
+            if (timeBudget) {
                 // Time budget
                 remaining = elapsedTimer.remainingTimeMillis();
                 avgTimeTaken = (double) elapsedTimer.elapsedMillis() / numIters;
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
-                stop = numIters >= params.budget;
+                stop = numIters >= budget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = fmCallsCount > params.budget || numIters > params.budget;
+                stop = fmCallsCount > budget || numIters > budget;
             } else if (budgetType == BUDGET_COPY_CALLS) {
-                stop = copyCount > params.budget || numIters > params.budget;
+                stop = copyCount > budget || numIters > budget;
             } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
-                stop = (copyCount + fmCallsCount) > params.budget || numIters > params.budget;
+                stop = (copyCount + fmCallsCount) > budget || numIters > budget;
+            } else {
+                throw new AssertionError("Unsupported budget type for MCTS: " + budgetType);
+            }
+            if (timeManager != null) { // a clock budget, which may be extended or stopped early
+                if (stop) {
+                    // BEHIND, UNST and CLOSE may continue the search
+                    long extension = timeManager.extension(this);
+                    if (extension > 0) {
+                        budget += extension;
+                        elapsedTimer.setMaxTimeMillis(budget);
+                        stop = false;
+                    }
+                } else if (params.earlyStopP > 0.0 && numIters % params.earlyStopInterval == 0) {
+                    // STOP: the iterations left are estimated from the rate so far
+                    long elapsed = elapsedTimer.elapsedNanos();
+                    double remainingIters = elapsed <= 0 ? Double.POSITIVE_INFINITY
+                            : numIters * (double) Math.max(0, elapsedTimer.remainingTimeNanos()) / elapsed;
+                    stop = timeManager.bestActionSettled(this, remainingIters);
+                }
             }
         }
         timeTaken = elapsedTimer.elapsedMillis();
+    }
+
+    /**
+     * The root whose statistics decide the action to take
+     */
+    protected SingleTreeNode decisionRoot() {
+        return this;
     }
 
     /**

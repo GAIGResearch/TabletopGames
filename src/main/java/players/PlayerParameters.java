@@ -77,6 +77,14 @@ public class PlayerParameters extends TunableParameters<AbstractPlayer> {
         return false;
     }
 
+    /**
+     * @return total thinking time for the game (BUDGET_GAME_SECONDS) or for each round (BUDGET_ROUND_SECONDS) in
+     * milliseconds, otherwise -1
+     */
+    public long getClockBudgetMillis() {
+        return budgetType.isClock() ? budget * 1000L : -1;
+    }
+
     @Override
     public AbstractPlayer instantiate() {
         throw new RuntimeException("PlayerParameters should not be instantiated directly.");

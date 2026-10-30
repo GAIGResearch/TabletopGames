@@ -286,7 +286,7 @@ public class PyTAG {
             }
 
             // Start the timer for this decision
-            gameState.playerTimer[activePlayer].resume();
+            game.getPlayerClock(activePlayer).resume();
 
             // Either ask player which action to use or, in case no actions are available, report the updated observation
             core.actions.AbstractAction action = null;
@@ -304,8 +304,8 @@ public class PyTAG {
             }
 
             // End the timer for this decision
-            gameState.playerTimer[activePlayer].pause();
-            gameState.playerTimer[activePlayer].incrementAction();
+            game.getPlayerClock(activePlayer).pause();
+            game.getPlayerClock(activePlayer).incrementAction();
 
             if (gameState.coreGameParameters.verbose && !(action == null)) {
                 System.out.println(action);

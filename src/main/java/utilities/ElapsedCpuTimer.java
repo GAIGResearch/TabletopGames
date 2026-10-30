@@ -1,19 +1,22 @@
 package utilities;
 
-/**
- * Created by diego on 26/02/14.
- */
-
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 
+/**
+ * Created by diego on 26/02/14.
+ * <p>
+ * This measures the CPU time of the current thread, so excludes garbage collection pauses and time when the thread
+ * is not scheduled. A timer must therefore be read on the thread that started it.
+ * The exception is Windows, where thread CPU time only advances in steps of the scheduler tick (15.6 ms), which is
+ * too coarse for a per-move budget; there it measures wall-clock time (System.nanoTime()).
+ */
 public class ElapsedCpuTimer {
 
-    protected static final boolean OS_WIN = System.getProperty("os.name").contains("Windows");
+    private static final ThreadMXBean BEAN = ManagementFactory.getThreadMXBean();
+    public static final boolean CPU_TIME = !System.getProperty("os.name").contains("Windows")
+            && BEAN.isCurrentThreadCpuTimeSupported();
 
-    // allows for easy reporting of elapsed time
-    protected ThreadMXBean bean = ManagementFactory.getThreadMXBean();
     protected long oldTime;
     protected long maxTime;
     protected int nIters;
@@ -60,6 +63,10 @@ public class ElapsedCpuTimer {
         return (long) (diff / 1000000.0);
     }
 
+    public long remainingTimeNanos() {
+        return maxTime - elapsed();
+    }
+
     public boolean exceededMaxTime() {
         return elapsed() > maxTime;
     }
@@ -88,7 +95,6 @@ public class ElapsedCpuTimer {
         ElapsedCpuTimer newCpuTimer = new ElapsedCpuTimer();
         newCpuTimer.maxTime = this.maxTime;
         newCpuTimer.oldTime = this.oldTime;
-        newCpuTimer.bean = this.bean;
         newCpuTimer.nIters = this.nIters;
         return newCpuTimer;
     }
@@ -102,18 +108,7 @@ public class ElapsedCpuTimer {
     }
 
     protected long getTime() {
-        return getCpuTime();
-    }
-
-    protected long getCpuTime() {
-        if(OS_WIN)
-            return System.nanoTime();
-
-        if (bean.isCurrentThreadCpuTimeSupported()) {
-            return bean.getCurrentThreadCpuTime();
-        } else {
-            throw new RuntimeException("CpuTime NOT Supported");
-        }
+        return CPU_TIME ? BEAN.getCurrentThreadCpuTime() : System.nanoTime();
     }
 
 }

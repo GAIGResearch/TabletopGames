@@ -101,6 +101,8 @@ class BasicTreeNode {
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
                 stop = fmCallsCount > params.budget;
+            } else {
+                throw new AssertionError("Unsupported budget type for BasicMCTS: " + budgetType);
             }
         }
     }

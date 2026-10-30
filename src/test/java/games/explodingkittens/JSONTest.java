@@ -5,10 +5,13 @@ import games.explodingkittens.actions.NopeableAction;
 import games.explodingkittens.actions.PlayEKCard;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import org.json.simple.JSONObject;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import utilities.JSONUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 import static games.explodingkittens.cards.ExplodingKittensCard.CardType.NOPE;
 import static games.explodingkittens.cards.ExplodingKittensCard.CardType.SKIP;
@@ -21,6 +24,10 @@ import static org.junit.Assert.*;
  * specifically exercise an {@link core.interfaces.IExtendedSequence} on the actionsInProgress stack.
  */
 public class JSONTest {
+
+    // deleted after each test, whether it passes or fails
+    @Rule
+    public TemporaryFolder tmp = new TemporaryFolder();
 
     private ExplodingKittensGameState freshState(int nPlayers) {
         ExplodingKittensParameters params = new ExplodingKittensParameters();
@@ -78,20 +85,18 @@ public class JSONTest {
     }
 
     @Test
-    public void testJSONLoadFromFile() {
+    public void testJSONLoadFromFile() throws IOException {
         ExplodingKittensGameState state = freshState(3);
         state.setTurnOwner(0);
         state.getPlayerHand(1).add(new ExplodingKittensCard(NOPE));
         state.setActionInProgress(new NopeableAction(0, new PlayEKCard(SKIP), state));
 
         JSONObject json = state.toJSON();
-        JSONUtils.writeJSON(json, "src/ekTestFile.json");
+        File file = tmp.newFile("ekTestFile.json");
+        JSONUtils.writeJSON(json, file.getPath());
 
-        ExplodingKittensGameState loaded = JSONUtils.loadClassFromFile("src/ekTestFile.json");
+        ExplodingKittensGameState loaded = JSONUtils.loadClassFromFile(file.getPath());
 
         assertEquals(state, loaded);
-        // we need to ensure the file root is picked up correctly to delete this
-        File file = new File("src/ekTestFile.json");
-        file.delete();
     }
 }

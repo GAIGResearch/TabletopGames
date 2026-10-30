@@ -65,6 +65,8 @@ public class RMHCPlayer extends AbstractPlayer {
                 keepIterating = (fmCalls + copyCalls) < params.budget;
             } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
                 keepIterating = numIters < params.budget;
+            } else {
+                throw new AssertionError("Unsupported budget type for RMHC: " + params.budgetType);
             }
         }
 
