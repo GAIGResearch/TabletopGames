@@ -180,7 +180,7 @@ The convenience overloads use `mode=both`, `numSuffixFrequency=true`, no binning
 
 ## Running the experiments
 
-`core.TAG` dispatches to the driver:
+`core.TAG` dispatches to the driver, which lives in `evaluation/jsonBag/`:
 
 ```bash
 java -jar target/TAG.jar JSONBagValueFunctionExperiments game=DotsAndBoxes n=1 nPlayers=2 \

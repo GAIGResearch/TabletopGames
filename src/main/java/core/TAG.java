@@ -8,7 +8,7 @@ import evaluation.optimisation.OneStepDeviations;
 import evaluation.optimisation.ParameterSearch;
 import gui.Frontend;
 import gui.FrontendSimple;
-import core.JSONBagValueFunctionExperiments;
+import evaluation.jsonBag.JSONBagValueFunctionExperiments;
 import gui.StateRenderer;
 
 import java.util.Arrays;

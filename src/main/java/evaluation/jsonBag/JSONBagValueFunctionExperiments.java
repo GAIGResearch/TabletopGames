@@ -1,5 +1,7 @@
-package core;
+package evaluation.jsonBag;
 
+import core.AbstractPlayer;
+import core.Game;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import org.jetbrains.annotations.NotNull;
