@@ -1,6 +1,7 @@
 package evaluation.jsonBag;
 
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.Game;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
@@ -134,7 +135,7 @@ public class JSONBagValueFunctionExperiments {
                         seeds[i] = rnd.nextInt();
                     }
                     long experimentStart = System.currentTimeMillis();
-                    TAGNumericStatSummary[] stats = Game.runMany(Collections.singletonList(gameTypeTest), players, n, seeds, null, false, null, 0);
+                    TAGNumericStatSummary[] stats = runSeededGames(gameTypeTest, players, seeds);
                     double experimentDurationSeconds = (System.currentTimeMillis() - experimentStart) / 1000.0;
                     appendCsvRows(csvOutputPath, gameTypeTest, prototypesFolderName, topFeaturesFolderName, topKFeatures, jsonBagOSLAPlayerIndex, stats, experimentDurationSeconds);
                 }
@@ -239,6 +240,59 @@ public class JSONBagValueFunctionExperiments {
             Files.writeString(Path.of(csvOutputPath), sb.toString(), StandardOpenOption.APPEND);
         } catch (IOException e) {
             throw new RuntimeException("Failed to append CSV rows to " + csvOutputPath, e);
+        }
+    }
+
+    /**
+     * Plays one game per seed and summarises the win/loss/draw values per player. This is what
+     * {@code Game.runMany} did for a single game type before the framework moved multi-game runs
+     * onto RunGames; the aggregation matches it exactly, including the statistics printed.
+     */
+    static TAGNumericStatSummary[] runSeededGames(GameType gameType, List<AbstractPlayer> players, long[] seeds) {
+        int nPlayers = players.size();
+        TAGNumericStatSummary[] perGame = new TAGNumericStatSummary[nPlayers];
+        for (int i = 0; i < nPlayers; i++) {
+            perGame[i] = new TAGNumericStatSummary("Game: " + gameType.name() + "; Player: " + i);
+        }
+
+        boolean ranAGame = false;
+        for (long seed : seeds) {
+            Game game = Game.runOne(gameType, null, players, seed, false, null, null, 0);
+            if (game == null) {
+                break;
+            }
+            ranAGame = true;
+            recordPlayerResults(perGame, game);
+        }
+
+        TAGNumericStatSummary[] overall = new TAGNumericStatSummary[nPlayers];
+        for (int i = 0; i < nPlayers; i++) {
+            overall[i] = new TAGNumericStatSummary("Overall Player " + i);
+        }
+        if (!ranAGame) {
+            return overall;
+        }
+
+        for (int i = 0; i < nPlayers; i++) {
+            System.out.println(perGame[i].toString());
+            overall[i].add(perGame[i]);
+        }
+        System.out.println("\n---------------------\n");
+        for (int i = 0; i < nPlayers; i++) {
+            System.out.println(overall[i].toString());
+        }
+        return overall;
+    }
+
+    /** Only WIN, LOSE and DRAW count, which is the filter Game.recordPlayerResults applied. */
+    private static void recordPlayerResults(TAGNumericStatSummary[] statSummaries, Game game) {
+        CoreConstants.GameResult[] results = game.getGameState().getPlayerResults();
+        for (int p = 0; p < statSummaries.length; p++) {
+            if (results[p] == CoreConstants.GameResult.WIN_GAME
+                    || results[p] == CoreConstants.GameResult.LOSE_GAME
+                    || results[p] == CoreConstants.GameResult.DRAW_GAME) {
+                statSummaries[p].add(results[p].value);
+            }
         }
     }
 }
