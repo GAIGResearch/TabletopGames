@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static utilities.JSONUtils.loadClassFromJSON;
 import static utilities.JSONUtils.loadJSONObjectsFromDirectory;
-import static utilities.Utils.clamp;
+import static utilities.Utils.jensenShannonDistance;
 import static utilities.Utils.pdf;
 
 public class ComparisonPlayer extends AbstractPlayer {
@@ -202,7 +202,7 @@ public class ComparisonPlayer extends AbstractPlayer {
                     agreementMatrix[i * playerCount + j] += 1;
                 }
                 else {
-                    double jsd = jensenShannonDistance(policies.get(i), policies.get(j));
+                    double jsd = jensenShannonDistance(pdf(policies.get(i)), pdf(policies.get(j)));
                     if (Double.isNaN(jsd)) {
                         throw new AssertionError("NaN SOMEHOW");
                     }
@@ -211,26 +211,6 @@ public class ComparisonPlayer extends AbstractPlayer {
                 }
             }
         }
-    }
-
-    // TODO get these into a separate class?
-    private double jensenShannonDistance(double[] p, double[] q) {
-        p = pdf(p); q = pdf(q);
-        double[] m = mix(p, q);
-        double jsd = 0;
-        for (int i = 0; i < p.length ; i++) {
-            if (p[i] > 0.0000001) {
-                jsd += p[i] * logBase2(p[i]/m[i]);
-            }
-            if (q[i] > 0.0000001) {
-                jsd += q[i] * logBase2(q[i]/m[i]);
-            }
-            if (Double.isNaN(jsd)) {
-                throw new AssertionError("NaN SOMEHOW");
-            }
-        }
-        jsd = clamp(jsd*0.5, 0, 1);
-        return Math.sqrt(jsd);
     }
 
     private double jaccardSimilarity(double[] p, double[] q) {
@@ -242,19 +222,6 @@ public class ComparisonPlayer extends AbstractPlayer {
             max_sum += Math.max(p[i], q[i]);
         }
         return min_sum/max_sum;
-    }
-
-    // WHY IS THERE NO LOG BASE 2 IN JAVA
-    private double logBase2(double x) {
-        return Math.log(x) / Math.log(2);
-    }
-
-    private double[] mix(double[] p, double[] q) {
-        double[] m = new double[p.length];
-        for (int i = 0; i < m.length; i++) {
-            m[i] = p[i] + q[i];
-        }
-        return pdf(m);
     }
 
 
