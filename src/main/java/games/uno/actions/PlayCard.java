@@ -53,7 +53,7 @@ public class PlayCard extends DrawCard implements IPrintable {
             }
         }
 
-        switch (cardToBePlayed.type) {
+        switch (cardToBePlayed.unoCardType) {
             case Reverse:
                 if (players == 2) { // Reverse cards are SKIP for 2 players
                     ugs.setSkipTurn(true);

@@ -54,11 +54,11 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     }
 
     boolean isWildCard(UnoCard card) {
-        return card.type == Wild;
+        return card.unoCardType == Wild;
     }
 
     boolean isNumberCard(UnoCard card) {
-        return card.type == UnoCard.UnoCardType.Number;
+        return card.unoCardType == UnoCard.UnoCardType.Number;
     }
 
     public void updateCurrentCard(UnoCard card) {
@@ -119,7 +119,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         for (int otherPlayer = 0; otherPlayer < getNPlayers(); otherPlayer++) {
             if ((selfOnly && otherPlayer == playerID) || (!selfOnly && otherPlayer != playerID)) {
                 for (UnoCard card : playerDecks.get(otherPlayer).getComponents()) {
-                    switch (card.type) {
+                    switch (card.unoCardType) {
                         case Number:
                             nPoints += card.number;
                             break;

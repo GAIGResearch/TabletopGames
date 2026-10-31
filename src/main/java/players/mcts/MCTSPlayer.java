@@ -16,8 +16,13 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toSet;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
+import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
+import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
+import static players.mcts.MCTSEnums.TreePolicy.RegretMatching;
+import static utilities.Utils.*;
 
 public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasStateHeuristic {
 
@@ -310,6 +315,35 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         checkRootChildCount(root, actions, gameState);
         lastAction = Pair.of(gameState.getCurrentPlayer(), root.bestAction());
         return lastAction.b.copy();
+    }
+
+    /**
+     * Get softmax policy of possible actions based on n_visits
+     * @param possibleActions
+     * @param temperature
+     * @return
+     */
+    public double[] getSoftmaxPolicy(List<AbstractAction> possibleActions, double temperature) {
+        double[] policy = new double[possibleActions.size()];
+        Arrays.fill(policy, 0);
+        SingleTreeNode currentRoot = root;
+        if (root instanceof MultiTreeNode multiRoot) {
+            currentRoot = multiRoot.getRoot(multiRoot.decisionPlayer);
+        }
+        for (int i = 0; i < possibleActions.size(); i++) {
+            AbstractAction a = possibleActions.get(i);
+            if (currentRoot.getActionValues().containsKey(a)) {
+                policy[i] = currentRoot.getActionValues().get(a).nVisits;
+            }
+        }
+        // SoftMax
+        policy = exponentiatePotentials(policy, temperature);
+        return pdf(policy);
+    }
+
+    // ONLY USE FOR IF A NESTED MCTSPlayer IN ANOTHER AbstractPlayer WHO DOES NOT ALWAYS RETURN THE MOVE CHOSEN BY MCTSPlayer
+    public void setLastAction(AbstractAction action) {
+        lastAction.b = action.copy();
     }
 
     /**

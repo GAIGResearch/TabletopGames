@@ -81,7 +81,7 @@ public class Wonder7Board extends Card {
         }
     }
 
-    private final Wonder type;
+    private final Wonder wonderType;
     public boolean effectUsed;
     protected int wonderStage;
     private final int wonderSide;
@@ -89,44 +89,44 @@ public class Wonder7Board extends Card {
     public final List<Map<Resource, Integer>> stageProduce; // Production of each stage
     public final int totalWonderStages;
 
-    public Wonder7Board(Wonder type, int side) {
-        super(type.toString());
-        this.type = type;
+    public Wonder7Board(Wonder wonderType, int side) {
+        super(wonderType.toString());
+        this.wonderType = wonderType;
         this.wonderSide = side;
         this.wonderStage = 1;
         this.effectUsed = false;
-        this.constructionCosts = type.constructionCosts.get(wonderSide);
-        this.stageProduce = type.stageProduce.get(wonderSide);
-        this.totalWonderStages = type.wonderStages[wonderSide];
+        this.constructionCosts = wonderType.constructionCosts.get(wonderSide);
+        this.stageProduce = wonderType.stageProduce.get(wonderSide);
+        this.totalWonderStages = wonderType.wonderStages[wonderSide];
     }
 
     // Copy constructor
-    protected Wonder7Board(Wonder type, int side, int componentID) {
-        super(type.toString(), componentID);
-        this.type = type;
+    protected Wonder7Board(Wonder wonderType, int side, int componentID) {
+        super(wonderType.toString(), componentID);
+        this.wonderType = wonderType;
         this.wonderSide = side;
         this.wonderStage = 1;
         this.effectUsed = false;
-        this.constructionCosts = type.constructionCosts.get(wonderSide);
-        this.stageProduce = type.stageProduce.get(wonderSide);
-        this.totalWonderStages = type.wonderStages[wonderSide];
+        this.constructionCosts = wonderType.constructionCosts.get(wonderSide);
+        this.stageProduce = wonderType.stageProduce.get(wonderSide);
+        this.totalWonderStages = wonderType.wonderStages[wonderSide];
     }
 
     @Override
     public String toString() {
         StringBuilder stages = new StringBuilder();
-        for (int i = 0; i < type.stageProduce.size(); i++) {
-            String cost = getString(type.constructionCosts.get(wonderSide).get(i));
-            String makes = getString(type.stageProduce.get(wonderSide).get(i));
+        for (int i = 0; i < wonderType.stageProduce.size(); i++) {
+            String cost = getString(wonderType.constructionCosts.get(wonderSide).get(i));
+            String makes = getString(wonderType.stageProduce.get(wonderSide).get(i));
             stages.append("{").append(i + 1).append(":").append(!cost.isEmpty() ? "cost=" + cost : "free").append(!cost.isEmpty() && !makes.isEmpty() ? "," : "").append(!makes.equals("") ? "makes=" + makes : "").append("}  ");
-            if (i != type.stageProduce.size() - 1) stages.append(", ");
+            if (i != wonderType.stageProduce.size() - 1) stages.append(", ");
         }
-        return type.name() + (effectUsed ? "(used)" : "") + "[" + (wonderStage - 1) + "]" +
-                ",makes=" + type.resourcesProduced + " " + stages;
+        return wonderType.name() + (effectUsed ? "(used)" : "") + "[" + (wonderStage - 1) + "]" +
+                ",makes=" + wonderType.resourcesProduced + " " + stages;
     }
 
     public Wonder wonderType() {
-        return type;
+        return wonderType;
     }
     public int getSide() {
         return wonderSide;
@@ -136,13 +136,13 @@ public class Wonder7Board extends Card {
     }
     public boolean isPlayable(AbstractGameState gameState) {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
-        if (wonderStage > type.wonderStages[wonderSide]) {
+        if (wonderStage > wonderType.wonderStages[wonderSide]) {
             return false;
         }
         // Checks if player can afford the cost of the card
-        Set<Resource> key = type.constructionCosts.get(wonderSide).get(wonderStage - 1).keySet(); //Gets the resources of the player
+        Set<Resource> key = wonderType.constructionCosts.get(wonderSide).get(wonderStage - 1).keySet(); //Gets the resources of the player
         for (Resource resource : key) {// Goes through every resource the player has
-            if (!((wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource)) >= type.constructionCosts.get(wonderSide).get(wonderStage - 1).get(resource))) { // Checks if players resource count is more or equal to card resource count (i.e. the player can afford the card)
+            if (!((wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource)) >= wonderType.constructionCosts.get(wonderSide).get(wonderStage - 1).get(resource))) { // Checks if players resource count is more or equal to card resource count (i.e. the player can afford the card)
                 return false; // Player cant afford card
             }
         }
@@ -156,7 +156,7 @@ public class Wonder7Board extends Card {
 
     @Override
     public Wonder7Board copy() {
-        Wonder7Board board = new Wonder7Board(type, wonderSide, componentID);
+        Wonder7Board board = new Wonder7Board(wonderType, wonderSide, componentID);
         board.wonderStage = wonderStage;
         board.effectUsed = effectUsed;
         return board;
@@ -167,11 +167,11 @@ public class Wonder7Board extends Card {
         if (this == o) return true;
         if (!(o instanceof Wonder7Board that)) return false;
         if (!super.equals(o)) return false;
-        return effectUsed == that.effectUsed && wonderStage == that.wonderStage && type == that.type && wonderSide == that.wonderSide;
+        return effectUsed == that.effectUsed && wonderStage == that.wonderStage && wonderType == that.wonderType && wonderSide == that.wonderSide;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), type, effectUsed, wonderStage, wonderSide);
+        return Objects.hash(super.hashCode(), wonderType, effectUsed, wonderStage, wonderSide);
     }
 }

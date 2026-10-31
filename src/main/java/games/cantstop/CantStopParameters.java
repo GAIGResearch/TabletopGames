@@ -6,6 +6,7 @@ import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class CantStopParameters extends TunableParameters {
 
@@ -105,12 +106,33 @@ public class CantStopParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return new CantStopParameters();
+        CantStopParameters ret = new CantStopParameters();
+        ret.TWO_MAX = TWO_MAX;
+        ret.THREE_MAX = THREE_MAX;
+        ret.FOUR_MAX = FOUR_MAX;
+        ret.FIVE_MAX = FIVE_MAX;
+        ret.SIX_MAX = SIX_MAX;
+        ret.SEVEN_MAX = SEVEN_MAX;
+        ret.EIGHT_MAX = EIGHT_MAX;
+        ret.NINE_MAX = NINE_MAX;
+        ret.TEN_MAX = TEN_MAX;
+        ret.ELEVEN_MAX = ELEVEN_MAX;
+        ret.TWELVE_MAX = TWELVE_MAX;
+        return ret;
     }
 
     @Override
-    protected boolean _equals(Object o) {
-        return o instanceof CantStopParameters;
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        CantStopParameters that = (CantStopParameters) o;
+        return TWO_MAX == that.TWO_MAX && THREE_MAX == that.THREE_MAX && FOUR_MAX == that.FOUR_MAX && FIVE_MAX == that.FIVE_MAX && SIX_MAX == that.SIX_MAX && SEVEN_MAX == that.SEVEN_MAX && EIGHT_MAX == that.EIGHT_MAX && NINE_MAX == that.NINE_MAX && TEN_MAX == that.TEN_MAX && ELEVEN_MAX == that.ELEVEN_MAX && TWELVE_MAX == that.TWELVE_MAX && DICE_NUMBER == that.DICE_NUMBER && DICE_SIDES == that.DICE_SIDES && COLUMNS_TO_WIN == that.COLUMNS_TO_WIN && MARKERS == that.MARKERS;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), TWO_MAX, THREE_MAX, FOUR_MAX, FIVE_MAX, SIX_MAX, SEVEN_MAX, EIGHT_MAX, NINE_MAX, TEN_MAX, ELEVEN_MAX, TWELVE_MAX, DICE_NUMBER, DICE_SIDES, COLUMNS_TO_WIN, MARKERS);
     }
 
     @Override

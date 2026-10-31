@@ -8,6 +8,7 @@ import evaluation.optimisation.OneStepDeviations;
 import evaluation.optimisation.ParameterSearch;
 import gui.Frontend;
 import gui.FrontendSimple;
+import evaluation.jsonBag.JSONBagValueFunctionExperiments;
 import gui.StateRenderer;
 
 import java.util.Arrays;
@@ -26,6 +27,7 @@ public class TAG {
         ExpertIteration,
         OneStepDeviations,
         SkillLadder,
+        JSONBagValueFunctionExperiments,
         StateRenderer,
         MCTSBudgetSweep;
 
@@ -73,6 +75,9 @@ public class TAG {
                 break;
             case SkillLadder:
                 SkillLadder.main(remainingArgs);
+                break;
+            case JSONBagValueFunctionExperiments:
+                JSONBagValueFunctionExperiments.main(remainingArgs);
                 break;
             case StateRenderer:
                 StateRenderer.main(remainingArgs);

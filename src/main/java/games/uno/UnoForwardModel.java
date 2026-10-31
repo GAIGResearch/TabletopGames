@@ -137,9 +137,9 @@ public class UnoForwardModel extends StandardForwardModel {
             if (ugs.getCoreGameParameters().verbose) {
                 System.out.println("First card no number " + ugs.currentColor);
             }
-            if (ugs.currentCard.type == UnoCard.UnoCardType.Reverse) {
+            if (ugs.currentCard.unoCardType == UnoCard.UnoCardType.Reverse) {
                 ugs.direction *= -1;
-            } else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
+            } else if (ugs.currentCard.unoCardType == UnoCard.UnoCardType.Draw) {
                 int player = ugs.getCurrentPlayer();
                 for (int i = 0; i < ugs.currentCard.drawN; i++) {
                     ugs.playerDecks.get(player).add(ugs.drawDeck.draw());

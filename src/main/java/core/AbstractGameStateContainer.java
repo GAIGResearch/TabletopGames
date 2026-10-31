@@ -46,7 +46,7 @@ public abstract class AbstractGameStateContainer {
     // The history is stored as a list of pairs, where the first element is the player who took the action
     // this is in chronological order
 //    public final List<Pair<Integer, AbstractAction>> history;
-    public final List<String> historyText;
+//    public final List<String> historyText;
 
     protected AbstractGameStateContainer(AbstractGameState gs) {
         this.gameType = gs.getGameType();
@@ -64,6 +64,6 @@ public abstract class AbstractGameStateContainer {
         this.playerResults = gs.getPlayerResults();
 
 //        this.history = gs.getHistory();
-        this.historyText = gs.getHistoryAsText();
+//        this.historyText = gs.getHistoryAsText();
     }
 }

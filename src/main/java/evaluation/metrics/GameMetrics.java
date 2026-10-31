@@ -1,5 +1,7 @@
 package evaluation.metrics;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IComponentContainer;
@@ -9,6 +11,9 @@ import evaluation.summarisers.TAGStatSummary;
 import evaluation.summarisers.TAGSummariser;
 import utilities.Pair;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 import static evaluation.metrics.Event.GameEvent.*;
@@ -408,6 +413,104 @@ public class GameMetrics implements IMetricsCollection {
                 put("PlayerIdx", String.class);
             }};
         }
+    }
+
+    public static class ScoresPerRound extends AbstractMetric {
+
+        ArrayList<Double> scoreArrayPerRound = new ArrayList<>();
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.type == Event.GameEvent.ROUND_OVER) {
+                for (int i=0; i<e.state.getNPlayers(); i++) {
+                    scoreArrayPerRound.add(e.state.getGameScore(i));
+                }
+                return false;
+            }
+            if (e.type == Event.GameEvent.GAME_OVER) {
+                for (int i=0; i<e.state.getNPlayers(); i++) {
+                    scoreArrayPerRound.add(e.state.getGameScore(i));
+                }
+                String scoreArrayStr = scoreArrayPerRound.toString();
+                records.put("ScoresPerRound", scoreArrayStr);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void notifyGameOver() {
+            super.notifyGameOver();
+            scoreArrayPerRound.clear();
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Set.of(Event.GameEvent.ROUND_OVER, Event.GameEvent.GAME_OVER);
+        }
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("ScoresPerRound", String.class);
+            return columns;
+        }
+    }
+
+    public static abstract class ActionsCount extends AbstractMetric {
+        // TODO let inheritor do proper initialization of actionsTracked somehow
+        protected Set<Class<?>> actionsTracked;
+        protected final HashMap<String, Integer> actionsCount = new HashMap<>();
+        @Override
+        protected final boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.type == Event.GameEvent.ACTION_CHOSEN) {
+                updateActionCount(e.action);
+                return false;
+            }
+            if (e.type == Event.GameEvent.GAME_OVER) {
+                return updateRecord(records);
+            }
+            return false;
+        }
+
+        protected void updateActionCount(AbstractAction a) {
+            if (actionsTracked.contains(a.getClass())) {
+                String actionName = a.getClass().getSimpleName();
+                actionsCount.put(actionName, actionsCount.getOrDefault(actionName, 0) + 1);
+            }
+        }
+
+        protected boolean updateRecord(Map<String, Object> records) {
+            for (Class<?> a : actionsTracked) {
+                String actionName = a.getSimpleName();
+                records.put(actionName, actionsCount.getOrDefault(actionName, 0));
+            }
+            return true;
+        }
+
+        @Override
+        public void notifyGameOver() {
+            super.notifyGameOver();
+            actionsCount.clear();
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Set.of(Event.GameEvent.ACTION_CHOSEN, Event.GameEvent.GAME_OVER);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            if (actionsTracked == null) {
+                initializeActionsTracked();
+            }
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (Class<?> a : actionsTracked) {
+                columns.put(a.getSimpleName(), Integer.class);
+            }
+            return columns;
+        }
+
+        // Initialize actionsTracked, have to implement this
+        protected abstract void initializeActionsTracked();
     }
 
     /**

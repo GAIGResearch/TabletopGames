@@ -414,6 +414,8 @@ public class SingleTreeNode {
             elapsedTimer.setMaxTimeMillis(params.budget - initialisationTime);
         }
 
+        // TODO STORE THE ORIGINAL DECORATORS HERE
+
         // Tracking number of iterations for iteration budget
         int numIters = 0;
         boolean stop = false;
@@ -471,6 +473,9 @@ public class SingleTreeNode {
         actionsInTree = new ArrayList<>();
         currentNodeTrajectory = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
+
+        // TODO RESET JSONBAG DECORATOR HERE
+        // COPY THE ORIGINAL DECORATORS, REMOVE THE CURRENT DECORATORS TO FOWARDMODEL, RESET IT WITH THE NEW COPY
 
         SingleTreeNode selected = treePolicy();
         if (selected == this && openLoopState.isNotTerminalForPlayer(decisionPlayer) && nVisits > 3 && !(this instanceof MCGSNode))

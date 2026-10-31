@@ -42,6 +42,9 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
     public MaxNSearchPlayer(MaxNSearchParameters parameters) {
         super(parameters, "MinMaxSearch");
     }
+    public MaxNSearchPlayer() {
+        this(new MaxNSearchParameters());
+    }
 
     @Override
     public MaxNSearchParameters getParameters() {
@@ -141,7 +144,7 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
         Map<AbstractAction, double[]> actionValues = new HashMap<>();
         for (AbstractAction action : actions) {
             AbstractGameState stateCopy = state.copy();
-            getForwardModel().next(stateCopy, action);
+            getForwardModel().next(stateCopy, action.copy());
             // if we are at the bottom, then save a bit of time by not calculating the valid actions (which we'll never try)
             List<AbstractAction> nextActions = searchDepth > 0 ? getForwardModel().computeAvailableActions(stateCopy) : List.of();
 
@@ -150,6 +153,7 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
                 case MACRO_ACTION ->
                         state.getCurrentPlayer() != stateCopy.getCurrentPlayer() ? searchDepth - 1 : searchDepth;
                 case TURN -> state.getTurnCounter() != stateCopy.getTurnCounter() ? searchDepth - 1 : searchDepth;
+                case ROUND -> state.getRoundCounter() != stateCopy.getRoundCounter() ? searchDepth - 1 : searchDepth;
             };
 
             // recurse - we are here just interested in the value of stateCopy, and hence of taking action
