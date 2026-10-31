@@ -17,7 +17,7 @@ The container is the piece you write per game. Everything downstream is game-agn
 | File | What it does |
 |---|---|
 | `Tokenizer` | Turns an object, a JSON string, or a game state into a token frequency map. Loads prototypes and filter lists from disk. |
-| `JensenShannonDistance` | `normalize` and `jsd` over two frequency maps. JSD is symmetric and bounded by 1. |
+| `JensenShannonDistance` | Removed. The helpers live in `utilities.Utils`: `jensenShannonDistance(Map, Map)` for two bags, `normaliseDistribution` for counts, and `double[]` overloads for plain probability vectors. JSD is symmetric and bounded by 1. |
 | `JSONBagHeuristic` | `IStateHeuristic` that scores a state by JSD to one prototype bag per player. |
 | `JSONBagOSLAPlayer` | One-step look-ahead: rolls each legal action forward, scores the result with `JSONBagHeuristic`, plays the best. |
 | `GameStateContainerFactory` | Maps a `GameType` to the container class that snapshots it. Throws if the game has no container. |

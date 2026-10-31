@@ -45,7 +45,7 @@ Wrapped agents need a forward model, and `ComparisonPlayer` forwards what the fr
 - A decision costs one search per MCTS member and 100 sampled games per other member, so a run is roughly two orders of magnitude slower than a normal game per decision point.
 - The action actually played is random, so the trajectory is nobody's policy. The matrix measures agreement at the states the run happens to visit.
 - Only the policy-JSD update is wired in. `simpleAgreementMatrixUpdate` (exact action equality) and `jaccardSimilarity` exist but nothing calls them; the exact-equality path is described in the code as unreliable for high-variance agents.
-- The JSD helpers here predate `players.jsonBagPlayers.JensenShannonDistance`, and reviewers have suggested consolidating the information-theoretic helpers into `utilities.Utils`.
+- The JSD helpers here predate the ones now in `utilities.Utils`; that pair should be folded into `Utils.jensenShannonDistance(double[], double[])` when someone next touches this class.
 - `copy()` prints `AAAAA` to stdout, left over from debugging.
 - `nSamples` is a field, not a constructor argument.
 

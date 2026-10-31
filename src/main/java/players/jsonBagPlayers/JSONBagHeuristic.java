@@ -3,11 +3,10 @@ package players.jsonBagPlayers;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
+import utilities.Utils;
 
 import java.util.*;
 
-import static players.jsonBagPlayers.JensenShannonDistance.jsd;
-import static players.jsonBagPlayers.JensenShannonDistance.normalize;
 
 public class JSONBagHeuristic implements IStateHeuristic {
 
@@ -27,7 +26,7 @@ public class JSONBagHeuristic implements IStateHeuristic {
             for (Map.Entry<String, ? extends Number> e : p.entrySet()) {
                 m.put(e.getKey(), e.getValue().doubleValue());
             }
-            prototypes.add(normalize(m));
+            prototypes.add(Utils.normaliseDistribution(m));
         }
         filterSet = Set.copyOf(filterList_);
         currentJSONBag = new HashMap<String, Integer>();
@@ -65,7 +64,7 @@ public class JSONBagHeuristic implements IStateHeuristic {
 
         double[] distances = new double[prototypes.size()];
         for (int i = 0; i < prototypes.size(); i++) {
-            distances[i] = jsd(prototypes.get(i), newJSONBag);
+            distances[i] = Utils.jensenShannonDistance(prototypes.get(i), newJSONBag);
         }
 //        double[] values = invertNormalized(distances);
         double[] values = subtractNormalized(distances);

@@ -257,6 +257,98 @@ public abstract class Utils {
     }
 
     /**
+     * Jensen-Shannon divergence between two probability distributions, base 2. It is symmetric and,
+     * for inputs that each sum to 1, lies in [0, 1].
+     * <p>
+     * Both arguments must have the same length and hold non-negative mass; the values are treated as
+     * probabilities, so normalise first (see {@link #pdf(double[])} or
+     * {@link #normaliseDistribution(Map)} if you are starting from counts).
+     */
+    public static double jensenShannonDivergence(double[] p, double[] q) {
+        if (p.length != q.length) {
+            throw new IllegalArgumentException("Jensen-Shannon needs distributions of equal length: "
+                    + p.length + " vs " + q.length);
+        }
+        double divergence = 0.0;
+        for (int i = 0; i < p.length; i++) {
+            if (Double.isNaN(p[i]) || Double.isNaN(q[i])) {
+                throw new IllegalArgumentException("NaN probability at index " + i + ": " + p[i] + ", " + q[i]);
+            }
+            if (p[i] < 0.0 || q[i] < 0.0) {
+                throw new IllegalArgumentException("Negative probability at index " + i + ": " + p[i] + ", " + q[i]);
+            }
+            double mixture = (p[i] + q[i]) / 2.0;
+            if (p[i] > 0.0) divergence += p[i] * log2(p[i] / mixture);
+            if (q[i] > 0.0) divergence += q[i] * log2(q[i] / mixture);
+        }
+        return clamp(divergence * 0.5, 0.0, 1.0);
+    }
+
+    /**
+     * The square root of {@link #jensenShannonDivergence(double[], double[])}, which makes it a metric
+     * (obeys the triangle inequality) bounded by 1.
+     */
+    public static double jensenShannonDistance(double[] p, double[] q) {
+        return Math.sqrt(jensenShannonDivergence(p, q));
+    }
+
+    /**
+     * Normalises a map of counts or masses so the values sum to 1. Keys are preserved; an empty map
+     * stays empty, and a map whose total is not positive comes back as all zeros rather than throwing,
+     * so a bag with no mass is comparable with another one.
+     */
+    public static <K> Map<K, Double> normaliseDistribution(Map<K, ? extends Number> counts) {
+        Map<K, Double> distribution = new HashMap<>(counts.size());
+        if (counts.isEmpty()) return distribution;
+        double total = 0.0;
+        for (Number value : counts.values()) {
+            if (value != null) total += value.doubleValue();
+        }
+        if (!(total > 0.0) || Double.isInfinite(total)) total = 1.0;
+        for (Map.Entry<K, ? extends Number> entry : counts.entrySet()) {
+            Number value = entry.getValue();
+            if (value != null && value.doubleValue() < 0.0) {
+                throw new IllegalArgumentException("Negative count for key " + entry.getKey() + ": " + value);
+            }
+            distribution.put(entry.getKey(), value == null ? 0.0 : value.doubleValue() / total);
+        }
+        return distribution;
+    }
+
+    /**
+     * Jensen-Shannon distance between two keyed distributions, such as JSON-Bag token counts. Both maps
+     * are normalised first, so counts and probabilities give the same answer.
+     * <p>
+     * Two empty maps are treated as identical, and one empty map against a non-empty one as maximally
+     * distant, which keeps the distance defined when a bag has no tokens.
+     */
+    public static <K> double jensenShannonDistance(Map<K, ? extends Number> p, Map<K, ? extends Number> q) {
+        boolean pEmpty = p == null || p.isEmpty();
+        boolean qEmpty = q == null || q.isEmpty();
+        if (pEmpty && qEmpty) return 0.0;
+        if (pEmpty || qEmpty) return 1.0;
+
+        Map<K, Double> pNorm = normaliseDistribution(p);
+        Map<K, Double> qNorm = normaliseDistribution(q);
+        Set<K> keys = new LinkedHashSet<>(pNorm.keySet());
+        keys.addAll(qNorm.keySet());
+
+        double[] pArray = new double[keys.size()];
+        double[] qArray = new double[keys.size()];
+        int index = 0;
+        for (K key : keys) {
+            pArray[index] = pNorm.getOrDefault(key, 0.0);
+            qArray[index] = qNorm.getOrDefault(key, 0.0);
+            index++;
+        }
+        return jensenShannonDistance(pArray, qArray);
+    }
+
+    private static double log2(double x) {
+        return Math.log(x) / Math.log(2);
+    }
+
+    /**
      * This decays statistics by gamma
      *
      * @param pair
