@@ -31,8 +31,9 @@ import java.util.Set;
  * }</pre>
  *
  * Files land in {@code <destDir>/rawGameStates/} as
- * {@code <GameType>-<gameID>-<roundCounter>-<turnCounter>.json}, overwriting a snapshot from the same point
- * in the same game, so a rerun refreshes the data rather than failing.
+ * {@code <GameType>-<gameID>-<roundCounter>-<turnCounter>.json}. The folder is created when the listener is
+ * given its directory, and a run refuses to start if it already exists, so a second run cannot overwrite a
+ * set of states by accident; move or delete the folder to run again.
  * <p>
  * Events default to {@code TURN_OVER} plus {@code GAME_OVER}. To choose others, pass an array of event names:
  *
@@ -71,7 +72,15 @@ public class SaveStateListener implements IGameListener {
     @Override
     public boolean setOutputDirectory(String... nestedDirectories) {
         outputDir = new File(String.join(File.separator, nestedDirectories), "rawGameStates");
-        return outputDir.exists() || outputDir.mkdirs();
+        if (outputDir.exists()) {
+            // Deliberately fatal: a second run must not scatter new snapshots over an existing set.
+            throw new RuntimeException(outputDir.getPath()
+                    + " ALREADY EXIST, DELETE OR MOVE THE DIRECTORY SOMEWHERE ELSE");
+        }
+        if (!outputDir.mkdirs()) {
+            throw new RuntimeException("CANNOT CREATE DIRECTORY FOR " + outputDir.getPath());
+        }
+        return true;
     }
 
     @Override

@@ -105,6 +105,19 @@ public class SaveStateListenerTest {
     }
 
     @Test
+    public void refusesToReuseAnExistingDirectory() throws Exception {
+        File existing = tmp.newFolder("rawGameStates");
+        SaveStateListener listener = new SaveStateListener();
+        try {
+            listener.setOutputDirectory(tmp.getRoot().getAbsolutePath());
+            fail("expected RuntimeException when rawGameStates already exists");
+        } catch (RuntimeException expected) {
+            assertTrue(expected.getMessage().contains("ALREADY EXIST"));
+            assertTrue("the existing folder must be untouched", existing.isDirectory());
+        }
+    }
+
+    @Test
     public void explainsItselfWhenNoDirectoryWasGiven() {
         SaveStateListener listener = new SaveStateListener();
         try {
