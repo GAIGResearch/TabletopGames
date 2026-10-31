@@ -1,7 +1,6 @@
 package games.connect4;
 
 import core.AbstractGameState;
-import core.AbstractGameStateContainer;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -15,23 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class Connect4Metrics implements IMetricsCollection {
-
-    public static class SaveStateConnect4 extends GameMetrics.SaveStateOnEvent {
-
-        public SaveStateConnect4(String[] args) {
-            super(args);
-        }
-
-        @Override
-        protected AbstractGameStateContainer getGSContainer(AbstractGameState gs) {
-            return new Connect4GameStateContainer((Connect4GameState) gs);
-        }
-
-        @Override
-        protected Set<IGameEvent> getSaveEventTypes() {
-            return Collections.singleton(Event.GameEvent.TURN_OVER);
-        }
-    }
 
     public static class GameParams extends AbstractMetric {
 

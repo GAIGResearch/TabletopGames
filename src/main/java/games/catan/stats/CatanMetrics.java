@@ -1,7 +1,6 @@
 package games.catan.stats;
 
 import core.AbstractGameState;
-import core.AbstractGameStateContainer;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
 import core.components.Edge;
@@ -12,7 +11,6 @@ import evaluation.metrics.Event;
 import evaluation.metrics.GameMetrics;
 import evaluation.metrics.IMetricsCollection;
 import games.catan.CatanGameState;
-import games.catan.CatanGameStateContainer;
 import games.catan.CatanParameters;
 import games.catan.actions.build.*;
 import games.catan.components.Building;
@@ -456,29 +454,5 @@ public class CatanMetrics implements IMetricsCollection {
             return columns;
         }
     }
-
-    public static class SaveStateCatan extends GameMetrics.SaveStateOnEvent {
-
-        public SaveStateCatan(String[] args) {
-            super(args);
-        }
-
-        @Override
-        protected AbstractGameStateContainer getGSContainer(AbstractGameState gs) {
-            return new CatanGameStateContainer((CatanGameState) gs);
-        }
-
-//        @Override
-//        protected boolean isValidSave(Event e) {
-//            return e.state.getRoundCounter() % e.state.getNPlayers() == 0;
-//        }
-
-        @Override
-        protected Set<IGameEvent> getSaveEventTypes() {
-            return Collections.singleton(Event.GameEvent.TURN_OVER);
-        }
-    }
-
-
 
 }

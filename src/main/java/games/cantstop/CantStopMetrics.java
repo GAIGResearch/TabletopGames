@@ -1,7 +1,6 @@
 package games.cantstop;
 
 import core.AbstractGameState;
-import core.AbstractGameStateContainer;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -15,27 +14,6 @@ import games.cantstop.actions.RollDice;
 import java.util.*;
 
 public class CantStopMetrics implements IMetricsCollection {
-    public static class SaveStateCantStop extends GameMetrics.SaveStateOnEvent {
-
-        public SaveStateCantStop(String[] args) {
-            super(args);
-        }
-
-        @Override
-        protected AbstractGameStateContainer getGSContainer(AbstractGameState gs) {
-            return new CantStopGameStateContainer((CantStopGameState) gs);
-        }
-
-//        @Override
-//        protected boolean isValidSave(Event e) {
-//            return e.state.getTurnCounter() % e.state.getNPlayers() == 0;
-//        }
-
-        @Override
-        protected Set<IGameEvent> getSaveEventTypes() {
-            return Collections.singleton(Event.GameEvent.TURN_OVER);
-        }
-    }
 
     public static class GameParams extends AbstractMetric {
 

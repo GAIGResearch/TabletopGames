@@ -1,7 +1,6 @@
 package games.dominion.metrics;
 
 import core.AbstractGameState;
-import core.AbstractGameStateContainer;
 import core.components.Card;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
@@ -280,24 +279,6 @@ public class DominionMetrics implements IMetricsCollection {
             columns.put("attackCount", Integer.class);
             columns.put("trashCardCount", Integer.class);
             return columns;
-        }
-    }
-
-    public static class SaveStateDominion extends GameMetrics.SaveStateOnEvent {
-
-        public SaveStateDominion(String[] args) {
-            super(args);
-        }
-
-
-        @Override
-        protected AbstractGameStateContainer getGSContainer(AbstractGameState gs) {
-            return new DominionGameStateContainer((DominionGameState) gs);
-        }
-
-        @Override
-        public Set<IGameEvent> getSaveEventTypes() {
-            return Collections.singleton(Event.GameEvent.TURN_OVER);
         }
     }
 

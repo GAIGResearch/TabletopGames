@@ -3,7 +3,6 @@ package games.seasaltpaper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import core.AbstractGameState;
-import core.AbstractGameStateContainer;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -168,37 +167,6 @@ public class SeaSaltPaperMetrics implements IMetricsCollection {
                 columns.put(t.name(), Integer.class);
             }
             return columns;
-        }
-    }
-
-    public static class SaveStateSSP extends GameMetrics.SaveStateOnEvent {
-
-        int turnSaveCycle;
-
-        public SaveStateSSP(String[] args) {
-            super(args);
-            if (args.length != 2) {
-                throw new AssertionError("INVALID NUMBER OF ARGUMENTS FOR SaveStatePerNTurns: args=" + Arrays.toString(args));
-            }
-            turnSaveCycle = Integer.parseInt(args[1]);
-        }
-
-        @Override
-        protected boolean isValidSave(Event e) {
-            if (e.type == Event.GameEvent.TURN_OVER) {
-                return e.state.getTurnCounter() % turnSaveCycle == 0;
-            }
-            return true;
-        }
-
-        @Override
-        protected AbstractGameStateContainer getGSContainer(AbstractGameState gs) {
-            return new SSPGameStateContainer((SeaSaltPaperGameState) gs);
-        }
-
-        @Override
-        public Set<IGameEvent> getSaveEventTypes() {
-            return Set.of(Event.GameEvent.ROUND_OVER, Event.GameEvent.TURN_OVER);
         }
     }
 

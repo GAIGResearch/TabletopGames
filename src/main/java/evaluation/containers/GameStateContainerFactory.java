@@ -1,4 +1,4 @@
-package players.jsonBagPlayers;
+package evaluation.containers;
 
 import core.AbstractGameState;
 import core.AbstractGameStateContainer;

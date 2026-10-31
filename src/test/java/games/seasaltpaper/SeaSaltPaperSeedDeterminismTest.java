@@ -41,7 +41,7 @@ public class SeaSaltPaperSeedDeterminismTest {
             forwardModel.next(otherState, actions.get(0).copy());
         }
         new com.google.gson.Gson().toJson(
-                players.jsonBagPlayers.GameStateContainerFactory.createContainer(otherState));
+                evaluation.containers.GameStateContainerFactory.createContainer(otherState));
 
         Map<String, Integer> after = Tokenizer.tokenize(seaSaltPaper(101L));
 

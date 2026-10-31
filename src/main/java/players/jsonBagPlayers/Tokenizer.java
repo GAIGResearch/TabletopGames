@@ -11,6 +11,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import core.AbstractGameState;
 import core.AbstractGameStateContainer;
+import evaluation.containers.GameStateContainerFactory;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.FileReader;

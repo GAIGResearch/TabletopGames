@@ -1,7 +1,6 @@
 package games.wonders7.metrics;
 
 import core.AbstractGameState;
-import core.AbstractGameStateContainer;
 import core.actions.AbstractAction;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
@@ -12,7 +11,6 @@ import evaluation.metrics.IMetricsCollection;
 import games.wonders7.Wonders7Constants;
 import games.wonders7.Wonders7GameParameters;
 import games.wonders7.Wonders7GameState;
-import games.wonders7.Wonders7GameStateContainer;
 import games.wonders7.actions.*;
 import games.wonders7.cards.Wonder7Card;
 import games.wonders7.cards.Wonder7Board;
@@ -292,23 +290,6 @@ public class Wonders7Metrics implements IMetricsCollection {
                 columns.put(r.name(), Integer.class);
             }
             return columns;
-        }
-    }
-
-    public static class SaveStateWonders7 extends GameMetrics.SaveStateOnEvent {
-
-        public SaveStateWonders7(String[] args) {
-            super(args);
-        }
-
-        @Override
-        protected AbstractGameStateContainer getGSContainer(AbstractGameState gs) {
-            return new Wonders7GameStateContainer((Wonders7GameState) gs);
-        }
-
-        @Override
-        public Set<IGameEvent> getSaveEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
     }
 

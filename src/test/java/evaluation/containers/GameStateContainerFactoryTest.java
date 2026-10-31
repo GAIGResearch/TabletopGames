@@ -1,4 +1,4 @@
-package players.jsonBagPlayers;
+package evaluation.containers;
 
 import core.AbstractGameState;
 import core.AbstractGameStateContainer;
@@ -12,6 +12,7 @@ import games.seasaltpaper.SSPGameStateContainer;
 import games.uno.UnoGameStateContainer;
 import games.wonders7.Wonders7GameStateContainer;
 import org.junit.Test;
+import players.jsonBagPlayers.Tokenizer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
