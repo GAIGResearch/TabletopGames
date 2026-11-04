@@ -5,13 +5,13 @@
   "heuristic": {
     "class": "players.heuristics.LeaderHeuristic"
   },
-  "exploreEpsilon": 0.3,
   "treePolicy": "UCB_Tuned",
   "rolloutType": "RANDOM",
   "information": "Information_Set",
   "class": "players.mcts.MCTSParams",
   "budget": 10,
-  "selectionPolicy": "ROBUST",
+  "reuseTree": true,
+  "selectionPolicy": ["ROBUST", "SIMPLE"],
   "timeFactor": [
     0.5,
     0.75,
