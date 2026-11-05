@@ -2,6 +2,7 @@ package evaluation.jsonBag;
 
 import core.AbstractPlayer;
 import core.Game;
+import evaluation.MultiGameRunner;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import org.jetbrains.annotations.NotNull;
@@ -134,7 +135,7 @@ public class JSONBagValueFunctionExperiments {
                         seeds[i] = rnd.nextInt();
                     }
                     long experimentStart = System.currentTimeMillis();
-                    TAGNumericStatSummary[] stats = Game.runMany(Collections.singletonList(gameTypeTest), players, n, seeds, null, false, null, 0);
+                    TAGNumericStatSummary[] stats = MultiGameRunner.runMany(Collections.singletonList(gameTypeTest), players, n, seeds, null, false, null, 0);
                     double experimentDurationSeconds = (System.currentTimeMillis() - experimentStart) / 1000.0;
                     appendCsvRows(csvOutputPath, gameTypeTest, prototypesFolderName, topFeaturesFolderName, topKFeatures, jsonBagOSLAPlayerIndex, stats, experimentDurationSeconds);
                 }
