@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.LinkedHashSet;
 
 public class SGCard extends Card {
 
@@ -83,8 +84,8 @@ public class SGCard extends Card {
                 // Calculate who has the most points and who has the second most points
                 int most = 0;
                 int secondMost = 0;
-                HashSet<Integer> mostPlayers = new HashSet<>();
-                HashSet<Integer> secondPlayers = new HashSet<>();
+                HashSet<Integer> mostPlayers = new LinkedHashSet<>();
+                HashSet<Integer> secondPlayers = new LinkedHashSet<>();
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     int nMakiRolls = gs.getPlayedCardTypes()[i].get(Maki).getValue();
 
@@ -137,8 +138,8 @@ public class SGCard extends Card {
                 //Calculate who has the most points and who has the least points
                 int best = gs.getPlayedCardTypes()[0].get(Pudding).getValue();
                 int worst = best;
-                HashSet<Integer> mostPlayers = new HashSet<>();
-                HashSet<Integer> leastPlayers = new HashSet<>();
+                HashSet<Integer> mostPlayers = new LinkedHashSet<>();
+                HashSet<Integer> leastPlayers = new LinkedHashSet<>();
                 for (int i = 0; i < gs.getNPlayers(); i++) {
                     int nPuddings = gs.getPlayedCardTypes()[i].get(Pudding).getValue();
 

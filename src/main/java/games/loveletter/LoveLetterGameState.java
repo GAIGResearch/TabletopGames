@@ -29,7 +29,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     // Cards in the reserve
     Deck<LoveLetterCard> reserveCards;
     LoveLetterCard removedCard;
-    Random redeterminisationRnd = new Random(System.currentTimeMillis());
 
     boolean[] currentlyActive; // If true: player is currently active in the game (not knocked out)
 

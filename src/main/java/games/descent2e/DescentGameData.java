@@ -166,7 +166,7 @@ public class DescentGameData extends AbstractGameData {
                 }
 
                 // Find starting locations for players, maps to a board
-                Map<String, List<Vector2D>> startingLocations = new HashMap<>();
+                Map<String, List<Vector2D>> startingLocations = new LinkedHashMap<>();
                 JSONArray ls = (JSONArray) obj.get("starting-locations");
                 if (ls != null) {
                     int i = 0;
@@ -208,7 +208,7 @@ public class DescentGameData extends AbstractGameData {
 
                         String[] rules = ((String) tDef.get(4)).split(";");
                         ArrayList<TokenAction> effects = new ArrayList<>();
-                        HashMap<Figure.Attribute, Integer> attributeModifiers = new HashMap<>();
+                        HashMap<Figure.Attribute, Integer> attributeModifiers = new LinkedHashMap<>();
                         for (String rule: rules) {
                             if (rule.contains("AttributeModifier")) {
                                 // An attribute modifier
@@ -300,7 +300,7 @@ public class DescentGameData extends AbstractGameData {
     }
 
     private static HashMap<String, HashMap<String, Monster>> loadMonsters(String dataPath) {
-        HashMap<String, HashMap<String, Monster>> monsters = new HashMap<>();
+        HashMap<String, HashMap<String, Monster>> monsters = new LinkedHashMap<>();
 
         JSONParser jsonParser = new JSONParser();
         try (FileReader reader = new FileReader(dataPath)) {
@@ -311,7 +311,7 @@ public class DescentGameData extends AbstractGameData {
 
                 String key = (String) obj.get("name");
                 Monster superT = new Monster();
-                HashSet<String> ignoreKeys = new HashSet<String>(){{
+                HashSet<String> ignoreKeys = new LinkedHashSet<String>(){{
                     add("act1");
                     add("act2");
                     add("name");
@@ -323,7 +323,7 @@ public class DescentGameData extends AbstractGameData {
                 ignoreKeys.add("tokenType");
                 ignoreKeys.add("name");
 
-                HashMap<String, Monster> monsterDef = new HashMap<>();
+                HashMap<String, Monster> monsterDef = new LinkedHashMap<>();
                 Monster act1m = new Monster();
                 act1m.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(0), ignoreKeys);
                 Monster act1M = new Monster();
@@ -399,9 +399,9 @@ public class DescentGameData extends AbstractGameData {
                 copy.sideQuests.add(q.copy());
             }
         }
-        copy.monsters = new HashMap<>();
+        copy.monsters = new LinkedHashMap<>();
         for (String k: monsters.keySet()) {
-            HashMap<String, Monster> monsterDef = new HashMap<>();
+            HashMap<String, Monster> monsterDef = new LinkedHashMap<>();
             for (String k2: monsters.get(k).keySet()) {
                 monsterDef.put(k2, monsters.get(k).get(k2).copy());
             }

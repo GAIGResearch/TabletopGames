@@ -13,6 +13,8 @@ public class HanabiDeckView extends DeckView<HanabiCard> {
     String dataPath;
     Image backOfCard;
     HanabiGameState hgs;
+    // the player whose knowledge of the cards is drawn (set by the GUI manager); -1 draws only what all know
+    int viewer = -1;
 
     /**
      * Constructor initialising information and adding key/mouse listener for card highlight (left click or ALT + hover
@@ -40,7 +42,7 @@ public class HanabiDeckView extends DeckView<HanabiCard> {
                     HanabiCard card = deck.get(i);
                     Rectangle r = new Rectangle(rect.x + offset * i, rect.y, itemWidth, itemHeight);
                     rects[i] = r;
-                    drawComponent(g, r, card, front || componentVisibility(deck, i));
+                    drawComponent(g, r, card, front);
                 }
             }
             if (cardHighlight != -1) {
@@ -48,7 +50,7 @@ public class HanabiDeckView extends DeckView<HanabiCard> {
                 if (deck.getSize() > cardHighlight) {
                     HanabiCard card = deck.get(cardHighlight);
                     Rectangle r = rects[cardHighlight];
-                    drawComponent(g, r, card, front || componentVisibility(deck, cardHighlight));
+                    drawComponent(g, r, card, front);
                 } else {
                     cardHighlight = -1;
                 }
@@ -71,16 +73,18 @@ public class HanabiDeckView extends DeckView<HanabiCard> {
      */
     @Override
     public void drawComponent(Graphics2D g, Rectangle rect, HanabiCard card, boolean front) {
-        int currentPlayer = hgs.getCurrentPlayer();
+        // front reveals the card in full; otherwise draw what the viewer knows of it
+        boolean colourKnown = front || !card.getColorStr(viewer).contains("?");
+        boolean numberKnown = front || !card.getNumberStr(viewer).contains("?");
         // Draw background
-        if (!card.getColorStr(currentPlayer).contains("?")) g.setColor(card.color.color);
+        if (colourKnown) g.setColor(card.color.color);
         else g.setColor(Color.lightGray);
         g.fillRect(rect.x, rect.y, rect.width - 1, rect.height - 1);
         g.setColor(Color.black);
 
         // Draw card name and owner
         String value = "?";
-        if (!card.getNumberStr(currentPlayer).contains("?")) value = "" + card.number;
+        if (numberKnown) value = "" + card.number;
         int w = (width * 2 - 10) / g.getFont().getSize();
         String wrapped =
                 WordWrap.from(value)

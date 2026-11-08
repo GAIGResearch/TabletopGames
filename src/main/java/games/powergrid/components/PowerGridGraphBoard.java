@@ -2,10 +2,12 @@ package games.powergrid.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -79,14 +81,17 @@ public final class PowerGridGraphBoard extends Component {
 
     public PowerGridGraphBoard(String name,Map<Integer, PowerGridCity> cities,List<Edge> edges) {
         super(CoreConstants.ComponentType.BOARD, name);
-        this.citiesById = Map.copyOf(cities);
+        // sorted by ID, as the iteration order of Map.copyOf() changes from one JVM launch to the next
+        this.citiesById = Collections.unmodifiableMap(new TreeMap<>(cities));
         Map<Integer, List<Edge>> tmp = new HashMap<>();
         for (Edge e : edges) {
             tmp.computeIfAbsent(e.from, k -> new ArrayList<>()).add(e);
             // add reverse edge since Power Grid is an undirected graph
             tmp.computeIfAbsent(e.to, k -> new ArrayList<>()).add(new Edge(e.to, e.from, e.cost));
         }
-        this.adj = tmp.entrySet().stream().collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, e -> List.copyOf(e.getValue())));
+        Map<Integer, List<Edge>> sorted = new TreeMap<>();
+        tmp.forEach((city, cityEdges) -> sorted.put(city, List.copyOf(cityEdges)));
+        this.adj = Collections.unmodifiableMap(sorted);
         this.maxCost =  maxValidShortestPathCost();
         this.AdjacencyVector = normalizedAdjacency2D();
               

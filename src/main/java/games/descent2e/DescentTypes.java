@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 import static games.descent2e.components.Figure.Attribute.Health;
 import static games.descent2e.components.Figure.Attribute.MovePoints;
@@ -55,28 +57,28 @@ public class DescentTypes {
     // TODO: params for move costs and damage
     public enum TerrainType {
         // Tile margins
-        Edge(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}}),
-        Open(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1);}}),
-        Null(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}}),
+        Edge(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}}),
+        Open(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1);}}),
+        Null(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}}),
 
         // Inside tile
-        Plain(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1);}}),
-        Water(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 2);}}),
-//        Sludge(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 2);}}),  // TODO: when a figure starts its turn or activation so that each space it occupies is a sludge space, its Speed is considered to be 1 and cannot be increased above 1 until the end of that turn or activation.
-        Lava(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 1);}}),
-        Hazard(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 1);}}),
-        Pit(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 2);}}),
-        Block(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}});
+        Plain(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1);}}),
+        Water(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 2);}}),
+//        Sludge(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 2);}}),  // TODO: when a figure starts its turn or activation so that each space it occupies is a sludge space, its Speed is considered to be 1 and cannot be increased above 1 until the end of that turn or activation.
+        Lava(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 1);}}),
+        Hazard(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 1);}}),
+        Pit(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 2);}}),
+        Block(new LinkedHashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}});
 
         HashMap<Figure.Attribute, Integer> moveCosts;
-        static HashSet<TerrainType> walkableTerrains = new HashSet<TerrainType>() {{
+        static HashSet<TerrainType> walkableTerrains = new LinkedHashSet<TerrainType>() {{
             add(Plain);
             add(Water);
             add(Lava);
             add(Hazard);
 //                add(Pit);
         }};
-        static HashSet<TerrainType> marginTerrains = new HashSet<TerrainType>() {{
+        static HashSet<TerrainType> marginTerrains = new LinkedHashSet<TerrainType>() {{
             add(Edge);
             add(Open);
             add(Null);
@@ -106,7 +108,7 @@ public class DescentTypes {
         }
 
         public static HashSet<String> getWalkableStringTerrains() {
-            HashSet<String> walkable = new HashSet<>();
+            HashSet<String> walkable = new LinkedHashSet<>();
             for (TerrainType t: getWalkableTerrains()) {
                 walkable.add(t.name().toLowerCase());
             }
@@ -118,7 +120,7 @@ public class DescentTypes {
         }
 
         public static HashSet<String> getMarginStringTerrains() {
-            HashSet<String> margins = new HashSet<>();
+            HashSet<String> margins = new LinkedHashSet<>();
             for (TerrainType t: getMarginTerrains()) {
                 margins.add(t.name().toLowerCase());
             }

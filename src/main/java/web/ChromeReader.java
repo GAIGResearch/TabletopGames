@@ -1,0 +1,453 @@
+package web;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import core.Game;
+import core.actions.AbstractAction;
+import games.GameType;
+import gui.AbstractGUIManager;
+import gui.ClickRegion;
+import gui.MapMove;
+import gui.MapRegion;
+import gui.RulesPages;
+import gui.views.RulesView;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Moves a GUI's standard parts (its action buttons, game state information and history; see
+ * {@link AbstractGUIManager#getActionPanel()}) from the streamed image into the page, where the browser draws them
+ * natively. A GUI that does not use a standard panel keeps that part in the image. It also sends the GUI's click
+ * regions (see {@link AbstractGUIManager#getClickRegions()}), the regions of a map and where each action is on it
+ * (see {@link AbstractGUIManager#getMapRegions()}), the parts of the frame that take the mouse wheel, and the game's
+ * rules (see {@link RulesPages}), whose tabs it takes out of the image.
+ * <p>
+ * Everything here runs on the Swing thread.
+ */
+class ChromeReader {
+
+    private static final Pattern HISTORY_LINE = Pattern.compile("Player (\\d+) : (.*)", Pattern.DOTALL);
+    private static final Pattern SCORES = Pattern.compile("Player Scores: (.*)");
+    private static final Pattern PHASE = Pattern.compile("Game phase: (.*)");
+    private static final Pattern TURN = Pattern.compile("Turn: (\\d+); Round: (\\d+)");
+    private static final Pattern CURRENT = Pattern.compile("Current player: (\\d+)");
+
+    private final AbstractGUIManager gui;
+    private final Game game;
+    private final JRootPane root;
+    private final Sender out;
+    private final boolean hasActions, hasInfo;
+
+    private JsonArray sentActions;
+    // the game tick when they were sent
+    private int sentTick = -1;
+    private JsonObject sentInfo;
+    private List<String> sentHistory = List.of();
+    private boolean historyReset;
+    // the regions last sent, and the version number the page knows them by
+    private String sentRegions;
+    private List<ClickRegion> regions = List.of();
+    private int regionsVersion;
+    // the game's pages of rules
+    private final List<RulesPages.Page> rules = new ArrayList<>();
+    private boolean sentRules;
+    private String sentWheelAreas;
+    private List<Object> sentMap;
+
+    /**
+     * @param gameType the game, for its rules written in Markdown (see {@link RulesPages})
+     */
+    ChromeReader(AbstractGUIManager gui, Game game, JRootPane root, GameType gameType, Sender out) {
+        this.gui = gui;
+        this.game = game;
+        this.root = root;
+        this.out = out;
+        hasActions = gui.getActionPanel() != null && gui.getActionButtons().length > 0;
+        hasInfo = gui.getInfoPanel() != null;
+        // hidden, not removed: update still reads them, and choose clicks their buttons
+        if (hasActions) gui.getActionPanel().setVisible(false);
+        if (hasInfo) gui.getInfoPanel().setVisible(false);
+        removeRulesTabs(root.getContentPane());
+        rules.addAll(RulesPages.load(gameType, game.getGameState().getGameParameters()));
+    }
+
+    /**
+     * Removes the GUI's rules tabs ({@link RulesView}s), whose pages are sent to the page instead.
+     */
+    private void removeRulesTabs(Container container) {
+        for (Component child : container.getComponents()) {
+            if (child instanceof JTabbedPane tabs)
+                for (int i = tabs.getTabCount() - 1; i >= 0; i--)
+                    if (tabs.getComponentAt(i) instanceof RulesView)
+                        tabs.removeTabAt(i);
+            // A tab strip with one tab left only takes room, so the tab replaces the tabbed pane where the layout
+            // allows it (a BorderLayout, which the GUIs with rules tabs use).
+            if (child instanceof JTabbedPane tabs && tabs.getTabCount() == 1
+                    && container.getLayout() instanceof BorderLayout layout) {
+                Object where = layout.getConstraints(tabs);
+                Component only = tabs.getComponentAt(0);
+                container.remove(tabs);
+                container.add(only, where);
+                child = only;
+            }
+            if (child instanceof Container c) removeRulesTabs(c);
+        }
+    }
+
+    /**
+     * Whether the page shows the actions (otherwise they stay in the image).
+     */
+    boolean hasActions() {
+        return hasActions;
+    }
+
+    /**
+     * Whether the page shows the game state information and history (otherwise they stay in the image).
+     */
+    boolean hasInfo() {
+        return hasInfo;
+    }
+
+    /**
+     * Sends everything on the next update, for a page that has reconnected.
+     */
+    void resend() {
+        sentActions = null;
+        sentInfo = null;
+        sentHistory = List.of();
+        historyReset = true;
+        sentRegions = null;
+        sentRules = false;
+        sentWheelAreas = null;
+        sentMap = null;
+    }
+
+    /**
+     * Sends whatever changed since the last update.
+     */
+    void update() {
+        if (!sentRules) {
+            sentRules = true;
+            if (!rules.isEmpty()) {
+                JsonArray pages = new JsonArray();
+                for (RulesPages.Page p : rules) {
+                    JsonObject page = new JsonObject();
+                    page.addProperty("title", p.title());
+                    page.addProperty("html", p.html());
+                    pages.add(page);
+                }
+                JsonObject msg = new JsonObject();
+                msg.addProperty("type", "rules");
+                msg.add("pages", pages);
+                out.sendText(msg.toString());
+            }
+        }
+        if (hasActions) {
+            JsonArray actions = new JsonArray();
+            JButton[] buttons = gui.getActionButtons();
+            for (int i = 0; i < buttons.length; i++)
+                if (offers(buttons[i])) {
+                    JsonObject a = new JsonObject();
+                    a.addProperty("i", i);
+                    a.addProperty("label", buttons[i].getText());
+                    String kind = kind(gui.getButtonAction(i));
+                    if (kind != null) a.addProperty("kind", kind);
+                    MapMove move = gui.getButtonAction(i) == null ? null : gui.getMapMove(gui.getButtonAction(i));
+                    if (move != null) {
+                        a.addProperty("from", move.from());
+                        a.addProperty("to", move.to());
+                    }
+                    actions.add(a);
+                }
+            // a new decision may offer the same actions as the last (placing armies again, say), and the page, which
+            // stops offering them once one is chosen, needs them again: so they are sent again whenever the game has
+            // moved on
+            int tick = game.getGameState().getGameTick();
+            if (!actions.equals(sentActions) || (tick != sentTick && !actions.isEmpty())) {
+                sentActions = actions;
+                sentTick = tick;
+                JsonObject msg = new JsonObject();
+                msg.addProperty("type", "actions");
+                msg.add("actions", actions);
+                out.sendText(msg.toString());
+            }
+        }
+        if (hasInfo) {
+            JsonObject info = info(gui.getGameStateInfo());
+            if (!info.equals(sentInfo)) {
+                sentInfo = info;
+                JsonObject msg = info.deepCopy();
+                msg.addProperty("type", "info");
+                out.sendText(msg.toString());
+            }
+            List<String> history = gui.getHistory();
+            sendHistory(history, gui.getHistoryRounds());
+        }
+        sendRegions();
+        sendMap();
+        sendWheelAreas();
+    }
+
+    /**
+     * Sends the map's regions when they have changed: each one's id, name and shape, and where its view is in the
+     * frame.
+     */
+    private void sendMap() {
+        List<MapRegion> map = new ArrayList<>();
+        for (MapRegion region : gui.getMapRegions())
+            if (region.view().isShowing()) map.add(region);
+        // the regions are the same as those sent if their views are where they were and their shapes the same
+        // objects, which their GUI keeps until a view is resized: so the paths are made again only then
+        List<Object> key = new ArrayList<>();
+        for (MapRegion region : map) {
+            key.add(region.id());
+            key.add(region.name());
+            key.add(System.identityHashCode(region.shape()));
+            key.add(SwingUtilities.convertPoint(region.view(), 0, 0, root));
+        }
+        if (key.equals(sentMap)) return;
+        sentMap = key;
+        JsonArray json = new JsonArray();
+        for (MapRegion region : map) {
+            Point offset = SwingUtilities.convertPoint(region.view(), 0, 0, root);
+            JsonObject r = new JsonObject();
+            r.addProperty("id", region.id());
+            r.addProperty("name", region.name());
+            r.addProperty("path", svgPath(region.shape(), offset.x, offset.y));
+            json.add(r);
+        }
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "map");
+        msg.add("regions", json);
+        out.sendText(msg.toString());
+    }
+
+    /**
+     * Sends the parts of the frame that take the mouse wheel themselves.
+     */
+    private void sendWheelAreas() {
+        JsonArray areas = new JsonArray();
+        addWheelAreas(root.getContentPane(), areas);
+        String text = areas.toString();
+        if (text.equals(sentWheelAreas)) return;
+        sentWheelAreas = text;
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "wheelAreas");
+        msg.add("areas", areas);
+        out.sendText(msg.toString());
+    }
+
+    private void addWheelAreas(Component c, JsonArray areas) {
+        if (!c.isShowing()) return;
+        // a scroll pane that can scroll, or a view with a wheel listener of its own (a board that zooms, say)
+        boolean takesWheel = c instanceof JScrollPane pane
+                ? pane.getVerticalScrollBar().isVisible() || pane.getHorizontalScrollBar().isVisible()
+                : c.getMouseWheelListeners().length > 0;
+        if (takesWheel && c instanceof JComponent jc) {
+            Rectangle r = SwingUtilities.convertRectangle(jc, jc.getVisibleRect(), root);
+            if (!r.isEmpty()) {
+                JsonArray a = new JsonArray();
+                a.add(r.x);
+                a.add(r.y);
+                a.add(r.width);
+                a.add(r.height);
+                areas.add(a);
+            }
+            return;
+        }
+        if (c instanceof Container container)
+            for (Component child : container.getComponents())
+                addWheelAreas(child, areas);
+    }
+
+    /**
+     * Sends the lines added since the last update or, if the history was replaced rather than added to, all of it; each
+     * with its round, where rounds holds it.
+     */
+    private void sendHistory(List<String> history, List<Integer> rounds) {
+        int sent = sentHistory.size();
+        boolean appended = !historyReset && history.size() >= sent
+                && (sent == 0 || Objects.equals(history.get(sent - 1), sentHistory.get(sent - 1)));
+        if (appended && history.size() == sent) return;
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "history");
+        msg.addProperty("reset", !appended);
+        JsonArray lines = new JsonArray();
+        for (int i = appended ? sent : 0; i < history.size(); i++) {
+            JsonObject line = historyLine(history.get(i));
+            line.addProperty("round", i < rounds.size() ? rounds.get(i) : -1);
+            lines.add(line);
+        }
+        msg.add("lines", lines);
+        sentHistory = history;
+        historyReset = false;
+        out.sendText(msg.toString());
+    }
+
+    private void sendRegions() {
+        List<ClickRegion> showing = new ArrayList<>();
+        JsonArray json = new JsonArray();
+        for (ClickRegion region : gui.getClickRegions()) {
+            JComponent view = region.view();
+            // a view in a tab not chosen is not showing
+            if (!view.isShowing() || region.actions().isEmpty()) continue;
+            Shape shape = region.shape();
+            Rectangle visible = view.getVisibleRect();
+            if (!visible.contains(shape.getBounds2D())) {
+                Area area = new Area(shape);
+                area.intersect(new Area(visible));
+                if (area.isEmpty()) continue;
+                shape = area;
+            }
+            Point offset = SwingUtilities.convertPoint(view, 0, 0, root);
+            JsonObject r = new JsonObject();
+            r.addProperty("path", svgPath(shape, offset.x, offset.y));
+            JsonArray options = new JsonArray();
+            for (AbstractAction a : region.actions())
+                options.add(a.getString(game.getGameState()));
+            r.add("options", options);
+            json.add(r);
+            showing.add(region);
+        }
+        String text = json.toString();
+        if (text.equals(sentRegions)) return;
+        sentRegions = text;
+        regions = showing;
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "regions");
+        msg.addProperty("v", ++regionsVersion);
+        msg.add("regions", json);
+        out.sendText(msg.toString());
+    }
+
+    /**
+     * Chooses the action on button i, if that button still offers the action the page showed.
+     */
+    void choose(int i, String label) {
+        JButton[] buttons = gui.getActionButtons();
+        if (i < 0 || i >= buttons.length || !offers(buttons[i]) || !buttons[i].getText().equals(label)) return;
+        // a click on the Swing button, rather than the action itself, so whatever the game does on a click happens
+        buttons[i].doClick(0);
+    }
+
+    /**
+     * Chooses option o of click region r, if the page's regions (version v) are still the ones offered.
+     */
+    void chooseRegion(int v, int r, int o) {
+        if (v != regionsVersion || r < 0 || r >= regions.size()) return;
+        List<? extends AbstractAction> actions = regions.get(r).actions();
+        if (o >= 0 && o < actions.size())
+            gui.chooseClicked(actions.get(o));
+    }
+
+    /**
+     * Passes the mouse entering or leaving the page's button for action i on to the Swing button, so a game's hover
+     * effects (highlights on the board, say) still happen.
+     */
+    void hover(int i, boolean enter) {
+        JButton[] buttons = gui.getActionButtons();
+        if (i < 0 || i >= buttons.length) return;
+        JButton b = buttons[i];
+        b.dispatchEvent(new MouseEvent(b, enter ? MouseEvent.MOUSE_ENTERED : MouseEvent.MOUSE_EXITED,
+                System.currentTimeMillis(), 0, b.getWidth() / 2, b.getHeight() / 2, 0, false));
+    }
+
+    private static boolean offers(JButton b) {
+        return b.isVisible() && b.getText() != null && !b.getText().isEmpty();
+    }
+
+    /**
+     * The name of the action's class, or of the class an anonymous one extends; null for no action.
+     */
+    static String kind(AbstractAction action) {
+        if (action == null) return null;
+        Class<?> c = action.getClass();
+        while (c.isAnonymousClass()) c = c.getSuperclass();
+        return c.getSimpleName();
+    }
+
+    /**
+     * The info panel's lines: the standard ones (see {@link AbstractGUIManager#getGameStateInfo()}) as fields, where
+     * they have their standard form, and any others as lines.
+     */
+    static JsonObject info(List<String> info) {
+        JsonObject result = new JsonObject();
+        JsonArray lines = new JsonArray();
+        for (String line : info) {
+            Matcher m;
+            if (line.startsWith("Game status: ")) {
+                // the page shows the game's progress itself
+                continue;
+            } else if ((m = SCORES.matcher(line)).matches() && scores(m.group(1)) != null) {
+                result.add("scores", scores(m.group(1)));
+            } else if ((m = PHASE.matcher(line)).matches()) {
+                result.addProperty("phase", m.group(1));
+            } else if ((m = TURN.matcher(line)).matches()) {
+                result.addProperty("turn", Integer.parseInt(m.group(1)));
+                result.addProperty("round", Integer.parseInt(m.group(2)));
+            } else if ((m = CURRENT.matcher(line)).matches()) {
+                result.addProperty("current", Integer.parseInt(m.group(1)));
+            } else {
+                lines.add(line);
+            }
+        }
+        result.add("lines", lines);
+        return result;
+    }
+
+    /**
+     * The scores in "1, 2, 3", or null if that is not a list of numbers.
+     */
+    private static JsonArray scores(String text) {
+        JsonArray scores = new JsonArray();
+        for (String s : text.split(",")) {
+            try {
+                scores.add(Double.parseDouble(s.trim()));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return scores;
+    }
+
+    /**
+     * A history line: its text, and the player it is about (from {@code "Player 2 : ..."}), or -1 if none.
+     */
+    static JsonObject historyLine(String line) {
+        JsonObject result = new JsonObject();
+        Matcher m = HISTORY_LINE.matcher(line);
+        result.addProperty("player", m.matches() ? Integer.parseInt(m.group(1)) : -1);
+        result.addProperty("text", m.matches() ? m.group(2) : line);
+        return result;
+    }
+
+    /**
+     * The shape as SVG path data, its curves made straight lines, moved by (dx, dy).
+     */
+    static String svgPath(Shape shape, double dx, double dy) {
+        StringBuilder path = new StringBuilder();
+        double[] c = new double[6];
+        for (PathIterator it = shape.getPathIterator(null, 0.5); !it.isDone(); it.next()) {
+            switch (it.currentSegment(c)) {
+                case PathIterator.SEG_MOVETO -> path.append('M').append(number(c[0] + dx)).append(' ').append(number(c[1] + dy));
+                case PathIterator.SEG_LINETO -> path.append('L').append(number(c[0] + dx)).append(' ').append(number(c[1] + dy));
+                case PathIterator.SEG_CLOSE -> path.append('Z');
+            }
+        }
+        return path.toString();
+    }
+
+    private static String number(double v) {
+        long tenths = Math.round(v * 10);
+        return tenths % 10 == 0 ? Long.toString(tenths / 10) : Double.toString(tenths / 10.0);
+    }
+}

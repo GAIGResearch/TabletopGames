@@ -74,6 +74,7 @@ public class PlayableActionRequirement implements Requirement<TMGameState> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(action);
+        // not the action's own hash code, as executing the action can change it while this is in a requirements set
+        return action == null ? 0 : action.getClass().getName().hashCode();
     }
 }

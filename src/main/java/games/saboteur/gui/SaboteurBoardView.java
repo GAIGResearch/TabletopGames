@@ -15,6 +15,10 @@ public class SaboteurBoardView extends JComponent {
     SaboteurGameState gs;
     SaboteurGUIManager gui;
     PartialObservableGridBoard board;
+    // the player whose view of the board is drawn (a human player, or the player to move when none is), and whether
+    // every card is shown; set by the GUI manager
+    int viewer = 0;
+    boolean showAll;
     Dimension size;
     Point panPos;
 
@@ -61,8 +65,8 @@ public class SaboteurBoardView extends JComponent {
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
                 PathCard card = (PathCard) board.getElement(j, i);
-                int humanID = gui.getHumanPlayerIds().iterator().next();
-                if (card != null) drawPathCard((Graphics2D) g, card, panPos.x + j * cellWidth, panPos.y + i * cellHeight, board.getElementVisibility(j, i).get(humanID));
+                if (card != null) drawPathCard((Graphics2D) g, card, panPos.x + j * cellWidth, panPos.y + i * cellHeight,
+                        showAll || board.getElementVisibility(j, i).get(viewer));
                 if (gui.gridHighlight != null && gui.gridHighlight.x == j && gui.gridHighlight.y == i) {
                     g.setColor(Color.green);
                     g.drawRect(panPos.x + j * cellWidth, panPos.y + i * cellHeight, cellWidth, cellHeight);
