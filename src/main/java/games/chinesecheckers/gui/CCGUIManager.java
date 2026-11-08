@@ -30,7 +30,7 @@ public class CCGUIManager extends AbstractGUIManager {
 
         JPanel infoPanel = createGameStateInfoPanel("ChineseCheckers", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
-                width, defaultActionPanelHeight, false);
+                width, defaultActionPanelHeight);
 
         // Debug Colours
 //        infoPanel.setBackground(Color.green);

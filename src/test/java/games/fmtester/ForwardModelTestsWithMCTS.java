@@ -10,6 +10,10 @@ import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
 import games.hareandtortoise.HareAndTortoiseParameters;
+import games.monopoly.MonopolyParameters;
+import games.risk.RiskParameters;
+import games.diplomacy.DiplomacyParadoxRule;
+import games.diplomacy.DiplomacyParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
@@ -17,8 +21,10 @@ import games.blackjack.BlackjackParameters;
 import games.goofspiel.GoofspielParameters;
 import games.leducpoker.LeducPokerParameters;
 import games.toads.ToadParameters;
+import games.ventlife.VentlifeParameters;
 import games.catan.CatanParameters;
 import games.crazyeights.CZEParameters;
+import games.perudo.PerudoParameters;
 import games.cribbage.CribbageParameters;
 import games.descent2e.DescentParameters;
 import games.pitch.PitchParameters;
@@ -87,6 +93,21 @@ public class ForwardModelTestsWithMCTS {
     }
 
     @Test
+    public void testMonopoly() {
+        // a short round cap, because a full game of Monopoly with MCTS players takes thousands of decisions
+        MonopolyParameters params = new MonopolyParameters();
+        params.setParameterValue("maxRounds", 8);
+        new ForwardModelTester(params, "game=Monopoly", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+        params = new MonopolyParameters();
+        params.setParameterValue("startingCash", 1000);
+        params.setParameterValue("incomeTaxPercent", 10);
+        params.setParameterValue("maxJailRolls", 1);
+        params.setParameterValue("minimumBid", 1);
+        params.setParameterValue("maxRounds", 8);
+        new ForwardModelTester(params, "game=Monopoly", "nGames=1", "nPlayers=2", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
     public void testHareAndTortoise() {
         new ForwardModelTester("game=HareAndTortoise", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
         HareAndTortoiseParameters params = new HareAndTortoiseParameters();
@@ -94,6 +115,33 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("nAnotherTurn", 2);
         params.setParameterValue("maxRounds", 30);
         new ForwardModelTester(params, "game=HareAndTortoise", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testDiplomacy() {
+        // two years: seven MCTS players each order every unit, one decision at a time
+        DiplomacyParameters params = new DiplomacyParameters();
+        params.setParameterValue("lastYear", 1902);
+        new ForwardModelTester(params, "game=Diplomacy", "nGames=1", "nPlayers=7", "agent=json\\players\\mcts.json");
+        params = new DiplomacyParameters();
+        params.setParameterValue("lastYear", 1901);
+        params.setParameterValue("paradoxRule", DiplomacyParadoxRule.SZYKMAN);
+        new ForwardModelTester(params, "game=Diplomacy", "nGames=1", "nPlayers=7", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testRisk() {
+        // a short round cap, because a full game of Risk with MCTS players takes thousands of decisions
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("maxRounds", 8);
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
+        params = new RiskParameters();
+        params.setParameterValue("secretMission", true);
+        params.setParameterValue("defenderChoosesDice", true);
+        params.setParameterValue("maxArmiesPerTerritory", 12);
+        params.setParameterValue("fortifyAlongPath", true);
+        params.setParameterValue("maxRounds", 8);
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
     }
 
     @Test
@@ -163,6 +211,16 @@ public class ForwardModelTestsWithMCTS {
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=4", "agent=json\\players\\mcts.json");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=5", "agent=json\\players\\mcts.json");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=6", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testPerudo() {
+        new ForwardModelTester("game=Perudo", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
+        PerudoParameters params = new PerudoParameters();
+        params.setParameterValue("palifico", true);
+        params.setParameterValue("calza", true);
+        params.setParameterValue("nDicePerPlayer", 3);
+        new ForwardModelTester(params, "game=Perudo", "nGames=1", "nPlayers=2", "agent=json\\players\\mcts.json");
     }
 
     @Test
@@ -503,5 +561,14 @@ public class ForwardModelTestsWithMCTS {
         params.setParameterValue("discardOption", true);
         params.setParameterValue("secondRoundStart", ToadParameters.SecondRoundStart.WINNER);
         new ForwardModelTester(params, "game=WarOfTheToads", "nGames=3", "nPlayers=2", "agent=json\\players\\mcts.json");
+    }
+
+    @Test
+    public void testVentlife() {
+        new ForwardModelTester("game=Ventlife", "nGames=1", "nPlayers=2", "agent=json\\players\\mcts.json");
+        // the draft
+        VentlifeParameters params = new VentlifeParameters();
+        params.setParameterValue("speciesSelection", VentlifeParameters.SpeciesSelection.DRAFT);
+        new ForwardModelTester(params, "game=Ventlife", "nGames=1", "nPlayers=3", "agent=json\\players\\mcts.json");
     }
 }

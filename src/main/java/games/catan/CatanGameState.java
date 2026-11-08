@@ -425,30 +425,16 @@ public class CatanGameState extends AbstractGameState {
         copy.playerTokens = new ArrayList<>();
         copy.victoryPoints = victoryPoints.clone();
 
-//        // Resources in hand are shuffled if PO
-//        List<CatanParameters.Resource> availableRes = new ArrayList<>();
-//
-//        // PO
-//        if (playerId != -1 || !getCoreGameParameters().partialObservable) {
-//            for (CatanParameters.Resource r : resourcePool.keySet()) {
-//                int nAvailable = ((CatanParameters) gameParameters).n_resource_cards - resourcePool.get(r).getValue();
-//                if (nAvailable > 0) {
-//                    for (int j = 0; j < nAvailable; j++) {
-//                        availableRes.add(r);
-//                    }
-//                }
-//            }
-//        }
-
+        // Resources in hand are assumed to be known in this implementation
         for (int i = 0; i < getNPlayers(); i++) {
-            Map<CatanParameters.Resource, Counter> exchangeRate = new HashMap<>();
+            Map<CatanParameters.Resource, Counter> exchangeRate = new LinkedHashMap<>();
             for (Map.Entry<CatanParameters.Resource, Counter> e: exchangeRates.get(i).entrySet()) {
                 exchangeRate.put(e.getKey(), e.getValue().copy());
             }
             copy.exchangeRates.add(exchangeRate);
 
             // Resources in hand
-            Map<CatanParameters.Resource, Counter> playerRes = new HashMap<>();
+            Map<CatanParameters.Resource, Counter> playerRes = new LinkedHashMap<>();
             for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(i).entrySet()) {
                 playerRes.put(e.getKey(), e.getValue().copy());
             }
@@ -460,25 +446,13 @@ public class CatanGameState extends AbstractGameState {
             // PO
             if (playerId != -1 || !getCoreGameParameters().partialObservable) {
                 if (i != playerId) {
-                    // Resources in hand are hidden
-//                    for (CatanParameters.Resource r : playerResources.get(i).keySet()) {
-//                        copy.playerResources.get(i).get(r).setValue(0);
-//                    }
-
                     // VP from dev cards hidden too
                     copy.victoryPoints[i] = 0;
-                } else {
-//                    // Remove from list of resources that may be in other player's hands the ones we know are in our hand
-//                    for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(i).entrySet()) {
-//                        for (int j = 0; j < e.getValue().getValue(); j++) {
-//                            availableRes.remove(e.getKey());
-//                        }
-//                    }
                 }
             }
 
             // Player tokens
-            Map<BuyAction.BuyType, Counter> playerTok = new HashMap<>();
+            Map<BuyAction.BuyType, Counter> playerTok = new LinkedHashMap<>();
             for (Map.Entry<BuyAction.BuyType, Counter> e: playerTokens.get(i).entrySet()) {
                 playerTok.put(e.getKey(), e.getValue().copy());
             }
@@ -494,7 +468,7 @@ public class CatanGameState extends AbstractGameState {
 
         copy.developmentCardPlayed = developmentCardPlayed;
 
-        copy.resourcePool = new HashMap<>();
+        copy.resourcePool = new LinkedHashMap<>();
         for (Map.Entry<CatanParameters.Resource, Counter> e: resourcePool.entrySet()) {
             copy.resourcePool.put(e.getKey(), e.getValue().copy());
         }
@@ -502,20 +476,9 @@ public class CatanGameState extends AbstractGameState {
         // PO
         if (playerId != -1 || !getCoreGameParameters().partialObservable) {
             // Combine dev cards with those in hand of unknown players. Shuffle and re-deal to players.
-            copy.shuffleDevelopmentCards(playerId);
+            copy.shuffleDevelopmentCards(playerId, redeterminisationRnd);
 
-            // Resources in hand are hidden
-//            for (int i = 0; i < nPlayers; i++) {
-//                if (i != playerId) {
-//                    int nInHand = getNResourcesInHand(i);
-//                    for (int j = 0; j < nInHand; j++) {
-//                        if (availableRes.isEmpty()) break;
-//                        CatanParameters.Resource r = availableRes.remove(rnd.nextInt(availableRes.size()));
-//                        copy.playerResources.get(i).get(r).increment();
-//                    }
-//                }
-//
-//            }
+            // Resources in hand are not hidden in current implementation
         }
 
         return copy;
@@ -536,7 +499,7 @@ public class CatanGameState extends AbstractGameState {
     }
 
 
-    private void shuffleDevelopmentCards(int playerId) {
+    private void shuffleDevelopmentCards(int playerId, Random rnd) {
         // Dev cards in hand are hidden and shuffled with the main deck
         int[][] turnCardsWereBoughtIn = new int[nPlayers][];
         for (int p = 0; p < getNPlayers(); p++) {
@@ -550,7 +513,7 @@ public class CatanGameState extends AbstractGameState {
             }
             playerDevCards.get(p).clear();
         }
-        devCards.shuffle(redeterminisationRnd);
+        devCards.shuffle(rnd);
         for (int p = 0; p < getNPlayers(); p++) {
             if (p == playerId)
                 continue;

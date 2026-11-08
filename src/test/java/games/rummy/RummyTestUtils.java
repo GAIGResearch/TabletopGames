@@ -282,7 +282,7 @@ class RummyTestUtils {
                 for (int q = 0; q < n; q++) {
                     boolean expected = known.contains(c) || q == p;
                     assertEquals("player " + p + "'s " + c + " (index " + i + ") visible to player " + q,
-                            expected, hand.getVisibilityForPlayer(i, q));
+                            expected, hand.isVisibleTo(i, q));
                 }
             }
         }

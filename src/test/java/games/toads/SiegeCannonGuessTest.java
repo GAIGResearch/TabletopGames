@@ -234,8 +234,8 @@ public class SiegeCannonGuessTest {
         // Trickster) becomes visible to player 0; the second Trickster (index 3) stays hidden.
         setHand(state, 1, assassinII(), tricksterII(), berserkerII(), tricksterII());
         guessAs(0, TRICKSTER);
-        assertTrue(state.getPlayerHand(1).isComponentVisible(1, 0));
-        assertFalse(state.getPlayerHand(1).isComponentVisible(3, 0));
+        assertTrue(state.getPlayerHand(1).isVisibleTo(1, 0));
+        assertFalse(state.getPlayerHand(1).isVisibleTo(3, 0));
         assertEquals(1, visibleTo(state, 1, 0));
     }
 
@@ -265,7 +265,7 @@ public class SiegeCannonGuessTest {
         // Guess General (key GENERAL_ONE) against a hand whose only General is General (Hostages), at index 1.
         setHand(state, 1, assassinII(), generalHostages(), berserkerII());
         guessAs(0, GENERAL_ONE);
-        assertTrue(state.getPlayerHand(1).isComponentVisible(1, 0));
+        assertTrue(state.getPlayerHand(1).isVisibleTo(1, 0));
         assertEquals(1, visibleTo(state, 1, 0));
     }
 
@@ -275,7 +275,7 @@ public class SiegeCannonGuessTest {
         // matched through its guess group - at index 1.
         setHand(state, 1, assassinII(), generalFlags(), berserkerII());
         guessAs(0, GENERAL_ONE);
-        assertTrue(state.getPlayerHand(1).isComponentVisible(1, 0));
+        assertTrue(state.getPlayerHand(1).isVisibleTo(1, 0));
         assertEquals(1, visibleTo(state, 1, 0));
     }
 
@@ -285,7 +285,7 @@ public class SiegeCannonGuessTest {
         // player 1 (and nothing of player 1's hand to player 0).
         setHand(state, 0, scout(), saboteurIII());
         guessAs(1, SABOTEUR);
-        assertTrue(state.getPlayerHand(0).isComponentVisible(1, 1));
+        assertTrue(state.getPlayerHand(0).isVisibleTo(1, 1));
         assertEquals(1, visibleTo(state, 0, 1));
         assertEquals(0, visibleTo(state, 1, 0));
     }
@@ -317,7 +317,7 @@ public class SiegeCannonGuessTest {
 
         // only player 1's Bodyguard is shown to player 0; the hand is still 2 kept + 2 drawn = 4 cards
         int index = state.getPlayerHand(1).getComponents().indexOf(bodyguard);
-        assertTrue(state.getPlayerHand(1).isComponentVisible(index, 0));
+        assertTrue(state.getPlayerHand(1).isVisibleTo(index, 0));
         assertEquals(1, visibleTo(state, 1, 0));
         assertEquals(4, state.getPlayerHand(1).getSize());
         // back to PLAY, the Defender (player 1) attacks Battle 2
@@ -359,7 +359,7 @@ public class SiegeCannonGuessTest {
         assertEquals(1, visibleTo(state, 0, 1));
         List<ToadCard> hand0 = state.getPlayerHand(0).getComponents();
         for (int i = 0; i < hand0.size(); i++)
-            if (state.getPlayerHand(0).isComponentVisible(i, 1))
+            if (state.getPlayerHand(0).isVisibleTo(i, 1))
                 assertTrue(hand0.get(i).type == GENERAL_ONE || hand0.get(i).type == GENERAL_TWO);
         // the Defender of Battle 2 (player 0) attacks Battle 3
         assertEquals(PLAY, state.getGamePhase());

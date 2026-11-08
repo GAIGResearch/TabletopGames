@@ -12,6 +12,7 @@ import utilities.Pair;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.LinkedHashMap;
 
 import static games.seasaltpaper.cards.CardColor.*;
 import static games.seasaltpaper.cards.CardSuite.*;
@@ -29,7 +30,7 @@ public class SeaSaltPaperParameters extends TunableParameters {
 
     // CollectorBonus = (base, increment)
     // collector score = base + increment * (count - 1)
-    public HashMap<CardSuite, Pair<Integer, Integer>> collectorBonusDict = new HashMap<>() {{
+    public HashMap<CardSuite, Pair<Integer, Integer>> collectorBonusDict = new LinkedHashMap<>() {{
         put(BOAT, new Pair<>(0, 0));
         put(FISH, new Pair<>(0, 0));
         put(CRAB, new Pair<>(0, 0));
@@ -41,7 +42,7 @@ public class SeaSaltPaperParameters extends TunableParameters {
         put(SAILOR, new Pair<>(0, 5));
     }};
 
-    public HashMap<CardSuite, Integer> duoBonusDict = new HashMap<>() {{
+    public HashMap<CardSuite, Integer> duoBonusDict = new LinkedHashMap<>() {{
         put(BOAT, 1);
         put(FISH, 1);
         put(CRAB, 1);
@@ -53,7 +54,7 @@ public class SeaSaltPaperParameters extends TunableParameters {
         put(SAILOR, 0);
     }};
 
-    public HashMap<CardSuite, Integer> multiplierDict = new HashMap<>() {{
+    public HashMap<CardSuite, Integer> multiplierDict = new LinkedHashMap<>() {{
         put(BOAT, 1);
         put(FISH, 1);
         put(CRAB, 1);
@@ -66,7 +67,7 @@ public class SeaSaltPaperParameters extends TunableParameters {
     }};
 
 
-    public HashMap<Pair<CardSuite, CardType>, Pair<Integer, CardColor[]>> cardsInit = new HashMap<>() {{
+    public HashMap<Pair<CardSuite, CardType>, Pair<Integer, CardColor[]>> cardsInit = new LinkedHashMap<>() {{
         put(new Pair<>(CRAB, CardType.DUO),
             new Pair<>(9, new CardColor[]{LIGHT_BLUE, LIGHT_BLUE, BLUE, BLUE, YELLOW, YELLOW, GREEN, GREY, BLACK})); // LightBlue (x2), Blue (x2), Yellow (x2), Green, Grey, Black
         put(new Pair<>(BOAT, CardType.DUO),
@@ -160,10 +161,10 @@ public class SeaSaltPaperParameters extends TunableParameters {
 
         p.victoryCondition = victoryCondition.clone();
 
-        p.collectorBonusDict = new HashMap<>(collectorBonusDict);
-        p.duoBonusDict = new HashMap<>(duoBonusDict);
-        p.multiplierDict = new HashMap<>(multiplierDict);
-        p.cardsInit = new HashMap<>(cardsInit);
+        p.collectorBonusDict = new LinkedHashMap<>(collectorBonusDict);
+        p.duoBonusDict = new LinkedHashMap<>(duoBonusDict);
+        p.multiplierDict = new LinkedHashMap<>(multiplierDict);
+        p.cardsInit = new LinkedHashMap<>(cardsInit);
 
         return p;
     }

@@ -62,7 +62,7 @@ public class LLStateFeaturesTunable extends TunableStateFeatures {
             for (int player = 0; player < llgs.getNPlayers(); player++) {
                 if (player != playerId) {
                     PartialObservableDeck<LoveLetterCard> deck = llgs.getPlayerHandCards().get(player);
-                    visibleCards += (int) IntStream.range(0, deck.getSize()).filter(i -> deck.getVisibilityForPlayer(i, playerId)).count();
+                    visibleCards += (int) IntStream.range(0, deck.getSize()).filter(i -> deck.isVisibleTo(i, playerId)).count();
                 }
             }
             data[10] = visibleCards;
@@ -82,7 +82,7 @@ public class LLStateFeaturesTunable extends TunableStateFeatures {
             for (int p = 0; p < llgs.getNPlayers(); p++) {
                 if (p != playerId && llgs.isNotTerminalForPlayer(p)) {
                     PartialObservableDeck<LoveLetterCard> hand = llgs.getPlayerHandCards().get(p);
-                    if (hand.getSize() > 0 && hand.getVisibilityForPlayer(0, playerId)) {
+                    if (hand.getSize() > 0 && hand.isVisibleTo(0, playerId)) {
                         value += 1;
                     }
                 }

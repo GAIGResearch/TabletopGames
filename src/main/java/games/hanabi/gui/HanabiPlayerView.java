@@ -27,7 +27,7 @@ public class HanabiPlayerView extends JComponent {
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        playerHandView = new HanabiDeckView(hbgs, humanId, d, true, dataPath, new Rectangle(border, border, playerAreaWidth, hanabiCardHeight));
+        playerHandView = new HanabiDeckView(hbgs, humanId, d, false, dataPath, new Rectangle(border, border, playerAreaWidth, hanabiCardHeight));
         add(playerHandView);
         scoreLabel = new JLabel("Points: 0");
         add(scoreLabel);
@@ -53,8 +53,10 @@ public class HanabiPlayerView extends JComponent {
      * Updates information
      * @param gameState - current game state
      */
-    public void update(HanabiGameState gameState) {
+    public void update(HanabiGameState gameState, int viewer, boolean fullyObservable) {
         playerHandView.updateComponent(gameState.getPlayerDecks().get(playerId));
+        playerHandView.viewer = viewer;
+        playerHandView.setFront(fullyObservable);
         scoreLabel.setText("Points: " + gameState.getGameScore(0));
     }
 }

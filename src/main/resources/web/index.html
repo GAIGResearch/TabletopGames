@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TAG Play</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect x=%224%22 y=%224%22 width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%232f6fd6%22/%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%222.6%22 fill=%22white%22/%3E%3Ccircle cx=%2221%22 cy=%2221%22 r=%222.6%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%222.6%22 fill=%22white%22/%3E%3C/svg%3E">
+</head>
+<body>
+<main class="setup">
+    <h1 id="heading">Play a game</h1>
+    <p class="subtitle">Set up a game against AI opponents. The game runs on the server; you play it here.</p>
+
+    <form id="setup">
+        <section class="card">
+            <h2>Game</h2>
+            <div class="fields">
+                <label id="game-field"><span>Game</span><select id="game"></select></label>
+                <label><span>Players</span><select id="players"></select></label>
+                <label><span>Your seat</span><select id="seat"></select></label>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Opponents</h2>
+            <div class="fields" id="opponents"></div>
+        </section>
+
+        <section class="card">
+            <div class="fields">
+                <label><span>Seed (blank for a new game each time)</span><input id="seed" inputmode="numeric" placeholder="Random"></label>
+                <label><span>Pause after each AI move</span>
+                    <select id="pause">
+                        <option value="0">None</option>
+                        <option value="300" selected>0.3 s</option>
+                        <option value="1000">1 s</option>
+                        <option value="2000">2 s</option>
+                    </select>
+                </label>
+            </div>
+            <label class="check"><input type="checkbox" id="insight">
+                <span>Show what the AI players weigh up for each move. This reveals what they know, including hidden
+                    cards and, in games of simultaneous choices, the move they are about to make.</span></label>
+        </section>
+
+        <section class="card" id="params-card">
+            <details>
+                <summary>Game parameters</summary>
+                <div class="fields" id="params"></div>
+                <p class="row"><span class="muted" id="params-summary"></span>
+                    <button type="button" class="link-button" id="params-reset">Reset to defaults</button></p>
+            </details>
+        </section>
+
+        <p class="error" id="error" hidden></p>
+        <div class="row">
+            <span class="muted">You can bookmark or share the game page's address to play this setup again.</span>
+            <button type="submit" class="primary">Start game</button>
+        </div>
+    </form>
+</main>
+<script src="setup.js"></script>
+</body>
+</html>

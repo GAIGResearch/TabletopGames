@@ -64,7 +64,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     public DescentGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
         nTeams = 2; // Two teams in Descent - the Heroes, and the Overlord
-        tiles = new HashMap<>();
+        tiles = new LinkedHashMap<>();
         data = new DescentGameData();
         attackDicePool = new DicePool(Collections.emptyList());
         defenceDicePool = new DicePool(Collections.emptyList());
@@ -122,7 +122,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     protected AbstractGameState _copy(int playerId) {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.data = data.copy();
-        copy.tiles = new HashMap<>();
+        copy.tiles = new LinkedHashMap<>();
         for (Map.Entry<Integer, GridBoard> e : tiles.entrySet()) {
             copy.tiles.put(e.getKey(), e.getValue().copy());
         }
@@ -156,9 +156,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.monsterGroups = new ArrayList<>();
         copy.monsterGroups.addAll(monsterGroups);
         copy.tileReferences = tileReferences.clone();
-        copy.gridReferences = new HashMap<>();
+        copy.gridReferences = new LinkedHashMap<>();
         for (Map.Entry<String, Map<Vector2D, Vector2D>> e : gridReferences.entrySet()) {
-            HashMap<Vector2D, Vector2D> map = new HashMap<>(e.getValue());
+            HashMap<Vector2D, Vector2D> map = new LinkedHashMap<>(e.getValue());
             copy.gridReferences.put(e.getKey(), map);
         }
         copy.initData = initData;

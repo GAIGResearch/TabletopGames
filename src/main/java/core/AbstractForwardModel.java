@@ -4,8 +4,6 @@ import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
 import core.actions.SimultaneousAction;
-import core.interfaces.IPlayerDecorator;
-import utilities.ActionTreeNode;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;
@@ -14,8 +12,6 @@ import java.util.stream.IntStream;
 import static core.CoreConstants.GameResult.*;
 
 public abstract class AbstractForwardModel {
-
-    public ActionTreeNode root;
 
     /* Limited access/Final methods */
 
@@ -84,8 +80,28 @@ public abstract class AbstractForwardModel {
         return _computeAvailableActions(gameState);
     }
 
+    /**
+     * Override this method if (and only if) you are implementing multiple action spaces for a game AND we have
+     * simultaneous moves. By default a non-default action space is passed on to _computeAvailableActions(gameState, actionSpace)
+     * (as in IExtendedSequence).
+     */
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace, int activePlayer) {
-        return _computeAvailableActions(gameState, activePlayer);
+        if (actionSpace == null || actionSpace.isDefault())
+            return _computeAvailableActions(gameState, activePlayer);
+        return _computeAvailableActions(gameState, actionSpace);
+    }
+
+    /**
+     * This is applied to every list of actions returned by computeAvailableActions(), whether the actions come from
+     * this forward model or from an IExtendedSequence. The default does nothing; see DecoratedForwardModel.
+     *
+     * @param gameState    - the state the actions were computed for
+     * @param actions      - the available actions
+     * @param activePlayer - the player the actions are for
+     * @return - the actions to make available
+     */
+    protected List<AbstractAction> filterAvailableActions(AbstractGameState gameState, List<AbstractAction> actions, int activePlayer) {
+        return actions;
     }
 
     protected abstract void endPlayerTurn(AbstractGameState state);
@@ -114,7 +130,7 @@ public abstract class AbstractForwardModel {
             return new DoNothing();
         } else {
             List<AbstractAction> possibleActions = computeAvailableActions(gameState);
-            int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(possibleActions.size());
+            int randomAction = gameState.getRnd().nextInt(possibleActions.size());
             next(gameState, possibleActions.get(randomAction));
             return possibleActions.get(randomAction);
         }
@@ -189,7 +205,7 @@ public abstract class AbstractForwardModel {
         } else {
             retValue = _computeAvailableActions(gameState, activePlayer);
         }
-        return retValue;
+        return filterAvailableActions(gameState, retValue, activePlayer);
     }
 
     /**

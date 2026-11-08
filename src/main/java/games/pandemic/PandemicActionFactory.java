@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.LinkedHashSet;
 
 import static core.CoreConstants.*;
 import static games.pandemic.PandemicConstants.*;
@@ -38,7 +39,7 @@ class PandemicActionFactory {
         int activePlayer = pgs.getTurnOrder().getCurrentPlayer(pgs);
 
         // Create a list for possible actions, including first move actions
-        Set<AbstractAction> actions = new HashSet<>(getMoveActions(pgs, activePlayer, playerHand));
+        Set<AbstractAction> actions = new LinkedHashSet<>(getMoveActions(pgs, activePlayer, playerHand));
 
         // Build research station, discard card corresponding to current player location to build one, if not already there.
         if (!((PropertyBoolean) playerLocationNode.getProperty(researchStationHash)).value
@@ -230,7 +231,7 @@ class PandemicActionFactory {
      * @return - list of AddResearchStation* actions
      */
     static List<AbstractAction> getResearchStationActions(PandemicGameState pgs, String playerLocation, Card card, int deckFrom, int deckTo, int cardIdx) {
-        Set<AbstractAction> actions = new HashSet<>();
+        Set<AbstractAction> actions = new LinkedHashSet<>();
         Counter rStationCounter = (Counter) pgs.getComponent(researchStationHash);
 
         // Check if any research station tokens left
@@ -255,7 +256,7 @@ class PandemicActionFactory {
      * @return all movement actions
      */
     static List<AbstractAction> getMoveActions(PandemicGameState pgs, int playerId, Deck<Card> playerHand){
-        Set<AbstractAction> actions = new HashSet<>();
+        Set<AbstractAction> actions = new LinkedHashSet<>();
 
         PropertyString playerLocationProperty = (PropertyString) pgs.getComponent(playerCardHash, playerId)
                 .getProperty(playerLocationHash);
@@ -313,7 +314,7 @@ class PandemicActionFactory {
         Deck<Card> playerDeck = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
         Deck<Card> playerDiscardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
 
-        Set<AbstractAction> acts = new HashSet<>();  // Only discard card actions available
+        Set<AbstractAction> acts = new LinkedHashSet<>();  // Only discard card actions available
         for (int i = 0; i < playerDeck.getSize(); i++) {
             acts.add(new DrawCard(playerDeck.getComponentID(), playerDiscardDeck.getComponentID(), i));  // adding card i from player deck to player discard deck
         }
@@ -325,7 +326,7 @@ class PandemicActionFactory {
      * @return - ArrayList, RemoveCardWithCard actions + DoNothing.
      */
     static List<AbstractAction> getRPactions(PandemicGameState pgs) {
-        Set<AbstractAction> acts = new HashSet<>();
+        Set<AbstractAction> acts = new LinkedHashSet<>();
         acts.add(new DoNothing());
 
         Deck<Card> infectionDiscard = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
@@ -355,7 +356,7 @@ class PandemicActionFactory {
         int fromDeck = playerHand.getComponentID();
         int toDeck = playerDiscard.getComponentID();
 
-        Set<AbstractAction> actions = new HashSet<>();
+        Set<AbstractAction> actions = new LinkedHashSet<>();
         actions.add(new DoNothing());  // Can always do nothing
 
         for (Card card: playerHand.getComponents()){
@@ -376,7 +377,7 @@ class PandemicActionFactory {
      * @return list of actions corresponding to the event card.
      */
     static List<AbstractAction> actionsFromEventCard(PandemicGameState pgs, Card card, int deckFrom, int deckTo, int cardIdx){
-        Set<AbstractAction> actions = new HashSet<>();
+        Set<AbstractAction> actions = new LinkedHashSet<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
         int playerIdx = pgs.getCurrentPlayer();
 
@@ -433,7 +434,7 @@ class PandemicActionFactory {
         int deckFrom = playerHand.getComponentID();
         int deckTo = playerDiscard.getComponentID();
 
-        Set<AbstractAction> actions = new HashSet<>();
+        Set<AbstractAction> actions = new LinkedHashSet<>();
         Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
         int nInfectCards = infectionDeck.getSize();
         int n = Math.min(nInfectCards, pp.nForecastCards);

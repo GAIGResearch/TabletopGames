@@ -16,22 +16,22 @@ public class RootGraphBoard extends Component implements IComponentContainer<Roo
 
     public RootGraphBoard(String name) {
         super(CoreConstants.ComponentType.BOARD, name);
-        boardNodes = new HashMap<>();
+        boardNodes = new LinkedHashMap<>();
     }
 
     public RootGraphBoard() {
         super(CoreConstants.ComponentType.BOARD);
-        boardNodes = new HashMap<>();
+        boardNodes = new LinkedHashMap<>();
     }
 
     protected RootGraphBoard(String name, int ID) {
         super(CoreConstants.ComponentType.BOARD, name, ID);
-        boardNodes = new HashMap<>();
+        boardNodes = new LinkedHashMap<>();
     }
 
     RootGraphBoard(int ID) {
         super(CoreConstants.ComponentType.BOARD, ID);
-        boardNodes = new HashMap<>();
+        boardNodes = new LinkedHashMap<>();
     }
 
     /**
@@ -42,8 +42,8 @@ public class RootGraphBoard extends Component implements IComponentContainer<Roo
     @Override
     public RootGraphBoard copy() {
         RootGraphBoard b = new RootGraphBoard(componentName, componentID);
-        HashMap<Integer, RootBoardNodeWithRootEdges> nodeCopies = new HashMap<>();
-        HashMap<Integer, RootEdge> RootEdgeCopies = new HashMap<>();
+        Map<Integer, RootBoardNodeWithRootEdges> nodeCopies = new LinkedHashMap<>();
+        Map<Integer, RootEdge> RootEdgeCopies = new LinkedHashMap<>();
         // Copy board nodes
         for (RootBoardNodeWithRootEdges bn : boardNodes.values()) {
             RootBoardNodeWithRootEdges bnCopy = bn.copy();

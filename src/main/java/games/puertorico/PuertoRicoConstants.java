@@ -149,7 +149,7 @@ public class PuertoRicoConstants {
         }
 
         public static Set<Integer> getQuarryDiscounts() {
-            Set<Integer> discounts = new HashSet<>();
+            Set<Integer> discounts = new LinkedHashSet<>();
             for (BuildingType type : BuildingType.values()) {
                 discounts.add(type.nMaxQuarryDiscount);
             }
