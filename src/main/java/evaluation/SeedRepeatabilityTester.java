@@ -145,12 +145,17 @@ public class SeedRepeatabilityTester {
             throw new IllegalArgumentException("At least two launches are needed to compare them");
         String java = Path.of(System.getProperty("java.home"), "bin", "java").toString();
         List<List<String>> actions = new ArrayList<>();
+        Path classpathArgs = null;
         try {
+            // the classpath goes in an argfile, as it can be longer than Windows allows on a command line
+            classpathArgs = Files.createTempFile("repeatability", ".args");
+            String classpath = System.getProperty("java.class.path").replace("\\", "\\\\");
+            Files.writeString(classpathArgs, "-cp\n\"" + classpath + "\"\n", StandardCharsets.UTF_8);
             for (int launch = 0; launch < launches; launch++) {
                 Path log = Files.createTempFile("repeatability", ".log");
                 try {
                     Process process = new ProcessBuilder(java, "-Djava.awt.headless=true",
-                            "-cp", System.getProperty("java.class.path"), SeedRepeatabilityTester.class.getName(),
+                            "@" + classpathArgs, SeedRepeatabilityTester.class.getName(),
                             "game=" + gameType.name(), "nPlayers=" + nPlayers, "seed=" + seed,
                             "agent=" + agent, "budget=" + budget, "logFile=" + log, "hashShift=" + launch * 101)
                             .redirectOutput(ProcessBuilder.Redirect.DISCARD)
@@ -169,6 +174,14 @@ public class SeedRepeatabilityTester {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while waiting for a launch of " + gameType, e);
+        } finally {
+            if (classpathArgs != null) {
+                try {
+                    Files.deleteIfExists(classpathArgs);
+                } catch (IOException e) {
+                    // only a temporary file left behind
+                }
+            }
         }
         return compare(actions);
     }
