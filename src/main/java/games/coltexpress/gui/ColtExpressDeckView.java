@@ -150,7 +150,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     Rectangle r = new Rectangle(rect.x + offset * i, rect.y, (int)(ceCardWidth * scale), (int)(ceCardHeight * scale));
                     rects[i] = r;
                     drawCard(g, (ColtExpressCard) deck.get(i), r, deck instanceof PartialObservableDeck ?
-                            activePlayer != -1 && ((PartialObservableDeck) deck).isComponentVisible(i, activePlayer) : front);
+                            front || activePlayer != -1 && ((PartialObservableDeck) deck).isComponentVisible(i, activePlayer) : front);
                 } else if (deck.get(0) instanceof Loot) {
                     // Loot
                     int offset = (rect.width-(int)(defaultItemSize * scale)) / deck.getSize();
@@ -180,7 +180,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     int offset = (rect.width-ceCardWidth) / deck.getSize();
                     Rectangle r = new Rectangle(rect.x + offset * cardHighlight, rect.y, ceCardWidth, ceCardHeight);
                     drawCard(g, (ColtExpressCard) deck.get(cardHighlight), r, (deck instanceof PartialObservableDeck ?
-                            (activePlayer != -1 && cardHighlight != -1 && ((PartialObservableDeck) deck).isComponentVisible(cardHighlight, activePlayer)) : front));
+                            (front || activePlayer != -1 && cardHighlight != -1 && ((PartialObservableDeck) deck).isComponentVisible(cardHighlight, activePlayer)) : front));
                 } else if (deck.get(0) instanceof Loot) {
                     // Loot
                     int offset = (rect.width-defaultItemSize) / deck.getSize();

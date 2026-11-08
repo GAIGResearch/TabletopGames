@@ -49,8 +49,15 @@ public class ReturnCardToDeck extends AbstractAction {
         return "Return " + card + " to the bottom of the deck";
     }
 
+    // the opponent does not see which card was returned
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "Player " + gameState.getCurrentPlayer() + " puts a card at the bottom of their deck";
+    }
+
+    // the history is written before the action executes, so the current player is the one returning the card
+    @Override
+    public String getString(AbstractGameState gameState, int perspectivePlayer) {
+        return perspectivePlayer == gameState.getCurrentPlayer() ? toString() : getString(gameState);
     }
 }

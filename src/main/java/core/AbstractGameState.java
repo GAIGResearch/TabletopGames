@@ -521,7 +521,21 @@ public abstract class AbstractGameState {
      * @param playerId - player observing the state.
      * @return - double, score of current state
      */
-    public abstract double getGameScore(int playerId);
+    public abstract double getGameScore(int playerID);
+
+    // Common helper method for the score compared to the best other player
+    public double getLead(int playerID) {
+        double maxOtherScore = 0.0;
+        for (int p = 0; p < nPlayers; p++) {
+            if (p != playerID) {
+                double score = getGameScore(p);
+                if (score > maxOtherScore) {
+                    maxOtherScore = score;
+                }
+            }
+        }
+        return getGameScore(playerID) - maxOtherScore;
+    }
 
     /**
      * @param playerId - the player observed

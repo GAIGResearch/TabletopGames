@@ -324,18 +324,18 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         } else {
             roles.add(role);
         }
-        Deck<Card> subset = new Deck<>("Temp", HIDDEN_TO_ALL);
+        // the roles are given as PlayerRole names, which have no spaces ("OperationsExpert" is "Operations Expert")
+        Set<String> wanted = new HashSet<>();
+        for (String r : roles) wanted.add(r.replace(" ", ""));
+        List<Card> subset = new ArrayList<>();
         for (Card c: cards.getComponents()) {
-            if (roles.contains(c.toString())) {
-                if (roles.size() == 1) return c;
-                subset.add(c);
-            }
+            if (wanted.contains(c.toString().replace(" ", ""))) subset.add(c);
         }
-        if (subset.getSize() > 0) {
-            subset.shuffle(pp.getRnd());
-            return subset.draw();
-        }
-        return null;
+        if (subset.isEmpty()) return null;
+        Card c = subset.get(pp.getRnd().nextInt(subset.size()));
+        // taken from the roles, so that no other player is dealt it
+        cards.remove(c);
+        return c;
     }
 
     /**

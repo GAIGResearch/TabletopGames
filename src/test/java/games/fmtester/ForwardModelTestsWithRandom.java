@@ -10,6 +10,10 @@ import games.gofish.GoFishParameters;
 import games.golfsix.GolfSixParameters;
 import games.klaverjassen.KlaverjassenParameters;
 import games.hareandtortoise.HareAndTortoiseParameters;
+import games.monopoly.MonopolyParameters;
+import games.risk.RiskParameters;
+import games.diplomacy.DiplomacyParadoxRule;
+import games.diplomacy.DiplomacyParameters;
 import games.lawnandorder.LawnAndOrderParameters;
 import games.schwimmen.SchwimmenParameters;
 import games.whist.WhistParameters;
@@ -17,7 +21,9 @@ import games.blackjack.BlackjackParameters;
 import games.goofspiel.GoofspielParameters;
 import games.leducpoker.LeducPokerParameters;
 import games.toads.ToadParameters;
+import games.ventlife.VentlifeParameters;
 import games.crazyeights.CZEParameters;
+import games.perudo.PerudoParameters;
 import games.cribbage.CribbageParameters;
 import games.pitch.PitchParameters;
 import games.president.PresidentParameters;
@@ -90,6 +96,27 @@ public class ForwardModelTestsWithRandom {
     }
 
     @Test
+    public void testMonopoly() {
+        // the rounds are capped because the tester's checks grow with the square of the game's length
+        MonopolyParameters params = new MonopolyParameters();
+        params.setParameterValue("maxRounds", 40);
+        new ForwardModelTester(params, "game=Monopoly", "nGames=1", "nPlayers=3");
+        // little cash, so that players mortgage, raise money and go bankrupt, with the percentage Income Tax and a
+        // harsher Jail
+        params = new MonopolyParameters();
+        params.setParameterValue("startingCash", 1000);
+        params.setParameterValue("incomeTaxPercent", 10);
+        params.setParameterValue("jailFine", 100);
+        params.setParameterValue("maxJailRolls", 1);
+        params.setParameterValue("maxDoubles", 2);
+        params.setParameterValue("mortgageInterestPercent", 20);
+        params.setParameterValue("buildingSalePercent", 100);
+        params.setParameterValue("minimumBid", 1);
+        params.setParameterValue("maxRounds", 40);
+        new ForwardModelTester(params, "game=Monopoly", "nGames=1", "nPlayers=4");
+    }
+
+    @Test
     public void testHareAndTortoise() {
         new ForwardModelTester("game=HareAndTortoise", "nGames=2", "nPlayers=3");
         new ForwardModelTester("game=HareAndTortoise", "nGames=1", "nPlayers=6");
@@ -100,6 +127,38 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("nMissATurn", 2);
         params.setParameterValue("maxRounds", 40);
         new ForwardModelTester(params, "game=HareAndTortoise", "nGames=1", "nPlayers=4");
+    }
+
+    @Test
+    public void testDiplomacy() {
+        // a few years only: the tester's checks grow with the square of the game's length
+        DiplomacyParameters params = new DiplomacyParameters();
+        params.setParameterValue("lastYear", 1904);
+        new ForwardModelTester(params, "game=Diplomacy", "nGames=1", "nPlayers=7");
+        // the Szykman paradox rule
+        params = new DiplomacyParameters();
+        params.setParameterValue("lastYear", 1903);
+        params.setParameterValue("paradoxRule", DiplomacyParadoxRule.SZYKMAN);
+        new ForwardModelTester(params, "game=Diplomacy", "nGames=1", "nPlayers=7");
+    }
+
+    @Test
+    public void testRisk() {
+        // the rounds are capped because the tester's checks grow with the square of the game's length, and random
+        // play rarely ends a game of Risk within the default 100 rounds
+        RiskParameters params = new RiskParameters();
+        params.setParameterValue("maxRounds", 30);
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=3");
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=6");
+        // Secret Mission with the expert rules and the defender choosing dice
+        params = new RiskParameters();
+        params.setParameterValue("secretMission", true);
+        params.setParameterValue("defenderChoosesDice", true);
+        params.setParameterValue("linearTradeValues", true);
+        params.setParameterValue("fortifyAlongPath", true);
+        params.setParameterValue("maxArmiesPerTerritory", 12);
+        params.setParameterValue("maxRounds", 30);
+        new ForwardModelTester(params, "game=Risk", "nGames=1", "nPlayers=4");
     }
 
     @Test
@@ -165,6 +224,16 @@ public class ForwardModelTestsWithRandom {
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=3");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=4");
         new ForwardModelTester("game=Pickomino", "nGames=1", "nPlayers=5");
+    }
+
+    @Test
+    public void testPerudo() {
+        new ForwardModelTester("game=Perudo", "nGames=2", "nPlayers=2");
+        new ForwardModelTester("game=Perudo", "nGames=2", "nPlayers=6");
+        PerudoParameters params = new PerudoParameters();
+        params.setParameterValue("palifico", true);
+        params.setParameterValue("calza", true);
+        new ForwardModelTester(params, "game=Perudo", "nGames=3", "nPlayers=4");
     }
 
     @Test
@@ -461,5 +530,15 @@ public class ForwardModelTestsWithRandom {
         params.setParameterValue("discardOption", true);
         params.setParameterValue("secondRoundStart", ToadParameters.SecondRoundStart.WINNER);
         new ForwardModelTester(params, "game=WarOfTheToads", "nGames=10", "nPlayers=2");
+    }
+
+    @Test
+    public void testVentlife() {
+        new ForwardModelTester("game=Ventlife", "nGames=1", "nPlayers=2");
+        new ForwardModelTester("game=Ventlife", "nGames=1", "nPlayers=4");
+        // the draft
+        VentlifeParameters params = new VentlifeParameters();
+        params.setParameterValue("speciesSelection", VentlifeParameters.SpeciesSelection.DRAFT);
+        new ForwardModelTester(params, "game=Ventlife", "nGames=1", "nPlayers=3");
     }
 }

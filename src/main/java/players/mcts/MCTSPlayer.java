@@ -276,6 +276,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         if (getParameters().getOpponentModel() instanceof IMASTUser) {
             ((IMASTUser) getParameters().getOpponentModel()).setMASTStats(root.MASTStatistics);
         }
+        if (getParameters().actionHeuristic instanceof IMASTUser) {
+            ((IMASTUser) getParameters().actionHeuristic).setMASTStats(root.MASTStatistics);
+        }
     }
 
     @Override

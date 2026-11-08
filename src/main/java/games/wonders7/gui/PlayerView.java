@@ -16,10 +16,18 @@ public class PlayerView extends JComponent {
     Dimension size = new Dimension(width, height);
     int pad = 2;
     int borderHeight = 20;
+    // whether the cards in hand are shown, or only how many (set by the GUI manager)
+    boolean showHand;
 
     public PlayerView(Wonders7GameState gs, int playerId) {
         this.gs = gs;
         this.playerId = playerId;
+    }
+
+    public void update(Wonders7GameState gs, boolean showHand) {
+        this.gs = gs;
+        this.showHand = showHand;
+        repaint();
     }
 
     @Override
@@ -47,7 +55,8 @@ public class PlayerView extends JComponent {
         g.drawString("Wonder: " + gs.getPlayerWonderBoard(playerId).toString(), pad*2, y);
         // cards to choose from:
         y += fontSize*2;
-        g.drawString("Cards in hand: " + gs.getPlayerHand(playerId).toString(), pad*2, y);
+        g.drawString("Cards in hand: " + (showHand ? gs.getPlayerHand(playerId).toString()
+                : gs.getPlayerHand(playerId).getSize() + " cards"), pad*2, y);
     }
 
     @Override

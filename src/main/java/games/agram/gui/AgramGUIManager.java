@@ -12,6 +12,7 @@ import games.tricktaking.gui.TrickView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
@@ -70,7 +71,7 @@ public class AgramGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml((AgramParameters) state.getGameParameters()), height));
+        RulesView.addTabs(tabs, GameType.Agram, state.getGameParameters(), height);
 
         // Player areas: player 0 at the bottom, then round the table
         playerViews = new PlayerHandView[nPlayers];
@@ -88,8 +89,7 @@ public class AgramGUIManager extends AbstractGUIManager {
         for (int i = 0; i < nPlayers; i++) {
             PlayerHandView playerView = new PlayerHandView(state.getPlayerHands().get(i), i, playerAreaWidth);
             playerView.setOpaque(false);
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            agentNames[i] = split[split.length - 1];
+            agentNames[i] = game.getPlayers().get(i).toString();
             TitledBorder title = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i,
                     TitledBorder.CENTER, TitledBorder.BELOW_BOTTOM);
@@ -110,7 +110,7 @@ public class AgramGUIManager extends AbstractGUIManager {
         mainGameArea.add(centreWrapper, BorderLayout.CENTER);
 
         JPanel infoPanel = createGameStateInfoPanel("Agram", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);
@@ -186,38 +186,5 @@ public class AgramGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(AgramParameters params) {
-        int n = params.nCardsPerPlayer;
-        String match = params.nDeals > 1
-                ? "<p><b>Match.</b> A match is " + params.nDeals + " deals. The winner of each deal deals the next, " +
-                "so the player after them leads. The player who has won most deals wins the match, and players " +
-                "with the same number of deals share the place.</p>"
-                : "";
-        return "<h2>Agram</h2>" +
-                "<p>A trick-taking game from West Africa. The winner of the last trick wins the deal.</p>" +
-                "<p><b>Cards.</b> The deck has 35 cards: Ace and 10 down to 3 in each suit, without the Ace of " +
-                "Spades. Ace is high.</p>" +
-                "<p><b>Deal.</b> Each player is dealt " + n + " cards, so there are " + n + " tricks. The cards " +
-                "left over are not used.</p>" +
-                "<p><b>Play.</b></p><ul>" +
-                "<li>The player after the dealer leads the first trick with any card.</li>" +
-                "<li>The other players must follow suit if they can, but need not play higher.</li>" +
-                "<li>A player who cannot follow suit may play any card. The others will then know that player has " +
-                "none of that suit.</li>" +
-                "<li>The highest card of the suit led wins the trick. There are no trumps.</li>" +
-                "<li>The winner of a trick leads the next.</li></ul>" +
-                "<p><b>Winning.</b> The winner of trick " + n + " wins the deal. The earlier tricks score " +
-                "nothing.</p>" + match +
-                "<h3>Interface</h3>" +
-                "<p>Choose a card from the action buttons at the bottom. Each player's area shows their hand, " +
-                "with a status line underneath: the number of cards, " +
-                (params.nDeals > 1 ? "the deals won, " : "") + "and the suits the player is known to be void in " +
-                "(\"void in\"). The name below the area is marked \"dealer\" for the dealer, and a blue outline " +
-                "shows whose turn it is.</p>" +
-                "<p>The centre shows the trick number, the suit led and the cards played so far, each labelled with " +
-                "the player who played it. The card winning the trick is outlined in orange. The bottom line counts " +
-                "the tricks played this deal and the cards not dealt.</p>";
     }
 }

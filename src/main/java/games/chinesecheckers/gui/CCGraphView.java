@@ -22,9 +22,15 @@ public class CCGraphView extends ComponentView implements IScreenHighlight {
         super(starBoard, defaultItemSize, defaultItemSize);
 
         this.starBoard = starBoard;
+        int maxX = 0, maxY = 0;
         for (CCNode node : starBoard.getBoardNodes()) {
             dots.put(node.getID(), new Rectangle(node.getX(), node.getY(), 10, 10));
+            maxX = Math.max(maxX, node.getX());
+            maxY = Math.max(maxY, node.getY());
         }
+        // drawNodes draws the board 30 pixels a step, offset by up to 72 across and 23 down, with 15 pixel pegs; and
+        // there is a margin
+        setPreferredSize(new Dimension(maxX * 30 + 72 + 15 + 40, maxY * 30 + 23 + 15 + 40));
     }
 
     void drawNodes(Graphics g) {
