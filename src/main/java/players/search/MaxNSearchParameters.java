@@ -16,6 +16,7 @@ public class MaxNSearchParameters extends PlayerParameters {
     protected SearchUnit searchUnit = SearchUnit.ACTION;
     protected IStateHeuristic heuristic = new GameDefaultHeuristic();
     protected boolean paranoid = false;
+    // only has an effect if paranoid is true, as plain MaxN with 3+ players does not support standard alpha-beta
     protected boolean alphaBetaPruning = true;
     protected boolean iterativeDeepening = false;
     protected boolean expandByEstimatedValue = false;

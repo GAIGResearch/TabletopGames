@@ -69,14 +69,16 @@ public class AlphaBetaPruningTests {
 
         // create a MaxNSearchPlayer with iterativeDeepening set to false
         MaxNSearchParameters paramsTwo = new MaxNSearchParameters();
-        paramsOne.iterativeDeepening = false;
+        paramsTwo.iterativeDeepening = false;
         paramsTwo.budget = 1000;
         paramsTwo.paranoid = false;
         paramsTwo.searchDepth = 4;
         MaxNSearchPlayer player2 = new MaxNSearchPlayer(paramsTwo);
         player2.setForwardModel(forwardModel);
 
-        runGame(gameState, player1, player2, true, false);
+        // Moves can differ where actions tie, as iterative deepening consumes more random numbers when shuffling;
+        // runGame checks that the root values agree whenever the chosen moves differ
+        runGame(gameState, player1, player2, false, false);
     }
 
     @Test
