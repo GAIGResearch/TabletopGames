@@ -315,7 +315,7 @@ public class GoFishGUIManager extends AbstractGUIManager {
         PartialObservableDeck<FrenchCard> hand = shown.getPlayerHands().get(target);
         int seen = 0;
         for (int i = 0; i < hand.getSize(); i++)
-            if (hand.get(i).number == rank && hand.isComponentVisible(i, asker)) seen++;
+            if (hand.get(i).number == rank && hand.isVisibleTo(i, asker)) seen++;
         if (seen > 0)
             return "Player " + target + " has shown " + seen + " " + rankName(rank) + (seen == 1 ? "" : "s");
         if (shown.getKnownVoids().get(target).contains(rank))
