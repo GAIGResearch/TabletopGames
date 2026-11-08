@@ -10,9 +10,6 @@ import games.GameType;
 import games.diamant.DiamantFeatures;
 import games.loveletter.features.LLStateFeaturesReduced;
 import games.powergrid.PowerGridFeatures;
-import games.powergrid.PowerGridGameState;
-import games.powergrid.PowerGridParameters;
-import games.powergrid.components.PowerGridCard;
 import games.stratego.StrategoFeatures;
 import games.sushigo.SGFeatures;
 import games.tictactoe.TTTFeatures;
@@ -23,11 +20,7 @@ import players.simple.RandomPlayer;
 import utilities.ActionTreeNode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -85,9 +78,7 @@ public class PyTAG {
     private IStateFeatureVector stateVectoriser;
     private IStateFeatureJSON stateJSONiser;
     private List<AbstractPlayer> players;
-    private int turnPause = 0;
     private int tick;
-    private int lastPlayer; // used to track actions per 'turn'
     private List<AbstractAction> availableActions;
 
     boolean isNormalized; // Bool for whether you want observations to be normalized
@@ -108,7 +99,6 @@ public class PyTAG {
     public static String getSupportedGamesJSON(){
         /* returns the supported games with the corresponding feature extractors */
         JSONObject json = new JSONObject();
-        String supportedGames = "";
         for (FeatureExtractors fe : FeatureExtractors.values()) {
             JSONObject features = new JSONObject();
             features.put("vector", fe.stateFeatureVector != null);
@@ -139,19 +129,6 @@ public class PyTAG {
         if (this.stateVectoriser == null && this.stateJSONiser == null){
             throw new Exception("Game does not implement the state feature vector or JSON interface");
         }
-
-//        if (game != null) {
-//            if (listeners != null)
-//                listeners.forEach(game::addListener);
-//
-//            // Randomize parameters
-//            if (randomizeParameters) {
-//                AbstractParameters gameParameters = game.getGameState().getGameParameters();
-//                gameParameters.randomize();
-//            }
-//
-//        }
-
     }
 
     // --Wrappers for interface functions--
@@ -226,9 +203,8 @@ public class PyTAG {
     public void reset(){
         // Reset game instance, run built-in agents until a python agent is required to make a decision
         this.game.reset(players);
-        this.turnPause = 0;
         this.tick = 0;
-        this.game.setTurnPause(turnPause);
+        this.game.setTurnPause(0);
         this.gameState = game.getGameState();
         this.lastSeed = seedRandom.nextLong();
         gameState.gameParameters.setRandomSeed(this.lastSeed);
@@ -317,7 +293,6 @@ public class PyTAG {
             forwardModel.next(gameState, action);
             tick++;
 
-            lastPlayer = activePlayer;
             activePlayer = gameState.getCurrentPlayer();
             currentPlayer = players.get(gameState.getCurrentPlayer());
         }

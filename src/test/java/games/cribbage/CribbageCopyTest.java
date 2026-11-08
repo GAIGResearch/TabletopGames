@@ -65,7 +65,7 @@ public class CribbageCopyTest {
         Set<FrenchCard> cards = new HashSet<>(s.getPlayerHand(0).getComponents());
         cards.addAll(s.getDrawDeck().getComponents());
         for (int i = 0; i < s.getCrib().getSize(); i++)
-            if (!s.getCrib().isComponentVisible(i, 1))
+            if (!s.getCrib().isVisibleTo(i, 1))
                 cards.add(s.getCrib().get(i));
         return cards;
     }

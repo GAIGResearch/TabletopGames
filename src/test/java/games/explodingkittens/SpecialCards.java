@@ -241,13 +241,13 @@ public class SpecialCards {
         // and check drawpile visibility
         for (int i = 0; i < state.drawPile.getSize(); i++) {
             if (i < 2)  // only the top 2 cards should be visible, as we drew the top one
-                assertTrue(state.drawPile.getVisibilityForPlayer(i, 0));
+                assertTrue(state.drawPile.isVisibleTo(i, 0));
             else
-                assertFalse(state.drawPile.getVisibilityForPlayer(i, 0));
+                assertFalse(state.drawPile.isVisibleTo(i, 0));
 
-            assertFalse(state.drawPile.getVisibilityForPlayer(i, 1));
-            assertFalse(state.drawPile.getVisibilityForPlayer(i, 2));
-            assertFalse(state.drawPile.getVisibilityForPlayer(i, 3));
+            assertFalse(state.drawPile.isVisibleTo(i, 1));
+            assertFalse(state.drawPile.isVisibleTo(i, 2));
+            assertFalse(state.drawPile.isVisibleTo(i, 3));
         }
     }
 

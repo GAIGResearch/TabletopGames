@@ -287,7 +287,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 for (int i = 0; i < retValue.playerHands[p].getSize(); i++) {
                     // if we (the perspective player) can see the card, then we need to keep it in place
                     // if not then we move it to the *bottom* of the drawpile (this is the end of an ArrayList...so more efficient?)
-                    if (!retValue.playerHands[p].getVisibilityForPlayer(i, playerId)) {
+                    if (!retValue.playerHands[p].isVisibleTo(i, playerId)) {
                         retValue.playerDrawPiles[p].add(retValue.playerHands[p].get(i), retValue.playerDrawPiles[p].getSize());
                     }
                 }
@@ -297,7 +297,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 retValue.playerDrawPiles[p].redeterminiseUnknown(redeterminisationRnd, playerId);
                 // we then remove cards from the top of the shuffled draw pile (in the region we know is not visible)
                 for (int i = 0; i < playerHands[p].getSize(); i++) {
-                    if (!playerHands[p].getVisibilityForPlayer(i, playerId)) {
+                    if (!playerHands[p].isVisibleTo(i, playerId)) {
                         // we then pick cards from the end of the drawpile List and add them to the Hand
                         // possibly more efficient picking from the end of an ArrayList?
                         retValue.playerHands[p].add(retValue.playerDrawPiles[p].pick(retValue.playerDrawPiles[p].getSize() - 1), i);

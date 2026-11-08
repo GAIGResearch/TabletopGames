@@ -297,7 +297,7 @@ public class RootGameState extends AbstractGameState {
                     copy.playerDecks.add(playerDecks.get(i).copy());
                     int toDraw = 0;
                     for (int e = copy.playerDecks.get(i).getSize() - 1; e >= 0; e--) {
-                        if (!copy.playerDecks.get(i).getVisibilityForPlayer(e, playerId)) {
+                        if (!copy.playerDecks.get(i).isVisibleTo(e, playerId)) {
                             //elements that are no visible/known get shuffled with drawPile and fresh cards are drawn
                             toDraw++;
                             copy.drawPile.add((copy.playerDecks.get(i).get(e)));
