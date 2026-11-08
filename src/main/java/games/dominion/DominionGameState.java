@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState implements IPrintable {
 
-    Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
+    Map<CardType, Integer> cardsIncludedInGame = new LinkedHashMap<>();
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
     PartialObservableDeck<DominionCard>[] playerDrawPiles;

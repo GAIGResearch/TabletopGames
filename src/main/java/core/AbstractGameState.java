@@ -104,6 +104,7 @@ public abstract class AbstractGameState {
     protected Random rnd;
     // redeterminisationRnd is used for redeterminisation only - this is to ensure that the main game is not affected
     // this is not initialised from any seed, as redeterminisation is used to hide data from players and cannot affect the game itself
+    // (unless AbstractParameters.redeterminisationSeed is positive)
     protected Random redeterminisationRnd = new Random();
 
     /**
@@ -137,6 +138,8 @@ public abstract class AbstractGameState {
         firstPlayer = 0;
         actionsInProgress.clear();
         rnd = new Random(gameParameters.randomSeed);
+        if (gameParameters.redeterminisationSeed > 0)
+            redeterminisationRnd = new Random(gameParameters.redeterminisationSeed);
     }
 
     /**
@@ -352,6 +355,9 @@ public abstract class AbstractGameState {
         // is not called an arbitrary number of times. This is to ensure that all shuffles in the main game are
         // the same if we start with the same seed
         s.rnd = new Random(redeterminisationRnd.nextLong());
+        // so that copies of this copy are seeded too
+        if (gameParameters.redeterminisationSeed > 0)
+            s.redeterminisationRnd = new Random(redeterminisationRnd.nextLong());
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);

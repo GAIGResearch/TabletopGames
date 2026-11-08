@@ -12,7 +12,7 @@ public class ExplodingKittensParameters extends TunableParameters {
 
     String dataPath = "data/explodingkittens/";
 
-    public Map<ExplodingKittensCard.CardType, Integer> cardCounts = new HashMap<>() {{
+    public Map<ExplodingKittensCard.CardType, Integer> cardCounts = new LinkedHashMap<>() {{
         put(ExplodingKittensCard.CardType.ATTACK, 4);
         put(ExplodingKittensCard.CardType.SKIP, 4);
         put(ExplodingKittensCard.CardType.FAVOR, 4);
@@ -56,7 +56,7 @@ public class ExplodingKittensParameters extends TunableParameters {
     @Override
     protected AbstractParameters _copy() {
         ExplodingKittensParameters ekp = new ExplodingKittensParameters();
-        ekp.cardCounts = new HashMap<>(cardCounts);
+        ekp.cardCounts = new LinkedHashMap<>(cardCounts);
         return ekp;
     }
 
