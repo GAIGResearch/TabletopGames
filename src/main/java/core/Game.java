@@ -7,6 +7,7 @@ import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import core.interfaces.IToJSON;
 import core.turnorders.ReactiveTurnOrder;
+import evaluation.MultiGameRunner;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.GameType;
@@ -14,9 +15,11 @@ import games.pandemic.PandemicForwardModel;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
-import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import players.jsonBagPlayers.JSONBagOSLAPlayer;
+import players.jsonBagPlayers.Tokenizer;
+import players.simple.OSLAPlayer;
 import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
@@ -728,9 +731,8 @@ public class Game {
     }
 
     /**
-     * The recommended way to run a game using the GUI is via evaluations.Frontend or evaluations.FrontEndSimple,
-     * and for experiments of many games use evaluations.RunGames, which provides more useful tools for gathering results.
-     * Only run a Game using this class for initial familiarisation with the framework.
+     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * some games for some screen sizes due to the vagaries of Java Swing...
      * <p>
      * Test class used to run a specific game. The user must specify:
      * 1. Action controller for GUI interactions / null for no visuals
@@ -750,25 +752,104 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        players.add(new MCTSPlayer());
-//        players.add(new HumanConsolePlayer());
-//        players.add(new HumanConsolePlayer());
+        /* Load prototypes */
+        GameType gameTypeTest = GameType.Dominion;
+        int p_keep = 100;
+        int n_keep_interval = 0;
+        boolean featureSelectionAllSeg = true;
+        int seg_num = 4;
+        String seg_mode = "cum";
+        String seg_name;
+        if (featureSelectionAllSeg) {
+            seg_name = "_allSegFS_seg" + seg_num + "_" + seg_mode;
+        }
+        else {
+            seg_name = "_singleFS";
+        }
+        boolean useSeparateTopFeaturesFolder = true;
+        int topFeaturesPKeep = 100;
+        int topFeaturesNKeepInterval = 0;
+        boolean topFeaturesFeatureSelectionAllSeg = false;
+        int topFeaturesSegNum = 4;
+        String topFeaturesSegMode = "cum";
+        String topFeaturesSegName;
+        if (topFeaturesFeatureSelectionAllSeg) {
+            topFeaturesSegName = "_allSegFS_seg" + topFeaturesSegNum + "_" + topFeaturesSegMode;
+        }
+        else {
+            topFeaturesSegName = "_singleFS";
+        }
+
+        String experimentRootPath = "Experiments/valueFuncTest2/" + gameTypeTest.name();
+        String prototypeFolderName = "/prototype" + p_keep + "_" + n_keep_interval + seg_name + "/";
+        String separateTopFeaturesFolderName = "/prototype" + topFeaturesPKeep + "_" + topFeaturesNKeepInterval + topFeaturesSegName + "/";
+        String topFeaturesFolderName = useSeparateTopFeaturesFolder ? separateTopFeaturesFolderName : prototypeFolderName;
+    //        String prototypesPath = "Experiments/valueFuncTest/" + gameTypeTest.name() + "/";
+        String defaultPrototypesPath = experimentRootPath + prototypeFolderName;
+        String prototypesPath = defaultPrototypesPath;
+        String separateTopFeaturesFolderPath = experimentRootPath + separateTopFeaturesFolderName;
+        String topFeaturesFolderPath = useSeparateTopFeaturesFolder ? separateTopFeaturesFolderPath : prototypesPath;
+
+        if (!prototypesPath.endsWith("/") && !prototypesPath.endsWith("\\")) {
+            prototypesPath += "/";
+        }
+        if (!topFeaturesFolderPath.endsWith("/") && !topFeaturesFolderPath.endsWith("\\")) {
+            topFeaturesFolderPath += "/";
+        }
+
+        System.out.println("READING PROTOTYPES FROM " + prototypesPath);
+        int n_prototypes = 4; // Set number of prototypes to load
+        List<Map<String, Integer>> prototypes = Tokenizer.loadPrototypes(prototypesPath, n_prototypes, useSeparateTopFeaturesFolder);
+        // Load top_features
+        int topKFeatures = 100;
+        String filterListPath = topFeaturesFolderPath + "features-top" + topKFeatures + ".json";
+        System.out.println("READING TOP FEATURES FROM " + filterListPath);
+        List<String> topFeaturesFilterList = Tokenizer.loadStringList(filterListPath);
+
+        Set<String> topFeaturesFilterSet = new HashSet<>(topFeaturesFilterList);
+        for (Map<String, Integer> prototype : prototypes) {
+            Tokenizer.filter(prototype, topFeaturesFilterSet, true);
+        }
+
+        JSONBagOSLAPlayer jsonBagOSLAPlayer = new JSONBagOSLAPlayer(prototypes, topFeaturesFilterList);
+
+//      players.add(new FirstActionPlayer());
+        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new SimultaneousOSLAPlayer());
+//        players.add(new SimultaneousOSLAPlayer());
+//        players.add(new SimultaneousOSLAPlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-//        players.add(new HumanGUIPlayer(ac));
-        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
+//        players.add(new RandomPlayer());
 
-
+        int jsonBagOSLAPlayerIndex = 1;
+        players.add(jsonBagOSLAPlayerIndex, jsonBagOSLAPlayer);
+        for (AbstractPlayer p : players) {
+            System.out.println(p);
+        }
+        
         /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;
 
         /* Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+//        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
+        /* Run multiple games */
+        long t = System.currentTimeMillis();
+        int n = 1000;
+        ArrayList<GameType> games = new ArrayList<>();
+        games.add(gameTypeTest);
+//        runMany(games, players, 100L, n, false, true, null, turnPause);
+        long[] seeds = new long[n];
+        Random rnd = new Random();
+        for (int i = 0; i < n; i++) {
+            seeds[i] = rnd.nextInt();
+        }
+        MultiGameRunner.runMany(games, players, n, seeds, null, false, null, 0);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
+        System.out.println("FISNIHED RUNNING IN " + (System.currentTimeMillis() - t)/1000 + " SECONDS");
     }
 }

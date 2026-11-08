@@ -65,10 +65,11 @@ public class DBGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (heuristic == null) { // lazy initialization
-            heuristic = new DotsAndBoxesHeuristic();
-        }
-        return heuristic.evaluateState(this, playerId);
+//        if (heuristic == null) { // lazy initialization   TODO CHANGE THIS BACK
+//            heuristic = new DotsAndBoxesHeuristic();
+//        }
+//        return heuristic.evaluateState(this, playerId);
+        return getGameScore(playerId);
     }
 
     /**

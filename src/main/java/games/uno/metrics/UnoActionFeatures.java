@@ -35,17 +35,17 @@ public class UnoActionFeatures implements IActionFeatureVector {
             data[0] = 1.0;
         } else if (action instanceof PlayCard) {
             UnoCard card = (UnoCard) ((PlayCard) action).getCard(state);
-            int typeIndex = card.type.ordinal();
+            int typeIndex = card.unoCardType.ordinal();
             data[1 + typeIndex] = 1.0;
 
-            if (card.type == UnoCard.UnoCardType.Number) {
+            if (card.unoCardType == UnoCard.UnoCardType.Number) {
                 UnoGameState ugs = (UnoGameState) state;
                 Deck<UnoCard> playerHand = ugs.getPlayerDecks().get(playerID);
                 int sameNumber = 0;
                 int sameColor = 0;
                 for (UnoCard handCard : playerHand.getComponents()) {
                     if (handCard.getComponentID() != card.getComponentID()) {
-                        if (handCard.type == UnoCard.UnoCardType.Number && handCard.number == card.number) {
+                        if (handCard.unoCardType == UnoCard.UnoCardType.Number && handCard.number == card.number) {
                             sameNumber++;
                         }
                         if (handCard.color.equals(card.color)) {

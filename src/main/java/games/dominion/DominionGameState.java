@@ -338,6 +338,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
 
         int score = getTotal(playerId, c -> c.victoryPoints(playerId, this));
         return score / 100.0;
+//        return new DominionHeuristic().evaluateState(this, playerId);
     }
 
     /**

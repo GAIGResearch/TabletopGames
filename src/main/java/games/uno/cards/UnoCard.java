@@ -16,15 +16,15 @@ public class UnoCard extends Card {
     }
 
     public final String color;
-    public final UnoCardType type;
+    public final UnoCardType unoCardType;
     public final int number;
     public final int drawN;
 
-    public UnoCard(UnoCardType type, String color, int number){
-        super(type.toString());
+    public UnoCard(UnoCardType unoCardType, String color, int number){
+        super(unoCardType.toString());
         this.color = color;
-        this.type = type;
-        if (type == UnoCardType.Draw) {
+        this.unoCardType = unoCardType;
+        if (unoCardType == UnoCardType.Draw) {
             this.drawN = number;
             this.number = -1;
         } else {
@@ -33,26 +33,26 @@ public class UnoCard extends Card {
         }
     }
 
-    public UnoCard(UnoCardType type, String color){
-        super(type.toString());
+    public UnoCard(UnoCardType unoCardType, String color){
+        super(unoCardType.toString());
         this.color = color;
-        this.type = type;
+        this.unoCardType = unoCardType;
         this.number = -1;
         this.drawN = -1;
     }
 
-    public UnoCard(UnoCardType type, String color, int number, int drawN) {
-        super(type.toString());
+    public UnoCard(UnoCardType unoCardType, String color, int number, int drawN) {
+        super(unoCardType.toString());
         this.color = color;
-        this.type = type;
+        this.unoCardType = unoCardType;
         this.number = number;
         this.drawN = drawN;
     }
 
-    private UnoCard(UnoCardType type, String color, int number, int drawN, int componentID) {
-        super(type.toString(), componentID);
+    private UnoCard(UnoCardType unoCardType, String color, int number, int drawN, int componentID) {
+        super(unoCardType.toString(), componentID);
         this.color = color;
-        this.type = type;
+        this.unoCardType = unoCardType;
         this.number = number;
         this.drawN = drawN;
     }
@@ -63,7 +63,7 @@ public class UnoCard extends Card {
     }
 
     public boolean isPlayable(UnoGameState gameState) {
-        return switch (type) {
+        return switch (unoCardType) {
             case Number ->
                     this.number == gameState.getCurrentCard().number || this.color.equals(gameState.getCurrentColor());
             case Skip, Reverse, Draw -> this.color.equals(gameState.getCurrentColor());
@@ -83,19 +83,19 @@ public class UnoCard extends Card {
 
     @Override
     public String toString() {
-        switch (type) {
+        switch (unoCardType) {
             case Number:
-                return type + "{" + color + " " + number + "}";
+                return unoCardType + "{" + color + " " + number + "}";
             case Skip:
             case Reverse:
-                return type + "{" + color + "}";
+                return unoCardType + "{" + color + "}";
             case Draw:
-                return type + "{" + drawN + " " + color + "}";
+                return unoCardType + "{" + drawN + " " + color + "}";
             case Wild:
                 if (drawN < 1) {
-                    return type.toString();
+                    return unoCardType.toString();
                 } else {
-                    return type + "{draw " + drawN + "}";
+                    return unoCardType + "{draw " + drawN + "}";
                 }
         }
         return null;

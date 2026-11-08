@@ -9,7 +9,7 @@ import players.heuristics.GameDefaultHeuristic;
 public class MaxNSearchParameters extends PlayerParameters {
 
     public enum SearchUnit {
-        ACTION, MACRO_ACTION, TURN
+        ACTION, MACRO_ACTION, TURN, ROUND
     }
 
     protected int searchDepth = 1;
