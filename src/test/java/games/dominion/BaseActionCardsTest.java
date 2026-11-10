@@ -276,7 +276,7 @@ public class BaseActionCardsTest {
         assertEquals(CardType.MOAT, hand.get(0).cardType());
         for (int i = 1; i < 3; i++) {
             assertFalse(state.isDefended(i));
-            assertTrue(hand.getVisibilityForPlayer(0, i));
+            assertTrue(hand.isVisibleTo(0, i));
         }
 
         assertEquals(1, state.getCurrentPlayer());
@@ -307,7 +307,7 @@ public class BaseActionCardsTest {
         for (int i = 0; i < 3; i++) {
             assertFalse(state.isDefended(i));
             if (i != 0)
-                assertFalse(hand.getVisibilityForPlayer(0, i));
+                assertFalse(hand.isVisibleTo(0, i));
         }
         assertEquals(0, state.getCurrentPlayer());
         actionsAvailable = fm.computeAvailableActions(state);
@@ -961,9 +961,9 @@ public class BaseActionCardsTest {
         assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
         assertEquals(CardType.SILVER, state.getDeck(DeckType.DRAW, 0).peek().cardType());
         PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, 0);
-        assertTrue(drawDeck.getVisibilityForPlayer(0, 0));
+        assertTrue(drawDeck.isVisibleTo(0, 0));
         for (int i = 1; i < 4; i++)
-            assertFalse(drawDeck.getVisibilityForPlayer(0, i));
+            assertFalse(drawDeck.isVisibleTo(0, i));
 
         assertEquals(Play, state.getGamePhase());
 
@@ -1376,7 +1376,7 @@ public class BaseActionCardsTest {
         for (int pDeck = 0; pDeck < 4; pDeck++) {
             for (int pObs = 0; pObs < 4; pObs++) {
                 boolean visibility = ((PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, pDeck))
-                        .getVisibilityForPlayer(0, pObs);
+                        .isVisibleTo(0, pObs);
                 //            System.out.printf("Deck=%d, Obs=%d : %s%n", pDeck, pObs, visibility);
                 if (pDeck != 2)
                     assertTrue(visibility);
@@ -1387,7 +1387,7 @@ public class BaseActionCardsTest {
         // and that player 2's hand is fully visible
         for (int i = 0; i < state.getDeck(DeckType.HAND, 2).getSize(); i++)
             for (int j = 0; j < state.getNPlayers(); j++)
-                assertTrue(((PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, 2)).getVisibilityForPlayer(i, j));
+                assertTrue(((PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, 2)).isVisibleTo(i, j));
 
         // then check that we have correct card counts
         assertEquals(5, state.getDeck(DeckType.HAND, 1).getSize());

@@ -63,14 +63,14 @@ public class CatanForwardModel extends StandardForwardModel {
         // Setup areas
         for (int i = 0; i < state.getNPlayers(); i++) {
             state.playerDevCards.add(new Deck<>("Player Development Deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
-            HashMap<BuyAction.BuyType, Counter> tokens = new HashMap<>();
+            HashMap<BuyAction.BuyType, Counter> tokens = new LinkedHashMap<>();
             for (Map.Entry<BuyAction.BuyType, Integer> type: params.tokenCounts.entrySet()) {
                 tokens.put(type.getKey(), new Counter(type.getValue(), type.getKey().name() + " Counter " + i));
             }
             state.playerTokens.add(tokens);
 
-            HashMap<CatanParameters.Resource, Counter> resources = new HashMap<>();
-            HashMap<CatanParameters.Resource, Counter> exchange = new HashMap<>();
+            HashMap<CatanParameters.Resource, Counter> resources = new LinkedHashMap<>();
+            HashMap<CatanParameters.Resource, Counter> exchange = new LinkedHashMap<>();
             for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
                 resources.put(res, new Counter(res + " " + i));
                 exchange.put(res, new Counter(params.default_exchange_rate,1, params.default_exchange_rate,res + " " + i));
@@ -81,7 +81,7 @@ public class CatanForwardModel extends StandardForwardModel {
         }
 
         // create resource pool
-        state.resourcePool = new HashMap<>();
+        state.resourcePool = new LinkedHashMap<>();
         for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
             state.resourcePool.put(res, new Counter(res.name()));
             state.resourcePool.get(res).increment(params.n_resource_cards);

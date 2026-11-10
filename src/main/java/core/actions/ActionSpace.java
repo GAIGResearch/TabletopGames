@@ -18,7 +18,7 @@ public class ActionSpace {
     public final Flexibility flexibility;  // TODO: no agents to take advantage of this yet, not supported in any games
     public final Context context;
 
-    public static ActionSpace Default = new ActionSpace();
+    public static final ActionSpace Default = new ActionSpace();
     public final boolean isDefault() {
         return this.equals(Default);
     }

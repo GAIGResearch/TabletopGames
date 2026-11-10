@@ -1,0 +1,30 @@
+# Fly config for a second server offering only Lawn and Order and Ventlife. Deploy with: fly deploy -c fly.ventlife.toml
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'tag-ventlife'
+primary_region = 'lhr'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[processes]
+  app = 'WebServer games=LawnAndOrder,Ventlife port=8080 maxSessions=3 idleMinutes=15'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'suspend'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+  [http_service.concurrency]
+    type = 'connections'
+    hard_limit = 50
+    soft_limit = 20
+
+[[vm]]
+  size = 'shared-cpu-2x'
+  memory = '2gb'

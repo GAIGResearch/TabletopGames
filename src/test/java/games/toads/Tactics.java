@@ -503,17 +503,17 @@ public class Tactics {
      */
     private void checkVisibilityOfHands(int n, boolean p0, boolean p1) {
         for (int i = n; i < state.playerHands.get(0).getSize(); i++) {
-            assertEquals(p0, state.playerHands.get(0).isComponentVisible(i, 1));
+            assertEquals(p0, state.playerHands.get(0).isVisibleTo(i, 1));
         }
         for (int i = n; i < state.playerHands.get(1).getSize(); i++)
-            assertEquals(p1, state.playerHands.get(1).isComponentVisible(i, 0));
+            assertEquals(p1, state.playerHands.get(1).isVisibleTo(i, 0));
     }
 
     private void checkVisibilityOfNumberOfCards(int n, int player) {
         // player should be able to see exactly n cards in their opponent's hand
         int visibleCount = 0;
         for (int cardIndex = 0; cardIndex < state.playerHands.get(1 - player).getSize(); cardIndex++) {
-            if (state.playerHands.get(1 - player).isComponentVisible(cardIndex, player)) {
+            if (state.playerHands.get(1 - player).isVisibleTo(cardIndex, player)) {
                 visibleCount++;
             }
         }
@@ -630,9 +630,9 @@ public class Tactics {
         for (int i = 0; i < state.playerHands.get(1).getSize(); i++) {
             ToadCard card = state.playerHands.get(1).getComponents().get(i);
             if (card.type == action.cardNotRevealed) {
-                assertFalse(state.playerHands.get(1).isComponentVisible(i, 0));
+                assertFalse(state.playerHands.get(1).isVisibleTo(i, 0));
             } else {
-                assertTrue(state.playerHands.get(1).isComponentVisible(i, 0));
+                assertTrue(state.playerHands.get(1).isVisibleTo(i, 0));
             }
         }
         assertEquals(1, state.getCurrentPlayer());
@@ -794,18 +794,18 @@ public class Tactics {
         assertEquals(state.getPlayerDeck(1).peek(2), card);
         assertEquals(3, state.getPlayerDeck(1).getSize());
         assertEquals(3, state.getPlayerDeck(0).getSize());
-        assertTrue(state.getPlayerDeck(1).isComponentVisible(2, 0));
-        assertTrue(state.getPlayerDeck(1).isComponentVisible(2, 1));
-        assertFalse(state.getPlayerDeck(1).isComponentVisible(0, 0));
-        assertFalse(state.getPlayerDeck(1).isComponentVisible(0, 1));
+        assertTrue(state.getPlayerDeck(1).isVisibleTo(2, 0));
+        assertTrue(state.getPlayerDeck(1).isVisibleTo(2, 1));
+        assertFalse(state.getPlayerDeck(1).isVisibleTo(0, 0));
+        assertFalse(state.getPlayerDeck(1).isVisibleTo(0, 1));
 
         // TODO: And check reshuffle preserves visibility
         ToadGameState copy = (ToadGameState) state.copy(0);
         assertEquals(copy.getPlayerDeck(1).peek(2), card);
-        assertTrue(copy.getPlayerDeck(1).isComponentVisible(2, 0));
-        assertTrue(copy.getPlayerDeck(1).isComponentVisible(2, 1));
-        assertFalse(copy.getPlayerDeck(1).isComponentVisible(0, 0));
-        assertFalse(copy.getPlayerDeck(1).isComponentVisible(0, 1));
+        assertTrue(copy.getPlayerDeck(1).isVisibleTo(2, 0));
+        assertTrue(copy.getPlayerDeck(1).isVisibleTo(2, 1));
+        assertFalse(copy.getPlayerDeck(1).isVisibleTo(0, 0));
+        assertFalse(copy.getPlayerDeck(1).isVisibleTo(0, 1));
     }
 
 

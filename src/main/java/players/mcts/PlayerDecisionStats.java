@@ -3,7 +3,7 @@ package players.mcts;
 import core.actions.AbstractAction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,16 +25,16 @@ public class PlayerDecisionStats {
     List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
 
     /** Visits and values per candidate action. */
-    final Map<AbstractAction, ActionStats> actionValues = new HashMap<>();
+    final Map<AbstractAction, ActionStats> actionValues = new LinkedHashMap<>();
 
     /** Action-heuristic scores, used for move ordering and progressive bias. */
-    final Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
+    final Map<AbstractAction, Double> actionValueEstimates = new LinkedHashMap<>();
 
     /** The pUCT prior. Rebuilt wholesale whenever the pdf is recalculated. */
-    Map<AbstractAction, Double> actionPDFEstimates = new HashMap<>();
+    Map<AbstractAction, Double> actionPDFEstimates = new LinkedHashMap<>();
 
     /** The regret-matching average policy. */
-    final Map<AbstractAction, Double> regretMatchingAverage = new HashMap<>();
+    final Map<AbstractAction, Double> regretMatchingAverage = new LinkedHashMap<>();
 
     PlayerDecisionStats(int player) {
         this.player = player;

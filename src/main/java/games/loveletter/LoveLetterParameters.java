@@ -8,6 +8,7 @@ import games.loveletter.cards.CardType;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 
 /** This class allows to modify the balance of the game. Each modification may result in several problems with the
@@ -18,7 +19,7 @@ public class LoveLetterParameters extends TunableParameters {
     String dataPath = "data/loveletter/";
 
     // Occurrence count for each card
-    public HashMap<CardType, Integer> cardCounts = new HashMap<CardType, Integer>() {{
+    public HashMap<CardType, Integer> cardCounts = new LinkedHashMap<CardType, Integer>() {{
         put(CardType.Princess, 1);
         put(CardType.Countess, 1);
         put(CardType.King, 1);

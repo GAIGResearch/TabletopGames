@@ -15,7 +15,8 @@ public class HowlTest extends AttributeTest {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "Howl (Willpower) Test by " + ((Figure) gameState.getComponentById(getSourceFigure())).getName() +
+                " on " + ((Figure) gameState.getComponentById(getTestingFigure())).getName();
     }
 
     @Override

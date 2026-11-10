@@ -85,15 +85,15 @@ public class PandemicGameState extends AbstractGameStateWithTurnOrder implements
 
     @Override
     public HashMap<HashMap<Integer, Double>, GameResult> getTerminalFeatures(int playerId) {
-        HashMap<HashMap<Integer, Double>, GameResult> terminals = new HashMap<>();
-        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, GameResult.WIN_GAME);
-        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, GameResult.LOSE_GAME);
-        terminals.put(new HashMap<Integer, Double>() {{ put(2, (double) ((PandemicParameters)gameParameters).loseMaxOutbreak); }},
+        HashMap<HashMap<Integer, Double>, GameResult> terminals = new LinkedHashMap<>();
+        terminals.put(new LinkedHashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, GameResult.WIN_GAME);
+        terminals.put(new LinkedHashMap<Integer, Double>() {{ put(1, 0.0); }}, GameResult.LOSE_GAME);
+        terminals.put(new LinkedHashMap<Integer, Double>() {{ put(2, (double) ((PandemicParameters)gameParameters).loseMaxOutbreak); }},
                 GameResult.LOSE_GAME);
         int i = 3;
         for (String color: colors) {
             int id = i;
-            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, GameResult.LOSE_GAME);
+            terminals.put(new LinkedHashMap<Integer, Double>() {{ put(id, 0.0); }}, GameResult.LOSE_GAME);
             i++;
         }
         return terminals;
@@ -224,7 +224,7 @@ public class PandemicGameState extends AbstractGameStateWithTurnOrder implements
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         PandemicGameState gs = new PandemicGameState(gameParameters.copy(), getNPlayers());
 
-        gs.areas = new HashMap<>();
+        gs.areas = new LinkedHashMap<>();
         for(int key : areas.keySet())
         {
             Area a = areas.get(key);

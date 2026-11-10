@@ -39,14 +39,14 @@ public class RootBoardNodeWithRootEdges extends Component {
 
     public RootBoardNodeWithRootEdges(boolean corner, String identifier) {
         super(CoreConstants.ComponentType.BOARD_NODE, identifier);
-        neighbourRootEdgeMapping = new HashMap<>();
+        neighbourRootEdgeMapping = new LinkedHashMap<>();
         this.corner = corner;
         this.identifier = identifier;
     }
 
     public RootBoardNodeWithRootEdges(boolean corner, String identifier, RootParameters.ClearingTypes clearingType, int maxBuildings){
         super(CoreConstants.ComponentType.BOARD_NODE, identifier);
-        neighbourRootEdgeMapping = new HashMap<>();
+        neighbourRootEdgeMapping = new LinkedHashMap<>();
         this.corner = corner;
         this.identifier = identifier;
         this.clearingType = clearingType;
@@ -56,7 +56,7 @@ public class RootBoardNodeWithRootEdges extends Component {
     protected RootBoardNodeWithRootEdges(int owner, int ID, boolean corner, String identifier) {
         super(CoreConstants.ComponentType.BOARD_NODE, identifier, ID);
         setOwnerId(owner);
-        neighbourRootEdgeMapping = new HashMap<>();
+        neighbourRootEdgeMapping = new LinkedHashMap<>();
         this.corner = corner;
         this.identifier = identifier;
     }
@@ -93,7 +93,7 @@ public class RootBoardNodeWithRootEdges extends Component {
      * @return the neighbours of this node.
      */
     public Set<RootBoardNodeWithRootEdges> getNeighbours() {
-        return new HashSet<>(neighbourRootEdgeMapping.values());
+        return new LinkedHashSet<>(neighbourRootEdgeMapping.values());
     }
 
     public Map<RootEdge, RootBoardNodeWithRootEdges> getNeighbourRootEdgeMapping() {
@@ -101,7 +101,7 @@ public class RootBoardNodeWithRootEdges extends Component {
     }
 
     public Set<RootEdge> getRootEdges() {
-        return new HashSet<>(neighbourRootEdgeMapping.keySet());
+        return new LinkedHashSet<>(neighbourRootEdgeMapping.keySet());
     }
 
     public void setMaxBuildings(int setTo) {
@@ -542,7 +542,7 @@ public class RootBoardNodeWithRootEdges extends Component {
     }
 
     public HashMap<RootParameters.BuildingType, Integer> getAllBuildings(){
-        return new HashMap<>(){
+        return new LinkedHashMap<>(){
             {
                 put(RootParameters.BuildingType.Roost, roost);
                 put(RootParameters.BuildingType.Sawmill, sawmill);
@@ -561,7 +561,7 @@ public class RootBoardNodeWithRootEdges extends Component {
     }
 
     public HashMap<RootParameters.TokenType, Integer> getAllTokens(){
-        return new HashMap<>(){
+        return new LinkedHashMap<>(){
             {
                 put(RootParameters.TokenType.Wood, wood);
                 put(RootParameters.TokenType.Sympathy, sympathy ? 1 : 0);

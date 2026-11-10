@@ -703,8 +703,9 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
      * </implNote>
      */
     public final class RegionPicker {
+        // sorted, as the iteration order of Map.of() and Set.of() changes from one JVM launch to the next
         private static final List<Integer> ALL_REGIONS =
-                new ArrayList<>(PowerGridGraphBoard.REGION_ADJ_NA.keySet());
+                PowerGridGraphBoard.REGION_ADJ_NA.keySet().stream().sorted().toList();
 
         /** Returns a random contiguous set of size k via a single DFS. */
         public static Set<Integer> randomContiguousSetDFS(AbstractGameState gs) {
@@ -724,7 +725,7 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
                 if (!chosen.add(u)) continue;
 
                 // Randomize neighbor order to avoid bias
-                List<Integer> nbrs = new ArrayList<>(PowerGridGraphBoard.REGION_ADJ_NA.get(u));
+                List<Integer> nbrs = new ArrayList<>(new TreeSet<>(PowerGridGraphBoard.REGION_ADJ_NA.get(u)));
                 Collections.shuffle(nbrs, rnd);
                 for (int v : nbrs) {
                     if (chosen.size() >= k) break;

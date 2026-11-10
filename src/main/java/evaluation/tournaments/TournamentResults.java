@@ -39,25 +39,73 @@ public class TournamentResults {
         }
     }
 
+    /**
+     * One record per game, used by analyses that need the seed and seating (e.g. SeedClusteredAnalysis).
+     * All arrays are indexed by player id within the game.
+     */
+    public static class GameRecord {
+        public final long seed;
+        public final String[] agents;
+        public final double[] points;
+        public final int[] ordinals;
+
+        @JsonCreator
+        public GameRecord(@JsonProperty("seed") long seed,
+                          @JsonProperty("agents") String[] agents,
+                          @JsonProperty("points") double[] points,
+                          @JsonProperty("ordinals") int[] ordinals) {
+            this.seed = seed;
+            this.agents = agents;
+            this.points = points;
+            this.ordinals = ordinals;
+            this.seating = String.join("|", agents);
+        }
+
+        @JsonIgnore
+        private final String seating;
+
+        // Agent names by player id; this identifies the seating within a tournament
+        public String seating() {
+            return seating;
+        }
+    }
+
     @JsonIgnore
     Map<String, AbstractPlayer> agentsByName = new HashMap<>();
     Map<String, Map<String, Integer>> nGamesPlayedPerOpponent = new HashMap<>();
     Map<String, Map<String, Integer>> winsPerPlayerPerOpponent = new HashMap<>();
     Map<String, Map<String, Integer>> ordinalDeltaPerOpponent = new HashMap<>();
     Map<String, List<Result>> playerResults = new HashMap<>();
+    List<GameRecord> gameRecords = new ArrayList<>();
 
     public void record(Game game) {
+        record(game, game.getGameState().getGameParameters().getRandomSeed());
+    }
+
+    /**
+     * Records the result of a finished game.
+     *
+     * @param seed - the seed the game was reset with (needed for seed-clustered analysis)
+     */
+    public void record(Game game, long seed) {
         if (game.getGameState().isNotTerminal())
             throw new IllegalArgumentException("Game has not finished yet");
 
+        int nPlayers = game.getPlayers().size();
+        String[] names = new String[nPlayers];
+        double[] allPoints = new double[nPlayers];
+        int[] allOrdinals = new int[nPlayers];
         int winningPlayerCount = game.getGameState().getTied().size() + game.getGameState().getWinners().size();
-        for (int j = 0; j < game.getPlayers().size(); j++) {
+        for (int j = 0; j < nPlayers; j++) {
             // Firstly we record the raw result for each player
             boolean playerIsWinner = game.getGameState().getOrdinalPosition(j) == 1;
+            names[j] = game.getPlayers().get(j).toString();
+            allPoints[j] = playerIsWinner ? (1.0 / winningPlayerCount) : 0.0;
+            allOrdinals[j] = game.getGameState().getOrdinalPosition(j);
             addResult(
                     game.getPlayers().get(j),
-                    playerIsWinner ? (1.0 / winningPlayerCount) : 0.0,
-                    game.getGameState().getOrdinalPosition(j),
+                    allPoints[j],
+                    allOrdinals[j],
                     game.getGameState().getGameScore(j),
                     playerIsWinner ? 1 : 0
             );
@@ -77,6 +125,11 @@ public class TournamentResults {
                 }
             }
         }
+        gameRecords.add(new GameRecord(seed, names, allPoints, allOrdinals));
+    }
+
+    public List<GameRecord> getGameRecords() {
+        return gameRecords;
     }
 
     public AbstractPlayer getAgent(String name) {
@@ -131,6 +184,7 @@ public class TournamentResults {
         winsPerPlayerPerOpponent.remove(name);
         ordinalDeltaPerOpponent.remove(name);
         agentsByName.remove(name);
+        gameRecords.removeIf(g -> Arrays.asList(g.agents).contains(name));
 
         // We then also remove the records of other players against this player
         for (String other : getAllAgentNames()) {
@@ -226,6 +280,7 @@ public class TournamentResults {
         for (Map.Entry<String, List<Result>> entry : this.playerResults.entrySet()) {
             copy.playerResults.put(entry.getKey(), new ArrayList<>(entry.getValue()));
         }
+        copy.gameRecords = new ArrayList<>(this.gameRecords);
         return copy;
     }
 
@@ -240,6 +295,7 @@ public class TournamentResults {
         public Map<String, Map<String, Integer>> winsPerPlayerPerOpponent;
         public Map<String, Map<String, Integer>> ordinalDeltaPerOpponent;
         public Map<String, List<Result>> playerResults;
+        public List<GameRecord> gameRecords;
 
         // no-arg constructor for Jackson
         public TournamentResultsDTO() {
@@ -254,6 +310,7 @@ public class TournamentResults {
         dto.winsPerPlayerPerOpponent = this.winsPerPlayerPerOpponent;
         dto.ordinalDeltaPerOpponent = this.ordinalDeltaPerOpponent;
         dto.playerResults = this.playerResults;
+        dto.gameRecords = this.gameRecords;
         return dto;
     }
 
@@ -268,6 +325,7 @@ public class TournamentResults {
         if (dto.winsPerPlayerPerOpponent != null) tr.winsPerPlayerPerOpponent = dto.winsPerPlayerPerOpponent;
         if (dto.ordinalDeltaPerOpponent != null) tr.ordinalDeltaPerOpponent = dto.ordinalDeltaPerOpponent;
         if (dto.playerResults != null) tr.playerResults = dto.playerResults;
+        if (dto.gameRecords != null) tr.gameRecords = new ArrayList<>(dto.gameRecords);
         return tr;
     }
 

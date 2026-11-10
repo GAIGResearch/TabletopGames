@@ -357,13 +357,13 @@ public class RootForwardModel extends StandardForwardModel {
         state.mouseQuests = 0;
         state.rabbitQuests = 0;
 
-        state.relationships = new HashMap<>(){{
+        state.relationships = new LinkedHashMap<>(){{
             put(RootParameters.Factions.MarquiseDeCat, RootParameters.Relationship.Neutral);
             put(RootParameters.Factions.EyrieDynasties, RootParameters.Relationship.Neutral);
             put(RootParameters.Factions.WoodlandAlliance, RootParameters.Relationship.Neutral);
         }};
 
-        state.aidNumbers = new HashMap<>(){{
+        state.aidNumbers = new LinkedHashMap<>(){{
             put(RootParameters.Factions.MarquiseDeCat, 0);
             put(RootParameters.Factions.EyrieDynasties, 0);
             put(RootParameters.Factions.WoodlandAlliance, 0);

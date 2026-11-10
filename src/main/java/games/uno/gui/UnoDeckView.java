@@ -50,7 +50,7 @@ public class UnoDeckView extends DeckView<UnoCard> {
     private Image getCardImage(UnoCard card) {
         Image img = null;
         String colorName = card.color.substring(0, 1).toUpperCase() + card.color.substring(1).toLowerCase();
-        switch(card.type) {
+        switch(card.unoCardType) {
             case Number:
                 img = ImageIO.GetInstance().getImage(dataPath + colorName + card.number + ".png");
                 break;

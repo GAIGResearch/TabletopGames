@@ -31,16 +31,22 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
      * <p>
      * Additionally, the BUDGET can be specified as a cutoff for the search. If this much time passes
      * without the search finishing, the best action found so far is returned (likely to be pretty random).
+     * With iterativeDeepening, no new depth is started once the budget is spent, and the answer of the deepest
+     * completed pass is returned. The result of an interrupted pass is used only if no pass has completed.
      */
 
 
     private long startTime;
     private SearchResult rootResult;
+    private boolean timedOut;
 
     protected List<Map<AbstractAction, ActionStats>> actionValueEstimates;
 
     public MaxNSearchPlayer(MaxNSearchParameters parameters) {
         super(parameters, "MinMaxSearch");
+    }
+    public MaxNSearchPlayer() {
+        this(new MaxNSearchParameters());
     }
 
     @Override
@@ -57,10 +63,13 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
         // - TURN: only when turn number has changed as a result of applying the action
         startTime = System.currentTimeMillis();
         rootResult = null;
+        timedOut = false;
         actionValueEstimates = new ArrayList<>();
         if (getParameters().iterativeDeepening) {
             // we do a depth D = 1 search, then D = 2 and so on until we reach maxDepth or exhaust budget
             for (int depth = 1; depth <= getParameters().searchDepth; depth++) {
+                if (rootResult != null && budgetExhausted())
+                    break;
                 if (depth == 1)
                     actionValueEstimates.add(new HashMap<>());
                 else {
@@ -71,7 +80,12 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
                     }
                     actionValueEstimates.add(0, newMap);
                 }
-                rootResult = expand(gs, actions, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                SearchResult result = expand(gs, actions, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                // an interrupted pass only saw some of the actions, so is no better than the last completed one
+                if (rootResult == null || !timedOut)
+                    rootResult = result;
+                if (timedOut)
+                    break;
             }
         } else {
             for (int depth = 0; depth < getParameters().searchDepth; depth++) {
@@ -81,6 +95,10 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
                     Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
         return rootResult == null ? null : rootResult.action;
+    }
+
+    private boolean budgetExhausted() {
+        return System.currentTimeMillis() - startTime > getParameters().budget;
     }
 
     public SearchResult getRootResult() {
@@ -133,7 +151,7 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
             // sort actions based on actionValueEstimates (with highest value first)
             actions.sort(Comparator.comparingDouble(a -> -actionValueEstimates.get(searchDepth - 1)
                     .getOrDefault(a, new ActionStats(state.getNPlayers()))
-                    .totValue[state.getCurrentPlayer()]));
+                    .valueOf(state.getCurrentPlayer())));
         } else {
             Collections.shuffle(actions, getRnd());
         }
@@ -141,7 +159,7 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
         Map<AbstractAction, double[]> actionValues = new HashMap<>();
         for (AbstractAction action : actions) {
             AbstractGameState stateCopy = state.copy();
-            getForwardModel().next(stateCopy, action);
+            getForwardModel().next(stateCopy, action.copy());
             // if we are at the bottom, then save a bit of time by not calculating the valid actions (which we'll never try)
             List<AbstractAction> nextActions = searchDepth > 0 ? getForwardModel().computeAvailableActions(stateCopy) : List.of();
 
@@ -150,6 +168,7 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
                 case MACRO_ACTION ->
                         state.getCurrentPlayer() != stateCopy.getCurrentPlayer() ? searchDepth - 1 : searchDepth;
                 case TURN -> state.getTurnCounter() != stateCopy.getTurnCounter() ? searchDepth - 1 : searchDepth;
+                case ROUND -> state.getRoundCounter() != stateCopy.getRoundCounter() ? searchDepth - 1 : searchDepth;
             };
 
             // recurse - we are here just interested in the value of stateCopy, and hence of taking action
@@ -187,8 +206,9 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
                 }
             }
 
-            if (System.currentTimeMillis() - startTime > params.budget) {
+            if (budgetExhausted()) {
                 // out of time - return best action so far
+                timedOut = true;
                 return new SearchResult(bestAction, bestValues, alpha, beta, actionValues);
             }
         }
