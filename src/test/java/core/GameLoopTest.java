@@ -30,7 +30,7 @@ public class GameLoopTest {
     private Game timedOutTicTacToe(boolean disqualify) {
         Game game = GameType.TicTacToe.createGameInstance(2, 42);
         // no thinking time at all, so every decision is a timeout
-        game.getGameState().getGameParameters().setThinkingTimeMins(0);
+        game.getGameState().getGameParameters().setThinkingTimeMillis(0);
         game.getCoreParameters().disqualifyPlayerOnTimeout = disqualify;
         game.reset(List.of(new RandomPlayer(), new RandomPlayer()));
         return game;
@@ -88,7 +88,7 @@ public class GameLoopTest {
         AbstractGameState state = game.getGameState();
         assertEquals(DISQUALIFY, state.getPlayerResults()[0]);
         assertTrue("no action should be applied for a disqualified player", state.getHistory().isEmpty());
-        assertEquals(1, state.getCurrentPlayer());
+        assertFalse("disqualifying one of two players ends the game", state.isNotTerminal());
     }
 
     @Test
@@ -102,7 +102,7 @@ public class GameLoopTest {
         // the parameters' seed would pick a different action
         assertNotEquals(expected, new Random(state.getGameParameters().getRandomSeed()).nextInt(actions.size()));
 
-        assertEquals(actions.get(expected), fm.disqualifyOrRandomAction(false, state));
+        assertEquals(actions.get(expected), fm.takeRandomAction(state, state.getCurrentPlayer()));
     }
 
     @Test

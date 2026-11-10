@@ -519,16 +519,6 @@ public class Game {
             }
             playerClocks[activePlayer].incrementAction();
 
-            // check timeout (on the real timer, which includes the time just taken)
-            if (gameState.playerTimer[activePlayer].exceededMaxTime()) {
-                if (gameState.coreGameParameters.disqualifyPlayerOnTimeout) {
-                    // a disqualified player takes no action
-                    gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, activePlayer);
-                    continue;
-                }
-                action = observedActions.get(gameState.getRnd().nextInt(observedActions.size()));
-            }
-
             if (gameState.coreGameParameters.verbose)
                 System.out.println(action);
 

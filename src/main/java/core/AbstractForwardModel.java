@@ -125,9 +125,7 @@ public abstract class AbstractForwardModel {
      */
     protected final AbstractAction takeRandomAction(AbstractGameState gameState, int player) {
         List<AbstractAction> possibleActions = computeAvailableActions(gameState, gameState.coreGameParameters.actionSpace, player);
-        // seeded by tick so that successive replacements differ, without consuming the game's own random stream
-        Random rnd = new Random(gameState.getGameParameters().getRandomSeed() + gameState.getGameTick());
-        return possibleActions.get(rnd.nextInt(possibleActions.size()));
+        return possibleActions.get(gameState.getRnd().nextInt(possibleActions.size()));
     }
 
     /**
