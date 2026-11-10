@@ -4,7 +4,6 @@ import core.actions.AbstractAction;
 import core.actions.LogEvent;
 import core.components.Area;
 import core.components.Component;
-import core.components.PartialObservableDeck;
 import core.interfaces.*;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
@@ -100,6 +99,7 @@ public abstract class AbstractGameState {
     protected Random rnd;
     // redeterminisationRnd is used for redeterminisation only - this is to ensure that the main game is not affected
     // this is not initialised from any seed, as redeterminisation is used to hide data from players and cannot affect the game itself
+    // (unless AbstractParameters.redeterminisationSeed is positive)
     protected Random redeterminisationRnd = new Random();
 
     /**
@@ -132,6 +132,8 @@ public abstract class AbstractGameState {
         firstPlayer = 0;
         actionsInProgress.clear();
         rnd = new Random(gameParameters.randomSeed);
+        if (gameParameters.redeterminisationSeed > 0)
+            redeterminisationRnd = new Random(gameParameters.redeterminisationSeed);
     }
 
     /**
@@ -368,6 +370,9 @@ public abstract class AbstractGameState {
         // is not called an arbitrary number of times. This is to ensure that all shuffles in the main game are
         // the same if we start with the same seed
         s.rnd = new Random(redeterminisationRnd.nextLong());
+        // so that copies of this copy are seeded too
+        if (gameParameters.redeterminisationSeed > 0)
+            s.redeterminisationRnd = new Random(redeterminisationRnd.nextLong());
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
@@ -533,7 +538,21 @@ public abstract class AbstractGameState {
      * @param playerId - player observing the state.
      * @return - double, score of current state
      */
-    public abstract double getGameScore(int playerId);
+    public abstract double getGameScore(int playerID);
+
+    // Common helper method for the score compared to the best other player
+    public double getLead(int playerID) {
+        double maxOtherScore = 0.0;
+        for (int p = 0; p < nPlayers; p++) {
+            if (p != playerID) {
+                double score = getGameScore(p);
+                if (score > maxOtherScore) {
+                    maxOtherScore = score;
+                }
+            }
+        }
+        return getGameScore(playerID) - maxOtherScore;
+    }
 
     /**
      * @param playerId - the player observed
@@ -616,35 +635,10 @@ public abstract class AbstractGameState {
 
     private List<Integer> unknownComponents(IComponentContainer<?> container, int player) {
         ArrayList<Integer> retValue = new ArrayList<>();
-        if (container instanceof PartialObservableDeck<?> pod) {
-            for (int i = 0; i < pod.getSize(); i++) {
-                if (!pod.getVisibilityForPlayer(i, player))
-                    retValue.add(pod.get(i).getComponentID());
-            }
-        } else {
-            switch (container.getVisibilityMode()) {
-                case VISIBLE_TO_ALL:
-                    break;
-                case HIDDEN_TO_ALL:
-                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
-                    break;
-                case VISIBLE_TO_OWNER:
-                    if (((Component) container).getOwnerId() != player)
-                        retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
-                    break;
-                case TOP_VISIBLE_TO_ALL:
-                    // add everything as unseen, and then remove the first element
-                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
-                    retValue.remove(container.getComponents().get(0).getComponentID());
-                    break;
-                case BOTTOM_VISIBLE_TO_ALL:
-                    // add in the ID of the last item only
-                    int length = container.getComponents().size();
-                    retValue.add(container.getComponents().get(length - 1).getComponentID());
-                    break;
-                case MIXED_VISIBILITY:
-                    throw new AssertionError("If something uses this visibility mode, then you need to also add code to this method please!");
-            }
+        List<? extends Component> contents = container.getComponents();
+        for (int i = 0; i < contents.size(); i++) {
+            if (!container.isVisibleTo(i, player))
+                retValue.add(contents.get(i).getComponentID());
         }
         // we also need to run through the contents in case that contains any Containers
         container.getComponents().stream().filter(c -> c instanceof IComponentContainer<?>).forEach(c ->

@@ -1,11 +1,13 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.actions.SimultaneousAction;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import core.interfaces.IToJSON;
 import core.turnorders.ReactiveTurnOrder;
+import evaluation.MultiGameRunner;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.GameType;
@@ -13,9 +15,11 @@ import games.pandemic.PandemicForwardModel;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
-import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import players.jsonBagPlayers.JSONBagOSLAPlayer;
+import players.jsonBagPlayers.Tokenizer;
+import players.simple.OSLAPlayer;
 import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 import utilities.ElapsedCpuChessTimer;
@@ -38,7 +42,6 @@ public class Game {
     private static final AtomicInteger idFountain = new AtomicInteger(0);
     // Type of game
     private final GameType gameType;
-    public boolean paused;
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
     // Real game state and forward model
@@ -51,7 +54,6 @@ public class Game {
 
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
-    private JFrame frame;
     // Timers for various function calls
     private double nextTime, copyTime, agentTime, actionComputeTime;
     private int nextCount, copyCount, actionComputeCount;
@@ -177,7 +179,6 @@ public class Game {
      * @param gui - gui to update.
      */
     public void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        // synchronise on game to avoid updating GUI in middle of action being taken
         AbstractGameState gameState = getGameState();
         AbstractPlayer player = getPlayers().get(getPlayerToMove());
         if (gui != null) {
@@ -303,7 +304,7 @@ public class Game {
         nextCount = 0;
         actionSpaceSize = new ArrayList<>();
         nActionsPerTurnSum = 0;
-        nActionsPerTurn = 1;
+        nActionsPerTurn = 0;
         nActionsPerTurnCount = 0;
         lastPlayer = -1;
         int gameID = idFountain.incrementAndGet();
@@ -316,8 +317,6 @@ public class Game {
     public final void run() {
 
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, gameState)));
-
-        boolean firstEnd = true;
 
         while (gameState.isNotTerminal() && !stop) {
 
@@ -336,8 +335,6 @@ public class Game {
                 int activePlayer = gameState.getCurrentPlayer();
                 if (debug) System.out.printf("Entered synchronized block in Game for player %s%n", activePlayer);
 
-                AbstractPlayer currentPlayer = players.get(activePlayer);
-
                 /*
                  * The Game is responsible for tracking the players and the current game state
                  * It is important that the Game never passes the main AbstractGameState to the individual players,
@@ -352,41 +349,39 @@ public class Game {
                 boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder) gameState).getTurnOrder() instanceof ReactiveTurnOrder
                         && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder) gameState).getTurnOrder()).getReactivePlayers().size() > 0);
 
-                // Check if this is the same player as last, count number of actions per turn
-                if (!reacting) {
-                    if (currentPlayer != null && activePlayer == lastPlayer) {
-                        nActionsPerTurn++;
-                    } else {
-                        nActionsPerTurnSum += nActionsPerTurn;
-                        nActionsPerTurn = 1;
-                        nActionsPerTurnCount++;
-                    }
-                }
-
+                // The state can have become terminal while we waited (the GUI can take actions while the game is paused)
                 if (gameState.isNotTerminal()) {
+                    // Check if this is the same player as last, count number of actions per turn
+                    if (!reacting) {
+                        if (activePlayer == lastPlayer) {
+                            nActionsPerTurn++;
+                        } else {
+                            recordTurnLength();
+                            nActionsPerTurn = 1;
+                            lastPlayer = activePlayer;
+                        }
+                    }
 
                     if (debug) System.out.printf("Invoking oneAction from Game for player %d%n", activePlayer);
                     oneAction();
-
-                } else {
-                    if (firstEnd) {
-                        if (gameState.coreGameParameters.verbose) {
-                            System.out.println("Ended");
-                        }
-                        terminate();
-                        firstEnd = false;
-                    }
                 }
 
                 if (debug) System.out.println("Exiting synchronized block in Game");
             }
         }
-        if (firstEnd) {
-            if (gameState.coreGameParameters.verbose) {
-                System.out.println("Ended");
-            }
-            terminate();
+        if (gameState.coreGameParameters.verbose) {
+            System.out.println("Ended");
         }
+        terminate();
+    }
+
+    // adds the number of actions in the turn just finished to the per-turn statistics
+    private void recordTurnLength() {
+        if (nActionsPerTurn > 0) {
+            nActionsPerTurnSum += nActionsPerTurn;
+            nActionsPerTurnCount++;
+        }
+        nActionsPerTurn = 0;
     }
 
     public final boolean isHumanToMove() {
@@ -418,7 +413,8 @@ public class Game {
 
         if (debug) System.out.printf("Starting oneAction for players %s%n", activePlayers);
 
-        Map<Integer, AbstractAction> actionsChosen = new HashMap<>();
+        // in the order of activePlayers
+        Map<Integer, AbstractAction> actionsChosen = new LinkedHashMap<>();
         Map<Integer, List<AbstractAction>> availableActions = new HashMap<>();
 
         for (int activePlayer : activePlayers) {
@@ -448,14 +444,14 @@ public class Game {
                 if (!actionsInProgress.isEmpty()) {
                     topOfStack = actionsInProgress.peek();
                 }
-                if (gameState.getHistory().size() > 1) {
-                    lastAction = gameState.getHistory().getLast().b;
+                List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
+                if (!history.isEmpty()) {
+                    lastAction = history.getLast().b;
                 }
                 if (debug) {
                     System.out.println("---\nActions in progress:");
                     for (IExtendedSequence a : actionsInProgress) System.out.println(a);
                     System.out.println("---\nRecent History:");
-                    List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
                     for (int i = Math.max(0, history.size() - 10); i < history.size(); i++)
                         System.out.println(history.get(i));
                 }
@@ -523,17 +519,41 @@ public class Game {
             }
             playerClocks[activePlayer].incrementAction();
 
+            // check timeout (on the real timer, which includes the time just taken)
+            if (gameState.playerTimer[activePlayer].exceededMaxTime()) {
+                if (gameState.coreGameParameters.disqualifyPlayerOnTimeout) {
+                    // a disqualified player takes no action
+                    gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, activePlayer);
+                    continue;
+                }
+                action = observedActions.get(gameState.getRnd().nextInt(observedActions.size()));
+            }
+
             if (gameState.coreGameParameters.verbose)
                 System.out.println(action);
 
             actionsChosen.put(activePlayer, action);
         }
         playerToMove = -1;
+
+        if (actionsChosen.isEmpty()) {
+            // every player to act has been disqualified, so we just move on to the next player
+            forwardModel.endPlayerTurn(gameState);
+            return new DoNothing();
+        }
+
         // fire ACTION_CHOSEN per player, only after all simultaneous players have chosen an action
-        for (int p : activePlayers) {
-            AbstractAction action = actionsChosen.get(p);
+        for (int p : actionsChosen.keySet()) {
+            AbstractAction chosen = actionsChosen.get(p);
             listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN,
-                    gameState, actionsChosen.get(p), availableActions.get(p), p)));
+                    gameState, chosen, availableActions.get(p), p)));
+            // a listener (e.g. an adviser) may have overridden the player's choice
+            if (overrideAction != null) {
+                players.get(p).overrideAction(chosen, overrideAction);
+                actionsChosen.put(p, overrideAction);
+                overrideAction = null;
+            }
+            AbstractAction action = actionsChosen.get(p);
             // save game state if requested
             if (action.saveGame() && gameState instanceof IToJSON serialisableGameState) {
                 String directory = String.format("%s%s%s%sG%d", savedStateDirectory, File.separator, gameType.name(), File.separator, gameState.getGameID());
@@ -544,7 +564,7 @@ public class Game {
         }
 
         AbstractAction finalAction = actionsChosen.size() == 1
-                ? actionsChosen.get(activePlayers.getFirst())
+                ? actionsChosen.values().iterator().next()
                 : new SimultaneousAction(actionsChosen);
 
         // apply once
@@ -554,7 +574,7 @@ public class Game {
         nextCount++;
 
         // fire ACTION_TAKEN once per player after applying
-        for (int p : activePlayers) {
+        for (int p : actionsChosen.keySet()) {
             listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN,
                     gameState, actionsChosen.get(p), availableActions.get(p), p)));
         }
@@ -567,6 +587,7 @@ public class Game {
      * Called at the end of game loop execution, when the game is over.
      */
     private void terminate() {
+        recordTurnLength(); // the final turn
         // Print last state
         if (gameState instanceof IPrintable && gameState.coreGameParameters.verbose) {
             ((IPrintable) gameState).printToConsole();
@@ -691,6 +712,15 @@ public class Game {
     }
 
     /**
+     * Mean number of consecutive actions taken by a player before play moves to another player.
+     *
+     * @return - mean number of actions per turn
+     */
+    public double getMeanActionsPerTurn() {
+        return nActionsPerTurnCount == 0 ? 0.0 : nActionsPerTurnSum / (double) nActionsPerTurnCount;
+    }
+
+    /**
      * Retrieves a list with one entry per game tick, each a pair (player ID, # actions)
      *
      * @return - list of action space sizes
@@ -752,7 +782,7 @@ public class Game {
     }
 
     public void flipPaused() {
-        this.paused = !this.paused;
+        this.pause = !this.pause;
     }
 
     public boolean isStopped() {
@@ -777,9 +807,8 @@ public class Game {
     }
 
     /**
-     * The recommended way to run a game using the GUI is via evaluations.Frontend or evaluations.FrontEndSimple,
-     * and for experiments of many games use evaluations.RunGames, which provides more useful tools for gathering results.
-     * Only run a Game using this class for initial familiarisation with the framework.
+     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * some games for some screen sizes due to the vagaries of Java Swing...
      * <p>
      * Test class used to run a specific game. The user must specify:
      * 1. Action controller for GUI interactions / null for no visuals
@@ -799,25 +828,104 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        players.add(new MCTSPlayer());
-//        players.add(new HumanConsolePlayer());
-//        players.add(new HumanConsolePlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-//        players.add(new HumanGUIPlayer(ac));
-        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
+        /* Load prototypes */
+        GameType gameTypeTest = GameType.Dominion;
+        int p_keep = 100;
+        int n_keep_interval = 0;
+        boolean featureSelectionAllSeg = true;
+        int seg_num = 4;
+        String seg_mode = "cum";
+        String seg_name;
+        if (featureSelectionAllSeg) {
+            seg_name = "_allSegFS_seg" + seg_num + "_" + seg_mode;
+        }
+        else {
+            seg_name = "_singleFS";
+        }
+        boolean useSeparateTopFeaturesFolder = true;
+        int topFeaturesPKeep = 100;
+        int topFeaturesNKeepInterval = 0;
+        boolean topFeaturesFeatureSelectionAllSeg = false;
+        int topFeaturesSegNum = 4;
+        String topFeaturesSegMode = "cum";
+        String topFeaturesSegName;
+        if (topFeaturesFeatureSelectionAllSeg) {
+            topFeaturesSegName = "_allSegFS_seg" + topFeaturesSegNum + "_" + topFeaturesSegMode;
+        }
+        else {
+            topFeaturesSegName = "_singleFS";
+        }
 
+        String experimentRootPath = "Experiments/valueFuncTest2/" + gameTypeTest.name();
+        String prototypeFolderName = "/prototype" + p_keep + "_" + n_keep_interval + seg_name + "/";
+        String separateTopFeaturesFolderName = "/prototype" + topFeaturesPKeep + "_" + topFeaturesNKeepInterval + topFeaturesSegName + "/";
+        String topFeaturesFolderName = useSeparateTopFeaturesFolder ? separateTopFeaturesFolderName : prototypeFolderName;
+    //        String prototypesPath = "Experiments/valueFuncTest/" + gameTypeTest.name() + "/";
+        String defaultPrototypesPath = experimentRootPath + prototypeFolderName;
+        String prototypesPath = defaultPrototypesPath;
+        String separateTopFeaturesFolderPath = experimentRootPath + separateTopFeaturesFolderName;
+        String topFeaturesFolderPath = useSeparateTopFeaturesFolder ? separateTopFeaturesFolderPath : prototypesPath;
+
+        if (!prototypesPath.endsWith("/") && !prototypesPath.endsWith("\\")) {
+            prototypesPath += "/";
+        }
+        if (!topFeaturesFolderPath.endsWith("/") && !topFeaturesFolderPath.endsWith("\\")) {
+            topFeaturesFolderPath += "/";
+        }
+
+        System.out.println("READING PROTOTYPES FROM " + prototypesPath);
+        int n_prototypes = 4; // Set number of prototypes to load
+        List<Map<String, Integer>> prototypes = Tokenizer.loadPrototypes(prototypesPath, n_prototypes, useSeparateTopFeaturesFolder);
+        // Load top_features
+        int topKFeatures = 100;
+        String filterListPath = topFeaturesFolderPath + "features-top" + topKFeatures + ".json";
+        System.out.println("READING TOP FEATURES FROM " + filterListPath);
+        List<String> topFeaturesFilterList = Tokenizer.loadStringList(filterListPath);
+
+        Set<String> topFeaturesFilterSet = new HashSet<>(topFeaturesFilterList);
+        for (Map<String, Integer> prototype : prototypes) {
+            Tokenizer.filter(prototype, topFeaturesFilterSet, true);
+        }
+
+        JSONBagOSLAPlayer jsonBagOSLAPlayer = new JSONBagOSLAPlayer(prototypes, topFeaturesFilterList);
+
+//      players.add(new FirstActionPlayer());
+        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new SimultaneousOSLAPlayer());
+//        players.add(new SimultaneousOSLAPlayer());
+//        players.add(new SimultaneousOSLAPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+
+        int jsonBagOSLAPlayerIndex = 1;
+        players.add(jsonBagOSLAPlayerIndex, jsonBagOSLAPlayer);
+        for (AbstractPlayer p : players) {
+            System.out.println(p);
+        }
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;
 
         /* Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+//        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
+        /* Run multiple games */
+        long t = System.currentTimeMillis();
+        int n = 1000;
+        ArrayList<GameType> games = new ArrayList<>();
+        games.add(gameTypeTest);
+//        runMany(games, players, 100L, n, false, true, null, turnPause);
+        long[] seeds = new long[n];
+        Random rnd = new Random();
+        for (int i = 0; i < n; i++) {
+            seeds[i] = rnd.nextInt();
+        }
+        MultiGameRunner.runMany(games, players, n, seeds, null, false, null, 0);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
+        System.out.println("FISNIHED RUNNING IN " + (System.currentTimeMillis() - t)/1000 + " SECONDS");
     }
 }

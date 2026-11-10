@@ -30,7 +30,7 @@ public class Dice extends Component implements IToJSON {
         }
     }
 
-    public final Type type;
+    public final Type diceType;
     public final int nSides; // Number of sides
     protected int value;  // Current value after last roll
     private double[] pdf;
@@ -39,17 +39,17 @@ public class Dice extends Component implements IToJSON {
         this(d6);  // By default d6
     }
 
-    public Dice(Type type) {
+    public Dice(Type diceType) {
         super(CoreConstants.ComponentType.DICE);
-        this.type = type;
-        this.nSides = type.nSides;
+        this.diceType = diceType;
+        this.nSides = diceType.nSides;
         this.pdf = new double[nSides];
         Arrays.fill(pdf, 1.0/nSides);
     }
     public Dice(int nSides) {
         super(CoreConstants.ComponentType.DICE);
         this.nSides = nSides;
-        this.type = sidesToType(nSides);
+        this.diceType = sidesToType(nSides);
         this.pdf = new double[nSides];
         Arrays.fill(pdf, 1.0/nSides);
     }
@@ -57,7 +57,7 @@ public class Dice extends Component implements IToJSON {
         super(CoreConstants.ComponentType.DICE);
         this.pdf = pdf.clone();
         this.nSides = pdf.length;
-        this.type = sidesToType(nSides);
+        this.diceType = sidesToType(nSides);
     }
     public Dice(JSONObject data) {
         this(((Number) data.get("nSides")).intValue());
@@ -98,9 +98,9 @@ public class Dice extends Component implements IToJSON {
         this(JSONUtils.loadJSONFile(json));
     }
 
-    private Dice(Type type, int nSides, int value, int ID) {
+    private Dice(Type diceType, int nSides, int value, int ID) {
         super(CoreConstants.ComponentType.DICE, ID);
-        this.type = type;
+        this.diceType = diceType;
         this.nSides = nSides;
         this.value = value;
         pdf = new double[0];
@@ -155,7 +155,7 @@ public class Dice extends Component implements IToJSON {
 
     @Override
     public Dice copy() {
-        Dice copy = new Dice(type, nSides, value, componentID);
+        Dice copy = new Dice(diceType, nSides, value, componentID);
         copy.pdf = Arrays.copyOf(pdf, pdf.length);
         copyComponentTo(copy);
         return copy;

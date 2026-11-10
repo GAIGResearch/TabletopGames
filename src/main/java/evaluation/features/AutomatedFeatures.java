@@ -7,6 +7,7 @@ import core.interfaces.IStateFeatureVector;
 import core.interfaces.IToJSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import players.learners.AbstractLearner;
 import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.Triple;
@@ -83,7 +84,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         // we then always add the underlying features as RAW features; these will always occupy the first |s| + |a| features
         for (int i = 0; i < underlyingNames.length; i++) {
             Class<?> type = underlyingTypes[i];
-            if (type == Double.class || type == double.class || type == Integer.class || type == int.class)
+            if (type == Double.class || type == double.class || type == Integer.class || type == int.class
+                    || type == Boolean.class || type == boolean.class)
                 addFeature(new AutomatedFeatures.ColumnDetails(underlyingNames[i], AutomatedFeatures.featureType.RAW,
                         null, null, i, type, null));
         }
@@ -319,7 +321,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             Object value = underlyingVectorData[underlyingIndex];
             switch (featureTypes.get(i)) {
                 case RAW:
-                    featureVector[i] = ((Number) value).doubleValue();
+                    featureVector[i] = value instanceof Boolean b ? (b ? 1.0 : 0.0) : ((Number) value).doubleValue();
                     break;
                 case ENUM:
                     Enum<?> enumValue = (Enum<?>) value;
@@ -449,7 +451,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
         // load files...the columns should correspond to the underlying vector
         // while allowing for additional columns (for target values)
-        Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", inputFiles);
+        // With a maxRecords limit, only the last maxRecords rows are held in memory, however large the files are
+        Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", maxRecords, inputFiles);
         List<String> headers = data.a;
         List<List<String>> dataRows = data.b;
 
@@ -631,7 +634,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                         for (int index : newIndices) {
                             Object valueObj = newDataColumns.get(index).get(j);
                             double value = valueObj instanceof Number ? ((Number) valueObj).doubleValue() :
-                                    valueObj instanceof String ? Double.parseDouble((String) valueObj) : 0;
+                                    valueObj instanceof Boolean b ? (b ? 1.0 : 0.0) :
+                                    valueObj instanceof String ? AbstractLearner.parseValue((String) valueObj) : 0;
                             interactionValue *= value;
                         }
                         interactionData.add(interactionValue);

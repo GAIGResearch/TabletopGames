@@ -15,14 +15,14 @@ public class PartialObservableGridBoard extends GridBoard
     {
         super(width, height);
 
-        //filling Visibility for each cell in grid
-        boolean[][] visibilityGrid = new boolean[height][width];
-        for(int i = 0; i < height; i++)
+        //filling Visibility for each cell in grid: a separate grid for each player
+        for(int p = 0; p < nPlayers; p++)
         {
-            Arrays.fill(visibilityGrid[i], defaultValue);
-        }
-        for(int i = 0; i < nPlayers; i++)
-        {
+            boolean[][] visibilityGrid = new boolean[height][width];
+            for(int i = 0; i < height; i++)
+            {
+                Arrays.fill(visibilityGrid[i], defaultValue);
+            }
             elementVisibility.add(visibilityGrid);
         }
 
@@ -35,14 +35,14 @@ public class PartialObservableGridBoard extends GridBoard
     {
         super(width, height, componentID);
 
-        //filling Visibility for each cell in grid
-        boolean[][] visibilityGrid = new boolean[height][width];
-        for(int i = 0; i < height; i++)
+        //filling Visibility for each cell in grid: a separate grid for each player
+        for(int p = 0; p < nPlayers; p++)
         {
-            Arrays.fill(visibilityGrid[i], defaultValue);
-        }
-        for(int i = 0; i < nPlayers; i++)
-        {
+            boolean[][] visibilityGrid = new boolean[height][width];
+            for(int i = 0; i < height; i++)
+            {
+                Arrays.fill(visibilityGrid[i], defaultValue);
+            }
             elementVisibility.add(visibilityGrid);
         }
 
@@ -58,7 +58,11 @@ public class PartialObservableGridBoard extends GridBoard
         this.elementVisibility = new ArrayList<>();
         for(boolean[][] visibility : elementVisibility)
         {
-            this.elementVisibility.add(visibility.clone());
+            // copy each row too, so the copy and the original do not share visibility
+            boolean[][] rows = new boolean[visibility.length][];
+            for(int i = 0; i < visibility.length; i++)
+                rows[i] = visibility[i].clone();
+            this.elementVisibility.add(rows);
         }
     }
 //endregion
@@ -221,7 +225,7 @@ public class PartialObservableGridBoard extends GridBoard
         if (this == o) return true;
         if (!(o instanceof PartialObservableGridBoard that)) return false;
         if (!super.equals(o)) return false;
-        return Arrays.equals(gridBoardVisibility, that.gridBoardVisibility) && Objects.equals(elementVisibility, that.elementVisibility);
+        return Arrays.equals(gridBoardVisibility, that.gridBoardVisibility) && Arrays.deepEquals(elementVisibility.toArray(), that.elementVisibility.toArray());
     }
 
     @Override

@@ -51,7 +51,7 @@ public class RemoveComponentFromDeck<T extends Component> extends DrawCard {
     @Override
     public String getString(AbstractGameState gameState) {
         return "RemoveComponentFromDeck{" +
-                "deck=" + deck +
+                "deck=" + gameState.getComponentById(deck).getComponentName() +
                 ", component=" + componentIdx +
                 ", cardPlayed=" + getCard(gameState).getComponentName() +
                 '}';

@@ -105,7 +105,7 @@ public class DeckSerializationTest {
                     deck.getVisibilityOfComponent(i), loaded.getVisibilityOfComponent(i));
             for (int p = 0; p < nPlayers; p++) {
                 assertEquals("card " + i + " visible to player " + p,
-                        deck.isComponentVisible(i, p), loaded.isComponentVisible(i, p));
+                        deck.isVisibleTo(i, p), loaded.isVisibleTo(i, p));
             }
         }
     }

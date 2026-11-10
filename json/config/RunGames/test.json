@@ -1,0 +1,7 @@
+{
+  "game": "Wonders7",
+  "playerDirectory" : "json/players/gameSpecific/Wonders7",
+  "nPlayers" : 4,
+  "matchups" : 100,
+  "verbose": true
+}

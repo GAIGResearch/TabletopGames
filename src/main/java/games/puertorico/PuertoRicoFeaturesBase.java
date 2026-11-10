@@ -15,7 +15,8 @@ public class PuertoRicoFeaturesBase implements IStateFeatureVector {
     @Override
     public String[] names() {
         return new String[] {"VP_Chips", "VP", "TownSize", "PlantationSize", "Quarries", "TownVacancies",
-                "PlantationVacancies", "Doubloons", "ProductionCapacity", "ProductionVariety", "StoreVolume", "StoreVariety"};
+                "PlantationVacancies", "Doubloons", "ProductionCapacity", "ProductionVariety", "StoreVolume",
+                "StoreVariety", "Lead"};
     }
     @Override
     public double[] doubleVector(AbstractGameState gs, int playerID) {
@@ -52,7 +53,7 @@ public class PuertoRicoFeaturesBase implements IStateFeatureVector {
         retValue[9] = goodTypes;
         retValue[10] = state.getPlayerBoard(playerID).getStores().values().stream().mapToInt(Integer::intValue).sum();
         retValue[11] = state.getPlayerBoard(playerID).getStores().values().stream().filter(i -> i > 0).count();
-
+        retValue[12] = state.getLead(playerID);
         return retValue;
     }
 

@@ -374,11 +374,11 @@ public class DecoupledUCTTests {
         EXPECTED.put("mast",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2549|copies=201|rollout=2000|digest=0068371ef0c257ef|rnd=2228064810716131872");
         EXPECTED.put("progressiveWidening",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2544|copies=201|rollout=2000|digest=8ae80866f7d2eee5|rnd=-8907240076208972560");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2562|copies=201|rollout=2000|digest=88936b824ea3322d|rnd=7503836405741062929");
         EXPECTED.put("pUCT",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2633|copies=201|rollout=2000|digest=4070216fc1dcf05a|rnd=-786632837516347028");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2635|copies=201|rollout=2000|digest=2a8f981d50da5332|rnd=-3369222499709464071");
         EXPECTED.put("initialiseVisits",
-                "type=SingleTreeNode|roots=1|visits=209|nodes=201|fm=2534|copies=201|rollout=2000|digest=5b7fc2467f2b3fc5|rnd=-934894581532007506");
+                "type=SingleTreeNode|roots=1|visits=209|nodes=201|fm=2535|copies=201|rollout=2000|digest=6e5314f4132795cf|rnd=2352922877088254688");
         EXPECTED.put("paranoid",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2521|copies=201|rollout=2000|digest=49c646e584299f9e|rnd=-3001675053116265653");
         EXPECTED.put("backupLambda",

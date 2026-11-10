@@ -96,16 +96,27 @@ class PlayerPanel extends JPanel {
 
     }
 
-    void _update(CatanGameState gs) {
+    /**
+     * @param showHidden whether this player's resources, development cards and secret victory points are shown, or
+     *                   only how many cards they hold
+     */
+    void _update(CatanGameState gs, boolean showHidden) {
         scoreLabel.setText("Score: " + gs.getScores()[playerID]);
         knightCount.setText("Knights: " + gs.getKnights()[playerID] + (gs.getLargestArmyOwner() == playerID? " [LARGEST ARMY]" : ""));
         longestRoad.setText("Longest road: " + gs.getRoadLengths()[playerID] + (gs.getLongestRoadOwner() == playerID? " [LONGEST ROAD]" : ""));
-        victoryPointsLabel.setText("VP: " + gs.getVictoryPoints()[playerID]);
+        victoryPointsLabel.setText("VP: " + (showHidden ? gs.getVictoryPoints()[playerID] : "?"));
+        int nResources = 0;
         for (CatanParameters.Resource r: CatanParameters.Resource.values()) {
             if (r == CatanParameters.Resource.WILD) continue;
-            resourceToLabelMap.get(r).setText(r.name() + " = " + gs.getPlayerResources(playerID).get(r));
+            nResources += gs.getPlayerResources(playerID).get(r).getValue();
+        }
+        for (CatanParameters.Resource r: CatanParameters.Resource.values()) {
+            if (r == CatanParameters.Resource.WILD) continue;
+            resourceToLabelMap.get(r).setText(r.name() + " = " + (showHidden ? gs.getPlayerResources(playerID).get(r)
+                    : "?"));
         }
 //        playerResources.setText("<html>Resources: " + gs.getPlayerResources(playerID).toString() + "</html>");
-        devCards.setText("Dev. Cards: " +  gs.getPlayerDevCards(playerID).toString());
+        devCards.setText(showHidden ? "Dev. Cards: " + gs.getPlayerDevCards(playerID).toString()
+                : "<html>Resources: " + nResources + " cards<br>Dev. Cards: " + gs.getPlayerDevCards(playerID).getSize() + " cards</html>");
     }
 }

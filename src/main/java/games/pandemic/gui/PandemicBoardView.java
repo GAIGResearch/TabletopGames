@@ -75,6 +75,11 @@ public class PandemicBoardView extends JComponent {
 
     int panX, panY;
 
+    // each city's clickable area, for the scale and pan they were made at (see cityAreas)
+    private Map<String, Shape> cityAreas = Map.of();
+    private String cityAreasFor;
+    private java.util.function.Function<String, String> toolTips;
+
     public PandemicBoardView(AbstractGameState gs) {
         gameState = (PandemicGameState) gs;
         this.graphBoard = ((PandemicGameState) gs).getWorld();
@@ -184,6 +189,51 @@ public class PandemicBoardView extends JComponent {
         });
 
 //        System.out.println(Arrays.toString(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
+        ToolTipManager.sharedInstance().registerComponent(this);
+    }
+
+    /**
+     * Each city's area on the board, by name, in the component's coordinates (as the board is zoomed and panned now):
+     * a disc a little larger than the city's, to be easy to click. The same shapes are returned until the board is
+     * zoomed or panned.
+     */
+    public Map<String, Shape> cityAreas() {
+        String key = scale + "," + panX + "," + panY;
+        if (!key.equals(cityAreasFor)) {
+            Map<String, Shape> areas = new HashMap<>();
+            for (Map.Entry<String, Rectangle> e : boardNodeLocations.entrySet()) {
+                Rectangle r = e.getValue();
+                double radius = Math.max(nodeSize, 16) * 0.75;
+                areas.put(e.getKey(), new java.awt.geom.Ellipse2D.Double(r.getCenterX() + panX - radius,
+                        r.getCenterY() + panY - radius, 2 * radius, 2 * radius));
+            }
+            cityAreas = areas;
+            cityAreasFor = key;
+        }
+        return cityAreas;
+    }
+
+    /**
+     * The city at the point of the component, or null.
+     */
+    public String cityAt(Point p) {
+        for (Map.Entry<String, Shape> e : cityAreas().entrySet())
+            if (e.getValue().contains(p))
+                return e.getKey();
+        return null;
+    }
+
+    /**
+     * Gives the tooltip for the city under the mouse.
+     */
+    public void setToolTips(java.util.function.Function<String, String> toolTips) {
+        this.toolTips = toolTips;
+    }
+
+    @Override
+    public String getToolTipText(MouseEvent event) {
+        String city = cityAt(event.getPoint());
+        return city == null || toolTips == null ? null : toolTips.apply(city);
     }
 
     private void updateScale(double scale) {

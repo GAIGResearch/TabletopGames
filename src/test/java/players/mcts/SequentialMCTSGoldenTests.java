@@ -65,9 +65,8 @@ public class SequentialMCTSGoldenTests {
             (gs, playerId) -> (((gs.getGameTick() * 37 + playerId * 11) % 23) / 23.0) - 0.5;
 
     /**
-     * Several parameters (pUCT, progressive bias/widening, initialiseVisits) are silently switched
-     * off in setActionsFromOpenLoopState when the action heuristic is nullReturn, so exercising them
-     * at all requires a real one.
+     * Several parameters (pUCT, progressive bias/widening, initialiseVisits) fail without an action
+     * heuristic, so exercising them at all requires a real one.
      */
     private static final IActionHeuristic NAME_HEURISTIC =
             (action, state, contextActions) -> (Math.abs(action.toString().hashCode()) % 11) / 11.0;
@@ -373,23 +372,23 @@ public class SequentialMCTSGoldenTests {
         EXPECTED.put("lmr.backupMaxMC",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=3079e42e3f79b8e2|rnd=-3582349705094124591");
         EXPECTED.put("lmr.progressiveWidening",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=a424d836bae86987|rnd=5149955473058966674");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=5d524e860ce003c4|rnd=593923753161084039");
         EXPECTED.put("lmr.progressiveWideningTight",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=139|fm=3450|copies=201|rollout=2000|digest=f6a192a170d8c6ae|rnd=-6993690106722028079");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=139|fm=3450|copies=201|rollout=2000|digest=27b92908554c271e|rnd=1593670086026938253");
         EXPECTED.put("lmr.progressiveBias",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=130710f5355c5113|rnd=-3582349705094124591");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=79896465c5927dc8|rnd=8148085011479300758");
         EXPECTED.put("lmr.initialiseVisits",
-                "type=SingleTreeNode|roots=1|visits=209|nodes=201|fm=2841|copies=201|rollout=2000|digest=c705e22be177086e|rnd=-8545389348336959084");
+                "type=SingleTreeNode|roots=1|visits=209|nodes=201|fm=2841|copies=201|rollout=2000|digest=f17419582943aa5d|rnd=1420251489928114627");
         EXPECTED.put("lmr.pUCT",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=ea6f62a30db5604d|rnd=-3582349705094124591");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=84e9effaa836b5f1|rnd=-2816744293914277965");
         EXPECTED.put("lmr.moveOrdering",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=1a230600ff1e4f75|rnd=-3582349705094124591");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2826|copies=201|rollout=2000|digest=e73cd5491eb73f05|rnd=-1707737303460813992");
         EXPECTED.put("dominion.oneTree",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2727|copies=201|rollout=2000|rnd=-2496636163438062769");
         EXPECTED.put("dominion.selfOnly",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=4315|copies=201|rollout=2000|rnd=-7657923564142018339");
         EXPECTED.put("dominion.multiTree",
-                "type=MultiTreeNode|roots=3|visits=600|nodes=602|fm=0|copies=3|rollout=0|rnd=9038810872087905479");
+                "type=MultiTreeNode|roots=3|visits=600|nodes=597|fm=0|copies=3|rollout=0|rnd=-6544440334738627109");
         EXPECTED.put("dominion.oma",
                 "type=OMATreeNode|roots=1|visits=200|nodes=201|fm=2727|copies=201|rollout=2000|rnd=-2496636163438062769");
         EXPECTED.put("dominion.omaAll",
@@ -399,13 +398,13 @@ public class SequentialMCTSGoldenTests {
         EXPECTED.put("dominion.closedLoop",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2000|copies=200|rollout=2000|rnd=-9040922895717772145");
         EXPECTED.put("dominion.informationSet",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2662|copies=201|rollout=2000|rnd=7038597520625713965");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2663|copies=201|rollout=2000|rnd=-5262918090353243385");
         EXPECTED.put("dominion.mast",
                 "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2727|copies=201|rollout=2000|rnd=-2496636163438062769");
         EXPECTED.put("dominion.forest",
-                "type=ForestNode|roots=3|visits=600|nodes=603|fm=8129|copies=603|rollout=6000|rnd=6318484678743188743");
+                "type=ForestNode|roots=3|visits=600|nodes=603|fm=7984|copies=603|rollout=6000|rnd=-642015364257997987");
         EXPECTED.put("dominion.reuseTree",
-                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2628|copies=201|rollout=2000|rnd=8950923499759266186");
+                "type=SingleTreeNode|roots=1|visits=200|nodes=201|fm=2627|copies=201|rollout=2000|rnd=-7599743034768376369");
     }
 
     /** The leading fields of a summary that are reproducible even for the structural-only cases. */

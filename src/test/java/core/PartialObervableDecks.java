@@ -24,22 +24,22 @@ public class PartialObervableDecks {
         deck.add(DominionCard.create(CardType.COPPER));
         deck.add(DominionCard.create(CardType.MILITIA));
         for (int i = 0; i < 2; i++) {
-            assertTrue(deck.isComponentVisible(i, 0));
-            assertFalse(deck.isComponentVisible(i, 1));
-            assertFalse(deck.isComponentVisible(i, 2));
+            assertTrue(deck.isVisibleTo(i, 0));
+            assertFalse(deck.isVisibleTo(i, 1));
+            assertFalse(deck.isVisibleTo(i, 2));
         }
         deck.setVisibilityOfComponent(1, new boolean[]{true, true, true});
         deck.add(DominionCard.create(CardType.SMITHY), 1); // Add to the middle of the deck
         // this moves the specifically modified card to position 2.
         for (int i = 0; i < 3; i++) {
             if (i != 2) {
-                assertTrue(deck.isComponentVisible(i, 0));
-                assertFalse(deck.isComponentVisible(i, 1));
-                assertFalse(deck.isComponentVisible(i, 2));
+                assertTrue(deck.isVisibleTo(i, 0));
+                assertFalse(deck.isVisibleTo(i, 1));
+                assertFalse(deck.isVisibleTo(i, 2));
             } else {
-                assertTrue(deck.isComponentVisible(i, 0));
-                assertTrue(deck.isComponentVisible(i, 1));
-                assertTrue(deck.isComponentVisible(i, 2));
+                assertTrue(deck.isVisibleTo(i, 0));
+                assertTrue(deck.isVisibleTo(i, 1));
+                assertTrue(deck.isVisibleTo(i, 2));
             }
         }
     }
@@ -50,9 +50,9 @@ public class PartialObervableDecks {
         deck.add(DominionCard.create(CardType.COPPER));
         deck.add(DominionCard.create(CardType.MILITIA));
         for (int i = 0; i < 2; i++) {
-            assertTrue(deck.isComponentVisible(i, 0));
-            assertTrue(deck.isComponentVisible(i, 1));
-            assertTrue(deck.isComponentVisible(i, 2));
+            assertTrue(deck.isVisibleTo(i, 0));
+            assertTrue(deck.isVisibleTo(i, 1));
+            assertTrue(deck.isVisibleTo(i, 2));
         }
     }
 
@@ -63,23 +63,23 @@ public class PartialObervableDecks {
         deck.add(DominionCard.create(CardType.MILITIA));
         deck.add(DominionCard.create(CardType.SMITHY));
         for (int i = 0; i < 3; i++) {
-            assertFalse(deck.isComponentVisible(i, 0));
-            assertFalse(deck.isComponentVisible(i, 1));
-            assertFalse(deck.isComponentVisible(i, 2));
-            assertFalse(deck.isComponentVisible(i, 3));
+            assertFalse(deck.isVisibleTo(i, 0));
+            assertFalse(deck.isVisibleTo(i, 1));
+            assertFalse(deck.isVisibleTo(i, 2));
+            assertFalse(deck.isVisibleTo(i, 3));
         }
         deck.setVisibilityOfComponent(0, new boolean[]{false, true, false, true});
         for (int i = 0; i < 3; i++) {
             if (i == 0) {
-                assertFalse(deck.isComponentVisible(i, 0));
-                assertTrue(deck.isComponentVisible(i, 1));
-                assertFalse(deck.isComponentVisible(i, 2));
-                assertTrue(deck.isComponentVisible(i, 3));
+                assertFalse(deck.isVisibleTo(i, 0));
+                assertTrue(deck.isVisibleTo(i, 1));
+                assertFalse(deck.isVisibleTo(i, 2));
+                assertTrue(deck.isVisibleTo(i, 3));
             } else {
-                assertFalse(deck.isComponentVisible(i, 0));
-                assertFalse(deck.isComponentVisible(i, 1));
-                assertFalse(deck.isComponentVisible(i, 2));
-                assertFalse(deck.isComponentVisible(i, 3));
+                assertFalse(deck.isVisibleTo(i, 0));
+                assertFalse(deck.isVisibleTo(i, 1));
+                assertFalse(deck.isVisibleTo(i, 2));
+                assertFalse(deck.isVisibleTo(i, 3));
             }
         }
     }
@@ -90,10 +90,10 @@ public class PartialObervableDecks {
         deck.add(DominionCard.create(CardType.COPPER));
         deck.add(DominionCard.create(CardType.MILITIA));
         for (int i = 0; i < 2; i++) {
-            assertFalse(deck.isComponentVisible(i, 0));
-            assertFalse(deck.isComponentVisible(i, 1));
-            assertTrue(deck.isComponentVisible(i, 2));
-            assertFalse(deck.isComponentVisible(i, 3));
+            assertFalse(deck.isVisibleTo(i, 0));
+            assertFalse(deck.isVisibleTo(i, 1));
+            assertTrue(deck.isVisibleTo(i, 2));
+            assertFalse(deck.isVisibleTo(i, 3));
         }
     }
 
@@ -107,8 +107,8 @@ public class PartialObervableDecks {
         deck.add(DominionCard.create(CardType.SMITHY));  // this is the top of the deck and the 'FIRST' card
         for (int i = 0; i < 3; i++) {
             for (int p = 0; p < 4; p++) {
-                System.out.println(i + " " + p + " " + deck.isComponentVisible(i, p));
-                assertTrue(deck.isComponentVisible(i, p));
+                System.out.println(i + " " + p + " " + deck.isVisibleTo(i, p));
+                assertTrue(deck.isVisibleTo(i, p));
             }
         }
     }
@@ -122,11 +122,11 @@ public class PartialObervableDecks {
         deck.shuffle(rnd);
         for (int i = 0; i < 3; i++) {
             for (int p = 0; p < 4; p++) {
-                System.out.println(i + " " + p + " " + deck.isComponentVisible(i, p));
+                System.out.println(i + " " + p + " " + deck.isVisibleTo(i, p));
                 if (i == 0) {
-                    assertTrue(deck.isComponentVisible(i, p));
+                    assertTrue(deck.isVisibleTo(i, p));
                 } else {
-                    assertFalse(deck.isComponentVisible(i, p));
+                    assertFalse(deck.isVisibleTo(i, p));
                 }
             }
         }
@@ -140,11 +140,11 @@ public class PartialObervableDecks {
         deck.add(DominionCard.create(CardType.SMITHY));  // this is the top of the deck and the 'FIRST' card
         for (int i = 0; i < 3; i++) {
             for (int p = 0; p < 4; p++) {
-                System.out.println(i + " " + p + " " + deck.isComponentVisible(i, p));
+                System.out.println(i + " " + p + " " + deck.isVisibleTo(i, p));
                 if (i == deck.getSize() - 1) {
-                    assertTrue(deck.isComponentVisible(i, p));
+                    assertTrue(deck.isVisibleTo(i, p));
                 } else {
-                    assertFalse(deck.isComponentVisible(i, p));
+                    assertFalse(deck.isVisibleTo(i, p));
                 }
             }
         }
@@ -162,11 +162,11 @@ public class PartialObervableDecks {
         assertEquals(CardType.COPPER, deck.get(2).cardType());
         for (int i = 0; i < 4; i++) {
             for (int p = 0; p < 4; p++) {
-                System.out.println(i + " " + p + " " + deck.isComponentVisible(i, p));
+                System.out.println(i + " " + p + " " + deck.isVisibleTo(i, p));
                 if (i > 1) {  // the last two cards are visible
-                    assertTrue(deck.isComponentVisible(i, p));
+                    assertTrue(deck.isVisibleTo(i, p));
                 } else {
-                    assertFalse(deck.isComponentVisible(i, p));
+                    assertFalse(deck.isVisibleTo(i, p));
                 }
             }
         }
@@ -182,18 +182,18 @@ public class PartialObervableDecks {
         deck2.add(DominionCard.create(CardType.COPPER));
         deck2.add(deck);
         for (int p = 0; p < 4; p++) {
-            assertTrue(deck2.isComponentVisible(0, p));
-            assertFalse(deck2.isComponentVisible(1, p));
-            assertFalse(deck2.isComponentVisible(2, p));
-            assertTrue(deck2.isComponentVisible(3, p));
+            assertTrue(deck2.isVisibleTo(0, p));
+            assertFalse(deck2.isVisibleTo(1, p));
+            assertFalse(deck2.isVisibleTo(2, p));
+            assertTrue(deck2.isVisibleTo(3, p));
         }
 
         deck2.shuffle(rnd);
         for (int p = 0; p < 4; p++) {
-            assertTrue(deck2.isComponentVisible(0, p));
-            assertFalse(deck2.isComponentVisible(1, p));
-            assertFalse(deck2.isComponentVisible(2, p));
-            assertFalse(deck2.isComponentVisible(3, p));
+            assertTrue(deck2.isVisibleTo(0, p));
+            assertFalse(deck2.isVisibleTo(1, p));
+            assertFalse(deck2.isVisibleTo(2, p));
+            assertFalse(deck2.isVisibleTo(3, p));
         }
     }
 
@@ -207,10 +207,10 @@ public class PartialObervableDecks {
         deck.add(DominionCard.create(CardType.COPPER));
         deck.setVisibility(CoreConstants.VisibilityMode.TOP_VISIBLE_TO_ALL);
         for (int p = 0; p < 4; p++) {
-            assertTrue(deck.isComponentVisible(0, p));
-            assertFalse(deck.isComponentVisible(1, p));
-            assertFalse(deck.isComponentVisible(2, p));
-            assertFalse(deck.isComponentVisible(3, p));
+            assertTrue(deck.isVisibleTo(0, p));
+            assertFalse(deck.isVisibleTo(1, p));
+            assertFalse(deck.isVisibleTo(2, p));
+            assertFalse(deck.isVisibleTo(3, p));
         }
     }
 
@@ -232,12 +232,12 @@ public class PartialObervableDecks {
         assertEquals(CardType.SILVER, deck.get(0).cardType());  // top
         assertEquals(CardType.COPPER, deck.get(5).cardType());  // bottom
         for (int p = 0; p < 4; p++) {
-            assertTrue(deck.isComponentVisible(0, p));
-            assertFalse(deck.isComponentVisible(1, p));
-            assertFalse(deck.isComponentVisible(2, p));
-            assertFalse(deck.isComponentVisible(3, p));
-            assertFalse(deck.isComponentVisible(4, p));
-            assertTrue(deck.isComponentVisible(5, p));
+            assertTrue(deck.isVisibleTo(0, p));
+            assertFalse(deck.isVisibleTo(1, p));
+            assertFalse(deck.isVisibleTo(2, p));
+            assertFalse(deck.isVisibleTo(3, p));
+            assertFalse(deck.isVisibleTo(4, p));
+            assertTrue(deck.isVisibleTo(5, p));
         }
 
         deck.redeterminiseUnknown(rnd, 1);
@@ -248,12 +248,12 @@ public class PartialObervableDecks {
                 deck.get(4).cardType() == CardType.MILITIA);
         assertEquals(CardType.COPPER, deck.get(5).cardType());
         for (int p = 0; p < 4; p++) {
-            assertTrue(deck.isComponentVisible(0, p));
-            assertFalse(deck.isComponentVisible(1, p));
-            assertFalse(deck.isComponentVisible(2, p));
-            assertFalse(deck.isComponentVisible(3, p));
-            assertFalse(deck.isComponentVisible(4, p));
-            assertTrue(deck.isComponentVisible(5, p));
+            assertTrue(deck.isVisibleTo(0, p));
+            assertFalse(deck.isVisibleTo(1, p));
+            assertFalse(deck.isVisibleTo(2, p));
+            assertFalse(deck.isVisibleTo(3, p));
+            assertFalse(deck.isVisibleTo(4, p));
+            assertTrue(deck.isVisibleTo(5, p));
         }
     }
 

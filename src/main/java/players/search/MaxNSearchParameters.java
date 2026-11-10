@@ -9,13 +9,14 @@ import players.heuristics.GameDefaultHeuristic;
 public class MaxNSearchParameters extends PlayerParameters {
 
     public enum SearchUnit {
-        ACTION, MACRO_ACTION, TURN
+        ACTION, MACRO_ACTION, TURN, ROUND
     }
 
     protected int searchDepth = 1;
     protected SearchUnit searchUnit = SearchUnit.ACTION;
     protected IStateHeuristic heuristic = new GameDefaultHeuristic();
     protected boolean paranoid = false;
+    // only has an effect if paranoid is true, as plain MaxN with 3+ players does not support standard alpha-beta
     protected boolean alphaBetaPruning = true;
     protected boolean iterativeDeepening = false;
     protected boolean expandByEstimatedValue = false;

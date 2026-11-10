@@ -18,7 +18,7 @@ public class CoreParameters extends TunableParameters<Object> {
     public long frameSleepMS = 100L;
 
     // Action space type for this game
-    public ActionSpace actionSpace = new ActionSpace(ActionSpace.Structure.Flat, ActionSpace.Flexibility.Default, ActionSpace.Context.Dependent);
+    public ActionSpace actionSpace = ActionSpace.Default;
 
     public CoreParameters() {
         addTunableParameter("verbose", verbose, Arrays.asList(false, true));
@@ -29,7 +29,8 @@ public class CoreParameters extends TunableParameters<Object> {
         addTunableParameter("disqualify player on timeout", disqualifyPlayerOnTimeout, Arrays.asList(false, true));
         addTunableParameter("always display full observable", alwaysDisplayFullObservable, Arrays.asList(false, true));
         addTunableParameter("always display current player", alwaysDisplayCurrentPlayer, Arrays.asList(false, true));
-        addTunableParameter("frame sleep MS", frameSleepMS, Arrays.asList(0L, 100L, 500L, 1000L, 5000L));
+        // Integer values, as TunableParameters converts any Long it is given to an int
+        addTunableParameter("frame sleep MS", (int) frameSleepMS, Arrays.asList(0, 100, 500, 1000, 5000));
         addTunableParameter("actionSpaceStructure", ActionSpace.Structure.Default, Arrays.asList(ActionSpace.Structure.values()));
         addTunableParameter("actionSpaceFlexibility", ActionSpace.Flexibility.Default, Arrays.asList(ActionSpace.Flexibility.values()));
         addTunableParameter("actionSpaceContext", ActionSpace.Context.Default, Arrays.asList(ActionSpace.Context.values()));
@@ -43,9 +44,8 @@ public class CoreParameters extends TunableParameters<Object> {
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CoreParameters)) return false;
-        if (!super.equals(o)) return false;
-        CoreParameters that = (CoreParameters) o;
+        // TunableParameters.equals() calls this, and compares the tunable parameter values
+        if (!(o instanceof CoreParameters that)) return false;
         return verbose == that.verbose && recordEventHistory == that.recordEventHistory && partialObservable == that.partialObservable && competitionMode == that.competitionMode && disqualifyPlayerOnIllegalActionPlayed == that.disqualifyPlayerOnIllegalActionPlayed && disqualifyPlayerOnTimeout == that.disqualifyPlayerOnTimeout && alwaysDisplayFullObservable == that.alwaysDisplayFullObservable && alwaysDisplayCurrentPlayer == that.alwaysDisplayCurrentPlayer && frameSleepMS == that.frameSleepMS && Objects.equals(actionSpace, that.actionSpace);
     }
 

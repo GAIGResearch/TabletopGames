@@ -14,25 +14,25 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public GraphBoardWithEdges(String name)
     {
         super(CoreConstants.ComponentType.BOARD, name);
-        boardNodes = new HashMap<>(initialCapacity);
+        boardNodes = new LinkedHashMap<>(initialCapacity);
     }
 
     public GraphBoardWithEdges()
     {
         super(CoreConstants.ComponentType.BOARD);
-        boardNodes = new HashMap<>(initialCapacity);
+        boardNodes = new LinkedHashMap<>(initialCapacity);
     }
 
     protected GraphBoardWithEdges(String name, int ID)
     {
         super(CoreConstants.ComponentType.BOARD, name, ID);
-        boardNodes = new HashMap<>(initialCapacity);
+        boardNodes = new LinkedHashMap<>(initialCapacity);
     }
 
     GraphBoardWithEdges(int ID)
     {
         super(CoreConstants.ComponentType.BOARD, ID);
-        boardNodes = new HashMap<>(initialCapacity);
+        boardNodes = new LinkedHashMap<>(initialCapacity);
     }
 
     /**
@@ -45,7 +45,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
         // A temporary map to store the copied edges
         // this slightly odd Edge -> Edge structure avoids the overhead of Integer Boxing/Unboxing compared
         // to using a Map<Integer, Edge> for the edge IDs
-        HashMap<Edge, Edge> edgeCopies = new HashMap<>(initialCapacity);
+        HashMap<Edge, Edge> edgeCopies = new LinkedHashMap<>(initialCapacity);
         // copy edges
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             // copy edges (then used in the next loop)
@@ -56,7 +56,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
         // Copy board nodes; we can't use the same trick as with Edges, because the Node change as we wire them up
         GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
-        HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>(initialCapacity);
+        HashMap<Integer, BoardNodeWithEdges> nodeCopies = new LinkedHashMap<>(initialCapacity);
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             BoardNodeWithEdges bnCopy = bn.copy();
             if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.componentID);

@@ -13,6 +13,7 @@ import utilities.Vector2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedHashMap;
 
 import static games.descent2e.abilities.HeroAbilities.HeroAbility.*;
 
@@ -109,7 +110,7 @@ public class HeroAbilities {
         if (f.getAbility().equals(RerollOnce) && !f.hasUsedHeroAbility()) {
             DiceType type = dice.getColour();
             //System.out.println("Widow Tarha rerolls the " + type + " die");
-            DicePool reroll = DicePool.constructDicePool(new HashMap<DiceType, Integer>() {{
+            DicePool reroll = DicePool.constructDicePool(new LinkedHashMap<DiceType, Integer>() {{
                 put(type, 1);
             }});
             reroll.roll((dgs.getRnd()));

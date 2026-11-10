@@ -60,7 +60,7 @@ public class TestRoundCardVisibilityAndShuffling {
                 // round (if any) has been revealed. So 2 cards are visible at the end of Round 0, and so on.
                 int expectedVisible = Math.min(state.getRoundCounter() + 2, state.getRounds().getSize());
                 for (int i = 0; i < expectedVisible; i++)
-                    assertTrue(state.getRounds().getVisibilityForPlayer(i, 0));
+                    assertTrue(state.getRounds().isVisibleTo(i, 0));
                 assertEquals(expectedVisible, visibleRoundCards);
 
                 int matches = 0, nonMatches = 0;
@@ -78,7 +78,7 @@ public class TestRoundCardVisibilityAndShuffling {
                         for (int j = 0; j < 3; j++)
                             assertEquals(state.getRounds().getVisibilityOfComponent(i)[j], copyState.getRounds().getVisibilityOfComponent(i)[j]);
                         RoundCard roundCard = state.getRounds().get(i);
-                        if (state.getRounds().isComponentVisible(i, 0)) {
+                        if (state.getRounds().isVisibleTo(i, 0)) {
                             assertEquals(roundCard, copyState.getRounds().get(i));
                         } else {
                             // We need to check Component Name, as equality also checks componentID, which will not match

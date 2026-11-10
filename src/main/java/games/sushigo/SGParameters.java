@@ -7,13 +7,14 @@ import utilities.Pair;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.LinkedHashMap;
 
 public class SGParameters extends AbstractParameters {
     public String dataPath = "data/sushigo/";
 
     public int nRounds = 3;
 
-    public HashMap<Pair<SGCard.SGCardType, Integer>, Integer> nCardsPerType = new HashMap<Pair<SGCard.SGCardType, Integer>, Integer>() {{
+    public HashMap<Pair<SGCard.SGCardType, Integer>, Integer> nCardsPerType = new LinkedHashMap<Pair<SGCard.SGCardType, Integer>, Integer>() {{
         put(new Pair<>(SGCard.SGCardType.Maki, 3), 8);
         put(new Pair<>(SGCard.SGCardType.Maki, 2), 12);
         put(new Pair<>(SGCard.SGCardType.Maki, 1), 6);
@@ -49,7 +50,7 @@ public class SGParameters extends AbstractParameters {
     protected AbstractParameters _copy() {
         SGParameters sgp = new SGParameters();
         sgp.dataPath = dataPath;
-        sgp.nCardsPerType = new HashMap<>(nCardsPerType);
+        sgp.nCardsPerType = new LinkedHashMap<>(nCardsPerType);
 
         sgp.valueMakiMost = valueMakiMost;
         sgp.valueMakiSecond = valueMakiSecond;

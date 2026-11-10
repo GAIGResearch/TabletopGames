@@ -55,3 +55,12 @@ json/experiments/Lab3_Connect4.json
 sgrun/
 cp.txt
 /claude_game_creator/
+
+# Local working artifacts (reports, council runs, scratch)
+.artifacts/
+
+# Agent session scratch (plans, notes)
+.hermes/
+
+# Experiment configs, seeds and prototype bags: data, kept local
+Experiments/

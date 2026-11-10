@@ -239,8 +239,8 @@ public class TMGameState extends AbstractGameState {
                     copy.playerHands[i].clear();
                 }
             }
-            copy.corpCards.shuffle(rnd);
-            copy.projectCards.shuffle(rnd);
+            copy.corpCards.shuffle(redeterminisationRnd);
+            copy.projectCards.shuffle(redeterminisationRnd);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerHands[i].getSize(); j++) {
