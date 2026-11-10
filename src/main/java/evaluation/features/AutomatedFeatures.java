@@ -449,7 +449,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
         // load files...the columns should correspond to the underlying vector
         // while allowing for additional columns (for target values)
-        Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", inputFiles);
+        // With a maxRecords limit, only the last maxRecords rows are held in memory, however large the files are
+        Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", maxRecords, inputFiles);
         List<String> headers = data.a;
         List<List<String>> dataRows = data.b;
 

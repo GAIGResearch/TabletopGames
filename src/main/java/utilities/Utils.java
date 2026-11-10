@@ -390,6 +390,53 @@ public abstract class Utils {
         return Pair.of(header, data);
     }
 
+    /**
+     * As {@link #loadDataWithHeader(String, String...)}, but keeps only the last maxRows rows (taken across the files
+     * in order), so that memory scales with maxRows and not with the size of the files.
+     * Rows whose column count does not match the header are dropped while reading, and do not count towards maxRows.
+     *
+     * @param maxRows the maximum number of rows to return; if this is not positive, then all rows are returned
+     */
+    public static Pair<List<String>, List<List<String>>> loadDataWithHeader(String delimiter, int maxRows, String... files) {
+        if (maxRows <= 0)
+            return loadDataWithHeader(delimiter, files);
+        if (files.length == 0)
+            return Pair.of(new ArrayList<>(), new ArrayList<>());
+        String splitOn = Pattern.quote(delimiter);
+        // As in the unlimited version, the header is that of the last file
+        List<String> header;
+        try (BufferedReader reader = new BufferedReader(new FileReader(files[files.length - 1]))) {
+            header = Arrays.asList(reader.readLine().split(splitOn));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem reading file " + files[files.length - 1]);
+        }
+        ArrayDeque<List<String>> lastRows = new ArrayDeque<>(maxRows + 1);
+        long skippedRows = 0;
+        for (String file : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                reader.readLine(); // header
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    List<String> datum = Arrays.asList(line.split(splitOn));
+                    if (datum.size() != header.size()) {
+                        skippedRows++;
+                        continue;
+                    }
+                    lastRows.addLast(datum);
+                    if (lastRows.size() > maxRows)
+                        lastRows.removeFirst();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new AssertionError("Problem reading file " + file);
+            }
+        }
+        if (skippedRows > 0)
+            System.err.println("Warning: Skipped " + skippedRows + " rows with inconsistent number of columns");
+        return Pair.of(header, new ArrayList<>(lastRows));
+    }
+
     public static void writeDataWithHeader(String delimiter, List<String> newFeatureNames, List<List<Object>> newDataRows, String outputFile) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
             // Write the header
