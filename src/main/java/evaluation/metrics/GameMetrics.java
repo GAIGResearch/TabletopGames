@@ -204,6 +204,40 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
+    /**
+     * Records the wall-clock time each agent took over each decision (one row per call to getAction()).
+     * Forced moves (only one action available, so the agent is not asked) are not recorded.
+     * Use with a ReportType of RawData/RawDataPerEvent, and group by PlayerName for per-agent statistics.
+     */
+    public static class AgentDecisionTime extends AbstractMetric {
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            return new HashMap<>() {{
+                put("PlayerIdx", Integer.class);
+                put("PlayerName", String.class);
+                put("Time (ms)", Double.class);
+                put("ActionSpace", Integer.class);
+            }};
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            long nanos = listener.getGame().getLastDecisionTime(e.playerID);
+            if (nanos < 0) return false;  // forced move - the agent was not asked
+            records.put("PlayerIdx", e.playerID);
+            records.put("PlayerName", listener.getGame().getPlayers().get(e.playerID).toString());
+            records.put("Time (ms)", nanos / 1e6);
+            records.put("ActionSpace", e.actions == null ? -1 : e.actions.size());
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(ACTION_CHOSEN);
+        }
+    }
+
     public static class OrdinalPosition extends AbstractMetric {
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {

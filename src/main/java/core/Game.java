@@ -57,6 +57,8 @@ public class Game {
     private ArrayList<Pair<Integer, Integer>> actionSpaceSize;
     // Number of times an agent is asked for decisions
     private int nDecisions;
+    // Time (ns) of the most recent getAction() call per player; -1 if that action was forced
+    private final Map<Integer, Long> lastDecisionTime = new HashMap<>();
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
     private boolean pause, stop;
@@ -250,6 +252,7 @@ public class Game {
         agentTime = 0;
         actionComputeTime = 0;
         nDecisions = 0;
+        lastDecisionTime.clear();
         actionComputeCount = 0;
         copyCount = 0;
         nextCount = 0;
@@ -428,6 +431,7 @@ public class Game {
                 // Can only do 1 action, so do it.
                 action = observedActions.getFirst();
                 currentPlayer.registerUpdatedObservation(observation);
+                lastDecisionTime.put(activePlayer, -1L);
             } else {
                 // Get action from player, and time it
                 s = System.nanoTime();
@@ -436,7 +440,9 @@ public class Game {
                 action = currentPlayer.getAction(observation, observedActions);
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
-                agentTime += (System.nanoTime() - s);
+                long decisionTime = (long) (System.nanoTime() - s);
+                agentTime += decisionTime;
+                lastDecisionTime.put(activePlayer, decisionTime);
                 nDecisions++;
             }
 
@@ -570,6 +576,16 @@ public class Game {
      */
     public double getAgentTime() {
         return agentTime / nDecisions;
+    }
+
+    /**
+     * Wall-clock time (nanoseconds) the given player took over its most recent call to getAction().
+     * Returns -1 if that player's most recent action was forced (only one action available, so the
+     * player was not asked), or if the player has not yet acted in this game.
+     * This is set before ACTION_CHOSEN is fired, so is valid for listeners on that event.
+     */
+    public long getLastDecisionTime(int playerID) {
+        return lastDecisionTime.getOrDefault(playerID, -1L);
     }
 
     /**
