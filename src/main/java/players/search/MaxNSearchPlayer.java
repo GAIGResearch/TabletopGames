@@ -160,9 +160,6 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
         for (AbstractAction action : actions) {
             AbstractGameState stateCopy = state.copy();
             getForwardModel().next(stateCopy, action.copy());
-            // if we are at the bottom, then save a bit of time by not calculating the valid actions (which we'll never try)
-            List<AbstractAction> nextActions = searchDepth > 0 ? getForwardModel().computeAvailableActions(stateCopy) : List.of();
-
             int newDepth = switch (params.searchUnit) {
                 case ACTION -> searchDepth - 1;
                 case MACRO_ACTION ->
@@ -170,6 +167,11 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
                 case TURN -> state.getTurnCounter() != stateCopy.getTurnCounter() ? searchDepth - 1 : searchDepth;
                 case ROUND -> state.getRoundCounter() != stateCopy.getRoundCounter() ? searchDepth - 1 : searchDepth;
             };
+
+            // stateCopy is only evaluated (not searched) if it is at the bottom of the search or terminal, so we
+            // do not need its actions. Some games also throw if asked for the actions of a terminal state.
+            List<AbstractAction> nextActions = newDepth > 0 && stateCopy.isNotTerminal()
+                    ? getForwardModel().computeAvailableActions(stateCopy) : List.of();
 
             // recurse - we are here just interested in the value of stateCopy, and hence of taking action
             // We are not interested in the best action from stateCopy
