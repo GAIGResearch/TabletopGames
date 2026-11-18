@@ -81,8 +81,7 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
                 playerViews[i].setOpaque(false);
 
                 // Get agent name
-                String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                String agentName = split[split.length - 1];
+                String agentName = game.getPlayers().get(i).toString();
 
                 // Create border, layouts and keep track of this view
                 TitledBorder title = BorderFactory.createTitledBorder(
@@ -113,7 +112,7 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
             JPanel infoPanel = createGameStateInfoPanel("MonopolyDeal", gameState, width, defaultInfoPanelHeight);
 
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, false, null, null, null);
+            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, null, null, null);
 
             // Add all views to frame
             parent.setLayout(new BoxLayout(parent, BoxLayout.Y_AXIS));

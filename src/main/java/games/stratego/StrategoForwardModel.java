@@ -214,7 +214,7 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
     public ActionTreeNode initActionTree(AbstractGameState state) {
         StrategoGameState sgs = (StrategoGameState) state;
         int gridSize = ((StrategoParams) sgs.getGameParameters()).gridSize;
-        root = new ActionTreeNode(0, "root");
+        ActionTreeNode root = new ActionTreeNode(0, "root");
 
         // Tree Structure
         // 0 - Root

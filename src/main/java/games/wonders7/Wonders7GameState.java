@@ -13,7 +13,6 @@ import games.wonders7.cards.Wonder7Board;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static games.wonders7.Wonders7Constants.Resource.*;
 import static games.wonders7.cards.Wonder7Card.CardType.*;
 
@@ -186,7 +185,8 @@ public class Wonders7GameState extends AbstractGameState {
         // where -1 is immediate loss, and +1 is immediate win
         // This is used by a number of agents as a default, including MCTS, to value the current state. If the game has a direct score, then the simplest approach here is just to scale this in line with some plausible maximum
         // see DominionGameState._getHeuristicScore() for an example of this; and contrast to DominionHeuristic for a more sophisticated approach
-        return new Wonders7Heuristic().evaluateState(this, playerId);
+//        return new Wonders7Heuristic().evaluateState(this, playerId); TODO CHANGE THIS BACK
+        return getGameScore(playerId);
     }
 
     protected void updateEndOfAgeMilitaryVPs() {
@@ -248,7 +248,7 @@ public class Wonders7GameState extends AbstractGameState {
     }
 
     public int cardsOfType(Wonder7Card.Type type, int player) {
-        return (int) playedCards.get(player).getComponents().stream().filter(c -> c.type == type).count();
+        return (int) playedCards.get(player).getComponents().stream().filter(c -> c.buildingType == type).count();
     }
 
     public Wonders7GameParameters getParams() {

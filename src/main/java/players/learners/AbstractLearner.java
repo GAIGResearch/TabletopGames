@@ -208,12 +208,23 @@ public abstract class AbstractLearner implements ILearner {
             int j = 1;
             for (String h : descriptions) {
                 if (indexForDescriptions.get(h) != null) {
-                    regressionData[j] = Double.parseDouble(allData.get(indexForDescriptions.get(h)));
+                    regressionData[j] = parseValue(allData.get(indexForDescriptions.get(h)));
                     j++;
                 }
             }
             dataArray[i] = regressionData;
         }
+    }
+
+    /**
+     * Parses a data value as a double; Boolean features are written as true/false and become 1/0
+     */
+    public static double parseValue(String value) {
+        if (value.equalsIgnoreCase("true"))
+            return 1.0;
+        if (value.equalsIgnoreCase("false"))
+            return 0.0;
+        return Double.parseDouble(value);
     }
 
 }

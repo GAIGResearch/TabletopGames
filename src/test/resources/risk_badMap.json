@@ -1,0 +1,16 @@
+{
+  "id": "Map with a neighbour that is not on it",
+  "type": "graph",
+  "verticesKey": "name",
+  "neighboursKey": "neighbours",
+  "maxNeighbours": -1,
+  "continents": [
+    {"name": "North", "bonus": 4}
+  ],
+  "nodes": [
+    {"name": ["String", "A"], "continent": ["String", "North"], "symbol": ["String", "Infantry"],
+     "neighbours": ["String[]", ["B"]]},
+    {"name": ["String", "B"], "continent": ["String", "North"], "symbol": ["String", "Cavalry"],
+     "neighbours": ["String[]", ["A", "Atlantis"]]}
+  ]
+}

@@ -74,7 +74,7 @@ public abstract class DominionAction extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, player, dummyAction);
+        return Objects.hash(type.ordinal(), player, dummyAction);  // ordinal, as an enum hashCode varies between JVM runs
     }
 
     @Override

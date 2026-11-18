@@ -1,0 +1,14 @@
+{
+  "description": "Ventlife Rulebook 3.0 tile distribution. Each tile is a Black Smoker with a left and a right terrain below it. quantity gives the tiles added at 2, 3 and 4 players: a game uses every column up to its player count.",
+  "tiles": [
+    {"left": "Basalt Ridge", "right": "Diffuse Vents", "quantity": [5, 2, 1]},
+    {"left": "Basalt Ridge", "right": "Microbial Mat", "quantity": [5, 2, 1]},
+    {"left": "Diffuse Vents", "right": "Basalt Ridge", "quantity": [5, 1, 2]},
+    {"left": "Diffuse Vents", "right": "Microbial Mat", "quantity": [5, 2, 1]},
+    {"left": "Microbial Mat", "right": "Basalt Ridge", "quantity": [5, 1, 2]},
+    {"left": "Microbial Mat", "right": "Diffuse Vents", "quantity": [5, 1, 2]},
+    {"left": "Basalt Ridge", "right": "Basalt Ridge", "quantity": [2, 1, 1]},
+    {"left": "Diffuse Vents", "right": "Diffuse Vents", "quantity": [2, 1, 1]},
+    {"left": "Microbial Mat", "right": "Microbial Mat", "quantity": [2, 1, 1]}
+  ]
+}

@@ -85,7 +85,7 @@ public class TMDeckDisplay extends JComponent implements IScreenHighlight {
 
         if (deck.getSize() > 0) {
             for (int i = 0; i < deck.getSize(); i++) {
-//            if (playerHand.isComponentVisible(i, gs.getCurrentPlayer())) {
+//            if (playerHand.isVisibleTo(i, gs.getCurrentPlayer())) {
                 if (deck.get(i) != null) {
                     cardViews[i].update(gs, deck.get(i), i);
                     cardViews[i].repaint();

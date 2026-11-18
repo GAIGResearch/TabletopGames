@@ -8,7 +8,9 @@ import evaluation.optimisation.OneStepDeviations;
 import evaluation.optimisation.ParameterSearch;
 import gui.Frontend;
 import gui.FrontendSimple;
+import evaluation.jsonBag.JSONBagValueFunctionExperiments;
 import gui.StateRenderer;
+import web.WebServer;
 
 import java.util.Arrays;
 
@@ -26,8 +28,10 @@ public class TAG {
         ExpertIteration,
         OneStepDeviations,
         SkillLadder,
+        JSONBagValueFunctionExperiments,
         StateRenderer,
-        MCTSBudgetSweep;
+        MCTSBudgetSweep,
+        WebServer;
 
         public static Entry find(String name) {
             for (Entry e : Entry.values()) {
@@ -74,11 +78,17 @@ public class TAG {
             case SkillLadder:
                 SkillLadder.main(remainingArgs);
                 break;
+            case JSONBagValueFunctionExperiments:
+                JSONBagValueFunctionExperiments.main(remainingArgs);
+                break;
             case StateRenderer:
                 StateRenderer.main(remainingArgs);
                 break;
             case MCTSBudgetSweep:
                 MCTSBudgetSweep.main(remainingArgs);
+                break;
+            case WebServer:
+                WebServer.main(remainingArgs);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + entry);

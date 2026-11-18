@@ -72,7 +72,7 @@ public class DescentGUI extends AbstractGUIManager {
         eastWrapper.add(east);
 
         JPanel infoPanel = createGameStateInfoPanel("Descent2e", dgs, maxWidth/2, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view}, maxWidth/2, defaultActionPanelHeight, false, false, null, this::onMouseEnter, this::onMouseExit);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view}, maxWidth/2, defaultActionPanelHeight, false, null, this::onMouseEnter, this::onMouseExit);
 
         JPanel south = new JPanel();
         south.setOpaque(false);
@@ -249,34 +249,14 @@ public class DescentGUI extends AbstractGUIManager {
         parent.repaint();
     }
 
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout,
-                                           boolean opaque,
+    @Override
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean opaque,
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
-        JPanel actionPanel = new JPanel();
-        actionPanel.setPreferredSize(new Dimension(width, height*100));
-        actionPanel.setOpaque(false);
-
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights, onActionSelected, onMouseEnter, onMouseExit);
-            actionButtons[i] = ab;
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.informAllActionButtons(actionButtons);
-        }
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
+        JComponent pane = super.createActionPanel(highlights, width, height, opaque, onActionSelected, onMouseEnter,
+                onMouseExit);
         pane.setMaximumSize(new Dimension(width, height));
-        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        pane.getVerticalScrollBar().setUnitIncrement(16);
         return pane;
     }
 

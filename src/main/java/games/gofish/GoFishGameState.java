@@ -11,6 +11,7 @@ import games.GameType;
 import utilities.DeterminisationUtilities;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 
 /**
  * <p>Game state for Go Fish. Data-only: all initialisation and rule logic lives in {@link GoFishForwardModel}.</p>
@@ -23,6 +24,10 @@ import java.util.*;
  *     <li>playerBooks - the books each player has laid down, as their cards, VISIBLE_TO_ALL</li>
  *     <li>extraTurn - whether the current player takes another turn after their ask</li>
  *     <li>knownVoids - the ranks each player is publicly known not to hold</li>
+ *     <li>shownBecause - for each card in a hand that is shown to the table, why it was shown (the kinds of
+ *     {@link GoFishKnowledge} it gives), keyed by componentID</li>
+ *     <li>knowledge - the kinds of public knowledge that redeterminised copies of this state use. The real game state
+ *     uses them all; an agent's observation may use fewer (see {@link GoFishKnowledgeDecorator})</li>
  * </ul>
  */
 public class GoFishGameState extends AbstractGameState implements IPrintable {
@@ -32,6 +37,8 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     List<Deck<FrenchCard>> playerBooks;
     boolean extraTurn;
     GoFishKnownVoids knownVoids;
+    Map<Integer, EnumSet<GoFishKnowledge>> shownBecause = new HashMap<>();
+    EnumSet<GoFishKnowledge> knowledge = GoFishKnowledge.all();
 
     public GoFishGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -63,15 +70,56 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
             copy.playerBooks.add(books.copy());
         copy.extraTurn = extraTurn;
         copy.knownVoids = knownVoids.copy();
-
-        if (getCoreGameParameters().partialObservable && playerId != -1) {
-            List<Deck<FrenchCard>> decks = new ArrayList<>();
-            decks.add(copy.drawDeck);
-            decks.addAll(copy.playerHands);
-            // cards shown to the table stay where they are, and no player is given a rank they are known not to hold
-            DeterminisationUtilities.reshuffle(playerId, decks, c -> true, redeterminisationRnd, copy.knownVoids::permits);
-        }
+        copy.shownBecause = new HashMap<>();
+        for (Map.Entry<Integer, EnumSet<GoFishKnowledge>> e : shownBecause.entrySet())
+            copy.shownBecause.put(e.getKey(), EnumSet.copyOf(e.getValue()));
+        copy.knowledge = EnumSet.copyOf(knowledge);
+        // the copy is given the core parameters only after _copy, so this state's are the ones to check
+        if (getCoreGameParameters().partialObservable)
+            copy.redeterminise(playerId, redeterminisationRnd);
         return copy;
+    }
+
+    /**
+     * From now on this state, and every copy made from it, uses only those kinds of public knowledge that are both in
+     * {@code knowledge} and already used. If that is fewer than before, the state forgets the others and is
+     * redeterminised in place from the player's perspective.
+     */
+    public void restrictKnowledge(Set<GoFishKnowledge> knowledge, int playerId) {
+        if (this.knowledge.retainAll(knowledge) && getCoreGameParameters().partialObservable)
+            redeterminise(playerId, redeterminisationRnd);
+    }
+
+    private void redeterminise(int playerId, Random rnd) {
+        if (playerId < 0) return;
+        if (!knowledge.equals(GoFishKnowledge.all()))
+            forgetUnusedKnowledge();
+        List<Deck<FrenchCard>> decks = new ArrayList<>();
+        decks.add(drawDeck);
+        decks.addAll(playerHands);
+        // cards shown to the table stay where they are, and no player is given a rank they are known not to hold
+        BiPredicate<Deck<FrenchCard>, FrenchCard> permitted = knowledge.contains(GoFishKnowledge.VOIDS) ? knownVoids::permits : null;
+        DeterminisationUtilities.reshuffle(playerId, decks, c -> true, rnd, permitted);
+    }
+
+    /**
+     * A card shown to the table only for reasons this state does not use goes back to being seen by its owner alone.
+     */
+    private void forgetUnusedKnowledge() {
+        for (int p = 0; p < playerHands.size(); p++) {
+            PartialObservableDeck<FrenchCard> hand = playerHands.get(p);
+            for (int i = 0; i < hand.getSize(); i++) {
+                int id = hand.get(i).getComponentID();
+                EnumSet<GoFishKnowledge> why = shownBecause.get(id);
+                if (why == null || !why.retainAll(knowledge)) continue;
+                if (why.isEmpty()) {
+                    boolean[] ownerOnly = new boolean[getNPlayers()];
+                    ownerOnly[p] = true;
+                    hand.setVisibilityOfComponent(i, ownerOnly);
+                    shownBecause.remove(id);
+                }
+            }
+        }
     }
 
     @Override
@@ -94,7 +142,9 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     protected boolean _equals(Object o) {
         if (!(o instanceof GoFishGameState that)) return false;
         return extraTurn == that.extraTurn
+                && Objects.equals(knowledge, that.knowledge)
                 && Objects.equals(knownVoids, that.knownVoids)
+                && Objects.equals(shownBecause, that.shownBecause)
                 && Objects.equals(playerHands, that.playerHands)
                 && Objects.equals(drawDeck, that.drawDeck)
                 && Objects.equals(playerBooks, that.playerBooks);
@@ -102,7 +152,8 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerHands, drawDeck, playerBooks, extraTurn, knownVoids);
+        return Objects.hash(super.hashCode(), playerHands, drawDeck, playerBooks, extraTurn, knownVoids,
+                shownBecause, knowledge);
     }
 
     @Override
@@ -132,6 +183,43 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
 
     public GoFishKnownVoids getKnownVoids() {
         return knownVoids;
+    }
+
+    /**
+     * The kinds of public knowledge that redeterminised copies of this state use (a copy).
+     */
+    public EnumSet<GoFishKnowledge> getKnowledge() {
+        return EnumSet.copyOf(knowledge);
+    }
+
+    /**
+     * Why the card was shown to the table (a copy): empty if it has not been.
+     */
+    public EnumSet<GoFishKnowledge> getShownBecause(FrenchCard card) {
+        EnumSet<GoFishKnowledge> why = shownBecause.get(card.getComponentID());
+        return why == null ? EnumSet.noneOf(GoFishKnowledge.class) : EnumSet.copyOf(why);
+    }
+
+    /**
+     * Whether the card was shown to the table for this reason.
+     */
+    public boolean isShownBecause(FrenchCard card, GoFishKnowledge why) {
+        EnumSet<GoFishKnowledge> reasons = shownBecause.get(card.getComponentID());
+        return reasons != null && reasons.contains(why);
+    }
+
+    /**
+     * Records that the card, now in a hand and shown to the table, was shown for this reason.
+     */
+    public void recordShown(FrenchCard card, GoFishKnowledge why) {
+        shownBecause.computeIfAbsent(card.getComponentID(), id -> EnumSet.noneOf(GoFishKnowledge.class)).add(why);
+    }
+
+    /**
+     * Forgets why the card was shown, as it leaves a hand.
+     */
+    public void forgetShown(FrenchCard card) {
+        shownBecause.remove(card.getComponentID());
     }
 
     public boolean isExtraTurn() {

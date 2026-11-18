@@ -77,7 +77,7 @@ public class HeartsForwardModel extends StandardForwardModel {
             }
         }
 
-        if (passDirection(hgs) == 0) {
+        if (hgs.getPassDirection() == 0) {
             // No passing this round, so nobody has a decision to make until the first trick
             startPlayingPhase(hgs);
         } else {
@@ -87,33 +87,11 @@ public class HeartsForwardModel extends StandardForwardModel {
     }
 
     /**
-     * How many seats to the left the passed cards travel this round: left, right, across, and then
-     * a round with no passing at all. If passing is switched off in the parameters, there is never
-     * any passing.
-     */
-    private int passDirection(HeartsGameState hgs) {
-        if (!((HeartsParameters) hgs.getGameParameters()).passCards)
-            return 0;
-        switch (hgs.getRoundCounter() % 4) {
-            case 0:
-                return 1;
-            case 1:
-                return hgs.getNPlayers() - 1;
-            case 2:
-                return hgs.getNPlayers() / 2;
-            case 3:
-                return 0;
-            default:
-                throw new IllegalStateException("Unexpected value: " + hgs.getRoundCounter());
-        }
-    }
-
-    /**
      * Everyone has committed all their cards: hand them on, and start trick play with the player
      * who now holds the starting card.
      */
     private void resolvePasses(HeartsGameState hgs) {
-        int passDirection = passDirection(hgs);
+        int passDirection = hgs.getPassDirection();
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             Deck<FrenchCard> nextPlayerDeck = hgs.playerDecks.get((i + passDirection) % hgs.getNPlayers());
             for (FrenchCard card : hgs.pendingPasses.get(i)) {

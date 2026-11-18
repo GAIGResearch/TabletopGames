@@ -2,8 +2,10 @@ package games.dotsboxes;
 
 import core.*;
 import core.actions.AbstractAction;
+import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -41,12 +43,6 @@ public class DBGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel();
         main.setOpaque(false);
         main.setLayout(new BorderLayout());
-        JPanel rules = new JPanel();
-        rules.setOpaque(false);
-        JLabel ruleText = new JLabel(getRuleText());
-        ruleText.setOpaque(false);
-        ruleText.setPreferredSize(new Dimension((int)(2/3.*displayWidth),displayHeight));
-        rules.add(ruleText);
 
         view = new DBGridBoardView(((DBGameState)game.getGameState()));
         JPanel infoPanel = createGameStateInfoPanel("Dots and Boxes", game.getGameState(), displayWidth, defaultInfoPanelHeight);
@@ -57,7 +53,7 @@ public class DBGUIManager extends AbstractGUIManager {
         main.add(label, BorderLayout.SOUTH);
 
         pane.add("Main", main);
-        pane.add("Rules", rules);
+        RulesView.addTabs(pane, GameType.DotsAndBoxes, game.getGameState().getGameParameters(), displayHeight);
         parent.setLayout(new BorderLayout());
 
         JPanel wrapper = new JPanel();
@@ -131,15 +127,5 @@ public class DBGUIManager extends AbstractGUIManager {
         if (gameState != null) {
             view.updateGameState(((DBGameState)gameState));
         }
-    }
-
-    private String getRuleText() {
-        String rules = "<html><center><h1>Dots & Boxes</h1></center><br/><hr><br/>";
-        rules += "<p>Play happens on a grid with dots in the corners of all cells. Players alternate drawing lines between the dots.</p><br/>";
-        rules += "<p>Whenever a grid cell is completely enclosed, the player who drew the last edge gets 1 point. If a line drawn closes X cells at the same time, then the player gets X points. If any cell is closed, the same player gets to draw another line.</p><br/>";
-        rules += "<p>WIN: The player with most boxes completed (points) wins.</p>";
-        rules += "<hr><p><b>INTERFACE: </b> Place edges by clicking on 2 adjacent dots where an edge doesn't already exist. Invalid actions will be ignored.</p>";
-        rules += "</html>";
-        return rules;
     }
 }

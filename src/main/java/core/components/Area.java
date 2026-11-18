@@ -15,19 +15,19 @@ public class Area extends Component implements IComponentContainer<Component> {
 
     public Area(int owner, String name) {
         super(CoreConstants.ComponentType.AREA, "");
-        this.components = new HashMap<>();
+        this.components = new LinkedHashMap<>();
         this.ownerId = owner;
     }
 
     private Area(int owner, String name, int ID) {
         super(CoreConstants.ComponentType.AREA, "", ID);
-        this.components = new HashMap<>();
+        this.components = new LinkedHashMap<>();
         this.ownerId = owner;
     }
 
     public Area copy() {
         Area new_area = new Area(ownerId, componentName, componentID);
-        new_area.components = new HashMap<>();
+        new_area.components = new LinkedHashMap<>();
         for (Map.Entry<Integer, Component> c: this.components.entrySet()){
             new_area.components.put(c.getKey(), c.getValue().copy());
         }

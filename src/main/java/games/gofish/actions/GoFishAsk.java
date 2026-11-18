@@ -6,6 +6,7 @@ import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import games.gofish.GoFishForwardModel;
 import games.gofish.GoFishGameState;
+import games.gofish.GoFishKnowledge;
 import games.gofish.GoFishKnownVoids;
 import games.gofish.GoFishParameters;
 
@@ -37,17 +38,15 @@ public class GoFishAsk extends AbstractAction {
         Arrays.fill(allVisible, true);
 
         // asking shows the table that the asker holds the rank
-        if (!holdsVisibleToAll(askerHand, rank))
-            for (int i = 0; i < askerHand.getSize(); i++)
-                if (askerHand.get(i).number == rank) {
-                    askerHand.setVisibilityOfComponent(i, allVisible);
-                    break;
-                }
+        showAskersCard(state, askerHand, allVisible);
 
         knownVoids.record(targetPlayer, rank);
         if (state.playerHasRank(targetPlayer, rank)) {
-            for (FrenchCard c : GoFishForwardModel.removeCardsOfRank(targetHand, rank).getComponents())
+            for (FrenchCard c : GoFishForwardModel.removeCardsOfRank(targetHand, rank).getComponents()) {
+                state.forgetShown(c);
                 askerHand.add(c, allVisible);
+                state.recordShown(c, GoFishKnowledge.CARDS_FISHED_FOR);
+            }
             knownVoids.received(asker, rank);
             state.setExtraTurn(params.continueOnSuccess);
         } else {
@@ -59,9 +58,10 @@ public class GoFishAsk extends AbstractAction {
                 return true;
             }
             boolean shown = params.continueOnDrawingSameRank && drawn.number == rank;
-            if (shown)
+            if (shown) {
                 askerHand.add(drawn, allVisible);
-            else
+                state.recordShown(drawn, GoFishKnowledge.CARDS_FISHED_FOR);
+            } else
                 askerHand.add(drawn);
             knownVoids.drew(asker);
             state.setExtraTurn(shown);
@@ -69,16 +69,33 @@ public class GoFishAsk extends AbstractAction {
         return true;
     }
 
-    private static boolean holdsVisibleToAll(PartialObservableDeck<FrenchCard> hand, int rank) {
+    /**
+     * Shows one of the asker's cards of the rank, recorded as {@link GoFishKnowledge#ASKERS_CARD}, unless one already
+     * is. A card of the rank already shown for another reason is preferred, so the table sees nothing new.
+     */
+    private void showAskersCard(GoFishGameState state, PartialObservableDeck<FrenchCard> hand, boolean[] allVisible) {
+        int chosen = -1;
+        boolean chosenVisible = false;
         for (int i = 0; i < hand.getSize(); i++) {
-            if (hand.get(i).number != rank) continue;
-            boolean visibleToAll = true;
-            for (boolean v : hand.getVisibilityOfComponent(i))
-                visibleToAll &= v;
-            if (visibleToAll)
-                return true;
+            FrenchCard c = hand.get(i);
+            if (c.number != rank) continue;
+            if (state.isShownBecause(c, GoFishKnowledge.ASKERS_CARD))
+                return;
+            boolean visible = visibleToAll(hand, i);
+            if (chosen < 0 || (visible && !chosenVisible)) {
+                chosen = i;
+                chosenVisible = visible;
+            }
         }
-        return false;
+        if (chosen < 0) return;
+        hand.setVisibilityOfComponent(chosen, allVisible);
+        state.recordShown(hand.get(chosen), GoFishKnowledge.ASKERS_CARD);
+    }
+
+    private static boolean visibleToAll(PartialObservableDeck<FrenchCard> hand, int i) {
+        for (boolean v : hand.getVisibilityOfComponent(i))
+            if (!v) return false;
+        return true;
     }
 
     @Override

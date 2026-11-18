@@ -55,7 +55,7 @@ public class LLActionFeaturesLarge implements IActionFeatureVector {
         if (targetPlayer > -1) {
             PartialObservableDeck<LoveLetterCard> hand = llgs.getPlayerHandCards().get(targetPlayer);
             for (int i = 0; i < hand.getSize(); i++) {
-                if (hand.isComponentVisible(i, playerID)) {
+                if (hand.isVisibleTo(i, playerID)) {
                     int index = hand.get(i).cardType.ordinal();
                     retValue[2 * featuresPerGroup + index] = 1.0;
                 }

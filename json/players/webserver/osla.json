@@ -1,0 +1,4 @@
+{
+  "label": "One-step look-ahead",
+  "class": "players.simple.OSLAPlayer"
+}

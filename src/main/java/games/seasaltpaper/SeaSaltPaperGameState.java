@@ -112,7 +112,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
                     ArrayList<SeaSaltPaperCard> shuffledCards = new ArrayList<>(); // Cards to be removed from playerHands and redeterminized
                     for (int j=0; j < playerHands.get(i).getSize(); j++) {
                         SeaSaltPaperCard cardCopy = gsCopy.playerHands.get(i).get(j);
-                        if (!playerHands.get(i).isComponentVisible(j, playerId)) { // if card not visible to playerId
+                        if (!playerHands.get(i).isVisibleTo(j, playerId)) { // if card not visible to playerId
                             shuffledCards.add(cardCopy);
                         }
                         else {

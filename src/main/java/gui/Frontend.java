@@ -17,6 +17,8 @@ import javax.swing.Timer;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 import java.util.*;
@@ -489,6 +491,13 @@ public class Frontend extends GUI {
 
         // Frame properties
         setFrameProperties();
+        // Closing the main window ends the program (the game thread and AWT threads would otherwise keep the JVM alive)
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                System.exit(0);
+            }
+        });
     }
 
     public static void main(String[] args) {

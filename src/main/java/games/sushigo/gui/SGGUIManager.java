@@ -77,8 +77,7 @@ public class SGGUIManager extends AbstractGUIManager {
                     playerHand.setPreferredSize(new Dimension(playerAreaWidth, playerAreaHeight));
 
                     // Get agent name
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
+                    String agentName = game.getPlayers().get(i).toString();
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(
@@ -108,7 +107,7 @@ public class SGGUIManager extends AbstractGUIManager {
 
                 // Bottom area will show actions available
                 if (!humanID.isEmpty()) {
-                    JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, false, null, null, null);
+                    JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, null, null, null);
                     parent.add(actionPanel, BorderLayout.SOUTH);
                 }
 
@@ -173,8 +172,7 @@ public class SGGUIManager extends AbstractGUIManager {
                 SGGameState parsedGameState = (SGGameState) gameState;
                 for (int i = 0; i < gameState.getNPlayers(); i++) {
                     playerHands[i].update(parsedGameState);
-                    if (i == gameState.getCurrentPlayer()
-                            || humanPlayerIds.contains(i)) {
+                    if (showHiddenInfo(gameState, i)) {
                         playerHands[i].playerHandView.setFront(true);
                         playerHands[i].setFocusable(true);
                     } else {

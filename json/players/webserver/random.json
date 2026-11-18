@@ -1,0 +1,4 @@
+{
+  "label": "Random",
+  "class": "players.simple.RandomPlayer"
+}

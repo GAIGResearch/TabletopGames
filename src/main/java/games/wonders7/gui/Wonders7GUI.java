@@ -20,6 +20,7 @@ import java.util.Set;
 public class Wonders7GUI extends AbstractGUIManager {
     JLabel ageLabel;
     JScrollPane[] playerViews;
+    PlayerView[] playerPanels;
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 27, 67), 3);
     Border[] playerViewBorders, playerViewBordersHighlight, playerViewBordersHighlightLose, playerViewBordersHighlightWin;
 
@@ -45,6 +46,7 @@ public class Wonders7GUI extends AbstractGUIManager {
         JPanel secondRow = new JPanel();
         secondRow.setLayout(new BoxLayout(secondRow, BoxLayout.X_AXIS));
         playerViews = new JScrollPane[nPlayers];
+        playerPanels = new PlayerView[nPlayers];
         playerViewBorders = new Border[nPlayers];
         playerViewBordersHighlight = new Border[nPlayers];
         playerViewBordersHighlightLose = new Border[nPlayers];
@@ -52,6 +54,7 @@ public class Wonders7GUI extends AbstractGUIManager {
         for (int i = 0; i < nCols; i++) {
             PlayerView playerView = new PlayerView((Wonders7GameState) game.getGameState(), i);
             playerViews[i] = new JScrollPane(playerView);
+            playerPanels[i] = playerView;
             playerViews[i].setPreferredSize(new Dimension(300, 300));
             playerViews[i].setMaximumSize(new Dimension(300, 300));
             playerViews[i].setMinimumSize(new Dimension(300, 300));
@@ -75,6 +78,7 @@ public class Wonders7GUI extends AbstractGUIManager {
         for (int i = nPlayers-1; i >= nCols; i--) {
             PlayerView playerView = new PlayerView((Wonders7GameState) game.getGameState(), i);
             playerViews[i] = new JScrollPane(playerView);
+            playerPanels[i] = playerView;
             playerViews[i].setPreferredSize(new Dimension(300, 300));
             secondRow.add(playerViews[i]);
 
@@ -107,6 +111,9 @@ public class Wonders7GUI extends AbstractGUIManager {
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+        for (int i = 0; i < gameState.getNPlayers(); i++)
+            playerPanels[i].update((Wonders7GameState) gameState,
+                    showHiddenInfo(gameState, i) || !gameState.isNotTerminal());
         if (gameState.isNotTerminal()) {
             ageLabel.setText("Current age: " + ((Wonders7GameState)gameState).getCurrentAge());
             for (int i = 0; i < gameState.getNPlayers(); i++) {

@@ -23,14 +23,14 @@ public class DToken extends Token {
         this.tokenType = tokenType;
         this.position = pos;
         effects = new ArrayList<>();
-        attributeModifiers = new HashMap<>();
+        attributeModifiers = new LinkedHashMap<>();
     }
     public DToken(DescentTypes.DescentToken tokenType, Vector2D pos, int componentID) {
         super(tokenType.name(), componentID);
         this.tokenType = tokenType;
         this.position = pos;
         effects = new ArrayList<>();
-        attributeModifiers = new HashMap<>();
+        attributeModifiers = new LinkedHashMap<>();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class DToken extends Token {
         for (TokenAction act: effects) {
             copy.effects.add(act.copy());
         }
-        copy.attributeModifiers = new HashMap<>(attributeModifiers);
+        copy.attributeModifiers = new LinkedHashMap<>(attributeModifiers);
         copyComponentTo(copy);
         return copy;
     }
@@ -202,7 +202,7 @@ public class DToken extends Token {
             copy.setupHowMany = setupHowMany;
             copy.locations = locations.clone();
             copy.effects = getEffectsCopy();
-            copy.attributeModifiers = new HashMap<>(attributeModifiers);
+            copy.attributeModifiers = new LinkedHashMap<>(attributeModifiers);
             copy.altName = altName;
             return copy;
         }

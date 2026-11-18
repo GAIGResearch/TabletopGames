@@ -219,7 +219,7 @@ final class CribbageTestUtils {
     static List<FrenchCard> cribCardsVisibleTo(CribbageGameState state, int player) {
         List<FrenchCard> visible = new ArrayList<>();
         for (int i = 0; i < state.crib.getSize(); i++)
-            if (state.crib.isComponentVisible(i, player))
+            if (state.crib.isVisibleTo(i, player))
                 visible.add(state.crib.get(i));
         return visible;
     }

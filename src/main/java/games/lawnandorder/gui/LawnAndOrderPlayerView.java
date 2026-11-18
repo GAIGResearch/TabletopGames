@@ -6,6 +6,7 @@ import games.lawnandorder.components.LawnCard;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,45 @@ public class LawnAndOrderPlayerView extends JComponent {
 
     public LawnAndOrderPlayerView(int playerId) {
         this.playerId = playerId;
+        // registers the view with the ToolTipManager, so getToolTipText(MouseEvent) is asked for each card
+        setToolTipText("");
+    }
+
+    /**
+     * The three attributes of the visible card under the mouse; the art alone is not always clear.
+     */
+    @Override
+    public String getToolTipText(MouseEvent e) {
+        LawnCard card = null;
+        if (showCards) {
+            card = cardAt(hand, handArea, e.getPoint());
+            if (chosen != null && chosenArea.contains(e.getPoint()))
+                card = chosen;
+        }
+        if (card == null)
+            card = cardAt(played(), lawnArea, e.getPoint());
+        if (card == null)
+            return null;
+        return "<html>" + LawnCard.Category.TYPE.subcommittee + ": " + card.type
+                + "<br>" + LawnCard.Category.COLOUR.subcommittee + ": " + card.colour
+                + "<br>" + LawnCard.Category.FEATURE.subcommittee + ": " + card.feature + "</html>";
+    }
+
+    /**
+     * The card of the fan under the point; where cards overlap the later one is on top.
+     */
+    private static LawnCard cardAt(List<LawnCard> cards, Rectangle area, Point p) {
+        for (int i = cards.size() - 1; i >= 0; i--)
+            if (fanSlot(cards.size(), i, area).contains(p))
+                return cards.get(i);
+        return null;
+    }
+
+    // the lawn in the order it was played, the first card on the left
+    private List<LawnCard> played() {
+        List<LawnCard> played = new ArrayList<>(lawn);
+        Collections.reverse(played);
+        return played;
     }
 
     @Override
@@ -61,10 +101,7 @@ public class LawnAndOrderPlayerView extends JComponent {
             LawnCardArt.drawCard(g2, chosen, chosenArea, showCards);
         else
             drawEmptySlot(g2, chosenArea);
-        // the lawn in the order it was played, the first card on the left
-        List<LawnCard> played = new ArrayList<>(lawn);
-        Collections.reverse(played);
-        drawFan(g2, played, lawnArea, true);
+        drawFan(g2, played(), lawnArea, true);
 
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 12f));
         g2.setColor(Color.white);
@@ -80,9 +117,13 @@ public class LawnAndOrderPlayerView extends JComponent {
             drawEmptySlot(g, new Rectangle(area.x, area.y, cardWidth, cardHeight));
             return;
         }
-        int step = cards.size() == 1 ? 0 : Math.min(cardWidth + 4, (area.width - cardWidth) / (cards.size() - 1));
         for (int i = 0; i < cards.size(); i++)
-            LawnCardArt.drawCard(g, cards.get(i), new Rectangle(area.x + i * step, area.y, cardWidth, cardHeight), faceUp);
+            LawnCardArt.drawCard(g, cards.get(i), fanSlot(cards.size(), i, area), faceUp);
+    }
+
+    private static Rectangle fanSlot(int nCards, int i, Rectangle area) {
+        int step = nCards == 1 ? 0 : Math.min(cardWidth + 4, (area.width - cardWidth) / (nCards - 1));
+        return new Rectangle(area.x + i * step, area.y, cardWidth, cardHeight);
     }
 
     private static void drawEmptySlot(Graphics2D g, Rectangle r) {

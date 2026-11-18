@@ -1,0 +1,11 @@
+{
+  "label": "MultiTree, 5s",
+  "class": "players.mcts.MCTSParams",
+  "budgetType": "BUDGET_TIME",
+  "opponentTreePolicy" : "MultiTree",
+  "rolloutLength": 30,
+  "heuristic" : {
+    "class": "players.heuristics.ScoreHeuristic"
+  },
+  "budget": 5000
+}

@@ -132,7 +132,7 @@ public class GoFishCopyTest {
                     PartialObservableDeck<FrenchCard> cp = copy.playerHands.get(q);
                     assertEquals(id + ": size of hand " + q, orig.getSize(), cp.getSize());
                     for (int j = 0; j < orig.getSize(); j++)
-                        if (orig.isComponentVisible(j, p))
+                        if (orig.isVisibleTo(j, p))
                             assertEquals(id + ": visible card " + j + " of hand " + q, orig.get(j), cp.get(j));
                     assertEquals(id + ": books of " + q, state.playerBooks.get(q).getComponents(),
                             copy.playerBooks.get(q).getComponents());

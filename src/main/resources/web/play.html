@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TAG Play</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect x=%224%22 y=%224%22 width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%232f6fd6%22/%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%222.6%22 fill=%22white%22/%3E%3Ccircle cx=%2221%22 cy=%2221%22 r=%222.6%22 fill=%22white%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%222.6%22 fill=%22white%22/%3E%3C/svg%3E">
+</head>
+<body class="play">
+<header class="bar">
+    <span class="title" id="title">Starting…</span>
+    <span class="status" id="status">Connecting</span>
+    <span class="spacer"></span>
+    <span class="muted" id="seed"></span>
+    <span class="zoom" role="group" aria-label="Zoom">
+        <button id="zoom-out" title="Smaller (Ctrl + mouse wheel, or pinch)">−</button>
+        <button id="zoom-fit" title="Fit the game to the window">Fit</button>
+        <button id="zoom-in" title="Larger (Ctrl + mouse wheel, or pinch)">+</button>
+    </span>
+    <span class="actions">
+        <button id="rules-button" title="The rules of the game" hidden>Rules</button>
+        <button id="panel-toggle" title="Show or hide the side panel">Panel</button>
+        <button id="sound" title="A sound when it becomes your turn while this tab is in the background"></button>
+        <button id="log" title="Download a record of this game: its setup, seed and moves">Log</button>
+        <button id="restart" title="Play this game again from the start, with the same seed">Restart</button>
+        <button id="new-game" title="The same setup with a new seed">New game</button>
+        <button id="setup" title="Back to the start page">Setup</button>
+    </span>
+</header>
+<div class="main">
+    <div class="stage-wrap">
+        <div class="stage" id="stage">
+            <div class="board" id="board">
+                <canvas id="screen" tabindex="0"></canvas>
+                <canvas id="overlay"></canvas>
+            </div>
+        </div>
+        <div id="notice"><span class="spinner"></span>Starting the game…</div>
+        <div class="toasts" id="toasts"></div>
+        <aside class="rules-panel" id="rules-panel" hidden>
+            <div class="rules-head">
+                <div class="rules-tabs" id="rules-tabs" role="tablist"></div>
+                <button class="close" id="rules-close" title="Close">×</button>
+            </div>
+            <div class="rules-body" id="rules-body"></div>
+        </aside>
+    </div>
+    <aside class="sidebar" id="sidebar" hidden>
+        <section class="panel" id="summary-panel" hidden>
+            <div class="panel-head">
+                <h2>Since your last move <span class="muted" id="summary-count"></span></h2>
+                <button class="close" id="summary-toggle" title="Hide the list">▾</button>
+            </div>
+            <ol class="summary" id="summary"></ol>
+        </section>
+        <section class="panel" id="plan-panel" hidden>
+            <div class="panel-head">
+                <h2>Your plan</h2>
+                <span class="muted" id="plan-count"></span>
+            </div>
+            <p class="muted" id="plan-empty">Choose on the map or below, in any order. Nothing is sent until you press
+                the button.</p>
+            <ol class="plan-steps" id="plan-steps"></ol>
+            <ul class="plan-warnings" id="plan-warnings"></ul>
+            <div class="row plan-buttons">
+                <button id="plan-clear" title="Take everything out of the plan">Clear</button>
+                <button id="plan-send" class="primary" title="Send the plan to the game">Send</button>
+            </div>
+        </section>
+        <section class="panel" id="actions-panel" hidden>
+            <div class="panel-head">
+                <h2 id="actions-title">Your move</h2>
+                <span class="muted" id="action-count"></span>
+            </div>
+            <input id="action-filter" type="search" placeholder="Filter actions" hidden>
+            <div class="action-list" id="action-list"></div>
+        </section>
+        <section class="panel" id="insight-panel" hidden>
+            <div class="panel-head"><h2>AI reasoning</h2></div>
+            <ol class="insight" id="insight"></ol>
+        </section>
+        <section class="panel" id="info-panel" hidden>
+            <div class="panel-head"><h2>Game</h2></div>
+            <table class="scoreboard" id="scoreboard" hidden></table>
+            <p class="muted progress" id="progress" hidden></p>
+            <dl class="info" id="info"></dl>
+        </section>
+        <section class="panel grow" id="history-panel" hidden>
+            <div class="panel-head">
+                <h2>History</h2>
+                <span class="head-buttons">
+                    <button class="close" id="history-rounds" title="Open or close every round" hidden>±</button>
+                    <button class="close" id="history-expand" title="Show the history in the whole side panel">⤢</button>
+                    <button class="close" id="history-column-toggle"
+                            title="Show the history in its own column beside the side panel">◫</button>
+                </span>
+            </div>
+            <ol class="history" id="history"></ol>
+        </section>
+    </aside>
+    <aside class="sidebar history-column" id="history-column" hidden></aside>
+</div>
+<div id="tooltip" hidden></div>
+<div id="region-menu" role="menu" hidden></div>
+
+<dialog id="results">
+    <h2 id="results-title">Game over</h2>
+    <table class="results">
+        <thead><tr><th>Place</th><th>Player</th><th class="num">Score</th></tr></thead>
+        <tbody id="results-body"></tbody>
+    </table>
+    <div class="row">
+        <button id="results-close">Look at the board</button>
+        <span class="actions">
+            <button id="results-restart">Restart</button>
+            <button id="results-new" class="primary">New game</button>
+        </span>
+    </div>
+</dialog>
+<script src="play.js"></script>
+</body>
+</html>

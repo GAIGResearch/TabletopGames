@@ -122,7 +122,7 @@ public class SaboteurGameState extends AbstractGameState {
             List<SaboteurCard> knownDiscards = new ArrayList<>();
             for (int i = 0; i < discardDeck.getSize(); i++) {
                 SaboteurCard c = discardDeck.peek(i);
-                boolean knownByPlayer = discardDeck.getVisibilityForPlayer(i, playerId);
+                boolean knownByPlayer = discardDeck.isVisibleTo(i, playerId);
                 if (knownByPlayer) {
                     knownDiscards.add(c);
                 } else {

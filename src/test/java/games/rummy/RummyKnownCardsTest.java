@@ -41,7 +41,7 @@ public class RummyKnownCardsTest {
         int i = hand.getComponents().indexOf(c);
         assertTrue(c + " is in the hand", i >= 0);
         for (int q = 0; q < nPlayers; q++)
-            assertTrue(c + " visible to player " + q, hand.getVisibilityForPlayer(i, q));
+            assertTrue(c + " visible to player " + q, hand.isVisibleTo(i, q));
     }
 
     @Test
@@ -62,9 +62,9 @@ public class RummyKnownCardsTest {
         fm.next(state, new DrawCard(false));
         PartialObservableDeck<FrenchCard> hand = state.getPlayerHand(0);
         int i = hand.getComponents().indexOf(top);
-        assertTrue(hand.getVisibilityForPlayer(i, 0));
-        assertFalse(hand.getVisibilityForPlayer(i, 1));
-        assertFalse(hand.getVisibilityForPlayer(i, 2));
+        assertTrue(hand.isVisibleTo(i, 0));
+        assertFalse(hand.isVisibleTo(i, 1));
+        assertFalse(hand.isVisibleTo(i, 2));
         assertHandVisibility(state, Set.of());
     }
 
@@ -201,7 +201,7 @@ public class RummyKnownCardsTest {
         FrenchCard other = firstOtherCard(copy.getPlayerHand(0), known);
         int j = copy.getPlayerHand(0).getComponents().indexOf(other);
         copy.getPlayerHand(0).setVisibilityOfComponent(j, 1, true);
-        assertFalse("the original is independent of the copy", state.getPlayerHand(0).getVisibilityForPlayer(j, 1));
+        assertFalse("the original is independent of the copy", state.getPlayerHand(0).isVisibleTo(j, 1));
         assertEquals(state.getPlayerHand(0).getComponents(), copy.getPlayerHand(0).getComponents());
         assertNotEquals(state, copy);
     }

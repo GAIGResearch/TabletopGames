@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.LinkedHashSet;
 
 import static games.descent2e.actions.Triggers.END_TURN;
 import static utilities.Utils.getNeighbourhood;
@@ -51,7 +52,7 @@ public class AcolyteAction extends TokenAction<AcolyteAction> implements IExtend
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
         int heroIdx = acolyte.getOwnerId();
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
-            HashSet<DToken> adjacentVillagers = new HashSet<>();
+            HashSet<DToken> adjacentVillagers = new LinkedHashSet<>();
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
             GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);

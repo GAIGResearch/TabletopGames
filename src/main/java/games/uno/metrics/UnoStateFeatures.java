@@ -72,9 +72,9 @@ public class UnoStateFeatures implements IStateFeatureVector {
         Set<String> numberColors = new HashSet<>();
         Set<Integer> numberValues = new HashSet<>();
         for (UnoCard card : playerHand.getComponents()) {
-            int typeIndex = card.type.ordinal();
+            int typeIndex = card.unoCardType.ordinal();
             data[otherNames.length + typeIndex] += 1.0;
-            if (card.type == UnoCard.UnoCardType.Number) {
+            if (card.unoCardType == UnoCard.UnoCardType.Number) {
                 numberColors.add(card.color);
                 numberValues.add(card.number);
             }

@@ -88,7 +88,7 @@ public class LoveLetterHeuristic extends TunableParameters implements IStateHeur
             for (int player = 0; player < llgs.getNPlayers(); player++) {
                 if (player != playerId) {
                     PartialObservableDeck<LoveLetterCard> deck = llgs.getPlayerHandCards().get(player);
-                    visibleCards += (int) IntStream.range(0, deck.getSize()).filter(i -> deck.getVisibilityForPlayer(i, playerId)).count();
+                    visibleCards += (int) IntStream.range(0, deck.getSize()).filter(i -> deck.isVisibleTo(i, playerId)).count();
                 }
             }
             retValue += visibleCards * FACTOR_HIDDEN / (llgs.getNPlayers() - 1.0);

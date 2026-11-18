@@ -40,6 +40,8 @@ public class GoFishForwardModel extends StandardForwardModel {
             layDownBooks(state, i);
         state.extraTurn = false;
         state.knownVoids = new GoFishKnownVoids(nPlayers);
+        state.shownBecause = new HashMap<>();
+        state.knowledge = GoFishKnowledge.all();
         state.setFirstPlayer(0);
     }
 
@@ -110,8 +112,12 @@ public class GoFishForwardModel extends StandardForwardModel {
         for (FrenchCard c : hand.getComponents())
             counts.merge(c.number, 1, Integer::sum);
         for (Map.Entry<Integer, Integer> e : counts.entrySet())
-            if (e.getValue() == 4)
-                state.playerBooks.get(playerId).add(removeCardsOfRank(hand, e.getKey()));
+            if (e.getValue() == 4) {
+                Deck<FrenchCard> book = removeCardsOfRank(hand, e.getKey());
+                for (FrenchCard c : book.getComponents())
+                    state.forgetShown(c);
+                state.playerBooks.get(playerId).add(book);
+            }
     }
 
     public static Deck<FrenchCard> removeCardsOfRank(Deck<FrenchCard> hand, int rank) {

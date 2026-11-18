@@ -4,10 +4,10 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.crazyeights.CZEGameState;
-import games.crazyeights.CZEParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import games.GameType;
 import gui.views.RulesView;
 import players.human.ActionController;
 import utilities.ImageIO;
@@ -75,7 +75,7 @@ public class CZEGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel(new BorderLayout());
         main.setOpaque(false);
         tabs.add("Game", main);
-        tabs.add("Rules", new RulesView(rulesHtml((CZEParameters) state.getGameParameters()), height));
+        RulesView.addTabs(tabs, GameType.CrazyEights, state.getGameParameters(), height);
 
         // Player areas, spread round the four sides
         playerViews = new CZEPlayerView[nPlayers];
@@ -94,8 +94,7 @@ public class CZEGUIManager extends AbstractGUIManager {
             CZEPlayerView playerView = new CZEPlayerView(state.getPlayerHands().get(i), i, dataPath);
             playerView.setOpaque(false);
 
-            String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-            String agentName = split[split.length - 1];
+            String agentName = game.getPlayers().get(i).toString();
             TitledBorder title = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                     "Player " + i + " [" + agentName + "]" + (i == nPlayers - 1 ? " - dealer" : ""),
@@ -133,7 +132,7 @@ public class CZEGUIManager extends AbstractGUIManager {
         mainGameArea.add(centreWrapper, BorderLayout.CENTER);
 
         JPanel infoPanel = createGameStateInfoPanel("Crazy Eights", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, actionPanelHeight, false);
+        JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, actionPanelHeight, false);
 
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(mainGameArea, BorderLayout.CENTER);
@@ -145,32 +144,6 @@ public class CZEGUIManager extends AbstractGUIManager {
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
-    }
-
-    /**
-     * Up to 31 actions can be offered at once (see getMaxActionSpace), so the buttons are laid out in rows
-     * and scroll vertically - the default single row would run far off the side of the window.
-     */
-    @Override
-    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
-        // wide enough columns for the longest label ("Play {Diamonds 8} nominating Spades")
-        JPanel actionPanel = new JPanel(new GridLayout(0, Math.max(3, width / 250), 4, 2));
-        actionPanel.setOpaque(false);
-        actionButtons = new ActionButton[maxActionSpace];
-        for (int i = 0; i < maxActionSpace; i++) {
-            actionButtons[i] = new ActionButton(ac, highlights);
-            actionButtons[i].setVisible(false);
-            actionPanel.add(actionButtons[i]);
-        }
-        for (ActionButton button : actionButtons)
-            button.informAllActionButtons(actionButtons);
-
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return pane;
     }
 
     /** A deck view with a caption above it, at a fixed size so the surrounding BoxLayout cannot squash it. */
@@ -233,41 +206,5 @@ public class CZEGUIManager extends AbstractGUIManager {
         return humanPlayerIds.contains(playerId)
                 || state.getCoreGameParameters().alwaysDisplayFullObservable
                 || (playerId == state.getCurrentPlayer() && state.getCoreGameParameters().alwaysDisplayCurrentPlayer);
-    }
-
-    private static String rulesHtml(CZEParameters params) {
-        String starter = params.dealerNominatesStarterSuit
-                ? "If the starter is an Eight, the dealer nominates the suit to match before play starts."
-                : "If the starter is an Eight, the suit to match is " + params.starterEightSuit + ".";
-        return "<h2>Crazy Eights</h2>" +
-                "<p>Be the first player to get rid of all your cards.</p>" +
-                "<p><b>Deal.</b> Each player is dealt " + params.nCardsPerPlayer + " cards (" +
-                params.nCardsPerPlayerTwoPlayers + " cards with two players). The last player is the dealer. The " +
-                "next card is turned up to start the discards (the starter), and its suit is the suit to match. " +
-                starter + " Player 0 plays first.</p>" +
-                "<p><b>Each turn.</b></p><ul>" +
-                "<li>Play a card of the suit to match, or of the same rank as the top discard. Its suit becomes the " +
-                "suit to match.</li>" +
-                "<li>An Eight can always be played, and the player nominates the next suit to match.</li>" +
-                "<li>A player who can play must play. A player who cannot play draws one card, and the turn " +
-                "ends.</li>" +
-                "<li>When the stock is empty, the discards except the top card are shuffled to make a new stock. " +
-                "If there is nothing to draw, the player passes.</li></ul>" +
-                "<p><b>End.</b> The first player with no cards wins. If every player passes in a row, the game is " +
-                "blocked, and every player with the fewest cards wins.</p>" +
-                "<p><b>Penalty.</b> When a player goes out, the other players are ranked by the penalty points for " +
-                "the cards left in their hands (fewest first):</p>" +
-                "<table border=1 cellpadding=4 cellspacing=0>" +
-                "<tr><td>Eight</td><td align=right>" + params.eightPenalty + "</td></tr>" +
-                "<tr><td>Jack, Queen, King</td><td align=right>" + params.pictureCardPenalty + "</td></tr>" +
-                "<tr><td>Ace</td><td align=right>" + params.acePenalty + "</td></tr>" +
-                "<tr><td>2 to 10</td><td align=right>face value</td></tr></table>" +
-                "<h3>Interface</h3>" +
-                "<p>Choose from the action buttons at the bottom. An Eight has one button for each suit it can " +
-                "nominate (\"nominating Spades\"). The button that names no suit keeps the Eight's own " +
-                "suit. The centre shows the Stock, the Discards and the Suit to match, with the number of passes " +
-                "in a row. Each player's area shows their hand and the number of cards, " +
-                "and the penalty when the hand is shown. The dealer is marked \"dealer\" below their area, and a " +
-                "blue outline shows whose turn it is.</p>";
     }
 }

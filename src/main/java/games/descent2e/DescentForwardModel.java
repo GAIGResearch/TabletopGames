@@ -321,7 +321,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
         if (action instanceof EndFigureTurn) {
             // now check to see if we need to end the player turn
-            dgs.logEvent(Event.GameEvent.GAME_EVENT, "End Turn: " + actingFigure.getName().replace("Hero: ", "") + "; " + actingFigure.getComponentID() + ";" + actingFigure.getPosition());
+            dgs.logEvent(Event.GameEvent.GAME_EVENT, "End Turn: " + actingFigure.getName().replace("Hero: ", "") + "; " + actingFigure.getPosition());
             if (actingFigure instanceof Hero) {
                 dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
                 if (dgs.heroActingNext == 0) {
@@ -695,7 +695,7 @@ public class DescentForwardModel extends StandardForwardModel {
 //                }
 //            }
 //
-//            if (!actions.isEmpty()) return new ArrayList<>(new HashSet<>(actions));
+//            if (!actions.isEmpty()) return new ArrayList<>(new LinkedHashSet<>(actions));
 //        }
 
         // End turn is (almost) always possible
@@ -713,7 +713,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 actions.add(standUp);
                 actions.remove(endTurn);
             }
-            return new ArrayList<>(new HashSet<>(actions));
+            return new ArrayList<>(new LinkedHashSet<>(actions));
         }
 
         // Next, we check if we can make a Poisoned or Diseased attribute test
@@ -735,7 +735,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
             if (tested) {
                 actions.remove(endTurn);
-                return new ArrayList<>(new HashSet<>(actions));
+                return new ArrayList<>(new LinkedHashSet<>(actions));
             }
         }
 
@@ -752,7 +752,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 actions.add(stunned);
                 actions.remove(endTurn);
             }
-            return new ArrayList<>(new HashSet<>(actions));
+            return new ArrayList<>(new LinkedHashSet<>(actions));
         }
 
         // Grisban the Thirsty's Hero Ability
@@ -950,7 +950,7 @@ public class DescentForwardModel extends StandardForwardModel {
             }
         }
 
-        return new ArrayList<>(new HashSet<>(actions));
+        return new ArrayList<>(new LinkedHashSet<>(actions));
         //return actions;
     }
 
@@ -1179,9 +1179,9 @@ public class DescentForwardModel extends StandardForwardModel {
         GraphBoard config = _data.findGraphBoard(bConfig);
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
-        dgs.tiles = new HashMap<>();  // Maps from component ID to gridboard object
-        HashMap<Integer, GridBoard> tileConfigs = new HashMap<>();
-        dgs.gridReferences = new HashMap<>();  // Maps from tile name to list of positions in the master grid board that its cells occupy
+        dgs.tiles = new LinkedHashMap<>();  // Maps from component ID to gridboard object
+        HashMap<Integer, GridBoard> tileConfigs = new LinkedHashMap<>();
+        dgs.gridReferences = new LinkedHashMap<>();  // Maps from tile name to list of positions in the master grid board that its cells occupy
         for (BoardNode bn : config.getBoardNodes()) {
             String name = bn.getComponentName();
             String tileName = name;
@@ -1195,7 +1195,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 tile.setComponentName(name);
                 dgs.tiles.put(tile.getComponentID(), tile);
                 tileConfigs.put(bn.getComponentID(), tile);
-                dgs.gridReferences.put(name, new HashMap<>());
+                dgs.gridReferences.put(name, new LinkedHashMap<>());
             }
         }
 
@@ -1225,7 +1225,7 @@ public class DescentForwardModel extends StandardForwardModel {
         // Create big board
         BoardNode[][] board = new BoardNode[height][width];  // Board nodes here will be the individual cells in the tiles
         dgs.tileReferences = new int[height][width];  // Reference to component ID of tile placed at that position
-        HashMap<BoardNode, BoardNode> drawn = new HashMap<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
+        HashMap<BoardNode, BoardNode> drawn = new LinkedHashMap<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
 
         // TODO iterate all that are not already drawn, to make sure disconnected tiles are also placed.
         // StartX / Y Will need to be adjusted to not draw on top of existing things
@@ -1599,7 +1599,7 @@ public class DescentForwardModel extends StandardForwardModel {
         int height = tileGrid.length;
         int width = tileGrid[0].length;
 
-        HashMap<String, ArrayList<Vector2D>> openings = new HashMap<>();
+        HashMap<String, ArrayList<Vector2D>> openings = new LinkedHashMap<>();
         // TOP, check each column, stop at the first encounter in each column.
         for (int j = 0; j < width; j++) {
             for (int i = 0; i < height; i++) {
@@ -1718,7 +1718,7 @@ public class DescentForwardModel extends StandardForwardModel {
             // TODO: this could be adding/removing abilities too
             // Check attribute modifiers
             // Map from who (all/minion/master) -> list of modifiers in pairs (Attribute, howMuch)
-            HashMap<String, ArrayList<Pair<Figure.Attribute, Integer>>> attributeModifiers = new HashMap<>();
+            HashMap<String, ArrayList<Pair<Figure.Attribute, Integer>>> attributeModifiers = new LinkedHashMap<>();
             if (mDef.length > 2) {
                 String mod = mDef[2];
                 String[] modifiers = mod.split(";");

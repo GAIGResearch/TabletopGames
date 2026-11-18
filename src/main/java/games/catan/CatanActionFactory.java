@@ -37,7 +37,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         // find possible settlement locations and propose them as actions
         CatanTile[][] board = gs.getBoard();
-        HashSet<Integer> settlementsAdded = new HashSet<>();
+        HashSet<Integer> settlementsAdded = new LinkedHashSet<>();
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
@@ -314,7 +314,7 @@ public class CatanActionFactory {
         if (free || gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
             CatanTile[][] board = gs.getBoard();
-            HashSet<Edge> edgesChecked = new HashSet<>(256);
+            HashSet<Edge> edgesChecked = new LinkedHashSet<>(256);
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
@@ -347,7 +347,7 @@ public class CatanActionFactory {
         boolean canBuyCity = gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.City), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.City).isMaximum();
         if (canBuySettlement || canBuyCity) {
-            Set<Building> settlementsAdded = new HashSet<>();
+            Set<Building> settlementsAdded = new LinkedHashSet<>();
             CatanTile[][] board = gs.getBoard();
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {

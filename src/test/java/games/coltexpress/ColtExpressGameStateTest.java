@@ -35,15 +35,15 @@ public class ColtExpressGameStateTest {
     @Test
     public void firstTurnOfEachRoundUsesThatRoundsCard() {
         assertEquals(state.getRounds().get(0).getTurnTypes()[0], state.getCurrentTurnType());
-        assertTrue(state.getRounds().getVisibilityForPlayer(0, 0));
-        assertFalse(state.getRounds().getVisibilityForPlayer(1, 0));
+        assertTrue(state.getRounds().isVisibleTo(0, 0));
+        assertFalse(state.getRounds().isVisibleTo(1, 0));
 
         while (state.getRoundCounter() == 0)
             fm.next(state, fm.computeAvailableActions(state).get(0));
 
         assertEquals(state.getRounds().get(1).getTurnTypes()[0], state.getCurrentTurnType());
-        assertTrue(state.getRounds().getVisibilityForPlayer(1, 0));
-        assertFalse(state.getRounds().getVisibilityForPlayer(2, 0));
+        assertTrue(state.getRounds().isVisibleTo(1, 0));
+        assertFalse(state.getRounds().isVisibleTo(2, 0));
     }
 
     @Test

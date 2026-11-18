@@ -185,7 +185,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             // cardReplacements stores the cards that we have used so far, to avoid inserting the same card twice
             HashMap<Integer, ArrayList<Integer>> cardReplacements = new LinkedHashMap<>();
             for (int i = 0; i < plannedActions.getSize(); i++) {
-                if (!plannedActions.isComponentVisible(i, playerId)) {
+                if (!plannedActions.isVisibleTo(i, playerId)) {
                     int p = plannedActions.get(i).playerID;
                     if (!cardReplacements.containsKey(p)) {
                         cardReplacements.put(p, new ArrayList<>());
@@ -220,7 +220,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             List<RoundCard> exclusionList = copy.rounds.getVisibleComponents(playerId).stream()
                     .filter(Objects::nonNull).collect(toList());
             for (int i = 0; i < rounds.getSize(); i++) {
-                if (!rounds.isComponentVisible(i, playerId)) {
+                if (!rounds.isVisibleTo(i, playerId)) {
                     if (i == rounds.getSize() - 1) { // last card, so use an End Round Card
                         copy.rounds.setComponent(i, randomEndRoundCard((ColtExpressParameters) getGameParameters(), null));
                     } else {

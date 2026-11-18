@@ -77,8 +77,7 @@ public class ResGUIManager extends AbstractGUIManager {
                 for (int i = 0; i < nPlayers; i++) {
                     ResPlayerView playerHand = new ResPlayerView(parsedGameState.getPlayerHandCards().get(i), i, humanID.stream().findFirst().orElse(0), parameters.getDataPath());
                     // Get agent name
-                    String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
-                    String agentName = split[split.length - 1];
+                    String agentName = game.getPlayers().get(i).toString();
 
                     // Create border, layouts and keep track of this view
                     TitledBorder title = BorderFactory.createTitledBorder(
@@ -155,19 +154,19 @@ public class ResGUIManager extends AbstractGUIManager {
             ResGameState parsedGameState = (ResGameState) gameState;
 
             //missionSuccessText = createGameStateInfoPanel("Size of Mission Team needed : " + parsedGameState.gameBoard.getMissionSuccessValues()[parsedGameState.getRoundCounter()], gameState, width, 100);
+            // spies know every player's role, so a spy whose hand is shown sees all the hands
+            boolean spyViewing = false;
+            for (int i = 0; i < gameState.getNPlayers(); i++)
+                if (showHiddenInfo(gameState, i)
+                        && parsedGameState.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.SPY)
+                    spyViewing = true;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(parsedGameState);
-                if (((ResGameState) gameState).getPlayerHandCards().get(gameState.getCurrentPlayer()).get(2).cardType == ResPlayerCards.CardType.SPY) {
+                if (spyViewing || showHiddenInfo(gameState, i)) {
                     playerHands[i].playerHandView.setFront(true);
-                    //playerHands[i].setFocusable(true);
+                    playerHands[i].setFocusable(true);
                 } else {
-                    if (i == gameState.getCurrentPlayer()
-                            || humanPlayerIds.contains(i)) {
-                        playerHands[i].playerHandView.setFront(true);
-                        playerHands[i].setFocusable(true);
-                    } else {
-                        playerHands[i].playerHandView.setFront(false);
-                    }
+                    playerHands[i].playerHandView.setFront(false);
                 }
 
                 // Highlight active player

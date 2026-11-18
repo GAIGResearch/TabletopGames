@@ -12,6 +12,9 @@ public abstract class AbstractParameters {
 
     // Random seed for this game
     long randomSeed;
+    // If positive, the seed for the game state's redeterminisationRnd, so that the random events agents simulate on
+    // copies of the state are repeatable
+    long redeterminisationSeed = -1;
     // Maximum number of rounds in the game - according to the rules
     // Once this is reached we end the game - and determine winners/losers in the normal way
     protected int maxRounds = -1;
@@ -62,6 +65,14 @@ public abstract class AbstractParameters {
 
     public void setRandomSeed(long randomSeed) {
         this.randomSeed = randomSeed;
+    }
+
+    public long getRedeterminisationSeed() {
+        return redeterminisationSeed;
+    }
+
+    public void setRedeterminisationSeed(long redeterminisationSeed) {
+        this.redeterminisationSeed = redeterminisationSeed;
     }
 
     public void setThinkingTimeMins(long thinkingTimeMins) {
@@ -148,6 +159,7 @@ public abstract class AbstractParameters {
     public AbstractParameters copy() {
         AbstractParameters copy = _copy();
         copy.randomSeed = System.currentTimeMillis();
+        copy.redeterminisationSeed = redeterminisationSeed;
         return copy;
     }
 
@@ -192,7 +204,7 @@ public abstract class AbstractParameters {
                 incrementRoundS == that.incrementRoundS &&
                 maxRounds == that.maxRounds && timeoutRounds == that.timeoutRounds &&
                 incrementMilestoneS == that.incrementMilestoneS;
-        // equals and hashcode deliberately excludes the random seed
+        // equals and hashcode deliberately exclude the random seeds
     }
 
     @Override

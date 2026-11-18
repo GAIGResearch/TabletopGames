@@ -87,10 +87,10 @@ public class HandManager {
     public static int calculatePoint(SeaSaltPaperGameState gs, int playerID) {
         PartialObservableDeck<SeaSaltPaperCard> playerHand = gs.getPlayerHands().get(playerID);
         Deck<SeaSaltPaperCard> playerDiscard = gs.getPlayerDiscards().get(playerID);
-        Map<CardSuite, Integer> collectorCount = new HashMap<>();
-        Map<CardSuite, Integer> multiplierCount = new HashMap<>();
-        Map<CardSuite, Integer> duoCount = new HashMap<>();
-        Map<CardSuite, Integer> suiteCount = new HashMap<>();
+        Map<CardSuite, Integer> collectorCount = new LinkedHashMap<>();
+        Map<CardSuite, Integer> multiplierCount = new LinkedHashMap<>();
+        Map<CardSuite, Integer> duoCount = new LinkedHashMap<>();
+        Map<CardSuite, Integer> suiteCount = new LinkedHashMap<>();
         int mermaidCount = 0;
 
         // Iterate through player hand
@@ -171,7 +171,7 @@ public class HandManager {
 
         PartialObservableDeck<SeaSaltPaperCard> playerHand = gs.getPlayerHands().get(playerID);
         Deck<SeaSaltPaperCard> playerDiscard = gs.getPlayerDiscards().get(playerID);
-        Map<CardColor, Integer> colorDict = new HashMap<>();
+        Map<CardColor, Integer> colorDict = new LinkedHashMap<>();
 
         // Iterate through player hand
         for (int i=0; i<playerHand.getSize(); i++) {

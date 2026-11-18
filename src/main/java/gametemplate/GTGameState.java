@@ -49,27 +49,43 @@ public class GTGameState extends AbstractGameState {
     }
 
     /**
-     * <p>Create a deep copy of the game state containing only those components the given player can observe.</p>
-     * <p>If the playerID is NOT -1 and If any components are not visible to the given player (e.g. cards in the hands
-     * of other players or a face-down deck), then these components should instead be randomized (in the previous examples,
-     * the cards in other players' hands would be combined with the face-down deck, shuffled together, and then new cards drawn
-     * for the other players). This process is also called 'redeterminisation'.</p>
-     * <p>There are some utilities to assist with this in utilities.DeterminisationUtilities. One firm is guideline is
-     * that the standard random number generator from getRnd() should not be used in this method. A separate Random is provided
-     * for this purpose - redeterminisationRnd.
-     *  This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)</p>
-     * <p>If the playerID passed is -1, then full observability is assumed and the state should be faithfully deep-copied.</p>
+     * <p>Create a faithful deep copy of the game state. This method only copies: it does not hide anything from the
+     * observing player, whatever the playerId.</p>
+     * <p>Hiding information is the job of {@link #redeterminise(int)}. {@link AbstractGameState#copy(int)} calls this
+     * method first, and then - only if the playerId is not -1 and the game is partially observable - calls
+     * redeterminise(playerId) on the new copy. Keeping the two apart keeps the responsibilities clear, and neither
+     * method needs to check the conditions the framework already checks.</p>
+     * <p>Pass gameParameters straight through to the copy (they are shared, not copied).</p>
      *
      * <p>Make sure the return type matches the class type, and is not AbstractGameState.</p>
      *
-     *
-     * @param playerId - player observing this game state.
+     * @param playerId - player observing this game state (normally not needed here).
      */
     @Override
     protected GTGameState _copy(int playerId) {
         GTGameState copy = new GTGameState(gameParameters, getNPlayers());
         // TODO: deep copy all variables to the new game state.
         return copy;
+    }
+
+    /**
+     * <p>Redeterminise the state (a copy just made by {@link #_copy(int)}) from the perspective of the given player:
+     * any components the player cannot observe (e.g. cards in the hands of other players, or a face-down deck) are
+     * randomised. In those examples the cards in other players' hands would be combined with the face-down deck,
+     * shuffled together, and new cards dealt back to the other players, keeping the hand sizes.</p>
+     * <p>This is called by {@link AbstractGameState#copy(int)} only when playerId is not -1 and the game is
+     * partially observable, so it need not check either.</p>
+     * <p>There are utilities to assist with this in utilities.DeterminisationUtilities (e.g. reshuffle). One firm
+     * guideline is that the standard random number generator from getRnd() should not be used in this method. A
+     * separate Random is provided for this purpose - redeterminisationRnd. This is to avoid the main RNG stream being
+     * distorted by the number of copies taken.</p>
+     * <p>If the game has no hidden information, do not override this.</p>
+     *
+     * @param playerId - player observing this game state.
+     */
+    @Override
+    public void redeterminise(int playerId) {
+        // TODO: shuffle the components hidden from playerId (or remove this method if there are none)
     }
 
     /**

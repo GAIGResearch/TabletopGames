@@ -136,7 +136,7 @@ public class PowerGridGUI extends AbstractGUIManager {
         parent.add(infoPanel, BorderLayout.NORTH);
 
 	    
-	     JComponent actionPanel = createActionPanel(new IScreenHighlight[0], topWidth, defaultActionPanelHeight,false,true,null,null,null);
+	     JComponent actionPanel = createActionPanel(new IScreenHighlight[0], topWidth, defaultActionPanelHeight, true, null,null,null);
 	     parent.add(actionPanel, BorderLayout.SOUTH);
 	
 	     // Make sure the overall preferred size accounts for the new bars

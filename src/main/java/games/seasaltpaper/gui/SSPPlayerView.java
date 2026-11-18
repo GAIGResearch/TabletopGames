@@ -34,7 +34,7 @@ public class SSPPlayerView extends JPanel {
         this.playerId = playerId;
 
         int humanId = human.stream().findFirst().orElse(-1);
-        this.playerHandView = new SSPDeckView(humanId, playerHand, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));  // todo only visible if player is human or always fully observable
+        this.playerHandView = new SSPDeckView(humanId, playerHand, false, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));  // face up set by the GUI manager
         this.playerDiscardView = new SSPDeckView(humanId, playerDiscard, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
         this.pointsText = new JLabel(0 + " points");
         this.pointsText.setOpaque(false);

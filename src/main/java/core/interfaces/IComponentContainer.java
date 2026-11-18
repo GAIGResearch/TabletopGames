@@ -26,6 +26,26 @@ public interface IComponentContainer<T extends Component> {
 
     CoreConstants.VisibilityMode getVisibilityMode();
 
+    /**
+     * Whether the component at the given index of getComponents() can be seen by the player, as given by
+     * getVisibilityMode(). A container with MIXED_VISIBILITY must override this (as PartialObservableDeck does).
+     *
+     * @param index    - index of the component in getComponents()
+     * @param playerId - the player looking at the component
+     * @return true if the player can see the component
+     */
+    default boolean isVisibleTo(int index, int playerId) {
+        return switch (getVisibilityMode()) {
+            case VISIBLE_TO_ALL -> true;
+            case HIDDEN_TO_ALL -> false;
+            case VISIBLE_TO_OWNER -> ((Component) this).getOwnerId() == playerId;
+            case TOP_VISIBLE_TO_ALL -> index == 0;
+            case BOTTOM_VISIBLE_TO_ALL -> index == getSize() - 1;
+            case MIXED_VISIBILITY ->
+                    throw new AssertionError("A container with MIXED_VISIBILITY must override isVisibleTo(): " + getClass().getName());
+        };
+    }
+
     default Stream<T> stream() {
         return getComponents().stream();
     }

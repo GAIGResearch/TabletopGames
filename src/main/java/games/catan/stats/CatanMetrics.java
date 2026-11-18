@@ -1,5 +1,6 @@
 package games.catan.stats;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
 import core.components.Edge;
@@ -7,6 +8,7 @@ import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
+import evaluation.metrics.GameMetrics;
 import evaluation.metrics.IMetricsCollection;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
@@ -452,7 +454,5 @@ public class CatanMetrics implements IMetricsCollection {
             return columns;
         }
     }
-
-
 
 }
