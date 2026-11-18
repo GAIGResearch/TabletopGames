@@ -7,6 +7,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import games.GameType;
 import games.tricktaking.CardOrder;
+import games.tricktaking.IForgettableVoids;
 import games.tricktaking.ITrickTakingState;
 import games.tricktaking.KnownVoids;
 import games.tricktaking.Trick;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * <p>Game state for Whist. Data-only: all initialisation and rule logic lives in {@link WhistForwardModel}.</p>
@@ -34,7 +36,8 @@ import java.util.Objects;
  *     <li>knownVoids - the suits each player is publicly known not to hold this deal</li>
  * </ul>
  */
-public class WhistGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite> {
+public class WhistGameState extends AbstractGameState implements ITrickTakingState<FrenchCard, FrenchCard.Suite>,
+        IForgettableVoids<FrenchCard.Suite> {
 
     List<Deck<FrenchCard>> playerHands;
     Trick<FrenchCard, FrenchCard.Suite> currentTrick;
@@ -146,19 +149,31 @@ public class WhistGameState extends AbstractGameState implements ITrickTakingSta
         copy.teamPoints = teamPoints.clone();
         copy.knownVoids = knownVoids.copy();
 
-        if (playerId != -1 && getCoreGameParameters().partialObservable) {
-            // Other players' hands are unknown: shuffle them together, keeping hand sizes, never giving a player a
-            // card of a suit they are known to be void in, and leaving the turned-up trump card with the dealer.
-            Deck<FrenchCard> dealerHand = copy.playerHands.get(getDealer());
-            boolean trumpCardHeld = playerId != getDealer() && trumpCard != null && dealerHand.contains(trumpCard);
-            if (trumpCardHeld)
-                dealerHand.remove(trumpCard);
-            DeterminisationUtilities.reshuffle(playerId, copy.playerHands, c -> true, redeterminisationRnd,
-                    knownVoids.permits(CardOrder.STANDARD));
-            if (trumpCardHeld)
-                dealerHand.add(trumpCard);
-        }
+        // the copy is given the core parameters and round counter (so its dealer) only after _copy
+        if (playerId != -1 && getCoreGameParameters().partialObservable)
+            copy.reshuffleHiddenCards(playerId, getDealer(), redeterminisationRnd);
         return copy;
+    }
+
+    @Override
+    public void redeterminise(int playerId) {
+        if (playerId != -1 && getCoreGameParameters().partialObservable)
+            reshuffleHiddenCards(playerId, getDealer(), redeterminisationRnd);
+    }
+
+    /**
+     * Other players' hands are unknown: shuffle them together, keeping hand sizes, never giving a player a card of a
+     * suit they are known to be void in, and leaving the turned-up trump card with the dealer.
+     */
+    private void reshuffleHiddenCards(int playerId, int dealer, Random rnd) {
+        Deck<FrenchCard> dealerHand = playerHands.get(dealer);
+        boolean trumpCardHeld = playerId != dealer && trumpCard != null && dealerHand.contains(trumpCard);
+        if (trumpCardHeld)
+            dealerHand.remove(trumpCard);
+        DeterminisationUtilities.reshuffle(playerId, playerHands, c -> true, rnd,
+                knownVoids.permits(CardOrder.STANDARD));
+        if (trumpCardHeld)
+            dealerHand.add(trumpCard);
     }
 
     /**

@@ -74,7 +74,9 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
         for (Map.Entry<Integer, EnumSet<GoFishKnowledge>> e : shownBecause.entrySet())
             copy.shownBecause.put(e.getKey(), EnumSet.copyOf(e.getValue()));
         copy.knowledge = EnumSet.copyOf(knowledge);
-        copy.redeterminise(playerId, redeterminisationRnd);
+        // the copy is given the core parameters only after _copy, so this state's are the ones to check
+        if (getCoreGameParameters().partialObservable)
+            copy.redeterminise(playerId, redeterminisationRnd);
         return copy;
     }
 
@@ -84,12 +86,12 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
      * redeterminised in place from the player's perspective.
      */
     public void restrictKnowledge(Set<GoFishKnowledge> knowledge, int playerId) {
-        if (this.knowledge.retainAll(knowledge))
+        if (this.knowledge.retainAll(knowledge) && getCoreGameParameters().partialObservable)
             redeterminise(playerId, redeterminisationRnd);
     }
 
     private void redeterminise(int playerId, Random rnd) {
-        if (!getCoreGameParameters().partialObservable || playerId < 0) return;
+        if (playerId < 0) return;
         if (!knowledge.equals(GoFishKnowledge.all()))
             forgetUnusedKnowledge();
         List<Deck<FrenchCard>> decks = new ArrayList<>();
