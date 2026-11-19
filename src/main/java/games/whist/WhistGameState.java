@@ -148,10 +148,6 @@ public class WhistGameState extends AbstractGameState implements ITrickTakingSta
         copy.tricksTaken = tricksTaken.clone();
         copy.teamPoints = teamPoints.clone();
         copy.knownVoids = knownVoids.copy();
-
-        // the copy is given the core parameters and round counter (so its dealer) only after _copy
-        if (playerId != -1 && getCoreGameParameters().partialObservable)
-            copy.reshuffleHiddenCards(playerId, getDealer(), redeterminisationRnd);
         return copy;
     }
 
