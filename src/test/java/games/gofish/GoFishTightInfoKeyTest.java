@@ -69,6 +69,47 @@ public class GoFishTightInfoKeyTest {
     }
 
     @Test
+    public void withRestrictedKnowledgeTheKeyInTheSearchMatchesItsRedeterminisations() {
+        // every set of knowledge kinds, one bit each
+        for (int k = 0; k < 8; k++) {
+            EnumSet<GoFishKnowledge> knowledge = GoFishKnowledge.of((k & 1) != 0, (k & 2) != 0, (k & 4) != 0);
+            for (int s = 0; s < 20; s++) {
+                GoFishGameState state = midGameState(s);
+                int p = state.getCurrentPlayer();
+                GoFishGameState search = (GoFishGameState) state.copy(p);
+                search.restrictKnowledge(knowledge, p);
+                // the search plays random actions from the agent's restricted observation
+                Random rnd = new Random(s);
+                for (int step = 0; step < 6 && search.isNotTerminal(); step++) {
+                    List<AbstractAction> actions = fm.computeAvailableActions(search);
+                    fm.next(search, actions.get(rnd.nextInt(actions.size())));
+                    Object expected = key.getKey(search, p);
+                    for (int i = 0; i < 20; i++)
+                        assertEquals(knowledge + " seed " + s + " step " + step, expected,
+                                key.getKey(search.copy(p), p));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void withoutVoidsTheKeyHoldsNone() {
+        GoFishGameState state = GoFishTestUtils.newState(valetParams(), 3, 1);
+        giveHand(state, 0, card("7H"), card("2S"));
+        giveHand(state, 1, card("3H"), card("4D"));
+        giveHand(state, 2, card("4H"), card("5H"));
+        state.getKnownVoids().record(2, 9);
+        GoFishGameState obs = (GoFishGameState) state.copy(0);
+        obs.restrictKnowledge(GoFishKnowledge.of(true, false, true), 0);
+        fm.next(obs, new GoFishAsk(1, 7));       // Go fish: P1 is seen to hold no 7
+        for (List<Integer> voids : key.getKey(obs, 0).knownVoids())
+            assertEquals(List.of(), voids);
+        fm.next(state, new GoFishAsk(1, 7));
+        assertEquals(List.of(7), key.getKey(state, 0).knownVoids().get(1));
+        assertEquals(List.of(9), key.getKey(state, 0).knownVoids().get(2));
+    }
+
+    @Test
     public void cardsPassedOnASuccessfulAskAreSeenByEveryone() {
         GoFishGameState state = GoFishTestUtils.newState(valetParams(), 3, 1);
         giveHand(state, 0, card("7H"), card("7D"), card("2S"));
@@ -108,7 +149,7 @@ public class GoFishTightInfoKeyTest {
             Deck<FrenchCard> drawDeck = state.getDrawDeck();
             int idx = -1;
             for (int i = 0; i < hand.getSize(); i++)
-                if (!hand.isComponentVisible(i, p) && hand.get(i).number != drawDeck.get(0).number)
+                if (!hand.isVisibleTo(i, p) && hand.get(i).number != drawDeck.get(0).number)
                     idx = i;
             if (idx < 0) continue;
             Object before = key.getKey(state, p);

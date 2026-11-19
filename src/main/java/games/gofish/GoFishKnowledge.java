@@ -4,8 +4,8 @@ import java.util.EnumSet;
 
 /**
  * <p>The kinds of public knowledge about the hands in Go Fish. The game records all of them; a player may be set to
- * use only some (see {@link GoFishKnowledgeDecorator}), in which case its redeterminised copies of the state forget
- * the rest.</p>
+ * use only some (see {@link GoFishKnowledgeDecorator}), in which case its observation of the state, and every copy made
+ * from it, forgets the rest.</p>
  *
  * <ul>
  *     <li>CARDS_FISHED_FOR - the cards seen to be handed over in answer to an ask, and a card drawn after "Go fish"

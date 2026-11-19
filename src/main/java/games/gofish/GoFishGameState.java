@@ -26,8 +26,8 @@ import java.util.function.BiPredicate;
  *     <li>knownVoids - the ranks each player is publicly known not to hold</li>
  *     <li>shownBecause - for each card in a hand that is shown to the table, why it was shown (the kinds of
  *     {@link GoFishKnowledge} it gives), keyed by componentID</li>
- *     <li>knowledge - the kinds of public knowledge that redeterminised copies of this state use. The real game state
- *     uses them all; an agent's observation may use fewer (see {@link GoFishKnowledgeDecorator})</li>
+ *     <li>knowledge - the kinds of public knowledge this state and its copies use. The real game state uses them all;
+ *     an agent's observation may use fewer (see {@link GoFishKnowledgeDecorator})</li>
  * </ul>
  */
 public class GoFishGameState extends AbstractGameState implements IPrintable {
@@ -74,9 +74,6 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
         for (Map.Entry<Integer, EnumSet<GoFishKnowledge>> e : shownBecause.entrySet())
             copy.shownBecause.put(e.getKey(), EnumSet.copyOf(e.getValue()));
         copy.knowledge = EnumSet.copyOf(knowledge);
-        // the copy is given the core parameters only after _copy, so this state's are the ones to check
-        if (getCoreGameParameters().partialObservable)
-            copy.redeterminise(playerId, redeterminisationRnd);
         return copy;
     }
 
@@ -87,25 +84,26 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
      */
     public void restrictKnowledge(Set<GoFishKnowledge> knowledge, int playerId) {
         if (this.knowledge.retainAll(knowledge) && getCoreGameParameters().partialObservable)
-            redeterminise(playerId, redeterminisationRnd);
+            redeterminise(playerId);
     }
 
-    private void redeterminise(int playerId, Random rnd) {
+    @Override
+    public void redeterminise(int playerId) {
         if (playerId < 0) return;
-        if (!knowledge.equals(GoFishKnowledge.all()))
-            forgetUnusedKnowledge();
+        forgetUnusedKnowledge();
         List<Deck<FrenchCard>> decks = new ArrayList<>();
         decks.add(drawDeck);
         decks.addAll(playerHands);
         // cards shown to the table stay where they are, and no player is given a rank they are known not to hold
         BiPredicate<Deck<FrenchCard>, FrenchCard> permitted = knowledge.contains(GoFishKnowledge.VOIDS) ? knownVoids::permits : null;
-        DeterminisationUtilities.reshuffle(playerId, decks, c -> true, rnd, permitted);
+        DeterminisationUtilities.reshuffle(playerId, decks, c -> true, redeterminisationRnd, permitted);
     }
 
-    /**
-     * A card shown to the table only for reasons this state does not use goes back to being seen by its owner alone.
-     */
-    private void forgetUnusedKnowledge() {
+    void forgetUnusedKnowledge() {
+        if (knowledge.equals(GoFishKnowledge.all())) return;
+        if (!knowledge.contains(GoFishKnowledge.VOIDS))
+            knownVoids.clear();
+        // a card shown to the table only for reasons this state does not use goes back to being seen by its owner alone
         for (int p = 0; p < playerHands.size(); p++) {
             PartialObservableDeck<FrenchCard> hand = playerHands.get(p);
             for (int i = 0; i < hand.getSize(); i++) {
@@ -186,7 +184,7 @@ public class GoFishGameState extends AbstractGameState implements IPrintable {
     }
 
     /**
-     * The kinds of public knowledge that redeterminised copies of this state use (a copy).
+     * A copy of {@code knowledge}.
      */
     public EnumSet<GoFishKnowledge> getKnowledge() {
         return EnumSet.copyOf(knowledge);

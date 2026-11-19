@@ -54,6 +54,10 @@ public class GoFishKnownVoids {
         voids[player] = 0;
     }
 
+    public void clear() {
+        Arrays.fill(voids, 0);
+    }
+
     /**
      * Whether redeterminisation may put the card in the deck.
      */

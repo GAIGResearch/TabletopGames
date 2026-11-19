@@ -67,6 +67,10 @@ public class GoFishForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         GoFishGameState state = (GoFishGameState) gameState;
         GoFishParameters params = (GoFishParameters) state.getGameParameters();
+        // A state in an agent's search may use only some kinds of knowledge. It forgets what the action showed of the
+        // others now, as its redeterminisations would, so that they cannot separate nodes keyed by information set.
+        if (state.getCoreGameParameters().partialObservable)
+            state.forgetUnusedKnowledge();
         layDownBooks(state, state.getCurrentPlayer());
 
         if (!params.playUntilAllBooks) {

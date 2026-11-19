@@ -240,8 +240,34 @@ public class GoFishKnowledgeTest {
                 broken |= c.number <= 10;
         }
         assertTrue("P1 is dealt a rank 2-10 in some copy", broken);
-        // the voids are still recorded, should the knowledge be wanted again
-        assertTrue(obs.getKnownVoids().isVoid(1, 5));
+        // the observation forgets the voids, which the game state keeps
+        assertTrue(obs.getKnownVoids().get(1).isEmpty());
+        assertTrue(state.getKnownVoids().isVoid(1, 5));
+    }
+
+    @Test
+    public void withoutVoidsAnAskInTheSearchRecordsNone() {
+        GoFishGameState obs = (GoFishGameState) state.copy(0);
+        obs.restrictKnowledge(of(true, false, true), 0);
+        fm.next(obs, new GoFishAsk(2, 5));     // Go fish: P2 is seen to hold no 5
+        assertTrue(obs.getKnownVoids().get(2).isEmpty());
+        fm.next(state, new GoFishAsk(2, 5));
+        assertTrue(state.getKnownVoids().isVoid(2, 5));
+    }
+
+    @Test
+    public void withoutCardsFishedForTheCardsHandedOverInTheSearchAreForgottenAtOnce() {
+        GoFishGameState obs = (GoFishGameState) state.copy(1);
+        obs.restrictKnowledge(of(false, true, true), 1);
+        // in P1's search, P0 asks P1 for 5s
+        GoFishGameState search = (GoFishGameState) obs.copy();
+        giveHand(search, 0, card("5H"), card("KD"));
+        giveHand(search, 1, card("5S"), card("5C"), card("9D"));
+        fm.next(search, new GoFishAsk(1, 5));
+        assertEquals(1, visibleToAllOfRank(search, 0, 5));
+        assertVisibleToAll(search, 0, card("5H"));
+        assertVisibleOnlyToOwner(search, 0, card("5S"));
+        assertVisibleOnlyToOwner(search, 0, card("5C"));
     }
 
     // ---- the decorator ----
