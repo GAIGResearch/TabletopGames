@@ -146,6 +146,7 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
         double[] bestValues = new double[state.getNPlayers()];
         double bestValue = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
+        actions = new ArrayList<>(actions);  // some games return immutable lists (Backgammon: Stream.toList())
         // we shuffle the actions so that ties are broken at random
         if (params.expandByEstimatedValue) {
             // sort actions based on actionValueEstimates (with highest value first)

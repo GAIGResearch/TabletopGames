@@ -37,6 +37,7 @@ public class RMHCPlayer extends AbstractPlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> possibleActions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
+        timer.setMaxTimeMillis(getParameters().budget);
         avgTimeTaken = 0;
         acumTimeTaken = 0;
         numIters = 0;

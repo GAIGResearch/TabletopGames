@@ -97,7 +97,8 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MoveRobber)) return false;
+        // exact class: subclasses also steal or use up a knight card
+        if (o == null || o.getClass() != getClass()) return false;
         MoveRobber that = (MoveRobber) o;
         return x == that.x && y == that.y && player == that.player && executed == that.executed;
     }

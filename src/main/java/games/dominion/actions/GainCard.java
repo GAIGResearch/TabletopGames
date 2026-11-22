@@ -55,7 +55,8 @@ public class GainCard extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof GainCard) {
+        // exact class: a BuyCard (which spends a buy and coins) must not match a GainCard
+        if (obj != null && obj.getClass() == getClass()) {
             GainCard other = (GainCard) obj;
             return other.cardType == cardType
                     && other.buyingPlayer == buyingPlayer
