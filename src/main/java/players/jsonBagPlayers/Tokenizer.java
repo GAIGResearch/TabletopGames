@@ -1,26 +1,21 @@
 package players.jsonBagPlayers;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import core.AbstractGameState;
 import core.AbstractGameStateContainer;
 import evaluation.containers.GameStateContainerFactory;
 import org.apache.commons.lang3.NotImplementedException;
+import utilities.Json;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class Tokenizer {
-    private static final Gson gson = new Gson();
 
     /**
      * Tokenizes a JSON string using the default configuration.
@@ -81,7 +76,7 @@ public class Tokenizer {
     public static Map<String, Integer> tokenize(Object obj, String prefix, boolean ordered,
                                                 String mode, boolean numSuffixFrequency, boolean filterPlayer, boolean binning, boolean pairXY,
                                                 Set<String> filterSet, boolean whitelist) {
-        JsonElement el = gson.toJsonTree(obj);
+        JsonNode el = Json.toTree(obj);
         return tokenize(el, prefix, ordered, mode, numSuffixFrequency, filterPlayer, binning, pairXY, filterSet, whitelist);
     }
 
@@ -96,18 +91,18 @@ public class Tokenizer {
 
     /**
      * Tokenizes a JSON string with full control over prefixing, ordering, and filtering.
-     * See {@link #tokenize(JsonElement, String, boolean, String, boolean, boolean, boolean, boolean, Set, boolean)}
+     * See {@link #tokenize(JsonNode, String, boolean, String, boolean, boolean, boolean, boolean, Set, boolean)}
      * for the tokenization behavior.
      */
     public static Map<String, Integer> tokenize(String json, String prefix, boolean ordered,
                                                 String mode, boolean numSuffixFrequency, boolean filterPlayer, boolean binning, boolean pairXY,
                                                 Set<String> filterSet, boolean whitelist) {
-        JsonElement root;
+        JsonNode root;
         try {
-            root = JsonParser.parseString(json);
-        } catch (JsonSyntaxException e) {
+            root = Json.mapper().readTree(json);
+        } catch (JsonProcessingException e) {
             // treat as primitive string if not valid JSON
-            root = new JsonPrimitive(json);
+            root = TextNode.valueOf(json);
         }
         return tokenize(root, prefix, ordered, mode, numSuffixFrequency, filterPlayer, binning, pairXY, filterSet, whitelist);
     }
@@ -140,7 +135,7 @@ public class Tokenizer {
      * @param whitelist true for whitelist filtering, false for blacklist filtering
      * @return token frequency map
      */
-    public static Map<String, Integer> tokenize(JsonElement collection, String prefix, boolean ordered,
+    public static Map<String, Integer> tokenize(JsonNode collection, String prefix, boolean ordered,
                                                 String mode, boolean numSuffixFrequency, boolean filterPlayer, boolean binning, boolean pairXY,
                                                 Set<String> filterSet, boolean whitelist) {
         Map<String, Integer> freq = new HashMap<>();
@@ -150,13 +145,12 @@ public class Tokenizer {
             throw new NotImplementedException("Tokenize mode 'char' is not supported");
         }
 
-        if (collection == null || collection instanceof JsonNull) return freq;
+        if (collection == null || collection.isNull() || collection.isMissingNode()) return freq;
 
-        if (collection.isJsonArray()) {
-            JsonArray arr = collection.getAsJsonArray();
-            for (int i = 0; i < arr.size(); i++) {
+        if (collection.isArray()) {
+            for (int i = 0; i < collection.size(); i++) {
                 String orderedPrefix = prefix + "[" + i + "]";
-                JsonElement item = arr.get(i);
+                JsonNode item = collection.get(i);
                 if (isAtomic(item)) {
                     String s = primitiveToString(item);
                     if (ordered && !"unordered".equals(mode)) {
@@ -177,33 +171,33 @@ public class Tokenizer {
                     }
                 }
             }
-        } else if (collection.isJsonObject()) {
-            JsonObject obj = collection.getAsJsonObject();
+        } else if (collection.isObject()) {
             // filter player (if present and > 0)
-            if (filterPlayer && obj.has("player") && obj.get("player").isJsonPrimitive()) {
-                int p = obj.get("player").getAsInt();
+            JsonNode player = collection.get("player");
+            if (filterPlayer && player != null && player.isValueNode() && !player.isNull()) {
+                int p = player.asInt();
                 if (p > 0) return freq;
             }
 
             int pairX = -99, pairY = -99;
-            for (Map.Entry<String, JsonElement> e : obj.entrySet()) {
+            for (Map.Entry<String, JsonNode> e : collection.properties()) {
                 String key = e.getKey();
                 String keyPrefix = prefix + "." + key;
-                JsonElement value = e.getValue();
+                JsonNode value = e.getValue();
                 if (isAtomic(value)) {
                     // binning numerical value
                     if (binning && ("x".equals(key) || "y".equals(key))) {
                         int n = 2;
-                        double dv = value.getAsDouble();
+                        double dv = value.asDouble();
                         int b = ((int) Math.floor(dv / n)) * n;
-                        value = new JsonPrimitive(b);
+                        value = IntNode.valueOf(b);
                     }
                     if ("x".equals(key)) {
-                        pairX = value.getAsInt();
+                        pairX = value.asInt();
                         if (pairXY) continue;
                     }
                     if ("y".equals(key)) {
-                        pairY = value.getAsInt();
+                        pairY = value.asInt();
                         if (pairXY) continue;
                     }
                     addToken(freq, keyPrefix + "." + primitiveToString(value), filterSet, whitelist);
@@ -234,18 +228,18 @@ public class Tokenizer {
         }
     }
 
-    private static boolean isAtomic(JsonElement el) {
-        return el == null || el.isJsonNull() || el.isJsonPrimitive();
+    private static boolean isAtomic(JsonNode el) {
+        return el == null || el.isValueNode() || el.isMissingNode();
     }
 
-    private static String primitiveToString(JsonElement el) {
-        if (el == null || el instanceof JsonNull) return "null";
-        if (!el.isJsonPrimitive()) return el.toString();
-        JsonPrimitive p = el.getAsJsonPrimitive();
-        if (p.isString()) return p.getAsString();
-        if (p.isNumber()) return p.getAsNumber().toString();
-        if (p.isBoolean()) return Boolean.toString(p.getAsBoolean());
-        return p.toString();
+    private static String primitiveToString(JsonNode el) {
+        if (el == null || el.isNull() || el.isMissingNode()) return "null";
+        if (el.isContainerNode()) return el.toString();
+        if (el.isTextual()) return el.textValue();
+        // the boxed number's own toString, so 3 stays "3" and 3.0 stays "3.0"
+        if (el.isNumber()) return el.numberValue().toString();
+        if (el.isBoolean()) return Boolean.toString(el.booleanValue());
+        return el.asText();
     }
 
     public static void addToken(Map<String, Integer> map, String token) {
@@ -261,17 +255,17 @@ public class Tokenizer {
         map.put(token, v == null ? 1 : v + 1);
     }
 
-    private static void addNumericFrequencyToken(Map<String, Integer> map, String tokenPrefix, JsonElement item,
+    private static void addNumericFrequencyToken(Map<String, Integer> map, String tokenPrefix, JsonNode item,
                                                  boolean numSuffixFrequency, Set<String> filterSet, boolean whitelist) {
         if (!numSuffixFrequency || tokenPrefix == null || !isPositiveInteger(item)) return;
-        int frequency = item.getAsInt();
+        int frequency = item.asInt();
         if (!isValidToken(tokenPrefix, filterSet, whitelist)) return;
         map.merge(tokenPrefix, frequency, Integer::sum);
     }
 
-    private static boolean isPositiveInteger(JsonElement el) {
-        if (el == null || !el.isJsonPrimitive() || !el.getAsJsonPrimitive().isNumber()) return false;
-        Number number = el.getAsNumber();
+    private static boolean isPositiveInteger(JsonNode el) {
+        if (el == null || !el.isNumber()) return false;
+        Number number = el.numberValue();
         if (number instanceof Integer || number instanceof Long || number instanceof Short || number instanceof Byte) {
             return number.longValue() > 0;
         }
@@ -305,13 +299,12 @@ public class Tokenizer {
      */
     public static List<Map<String, Integer>> loadPrototypes(String path, int n_prototypes, boolean full) {
         List<Map<String, Integer>> prototypes = new ArrayList<>();
-        Gson gson = new Gson();
-        Type mapType = new TypeToken<Map<String, Integer>>() {}.getType();
+        TypeReference<Map<String, Integer>> mapType = new TypeReference<>() {};
         String fullString = full ? "full_" : "";
         for (int i = 0; i < n_prototypes; i++) {
             String filePath = path + "/" + fullString + "prototype" + i + ".json";
             try (FileReader reader = new FileReader(filePath)) {
-                Map<String, Integer> prototype = gson.fromJson(reader, mapType);
+                Map<String, Integer> prototype = Json.mapper().readValue(reader, mapType);
                 if (prototype != null) {
                     prototypes.add(prototype);
                 } else {
@@ -334,9 +327,8 @@ public class Tokenizer {
      * @return a list of strings loaded from the JSON file, or an empty list if loading fails
      */
     public static List<String> loadStringList(String filePath) {
-        Type listType = new TypeToken<List<String>>() {}.getType();
         try (FileReader reader = new FileReader(filePath)) {
-            List<String> result = gson.fromJson(reader, listType);
+            List<String> result = Json.mapper().readValue(reader, new TypeReference<List<String>>() {});
             return result != null ? result : new ArrayList<>();
         } catch (IOException e) {
             System.err.println("Error loading string list from " + filePath + ": " + e.getMessage());

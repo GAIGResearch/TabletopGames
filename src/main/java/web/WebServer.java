@@ -1,6 +1,6 @@
 package web;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import utilities.Utils;
@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import utilities.Json;
 
 /**
  * Serves TAG games to a browser. The game, its AI players and its Swing GUI all run here; the GUI is drawn into a
@@ -184,10 +185,10 @@ public class WebServer {
      * @param code for the page: "gone" for a game it cannot reconnect to, "moved" for one taken over by another window
      */
     private static void sendError(Sender sender, String message, String code) {
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "error");
-        msg.addProperty("message", message);
-        if (code != null) msg.addProperty("code", code);
+        ObjectNode msg = Json.object();
+        msg.put("type", "error");
+        msg.put("message", message);
+        if (code != null) msg.put("code", code);
         sender.sendText(msg.toString());
         sender.close();
     }

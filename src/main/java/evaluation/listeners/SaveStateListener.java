@@ -1,13 +1,12 @@
 package evaluation.listeners;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import core.AbstractGameState;
 import core.AbstractGameStateContainer;
 import core.Game;
 import evaluation.containers.GameStateContainerFactory;
 import evaluation.metrics.Event;
 import core.interfaces.IGameEvent;
+import utilities.Json;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -51,7 +50,6 @@ public class SaveStateListener implements IGameListener {
             Collections.unmodifiableSet(EnumSet.of(Event.GameEvent.TURN_OVER, Event.GameEvent.GAME_OVER));
 
     private final Set<IGameEvent> events;
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private Game game;
     private File outputDir;
@@ -116,7 +114,7 @@ public class SaveStateListener implements IGameListener {
                 + state.getRoundCounter() + "-" + state.getTurnCounter() + ".json";
         File target = new File(outputDir, fileName);
         try (FileWriter writer = new FileWriter(target)) {
-            gson.toJson(container, writer);
+            Json.prettyWriter().writeValue(writer, container);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write game state to " + target, e);
         }

@@ -1,6 +1,5 @@
 package llm;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
@@ -15,6 +14,7 @@ import dev.langchain4j.model.mistralai.MistralAiChatModel;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
+import utilities.Json;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -231,10 +231,9 @@ public class LLMAccess {
         String apiUrl = String.format("https://%s/v1/projects/%s/locations/%s/endpoints/openapi/chat/completions",
                 ENDPOINT, geminiProject, llamaLocation);
 
-        ObjectMapper objectMapper = new ObjectMapper();
         String jsonContent;
         try {
-            jsonContent = objectMapper.writeValueAsString(query); // Escapes special characters automatically
+            jsonContent = Json.mapper().writeValueAsString(query); // Escapes special characters automatically
         } catch (IOException e) {
             System.out.println("Error converting query to JSON: " + e.getMessage());
             return "Error converting query to JSON";

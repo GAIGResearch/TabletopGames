@@ -11,6 +11,11 @@ public class TagOnCardRequirement implements Requirement<TMCard> {
 
     public TMTypes.Tag[] tags;  // card must contain all of these tags
 
+    @SuppressWarnings("unused") // for JSON
+    private TagOnCardRequirement() {
+        this(null);
+    }
+
     public TagOnCardRequirement(TMTypes.Tag[] t) {
         this.tags = t;
     }

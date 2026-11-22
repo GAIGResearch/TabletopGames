@@ -1,7 +1,7 @@
 package web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.AbstractPlayer;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import utilities.Json;
 
 /**
  * The agents a browser player can play against: the agent JSON files in the server's agent directory, and any in the
@@ -78,14 +79,14 @@ class OpponentCatalog {
         return all.stream().filter(Opponent::isDefault).findFirst().orElse(all.get(0)).id();
     }
 
-    JsonArray describe(GameType game) {
-        JsonArray result = new JsonArray();
+    ArrayNode describe(GameType game) {
+        ArrayNode result = Json.array();
         String defaultId = forGame(game).isEmpty() ? null : defaultFor(game);
         for (Opponent o : forGame(game)) {
-            JsonObject j = new JsonObject();
-            j.addProperty("id", o.id());
-            if (!o.description().isEmpty()) j.addProperty("description", o.description());
-            if (o.id().equals(defaultId)) j.addProperty("default", true);
+            ObjectNode j = Json.object();
+            j.put("id", o.id());
+            if (!o.description().isEmpty()) j.put("description", o.description());
+            if (o.id().equals(defaultId)) j.put("default", true);
             result.add(j);
         }
         return result;

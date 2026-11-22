@@ -185,7 +185,7 @@ public class JSONBagTokenizerTest {
 
     @Test
     public void gameStateIsTokenizedThroughItsContainer() {
-        // exercises GameStateContainerFactory + Gson reflection over the container fields
+        // exercises GameStateContainerFactory + serialisation of the container's fields
         AbstractGameState gs = GameType.DotsAndBoxes.createGameInstance(2, 1234L).getGameState();
         Map<String, Integer> bag = Tokenizer.tokenize(gs);
 

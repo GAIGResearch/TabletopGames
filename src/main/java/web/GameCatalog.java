@@ -1,7 +1,7 @@
 package web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import utilities.Json;
 
 /**
  * The games the server offers, and their parameters as a form can show them.
@@ -52,14 +53,14 @@ class GameCatalog {
         throw new IllegalArgumentException("Unknown game: " + name);
     }
 
-    JsonArray describe() {
-        JsonArray result = new JsonArray();
+    ArrayNode describe() {
+        ArrayNode result = Json.array();
         for (GameType game : games) {
-            JsonObject g = new JsonObject();
-            g.addProperty("name", game.name());
-            g.addProperty("minPlayers", game.getMinPlayers());
-            g.addProperty("maxPlayers", game.getMaxPlayers());
-            g.add("params", describeParameters(game));
+            ObjectNode g = Json.object();
+            g.put("name", game.name());
+            g.put("minPlayers", game.getMinPlayers());
+            g.put("maxPlayers", game.getMaxPlayers());
+            g.set("params", describeParameters(game));
             result.add(g);
         }
         return result;
@@ -68,8 +69,8 @@ class GameCatalog {
     /**
      * The game's parameters that a form can set, each with its default and any possible values the game lists.
      */
-    static JsonArray describeParameters(GameType game) {
-        JsonArray result = new JsonArray();
+    static ArrayNode describeParameters(GameType game) {
+        ArrayNode result = Json.array();
         // only a TunableParameters class lists its parameters
         if (!(game.createParameters(0) instanceof TunableParameters<?> params)) return result;
         for (String name : params.getParameterNames()) {
@@ -77,16 +78,16 @@ class GameCatalog {
             String kind = kind(type);
             // only numbers, booleans, strings and enums
             if (kind == null) continue;
-            JsonObject p = new JsonObject();
-            p.addProperty("name", name);
-            p.addProperty("type", kind);
-            p.addProperty("default", String.valueOf(params.getDefaultParameterValue(name)));
-            JsonArray values = new JsonArray();
+            ObjectNode p = Json.object();
+            p.put("name", name);
+            p.put("type", kind);
+            p.put("default", String.valueOf(params.getDefaultParameterValue(name)));
+            ArrayNode values = Json.array();
             List<Object> possible = type.isEnum() ? Arrays.asList(type.getEnumConstants()) : params.getPossibleValues(name);
             // a parameter declared without a list of settings lists only its default; that is free entry, not a choice
             if (possible.size() > 1)
                 for (Object v : possible) values.add(String.valueOf(v));
-            p.add("values", values);
+            p.set("values", values);
             result.add(p);
         }
         return result;

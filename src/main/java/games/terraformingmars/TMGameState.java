@@ -920,6 +920,11 @@ public class TMGameState extends AbstractGameState {
         public double rate;
         public Requirement<TMCard> requirement;
 
+        @SuppressWarnings("unused") // for JSON
+        private ResourceMapping() {
+            this(null, null, 0, null);
+        }
+
         public ResourceMapping(TMTypes.Resource from, TMTypes.Resource to, double rate, Requirement<TMCard> requirement) {
             this.from = from;
             this.to = to;

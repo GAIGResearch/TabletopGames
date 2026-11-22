@@ -1,6 +1,6 @@
 package web;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.Map;
 import java.util.Objects;
+import utilities.Json;
 
 /**
  * Turns the browser's mouse and key events into AWT events on the frame, so the GUI sees what it would see on the
@@ -34,7 +35,7 @@ class InputForwarder {
         this.out = out;
     }
 
-    void handle(String type, JsonObject msg) {
+    void handle(String type, ObjectNode msg) {
         switch (type) {
             case "mouse" -> mouse(msg);
             case "wheel" -> wheel(msg);
@@ -43,9 +44,9 @@ class InputForwarder {
         }
     }
 
-    private void mouse(JsonObject msg) {
-        String kind = msg.get("kind").getAsString();
-        Point p = new Point(msg.get("x").getAsInt(), msg.get("y").getAsInt());
+    private void mouse(ObjectNode msg) {
+        String kind = msg.get("kind").asText();
+        Point p = new Point(msg.get("x").asInt(), msg.get("y").asInt());
         int mods = modifiers(msg);
         if (kind.equals("leave")) {
             if (inside) post(MouseEvent.MOUSE_EXITED, p, mods, 0, MouseEvent.NOBUTTON);
@@ -60,7 +61,7 @@ class InputForwarder {
             inside = true;
         }
         int button = button(msg);
-        int clicks = msg.has("clicks") ? Math.max(1, msg.get("clicks").getAsInt()) : 1;
+        int clicks = msg.has("clicks") ? Math.max(1, msg.get("clicks").asInt()) : 1;
         switch (kind) {
             case "move" -> {
                 boolean buttonDown = (mods & (InputEvent.BUTTON1_DOWN_MASK | InputEvent.BUTTON2_DOWN_MASK | InputEvent.BUTTON3_DOWN_MASK)) != 0;
@@ -99,9 +100,9 @@ class InputForwarder {
                 new MouseEvent(frame, id, System.currentTimeMillis(), mods, p.x, p.y, clicks, popupTrigger, button));
     }
 
-    private void wheel(JsonObject msg) {
-        Point p = new Point(msg.get("x").getAsInt(), msg.get("y").getAsInt());
-        double delta = msg.get("deltaY").getAsDouble();
+    private void wheel(ObjectNode msg) {
+        Point p = new Point(msg.get("x").asInt(), msg.get("y").asInt());
+        double delta = msg.get("deltaY").asDouble();
         if (delta == 0) return;
         int rotation = delta > 0 ? 1 : -1;
         Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(
@@ -109,9 +110,9 @@ class InputForwarder {
                         p.x, p.y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, 3, rotation));
     }
 
-    private void key(JsonObject msg) {
-        String kind = msg.get("kind").getAsString();
-        String key = msg.get("key").getAsString();
+    private void key(ObjectNode msg) {
+        String kind = msg.get("kind").asText();
+        String key = msg.get("key").asText();
         int mods = modifiers(msg);
         int keyCode = keyCode(key);
         char keyChar = key.length() == 1 ? key.charAt(0) : KeyEvent.CHAR_UNDEFINED;
@@ -149,9 +150,9 @@ class InputForwarder {
     private void sendTooltip(String text) {
         if (Objects.equals(text, tooltip)) return;
         tooltip = text;
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "tooltip");
-        msg.addProperty("text", text);
+        ObjectNode msg = Json.object();
+        msg.put("type", "tooltip");
+        msg.put("text", text);
         out.sendText(msg.toString());
     }
 
@@ -160,9 +161,9 @@ class InputForwarder {
         return c != null ? c : frame.getContentPane();
     }
 
-    private static int button(JsonObject msg) {
+    private static int button(ObjectNode msg) {
         if (!msg.has("button")) return MouseEvent.NOBUTTON;
-        return switch (msg.get("button").getAsInt()) {
+        return switch (msg.get("button").asInt()) {
             case 0 -> MouseEvent.BUTTON1;
             case 1 -> MouseEvent.BUTTON2;
             case 2 -> MouseEvent.BUTTON3;
@@ -173,22 +174,22 @@ class InputForwarder {
     /**
      * The AWT modifier mask for the message's keys and mouse buttons.
      */
-    private static int modifiers(JsonObject msg) {
+    private static int modifiers(ObjectNode msg) {
         int mods = 0;
         if (flag(msg, "shift")) mods |= InputEvent.SHIFT_DOWN_MASK;
         if (flag(msg, "ctrl")) mods |= InputEvent.CTRL_DOWN_MASK;
         if (flag(msg, "alt")) mods |= InputEvent.ALT_DOWN_MASK;
         if (flag(msg, "meta")) mods |= InputEvent.META_DOWN_MASK;
         // the browser's buttons mask has 1 for the primary button, 2 for the secondary and 4 for the middle one
-        int buttons = msg.has("buttons") ? msg.get("buttons").getAsInt() : 0;
+        int buttons = msg.has("buttons") ? msg.get("buttons").asInt() : 0;
         if ((buttons & 1) != 0) mods |= InputEvent.BUTTON1_DOWN_MASK;
         if ((buttons & 2) != 0) mods |= InputEvent.BUTTON3_DOWN_MASK;
         if ((buttons & 4) != 0) mods |= InputEvent.BUTTON2_DOWN_MASK;
         return mods;
     }
 
-    private static boolean flag(JsonObject msg, String name) {
-        return msg.has(name) && msg.get(name).getAsBoolean();
+    private static boolean flag(ObjectNode msg, String name) {
+        return msg.has(name) && msg.get(name).asBoolean();
     }
 
     private static final Map<String, Integer> namedKeys = Map.ofEntries(

@@ -95,36 +95,6 @@ public class TMForwardModel extends StandardForwardModel {
             e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards, gs.globalParameters);
         }
 
-//        TMCard cccc = null;
-//        try {
-//            GsonBuilder gsonBuilder = new GsonBuilder()
-//                    .registerTypeAdapter(Requirement.class, new SimpleSerializer<Requirement>())
-//                    .registerTypeAdapter(Effect.class, new SimpleSerializer<Effect>())
-//                    .registerTypeAdapter(Discount.class, new Discount())
-//                    .registerTypeAdapter(TMAction.class, new SimpleSerializer<TMAction>())
-//                    ;
-//
-////            GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Requirement.class, new RequirementJSONSerializer());
-//            Gson gson = gsonBuilder.setPrettyPrinting().create();
-//
-//            FileWriter fw = new FileWriter("data/terraformingmars/projectCards/jsonCardsCORP.json");
-//            fw.write("[");
-//            for (TMCard c: gs.projectCards.getComponents()) {
-//                cccc = c;
-//                TMCard cCopy = c.copySerializable();
-//                String jsonString = gson.toJson(cCopy);
-//                fw.write(jsonString + ",");
-//                System.out.println(jsonString);
-//                fw.flush();
-//            }
-//            fw.write("]");
-//            fw.flush();
-//            fw.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            System.out.println(cccc.toString());
-//        }
-
         if (gs.getNPlayers() == 1) {
             // Disable milestones and awards for solo play
             gs.milestones = new LinkedHashSet<>();

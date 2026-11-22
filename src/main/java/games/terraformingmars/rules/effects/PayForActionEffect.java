@@ -9,6 +9,11 @@ public class PayForActionEffect extends Effect {
     public int minCost;
     public TMTypes.ActionType actionType;
 
+    @SuppressWarnings("unused") // for JSON
+    private PayForActionEffect() {
+        this(false, null, 0);
+    }
+
     public PayForActionEffect(boolean mustBeCurrentPlayer, TMAction effectAction, TMTypes.ActionType at) {
         super(mustBeCurrentPlayer, effectAction);
         this.actionType = at;

@@ -1,14 +1,10 @@
 package games.root;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import core.interfaces.IStateHeuristic;
+import utilities.Json;
 
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.*;
 
 public class EvolutionaryHeuristicGenerator {
@@ -56,6 +52,10 @@ public class EvolutionaryHeuristicGenerator {
             this.weights = weights;
             this.fitness = null;
         }
+
+        @SuppressWarnings("unused") // for JSON
+        private Individual() {
+        }
     }
 
     // Class to represent a generation
@@ -66,6 +66,10 @@ public class EvolutionaryHeuristicGenerator {
         Generation(int generationNumber, List<Individual> population) {
             this.generationNumber = generationNumber;
             this.population = population;
+        }
+
+        @SuppressWarnings("unused") // for JSON
+        private Generation() {
         }
     }
 
@@ -100,10 +104,10 @@ public class EvolutionaryHeuristicGenerator {
 
     // Load the entire evolutionary data from the JSON file
     private Generations loadEvolutionData() {
-        try (FileReader reader = new FileReader(filePath)) {
-            Gson gson = new Gson();
-            Type evolutionDataType = new TypeToken<Generations>() {}.getType();
-            Generations data = gson.fromJson(reader, evolutionDataType);
+        File file = new File(filePath);
+        if (!file.exists() || file.length() == 0) return new Generations();
+        try {
+            Generations data = Json.mapper().readValue(file, Generations.class);
             return data != null ? data : new Generations();
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,9 +117,8 @@ public class EvolutionaryHeuristicGenerator {
 
     // Save the entire evolutionary data to the JSON file
     private void saveEvolutionData(Generations data) {
-        try (FileWriter writer = new FileWriter(filePath)) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();  // Enable pretty printing
-            gson.toJson(data, writer);
+        try {
+            Json.prettyWriter().writeValue(new File(filePath), data);
         } catch (IOException e) {
             e.printStackTrace();
         }

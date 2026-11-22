@@ -1,7 +1,7 @@
 package web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.Game;
 import core.actions.AbstractAction;
 import games.GameType;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import utilities.Json;
 
 /**
  * Moves a GUI's standard parts (its action buttons, game state information and history; see
@@ -47,10 +48,10 @@ class ChromeReader {
     private final Sender out;
     private final boolean hasActions, hasInfo;
 
-    private JsonArray sentActions;
+    private ArrayNode sentActions;
     // the game tick when they were sent
     private int sentTick = -1;
-    private JsonObject sentInfo;
+    private ObjectNode sentInfo;
     private List<String> sentHistory = List.of();
     private boolean historyReset;
     // the regions last sent, and the version number the page knows them by
@@ -138,33 +139,33 @@ class ChromeReader {
         if (!sentRules) {
             sentRules = true;
             if (!rules.isEmpty()) {
-                JsonArray pages = new JsonArray();
+                ArrayNode pages = Json.array();
                 for (RulesPages.Page p : rules) {
-                    JsonObject page = new JsonObject();
-                    page.addProperty("title", p.title());
-                    page.addProperty("html", p.html());
+                    ObjectNode page = Json.object();
+                    page.put("title", p.title());
+                    page.put("html", p.html());
                     pages.add(page);
                 }
-                JsonObject msg = new JsonObject();
-                msg.addProperty("type", "rules");
-                msg.add("pages", pages);
+                ObjectNode msg = Json.object();
+                msg.put("type", "rules");
+                msg.set("pages", pages);
                 out.sendText(msg.toString());
             }
         }
         if (hasActions) {
-            JsonArray actions = new JsonArray();
+            ArrayNode actions = Json.array();
             JButton[] buttons = gui.getActionButtons();
             for (int i = 0; i < buttons.length; i++)
                 if (offers(buttons[i])) {
-                    JsonObject a = new JsonObject();
-                    a.addProperty("i", i);
-                    a.addProperty("label", buttons[i].getText());
+                    ObjectNode a = Json.object();
+                    a.put("i", i);
+                    a.put("label", buttons[i].getText());
                     String kind = kind(gui.getButtonAction(i));
-                    if (kind != null) a.addProperty("kind", kind);
+                    if (kind != null) a.put("kind", kind);
                     MapMove move = gui.getButtonAction(i) == null ? null : gui.getMapMove(gui.getButtonAction(i));
                     if (move != null) {
-                        a.addProperty("from", move.from());
-                        a.addProperty("to", move.to());
+                        a.put("from", move.from());
+                        a.put("to", move.to());
                     }
                     actions.add(a);
                 }
@@ -175,18 +176,18 @@ class ChromeReader {
             if (!actions.equals(sentActions) || (tick != sentTick && !actions.isEmpty())) {
                 sentActions = actions;
                 sentTick = tick;
-                JsonObject msg = new JsonObject();
-                msg.addProperty("type", "actions");
-                msg.add("actions", actions);
+                ObjectNode msg = Json.object();
+                msg.put("type", "actions");
+                msg.set("actions", actions);
                 out.sendText(msg.toString());
             }
         }
         if (hasInfo) {
-            JsonObject info = info(gui.getGameStateInfo());
+            ObjectNode info = info(gui.getGameStateInfo());
             if (!info.equals(sentInfo)) {
                 sentInfo = info;
-                JsonObject msg = info.deepCopy();
-                msg.addProperty("type", "info");
+                ObjectNode msg = info.deepCopy();
+                msg.put("type", "info");
                 out.sendText(msg.toString());
             }
             List<String> history = gui.getHistory();
@@ -216,18 +217,18 @@ class ChromeReader {
         }
         if (key.equals(sentMap)) return;
         sentMap = key;
-        JsonArray json = new JsonArray();
+        ArrayNode json = Json.array();
         for (MapRegion region : map) {
             Point offset = SwingUtilities.convertPoint(region.view(), 0, 0, root);
-            JsonObject r = new JsonObject();
-            r.addProperty("id", region.id());
-            r.addProperty("name", region.name());
-            r.addProperty("path", svgPath(region.shape(), offset.x, offset.y));
+            ObjectNode r = Json.object();
+            r.put("id", region.id());
+            r.put("name", region.name());
+            r.put("path", svgPath(region.shape(), offset.x, offset.y));
             json.add(r);
         }
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "map");
-        msg.add("regions", json);
+        ObjectNode msg = Json.object();
+        msg.put("type", "map");
+        msg.set("regions", json);
         out.sendText(msg.toString());
     }
 
@@ -235,18 +236,18 @@ class ChromeReader {
      * Sends the parts of the frame that take the mouse wheel themselves.
      */
     private void sendWheelAreas() {
-        JsonArray areas = new JsonArray();
+        ArrayNode areas = Json.array();
         addWheelAreas(root.getContentPane(), areas);
         String text = areas.toString();
         if (text.equals(sentWheelAreas)) return;
         sentWheelAreas = text;
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "wheelAreas");
-        msg.add("areas", areas);
+        ObjectNode msg = Json.object();
+        msg.put("type", "wheelAreas");
+        msg.set("areas", areas);
         out.sendText(msg.toString());
     }
 
-    private void addWheelAreas(Component c, JsonArray areas) {
+    private void addWheelAreas(Component c, ArrayNode areas) {
         if (!c.isShowing()) return;
         // a scroll pane that can scroll, or a view with a wheel listener of its own (a board that zooms, say)
         boolean takesWheel = c instanceof JScrollPane pane
@@ -255,7 +256,7 @@ class ChromeReader {
         if (takesWheel && c instanceof JComponent jc) {
             Rectangle r = SwingUtilities.convertRectangle(jc, jc.getVisibleRect(), root);
             if (!r.isEmpty()) {
-                JsonArray a = new JsonArray();
+                ArrayNode a = Json.array();
                 a.add(r.x);
                 a.add(r.y);
                 a.add(r.width);
@@ -278,16 +279,16 @@ class ChromeReader {
         boolean appended = !historyReset && history.size() >= sent
                 && (sent == 0 || Objects.equals(history.get(sent - 1), sentHistory.get(sent - 1)));
         if (appended && history.size() == sent) return;
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "history");
-        msg.addProperty("reset", !appended);
-        JsonArray lines = new JsonArray();
+        ObjectNode msg = Json.object();
+        msg.put("type", "history");
+        msg.put("reset", !appended);
+        ArrayNode lines = Json.array();
         for (int i = appended ? sent : 0; i < history.size(); i++) {
-            JsonObject line = historyLine(history.get(i));
-            line.addProperty("round", i < rounds.size() ? rounds.get(i) : -1);
+            ObjectNode line = historyLine(history.get(i));
+            line.put("round", i < rounds.size() ? rounds.get(i) : -1);
             lines.add(line);
         }
-        msg.add("lines", lines);
+        msg.set("lines", lines);
         sentHistory = history;
         historyReset = false;
         out.sendText(msg.toString());
@@ -295,7 +296,7 @@ class ChromeReader {
 
     private void sendRegions() {
         List<ClickRegion> showing = new ArrayList<>();
-        JsonArray json = new JsonArray();
+        ArrayNode json = Json.array();
         for (ClickRegion region : gui.getClickRegions()) {
             JComponent view = region.view();
             // a view in a tab not chosen is not showing
@@ -309,12 +310,12 @@ class ChromeReader {
                 shape = area;
             }
             Point offset = SwingUtilities.convertPoint(view, 0, 0, root);
-            JsonObject r = new JsonObject();
-            r.addProperty("path", svgPath(shape, offset.x, offset.y));
-            JsonArray options = new JsonArray();
+            ObjectNode r = Json.object();
+            r.put("path", svgPath(shape, offset.x, offset.y));
+            ArrayNode options = Json.array();
             for (AbstractAction a : region.actions())
                 options.add(a.getString(game.getGameState()));
-            r.add("options", options);
+            r.set("options", options);
             json.add(r);
             showing.add(region);
         }
@@ -322,10 +323,10 @@ class ChromeReader {
         if (text.equals(sentRegions)) return;
         sentRegions = text;
         regions = showing;
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "regions");
-        msg.addProperty("v", ++regionsVersion);
-        msg.add("regions", json);
+        ObjectNode msg = Json.object();
+        msg.put("type", "regions");
+        msg.put("v", ++regionsVersion);
+        msg.set("regions", json);
         out.sendText(msg.toString());
     }
 
@@ -379,36 +380,36 @@ class ChromeReader {
      * The info panel's lines: the standard ones (see {@link AbstractGUIManager#getGameStateInfo()}) as fields, where
      * they have their standard form, and any others as lines.
      */
-    static JsonObject info(List<String> info) {
-        JsonObject result = new JsonObject();
-        JsonArray lines = new JsonArray();
+    static ObjectNode info(List<String> info) {
+        ObjectNode result = Json.object();
+        ArrayNode lines = Json.array();
         for (String line : info) {
             Matcher m;
             if (line.startsWith("Game status: ")) {
                 // the page shows the game's progress itself
                 continue;
             } else if ((m = SCORES.matcher(line)).matches() && scores(m.group(1)) != null) {
-                result.add("scores", scores(m.group(1)));
+                result.set("scores", scores(m.group(1)));
             } else if ((m = PHASE.matcher(line)).matches()) {
-                result.addProperty("phase", m.group(1));
+                result.put("phase", m.group(1));
             } else if ((m = TURN.matcher(line)).matches()) {
-                result.addProperty("turn", Integer.parseInt(m.group(1)));
-                result.addProperty("round", Integer.parseInt(m.group(2)));
+                result.put("turn", Integer.parseInt(m.group(1)));
+                result.put("round", Integer.parseInt(m.group(2)));
             } else if ((m = CURRENT.matcher(line)).matches()) {
-                result.addProperty("current", Integer.parseInt(m.group(1)));
+                result.put("current", Integer.parseInt(m.group(1)));
             } else {
                 lines.add(line);
             }
         }
-        result.add("lines", lines);
+        result.set("lines", lines);
         return result;
     }
 
     /**
      * The scores in "1, 2, 3", or null if that is not a list of numbers.
      */
-    private static JsonArray scores(String text) {
-        JsonArray scores = new JsonArray();
+    private static ArrayNode scores(String text) {
+        ArrayNode scores = Json.array();
         for (String s : text.split(",")) {
             try {
                 scores.add(Double.parseDouble(s.trim()));
@@ -422,11 +423,11 @@ class ChromeReader {
     /**
      * A history line: its text, and the player it is about (from {@code "Player 2 : ..."}), or -1 if none.
      */
-    static JsonObject historyLine(String line) {
-        JsonObject result = new JsonObject();
+    static ObjectNode historyLine(String line) {
+        ObjectNode result = Json.object();
         Matcher m = HISTORY_LINE.matcher(line);
-        result.addProperty("player", m.matches() ? Integer.parseInt(m.group(1)) : -1);
-        result.addProperty("text", m.matches() ? m.group(2) : line);
+        result.put("player", m.matches() ? Integer.parseInt(m.group(1)) : -1);
+        result.put("text", m.matches() ? m.group(2) : line);
         return result;
     }
 

@@ -103,11 +103,11 @@ public class SessionConfigTest {
     public void parametersWithoutAListOfSettingsAreFreeEntry() {
         var described = GameCatalog.describeParameters(GameType.LawnAndOrder);
         for (var e : described) {
-            var p = e.getAsJsonObject();
-            if (p.get("name").getAsString().equals("maxRounds"))
-                assertEquals(0, p.getAsJsonArray("values").size());
-            if (p.get("name").getAsString().equals("handSize"))
-                assertTrue(p.getAsJsonArray("values").size() > 1);
+            var p = e;
+            if (p.get("name").asText().equals("maxRounds"))
+                assertEquals(0, p.get("values").size());
+            if (p.get("name").asText().equals("handSize"))
+                assertTrue(p.get("values").size() > 1);
         }
     }
 }

@@ -1,7 +1,7 @@
 package evaluation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.*;
@@ -24,6 +24,7 @@ import players.learners.AbstractLearner;
 import players.learners.LearnFromData;
 import players.mcts.MCTSExpertIterationListener;
 import players.mcts.MCTSPlayer;
+import utilities.Json;
 import utilities.Pair;
 
 import java.io.BufferedReader;
@@ -66,7 +67,8 @@ public class ExpertIteration {
     Map<RunArg, Object> NTBEAConfig;
     Map<RunArg, Object> RGConfig;
 
-    ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    ObjectMapper mapper = Json.mapper();
+    ObjectWriter prettyWriter = Json.prettyWriter();
     TournamentResults runningTournamentResults = new TournamentResults();
 
     int[] valueSearchSettings;
@@ -592,7 +594,7 @@ public class ExpertIteration {
     // Persists the per-iteration row counts and the current sample rates, so that a restart can pick these up
     void saveProgress() {
         try {
-            mapper.writeValue(progressFile(),
+            prettyWriter.writeValue(progressFile(),
                     new Progress(stateRowsPerIteration, actionRowsPerIteration, stateSampleRate, actionSampleRate));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -725,7 +727,7 @@ public class ExpertIteration {
         if (localAgents.size() > 1) {
             try {
                 // write the DTO so Jackson serializes a JSON-friendly structure
-                mapper.writeValue(new File(dataDir + File.separator + "RunningTournamentResults.json"), runningTournamentResults.toDTO());
+                prettyWriter.writeValue(new File(dataDir + File.separator + "RunningTournamentResults.json"), runningTournamentResults.toDTO());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

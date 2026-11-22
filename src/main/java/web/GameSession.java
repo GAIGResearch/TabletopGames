@@ -1,9 +1,8 @@
 package web;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
@@ -26,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import utilities.Json;
 
 /**
  * One browser player's game: the {@link Game} on its own thread, with a {@link HumanGUIPlayer} in the browser player's
@@ -119,9 +119,9 @@ public class GameSession {
     }
 
     private void sendKey() {
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "session");
-        msg.addProperty("key", key);
+        ObjectNode msg = Json.object();
+        msg.put("type", "session");
+        msg.put("key", key);
         out.sendText(msg.toString());
     }
 
@@ -199,16 +199,16 @@ public class GameSession {
     public synchronized void onMessage(String text) {
         if (stopped) return;
         lastActivity = System.currentTimeMillis();
-        JsonObject msg = JsonParser.parseString(text).getAsJsonObject();
-        String type = msg.get("type").getAsString();
+        ObjectNode msg = (ObjectNode) Json.parse(text);
+        String type = msg.get("type").asText();
         // Anything but a mouse move may change what the GUI shows (a click may change its tab, say), so the GUI is
         // updated. A move's effects are the views' own, and they repaint themselves.
-        if (!(type.equals("mouse") && msg.get("kind").getAsString().equals("move"))) updateNow = true;
+        if (!(type.equals("mouse") && msg.get("kind").asText().equals("move"))) updateNow = true;
         if (type.equals("resize")) {
-            int w = msg.get("w").getAsInt(), h = msg.get("h").getAsInt();
-            double dpr = msg.get("dpr").getAsDouble();
+            int w = msg.get("w").asInt(), h = msg.get("h").asInt();
+            double dpr = msg.get("dpr").asDouble();
             // the page's zoom, or none (0) to fit the GUI to the space
-            double zoom = msg.has("zoom") && !msg.get("zoom").isJsonNull() ? msg.get("zoom").getAsDouble() : 0;
+            double zoom = msg.has("zoom") && !msg.get("zoom").isNull() ? msg.get("zoom").asDouble() : 0;
             zoom = zoom <= 0 ? 0 : Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
             if (started) {
                 resize(w, h, dpr, zoom);
@@ -226,24 +226,24 @@ public class GameSession {
         } else if (!started) {
             return;
         } else if (type.equals("action")) {
-            int i = msg.get("i").getAsInt();
-            String label = msg.get("label").getAsString();
+            int i = msg.get("i").asInt();
+            String label = msg.get("label").asText();
             SwingUtilities.invokeLater(() -> chrome.choose(i, label));
             streamer.nudge();
         } else if (type.equals("region")) {
-            int v = msg.get("v").getAsInt(), r = msg.get("r").getAsInt(), o = msg.get("o").getAsInt();
+            int v = msg.get("v").asInt(), r = msg.get("r").asInt(), o = msg.get("o").asInt();
             SwingUtilities.invokeLater(() -> chrome.chooseRegion(v, r, o));
             streamer.nudge();
         } else if (type.equals("plan")) {
-            String op = msg.get("op").getAsString();
-            int i = msg.has("i") ? msg.get("i").getAsInt() : -1;
+            String op = msg.get("op").asText();
+            int i = msg.has("i") ? msg.get("i").asInt() : -1;
             SwingUtilities.invokeLater(() -> planOp(op, i));
             streamer.nudge();
         } else if (type.equals("log")) {
             out.sendText(gameLog().toString());
         } else if (type.equals("actionHover")) {
-            int i = msg.get("i").getAsInt();
-            boolean enter = msg.get("enter").getAsBoolean();
+            int i = msg.get("i").asInt();
+            boolean enter = msg.get("enter").asBoolean();
             SwingUtilities.invokeLater(() -> chrome.hover(i, enter));
             streamer.nudge();
         } else if (type.equals("quit")) {
@@ -412,12 +412,12 @@ public class GameSession {
      * Sends the plan to the page when it has changed (no steps when there is no plan).
      */
     private void sendPlan() {
-        JsonObject msg;
+        ObjectNode msg;
         if (plan != null) {
             msg = plan.toJson();
         } else {
-            msg = new JsonObject();
-            msg.addProperty("type", "plan");
+            msg = Json.object();
+            msg.put("type", "plan");
         }
         String text = msg.toString();
         if (text.equals(sentPlan)) return;
@@ -461,27 +461,27 @@ public class GameSession {
     }
 
     private void sendStarted(long seed, List<AbstractPlayer> players) {
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "started");
-        msg.addProperty("game", config.game().name());
-        msg.addProperty("seed", seed);
-        msg.addProperty("seat", config.seat());
-        msg.add("players", playerNames(players));
-        msg.addProperty("actionsInPage", chrome.hasActions());
-        msg.addProperty("infoInPage", chrome.hasInfo());
+        ObjectNode msg = Json.object();
+        msg.put("type", "started");
+        msg.put("game", config.game().name());
+        msg.put("seed", seed);
+        msg.put("seat", config.seat());
+        msg.set("players", playerNames(players));
+        msg.put("actionsInPage", chrome.hasActions());
+        msg.put("infoInPage", chrome.hasInfo());
         out.sendText(msg.toString());
     }
 
     private void sendMessage(String title, String message) {
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "message");
-        msg.addProperty("title", title);
-        msg.addProperty("text", message);
+        ObjectNode msg = Json.object();
+        msg.put("type", "message");
+        msg.put("title", title);
+        msg.put("text", message);
         out.sendText(msg.toString());
     }
 
-    private JsonArray playerNames(List<AbstractPlayer> players) {
-        JsonArray names = new JsonArray();
+    private ArrayNode playerNames(List<AbstractPlayer> players) {
+        ArrayNode names = Json.array();
         for (int i = 0; i < players.size(); i++)
             names.add(i == config.seat() ? "You" : players.get(i).toString());
         return names;
@@ -495,18 +495,18 @@ public class GameSession {
         if (!state.isNotTerminal()) {
             if (reportedResults) return;
             reportedResults = true;
-            JsonObject msg = new JsonObject();
-            msg.addProperty("type", "gameOver");
-            JsonArray results = new JsonArray();
+            ObjectNode msg = Json.object();
+            msg.put("type", "gameOver");
+            ArrayNode results = Json.array();
             for (int i = 0; i < state.getNPlayers(); i++) {
-                JsonObject r = new JsonObject();
-                r.addProperty("player", i);
-                r.addProperty("position", state.getOrdinalPosition(i));
-                r.addProperty("score", state.getGameScore(i));
-                r.addProperty("result", String.valueOf(state.getPlayerResults()[i]));
+                ObjectNode r = Json.object();
+                r.put("player", i);
+                r.put("position", state.getOrdinalPosition(i));
+                r.put("score", state.getGameScore(i));
+                r.put("result", String.valueOf(state.getPlayerResults()[i]));
                 results.add(r);
             }
-            msg.add("results", results);
+            msg.set("results", results);
             out.sendText(msg.toString());
             return;
         }
@@ -516,10 +516,10 @@ public class GameSession {
         String turn = yourTurn + ":" + player;
         if (turn.equals(reportedTurn)) return;
         reportedTurn = turn;
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "turn");
-        msg.addProperty("yourTurn", yourTurn);
-        msg.addProperty("player", player);
+        ObjectNode msg = Json.object();
+        msg.put("type", "turn");
+        msg.put("yourTurn", yourTurn);
+        msg.put("player", player);
         out.sendText(msg.toString());
     }
 
@@ -527,51 +527,51 @@ public class GameSession {
      * A record of the game so far, for a bug report or to set the game up again. The actions are described as the
      * browser player saw them.
      */
-    private JsonObject gameLog() {
-        JsonObject log = new JsonObject();
-        log.addProperty("type", "log");
-        log.addProperty("game", config.game().name());
-        log.addProperty("seed", seed);
-        log.addProperty("started", java.time.Instant.ofEpochMilli(startedAt).toString());
-        log.addProperty("browserSeat", config.seat());
-        JsonArray players = new JsonArray();
+    private ObjectNode gameLog() {
+        ObjectNode log = Json.object();
+        log.put("type", "log");
+        log.put("game", config.game().name());
+        log.put("seed", seed);
+        log.put("started", java.time.Instant.ofEpochMilli(startedAt).toString());
+        log.put("browserSeat", config.seat());
+        ArrayNode players = Json.array();
         for (int i = 0; i < config.nPlayers(); i++) {
-            JsonObject p = new JsonObject();
-            p.addProperty("seat", i);
-            p.addProperty("agent", config.opponents().get(i));
-            p.addProperty("name", game.getPlayers().get(i).toString());
+            ObjectNode p = Json.object();
+            p.put("seat", i);
+            p.put("agent", config.opponents().get(i));
+            p.put("name", game.getPlayers().get(i).toString());
             players.add(p);
         }
-        log.add("players", players);
-        JsonObject changed = new JsonObject();
-        config.params().forEach(changed::addProperty);
-        log.add("changedParameters", changed);
-        JsonObject all = new JsonObject();
+        log.set("players", players);
+        ObjectNode changed = Json.object();
+        config.params().forEach(changed::put);
+        log.set("changedParameters", changed);
+        ObjectNode all = Json.object();
         if (game.getGameState().getGameParameters() instanceof evaluation.optimisation.TunableParameters<?> tp)
-            tp.getParameterNames().forEach(n -> all.addProperty(n, String.valueOf(tp.getParameterValue(n))));
-        log.add("parameters", all);
+            tp.getParameterNames().forEach(n -> all.put(n, String.valueOf(tp.getParameterValue(n))));
+        log.set("parameters", all);
 
         AbstractGameState state = game.getGameState();
-        JsonArray actions = new JsonArray();
+        ArrayNode actions = Json.array();
         Set<Integer> perspective = Set.of(config.seat());
         for (var entry : history(state)) {
-            JsonObject a = new JsonObject();
-            a.addProperty("player", entry.a);
-            a.addProperty("action", entry.b.getString(state, perspective));
+            ObjectNode a = Json.object();
+            a.put("player", entry.a);
+            a.put("action", entry.b.getString(state, perspective));
             actions.add(a);
         }
-        log.add("actions", actions);
-        log.addProperty("gameStatus", String.valueOf(state.getGameStatus()));
+        log.set("actions", actions);
+        log.put("gameStatus", String.valueOf(state.getGameStatus()));
         if (!state.isNotTerminal()) {
-            JsonArray results = new JsonArray();
+            ArrayNode results = Json.array();
             for (int i = 0; i < state.getNPlayers(); i++) {
-                JsonObject r = new JsonObject();
-                r.addProperty("player", i);
-                r.addProperty("position", state.getOrdinalPosition(i));
-                r.addProperty("score", state.getGameScore(i));
+                ObjectNode r = Json.object();
+                r.put("player", i);
+                r.put("position", state.getOrdinalPosition(i));
+                r.put("score", state.getGameScore(i));
                 results.add(r);
             }
-            log.add("results", results);
+            log.set("results", results);
         }
         return log;
     }
@@ -588,9 +588,9 @@ public class GameSession {
     }
 
     private void sendError(String message) {
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "error");
-        msg.addProperty("message", message);
+        ObjectNode msg = Json.object();
+        msg.put("type", "error");
+        msg.put("message", message);
         out.sendText(msg.toString());
     }
 

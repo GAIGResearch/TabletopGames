@@ -21,9 +21,9 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link GameStateContainerFactory} and for tokenizing a game state through its
- * container. The container is serialised reflectively by Gson, so these tests also guard against
- * field-name clashes in the game state hierarchy (Gson rejects a class that declares two fields
- * with the same JSON name).
+ * container. The container is serialised from its fields by {@link utilities.Json}, so these tests also
+ * guard against field-name clashes in the game state hierarchy (the mapper rejects a class that declares
+ * two fields with the same JSON name).
  */
 public class GameStateContainerFactoryTest {
 

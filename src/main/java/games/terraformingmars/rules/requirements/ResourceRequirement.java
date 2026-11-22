@@ -16,6 +16,11 @@ public class ResourceRequirement implements Requirement<TMGameState> {
     final int cardID;
     final int player;
 
+    @SuppressWarnings("unused") // for JSON
+    private ResourceRequirement() {
+        this(null, 0, false, -1, -1);
+    }
+
     public ResourceRequirement(TMTypes.Resource resource, int amount, boolean production, int player, int cardID) {
         this.resource = resource;
         this.amount = amount;

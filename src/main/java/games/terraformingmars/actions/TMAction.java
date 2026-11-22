@@ -1,5 +1,6 @@
 package games.terraformingmars.actions;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
@@ -21,6 +22,8 @@ import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
+/** Written to JSON with its class name under {@code "class"}, as configurable classes in {@code data/} are. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "class")
 public class TMAction extends AbstractAction {
     public boolean freeActionPoint;
     public int player;

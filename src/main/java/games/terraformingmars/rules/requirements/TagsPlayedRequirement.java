@@ -15,6 +15,11 @@ public class TagsPlayedRequirement implements Requirement<TMGameState> {
     public final int[] nMin;
     int nTags;
 
+    @SuppressWarnings("unused") // for JSON
+    private TagsPlayedRequirement() {
+        this(null, null);
+    }
+
     public TagsPlayedRequirement(TMTypes.Tag[] tag, int[] nMin) {
         this.tags = tag;
         this.nMin = nMin;

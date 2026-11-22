@@ -258,7 +258,7 @@ public class PandemicMovePlanTest {
             previews.add(summary(plan.preview()));
         }
         // the page is shown them all
-        assertEquals(steps.length, plan.toJson().getAsJsonArray("steps").size());
+        assertEquals(steps.length, plan.toJson().get("steps").size());
         // taking out the last step keeps the others, and it may be planned again
         plan.remove(steps.length - 1);
         assertEquals(steps.length - 1, plan.steps().size());
