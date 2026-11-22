@@ -1,7 +1,7 @@
 package evaluation.tournaments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import utilities.Json;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
@@ -29,11 +29,10 @@ public class TournamentResultsSerializationTest {
         tr.addResult(p1, 0.5, 2, 7.0, 0);
         tr.addResult(p2, 0.0, 3, 4.0, 0);
 
-        ObjectMapper om = new ObjectMapper();
-        om.enable(SerializationFeature.INDENT_OUTPUT);
+        ObjectMapper om = Json.mapper();
 
         // Serialize and deserialize using Jackson
-        String json = om.writeValueAsString(tr);
+        String json = Json.prettyWriter().writeValueAsString(tr);
         TournamentResults tr2 = om.readValue(json, TournamentResults.class);
 
         // Check the maps
@@ -73,7 +72,7 @@ public class TournamentResultsSerializationTest {
         tr.gameRecords.add(new TournamentResults.GameRecord(42L, new String[]{"P1", "P2"},
                 new double[]{1.0, 0.0}, new int[]{1, 2}));
 
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = Json.mapper();
         TournamentResults tr2 = om.readValue(om.writeValueAsString(tr), TournamentResults.class);
 
         assertEquals(1, tr2.getGameRecords().size());
@@ -89,7 +88,7 @@ public class TournamentResultsSerializationTest {
         // files written before game records were added
         String json = "{\"nGamesPlayedPerOpponent\":{},\"winsPerPlayerPerOpponent\":{},\"ordinalDeltaPerOpponent\":{}," +
                 "\"playerResults\":{\"P1\":[{\"points\":1.0,\"ordinal\":1,\"score\":3.0,\"win\":1}]}}";
-        TournamentResults tr = new ObjectMapper().readValue(json, TournamentResults.class);
+        TournamentResults tr = Json.mapper().readValue(json, TournamentResults.class);
         assertEquals(1, tr.getPlayerPoints("P1").size());
         assertTrue(tr.getGameRecords().isEmpty());
     }

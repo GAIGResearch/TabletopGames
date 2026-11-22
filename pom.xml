@@ -25,17 +25,30 @@
     <artifactId>ModernBoardGame</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!-- Jackson is TAG's JSON library (utilities.Json). The BOM pins all Jackson modules to the
+         version that Spark and langchain4j resolve to, so there is one Jackson on the classpath. -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>2.21.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10</version>
         </dependency>
         <dependency>
             <groupId>com.github.davidmoten</groupId>

@@ -26,7 +26,9 @@
             <includes>
                 <include>ai.tabletopgames:ModernBoardGame</include>
                 <include>com.googlecode.json-simple:json-simple</include>
-                <include>com.google.code.gson:gson</include>
+                <include>com.fasterxml.jackson.core:jackson-databind</include>
+                <include>com.fasterxml.jackson.core:jackson-core</include>
+                <include>com.fasterxml.jackson.core:jackson-annotations</include>
                 <include>com.github.davidmoten:word-wrap</include>
                 <include>com.github.davidmoten:guava-mini</include>
                 <include>org.slf4j:slf4j-nop</include>

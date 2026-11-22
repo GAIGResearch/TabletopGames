@@ -1,8 +1,5 @@
 package games.terraformingmars.components;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
 import core.components.Card;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -12,7 +9,7 @@ import games.terraformingmars.rules.effects.*;
 import games.terraformingmars.rules.requirements.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import utilities.SimpleDeserializer;
+import utilities.Json;
 import utilities.Utils;
 
 import java.util.*;
@@ -226,24 +223,11 @@ public class TMCard extends Card {
     public static TMCard loadCardJSON(JSONObject cardDef)
     {
         TMCard card = null;
-        try{
-            GsonBuilder gsonBuilder = new GsonBuilder()
-                    .registerTypeAdapter(Requirement.class, new SimpleDeserializer<Requirement>())
-                    .registerTypeAdapter(Effect.class, new SimpleDeserializer<Effect>())
-                    .registerTypeAdapter(Discount.class, new Discount())
-                    .registerTypeAdapter(TMAction.class, new SimpleDeserializer<TMAction>())
-                    // otherwise Gson fills HashSet and HashMap fields with plain ones, which iterate over keys such as
-                    // enums in an order that changes from one JVM launch to the next
-                    .registerTypeAdapter(HashSet.class, (InstanceCreator<HashSet<?>>) type -> new LinkedHashSet<>())
-                    .registerTypeAdapter(HashMap.class, (InstanceCreator<HashMap<?, ?>>) type -> new LinkedHashMap<>())
-                    ;
-            Gson gson = gsonBuilder.setPrettyPrinting().create();
-            card = gson.fromJson(cardDef.toJSONString(), TMCard.class);
-        }catch(Exception e)
-        {
+        try {
+            card = Json.mapper().readValue(cardDef.toJSONString(), TMCard.class);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
         return card;
     }
 

@@ -1,7 +1,7 @@
 package web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -12,6 +12,7 @@ import evaluation.metrics.Event;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import utilities.Json;
 
 /**
  * Sends the browser what an AI player weighed up for each decision it makes: its most visited actions, with the share
@@ -47,25 +48,25 @@ class AIInsight implements IGameListener {
         List<Map.Entry<AbstractAction, Map<String, Object>>> ranked = new ArrayList<>(stats.entrySet());
         ranked.sort((a, b) -> Integer.compare(visits(b.getValue()), visits(a.getValue())));
 
-        JsonArray candidates = new JsonArray();
+        ArrayNode candidates = Json.array();
         for (Map.Entry<AbstractAction, Map<String, Object>> e : ranked.subList(0, Math.min(CANDIDATES, ranked.size()))) {
-            JsonObject c = new JsonObject();
-            c.addProperty("label", e.getKey().getString(state));
-            c.addProperty("visits", visits(e.getValue()));
+            ObjectNode c = Json.object();
+            c.put("label", e.getKey().getString(state));
+            c.put("visits", visits(e.getValue()));
             if (e.getValue().get("visitProportion") instanceof Number share)
-                c.addProperty("share", share.doubleValue());
+                c.put("share", share.doubleValue());
             if (e.getValue().get("nodeValue") instanceof double[] values && event.playerID < values.length)
-                c.addProperty("value", values[event.playerID]);
-            c.addProperty("chosen", e.getKey().equals(event.action));
+                c.put("value", values[event.playerID]);
+            c.put("chosen", e.getKey().equals(event.action));
             candidates.add(c);
         }
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "insight");
-        msg.addProperty("player", event.playerID);
-        msg.addProperty("name", player.toString());
-        msg.addProperty("chosen", event.action.getString(state));
-        msg.addProperty("considered", stats.size());
-        msg.add("candidates", candidates);
+        ObjectNode msg = Json.object();
+        msg.put("type", "insight");
+        msg.put("player", event.playerID);
+        msg.put("name", player.toString());
+        msg.put("chosen", event.action.getString(state));
+        msg.put("considered", stats.size());
+        msg.set("candidates", candidates);
         out.sendText(msg.toString());
     }
 

@@ -1,10 +1,13 @@
 package games.terraformingmars.rules.requirements;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 
 import java.awt.*;
 
+/** Written to JSON with its class name under {@code "class"}, as configurable classes in {@code data/} are. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "class")
 public interface Requirement<T> {
     /*
      2 cases implemented:

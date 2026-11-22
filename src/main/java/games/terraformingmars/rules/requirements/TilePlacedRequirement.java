@@ -15,6 +15,11 @@ public class TilePlacedRequirement implements Requirement<TMGameState> {
     public final boolean max;  // if true, value of counter must be <= threshold, if false >=
     public final boolean any;  // tiles placed by any player, or by the player who checks this
 
+    @SuppressWarnings("unused") // for JSON
+    private TilePlacedRequirement() {
+        this(null, 0, false, false);
+    }
+
     public TilePlacedRequirement(TMTypes.Tile tile, int threshold, boolean max, boolean any) {
         this.tile = tile;
         this.threshold = threshold;

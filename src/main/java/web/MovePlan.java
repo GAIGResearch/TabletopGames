@@ -1,7 +1,7 @@
 package web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import gui.IMovePlanner;
@@ -9,6 +9,7 @@ import gui.IMovePlanner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import utilities.Json;
 
 /**
  * The plan the browser player is making for a decision the game is waiting for (see {@link IMovePlanner}): the
@@ -112,21 +113,21 @@ class MovePlan {
      * The plan for the page: its steps, what the player should know before sending it, and the label of the button
      * that sends it.
      */
-    JsonObject toJson() {
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "plan");
-        JsonArray list = new JsonArray();
+    ObjectNode toJson() {
+        ObjectNode msg = Json.object();
+        msg.put("type", "plan");
+        ArrayNode list = Json.array();
         // each step described in the state it was planned in
         AbstractGameState state = decision.copy();
         for (AbstractAction step : steps) {
             list.add(describe.apply(step, state));
             planner.apply(state, step.copy());
         }
-        msg.add("steps", list);
-        JsonArray warnings = new JsonArray();
+        msg.set("steps", list);
+        ArrayNode warnings = Json.array();
         planner.warnings(preview, player).forEach(warnings::add);
-        msg.add("warnings", warnings);
-        msg.addProperty("send", planner.sendLabel());
+        msg.set("warnings", warnings);
+        msg.put("send", planner.sendLabel());
         return msg;
     }
 }

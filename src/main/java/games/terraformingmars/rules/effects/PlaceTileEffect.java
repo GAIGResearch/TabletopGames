@@ -16,6 +16,11 @@ public class PlaceTileEffect extends Effect {
     public TMTypes.Resource[] resourceTypeGained;
     public boolean onMars; // tile must've been placed on mars
 
+    @SuppressWarnings("unused") // for JSON
+    private PlaceTileEffect() {
+        this(false, null, false, null, null);
+    }
+
     public PlaceTileEffect(boolean mustBeCurrentPlayer, TMAction effectAction, boolean onMars, TMTypes.Tile tile, TMTypes.Resource[] resourceGained) {
         super(mustBeCurrentPlayer, effectAction);
         this.onMars = onMars;

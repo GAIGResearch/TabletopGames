@@ -1,6 +1,6 @@
 package web;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -97,13 +97,13 @@ public class MovePlanTest {
 
     @Test
     public void thePageIsSentTheStepsWarningsAndTheSendButtonsLabel() {
-        JsonObject json = plan("Tri-Alb").toJson();
-        assertEquals("plan", json.get("type").getAsString());
-        assertEquals(1, json.getAsJsonArray("steps").size());
-        assertEquals("F Tri-Alb", json.getAsJsonArray("steps").get(0).getAsString());
+        ObjectNode json = plan("Tri-Alb").toJson();
+        assertEquals("plan", json.get("type").asText());
+        assertEquals(1, json.get("steps").size());
+        assertEquals("F Tri-Alb", json.get("steps").get(0).asText());
         // A Bud and A Vie hold
-        assertEquals(1, json.getAsJsonArray("warnings").size());
-        assertEquals("Send orders", json.get("send").getAsString());
+        assertEquals(1, json.get("warnings").size());
+        assertEquals("Send orders", json.get("send").asText());
     }
 
     /**

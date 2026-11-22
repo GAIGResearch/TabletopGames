@@ -1,7 +1,6 @@
 package evaluation.listeners;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import core.AbstractGameState;
 import core.Game;
 import evaluation.metrics.Event;
@@ -10,9 +9,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import utilities.Json;
 
 import java.io.File;
-import java.io.FileReader;
 import java.util.List;
 import java.util.Random;
 
@@ -50,12 +49,10 @@ public class SaveStateListenerTest {
         assertTrue("unexpected name: " + files[0].getName(),
                 files[0].getName().matches("CantStop-\\d+-\\d+-\\d+\\.json"));
 
-        try (FileReader reader = new FileReader(files[0])) {
-            JsonObject snapshot = JsonParser.parseReader(reader).getAsJsonObject();
-            assertEquals("CantStop", snapshot.get("gameType").getAsString());
-            assertEquals(2, snapshot.get("nPlayers").getAsInt());
-            assertTrue(snapshot.has("completedColumns"));
-        }
+        JsonNode snapshot = Json.mapper().readTree(files[0]);
+        assertEquals("CantStop", snapshot.get("gameType").asText());
+        assertEquals(2, snapshot.get("nPlayers").asInt());
+        assertTrue(snapshot.has("completedColumns"));
     }
 
     @Test

@@ -1,6 +1,5 @@
 package players.heuristics;
 
-import com.fasterxml.jackson.databind.annotation.NoClass;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;

@@ -1,7 +1,5 @@
 package games.seasaltpaper;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import core.AbstractGameState;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;

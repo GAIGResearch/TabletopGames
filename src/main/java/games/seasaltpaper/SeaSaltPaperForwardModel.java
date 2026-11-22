@@ -1,7 +1,5 @@
 package games.seasaltpaper;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import core.*;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
@@ -10,6 +8,7 @@ import core.components.PartialObservableDeck;
 import games.seasaltpaper.actions.*;
 import games.seasaltpaper.cards.*;
 import games.seasaltpaper.SeaSaltPaperGameState.TurnPhase;
+import utilities.Json;
 import utilities.Pair;
 
 import java.io.FileWriter;
@@ -261,13 +260,12 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
     }
 
     private void gameStateToJson(SeaSaltPaperGameState gs) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         SeaSaltPaperParameters params = (SeaSaltPaperParameters) gs.getGameParameters();
         SSPGameStateContainer gsContainer = new SSPGameStateContainer(gs);
         String fileName = "ssp-" + gs.getGameID() + "-" + gs.getRoundCounter() + "-" + gs.getTurnCounter() + ".json";
         String fileDir = params.dataPath + "/gameStates/";
         try (FileWriter f = new FileWriter(fileDir + fileName)) {
-            gson.toJson(gsContainer, f);
+            Json.prettyWriter().writeValue(f, gsContainer);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

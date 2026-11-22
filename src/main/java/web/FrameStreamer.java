@@ -1,7 +1,7 @@
 package web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -21,6 +21,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import utilities.Json;
 
 /**
  * Sends what a frame shows to the browser. On a tick when something in the frame has asked to be repainted (or every
@@ -186,27 +187,27 @@ class FrameStreamer {
                 .map(t -> png(image.getSubimage(t.x, t.y, t.width, t.height)))
                 .toList();
 
-        JsonObject header = new JsonObject();
-        header.addProperty("seq", ++seq);
-        header.addProperty("w", w);
-        header.addProperty("h", h);
-        header.addProperty("fw", frameSize.width);
-        header.addProperty("fh", frameSize.height);
-        header.addProperty("zoom", zoom);
-        JsonArray tiles = new JsonArray();
+        ObjectNode header = Json.object();
+        header.put("seq", ++seq);
+        header.put("w", w);
+        header.put("h", h);
+        header.put("fw", frameSize.width);
+        header.put("fh", frameSize.height);
+        header.put("zoom", zoom);
+        ArrayNode tiles = Json.array();
         int total = 0;
         for (int i = 0; i < changed.size(); i++) {
             Rectangle t = changed.get(i);
-            JsonObject tile = new JsonObject();
-            tile.addProperty("x", t.x);
-            tile.addProperty("y", t.y);
-            tile.addProperty("w", t.width);
-            tile.addProperty("h", t.height);
-            tile.addProperty("len", pngs.get(i).length);
+            ObjectNode tile = Json.object();
+            tile.put("x", t.x);
+            tile.put("y", t.y);
+            tile.put("w", t.width);
+            tile.put("h", t.height);
+            tile.put("len", pngs.get(i).length);
             tiles.add(tile);
             total += pngs.get(i).length;
         }
-        header.add("tiles", tiles);
+        header.set("tiles", tiles);
         byte[] headerBytes = header.toString().getBytes(StandardCharsets.UTF_8);
 
         ByteBuffer message = ByteBuffer.allocate(4 + headerBytes.length + total);

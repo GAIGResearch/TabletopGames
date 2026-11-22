@@ -1,15 +1,23 @@
 package games.terraformingmars.rules.effects;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.actions.TMAction;
 
 import java.util.Objects;
 
+/** Written to JSON with its class name under {@code "class"}, as configurable classes in {@code data/} are. */
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "class")
 public abstract class Effect {
     public boolean mustBeCurrentPlayer;  // if true, only applies when player is current player
 //    public boolean appliesToPlayer;  // if true, applies to the player, otherwise can apply to any TODO
 //    public boolean mustApply;  // "up to X" type effects don't have to apply TODO
     public TMAction effectAction;
+
+    @SuppressWarnings("unused") // for JSON
+    protected Effect() {
+        this(false, null);
+    }
 
     public Effect(boolean mustBeCurrentPlayer, TMAction effectAction) {
         this.mustBeCurrentPlayer = mustBeCurrentPlayer;

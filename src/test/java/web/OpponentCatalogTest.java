@@ -62,7 +62,7 @@ public class OpponentCatalogTest {
 
         agent("b", "{\"default\": true, \"class\": \"players.simple.RandomPlayer\"}");
         assertEquals("b", catalog.defaultFor(GameType.LawnAndOrder));
-        assertTrue(catalog.describe(GameType.LawnAndOrder).get(1).getAsJsonObject().get("default").getAsBoolean());
+        assertTrue(catalog.describe(GameType.LawnAndOrder).get(1).get("default").asBoolean());
     }
 
     @Test

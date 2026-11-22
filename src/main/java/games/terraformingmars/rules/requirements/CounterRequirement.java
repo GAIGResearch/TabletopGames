@@ -17,6 +17,11 @@ public class CounterRequirement implements Requirement<TMGameState> {
     int thresholdIdx;
     public boolean max;  // if true, value of counter must be <= threshold, if false >=
 
+    @SuppressWarnings("unused") // for JSON
+    private CounterRequirement() {
+        this(null, 0, false);
+    }
+
     public CounterRequirement(String code, int threshold, boolean max) {
         this.counterCode = code;
         this.thresholdIdx = threshold;

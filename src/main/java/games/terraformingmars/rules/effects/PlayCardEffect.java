@@ -13,6 +13,11 @@ import java.util.LinkedHashSet;
 public class PlayCardEffect extends Effect {
     public HashSet<TMTypes.Tag> tagsOnCard;
 
+    @SuppressWarnings("unused") // for JSON
+    private PlayCardEffect() {
+        this(false, null, null);
+    }
+
     public PlayCardEffect(boolean mustBeCurrentPlayer, TMAction effectAction, HashSet<TMTypes.Tag> tags) {
         super(mustBeCurrentPlayer, effectAction);
         this.tagsOnCard = tags;

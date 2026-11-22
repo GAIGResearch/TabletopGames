@@ -10,6 +10,11 @@ public class PlayableActionRequirement implements Requirement<TMGameState> {
 
     TMAction action;
 
+    @SuppressWarnings("unused") // for JSON
+    private PlayableActionRequirement() {
+        this(null);
+    }
+
     public PlayableActionRequirement(TMAction action) {
         this.action = action;
     }
