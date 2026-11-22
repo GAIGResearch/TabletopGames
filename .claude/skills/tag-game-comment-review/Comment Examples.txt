@@ -1,0 +1,109 @@
+Old function and comment: 
+    /**
+     * The player's score for one species, as at the end of the game.
+     */
+    public int speciesScore(int player, Species species)
+
+Corrected comment:
+    /**
+     * The player's current score for one species
+     */
+    public int speciesScore(int player, Species species) 
+
+Old comment
+    /**
+     * The top hex at the position, or null if no tile covers it.
+     */
+    public HexCell getCell(HexCoord hex) 
+
+New comment
+    /**
+     * The top hex at the position (or null if it is not covered by a tile)
+     */
+    public HexCell getCell(HexCoord hex) 
+
+Old comment
+    /**
+     * A covered position with no creature on it.
+     */
+    public boolean isEmptyHex(HexCoord hex) {
+
+New comment:
+    /**
+     * The hex has a tile on it, but no creature
+     */
+    public boolean isEmptyHex(HexCoord hex) 
+
+Old comment:
+    /**
+     * Whether the position is an Edge hex: covered, with at least one neighbour that is not.
+     */
+    public boolean isEdge(HexCoord hex) 
+
+New comment:
+    /**
+     * an edge is a hex covered by a tile with at least one neighbour not covered by a tile
+     */
+    public boolean isEdge(HexCoord hex) 
+
+Old phrasing: which suggests iteration over a hash collection in code that random agents do not reach.
+New phrasing: which suggests iteration over a hash collection in code not reached by random agents.
+
+  
+Before:
+      // The Attacker's hidden card and both the Defender's cards are chosen at once, so undo any of these choices
+        // the opponent has already made. Our own we keep: getPlayersStillToPlay() decides who still has to choose
+        // from them, so losing our own here would have us asked to choose a second time.
+        // Modelling what the opponent chose is the responsibility of the deciding agent.
+
+Replaced by:
+      // The Attacker's hidden card and both the Defender's cards are chosen at once, so undo any of these choices
+      // the opponent has already made.  We do not change the cards we played.
+      // It is the responsibility of the deciding agent to model the opponent's simultaneous choice.
+
+
+Before:
+        // PLAY: the Attacker opens the Battle with their face-up card; then the Attacker's hidden card and both the
+        // Defender's cards are chosen at once. These may arrive one at a time, or together as a single
+        // SimultaneousAction, and both reach the same state.
+Replaced by:
+        // PLAY: the Attacker opens the Battle with their face-up card; then the Attacker's hidden card and both the
+        // Defender's cards are chosen at once. These may arrive one at a time, or together as a single
+        // SimultaneousAction.
+
+Before:
+            // they are listed in the order they resolved, and the first must be on top of the stack
+Replaced by:
+            // they are listed in the order they resolved. The first must be on top of the stack
+
+
+Hare and Tortoise (the class Javadocs of the actions, and one helper)
+
+Before (a comma clause where a direct phrase will do):
+     * Moves the runner free of charge, as a hare card directs.
+Replaced by:
+     * Moves the runner free of charge as directed by a hare card.
+
+Before (the second sentence lists where the action is used - that is the callers' business):
+ * The current player chews a carrot: draws HareAndTortoiseParameters.carrotsPerChew carrots, or pays them in.
+ * This is how a runner stays on a carrot square, and the choice offered by the "draw or discard 10" hare card.
+Replaced by:
+ * The current player chews a carrot: draws HareAndTortoiseParameters.carrotsPerChew carrots, or pays them in.
+
+Before (when the action is offered, and what it leaves unchanged, are not what it does):
+ * The current player, whose runner has just reached a lettuce square, discards a lettuce and draws carrots for
+ * their race position. The runner stays where it is.
+Replaced by:
+ * The current player discards a lettuce and draws carrots for their race position.
+
+Before (the hare card's name with a hard-coded parameter value, and the actions the choices method builds):
+ * The choice given by the "Either draw or discard 10 carrots" hare card: ChewCarrot(true) to draw, or
+ * ChewCarrot(false) to discard.
+Replaced by:
+ * Player chooses to either draw or discard carrots.
+
+Before (repeats the class name Move and its constructor Move(int from, int to)):
+ * Moves the current player's runner from one square to another: forwards (paying the Race Card cost), to HOME
+ * (HareAndTortoiseParameters.HOME_SQUARE), or back to a tortoise square (drawing carrots).
+Replaced by:
+ (no Javadoc)

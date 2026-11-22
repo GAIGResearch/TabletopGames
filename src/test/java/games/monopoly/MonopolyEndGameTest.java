@@ -116,6 +116,32 @@ public class MonopolyEndGameTest {
         assertEquals(2, state.getFinalPlace(0));
     }
 
+    @Test(timeout = 5000)
+    public void theLastPlayerStandingWinsWithoutPayingInterestTheyCannotRaise() {
+        // BUG_REPORT.md: player 1 receives mortgaged property from the last other player, and could not raise the
+        // interest on it. The game is over when player 0 goes out, so player 1 wins and owes no interest (this used
+        // to make player 1 bankrupt to the Bank too, leaving nobody in, and nextPlayerIn then looped forever)
+        params.setParameterValue("mortgageInterestPercent", 100);
+        newPlayers(2);
+        state.setCash(0, 3);
+        give(state, 0, sq("Park Lane"), mayfair);
+        state.setMortgaged(sq("Park Lane"), true);
+        state.setMortgaged(mayfair, true);
+        state.setCash(1, 0);
+        give(state, 1, whitechapel);
+        roll(state, fm, 1, 2); // GO + 3 = Whitechapel Road, rent 4 > 3; interest 175 + 200 > 3 + 30 raisable
+        assertEquals(GAME_END, state.getGameStatus());
+        assertTrue(state.isBankrupt(0));
+        assertFalse(state.isBankrupt(1));
+        assertEquals(2, state.getFinalPlace(0));
+        assertArrayEquals(new GameResult[]{LOSE_GAME, WIN_GAME}, state.getPlayerResults());
+        assertFalse(state.isActionInProgress());
+        // player 1 keeps the cash and the properties, still mortgaged
+        assertEquals(3, state.getCash(1));
+        assertEquals(1, state.getOwner(mayfair));
+        assertTrue(state.isMortgaged(mayfair));
+    }
+
     @Test
     public void theGameGoesOnWhileTwoPlayersAreIn() {
         newPlayers(4);

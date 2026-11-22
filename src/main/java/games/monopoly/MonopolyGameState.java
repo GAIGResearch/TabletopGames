@@ -450,8 +450,9 @@ public class MonopolyGameState extends AbstractGameState {
         }
         finalPlace[player] = getNPlayersIn();
         setPlayerResult(CoreConstants.GameResult.LOSE_GAME, player);
-        // a player creditor pays the interest on the mortgaged properties they receive, all at once
-        if (creditor != -1) {
+        // a player creditor pays the interest on the mortgaged properties they receive, all at once, unless the game is
+        // over (they are the last player in, and have won)
+        if (creditor != -1 && getNPlayersIn() > 1) {
             int interest = 0;
             for (MonopolySquare s : properties)
                 if (mortgaged[s.index()])
@@ -470,6 +471,8 @@ public class MonopolyGameState extends AbstractGameState {
      * The next player round the table after the given one who is not bankrupt.
      */
     public int nextPlayerIn(int player) {
+        if (getNPlayersIn() == 0)
+            throw new IllegalStateException("No player is left in the game");
         int next = player;
         do {
             next = (next + 1) % getNPlayers();
