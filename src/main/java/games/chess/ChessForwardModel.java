@@ -8,6 +8,7 @@ import games.chess.actions.Castle;
 import games.chess.actions.EnPassant;
 import games.chess.actions.MovePiece;
 import games.chess.actions.Promotion;
+import games.chess.components.ChessBoard;
 import games.chess.components.ChessPiece;
 
 
@@ -22,9 +23,12 @@ public class ChessForwardModel extends StandardForwardModel {
     protected void _setup(AbstractGameState firstState) {
 
         ChessGameState chessState = (ChessGameState) firstState;
+        // The same state object is reused for every game a Game plays, so anything left from the last one must go
+        chessState.board = new ChessBoard();
+        chessState.gameStateCounts.clear();
         chessState.blackPieces.clear();
-        chessState.whitePieces.clear(); 
-        
+        chessState.whitePieces.clear();
+
         
         //Add pieces to the board
         for (int i = 0; i < 8; i++) {

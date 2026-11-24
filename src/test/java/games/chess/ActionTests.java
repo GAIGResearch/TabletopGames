@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.codahale.metrics.Slf4jReporter;
 
 import core.Game;
 import core.actions.AbstractAction;
