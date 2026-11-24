@@ -129,7 +129,6 @@ public class PickominoGameState extends AbstractGameState {
 
         PickominoGameState that = (PickominoGameState) o;
 
-        if(!super.equals(o)) return false;
 
         // Compare remainingTiles
         if (!this.remainingTiles.equals(that.remainingTiles)) return false;

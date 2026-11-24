@@ -26,7 +26,6 @@ public class MMParameters extends TunableParameters {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         MMParameters that = (MMParameters) o;
         return boardWidth == that.boardWidth && boardHeight == that.boardHeight;
     }

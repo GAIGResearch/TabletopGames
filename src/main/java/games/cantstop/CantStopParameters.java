@@ -125,7 +125,6 @@ public class CantStopParameters extends TunableParameters {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         CantStopParameters that = (CantStopParameters) o;
         return TWO_MAX == that.TWO_MAX && THREE_MAX == that.THREE_MAX && FOUR_MAX == that.FOUR_MAX && FIVE_MAX == that.FIVE_MAX && SIX_MAX == that.SIX_MAX && SEVEN_MAX == that.SEVEN_MAX && EIGHT_MAX == that.EIGHT_MAX && NINE_MAX == that.NINE_MAX && TEN_MAX == that.TEN_MAX && ELEVEN_MAX == that.ELEVEN_MAX && TWELVE_MAX == that.TWELVE_MAX && DICE_NUMBER == that.DICE_NUMBER && DICE_SIDES == that.DICE_SIDES && COLUMNS_TO_WIN == that.COLUMNS_TO_WIN && MARKERS == that.MARKERS;
     }

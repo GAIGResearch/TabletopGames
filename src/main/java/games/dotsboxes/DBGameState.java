@@ -89,7 +89,6 @@ public class DBGameState extends AbstractGameState {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DBGameState)) return false;
-        if (!super.equals(o)) return false;
         DBGameState that = (DBGameState) o;
         return lastActionDidNotScore == that.lastActionDidNotScore && Objects.equals(heuristic, that.heuristic)
                 && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) &&

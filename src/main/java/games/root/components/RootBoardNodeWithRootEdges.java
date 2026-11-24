@@ -143,7 +143,17 @@ public class RootBoardNodeWithRootEdges extends Component {
                 vagabond == that.vagabond &&
                 ruins == that.ruins &&
                 Objects.equals(identifier, that.identifier);
-        return Objects.equals(neighbourRootEdgeMapping, that.neighbourRootEdgeMapping) && tmp;
+        return tmp && sameNeighbours(that);
+    }
+
+    // neighbours are compared by ID: comparing them by value would walk round the board's cycles forever
+    private boolean sameNeighbours(RootBoardNodeWithRootEdges that) {
+        if (neighbourRootEdgeMapping.size() != that.neighbourRootEdgeMapping.size()) return false;
+        for (Map.Entry<RootEdge, RootBoardNodeWithRootEdges> e : neighbourRootEdgeMapping.entrySet()) {
+            RootBoardNodeWithRootEdges other = that.neighbourRootEdgeMapping.get(e.getKey());
+            if (other == null || other.getComponentID() != e.getValue().getComponentID()) return false;
+        }
+        return true;
     }
 
     @Override

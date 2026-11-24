@@ -122,7 +122,6 @@ public class ChessGameState extends AbstractGameState {
     @Override
     protected boolean _equals(Object o) {
         return o instanceof ChessGameState that &&
-                super.equals(o) &&
                 this.halfMoveClock == that.halfMoveClock &&
                 this.whitePieces.equals(that.whitePieces) &&
                 this.blackPieces.equals(that.blackPieces) &&

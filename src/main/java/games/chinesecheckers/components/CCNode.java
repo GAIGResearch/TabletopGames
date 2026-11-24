@@ -161,8 +161,9 @@ public class CCNode extends Component {
     @Override
     public boolean equals(Object o) {
         if (o instanceof CCNode other) {
-            return componentID == other.componentID && occupiedPeg == other.occupiedPeg &&
-                    x == other.x && y == other.y && Objects.equals(neighbours, other.neighbours) &&
+            // neighbours are compared by ID (neighboursBySide): comparing the nodes would walk round the board forever
+            return componentID == other.componentID && Objects.equals(occupiedPeg, other.occupiedPeg) &&
+                    x == other.x && y == other.y &&
                     Arrays.equals(neighboursBySide, other.neighboursBySide) &&
                     maxNeighbours == other.maxNeighbours;
         }

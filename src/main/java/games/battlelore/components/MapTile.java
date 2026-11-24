@@ -138,7 +138,7 @@ public class MapTile extends BoardNode {
         return ownerId == mapTile.ownerId
                 && locationX == mapTile.locationX
                 && locationY == mapTile.locationY
-                && units == mapTile.units
+                && Objects.equals(units, mapTile.units)
                 && type == mapTile.type
                 && componentID == mapTile.componentID;
     }

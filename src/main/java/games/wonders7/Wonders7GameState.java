@@ -355,7 +355,6 @@ public class Wonders7GameState extends AbstractGameState {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Wonders7GameState)) return false;
-        if (!super.equals(o)) return false;
         Wonders7GameState that = (Wonders7GameState) o;
         return currentAge == that.currentAge && direction == that.direction && Objects.equals(playerResources, that.playerResources) &&
                 Objects.equals(playerHands, that.playerHands) && Objects.equals(playedCards, that.playedCards) &&

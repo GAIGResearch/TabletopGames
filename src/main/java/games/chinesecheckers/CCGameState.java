@@ -67,7 +67,6 @@ public class CCGameState extends AbstractGameState {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CCGameState)) return false;
-        if (!super.equals(o)) return false;
         CCGameState that = (CCGameState) o;
         return Objects.equals(starBoard, that.starBoard);
     }

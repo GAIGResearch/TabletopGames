@@ -47,6 +47,7 @@ public class RootForwardModel extends StandardForwardModel {
         Arrays.fill(state.playerScores,0);
         state.gameMap = createRootNodeGraph(true);
         state.mapType = RootParameters.MapType.Summer;
+        state.vagabondCharacter = null;  // setVagabondCharacter only sets it while null
         state.actionsPlayed = 0;
         state.playerSubGamePhase = 0;
         state.playersSetUp = 0;

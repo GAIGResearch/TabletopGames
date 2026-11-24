@@ -46,6 +46,7 @@ public class ResForwardModel extends StandardForwardModel {
         resgs.votingChoice = new ResPlayerCards.CardType[firstState.getNPlayers()];
         resgs.gameBoardValues = new ArrayList<>(5);
         resgs.failedVoteCounter = 0;
+        resgs.voteSuccess = false;
         resgs.playerHandCards = new ArrayList<>(firstState.getNPlayers());
         resgs.gameBoard = resp.getPlayerBoard(firstState.getNPlayers());
         resgs.historicTeams = new ArrayList<>();

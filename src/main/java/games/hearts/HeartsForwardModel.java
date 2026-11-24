@@ -83,6 +83,8 @@ public class HeartsForwardModel extends StandardForwardModel {
         } else {
             hgs.setGamePhase(HeartsGameState.Phase.PASSING);
             hgs.setFirstPlayer(0);
+            // replaced once the passes are resolved; until then not the last trick of the previous round or game
+            hgs.currentTrick = new Trick<>("CurrentTrick", hgs.getNPlayers(), 0, CardOrder.STANDARD);
         }
     }
 

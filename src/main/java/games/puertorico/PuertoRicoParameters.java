@@ -72,7 +72,7 @@ public class PuertoRicoParameters extends TunableParameters {
 
     @Override
     protected boolean _equals(Object o) {
-        return o == this;
+        return o instanceof PuertoRicoParameters;  // TunableParameters.equals compares the parameter values
     }
 
     @Override

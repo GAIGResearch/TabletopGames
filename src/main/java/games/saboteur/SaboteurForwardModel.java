@@ -187,8 +187,8 @@ public class SaboteurForwardModel extends StandardForwardModel {
     }
 
     private void resetPathCardOptions(SaboteurGameState sgs) {
-        sgs.pathCardOptions.clear();
-        sgs.goalLocationsFound.clear();
+        sgs.pathCardOptions = new LinkedHashSet<>();  // clear() keeps a grown table, which would change the order of the actions
+        sgs.goalLocationsFound = new HashSet<>();
         sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX() + 1, sgs.startingSquare.getY()));
         sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX() - 1, sgs.startingSquare.getY()));
         sgs.pathCardOptions.add(new Vector2D(sgs.startingSquare.getX(), sgs.startingSquare.getY() + 1));
@@ -301,8 +301,8 @@ public class SaboteurForwardModel extends StandardForwardModel {
     //For when Rockfall card is played
     //Recalculate all possible path card options via recursion
     private void recalculatePathCardOptions(SaboteurGameState sgs) {
-        sgs.pathCardOptions.clear();
-        sgs.goalLocationsFound.clear();
+        sgs.pathCardOptions = new LinkedHashSet<>();  // clear() keeps a grown table, which would change the order of the actions
+        sgs.goalLocationsFound = new HashSet<>();
         recalculatePathCardOptionsRecursive(new HashSet<>(), sgs, sgs.startingSquare);
     }
 

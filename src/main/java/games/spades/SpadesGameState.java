@@ -229,7 +229,6 @@ public class SpadesGameState extends AbstractGameState implements IPrintable,
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SpadesGameState that)) return false;
-        if (!super.equals(o)) return false;
 
         return Objects.equals(playerHands, that.playerHands) &&
                 Objects.equals(currentTrick, that.currentTrick) &&

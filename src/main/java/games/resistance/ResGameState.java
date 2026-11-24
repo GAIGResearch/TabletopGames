@@ -46,7 +46,6 @@ public class ResGameState extends AbstractGameState {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ResGameState)) return false;
-        if (!super.equals(o)) return false;
         ResGameState that = (ResGameState) o;
         return
                 leaderID == that.leaderID &&

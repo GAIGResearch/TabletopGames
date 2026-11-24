@@ -178,7 +178,6 @@ public class SeaSaltPaperParameters extends TunableParameters {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         SeaSaltPaperParameters that = (SeaSaltPaperParameters) o;
         return numberOfCardsDraw == that.numberOfCardsDraw && numberOfCardsDiscard == that.numberOfCardsDiscard && individualVisibility == that.individualVisibility && discardPileCount == that.discardPileCount && Objects.equals(dataPath, that.dataPath) && Arrays.equals(victoryCondition, that.victoryCondition)
                 && Objects.equals(collectorBonusDict, that.collectorBonusDict) && Objects.equals(duoBonusDict, that.duoBonusDict) && Objects.equals(multiplierDict, that.multiplierDict) && Objects.equals(cardsInit, that.cardsInit);

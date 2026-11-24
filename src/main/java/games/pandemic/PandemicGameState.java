@@ -132,7 +132,6 @@ public class PandemicGameState extends AbstractGameStateWithTurnOrder implements
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PandemicGameState)) return false;
-        if (!super.equals(o)) return false;
         PandemicGameState that = (PandemicGameState) o;
         return quietNight == that.quietNight &&
                 epidemic == that.epidemic &&

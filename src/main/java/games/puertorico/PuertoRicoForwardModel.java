@@ -40,6 +40,7 @@ public class PuertoRicoForwardModel extends StandardForwardModel {
         }
 
         pgs.currentRole = null;
+        pgs.roleOwner = 0;
 
         pgs.plantationDeck = new Deck<>("Plantation Deck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         pgs.visiblePlantations = new Deck<>("Available Plantations", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);

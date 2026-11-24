@@ -14,6 +14,7 @@ import games.GameType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HanabiGameState extends AbstractGameState implements IPrintable {
 
@@ -49,7 +50,8 @@ public class HanabiGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        HanabiGameState copy = new HanabiGameState(gameParameters.copy(), getNPlayers());
+        HanabiGameState copy = new HanabiGameState(gameParameters, getNPlayers());
+        copy.endTurn = endTurn;
         copy.playerDecks = new ArrayList<>();
         for (PartialObservableDeck<HanabiCard> d : playerDecks) {
             copy.playerDecks.add(d.copy(playerId));
@@ -114,6 +116,15 @@ public class HanabiGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected boolean _equals(Object o) {
-        return false;
+        return o instanceof HanabiGameState that && endTurn == that.endTurn &&
+                playerDecks.equals(that.playerDecks) && drawDeck.equals(that.drawDeck) &&
+                discardDeck.equals(that.discardDeck) && failCounter.equals(that.failCounter) &&
+                hintCounter.equals(that.hintCounter) && currentCard.equals(that.currentCard);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerDecks, drawDeck, discardDeck, failCounter, hintCounter,
+                currentCard, endTurn);
     }
 }

@@ -287,7 +287,7 @@ public class PuertoRicoGameState extends AbstractGameState {
 
     @Override
     protected PuertoRicoGameState _copy(int playerId) {
-        PuertoRicoGameState retValue = new PuertoRicoGameState(gameParameters.copy(), nPlayers);
+        PuertoRicoGameState retValue = new PuertoRicoGameState(gameParameters, nPlayers);
         retValue.ships = ships.stream().map(Ship::copy).collect(toList());
         retValue.plantationDeck = plantationDeck.copy();
         if (playerId != -1) {

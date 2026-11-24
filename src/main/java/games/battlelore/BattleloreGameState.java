@@ -183,7 +183,7 @@ public class BattleloreGameState extends AbstractGameState {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
+        BattleloreGameState state = new BattleloreGameState(gameParameters, getNPlayers());
 
         state.gameBoard = gameBoard.copy();
 
@@ -221,7 +221,6 @@ public class BattleloreGameState extends AbstractGameState {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BattleloreGameState that)) return false;
-        if (!super.equals(o)) return false;
         return Arrays.equals(playerScores, that.playerScores) && Objects.equals(gameBoard, that.gameBoard) && Objects.equals(unitTypes, that.unitTypes);
     }
 

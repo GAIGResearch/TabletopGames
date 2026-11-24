@@ -225,7 +225,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     {
         if (this == o)                        return true;
         if (!(o instanceof DiamantGameState)) return false;
-        if (!super.equals(o))                 return false;
 
         DiamantGameState that = (DiamantGameState) o;
 

@@ -263,7 +263,6 @@ public class MonopolyDealHeuristic extends TunableParameters implements IStateHe
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MonopolyDealHeuristic)) return false;
-        if (!super.equals(o)) return false;
         MonopolyDealHeuristic that = (MonopolyDealHeuristic) o;
         return BANK_VALUE_1 == that.BANK_VALUE_1 && BANK_VALUE_2 == that.BANK_VALUE_2 && BANK_VALUE_3 == that.BANK_VALUE_3 && BANK_VALUE_4 == that.BANK_VALUE_4 && BANK_VALUE_5 == that.BANK_VALUE_5 && BANK_VALUE_10 == that.BANK_VALUE_10 && BROWN_VALUE == that.BROWN_VALUE && LIGHTBLUE_VALUE == that.LIGHTBLUE_VALUE && PINK_VALUE == that.PINK_VALUE && ORANGE_VALUE == that.ORANGE_VALUE && RED_VALUE == that.RED_VALUE && YELLOW_VALUE == that.YELLOW_VALUE && GREEN_VALUE == that.GREEN_VALUE && BLUE_VALUE == that.BLUE_VALUE && RAILROAD_VALUE == that.RAILROAD_VALUE && UTILITY_VALUE == that.UTILITY_VALUE && COMPLETESET_VALUE == that.COMPLETESET_VALUE && HAND_SLYDEAL == that.HAND_SLYDEAL && HAND_FORCEDDEAL == that.HAND_FORCEDDEAL && HAND_DEBTCOLLECTOR == that.HAND_DEBTCOLLECTOR && HAND_ITSMYBIRTHDAY == that.HAND_ITSMYBIRTHDAY && HAND_DEALBREAKER == that.HAND_DEALBREAKER && HAND_JUSTSAYNO == that.HAND_JUSTSAYNO && HAND_MULTICOLORRENT == that.HAND_MULTICOLORRENT && HAND_PROPERTYRENT == that.HAND_PROPERTYRENT && HAND_MULTICOLORWILD == that.HAND_MULTICOLORWILD && HEURISTIC_TYPE == that.HEURISTIC_TYPE && Objects.equals(cardValue, that.cardValue) && Objects.equals(setValue, that.setValue);
     }

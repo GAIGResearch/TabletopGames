@@ -41,7 +41,7 @@ public class BattleloreGameParameters extends AbstractParameters {
     public boolean _equals(Object o) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) {return false;}
-        if (super.equals(o)) return false;
+        if (!super.equals(o)) return false;
 
         BattleloreGameParameters that = (BattleloreGameParameters) o;
         return hexWidth == that.hexWidth &&

@@ -36,6 +36,8 @@ public class CribbageForwardModel extends StandardForwardModel {
         state.crib = new PartialObservableDeck<>("Crib", -1, nPlayers, HIDDEN_TO_ALL);
         state.playSequence = new ArrayList<>();
         state.scores = new int[nPlayers];
+        // a game usually ends mid-round, leaving its starter card on the reused state
+        state.starter = null;
         deal(state);
     }
 

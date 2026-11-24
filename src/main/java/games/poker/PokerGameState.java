@@ -356,7 +356,6 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PokerGameState)) return false;
-        if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
         return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) &&
                 Arrays.equals(playerMoney, that.playerMoney) &&

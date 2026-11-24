@@ -173,7 +173,8 @@ public class MMGameState extends AbstractGameState {
 
         PartialObservableDeck<BoardNode> shuffledAnswerCode = new PartialObservableDeck<>("Shuffled Answer Code", 0, new boolean[]{false});
         for (int i = 0; i < width; i++) {
-            shuffledAnswerCode.add(MMConstants.guessColours.get(rnd.nextInt(MMConstants.guessColours.size())));
+            // a copy: adding to the deck sets the owner, and the constants are shared by every game in the JVM
+            shuffledAnswerCode.add(MMConstants.guessColours.get(rnd.nextInt(MMConstants.guessColours.size())).copy());
         }
         return shuffledAnswerCode;
     }

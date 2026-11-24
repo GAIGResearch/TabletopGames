@@ -64,7 +64,6 @@ public class TileBuildState extends AbstractGameState {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TileBuildState that)) return false;
-        if (!super.equals(o)) return false;
         return Objects.equals(tile, that.tile);
     }
 

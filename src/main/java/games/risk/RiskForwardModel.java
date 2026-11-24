@@ -25,6 +25,9 @@ public class RiskForwardModel extends StandardForwardModel {
         RiskMap map = params.getMap();
         int nTerritories = map.nTerritories();
 
+        state.nSetsTraded = 0;  // sets each trade's value, so must not carry on from the last game
+        state.capturedThisTurn = false;
+        state.territoryBonusTaken = false;
         state.owner = new int[nTerritories];
         Arrays.fill(state.owner, -1);
         state.armies = new int[nTerritories];

@@ -128,7 +128,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof LoveLetterGameState)) return false;
-        if (!super.equals(o)) return false;
         LoveLetterGameState that = (LoveLetterGameState) o;
         return Objects.equals(playerHandCards, that.playerHandCards) &&
                 Objects.equals(playerDiscardCards, that.playerDiscardCards) &&

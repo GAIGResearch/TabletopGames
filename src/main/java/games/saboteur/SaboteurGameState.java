@@ -38,7 +38,7 @@ public class SaboteurGameState extends AbstractGameState {
         super(parameters, nPlayers);
         playerDecks = new ArrayList<>();
         toolDeck = new ArrayList<>();
-        pathCardOptions = new HashSet<>();
+        pathCardOptions = new LinkedHashSet<>();
         goalLocationsFound = new HashSet<>();
         playerNuggetDecks = new ArrayList<>();
     }
@@ -74,7 +74,7 @@ public class SaboteurGameState extends AbstractGameState {
         }
         copy.goalDeck = goalDeck.copy();
 
-        copy.pathCardOptions = new HashSet<>();
+        copy.pathCardOptions = new LinkedHashSet<>();
         for (Vector2D pathCardOption : pathCardOptions) {
             copy.pathCardOptions.add(pathCardOption.copy());
         }

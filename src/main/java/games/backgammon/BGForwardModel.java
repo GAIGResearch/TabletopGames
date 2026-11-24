@@ -94,6 +94,9 @@ public class BGForwardModel extends StandardForwardModel {
             else
                 gameState.dice[i] = new Dice(bgp.diceSides);
         }
+        // set by the first roll; the state object is reused between games, so the last game's roll must go
+        gameState.availableDiceValues = null;
+        gameState.diceUsed = null;
 
         gameState.setGamePhase(RollDice);
         gameState.blots = new int[2];

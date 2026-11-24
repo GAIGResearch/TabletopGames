@@ -282,7 +282,6 @@ public class SGGameState extends AbstractGameState {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SGGameState)) return false;
-        if (!super.equals(o)) return false;
         SGGameState that = (SGGameState) o;
         return nCardsInHand == that.nCardsInHand && deckRotations == that.deckRotations &&
                 Objects.equals(playerHands, that.playerHands) && Objects.equals(drawPile, that.drawPile) &&

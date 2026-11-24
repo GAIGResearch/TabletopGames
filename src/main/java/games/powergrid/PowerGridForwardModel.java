@@ -58,6 +58,8 @@ public class PowerGridForwardModel extends StandardForwardModel implements ITree
 		state.setValidCities(state.gameMap.validCities(state.getActiveRegions()));//creates a set of valid cities based on the current legal board 
 		state.setOneHotRegions(state.getActiveRegions(), 7);
 		state.setResourceMarket(new PowerGridResourceMarket());
+		state.resetPlantsRan();
+		state.setDiscountCard(0);
 		state.resourceMarket.setUpMarket(params.startinResources);//TODO Eventually change this when EU implemented and put in parameters the amount of initial setup
 		state.initFuelStorage(); 
 		state.setIncome(new int [] {0, 0, 0, 0, 0, 0});

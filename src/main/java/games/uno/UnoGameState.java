@@ -259,7 +259,6 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UnoGameState)) return false;
-        if (!super.equals(o)) return false;
         UnoGameState that = (UnoGameState) o;
         return skipTurn == that.skipTurn && direction == that.direction && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(discardDeck, that.discardDeck) && Objects.equals(currentCard, that.currentCard) && Objects.equals(currentColor, that.currentColor) && Arrays.equals(playerScore, that.playerScore) && Arrays.equals(expulsionRound, that.expulsionRound);
     }

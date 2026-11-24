@@ -237,7 +237,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DescentGameState that)) return false;
-        if (!super.equals(o)) return false;
         return initData == that.initData && overlordPlayer == that.overlordPlayer &&
                 Objects.equals(data, that.data) && Objects.equals(tiles, that.tiles) &&
                 Arrays.deepEquals(tileReferences, that.tileReferences) &&

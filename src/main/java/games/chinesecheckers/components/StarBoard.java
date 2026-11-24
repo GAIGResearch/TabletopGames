@@ -41,7 +41,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         for (int i = 0; i < this.boardNodes.size(); i++) {
             CCNode currentNode = this.getBoardNodes().get(i);
             CCNode copiedNode = new CCNode(currentNode.getComponentID());
-            copiedNode.copyComponentTo(currentNode);
+            currentNode.copyComponentTo(copiedNode);
             copiedNode.setColourNode(currentNode.getBaseColour());
             if (currentNode.isNodeOccupied()) {
                 Peg pegCopy = (Peg) currentNode.getOccupiedPeg().copy();
