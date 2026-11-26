@@ -114,7 +114,7 @@ public class HanabiForwardModel extends StandardForwardModel {
         }
 
         if (hbgs.hintCounter.getValue() != hbgs.hintCounter.getMinimum()){
-            Set<AbstractAction> actionSet = new HashSet<>();
+            Set<AbstractAction> actionSet = new LinkedHashSet<>();
             for (int i = 0; i < gameState.getNPlayers(); i++){
                 if (i != player) {
                     for (HanabiCard card: hbgs.playerDecks.get(i).getComponents()) {

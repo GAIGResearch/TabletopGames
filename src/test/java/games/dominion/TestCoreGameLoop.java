@@ -273,7 +273,7 @@ public class TestCoreGameLoop {
 
         drawDeck.draw();
         for (int i = 0; i < 4; i++) {
-            assertFalse(drawDeck.getVisibilityForPlayer(0, i));
+            assertFalse(drawDeck.isVisibleTo(0, i));
         }
 
     }

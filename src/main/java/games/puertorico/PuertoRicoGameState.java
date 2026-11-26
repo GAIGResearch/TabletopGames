@@ -67,7 +67,7 @@ public class PuertoRicoGameState extends AbstractGameState {
     }
 
     public Map<Role, Integer> getAvailableRoles() {
-        Map<Role, Integer> retValue = new HashMap<>();
+        Map<Role, Integer> retValue = new LinkedHashMap<>();
         for (Role r : rolesAvailable.keySet()) {
             if (rolesAvailable.get(r))
                 retValue.put(r, moneyOnRoles.get(r));

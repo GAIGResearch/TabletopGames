@@ -1,0 +1,8 @@
+{
+  "class": "evaluation.listeners.SaveStateListener",
+  "args": [
+    [
+      "ROUND_OVER"
+    ]
+  ]
+}

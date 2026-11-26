@@ -7,6 +7,7 @@ import core.components.Deck;
 import games.hareandtortoise.actions.ChewCarrot;
 import games.hareandtortoise.actions.ChewLettuce;
 import games.hareandtortoise.actions.Move;
+import games.hareandtortoise.components.SquareType;
 
 import java.util.ArrayList;
 import java.util.Arrays;

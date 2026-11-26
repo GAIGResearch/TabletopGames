@@ -44,7 +44,7 @@ public class OSLAPlayer extends AbstractPlayer {
         for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {
             AbstractAction action = actions.get(actionIndex);
             AbstractGameState gsCopy = gs.copy();
-            getForwardModel().next(gsCopy, action);
+            rollNextGameState(gsCopy, action.copy());
 
             if (heuristic != null) {
                 valState[actionIndex] = heuristic.evaluateState(gsCopy, playerID);
@@ -61,6 +61,11 @@ public class OSLAPlayer extends AbstractPlayer {
         }
 
         return bestAction;
+    }
+
+    // Override this when need to roll toward endRound or endTurn (not just one step)
+    protected void rollNextGameState(AbstractGameState gs, AbstractAction a) {
+        getForwardModel().next(gs, a);
     }
 
     @Override

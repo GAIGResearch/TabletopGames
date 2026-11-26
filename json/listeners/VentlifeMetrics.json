@@ -1,0 +1,12 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args":  [
+    {"enum" : "evaluation.metrics.IDataLogger$ReportDestination", "value" : "ToFile"},
+    [
+      {"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "RawDataPerEvent"}
+    ],
+    [
+      {"class": "games.ventlife.metrics.VentlifeMetrics$GameEnd" },
+      {"class": "games.ventlife.metrics.VentlifeMetrics$Actions" }
+    ]]
+}

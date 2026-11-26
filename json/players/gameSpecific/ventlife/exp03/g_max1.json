@@ -1,0 +1,1 @@
+{"class": "games.ventlife.ai.VentlifeGreedyParams", "tileLookahead": 0, "heuristic": {"class": "games.ventlife.ai.VentlifeHeuristic", "oppMaxWeight": 1.0, "oppMeanWeight": 0.0, "exposure": 0.0}}

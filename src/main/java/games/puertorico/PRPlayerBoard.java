@@ -23,12 +23,12 @@ public class PRPlayerBoard extends Component {
         super(CoreConstants.ComponentType.BOARD, "Player Board of Player " + player);
         this.plantations = new ArrayList<>();
         this.buildings = new ArrayList<>();
-        this.stores = new HashMap<>();
+        this.stores = new LinkedHashMap<>();
         this.vp = 0;
         this.ownerId = player;
         this.colonistsInSupply = 0;
         this.doubloons = 0;
-        this.cropsInWarehouses = new HashSet<>();
+        this.cropsInWarehouses = new LinkedHashSet<>();
     }
     private PRPlayerBoard(int player, int componentID) {
         super(CoreConstants.ComponentType.BOARD, "Player Board of Player " + player, componentID);
@@ -68,7 +68,7 @@ public class PRPlayerBoard extends Component {
         this.stores.put(crop, this.getStoresOf(crop) + amount);
     }
     public Map<Crop, Integer> getStores() {
-        return new HashMap<>(this.stores);
+        return new LinkedHashMap<>(this.stores);
     }
 
     public int getPlantationsOf(Crop crop) {
@@ -119,12 +119,12 @@ public class PRPlayerBoard extends Component {
     public PRPlayerBoard copy() {
         PRPlayerBoard copy = new PRPlayerBoard(ownerId, componentID);
         copy.plantations = plantations.stream().map(Plantation::copy).collect(toList());
-        copy.stores = new HashMap<>(this.stores);
+        copy.stores = new LinkedHashMap<>(this.stores);
         copy.vp = this.vp;
         copy.colonistsInSupply = this.colonistsInSupply;
         copy.buildings = buildings.stream().map(Building::copy).collect(toList());
         copy.doubloons = this.doubloons;
-        copy.cropsInWarehouses = new HashSet<>(this.cropsInWarehouses);
+        copy.cropsInWarehouses = new LinkedHashSet<>(this.cropsInWarehouses);
         return copy;
     }
 

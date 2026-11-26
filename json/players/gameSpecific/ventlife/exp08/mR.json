@@ -1,0 +1,15 @@
+{
+  "class": "players.mcts.MCTSParams",
+  "budgetType": "BUDGET_TIME",
+  "budget": -999,
+  "rolloutLength": 0,
+  "backupPolicy": "MaxMC",
+  "K": 0.01,
+  "reuseTree": true,
+  "maxBackupThreshold": 3,
+  "heuristic": {"class": "games.ventlife.ai.VentlifeHeuristic", "oppMaxWeight": 0.0, "oppMeanWeight": 1.25, "exposure": 0.0, "risk": 1.5, "oppRisk": 0.5, "exposureMoveFactor": 0.75, "exposureCrabValue": 4.0},
+  "actionHeuristic": {"class": "games.ventlife.ai.VentlifeActionHeuristic", "heuristic": {"class": "games.ventlife.ai.VentlifeHeuristic", "oppMaxWeight": 0.0, "oppMeanWeight": 1.25, "exposure": 0.0, "risk": 1.5, "oppRisk": 0.5, "exposureMoveFactor": 0.75, "exposureCrabValue": 4.0}},
+  "actionHeuristicRecalculation": 1000000,
+  "progressiveWideningConstant": 2.0,
+  "progressiveWideningExponent": 0.5
+}

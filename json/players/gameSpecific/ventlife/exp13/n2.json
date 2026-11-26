@@ -1,0 +1,24 @@
+{
+ "budgetType": "BUDGET_TIME",
+ "tileLookahead": 6,
+ "opponentReplies": true,
+ "creatureAlternatives": 2,
+ "creatureLookahead": 4,
+ "heuristic": {
+  "exposureCrabValue": 6.0,
+  "winBonus": 0.0,
+  "fishSeed": 0.0,
+  "oppMeanWeight": 1.25,
+  "oppMaxWeight": 0.0,
+  "riskModel": 1,
+  "exposure": 0.25,
+  "endScaling": false,
+  "risk": 1.5,
+  "class": "games.ventlife.ai.VentlifeHeuristic",
+  "oppRisk": 0.25,
+  "oppExposure": -1.0,
+  "exposureMoveFactor": 0.5
+ },
+ "class": "games.ventlife.ai.VentlifeGreedyParams",
+ "budget": 64
+}

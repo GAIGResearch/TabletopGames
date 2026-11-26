@@ -2,8 +2,9 @@ package web;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 
 /**
  * Swing's repaint manager, which also notes the windows something has asked to be repainted in, so that a
@@ -11,7 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 class DirtyTracker extends RepaintManager {
 
-    private static final Set<Window> dirty = ConcurrentHashMap.newKeySet();
+    // Weak, as a window may be marked again after its session forgets it (a repaint asked for while the session
+    // stops), and must not then keep the session's GUI and game alive.
+    private static final Set<Window> dirty = Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
     static void install() {
         RepaintManager.setCurrentManager(new DirtyTracker());

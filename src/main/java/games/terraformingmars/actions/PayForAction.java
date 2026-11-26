@@ -191,7 +191,11 @@ public class PayForAction extends TMAction implements TMExtendedSequence {
 
     @Override
     public PayForAction copy() {
-        return (PayForAction) super.copy();
+        PayForAction copy = (PayForAction) super.copy();
+        // the requirement must check the copy's own action (which _execute changes), not a separate copy of it
+        copy.requirements.removeIf(r -> r instanceof PlayableActionRequirement);
+        copy.requirements.add(new PlayableActionRequirement(copy.action));
+        return copy;
     }
 
     @Override

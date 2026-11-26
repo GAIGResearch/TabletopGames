@@ -115,6 +115,7 @@ public class MCTSNodesAndVisitsTests {
 
     private void runGame(Game game, int moves, int[] expectedNodes, int[] errorMargin) {
         int counter = 0;
+        int maxDepthReached = 0;
         AbstractGameState state = game.getGameState();
         AbstractForwardModel forwardModel = game.getForwardModel();
         do {
@@ -136,9 +137,12 @@ public class MCTSNodesAndVisitsTests {
                                         .filter(Objects::nonNull)
                                         .mapToInt(SingleTreeNode::getVisits).sum());
                 }
-                if (params.maxTreeDepth == 3)
-                    assertEquals(3, stats.depthReached);
-                else {
+                if (params.maxTreeDepth == 3) {
+                    // with many actions the budget can run out before depth 2 is fully expanded, so depth 3 is
+                    // not required on every move - only that the limit is never exceeded, and is reached at some point
+                    assertTrue(stats.depthReached <= 3);
+                    maxDepthReached = Math.max(maxDepthReached, stats.depthReached);
+                } else {
                     System.out.printf("Move %d has %d versus %d expected nodes", counter, stats.totalNodes, expectedNodes[counter]);
                     assertEquals(expectedNodes[counter], stats.totalNodes, errorMargin[counter]);
                 }
@@ -146,6 +150,8 @@ public class MCTSNodesAndVisitsTests {
             }
             forwardModel.next(state, actionChosen);
         } while (counter < moves);
+        if (params.maxTreeDepth == 3)
+            assertEquals(3, maxDepthReached);
     }
 
 

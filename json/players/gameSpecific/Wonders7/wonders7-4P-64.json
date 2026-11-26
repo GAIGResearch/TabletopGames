@@ -1,0 +1,20 @@
+{
+  "budgetType" : "BUDGET_TIME",
+  "rolloutLengthPerPlayer" : true,
+  "MASTBoltzmann" : 1.0,
+  "oppModelType" : "MAST",
+  "rolloutLength" : 30,
+  "useMASTAsActionHeuristic" : true,
+  "heuristic" : {
+    "heuristicType" : "LEADER",
+    "class" : "players.heuristics.CoarseTunableHeuristic"
+  },
+  "FPU" : 1.0,
+  "K" : 1.0,
+  "maxTreeDepth" : 10,
+  "MAST" : "Both",
+  "rolloutType" : "MAST",
+  "maxBackupThreshold" : 3000,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : 64
+}

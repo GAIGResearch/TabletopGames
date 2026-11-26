@@ -687,6 +687,41 @@ public class MCTSTreeSelectionTests {
         assertEquals(333, counts[2], 75);
     }
 
+    @Test
+    public void uniformFlatSelectionCyclesThroughTheActions() {
+        params.treePolicy = UniformFlat;
+        setupPlayer();
+        List<AbstractAction> chosen = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            AbstractAction action = node.treePolicyAction(true);
+            chosen.add(action);
+            node.backUpSingleNode(action, new double[]{action.equals(new LMRAction("Middle")) ? 1.0 : 0.0});
+        }
+        // the rewards make no difference: each action in turn, in the order of the available actions
+        Map<AbstractAction, Integer> counts = new HashMap<>();
+        for (AbstractAction action : chosen) {
+            counts.put(action, counts.getOrDefault(action, 0) + 1);
+        }
+        assertEquals(3, counts.size());
+        assertEquals(3, counts.get(new LMRAction("Left")).intValue());
+        assertEquals(3, counts.get(new LMRAction("Middle")).intValue());
+        assertEquals(3, counts.get(new LMRAction("Right")).intValue());
+    }
+
+    @Test
+    public void uniformFlatSelectionPicksTheLeastVisitedAction() {
+        params.treePolicy = UniformFlat;
+        setupPlayer();
+        first10Visits(node);   // Left 1, Middle 5, Right 4
+        for (int i = 0; i < 3; i++) {
+            assertEquals(new LMRAction("Left"), node.treePolicyAction(true));
+            node.backUpSingleNode(new LMRAction("Left"), new double[]{0.0});
+        }
+        // Left 4, Middle 5, Right 4: Left and Right now tie
+        AbstractAction next = node.treePolicyAction(true);
+        assertTrue(next.equals(new LMRAction("Left")) || next.equals(new LMRAction("Right")));
+    }
+
 
     @Test
     public void greedySelection() {

@@ -90,7 +90,15 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
     private void setupDrawPile(SeaSaltPaperGameState gs) {
         SeaSaltPaperParameters parameters = (SeaSaltPaperParameters) gs.getGameParameters();
 
-        for (Pair<CardSuite, CardType> p: parameters.cardsInit.keySet()) {
+        // cardsInit is a HashMap keyed by enum pairs, so its keySet() order follows the JVM's identity hash codes.
+        // Iterating it directly (as this method used to) made the order cards are added to the draw pile - and
+        // therefore the shuffled deal for a given seed - depend on what else the process had done, rather than on
+        // the game seed. Sort the definitions so the same seed always produces the same deal.
+        List<Pair<CardSuite, CardType>> cardDefinitions = new ArrayList<>(parameters.cardsInit.keySet());
+        cardDefinitions.sort(Comparator.comparing((Pair<CardSuite, CardType> p) -> p.a.name())
+                .thenComparing(p -> p.b.name()));
+
+        for (Pair<CardSuite, CardType> p : cardDefinitions) {
             int count = parameters.cardsInit.get(p).a;
             for (int i = 0; i < count; i++) {
                 CardColor c = parameters.cardsInit.get(p).b[i];
@@ -254,7 +262,6 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 
     private void gameStateToJson(SeaSaltPaperGameState gs) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//        Gson gson = new Gson();
         SeaSaltPaperParameters params = (SeaSaltPaperParameters) gs.getGameParameters();
         SSPGameStateContainer gsContainer = new SSPGameStateContainer(gs);
         String fileName = "ssp-" + gs.getGameID() + "-" + gs.getRoundCounter() + "-" + gs.getTurnCounter() + ".json";

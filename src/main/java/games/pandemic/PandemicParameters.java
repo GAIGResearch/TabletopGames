@@ -8,6 +8,7 @@ import games.GameType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.LinkedHashMap;
 
 public class PandemicParameters extends TunableParameters {
 
@@ -29,7 +30,7 @@ public class PandemicParameters extends TunableParameters {
     int nResearchStations = 6;
 
     // Number of cards each player receives at the start of the game.
-    HashMap<Integer, Integer> nCardsPerPlayer = new HashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player
+    HashMap<Integer, Integer> nCardsPerPlayer = new LinkedHashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player
         {
             put(2, 4);
             put(3, 3);
@@ -109,7 +110,7 @@ public class PandemicParameters extends TunableParameters {
         System.arraycopy(pandemicParameters.infectionRate, 0, infectionRate, 0, infectionRate.length);
 
         // Number of cards each player receives.
-        this.nCardsPerPlayer = new HashMap<>();
+        this.nCardsPerPlayer = new LinkedHashMap<>();
         for(int key : pandemicParameters.nCardsPerPlayer.keySet())
             this.nCardsPerPlayer.put(key, pandemicParameters.nCardsPerPlayer.get(key));
     }

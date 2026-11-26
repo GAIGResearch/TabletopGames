@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.interfaces.IPlayerDecorator;
 
 import java.util.ArrayList;
@@ -54,6 +55,11 @@ public class DecoratedForwardModel extends AbstractForwardModel {
     }
 
     @Override
+    protected void abstractSetup(AbstractGameState firstState) {
+        wrappedFM.abstractSetup(firstState);
+    }
+
+    @Override
     protected void _setup(AbstractGameState firstState) {
         wrappedFM._setup(firstState);
     }
@@ -73,14 +79,34 @@ public class DecoratedForwardModel extends AbstractForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        List<AbstractAction> actions = wrappedFM._computeAvailableActions(gameState);
+        return wrappedFM._computeAvailableActions(gameState);
+    }
 
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, int activePlayer) {
+        return wrappedFM._computeAvailableActions(gameState, activePlayer);
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
+        return wrappedFM._computeAvailableActions(gameState, actionSpace);
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace, int activePlayer) {
+        return wrappedFM._computeAvailableActions(gameState, actionSpace, activePlayer);
+    }
+
+    @Override
+    protected List<AbstractAction> filterAvailableActions(AbstractGameState gameState, List<AbstractAction> actions, int activePlayer) {
+        // the wrapped forward model may itself be decorated
+        actions = wrappedFM.filterAvailableActions(gameState, actions, activePlayer);
         // Then apply Decorators regardless of source of actions
         for (IPlayerDecorator decorator : generalDecorators) {
             actions = decorator.actionFilter(gameState, actions);
         }
-        if (playerSpecificDecorators.containsKey(gameState.getCurrentPlayer())) {
-            for (IPlayerDecorator decorator : playerSpecificDecorators.get(gameState.getCurrentPlayer())) {
+        if (playerSpecificDecorators.containsKey(activePlayer)) {
+            for (IPlayerDecorator decorator : playerSpecificDecorators.get(activePlayer)) {
                 actions = decorator.actionFilter(gameState, actions);
             }
         }
@@ -90,6 +116,16 @@ public class DecoratedForwardModel extends AbstractForwardModel {
     @Override
     protected void endPlayerTurn(AbstractGameState state) {
         wrappedFM.endPlayerTurn(state);
+    }
+
+    @Override
+    protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
+        wrappedFM.illegalActionPlayed(gameState, action);
+    }
+
+    @Override
+    protected void endGame(AbstractGameState gs) {
+        wrappedFM.endGame(gs);
     }
 
     @Override

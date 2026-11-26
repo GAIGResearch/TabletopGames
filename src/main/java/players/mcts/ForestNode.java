@@ -42,10 +42,6 @@ public class ForestNode extends SingleTreeNode {
         MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             MASTStatistics.add(new HashMap<>());
-        if (params.useMASTAsActionHeuristic) {
-            params.actionHeuristic = new MASTActionHeuristic(params.MASTActionKey, params.MASTDefaultValue);
-            ((MASTActionHeuristic) params.actionHeuristic).setMASTStats(MASTStatistics);
-        }
         roots = new SingleTreeNode[params.numDeterminizations];
     }
 

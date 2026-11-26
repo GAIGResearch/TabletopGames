@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.LinkedHashSet;
 
 import static core.CoreConstants.playersHash;
 import static utilities.Utils.getNeighbourhood;
@@ -50,7 +51,7 @@ public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implemen
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
         int heroIdx = acolyte.getOwnerId();
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
-            HashSet<Hero> adjacentHeroes = new HashSet<>();
+            HashSet<Hero> adjacentHeroes = new LinkedHashSet<>();
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
             GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);

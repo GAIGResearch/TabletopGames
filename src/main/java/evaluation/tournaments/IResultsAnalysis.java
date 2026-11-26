@@ -18,4 +18,12 @@ public interface IResultsAnalysis {
      * @return A sorted map of agent names to their mean value and standard error.
      */
     LinkedHashMap<String, Pair<Double, Double>> getRanking(TournamentResults results);
+
+    /**
+     * The number of independent observations behind the standard error that getRanking reports for this agent.
+     * This sets the degrees of freedom of a confidence interval. By default every game result is independent.
+     */
+    default int sampleSize(TournamentResults results, String agent) {
+        return results.getPlayerResults(agent).size();
+    }
 }

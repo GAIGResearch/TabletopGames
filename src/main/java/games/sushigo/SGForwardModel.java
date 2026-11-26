@@ -44,9 +44,9 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
             gs.playerScore[i] = new Counter(0, 0, Integer.MAX_VALUE, "Player " + i + " score");
             gs.playerHands.add(new Deck<>("Player " + i + " hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             gs.playedCards.add(new Deck<>("Player " + i + " played cards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
-            gs.playedCardTypes[i] = new HashMap<>();
-            gs.playedCardTypesAllGame[i] = new HashMap<>();
-            gs.pointsPerCardType[i] = new HashMap<>();
+            gs.playedCardTypes[i] = new LinkedHashMap<>();
+            gs.playedCardTypesAllGame[i] = new LinkedHashMap<>();
+            gs.pointsPerCardType[i] = new LinkedHashMap<>();
             for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
                 gs.playedCardTypes[i].put(type, new Counter(0, 0, Integer.MAX_VALUE, "Played cards " + type.name()));
                 gs.playedCardTypesAllGame[i].put(type, new Counter(0, 0, Integer.MAX_VALUE, "Played cards (all) " + type.name()));

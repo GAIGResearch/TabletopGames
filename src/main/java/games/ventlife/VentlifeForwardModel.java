@@ -100,8 +100,9 @@ public class VentlifeForwardModel extends StandardForwardModel {
         }
         for (HexCoord smoker : candidates)
             for (int o = 0; o < 6; o++)
-                if (canPlaceTile(state, smoker, o))
+                if (seafloor ? canPlaceOnSeafloor(state, shore, smoker, o) : VentlifeUtils.isPlateauPlacement(state, smoker, o))
                     actions.add(new PlaceTile(tile, smoker, o));
+        }
         return actions;
     }
 

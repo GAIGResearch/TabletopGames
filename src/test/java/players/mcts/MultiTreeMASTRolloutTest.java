@@ -109,7 +109,9 @@ public class MultiTreeMASTRolloutTest {
         assertTrue(mctsPlayer.root.fmCallsCount > 5000); // rollout of 10 x 500 as minimum
 
         // we should use the rollout policy for most of these
-        verify(mockRollout, times(5000)).getAction(any(), any());
+        // (at least 10 x 500: opponents may also take rollout actions before the rollout length starts counting,
+        // which is when the decision player leaves their tree)
+        verify(mockRollout, atLeast(5000)).getAction(any(), any());
     }
 
     @Test

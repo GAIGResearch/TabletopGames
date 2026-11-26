@@ -38,7 +38,12 @@ public class CreatureStep implements IExtendedSequence {
      * Whether the player has any legal placement.
      */
     public boolean hasPlacement(VentlifeGameState state) {
-        return !firstPlacements(state).isEmpty();
+        for (Species s : state.getSpeciesInPlay())
+            if (state.getSupply(player, s) > 0)
+                for (Hex h : state.getField().keySet())
+                    if (s.canPlace(state, player, h))
+                        return true;
+        return false;
     }
 
     /**

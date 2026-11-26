@@ -82,6 +82,18 @@ public class ExpertIteration {
 
     public enum TrainingMode {Batch, Exponential}
 
+    // we do not want to sample more than about 5% of states to avoid over-correlation between samples (not such an issue for actions)
+    static final double MAX_STATE_SAMPLE_RATE = 0.05;
+    static final double MAX_ACTION_SAMPLE_RATE = 1.0;
+    // the most that a sample rate can change by (as a multiple) from one iteration to the next
+    static final double MAX_RATE_CHANGE = 10.0;
+    static final String PROGRESS_FILE = "ExpertIterationProgress.json";
+
+    // What a restart needs to know about the data gathered so far (written after each data gathering and iteration)
+    public record Progress(int[] stateRowsPerIteration, int[] actionRowsPerIteration,
+                           double stateSampleRate, double actionSampleRate) {
+    }
+
     public ExpertIteration(String[] args) {
 
         config = parseConfig(args, Collections.singletonList(RunArg.Usage.ExpertIteration));
@@ -182,6 +194,16 @@ public class ExpertIteration {
             throw new RuntimeException(ex.getMessage());
         }
 
+        // On a restart we need the rows gathered in each previous iteration, and the current sample rates
+        boolean progressLoaded = false;
+        if (restartAtIteration > 0 || restartWithTuning) {
+            progressLoaded = loadProgress();
+            if (progressLoaded)
+                System.out.printf("Reloaded progress: State sample rate: %.4f, Action sample rate: %.4f%n", stateSampleRate, actionSampleRate);
+            else
+                System.out.println("No saved progress found: sample rates restart from the baseline");
+        }
+
         if (restartWithTuning) {
             int iterationRef = config.get(RunArg.expertTrainingMode) == TrainingMode.Exponential ? 0 : iter;
             if (stateLearnerFile != null)
@@ -255,11 +277,18 @@ public class ExpertIteration {
             long iterationStartTime = System.currentTimeMillis();
             // learn the heuristics from the data
             // it is possible we skip this if restarting (as the data is still there from the previous run)
+            boolean rowsGatheredKnown = true;
             if (restartWithTuning) {
                 restartWithTuning = false;
+                // the rows gathered for this iteration were saved (with the sample rates used) before the restart
+                rowsGatheredKnown = progressLoaded;
             } else {
+                int[] rowsBefore = currentDataRowCounts();
                 finished = gatherDataAndCheckConvergence();
                 if (!finished) {
+                    recordRowsGathered(rowsBefore);
+                    // saved before the marker, so that a restart with tuning will find the rows for this iteration
+                    saveProgress();
                     try {
                         dataGatheredMarker(iter).createNewFile();
                     } catch (IOException e) {
@@ -292,30 +321,15 @@ public class ExpertIteration {
                         tuneTime.a, tuneTime.b
                 );
 
-                // record the amount of data gathered for this iteration
-                int totalStateRecords = getTotalDataSize("state");
-                TrainingMode trainingMode = (TrainingMode) config.get(RunArg.expertTrainingMode);
-                stateRowsPerIteration[iter] = switch (trainingMode) {
-                    case Batch -> totalStateRecords;  // we just have the current set of data
-                    case Exponential -> totalStateRecords - Arrays.stream(stateRowsPerIteration).sum(); // data is gathered incrementally
-                    default -> throw new IllegalArgumentException("Unknown training mode: " + trainingMode);
-                };
-
-                int totalActionRecords = getTotalDataSize("action");
-                actionRowsPerIteration[iter] = switch(trainingMode) {
-                    case Batch -> totalActionRecords;
-                    case Exponential -> totalActionRecords - Arrays.stream(actionRowsPerIteration).sum();
-                    default -> throw new IllegalArgumentException("Unknown training mode: " + trainingMode);
-                };
-
-                // we can now adjust some parameters based on empirical data (data gathered per iteration, and time taken)
-                // generally speaking we want each iteration to generate about 10-15% of the total data
-                // we therefore calculate sample rates for each of value and actions to achieve this
-                stateSampleRate = Math.min(0.05, baselineStateSampleRate * maxRecords / 8.0 / (double) stateRowsPerIteration[iter]);
-                // we do not want to sample more than about 5% of state to avoid over-correlation between samples (not such an issue for actions)
-                actionSampleRate = Math.min(1.0, baselineActionSampleRate * maxRecords / 8.0 / (double) actionRowsPerIteration[iter]);
-                System.out.printf("State records gathered: %d, Action records gathered: %d%n", stateRowsPerIteration[iter], actionRowsPerIteration[iter]);
-                System.out.printf("State sample rate: %.3f, Action sample rate: %.3f\n", stateSampleRate, actionSampleRate);
+                // we can now adjust the sample rates based on the data gathered this iteration
+                if (rowsGatheredKnown) {
+                    System.out.printf("State records gathered: %d, Action records gathered: %d%n", stateRowsPerIteration[iter], actionRowsPerIteration[iter]);
+                    updateSampleRates();
+                } else {
+                    System.out.printf("Records gathered in iteration %d are unknown (no saved progress), so sample rates are unchanged%n", iter);
+                }
+                System.out.printf("State sample rate: %.4f, Action sample rate: %.4f%n", stateSampleRate, actionSampleRate);
+                saveProgress();
 
                 //TODO: We also don't want the learning process to take up more than about 1/3rd of the total time. So we adjust
                 // the limit on maxRecords if needed
@@ -418,6 +432,7 @@ public class ExpertIteration {
     // any very poorly performing agents are removed from the list (dominated by all other agents)
     // This also checks for convergence; meaning that the best agent has not changed for 3 iterations
     private boolean gatherDataAndCheckConvergence() {
+        prepareDataFilesForGathering();
         Map<RunArg, Object> tournamentConfig = new HashMap<>(RGConfig);
         tournamentConfig.put(RunArg.verbose, false);
 
@@ -518,28 +533,112 @@ public class ExpertIteration {
         return false;
     }
 
-    private int getTotalDataSize(String fileType) {
-        // for all stateLearner files, open them and check their length in rows. Return the total
-        String[] files = switch (fileType) {
-            case "state" -> stateDataFilesByIteration;
-            case "action" -> actionDataFilesByIteration;
-            default -> throw new IllegalArgumentException("Invalid file type: " + fileType);
-        };
+    /**
+     * The next sample rate, rescaling the rate that was used to gather rowsGathered so that the next iteration
+     * gathers about targetRows. The change in any one iteration is bounded by MAX_RATE_CHANGE, so that one unusually
+     * small (or empty) iteration cannot move the rate by orders of magnitude.
+     */
+    static double updatedSampleRate(double currentRate, int rowsGathered, double targetRows, double maxRate) {
+        double factor = targetRows / Math.max(rowsGathered, 1);
+        factor = Math.max(1.0 / MAX_RATE_CHANGE, Math.min(MAX_RATE_CHANGE, factor));
+        return Math.min(maxRate, currentRate * factor);
+    }
+
+    // generally speaking we want each iteration to generate about 10-15% of the total data
+    // we therefore calculate sample rates for each of value and actions to achieve this
+    void updateSampleRates() {
+        double target = maxRecords / 8.0;
+        stateSampleRate = updatedSampleRate(stateSampleRate, stateRowsPerIteration[iter], target, MAX_STATE_SAMPLE_RATE);
+        actionSampleRate = updatedSampleRate(actionSampleRate, actionRowsPerIteration[iter], target, MAX_ACTION_SAMPLE_RATE);
+    }
+
+    /**
+     * The number of data rows (excluding the header line) across all the files. Null or missing files count as zero.
+     */
+    static int countDataRows(String... files) {
         int totalDataSize = 0;
         for (String fileName : files) {
-            if (fileName == null || fileName.isEmpty()) continue;
+            if (fileName == null || fileName.isEmpty() || !new File(fileName).exists()) continue;
+            int lines = 0;
             try (BufferedReader reader = Files.newBufferedReader(Path.of(fileName))) {
                 while (reader.readLine() != null) {
-                    totalDataSize++;
+                    lines++;
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            totalDataSize += Math.max(0, lines - 1);
         }
         return totalDataSize;
     }
 
-    private RoundRobinTournament runTournament(List<AbstractPlayer> localAgents, Map<RunArg, Object> runGamesConfig) {
+    // {state, action} rows currently in the data files
+    int[] currentDataRowCounts() {
+        return new int[]{countDataRows(stateDataFilesByIteration), countDataRows(actionDataFilesByIteration)};
+    }
+
+    // Records the rows gathered this iteration as the growth in the data files since rowsBefore
+    // (from currentDataRowCounts()). This does not depend on the history of earlier iterations.
+    void recordRowsGathered(int[] rowsBefore) {
+        int[] rowsAfter = currentDataRowCounts();
+        stateRowsPerIteration[iter] = rowsAfter[0] - rowsBefore[0];
+        actionRowsPerIteration[iter] = rowsAfter[1] - rowsBefore[1];
+    }
+
+    private File progressFile() {
+        return new File(dataDir + File.separator + PROGRESS_FILE);
+    }
+
+    // Persists the per-iteration row counts and the current sample rates, so that a restart can pick these up
+    void saveProgress() {
+        try {
+            mapper.writeValue(progressFile(),
+                    new Progress(stateRowsPerIteration, actionRowsPerIteration, stateSampleRate, actionSampleRate));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Reloads the progress written by saveProgress(). If there is no saved progress, nothing changes.
+     *
+     * @return true if saved progress was found and loaded
+     */
+    boolean loadProgress() {
+        File file = progressFile();
+        if (!file.exists())
+            return false;
+        try {
+            Progress progress = mapper.readValue(file, Progress.class);
+            // expertIterations may have been changed on the restart, so we copy over the overlap
+            System.arraycopy(progress.stateRowsPerIteration(), 0, stateRowsPerIteration, 0,
+                    Math.min(progress.stateRowsPerIteration().length, stateRowsPerIteration.length));
+            System.arraycopy(progress.actionRowsPerIteration(), 0, actionRowsPerIteration, 0,
+                    Math.min(progress.actionRowsPerIteration().length, actionRowsPerIteration.length));
+            stateSampleRate = progress.stateSampleRate();
+            actionSampleRate = progress.actionSampleRate();
+            return true;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Data loggers always append, because a data gathering can run more than one tournament. In Batch mode each
+     * iteration has a file of its own, so we start the gathering by removing any file for this iteration (left over
+     * from an aborted run). In Exponential mode all data accumulates in the one (_00) file, which we keep.
+     */
+    void prepareDataFilesForGathering() {
+        if (config.get(RunArg.expertTrainingMode) == TrainingMode.Exponential)
+            return;
+        for (String type : List.of("State", "Action")) {
+            File file = new File(dataDir + File.separator + String.format("%s_%s_%02d.txt", type, prefix, iter));
+            if (file.exists() && !file.delete())
+                throw new RuntimeException("Could not delete old data file " + file);
+        }
+    }
+
+    RoundRobinTournament runTournament(List<AbstractPlayer> localAgents, Map<RunArg, Object> runGamesConfig) {
         boolean allDataAsOne = config.get(RunArg.expertTrainingMode) == TrainingMode.Exponential;
         RoundRobinTournament tournament = new RoundRobinTournament(localAgents, gameToPlay, nPlayers, params, runGamesConfig);
         tournament.setTournamentResults(runningTournamentResults);
@@ -576,7 +675,7 @@ public class ExpertIteration {
                 stateListener = stateListener
                         .setSampleRate(stateSampleRate)
                         .setStateHeuristic(stateLearner.getHeuristic())
-                        .setLogger(new FileStatsLogger(fileName, "\t", allDataAsOne));
+                        .setLogger(new FileStatsLogger(fileName, "\t", true));  // see prepareDataFilesForGathering()
                 stateListener.setOutputDirectory(dataDir);
                 tournament.addListener(stateListener);
             }
@@ -614,7 +713,7 @@ public class ExpertIteration {
             };
             String fileName = String.format("Action_%s_%02d.txt", prefix, allDataAsOne ? 0 : iter);
             actionListener = actionListener
-                    .setLogger(new FileStatsLogger(fileName, "\t", allDataAsOne))
+                    .setLogger(new FileStatsLogger(fileName, "\t", true))  // see prepareDataFilesForGathering()
                     .setSampleRate(actionSampleRate);
             actionListener.setOutputDirectory(dataDir);
 

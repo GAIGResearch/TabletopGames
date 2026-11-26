@@ -172,7 +172,7 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
         // We can pass, or play any card in our hand
         actions.add(new Pass());
         // get all unique playable types in hand
-        Set<ExplodingKittensCard.CardType> playableTypes = new HashSet<>();
+        Set<ExplodingKittensCard.CardType> playableTypes = new LinkedHashSet<>();
         for (int i = 0; i < playerDeck.getSize(); i++) {
             playableTypes.add(playerDeck.get(i).cardType);
         }
