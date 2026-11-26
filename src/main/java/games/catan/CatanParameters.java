@@ -65,7 +65,7 @@ public class CatanParameters extends TunableParameters {
         put(Building.Type.City, 2);
     }};
 
-    // EnumMaps, so that the board is laid out in the same order in every run (a HashMap's order of enum keys varies)
+    // EnumMaps keep the order of enum keys the same in every run (a HashMap's order varies), and so the board layout
     EnumMap<CatanTile.TileType, Integer> tileCounts = new EnumMap<>(CatanTile.TileType.class) {{
         put(CatanTile.TileType.HILLS, 3);
         put(CatanTile.TileType.FOREST, 4);

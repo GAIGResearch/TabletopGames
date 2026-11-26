@@ -66,7 +66,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
         GridBoard gridBoard = gameState.getGridBoard();
         int n = gameState.getGridSize();
 
-        // each line is given by its first square and the step along it: the columns, the rows and the two diagonals
+        // the columns, the rows and the two diagonals, each given by its first square and the step along it
         List<int[]> lines = new ArrayList<>();
         for (int x = 0; x < n; x++)
             lines.add(new int[]{x, 0, 0, 1});

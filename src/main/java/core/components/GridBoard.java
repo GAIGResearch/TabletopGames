@@ -18,12 +18,12 @@ import java.util.*;
 import static core.CoreConstants.imgHash;
 
 /**
- * A board of width by height squares, each holding a BoardNode or empty: a facade over a SparseGrid of SquareCoords
- * that bounds it and reads and writes it by (x, y), with x increasing to the east and y to the south.
+ * A board of width by height squares, each holding a BoardNode or empty. It is read and written by (x, y), with x
+ * increasing to the east and y to the south, and keeps its nodes in a SparseGrid of SquareCoords.
  * <p>
- * Unlike the values of a SparseGrid, BoardNodes may be changed in place (their properties and neighbours), so a copy
- * of the board copies its nodes, with BoardNode.copy(). A node that is immutable (and has no neighbours) may return
- * itself from copy(), to be shared by the copies of the board.
+ * BoardNodes may be changed in place (their properties and neighbours), so a copy of the board copies each node with
+ * BoardNode.copy(). A node that is immutable and has no neighbours may return itself from copy(), and is then shared
+ * by the copies of the board.
  */
 public class GridBoard extends Component implements IComponentContainer<BoardNode> {
 
@@ -102,7 +102,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     }
 
     /**
-     * The node at (x, y), or null if the square is empty or off the board.
+     * The node at (x, y) (null if the square is empty or off the board)
      */
     public BoardNode getElement(int x, int y) {
         return grid.get(new SquareCoord(x, y));
@@ -159,8 +159,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     }
 
     /**
-     * The board's nodes in an array indexed [y][x], turned clockwise by a number of quarter turns. The nodes are
-     * copies.
+     * Copies of the board's nodes in an array indexed [y][x], turned clockwise by orientation quarter turns.
      */
     public BoardNode[][] rotate(int orientation) {
         BoardNode[][] retValue = copy().toArray();
@@ -216,7 +215,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         return g;
     }
 
-    // copies each node into g, with its neighbours the copies of its neighbours
+    // copies each node into g, and links each copy to the copies of the original's neighbours
     private void copyNodesTo(GridBoard g) {
         Map<Integer, BoardNode> nodeCopies = new HashMap<>();
         for (Map.Entry<SquareCoord, BoardNode> e : grid.asMap().entrySet()) {

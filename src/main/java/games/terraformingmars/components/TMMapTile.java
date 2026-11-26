@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A space for a tile, on Mars or off it (at x = y = -1). Immutable, as the values of a SparseGrid must be: when a
- * tile is placed or the space reserved, it is replaced by a new one with the same componentID
+ * A space for a tile, on Mars or off it (at x = y = -1). TMMapTile is immutable (as SparseGrid requires). When a
+ * tile is placed or the space reserved, the space is replaced by a new one with the same componentID
  * (see TMGameState.setMapTile).
  */
 public class TMMapTile extends BoardNode {
@@ -34,7 +34,7 @@ public class TMMapTile extends BoardNode {
         this.reserved = -1;
     }
 
-    // the space with a tile and reservation
+    // a copy of orig with the tile placed and the reservation
     private TMMapTile(TMMapTile orig, TMTypes.Tile tilePlaced, int reserved) {
         super(-1, "Tile", orig.componentID);
         orig.copyComponentTo(this);
@@ -56,7 +56,7 @@ public class TMMapTile extends BoardNode {
     }
 
     /**
-     * This space reserved for the player.
+     * A copy of this space reserved for the player.
      */
     public TMMapTile withReserved(int player) {
         return new TMMapTile(this, tilePlaced, player);
@@ -79,7 +79,7 @@ public class TMMapTile extends BoardNode {
     }
 
     /**
-     * This space with the tile placed by the player, who owns it if it can be owned.
+     * A copy of this space with the tile placed by the player, who owns it if it can be owned.
      */
     public TMMapTile withTilePlaced(TMTypes.Tile which, int player) {
         TMMapTile retValue = new TMMapTile(this, which, reserved);

@@ -81,7 +81,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     /**
-     * Replaces the units on the tile with ones that may or may not still move and attack.
+     * Sets whether the units on the tile can still move and attack.
      */
     public void SetUnitOrders(MapTile tile, boolean canMove, boolean canAttack) {
         if (tile != null && tile.GetUnits() != null) {
@@ -103,17 +103,15 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     /**
-     * The tile at the offset position on the board, whose odd rows are shifted right; null if it is off the board.
+     * The tile in column locX of row locY (or null if this is off the board)
      */
     public MapTile getTile(int locX, int locY) {
+        // odd rows are shifted right
         return gameBoard.get(HexCoord.fromOffset(locX, locY, HexCoord.Offset.ODD_R));
     }
 
-    /**
-     * The tile with the componentID, as it now is.
-     */
     public MapTile getTile(int componentID) {
-        // not getComponentById, which may hold an earlier version of the tile
+        // search the board, as getComponentById may hold an earlier version of the tile
         for (MapTile tile : gameBoard.asMap().values()) {
             if (tile.getComponentID() == componentID) {
                 return tile;
@@ -123,7 +121,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     /**
-     * Puts the tile on the board, in place of the one at its position.
+     * Replaces the tile on the board at the same hex.
      */
     public void setTile(MapTile tile) {
         gameBoard.set(tile.getHex(), tile);

@@ -86,8 +86,8 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public boolean equals(Object other) {
-        // equality does not actually depend on hex and edge...it really just needs to use the edge componentID
-        // as the road is the same if built from one hex, or from another next door that shares the edge
+        // equality uses the edge componentID, not hex and edge, as the road is the same if built from one hex, or
+        // from another next door that shares the edge
         if (other instanceof BuildRoad otherAction) {
             return playerID == otherAction.playerID && free == otherAction.free && componentID == otherAction.componentID;
         }

@@ -10,25 +10,25 @@ import java.util.*;
 
 /**
  * The star-shaped board: 121 nodes, numbered row by row from the top point, and the pegs on them.
- * <p>
- * The nodes are the hexes of a hexagram round the origin: those with every cube coordinate at least -RADIUS, or every
- * one at most RADIUS. The shape and the base colours of the nodes are the same on every board; only the pegs change.
  */
 public class StarBoard extends Component {
 
     // the half-width of the hexagon in the middle of the star
     public static final int RADIUS = 4;
+    // the shape and the base colours of the nodes are the same on every board
     private static final List<HexCoord> POSITIONS = new ArrayList<>();
     private static final Map<HexCoord, Integer> NODES = new HashMap<>();
     private static final Peg.Colour[] BASE_COLOURS;
 
     static {
+        // the hexagram round the origin is the hexes with every cube coordinate at least -RADIUS, or every one at
+        // most RADIUS
         for (HexCoord h : HexCoord.hexagon(2 * RADIUS)) {
             int q = h.q(), r = h.r(), s = -q - r;
             if (Math.min(q, Math.min(r, s)) >= -RADIUS || Math.max(q, Math.max(r, s)) <= RADIUS)
                 POSITIONS.add(h);
         }
-        // HexCoord.hexagon lists hexes row by row
+        // HexCoord.hexagon lists hexes row by row, so the nodes are numbered row by row
         for (int i = 0; i < POSITIONS.size(); i++)
             NODES.put(POSITIONS.get(i), i);
 
@@ -60,7 +60,7 @@ public class StarBoard extends Component {
     }
 
     /**
-     * The node at the hex, or -1 if it is off the board.
+     * The node at the hex (or -1 if it is off the board)
      */
     public int getNode(HexCoord hex) {
         Integer node = NODES.get(hex);
@@ -68,14 +68,14 @@ public class StarBoard extends Component {
     }
 
     /**
-     * The colour of the node: that of the player whose destination it is, or neutral.
+     * The colour of the player whose destination the node is (or neutral)
      */
     public Peg.Colour getBaseColour(int node) {
         return BASE_COLOURS[node];
     }
 
     /**
-     * The peg on the node, or null if it is empty.
+     * The peg on the node (or null if it is empty)
      */
     public Peg getPeg(int node) {
         return pegs.get(POSITIONS.get(node));
@@ -86,17 +86,18 @@ public class StarBoard extends Component {
     }
 
     /**
-     * Puts the peg on the node, or empties it if the peg is null.
+     * Puts the peg on the node (a null peg empties it)
      */
     public void setPeg(int node, Peg peg) {
         pegs.set(POSITIONS.get(node), peg);
     }
 
     /**
-     * The number of steps between the nodes, moving between adjacent ones.
+     * The number of steps from one node to the other
      */
     public int distanceBetween(int from, int to) {
-        // a straight path between two hexes of the star stays on it, so this is the distance between the hexes
+        // between any two hexes of the star there is a shortest path that stays on it, so the hex distance is the
+        // number of steps over the board
         return POSITIONS.get(from).distance(POSITIONS.get(to));
     }
 

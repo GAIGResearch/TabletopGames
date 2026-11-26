@@ -93,7 +93,7 @@ public class VentlifeGameState extends AbstractGameState {
     // ---------------------------------------------------------------- queries
 
     /**
-     * The top hex at the position, or null if no tile covers it.
+     * The top hex at the position (or null if it is not covered by a tile)
      */
     public HexCell getCell(HexCoord hex) {
         return field.get(hex);
@@ -112,21 +112,21 @@ public class VentlifeGameState extends AbstractGameState {
     }
 
     /**
-     * A covered position with no creature on it.
+     * The hex has a tile on it, but no creature
      */
     public boolean isEmptyHex(HexCoord hex) {
         return field.contains(hex) && !creatures.contains(hex);
     }
 
     /**
-     * Whether the position is an Edge hex: covered, with at least one neighbour that is not.
+     * an edge is a hex covered by a tile with at least one neighbour not covered by a tile
      */
     public boolean isEdge(HexCoord hex) {
         return field.isOnBorder(hex);
     }
 
     /**
-     * The player's score for one species, as at the end of the game.
+     * The player's current score for one species
      */
     public int speciesScore(int player, Species species) {
         return species.score(this, player);

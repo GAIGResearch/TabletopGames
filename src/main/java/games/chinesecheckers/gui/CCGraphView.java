@@ -16,8 +16,8 @@ import java.util.List;
 import static gui.GUI.defaultItemSize;
 
 /**
- * The star: the nodes in their base colours, joined to their neighbours, with their numbers (as the actions name
- * them), and the pegs on them.
+ * Draws each node of the star in its base colour, with the links to its neighbours, its number (as used by the
+ * actions) and any peg on it.
  */
 public class CCGraphView extends ComponentView implements IScreenHighlight {
 

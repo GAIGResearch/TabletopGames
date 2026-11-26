@@ -76,7 +76,7 @@ public class BattleloreBoardTest {
 
     @Test
     public void anActionSeesTheTileAsItNowIs() {
-        // getComponentById would give the tile as it was first seen
+        // getComponentById caches the tile as it is before the second unit is added
         MapTile attacker = addUnit(2, 2, Dakhan_Lords, 1);
         MapTile defender = addUnit(3, 2, Uthuk_Yllan, 1);
         state.getComponentById(attacker.getComponentID());

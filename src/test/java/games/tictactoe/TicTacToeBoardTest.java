@@ -89,7 +89,7 @@ public class TicTacToeBoardTest {
     }
     @Test
     public void aCopyKeepsTheBoardSize() {
-        // set on the field, which a copy of the parameters does not keep
+        // set directly on the field, which a copy of the parameters loses, so the copy must take the size from its board
         TicTacToeGameParameters params = new TicTacToeGameParameters();
         params.gridSize = 4;
         Game big = GameType.TicTacToe.createGameInstance(2, params);

@@ -36,7 +36,7 @@ public class PlayRockFallCard extends AbstractAction {
                 sgs.getRoleDeck().setVisibilityOfComponent(sgs.getCurrentPlayer(), p, true);
         }
         sgs.getDiscardDeck().add(currentDeck.pick(idx));
-        // the card taken off the board is discarded face up: everyone has seen it
+        // the card taken off the board is discarded face up, as everyone has seen it
         boolean[] seenByAll = new boolean[sgs.getNPlayers()];
         Arrays.fill(seenByAll, true);
         sgs.getDiscardDeck().add(deletedCard, seenByAll);

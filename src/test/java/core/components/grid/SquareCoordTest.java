@@ -12,7 +12,7 @@ public class SquareCoordTest {
 
     @Test
     public void neighboursRunClockwiseFromEast() {
-        // y increases downwards, so south is +1
+        // y increases downwards, so south is y + 1
         assertEquals(List.of(new SquareCoord(3, 2), new SquareCoord(2, 3), new SquareCoord(1, 2), new SquareCoord(2, 1)),
                 new SquareCoord(2, 2).neighbours());
         assertEquals(SquareCoord.W, new SquareCoord(0, 0).opposite(SquareCoord.E));

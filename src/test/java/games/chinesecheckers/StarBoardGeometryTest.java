@@ -14,7 +14,8 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 /**
- * The star is a hexagram of 121 hexes round the origin, with node 0 at the top point and node 60 in the middle.
+ * Tests the shape of the StarBoard: a hexagram of 121 hexes round the origin, with node 0 at the top point and node
+ * 60 in the middle.
  */
 public class StarBoardGeometryTest {
 
@@ -56,9 +57,9 @@ public class StarBoardGeometryTest {
         }
         // six points of 10 nodes and a hexagon of 61 have 312 links between them
         assertEquals(2 * 312, links);
-        // the points have two neighbours each
+        // the tip of a point has two neighbours
         assertEquals(List.of(1, 2), neighbours(0).stream().sorted().toList());
-        // the hand-built board had no link from 84 to 73
+        // 84 and 73 are neighbours
         assertTrue(neighbours(84).contains(73));
     }
 
@@ -71,7 +72,7 @@ public class StarBoardGeometryTest {
             for (int m : neighbours(i))
                 assertEquals(1, board.distanceBetween(i, m));
         }
-        // every distance is the shortest path over the board's links
+        // every distance is the length of the shortest path over the board's links
         for (int from = 0; from < board.nNodes(); from++) {
             int[] steps = new int[board.nNodes()];
             Arrays.fill(steps, -1);
@@ -105,7 +106,7 @@ public class StarBoardGeometryTest {
 
     @Test
     public void aPegJumpsOverANeighbourInEveryDirection() {
-        // a purple peg in the middle, ringed by red pegs: it can only jump, to the six nodes two steps away
+        // a purple peg in the middle, ringed by red pegs, can only jump to the six nodes two steps away
         Game game = GameType.ChineseCheckers.createGameInstance(2, new CCParameters());
         CCGameState state = (CCGameState) game.getGameState();
         StarBoard b = state.getStarBoard();

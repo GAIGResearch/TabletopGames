@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * The board is 7 wide and 6 high, with y = 0 at the top: a token dropped in an empty column lands at y = 5.
+ * The board is 7 wide and 6 high, with y = 0 at the top, so a token dropped in an empty column lands at y = 5.
  */
 public class Connect4BoardTest {
 
@@ -124,7 +124,7 @@ public class Connect4BoardTest {
 
     @Test
     public void aCopyKeepsTheBoardSize() {
-        // set on the fields, which a copy of the parameters does not keep
+        // set directly on the fields, which a copy of the parameters loses, so the copy must take the size from its board
         Connect4GameParameters params = new Connect4GameParameters();
         params.width = 5;
         params.height = 4;

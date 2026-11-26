@@ -33,7 +33,7 @@ public class VentlifeFieldView extends JComponent {
     static final Color LAST_TILE = new Color(255, 120, 0);
 
     VentlifeGameState state;
-    // set when painting
+    // fitted to the field each time it is painted
     HexLayout layout = new HexLayout(MAX_SIZE, WIDTH / 2.0, HEIGHT / 2.0);
     Map<HexCoord, Color> outlines = new HashMap<>();
     // the terrains of a tile shown where it would be placed

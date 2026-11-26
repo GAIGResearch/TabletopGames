@@ -17,8 +17,8 @@ public record HexCoord(int q, int r) implements GridCoord<HexCoord> {
     private static final int[][] DIRECTIONS = {{1, 0}, {0, 1}, {-1, 1}, {-1, 0}, {0, -1}, {1, -1}};
 
     /**
-     * How a rectangular array of hexes is laid out: rows are numbered down the screen, and either the odd or the even
-     * rows are shifted half a hex to the right.
+     * The layout of a rectangular array of hexes. Rows are numbered down the screen, and either the even rows
+     * (EVEN_R) or the odd rows (ODD_R) are shifted half a hex to the right.
      */
     public enum Offset {EVEN_R, ODD_R}
 
@@ -42,7 +42,7 @@ public record HexCoord(int q, int r) implements GridCoord<HexCoord> {
     }
 
     /**
-     * Every hex within radius steps of the origin, in order.
+     * Every hex within radius steps of the origin, row by row.
      */
     public static List<HexCoord> hexagon(int radius) {
         List<HexCoord> retValue = new ArrayList<>();
@@ -53,8 +53,8 @@ public record HexCoord(int q, int r) implements GridCoord<HexCoord> {
     }
 
     /**
-     * The hexes exactly radius steps from this one, clockwise from the one radius steps to the north-west. The
-     * k-th hex of the ring is reached by a step in direction k / radius.
+     * The hexes exactly radius steps from this one, clockwise, ending with the one radius steps to the north-west.
+     * The k-th hex (from 0) is a step in direction k / radius from the one before it.
      */
     public List<HexCoord> ring(int radius) {
         List<HexCoord> retValue = new ArrayList<>(6 * radius);

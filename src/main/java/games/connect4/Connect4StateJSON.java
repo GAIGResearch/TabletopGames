@@ -35,8 +35,8 @@ public class Connect4StateJSON {
         json.put("width", board.getWidth());
         json.put("height", board.getHeight());
 
-        // The board is stored row by row (y outer, x inner). Each cell records its name: which
-        // marker, or the empty cell.
+        // The board is stored row by row (y outer, x inner). Each cell records the name of its
+        // marker, or Connect4Constants.emptyCell.
         JSONArray rows = new JSONArray();
         for (int y = 0; y < board.getHeight(); y++) {
             JSONArray row = new JSONArray();
@@ -95,8 +95,7 @@ public class Connect4StateJSON {
     }
 
     /**
-     * The shared static playerMapping marker with the name, so that componentIDs are identical to the
-     * pre-serialization state; null for the empty cell.
+     * The playerMapping marker with the name (or null for an empty cell)
      */
     private static BoardNode marker(String name) {
         for (BoardNode marker : Connect4Constants.playerMapping) {

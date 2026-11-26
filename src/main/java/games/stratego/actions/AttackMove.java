@@ -92,7 +92,7 @@ public class AttackMove extends Move {
         return true;
     }
 
-    // the winner is a player id, or -1 for a tie
+    // winner is a player id (or -1 for a tie)
     private void logBattle(AbstractGameState gs, Piece movedPiece, Piece attackedPiece, int winner) {
         gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome,
                 movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +

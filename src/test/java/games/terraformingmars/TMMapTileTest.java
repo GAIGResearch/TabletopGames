@@ -27,7 +27,7 @@ public class TMMapTileTest {
         int player = state.getCurrentPlayer();
         TMTypes.Resource res = mt.getResources()[0];
         int before = state.getPlayerResources()[player].get(res).getValue();
-        // getComponentById would give the space as it was first seen
+        // getComponentById caches the space as it is before the tile is placed
         state.getComponentById(mt.getComponentID());
 
         assertTrue(state.placeTile(mt, TMTypes.Tile.City));

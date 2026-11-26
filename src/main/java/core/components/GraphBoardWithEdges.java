@@ -9,7 +9,8 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     // List of nodes in the board graph, mapping component ID to object reference
     protected Map<Integer, BoardNodeWithEdges> boardNodes;
 
-    // boardNodes by componentID - minNodeID, so getNodeByID needs no boxing (null if the IDs are too spread out)
+    // boardNodes indexed by (componentID - minNodeID), so that getNodeByID avoids boxing the key. It is null when
+    // the IDs are too spread out for an array.
     private BoardNodeWithEdges[] nodeIndex;
     private int minNodeID;
     private boolean nodeIndexBuilt;

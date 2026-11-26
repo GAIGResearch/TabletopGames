@@ -39,7 +39,7 @@ public class TMGameState extends AbstractGameState {
     // Each turn a player takes up to TMGameParameters.nActionsPerPlayer actions, until all players have passed
     int nActionsTaken, nPassed;
     boolean[] passed;
-    // the spaces on Mars, by their hexes, the odd rows shifted right
+    // the spaces on Mars, by their hexes (odd rows are shifted right)
     SparseGrid<HexCoord, TMMapTile> board;
     // the spaces off Mars
     List<TMMapTile> extraTiles;
@@ -454,17 +454,18 @@ public class TMGameState extends AbstractGameState {
     }
 
     /**
-     * The space on Mars at the offset position, the odd rows shifted right; null if there is none.
+     * The space on Mars in column x of row y (or null if there is none)
      */
     public TMMapTile getTile(int x, int y) {
+        // odd rows are shifted right
         return board.get(HexCoord.fromOffset(x, y, HexCoord.Offset.ODD_R));
     }
 
     /**
-     * The space, on Mars or off it, with the componentID, as it now is.
+     * The space with the componentID, on Mars or off it.
      */
     public TMMapTile getMapTile(int componentID) {
-        // not getComponentById, which may hold an earlier version of the space
+        // search the spaces, as getComponentById may hold an earlier version of the space
         for (TMMapTile mt : board.asMap().values()) {
             if (mt.getComponentID() == componentID) return mt;
         }
@@ -475,7 +476,7 @@ public class TMGameState extends AbstractGameState {
     }
 
     /**
-     * Puts the space in place of the one with its componentID.
+     * Replaces the space that has the same componentID.
      */
     public void setMapTile(TMMapTile mt) {
         if (mt.getX() >= 0) {
@@ -509,8 +510,8 @@ public class TMGameState extends AbstractGameState {
     }
 
     /**
-     * Places the tile on the space, if it has none, as setTilePlaced, and raises the global parameter the tile
-     * raises (unless it is at its maximum). Returns false if the space had a tile.
+     * Places the tile as setTilePlaced does, and raises the tile's global parameter (unless it is at its maximum).
+     * Returns false, placing nothing, if the space already has a tile.
      */
     public boolean placeTile(TMMapTile mt, TMTypes.Tile which) {
         if (mt.getTilePlaced() == null) {

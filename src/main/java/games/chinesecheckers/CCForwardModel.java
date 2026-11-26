@@ -86,7 +86,7 @@ public class CCForwardModel extends StandardForwardModel {
     }
 
     private void repeatAction(StarBoard board, int node, Set<AbstractAction> actions, Peg.Colour playerCol) {
-        // This looks for a chain of jumps, without revisiting previous nodes, that starts at the given node
+        // the nodes reached from the given node by a chain of jumps, without revisiting any
         Set<Integer> visited = new LinkedHashSet<>();
         Queue<Integer> toVisit = new ArrayDeque<>();
         toVisit.add(node);
@@ -98,7 +98,7 @@ public class CCForwardModel extends StandardForwardModel {
             boolean canLeaveZone = board.getBaseColour(expNode) != playerCol;
             HexCoord here = board.getPosition(expNode);
             for (int d = 0; d < here.nDirections(); d++) {
-                // over an occupied neighbour to the empty node beyond it in the same direction
+                // a jump goes over an occupied neighbour to the empty node beyond it in the same direction
                 HexCoord over = here.neighbour(d);
                 int neighbour = board.getNode(over);
                 if (neighbour < 0 || !board.isOccupied(neighbour)) continue;

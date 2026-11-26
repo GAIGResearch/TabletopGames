@@ -58,7 +58,7 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public String toString() {
-        // no String.format, which is slow, as the history records this text for every offer made in a search
+        // concatenated, as String.format is slow and the history records this text for every offer made in a search
         return "Trade (p" + offeringPlayerID + " to p" + otherPlayerID + " : " + nOffered + " " + resourceOffered +
                 " for " + nRequested + " " + resourceRequested + ")";
     }

@@ -15,7 +15,7 @@ import java.util.Objects;
 
 public class TicTacToeGameState extends AbstractGameState implements IPrintable {
 
-    // the x and o tokens of TicTacToeConstants.playerMapping; a square with none is empty
+    // the x and o tokens of TicTacToeConstants.playerMapping
     GridBoard gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {

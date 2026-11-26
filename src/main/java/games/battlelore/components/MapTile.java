@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A hex of the board and the units on it. Immutable, as the values of a SparseGrid must be: when the units change,
- * the tile is replaced on the board by a new one with the same componentID.
+ * A hex of the board and the units on it. MapTile is immutable (as SparseGrid requires). When the units change,
+ * the tile on the board is replaced by a new one with the same componentID.
  */
 public class MapTile extends BoardNode {
 
@@ -27,10 +27,8 @@ public class MapTile extends BoardNode {
         return locationY;
     }
 
-    /**
-     * The hex of the tile on the board, whose odd rows are shifted right.
-     */
     public HexCoord getHex() {
+        // odd rows are shifted right
         return HexCoord.fromOffset(locationX, locationY, HexCoord.Offset.ODD_R);
     }
 
@@ -49,7 +47,7 @@ public class MapTile extends BoardNode {
     }
 
     /**
-     * This tile with the units on it.
+     * A copy of this tile holding newUnits.
      */
     public MapTile withUnits(List<Unit> newUnits) {
         return new MapTile(componentID, locationX, locationY, newUnits);
@@ -76,7 +74,7 @@ public class MapTile extends BoardNode {
     }
 
     /**
-     * The units on the tile, or null if there are none.
+     * The units on the tile (or null if there are none)
      */
     public List<Unit> GetUnits() {
         if (!units.isEmpty()) {

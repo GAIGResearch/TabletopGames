@@ -9,7 +9,7 @@ import java.util.Objects;
 import static games.catan.CatanConstants.HEX_SIDES;
 
 /**
- * A tile of the board. Tiles are immutable, so copies of the board share them.
+ * Tiles are immutable, so copies of the board share them.
  */
 public class CatanTile extends BoardNode {
     public enum TileType {
@@ -25,7 +25,7 @@ public class CatanTile extends BoardNode {
     public final HexCoord hex;
     private final TileType tileType;
     private final int number;
-    // the ids of the buildings at the vertices and of the roads along the sides, -1 where there are none
+    // the ids of the buildings at the vertices and of the roads along the sides (-1 where there is none)
     private final int[] vertexIDs, edgeIDs;
 
     /**
@@ -52,7 +52,7 @@ public class CatanTile extends BoardNode {
     }
 
     /**
-     * This tile, with the buildings at its vertices and the roads along its sides given by their ids.
+     * A copy of this tile holding the ids of the buildings at its vertices and the roads along its sides.
      */
     public CatanTile withIDs(int[] vertexIDs, int[] edgeIDs) {
         return new CatanTile(this, vertexIDs, edgeIDs);
@@ -75,8 +75,8 @@ public class CatanTile extends BoardNode {
     }
 
     /**
-     * The two other hexes at the vertex, clockwise. The vertex is vertex + 2 of the first and vertex + 4 of the
-     * second.
+     * The two other hexes that meet at the vertex, clockwise. The vertex is numbered vertex + 2 on the first and
+     * vertex + 4 on the second.
      */
     public HexCoord[] getNeighboursOnVertex(int vertex) {
         return new HexCoord[]{hex.neighbour((vertex + 5) % HEX_SIDES), hex.neighbour(vertex)};

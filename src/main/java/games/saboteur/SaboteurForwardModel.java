@@ -64,7 +64,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
         sgs.discardDeck = new PartialObservableDeck<>("DiscardDeck", -1, sgs.getNPlayers(), HIDDEN_TO_ALL);
 
-        // the board is not infinite, to avoid silliness: see SaboteurGameState.isOnBoard
+        // SaboteurGameState.isOnBoard keeps the cards within SaboteurGameParameters.boardWidth and boardHeight
         sgs.gridBoard = new SparseGrid<>("Board", sgs.getNPlayers());
         // we start just in from the left edge, and half way down
         sgs.startingSquare = new SquareCoord(sgp.horizontalPadding, sgp.boardHeight() / 2);
@@ -113,7 +113,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
     }
 
     private void resetBoard(SaboteurGameState sgs, SaboteurGameParameters sgp) {
-        // clear the board, but for the starting card
+        // clear the board, except for the starting card
         for (SquareCoord pos : sgs.gridBoard.sortedPositions()) {
             if (pos.equals(sgs.startingSquare)) {
                 continue;

@@ -16,8 +16,8 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 
 /**
- * The board's odd rows are shifted half a hex right, so (1,0) touches (0,0), (2,0), (0,1) and (1,1) on the board. The
- * scenario's units are cleared, and units added with move range 1 and melee range 1.
+ * The board's odd rows are shifted half a hex right, so (1,0) touches (0,0), (2,0), (0,1) and (1,1). The scenario's
+ * units are cleared, and each test adds units with move range 1 and melee range 1.
  */
 public class BattleloreRangeTest {
 

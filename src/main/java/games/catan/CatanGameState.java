@@ -22,7 +22,7 @@ import static games.catan.stats.CatanMetrics.CatanEvent.LargestArmySteal;
 public class CatanGameState extends AbstractGameState {
     protected SparseGrid<HexCoord, CatanTile> board;
     protected HexCoord robber; // the hex the robber is on
-    // the board's tiles in order of position, or null until getTiles is called
+    // the board's tiles in order of position (or null until getTiles is called)
     private List<CatanTile> tiles;
     protected GraphBoardWithEdges catanGraph;
     protected int[] scores; // score for each player
@@ -136,17 +136,14 @@ public class CatanGameState extends AbstractGameState {
     }
 
     /**
-     * The tile at the hex, or null if it is off the board.
+     * The tile at the hex (or null if the hex is off the board)
      */
     public CatanTile getTile(HexCoord hex) {
         return board.get(hex);
     }
 
-    /**
-     * Every tile, in order of position.
-     */
     public List<CatanTile> getTiles() {
-        // stale if the board changes after setup
+        // the list is cached, so it will be stale if the board changes after setup
         if (tiles == null) {
             List<CatanTile> retValue = new ArrayList<>(board.size());
             for (HexCoord hex : board.sortedPositions())

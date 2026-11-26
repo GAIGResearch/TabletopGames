@@ -77,8 +77,7 @@ public class CatanBoardTest {
                 }
             }
         assertTrue(checks > 0);
-        // 37 hexes have 6 * 37 = 222 corners: the vertices inside the hexagon of radius 3 are shared by three hexes
-        // and those on its edge by one or two, giving 96 vertices as on any hexagon of 37 hexes
+        // a hexagon of hexes of radius r has 6(r + 1)^2 vertices, so 96 for the 37 hexes of radius 3
         assertEquals(96, state.getSettlements().size());
     }
 
@@ -219,8 +218,8 @@ public class CatanBoardTest {
     }
 
     /**
-     * Plays the first round of setup with the first legal placement of each player, then returns the first placement
-     * in the action space, of the next player, whose vertex touches three land tiles.
+     * Plays the first round of setup, each player taking their first legal placement. Then returns the first
+     * placement offered to the next player in the action space whose vertex touches three land tiles.
      */
     private AbstractAction secondRoundPlacement(ActionSpace actionSpace) {
         while (state.getRoundCounter() == 0) {

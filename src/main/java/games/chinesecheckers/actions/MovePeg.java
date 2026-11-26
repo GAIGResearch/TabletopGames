@@ -25,7 +25,7 @@ public class MovePeg extends AbstractAction {
         StarBoard board = state.getStarBoard();
         Peg peg = board.getPeg(from);
 
-        // a peg's destination is the nodes of its own colour (it starts on those of the opposite colour)
+        // a peg's destination is the nodes of its own colour
         boolean inDestination = peg.inDestination() || board.getBaseColour(to) == peg.colour();
         board.setPeg(from, null);
         board.setPeg(to, inDestination == peg.inDestination() ? peg : new Peg(peg.colour(), true));

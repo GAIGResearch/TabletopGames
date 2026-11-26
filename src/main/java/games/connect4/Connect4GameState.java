@@ -19,7 +19,7 @@ import java.util.Objects;
 
 public class Connect4GameState extends AbstractGameState implements IPrintable, IToJSON {
 
-    // the x and o tokens of Connect4Constants.playerMapping; a square with none is empty. y is 0 at the top
+    // the x and o tokens of Connect4Constants.playerMapping, with y = 0 the top row
     GridBoard gridBoard;
     LinkedList<Pair<Integer, Integer>> winnerCells;
 

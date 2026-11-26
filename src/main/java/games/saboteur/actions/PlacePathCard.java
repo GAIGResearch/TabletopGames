@@ -41,9 +41,9 @@ public class PlacePathCard extends AbstractAction
         return true;
     }
 
-    // the card in the current player's hand, or null; not looked up by id in the state, as a card placed turned round
-    // is a new object with the same id
+    // the card in the current player's hand (or null)
     private PathCard cardInHand(SaboteurGameState sgs) {
+        // a card placed turned round is a separate object with the same id, so getComponentById may give the other one
         for (SaboteurCard c : sgs.getPlayerDecks().get(sgs.getCurrentPlayer()).getComponents())
             if (c.getComponentID() == pathCardID)
                 return (PathCard) c;

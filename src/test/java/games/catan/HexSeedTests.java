@@ -73,8 +73,8 @@ public class HexSeedTests {
 
     @Test
     public void hexSeedGivesTheRecordedBoard() {
-        // the land tiles in order of position (initial and number), then the harbours by the vertices of the tiles in
-        // order of position; the same in every run, whatever the JVM has done before
+        // The recorded board lists the land tiles in order of position (by initial and number), then the harbours by
+        // the vertices of the tiles in the same order. It must be the same in every run, whatever the JVM has done before
         CatanParameters params = new CatanParameters();
         params.setParameterValue("hexShuffleSeed", 39392);
         CatanGameState state = new CatanGameState(params, 4);

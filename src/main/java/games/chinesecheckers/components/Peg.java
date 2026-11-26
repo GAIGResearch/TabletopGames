@@ -3,8 +3,7 @@ package games.chinesecheckers.components;
 import java.awt.*;
 
 /**
- * A peg of a player's colour, and whether it has reached the destination of that colour (after which it may not
- * leave it).
+ * A peg of a player's colour, and whether it has reached its destination
  */
 public record Peg(Colour colour, boolean inDestination) {
 

@@ -1,8 +1,8 @@
 package core.components.grid;
 
 /**
- * A corner where up to three hexes meet (see HexCoord for the numbering of corners). Each corner is shared by three
- * hexes, so it is stored as corner 0 or 1 of one of them, and the same point is always an equal HexVertex.
+ * A corner where up to three hexes meet (see HexCoord for the numbering of corners). It is stored as corner 0 or 1
+ * of one of them, so the same point given from any of the hexes is an equal HexVertex.
  */
 public record HexVertex(HexCoord hex, int corner) {
 

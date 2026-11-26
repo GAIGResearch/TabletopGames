@@ -10,7 +10,7 @@ import java.util.*;
 public class MMGameState extends AbstractGameState {
 
     PartialObservableDeck<BoardNode> answerCode;
-    // the guess and result pegs, each row a turn; a square with no peg is empty
+    // the guess and result pegs, one row per turn
     GridBoard guessBoard;
     GridBoard resultBoard;
     int activeRow;

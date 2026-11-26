@@ -97,7 +97,7 @@ public class SaboteurGameParameters extends TunableParameters<SaboteurGameParame
 
 
     public int boardWidth() {
-        // the start, the goals goalSpacingX to its right, and horizontalPadding beyond each
+        // the start and the goals (goalSpacingX to its right), with horizontalPadding beyond each of them
         return goalSpacingX + 2 + horizontalPadding * 2;
     }
 

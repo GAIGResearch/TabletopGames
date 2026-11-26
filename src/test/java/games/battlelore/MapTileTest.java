@@ -27,9 +27,9 @@ public class MapTileTest {
         // from row 0 to row 2 is two steps whether straight down or one column across
         assertEquals(2, distance(3, 0, 3, 2));
         assertEquals(2, distance(3, 0, 2, 2));
-        // (2,0) to (0,1): a step down-left to (1,1), then left; 2.24 apart as the crow flies over the offsets
+        // from (2,0) to (0,1) is a step down-left to (1,1), then a step left
         assertEquals(2, distance(2, 0, 0, 1));
-        // two columns across and four rows down: the rows absorb the columns
+        // four steps down can also move two columns across
         assertEquals(4, distance(0, 0, 2, 4));
     }
 }

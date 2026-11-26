@@ -10,7 +10,8 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Hexes of size 10 have centres sqrt(3) * 10 = 17.32 apart along a row, and rows 15 apart.
+ * The layout has hexes of size 10, with (0,0) centred at (100, 50). Their centres are sqrt(3) * 10 = 17.32 apart
+ * along a row, and rows are 15 apart.
  */
 public class HexLayoutTest {
 
@@ -62,8 +63,8 @@ public class HexLayoutTest {
 
     @Test
     public void fittingCentresTheHexesInTheArea() {
-        // (0,0) and (2,0): centres 2 * sqrt3 * size apart, plus a hex width, must fit 200 - 2 * 10 wide; 2 * size high
-        // must fit 100 - 2 * 10
+        // the centres of (0,0) and (2,0) are 2 * sqrt(3) * size apart, and that plus a hex width must fit in
+        // 200 - 2 * 10. The hexes are 2 * size high, which must fit in 100 - 2 * 10.
         HexLayout fit = HexLayout.fitting(List.of(HexCoord.ORIGIN, new HexCoord(2, 0)), 200, 100, 10, 1000);
         assertEquals(Math.min(180 / (3 * SQRT3), 80 / 2.0), fit.size(), EPS);
         Point2D a = fit.centre(HexCoord.ORIGIN), b = fit.centre(new HexCoord(2, 0));

@@ -8,8 +8,8 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 
 /**
- * Where pointy-topped hexes are drawn on screen: size is the distance from a hex's centre to each corner, and the
- * origin is the centre of hex (0,0). A hex is sqrt(3) * size wide and 2 * size high.
+ * The screen positions of pointy-topped hexes. size is the distance from a hex's centre to each corner, so a hex is
+ * sqrt(3) * size wide and 2 * size high. (originX, originY) is the centre of hex (0,0).
  */
 public record HexLayout(double size, double originX, double originY) {
 

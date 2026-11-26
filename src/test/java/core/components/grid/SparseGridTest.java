@@ -113,7 +113,7 @@ public class SparseGridTest {
         copy.set(hex(0, 0), "changed");
         copy.set(hex(4, 4), "new");
         copy.remove(hex(1, 0));
-        // and far enough away to grow the copy
+        // one far enough away to grow the copy
         copy.set(hex(-50, 50), "far");
         assertEquals("a", grid.get(hex(0, 0)));
         assertEquals("b", grid.get(hex(1, 0)));
@@ -190,7 +190,7 @@ public class SparseGridTest {
         tokens.set(new SquareCoord(0, 0), b);
         assertEquals(Set.of(a, b), new HashSet<>(tokens.getComponents()));
         assertEquals(CoreConstants.VisibilityMode.MIXED_VISIBILITY, tokens.getVisibilityMode());
-        // values that are not components are not
+        // a grid of Strings contains no components
         assertTrue(grid.getComponents().isEmpty());
         assertEquals(CoreConstants.VisibilityMode.VISIBLE_TO_ALL, grid.getVisibilityMode());
     }

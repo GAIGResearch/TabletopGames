@@ -11,7 +11,7 @@ public class PathCard extends SaboteurCard {
     final public PathCardType type;
     final boolean hasTreasure;
     final boolean symmetric;
-    // the card turned round, made when first asked for, and turned round again back to this
+    // this card turned round, made by the first call to rotated(). Turning that round again gives back this card.
     private PathCard turned;
 
     public enum PathCardType {
@@ -42,7 +42,7 @@ public class PathCard extends SaboteurCard {
     }
 
     /**
-     * The card turned round (half a turn): the same card, so with the same component id.
+     * This card turned round by half a turn. It is the same card, so it has the same component id.
      */
     public PathCard rotated()
     {

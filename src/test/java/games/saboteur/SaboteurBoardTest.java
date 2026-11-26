@@ -150,13 +150,13 @@ public class SaboteurBoardTest {
     public void aCardPlacedTurnedRoundCanBePlayedAgainLater() {
         PathCard corner = path(T, T, F, F);
         giveHand(corner);
-        // the state's lookup of components by id now holds the card as it was dealt
+        // getAllComponents fills the state's lookup of components by id with the card as it was dealt
         state.getAllComponents();
         fm.next(state, new PlacePathCard(sq(3, 6), corner.getComponentID(), true));
-        // a later round returns the card from the board to a hand; here, straight to the next player's
+        // in play the card would return to a hand in a later round; here it goes straight to the next player's hand
         PathCard placed = state.gridBoard.remove(sq(3, 6));
         giveHand(placed);
-        // open west and north as it lies, it fits west of the start turned back again
+        // it lies open west and north, so it fits west of the start when turned back again
         fm.next(state, new PlacePathCard(sq(1, 6), corner.getComponentID(), true));
         PathCard again = state.gridBoard.get(sq(1, 6));
         assertTrue(again.opensTo(SquareCoord.E) && again.opensTo(SquareCoord.S));
@@ -235,7 +235,7 @@ public class SaboteurBoardTest {
         assertTrue(fm.computeAvailableActions(state).contains(new PlayRockFallCard(sq(3, 6))));
         fm.next(state, new PlayRockFallCard(sq(3, 6)));
         assertFalse(state.gridBoard.contains(sq(3, 6)));
-        // both the Rockfall card and the card it removed are discarded; the removed card face up
+        // both the Rockfall card and the card it removed are discarded, the removed card face up
         assertEquals(discards + 2, state.discardDeck.getSize());
         assertTrue(state.discardDeck.getComponents().contains(rockfall));
         int idx = state.discardDeck.getComponents().indexOf(deadEnd);

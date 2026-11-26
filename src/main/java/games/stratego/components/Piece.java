@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A piece on the board, owned by the player of its alliance. Immutable, so that a copy of the board can share it: a
- * piece that moves or is revealed is replaced on the board by a new one with the same componentID.
+ * A piece on the board, owned by the player of its alliance. It is immutable, so a copy of the board can share it.
+ * A piece that moves or is revealed is replaced on the board by a new one with the same componentID.
  */
 public class Piece extends BoardNode {
 
@@ -147,12 +147,12 @@ public class Piece extends BoardNode {
     }
 
     /**
-     * This piece as a player who does not know its type might guess it to be.
+     * A copy of this piece with the type hiddenPieceType, for a player who does not know its true type.
      */
     public Piece partialCopy(PieceType hiddenPieceType){
         Piece copy = new Piece(hiddenPieceType, alliance, position, false, componentID);
         copyComponentTo(copy);
-        // copyComponentTo sets the true type's name
+        // copyComponentTo copies the true type's name, so the hidden one replaces it
         copy.setComponentName(hiddenPieceType.name());
         return copy;
     }

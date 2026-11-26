@@ -75,7 +75,7 @@ public class HexCoordTest {
 
     @Test
     public void oddROffsetNeighboursMatchTheOffsetTables() {
-        // offset (dcol, drow) of each neighbour, for even and odd rows, from the standard odd-r tables
+        // (dcol, drow) of each neighbour of a hex in an even row, then an odd row, from the standard odd-r tables
         int[][][] table = {{{1, 0}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}},
                 {{1, 0}, {1, -1}, {0, -1}, {-1, 0}, {0, 1}, {1, 1}}};
         checkOffsetNeighbours(ODD_R, table);
@@ -83,7 +83,8 @@ public class HexCoordTest {
 
     @Test
     public void evenROffsetNeighboursMatchTheOffsetTablesInDirectionOrder() {
-        // in direction order E, SE, SW, W, NW, NE, for even and odd rows
+        // (dcol, drow) of each neighbour in direction order (E, SE, SW, W, NW, NE), for a hex in an even row, then
+        // an odd row
         int[][][] table = {{{1, 0}, {1, 1}, {0, 1}, {-1, 0}, {0, -1}, {1, -1}},
                 {{1, 0}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}}};
         for (int row = -2; row <= 2; row++)
@@ -132,15 +133,15 @@ public class HexCoordTest {
 
     @Test
     public void ringRunsClockwiseFromTheNorthWest() {
-        // from the hex north-west of (1,1), stepping E, SE, SW, W, NW, NE
+        // starting from the hex north-west of (1,1), one step each E, SE, SW, W, NW, NE
         assertEquals(List.of(hex(2, 0), hex(2, 1), hex(1, 2), hex(0, 2), hex(0, 1), hex(1, 0)), hex(1, 1).ring(1));
         List<HexCoord> ring = HexCoord.ORIGIN.ring(2);
         assertEquals(12, ring.size());
         assertEquals(12, new HashSet<>(ring).size());
         for (int k = 0; k < ring.size(); k++) {
             assertEquals(2, HexCoord.ORIGIN.distance(ring.get(k)));
-            // the k-th hex is a step in direction k / 2 from the one before it (the last before the first is the
-            // start, two steps north-west)
+            // the k-th hex is a step in direction k / 2 from the one before it. Before the first comes the hex two
+            // steps north-west
             HexCoord before = k == 0 ? hex(0, -2) : ring.get(k - 1);
             assertEquals(ring.get(k), before.neighbour(k / 2));
         }

@@ -404,9 +404,10 @@ public class PlaceTile extends TMAction implements TMExtendedSequence {
     }
 
     /**
-     * The cells next to the cell on the board, whose odd rows are shifted right; some may be off the board.
+     * The cells next to the cell (some may be off the board)
      */
     public static List<Vector2D> getNeighbours(Vector2D cell) {
+        // odd rows are shifted right
         ArrayList<Vector2D> neighbors = new ArrayList<>();
         for (HexCoord n : HexCoord.fromOffset(cell.getX(), cell.getY(), ODD_R).neighbours())
             neighbors.add(new Vector2D(n.offsetCol(ODD_R), n.r()));

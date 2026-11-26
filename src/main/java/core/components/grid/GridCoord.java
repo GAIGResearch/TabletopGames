@@ -6,15 +6,15 @@ import java.util.*;
  * A position on a grid of hexes or squares. Directions are numbered from 0 (east) clockwise as drawn on screen, with
  * y increasing downwards, so turning by k steps is (d + k) % nDirections().
  * <p>
- * Positions are ordered row by row: by second(), then first().
+ * Positions are ordered row by row (by second(), then first()).
  */
 public interface GridCoord<C extends GridCoord<C>> extends Comparable<C> {
 
     int nDirections();
 
     /**
-     * The position as a pair of integers, (q, r) for a hex and (x, y) for a square: with second(), it places the
-     * position in an array.
+     * first() and second() give the position as a pair of integers ((q, r) for a hex, (x, y) for a square), which
+     * can index it in an array.
      */
     int first();
 

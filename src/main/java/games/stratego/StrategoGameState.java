@@ -41,7 +41,7 @@ public class StrategoGameState extends AbstractGameState{
         s.gridBoard = gridBoard.copy();
 
         if (playerId != -1 && getCoreGameParameters().partialObservable){
-            // the opponent's unknown pieces, row by row, are dealt their types again at random
+            // the types of the opponent's unknown pieces are shuffled among them
             Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
             List<Piece> hidden = new ArrayList<>();
             for (Piece p : getPieces()) {
@@ -102,17 +102,17 @@ public class StrategoGameState extends AbstractGameState{
     }
 
     /**
-     * The piece at the position, or null if there is none.
+     * The piece at the position (or null if it is empty)
      */
     public Piece getPiece(Vector2D position) {
         return (Piece) gridBoard.getElement(position);
     }
 
     /**
-     * The piece on the board with the componentID, or null if it has been taken.
+     * The piece on the board with the componentID (or null if it has been taken)
      */
     public Piece getPiece(int componentID) {
-        // not getComponentById, which may hold an earlier version of the piece
+        // the board is searched, as getComponentById may hold an earlier version of the piece
         for (Piece p : getPieces())
             if (p.getComponentID() == componentID)
                 return p;
@@ -120,7 +120,7 @@ public class StrategoGameState extends AbstractGameState{
     }
 
     /**
-     * Puts the piece at the position, or empties it if the piece is null.
+     * Puts the piece at the position (or empties the position if the piece is null)
      */
     public void setPiece(Vector2D position, Piece piece) {
         gridBoard.setElement(position, piece);

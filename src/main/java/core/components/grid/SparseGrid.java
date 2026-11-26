@@ -7,24 +7,21 @@ import core.interfaces.IComponentContainer;
 import java.util.*;
 
 /**
- * A grid of hexes or squares with no fixed size or shape: a value at each position that has one. Suits a board that
- * grows as tiles or cards are laid, and a fixed board of any shape.
+ * A grid of hexes or squares with no fixed size or shape, holding a value at some of its positions. It suits a board
+ * that grows as tiles or cards are laid, as well as a fixed board of any shape.
  * <p>
- * The values must be immutable: a copy of the grid shares them, so copying is cheap and still deep. To change a
- * position, set a new value there.
+ * The values must be immutable, because a copy of the grid shares them. To change a position, set a new value there.
  * <p>
- * A grid made for a number of players is partially observable: each position can be hidden from each player. Every
- * position starts visible to everyone, whether or not it holds a value.
- * <p>
- * The values that are Components are the grid's contained components.
+ * A grid made with a number of players is partially observable, and each position can be hidden from each player.
+ * Every position starts visible to everyone, whether or not it holds a value.
  */
 public class SparseGrid<C extends GridCoord<C>, T> extends Component implements IComponentContainer<Component> {
 
     // the extra room on each side when the grid first takes a position
     private static final int MARGIN = 4;
 
-    // the values and their positions in arrays over the rectangle of (first, second) from (minFirst, minSecond),
-    // width by height; null where a position has no value
+    // values and positions cover a rectangle of width by height positions, row by row from (minFirst, minSecond).
+    // Both are null where a position has no value.
     private Object[] values = new Object[0], positions = new Object[0];
     private int minFirst, minSecond, width, height;
     private int size;
@@ -71,7 +68,7 @@ public class SparseGrid<C extends GridCoord<C>, T> extends Component implements 
     }
 
     /**
-     * The value at the position, or null if it has none.
+     * The value at the position (null if it has none)
      */
     @SuppressWarnings("unchecked")
     public T get(C pos) {
@@ -80,7 +77,7 @@ public class SparseGrid<C extends GridCoord<C>, T> extends Component implements 
     }
 
     /**
-     * Puts the value at the position, or takes away the value there if it is null.
+     * Puts the value at the position. A null value removes the one there.
      */
     public void set(C pos, T value) {
         if (value == null) {
@@ -159,14 +156,14 @@ public class SparseGrid<C extends GridCoord<C>, T> extends Component implements 
     }
 
     /**
-     * The positions with values, in order.
+     * The positions with values, row by row.
      */
     public Set<C> positions() {
         return asMap().keySet();
     }
 
     /**
-     * The positions with values, in order.
+     * The positions with values, row by row.
      */
     @SuppressWarnings("unchecked")
     public List<C> sortedPositions() {
@@ -179,7 +176,7 @@ public class SparseGrid<C extends GridCoord<C>, T> extends Component implements 
     }
 
     /**
-     * A read-only view of the values by position, in order of position.
+     * A read-only view of the values by position, row by row.
      */
     public Map<C, T> asMap() {
         if (view == null)

@@ -50,7 +50,7 @@ public class HexVertexAndSideTest {
 
     @Test
     public void theStandardCatanBoardHas54VerticesAnd72Sides() {
-        // the 19 land hexes of the base game: 54 intersections and 72 paths
+        // the 19 land hexes of the base game have 54 intersections and 72 paths
         Set<HexVertex> vertices = new HashSet<>();
         Set<HexSide> sides = new HashSet<>();
         for (HexCoord h : HexCoord.hexagon(2))

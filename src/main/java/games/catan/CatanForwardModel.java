@@ -311,7 +311,7 @@ public class CatanForwardModel extends StandardForwardModel {
         Collections.shuffle(tileList, toUse);
         Collections.shuffle(numberList, toUse);
 
-        // land within the radius of the centre, ringed by sea
+        // land tiles, inside a ring of sea tiles at distance radius from the centre
         int radius = params.n_tiles_per_row / 2;
         SparseGrid<HexCoord, CatanTile> board = new SparseGrid<>("Board");
         for (HexCoord hex : HexCoord.hexagon(radius)) {
@@ -352,8 +352,8 @@ public class CatanForwardModel extends StandardForwardModel {
             vertexIDs.put(tile.hex, ids);
         }
 
-        // A road along each side of a land tile other than the desert, from one of its vertices to the next. The
-        // tile across the side, whatever it is, shares it
+        // A road along each side of each land tile other than the desert, joining the buildings at the two ends of
+        // the side. The tile across the side (land or sea) shares the road
         Map<HexSide, Integer> roads = new HashMap<>();
         for (CatanTile tile : tiles) {
             if (tile.getTileType() == CatanTile.TileType.DESERT || tile.getTileType() == CatanTile.TileType.SEA)
@@ -391,7 +391,7 @@ public class CatanForwardModel extends StandardForwardModel {
         Random toUse = cp.hexShuffleSeed > -1 ? new Random(cp.hexShuffleSeed * 2L) : rnd;
         Collections.shuffle(harbors, toUse);
 
-        // on every other tile of the ring of sea, at its two vertices facing the land
+        // a harbour on every other tile of the ring of sea, at the two vertices of the tile that face the land
         int radius = cp.n_tiles_per_row / 2;
         List<HexCoord> ring = HexCoord.ORIGIN.ring(radius);
         for (int k = 0; k < ring.size() && !harbors.isEmpty(); k += 2) {
