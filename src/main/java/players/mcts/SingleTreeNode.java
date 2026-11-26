@@ -284,22 +284,6 @@ public class SingleTreeNode {
             // if, like MAST, the actionHeuristic is dynamic, then this should be set to a lower value as estimates may
             // change over the course of the search. Setting it to 1 will update it on every visit; but possibly
             // at a high additional computational cost.
-            if (params.actionHeuristic != IActionHeuristic.nullReturn) {
-                if (pds.actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
-                    // in this case we initialise all action values
-                    double[] heuristicScores = params.actionHeuristic.evaluateAllActions(pds.actionsFromOpenLoopState, actionState);
-                    // no noise for a NullActionHeuristic, so that a search without one draws no extra random numbers
-                    boolean tieBreak = !(params.actionHeuristic instanceof NullActionHeuristic);
-                    for (int i = 0; i < pds.actionsFromOpenLoopState.size(); i++) {
-                        pds.actionValueEstimates.put(pds.actionsFromOpenLoopState.get(i),
-                                heuristicScores[i] + (tieBreak ? rnd.nextDouble() * 0.00001 : 0.0));
-                    }
-                } else {
-                    // we just initialise the new actions
-                    for (AbstractAction action : pds.actionsFromOpenLoopState) {
-                        if (!pds.actionValueEstimates.containsKey(action)) {
-                            pds.actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState, pds.actionsFromOpenLoopState));
-                        }
             if (pds.actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                 // in this case we initialise all action values
                 double[] heuristicScores = params.actionHeuristic.evaluateAllActions(pds.actionsFromOpenLoopState, actionState);

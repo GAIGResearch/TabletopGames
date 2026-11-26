@@ -6,7 +6,7 @@ import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.components.Creature;
-import games.ventlife.components.Hex;
+import core.components.grid.HexCoord;
 import games.ventlife.components.Species;
 import games.ventlife.components.Terrain;
 
@@ -82,7 +82,7 @@ public class VentlifeHeuristic extends TunableParameters<VentlifeHeuristic> impl
         double oppExp = oppExposure < 0 ? exposure : oppExposure;
         double oppR = oppRisk < 0 ? risk : oppRisk;
         if (exposure != 0 || oppExp != 0 || risk != 0 || oppR != 0) {
-            Map<Hex, Integer> exposedPositions = VentlifeScorer.exposedPositions(state);
+            Map<HexCoord, Integer> exposedPositions = VentlifeScorer.exposedPositions(state);
             if (exposure != 0 || oppExp != 0) {
                 double scale = 1.0;
                 if (endScaling) {
@@ -107,13 +107,13 @@ public class VentlifeHeuristic extends TunableParameters<VentlifeHeuristic> impl
     }
 
     private void addFishSeeds(VentlifeGameState state, double[] adjusted) {
-        Map<Hex, Creature> creatures = state.getCreatures();
-        for (Map.Entry<Hex, Creature> e : creatures.entrySet()) {
+        Map<HexCoord, Creature> creatures = state.getCreatures();
+        for (Map.Entry<HexCoord, Creature> e : creatures.entrySet()) {
             Creature c = e.getValue();
             if (c.species() != Species.EELPOUT_FISH || state.getSupply(c.owner(), Species.EELPOUT_FISH) == 0)
                 continue;
             boolean alone = true, room = false;
-            for (Hex nb : e.getKey().neighbours()) {
+            for (HexCoord nb : e.getKey().neighbours()) {
                 Creature other = creatures.get(nb);
                 if (other != null) {
                     if (other.species() == Species.EELPOUT_FISH && other.owner() == c.owner()) {

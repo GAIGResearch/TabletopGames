@@ -229,14 +229,14 @@ public class CatanParameters extends TunableParameters {
         retValue.n_settlements_setup = n_settlements_setup;
         retValue.nResourcesYoP = nResourcesYoP;
         retValue.nRoadsRB = nRoadsRB;
-        retValue.buildingValue = new HashMap<>(buildingValue);
-        retValue.nProduction = new HashMap<>(nProduction);
+        retValue.buildingValue = new LinkedHashMap<>(buildingValue);
+        retValue.nProduction = new LinkedHashMap<>(nProduction);
         retValue.tileCounts = new EnumMap<>(tileCounts);
-        retValue.numberTokens = new HashMap<>(numberTokens);
-        retValue.productMapping = new HashMap<>(productMapping);
-        retValue.costMapping = new HashMap<>(costMapping);
-        retValue.tokenCounts = new HashMap<>(tokenCounts);
-        retValue.developmentCardCount = new HashMap<>(developmentCardCount);
+        retValue.numberTokens = new LinkedHashMap<>(numberTokens);
+        retValue.productMapping = new LinkedHashMap<>(productMapping);
+        retValue.costMapping = new LinkedHashMap<>(costMapping);
+        retValue.tokenCounts = new LinkedHashMap<>(tokenCounts);
+        retValue.developmentCardCount = new LinkedHashMap<>(developmentCardCount);
         retValue.harborCount = new EnumMap<>(harborCount);
         return retValue;
     }

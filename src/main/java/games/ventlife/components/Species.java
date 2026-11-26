@@ -4,6 +4,7 @@ import core.components.grid.GridCoord;
 import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeParameters;
+import games.ventlife.VentlifeUtils;
 
 import java.util.*;
 
@@ -174,33 +175,22 @@ public enum Species {
      * The player's score for their Yeti Crabs on the Elevated Plateaus.
      */
     private static int plateauScore(VentlifeGameState state, int player) {
-        // an Elevated Plateau is a connected group of covered positions of one level, 2 or more
-        Map<Integer, Set<HexCoord>> byLevel = new HashMap<>();
-        for (Map.Entry<HexCoord, HexCell> e : state.getField().entrySet())
-            if (e.getValue().level() >= 2)
-                byLevel.computeIfAbsent(e.getValue().level(), k -> new HashSet<>()).add(e.getKey());
         int score = 0;
-        for (Set<HexCoord> sameLevel : byLevel.values())
-            for (Set<HexCoord> plateau : GridCoord.connectedGroups(sameLevel)) {
-                int[] crabs = new int[state.getNPlayers()];
-                for (HexCoord h : plateau) {
-                    Creature c = state.getCreature(h);
-                    if (c != null && c.species() == YETI_CRAB)
-                        crabs[c.owner()] += c.count();
-                }
-                if (crabs[player] == 0)
-                    continue;
-                int most = Arrays.stream(crabs).max().orElse(0);
-                long nMost = Arrays.stream(crabs).filter(n -> n == most).count();
-                // the most Crabs score the size; the second most half of it, rounded down, unless the most is tied
-                if (crabs[player] == most)
-                    score += plateau.size();
-                else if (nMost == 1) {
-                    int second = Arrays.stream(crabs).filter(n -> n < most).max().orElse(0);
-                    if (crabs[player] == second)
-                        score += plateau.size() / 2;
-                }
+        for (Set<HexCoord> plateau : VentlifeUtils.plateaus(state)) {
+            int[] crabs = VentlifeUtils.crabsOn(state, plateau);
+            if (crabs[player] == 0)
+                continue;
+            int most = Arrays.stream(crabs).max().orElse(0);
+            long nMost = Arrays.stream(crabs).filter(n -> n == most).count();
+            // the most Crabs score the size; the second most half of it, rounded down, unless the most is tied
+            if (crabs[player] == most)
+                score += plateau.size();
+            else if (nMost == 1) {
+                int second = Arrays.stream(crabs).filter(n -> n < most).max().orElse(0);
+                if (crabs[player] == second)
+                    score += plateau.size() / 2;
             }
+        }
         return score;
     }
 

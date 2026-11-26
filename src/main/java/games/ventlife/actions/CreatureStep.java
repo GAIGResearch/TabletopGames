@@ -40,7 +40,7 @@ public class CreatureStep implements IExtendedSequence {
     public boolean hasPlacement(VentlifeGameState state) {
         for (Species s : state.getSpeciesInPlay())
             if (state.getSupply(player, s) > 0)
-                for (Hex h : state.getField().keySet())
+                for (HexCoord h : state.getField().keySet())
                     if (s.canPlace(state, player, h))
                         return true;
         return false;

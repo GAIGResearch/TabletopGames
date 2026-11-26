@@ -1,5 +1,7 @@
 package games.ventlife.features;
 
+import core.components.grid.GridCoord;
+import core.components.grid.HexCoord;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import games.ventlife.VentlifeGameState;
@@ -40,14 +42,14 @@ public class VentlifeStateFeatures implements IStateFeatureVector {
         // creatures
         int[] onField = new int[state.getNPlayers()];
         Set<Species> present = EnumSet.noneOf(Species.class);
-        Set<Hex> fish = new HashSet<>();
+        Set<HexCoord> fish = new HashSet<>();
         int exposed = 0, heightScorers = 0, heightScorerLevels = 0;
-        for (Map.Entry<Hex, Creature> e : state.getCreatures().entrySet()) {
+        for (Map.Entry<HexCoord, Creature> e : state.getCreatures().entrySet()) {
             Creature c = e.getValue();
             onField[c.owner()] += c.count();
             if (c.owner() != playerID)
                 continue;
-            Hex hex = e.getKey();
+            HexCoord hex = e.getKey();
             present.add(c.species());
             if (VentlifeUtils.isExposed(state, hex, c.species()))
                 exposed += c.count();
@@ -72,8 +74,8 @@ public class VentlifeStateFeatures implements IStateFeatureVector {
         retValue[10] = heightScorers == 0 ? 0 : (double) heightScorerLevels / heightScorers;
 
         // the field
-        for (Map.Entry<Hex, HexCell> e : state.getField().entrySet()) {
-            Hex hex = e.getKey();
+        for (Map.Entry<HexCoord, HexCell> e : state.getField().entrySet()) {
+            HexCoord hex = e.getKey();
             int level = e.getValue().level();
             if (!state.getCreatures().containsKey(hex))
                 retValue[11]++;
@@ -86,12 +88,12 @@ public class VentlifeStateFeatures implements IStateFeatureVector {
         retValue[12] = state.getField().size();
 
         // groups
-        for (Set<Hex> plateau : VentlifeUtils.plateaus(state)) {
+        for (Set<HexCoord> plateau : VentlifeUtils.plateaus(state)) {
             int[] crabs = VentlifeUtils.crabsOn(state, plateau);
             if (crabs[playerID] > 0 && crabs[playerID] == Arrays.stream(crabs).max().orElse(0))
                 retValue[16]++;
         }
-        for (Set<Hex> shoal : VentlifeUtils.connectedGroups(fish))
+        for (Set<HexCoord> shoal : GridCoord.connectedGroups(fish))
             retValue[17] = Math.max(retValue[17], shoal.size());
 
         return retValue;

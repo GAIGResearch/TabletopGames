@@ -1,5 +1,6 @@
 package games.ventlife.ai;
 
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeParameters;
 import games.ventlife.VentlifeUtils;
@@ -21,14 +22,14 @@ public class VentlifeScorer {
      * The positions a plateau tile could now cover: bit 1 if covered by one of the tile's terrains, bit 2 if by its
      * Black Smoker (which Tube Worms climb onto rather than being displaced).
      */
-    public static Map<Hex, Integer> exposedPositions(VentlifeGameState state) {
-        Map<Hex, Integer> retValue = new HashMap<>();
-        for (Map.Entry<Hex, HexCell> e : state.getField().entrySet()) {
+    public static Map<HexCoord, Integer> exposedPositions(VentlifeGameState state) {
+        Map<HexCoord, Integer> retValue = new HashMap<>();
+        for (Map.Entry<HexCoord, HexCell> e : state.getField().entrySet()) {
             HexCell under = e.getValue();
             if (under.terrain() != Terrain.BLACK_SMOKER)
                 continue;
             // as VentlifeUtils.isPlateauPlacement, for the six orientations at once
-            Hex smoker = e.getKey();
+            HexCoord smoker = e.getKey();
             HexCell[] around = new HexCell[6];
             boolean[] ok = new boolean[6];
             for (int d = 0; d < 6; d++) {
@@ -60,24 +61,24 @@ public class VentlifeScorer {
         return exposedValue(state, exposedPositions(state), moveFactor, crabValue);
     }
 
-    public static double[] exposedValue(VentlifeGameState state, Map<Hex, Integer> exposed, double moveFactor,
+    public static double[] exposedValue(VentlifeGameState state, Map<HexCoord, Integer> exposed, double moveFactor,
                                         double crabValue) {
         double[] retValue = new double[state.getNPlayers()];
         if (exposed.isEmpty()) return retValue;
         VentlifeParameters params = state.getParams();
-        Map<Hex, Creature> creatures = state.getCreatures();
-        for (Map.Entry<Hex, Integer> e : exposed.entrySet()) {
+        Map<HexCoord, Creature> creatures = state.getCreatures();
+        for (Map.Entry<HexCoord, Integer> e : exposed.entrySet()) {
             Creature c = creatures.get(e.getKey());
             if (c == null) continue;
             if (c.species() == Species.TUBE_WORM && e.getValue() == 2) continue;
-            Hex hex = e.getKey();
+            HexCoord hex = e.getKey();
             double loss = switch (c.species()) {
                 case TUBE_WORM -> c.count() * state.getLevel(hex);
                 case VENT_SPONGE -> params.spongePointsPerTerrain * adjacentTerrainCount(state, hex);
                 case YETI_CRAB -> moveFactor * crabValue;
                 case EELPOUT_FISH -> {
                     int nb = 0;
-                    for (Hex h : hex.neighbours()) {
+                    for (HexCoord h : hex.neighbours()) {
                         Creature f = creatures.get(h);
                         if (f != null && f.species() == Species.EELPOUT_FISH && f.owner() == c.owner()) nb++;
                     }
@@ -95,11 +96,11 @@ public class VentlifeScorer {
      * CoverageModel probability that it is covered before the end of the game times what it would lose (as in
      * exposedValue).
      */
-    public static double[] riskValue(VentlifeGameState state, Map<Hex, Integer> exposed, double moveFactor,
+    public static double[] riskValue(VentlifeGameState state, Map<HexCoord, Integer> exposed, double moveFactor,
                                      double crabValue, int model) {
         double[] retValue = new double[state.getNPlayers()];
         int tilesLeft = CoverageModel.tilesLeft(state);
-        for (Map.Entry<Hex, Creature> e : state.getCreatures().entrySet()) {
+        for (Map.Entry<HexCoord, Creature> e : state.getCreatures().entrySet()) {
             Creature c = e.getValue();
             double loss = lossIfCovered(state, e.getKey(), c, moveFactor, crabValue);
             if (loss != 0)
@@ -112,12 +113,12 @@ public class VentlifeScorer {
      * What a creature would lose if covered: the whole score of Tube Worms and Vent Sponges (which return to supply),
      * moveFactor times the score of the others (a Fish counts its share of its shoal, a Crab crabValue).
      */
-    static double lossIfCovered(VentlifeGameState state, Hex hex, Creature c, double moveFactor, double crabValue) {
+    static double lossIfCovered(VentlifeGameState state, HexCoord hex, Creature c, double moveFactor, double crabValue) {
         return switch (c.species()) {
             case TUBE_WORM, VENT_SPONGE -> creatureScore(state, hex, c);
             case YETI_CRAB -> moveFactor * crabValue;
             case EELPOUT_FISH -> {
-                for (Hex h : hex.neighbours()) {
+                for (HexCoord h : hex.neighbours()) {
                     Creature f = state.getCreature(h);
                     if (f != null && f.species() == Species.EELPOUT_FISH && f.owner() == c.owner())
                         yield moveFactor * state.getParams().shoalPoints;
@@ -131,7 +132,7 @@ public class VentlifeScorer {
     /**
      * The score of one creature of a species scored on its own (not Fish or Crabs).
      */
-    static int creatureScore(VentlifeGameState state, Hex hex, Creature c) {
+    static int creatureScore(VentlifeGameState state, HexCoord hex, Creature c) {
         VentlifeParameters params = state.getParams();
         switch (c.species()) {
             case TUBE_WORM:
@@ -140,7 +141,7 @@ public class VentlifeScorer {
                 return params.spongePointsPerTerrain * adjacentTerrainCount(state, hex);
             case VENT_SHRIMP: {
                 boolean vents = false, mat = false;
-                for (Hex nb : hex.neighbours()) {
+                for (HexCoord nb : hex.neighbours()) {
                     HexCell cell = state.getCell(nb);
                     if (cell == null) continue;
                     if (cell.terrain() == Terrain.DIFFUSE_VENTS) vents = true;
@@ -150,7 +151,7 @@ public class VentlifeScorer {
             }
             case VOLCANO_SNAIL: {
                 int level = state.getLevel(hex), edges = 0;
-                for (Hex nb : hex.neighbours()) {
+                for (HexCoord nb : hex.neighbours()) {
                     HexCell cell = state.getCell(nb);
                     if (cell != null && cell.level() != level)
                         edges++;
@@ -159,7 +160,7 @@ public class VentlifeScorer {
             }
             case OCTOPUS: {
                 int mask = 0;
-                for (Hex nb : hex.neighbours()) {
+                for (HexCoord nb : hex.neighbours()) {
                     Creature other = state.getCreature(nb);
                     if (other != null && other.species() != Species.OCTOPUS)
                         mask |= 1 << other.species().ordinal();
@@ -176,18 +177,18 @@ public class VentlifeScorer {
         int[] retValue = new int[n];
         VentlifeParameters params = state.getParams();
         List<Species> inPlay = state.getSpeciesInPlay();
-        Map<Hex, Creature> creatures = state.getCreatures();
+        Map<HexCoord, Creature> creatures = state.getCreatures();
         boolean fishInPlay = inPlay.contains(Species.EELPOUT_FISH);
-        Map<Hex, Creature> fish = fishInPlay ? new HashMap<>() : null;
-        for (Map.Entry<Hex, Creature> e : creatures.entrySet()) {
+        Map<HexCoord, Creature> fish = fishInPlay ? new HashMap<>() : null;
+        for (Map.Entry<HexCoord, Creature> e : creatures.entrySet()) {
             Creature c = e.getValue();
-            Hex hex = e.getKey();
+            HexCoord hex = e.getKey();
             switch (c.species()) {
                 case TUBE_WORM -> retValue[c.owner()] += c.count() * state.getLevel(hex);
                 case VENT_SPONGE -> retValue[c.owner()] += params.spongePointsPerTerrain * adjacentTerrainCount(state, hex);
                 case VENT_SHRIMP -> {
                     boolean vents = false, mat = false;
-                    for (Hex nb : hex.neighbours()) {
+                    for (HexCoord nb : hex.neighbours()) {
                         HexCell cell = state.getCell(nb);
                         if (cell == null) continue;
                         if (cell.terrain() == Terrain.DIFFUSE_VENTS) vents = true;
@@ -198,7 +199,7 @@ public class VentlifeScorer {
                 }
                 case VOLCANO_SNAIL -> {
                     int level = state.getLevel(hex), edges = 0;
-                    for (Hex nb : hex.neighbours()) {
+                    for (HexCoord nb : hex.neighbours()) {
                         HexCell cell = state.getCell(nb);
                         if (cell != null && cell.level() != level)
                             edges++;
@@ -207,7 +208,7 @@ public class VentlifeScorer {
                 }
                 case OCTOPUS -> {
                     int mask = 0;
-                    for (Hex nb : hex.neighbours()) {
+                    for (HexCoord nb : hex.neighbours()) {
                         Creature other = creatures.get(nb);
                         if (other != null && other.species() != Species.OCTOPUS)
                             mask |= 1 << other.species().ordinal();
@@ -222,16 +223,16 @@ public class VentlifeScorer {
         }
         if (fishInPlay && !fish.isEmpty()) {
             // shoals: connected Fish of one owner
-            Set<Hex> seen = new HashSet<>();
-            ArrayDeque<Hex> open = new ArrayDeque<>();
-            for (Map.Entry<Hex, Creature> e : fish.entrySet()) {
+            Set<HexCoord> seen = new HashSet<>();
+            ArrayDeque<HexCoord> open = new ArrayDeque<>();
+            for (Map.Entry<HexCoord, Creature> e : fish.entrySet()) {
                 if (!seen.add(e.getKey())) continue;
                 int owner = e.getValue().owner(), size = 0;
                 open.push(e.getKey());
                 while (!open.isEmpty()) {
-                    Hex h = open.pop();
+                    HexCoord h = open.pop();
                     size++;
-                    for (Hex nb : h.neighbours()) {
+                    for (HexCoord nb : h.neighbours()) {
                         Creature f = fish.get(nb);
                         if (f != null && f.owner() == owner && seen.add(nb))
                             open.push(nb);
@@ -253,7 +254,7 @@ public class VentlifeScorer {
                 break;
             }
         if (!anyCrab) return;
-        for (Set<Hex> plateau : VentlifeUtils.plateaus(state)) {
+        for (Set<HexCoord> plateau : VentlifeUtils.plateaus(state)) {
             int[] crabs = VentlifeUtils.crabsOn(state, plateau);
             int most = 0;
             for (int c : crabs) most = Math.max(most, c);
@@ -273,9 +274,9 @@ public class VentlifeScorer {
         }
     }
 
-    static int adjacentTerrainCount(VentlifeGameState state, Hex hex) {
+    static int adjacentTerrainCount(VentlifeGameState state, HexCoord hex) {
         int mask = 0;
-        for (Hex nb : hex.neighbours()) {
+        for (HexCoord nb : hex.neighbours()) {
             HexCell cell = state.getCell(nb);
             if (cell != null)
                 mask |= 1 << cell.terrain().ordinal();

@@ -1,5 +1,6 @@
 package games.ventlife.ai;
 
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeParameters;
 import games.ventlife.components.*;
@@ -11,25 +12,25 @@ import games.ventlife.components.*;
  */
 interface Board {
 
-    HexCell cell(Hex hex);
+    HexCell cell(HexCoord hex);
 
-    Creature creature(Hex hex);
+    Creature creature(HexCoord hex);
 
     static Board of(VentlifeGameState state) {
         return new Board() {
             @Override
-            public HexCell cell(Hex hex) {
+            public HexCell cell(HexCoord hex) {
                 return state.getCell(hex);
             }
 
             @Override
-            public Creature creature(Hex hex) {
+            public Creature creature(HexCoord hex) {
                 return state.getCreature(hex);
             }
         };
     }
 
-    default int level(Hex hex) {
+    default int level(HexCoord hex) {
         HexCell c = cell(hex);
         return c == null ? 0 : c.level();
     }
@@ -37,13 +38,13 @@ interface Board {
     /**
      * The score of one creature of a species scored on its own (not Fish or Crabs), as VentlifeScorer.creatureScore.
      */
-    static int creatureScore(Board b, VentlifeParameters params, Hex hex, Creature c) {
+    static int creatureScore(Board b, VentlifeParameters params, HexCoord hex, Creature c) {
         switch (c.species()) {
             case TUBE_WORM:
                 return c.count() * b.level(hex);
             case VENT_SPONGE: {
                 int mask = 0;
-                for (Hex nb : hex.neighbours()) {
+                for (HexCoord nb : hex.neighbours()) {
                     HexCell cell = b.cell(nb);
                     if (cell != null) mask |= 1 << cell.terrain().ordinal();
                 }
@@ -51,7 +52,7 @@ interface Board {
             }
             case VENT_SHRIMP: {
                 boolean vents = false, mat = false;
-                for (Hex nb : hex.neighbours()) {
+                for (HexCoord nb : hex.neighbours()) {
                     HexCell cell = b.cell(nb);
                     if (cell == null) continue;
                     if (cell.terrain() == Terrain.DIFFUSE_VENTS) vents = true;
@@ -61,7 +62,7 @@ interface Board {
             }
             case VOLCANO_SNAIL: {
                 int level = b.level(hex), edges = 0;
-                for (Hex nb : hex.neighbours()) {
+                for (HexCoord nb : hex.neighbours()) {
                     HexCell cell = b.cell(nb);
                     if (cell != null && cell.level() != level) edges++;
                 }
@@ -69,7 +70,7 @@ interface Board {
             }
             case OCTOPUS: {
                 int mask = 0;
-                for (Hex nb : hex.neighbours()) {
+                for (HexCoord nb : hex.neighbours()) {
                     Creature other = b.creature(nb);
                     if (other != null && other.species() != Species.OCTOPUS)
                         mask |= 1 << other.species().ordinal();
@@ -84,13 +85,13 @@ interface Board {
     /**
      * What a creature would lose if covered, as VentlifeScorer.lossIfCovered.
      */
-    static double lossIfCovered(Board b, VentlifeParameters params, Hex hex, Creature c, double moveFactor,
+    static double lossIfCovered(Board b, VentlifeParameters params, HexCoord hex, Creature c, double moveFactor,
                                 double crabValue) {
         return switch (c.species()) {
             case TUBE_WORM, VENT_SPONGE -> creatureScore(b, params, hex, c);
             case YETI_CRAB -> moveFactor * crabValue;
             case EELPOUT_FISH -> {
-                for (Hex h : hex.neighbours()) {
+                for (HexCoord h : hex.neighbours()) {
                     Creature f = b.creature(h);
                     if (f != null && f.species() == Species.EELPOUT_FISH && f.owner() == c.owner())
                         yield moveFactor * params.shoalPoints;
@@ -105,7 +106,7 @@ interface Board {
      * How a plateau tile could now cover the position, as in VentlifeScorer.exposedPositions: bit 1 by one of its
      * terrains, bit 2 by its Black Smoker; 0 if not at all.
      */
-    static int exposedBits(Board b, Hex hex) {
+    static int exposedBits(Board b, HexCoord hex) {
         HexCell own = b.cell(hex);
         if (own == null) return 0;
         int level = own.level(), bits = 0;
@@ -114,7 +115,7 @@ interface Board {
             for (int o = 0; o < 6 && (bits & 2) == 0; o++)
                 if (plateau(b, hex, own, o)) bits |= 2;
         for (int d = 0; d < 6; d++) {
-            Hex smoker = hex.neighbour(d);
+            HexCoord smoker = hex.neighbour(d);
             HexCell s = b.cell(smoker);
             if (s == null || s.terrain() != Terrain.BLACK_SMOKER || s.level() != level) continue;
             // the position is in direction (d + 3) from the Smoker: the tile's right terrain for orientation d + 3,
@@ -128,7 +129,7 @@ interface Board {
         return bits;
     }
 
-    private static boolean plateau(Board b, Hex smoker, HexCell under, int o) {
+    private static boolean plateau(Board b, HexCoord smoker, HexCell under, int o) {
         HexCell right = b.cell(smoker.neighbour(o)), left = b.cell(smoker.neighbour((o + 1) % 6));
         if (right == null || left == null || right.level() != under.level() || left.level() != under.level())
             return false;
@@ -138,7 +139,7 @@ interface Board {
     /**
      * The CoverageData features of a creature of the species on the position (ownerMovesNext left 0).
      */
-    static double[] features(Board b, Hex hex, Species species, int exposedBits, int tilesLeft) {
+    static double[] features(Board b, HexCoord hex, Species species, int exposedBits, int tilesLeft) {
         double[] f = new double[CoverageData.FEATURES.length];
         f[0] = exposedBits != 0 && (species != Species.TUBE_WORM || (exposedBits & 1) != 0) ? 1 : 0;
         HexCell own = b.cell(hex);
@@ -146,7 +147,7 @@ interface Board {
         f[1] = level;
         int same = 0, empty = 0, higher = 0, lower = 0, smokers = 0;
         if (own.terrain() == Terrain.BLACK_SMOKER) smokers++;
-        for (Hex nb : hex.neighbours()) {
+        for (HexCoord nb : hex.neighbours()) {
             HexCell c = b.cell(nb);
             if (c == null) {
                 empty++;

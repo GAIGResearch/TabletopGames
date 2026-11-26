@@ -1,7 +1,7 @@
 package games.ventlife.ai;
 
 import games.ventlife.VentlifeGameState;
-import games.ventlife.components.Hex;
+import core.components.grid.HexCoord;
 import games.ventlife.components.Species;
 
 import java.util.Map;
@@ -30,7 +30,7 @@ public class CoverageModel {
     /**
      * The probability for a creature of the species on the hex, given the exposed positions and the tiles left.
      */
-    public static double probability(VentlifeGameState state, Hex hex, Species species, Map<Hex, Integer> exposed,
+    public static double probability(VentlifeGameState state, HexCoord hex, Species species, Map<HexCoord, Integer> exposed,
                                      int tilesLeft, int model) {
         return probability(CoverageData.features(state, hex, species, exposed, tilesLeft), species, model);
     }

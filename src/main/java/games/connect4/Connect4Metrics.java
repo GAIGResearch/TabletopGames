@@ -64,7 +64,7 @@ public class Connect4Metrics implements IMetricsCollection {
             for (int i = 0; i < gs.getWidth(); i++) {
                 int count = 0;
                 for (int j = 0; j < gs.getHeight(); j++) {
-                    if (!gs.gridBoard.getElement(i, j).getComponentName().equals(Connect4Constants.emptyCell)) {
+                    if (gs.gridBoard.getElement(i, j) != null) {
                         count++;
                     }
                 }

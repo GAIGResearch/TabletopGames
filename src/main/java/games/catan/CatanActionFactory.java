@@ -37,7 +37,7 @@ public class CatanActionFactory {
     static List<AbstractAction> getSetupActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         // find possible settlement locations and propose them as actions
-        HashSet<Integer> settlementsAdded = new HashSet<>();
+        HashSet<Integer> settlementsAdded = new LinkedHashSet<>();
         for (CatanTile tile : gs.getTiles()) {
             // where it is legal to place tile then it can be placed from there
             if (!(tile.getTileType().equals(CatanTile.TileType.SEA) ||
@@ -306,7 +306,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (free || gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
-            HashSet<Edge> edgesChecked = new HashSet<>(256);
+            HashSet<Edge> edgesChecked = new LinkedHashSet<>(256);
             for (CatanTile tile : gs.getTiles()) {
                 // Skip sea and desert tiles; we will look at their edges via their neighbours
                 if (tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
@@ -336,7 +336,7 @@ public class CatanActionFactory {
         boolean canBuyCity = gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.City), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.City).isMaximum();
         if (canBuySettlement || canBuyCity) {
-            Set<Building> settlementsAdded = new HashSet<>();
+            Set<Building> settlementsAdded = new LinkedHashSet<>();
             for (CatanTile tile : gs.getTiles()) {
                 // every vertex that can be built on, and so every settlement, touches a resource tile
                 if (tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))

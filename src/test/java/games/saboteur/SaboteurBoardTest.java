@@ -241,7 +241,7 @@ public class SaboteurBoardTest {
         int idx = state.discardDeck.getComponents().indexOf(deadEnd);
         assertTrue(idx >= 0);
         for (int p = 0; p < 4; p++)
-            assertTrue(state.discardDeck.getVisibilityForPlayer(idx, p));
+            assertTrue(state.discardDeck.isVisibleTo(idx, p));
         assertEquals(Set.of(sq(3, 6), sq(2, 7), sq(1, 6), sq(2, 5)), state.pathCardOptions);
     }
 

@@ -84,21 +84,28 @@ public class VentlifeForwardModel extends StandardForwardModel {
                 actions.add(new PlaceTile(tile, HexCoord.ORIGIN, o));
             return actions;
         }
-        // candidate Smoker positions: within two steps of the field (seafloor), or on a Black Smoker (plateau);
-        // sorted, so that equal states list their actions in the same order
-        Set<HexCoord> candidates = new TreeSet<>();
+        // the shore: uncovered positions next to the field. A seafloor tile touches the field along an edge exactly
+        // when one of its hexes is on the shore, so its Smoker is on the shore or next to it
+        Set<HexCoord> shore = new HashSet<>();
+        Set<HexCoord> candidates = new HashSet<>();
         for (Map.Entry<HexCoord, HexCell> e : state.field.asMap().entrySet()) {
             if (e.getValue().terrain() == Terrain.BLACK_SMOKER)
                 candidates.add(e.getKey());
-            for (HexCoord n : e.getKey().neighbours()) {
+            for (HexCoord n : e.getKey().neighbours())
+                if (!state.field.contains(n))
+                    shore.add(n);
+        }
+        for (HexCoord s : shore) {
+            candidates.add(s);
+            for (HexCoord n : s.neighbours())
                 if (!state.field.contains(n))
                     candidates.add(n);
-                for (HexCoord nn : n.neighbours())
-                    if (!state.field.contains(nn))
-                        candidates.add(nn);
-            }
         }
-        for (HexCoord smoker : candidates)
+        // sorted, so that equal states list their actions in the same order
+        List<HexCoord> sorted = new ArrayList<>(candidates);
+        Collections.sort(sorted);
+        for (HexCoord smoker : sorted) {
+            boolean seafloor = !state.field.contains(smoker);
             for (int o = 0; o < 6; o++)
                 if (seafloor ? canPlaceOnSeafloor(state, shore, smoker, o) : VentlifeUtils.isPlateauPlacement(state, smoker, o))
                     actions.add(new PlaceTile(tile, smoker, o));
@@ -106,35 +113,15 @@ public class VentlifeForwardModel extends StandardForwardModel {
         return actions;
     }
 
-    private boolean canPlaceTile(VentlifeGameState state, HexCoord smoker, int orientation) {
-        List<HexCoord> hexes = VentlifeUtils.tileHexes(smoker, orientation);
-        int covered = 0;
-        for (HexCoord h : hexes)
-            if (state.field.contains(h))
-                covered++;
-        if (covered == 0) {
-            // seafloor expansion: touching the field along an edge
-            for (HexCoord h : hexes)
-                for (HexCoord n : h.neighbours())
-                    if (state.field.contains(n))
-                        return true;
+    /**
+     * Whether a tile may go on the seafloor with its (uncovered) Smoker there: its other two hexes uncovered too, and
+     * at least one of the three on the shore.
+     */
+    private boolean canPlaceOnSeafloor(VentlifeGameState state, Set<HexCoord> shore, HexCoord smoker, int orientation) {
+        HexCoord left = smoker.neighbour((orientation + 1) % 6), right = smoker.neighbour(orientation);
+        if (state.field.contains(left) || state.field.contains(right))
             return false;
-        }
-        if (covered < 3)
-            return false;
-        // plateau formation: Smoker on a Black Smoker, all three at one level, over more than one tile
-        HexCell under = state.field.get(smoker);
-        if (under.terrain() != Terrain.BLACK_SMOKER)
-            return false;
-        boolean differentTiles = false;
-        for (HexCoord h : hexes) {
-            HexCell cell = state.field.get(h);
-            if (cell.level() != under.level())
-                return false;
-            if (cell.tileId() != under.tileId())
-                differentTiles = true;
-        }
-        return differentTiles;
+        return shore.contains(smoker) || shore.contains(left) || shore.contains(right);
     }
 
     @Override
