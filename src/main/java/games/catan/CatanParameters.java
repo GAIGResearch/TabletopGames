@@ -10,6 +10,7 @@ import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -64,7 +65,8 @@ public class CatanParameters extends TunableParameters {
         put(Building.Type.City, 2);
     }};
 
-    HashMap<CatanTile.TileType, Integer> tileCounts = new LinkedHashMap<CatanTile.TileType, Integer>() {{
+    // EnumMaps keep the order of enum keys the same in every run (a HashMap's order varies), and so the board layout
+    EnumMap<CatanTile.TileType, Integer> tileCounts = new EnumMap<>(CatanTile.TileType.class) {{
         put(CatanTile.TileType.HILLS, 3);
         put(CatanTile.TileType.FOREST, 4);
         put(CatanTile.TileType.MOUNTAINS, 3);
@@ -165,7 +167,7 @@ public class CatanParameters extends TunableParameters {
         put(CatanCard.CardType.VICTORY_POINT_CARD, 5);
     }};
 
-    public HashMap<Resource, Integer> harborCount = new LinkedHashMap<Resource, Integer>() {{
+    public EnumMap<Resource, Integer> harborCount = new EnumMap<>(Resource.class) {{
         put(Resource.BRICK, 1);
         put(Resource.LUMBER, 1);
         put(Resource.ORE, 1);
@@ -229,13 +231,13 @@ public class CatanParameters extends TunableParameters {
         retValue.nRoadsRB = nRoadsRB;
         retValue.buildingValue = new LinkedHashMap<>(buildingValue);
         retValue.nProduction = new LinkedHashMap<>(nProduction);
-        retValue.tileCounts = new LinkedHashMap<>(tileCounts);
+        retValue.tileCounts = new EnumMap<>(tileCounts);
         retValue.numberTokens = new LinkedHashMap<>(numberTokens);
         retValue.productMapping = new LinkedHashMap<>(productMapping);
         retValue.costMapping = new LinkedHashMap<>(costMapping);
         retValue.tokenCounts = new LinkedHashMap<>(tokenCounts);
         retValue.developmentCardCount = new LinkedHashMap<>(developmentCardCount);
-        retValue.harborCount = new LinkedHashMap<>(harborCount);
+        retValue.harborCount = new EnumMap<>(harborCount);
         return retValue;
     }
 

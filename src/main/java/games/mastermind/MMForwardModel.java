@@ -17,8 +17,8 @@ public class MMForwardModel extends StandardForwardModel {
         MMGameState mmgs = (MMGameState) firstState;
         MMParameters mmp = (MMParameters) mmgs.getGameParameters();
 
-        mmgs.guessBoard = new GridBoard(mmp.boardWidth, mmp.boardHeight, new BoardNode(MMConstants.emptyPeg));
-        mmgs.resultBoard = new GridBoard(mmp.boardWidth, mmp.boardHeight, new BoardNode(MMConstants.emptyPeg));
+        mmgs.guessBoard = new GridBoard(mmp.boardWidth, mmp.boardHeight, "Guess Board");
+        mmgs.resultBoard = new GridBoard(mmp.boardWidth, mmp.boardHeight, "Result Board");
         mmgs.activeRow = 0;
         mmgs.activeCol = 0;
         mmgs.answerCode = mmgs.generateRandomShuffledAnswerCode(mmp.boardWidth, mmgs.getRnd());
@@ -50,7 +50,7 @@ public class MMForwardModel extends StandardForwardModel {
             if (win) {
                 mmgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 0);
                 // Fill the resultBoard's last row with 'correct'
-                for (int i=0; i<mmgs.guessBoard.getWidth(); i++) {
+                for (int i=0; i<mmgs.resultBoard.getWidth(); i++) {
                     mmgs.resultBoard.setElement(i, mmgs.activeRow, MMConstants.resultColours.get(0));
                 }
             } else {
@@ -84,7 +84,8 @@ public class MMForwardModel extends StandardForwardModel {
         boolean gameEnd = true;
 
         for (int i=0; i<mmp.boardWidth; i++) {
-            if (!gameState.guessBoard.getElement(i,gameState.activeRow).getComponentName().equals(gameState.answerCode.get(i).getComponentName())) {
+            BoardNode guess = gameState.guessBoard.getElement(i, gameState.activeRow);
+            if (guess == null || !guess.getComponentName().equals(gameState.answerCode.get(i).getComponentName())) {
                 win = false;
                 gameEnd = false;
                 break;

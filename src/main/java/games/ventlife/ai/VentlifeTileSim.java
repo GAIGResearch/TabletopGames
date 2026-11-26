@@ -1,5 +1,6 @@
 package games.ventlife.ai;
 
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeUtils;
 import games.ventlife.actions.PlaceTile;
@@ -21,7 +22,7 @@ public class VentlifeTileSim {
     private VentlifeTileSim() {
     }
 
-    private record Covered(Creature creature, Hex from, int fromLevel) {
+    private record Covered(Creature creature, HexCoord from, int fromLevel) {
     }
 
     public static VentlifeGameState afterTile(VentlifeGameState state, PlaceTile t) {
@@ -30,12 +31,12 @@ public class VentlifeTileSim {
         s.getHand(placer).remove(t.tile);
         int level = s.getLevel(t.smoker) + 1;
         int tileId = s.takeNextTileId();
-        List<Hex> hexes = VentlifeUtils.tileHexes(t.smoker, t.orientation);
+        List<HexCoord> hexes = VentlifeUtils.tileHexes(t.smoker, t.orientation);
         // the placer's creatures first, then the other players' clockwise; one player's in tile order
         List<Covered> covered = new ArrayList<>();
         for (int k = 0; k < n; k++) {
             int owner = (placer + k) % n;
-            for (Hex h : hexes) {
+            for (HexCoord h : hexes) {
                 Creature c = s.getCreature(h);
                 if (c == null || c.owner() != owner) continue;
                 if (h.equals(t.smoker) && c.species() == Species.TUBE_WORM) continue;
@@ -46,7 +47,7 @@ public class VentlifeTileSim {
         s.setCell(hexes.get(1), new HexCell(t.tile.left, level, tileId));
         s.setCell(hexes.get(2), new HexCell(t.tile.right, level, tileId));
         for (Covered c : covered) {
-            List<Hex> destinations = c.creature.species().destinations(s, c.from, c.fromLevel, tileId);
+            List<HexCoord> destinations = c.creature.species().destinations(s, c.from, c.fromLevel, tileId);
             if (destinations.size() > 1)
                 break;
             if (destinations.isEmpty())

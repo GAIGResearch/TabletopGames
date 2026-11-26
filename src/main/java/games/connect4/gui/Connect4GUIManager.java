@@ -28,11 +28,11 @@ public class Connect4GUIManager extends AbstractGUIManager {
         if (game == null) return;
 
         Connect4GameState gameState = (Connect4GameState) game.getGameState();
-        view = new Connect4BoardView(gameState.getGridBoard());
+        view = new Connect4BoardView(gameState.getGridBoard(), gameState.getWidth(), gameState.getHeight());
 
         // Set width/height of display
-        this.width = Math.max(defaultDisplayWidth, defaultItemSize * gameState.getGridBoard().getWidth());
-        this.height = defaultItemSize * gameState.getGridBoard().getHeight();
+        this.width = Math.max(defaultDisplayWidth, defaultItemSize * gameState.getWidth());
+        this.height = defaultItemSize * gameState.getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Connect 4", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},

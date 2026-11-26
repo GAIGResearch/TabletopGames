@@ -1,5 +1,6 @@
 package games.ventlife.ai;
 
+import core.components.grid.HexCoord;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -30,10 +31,10 @@ public class CoverageData {
     public static final String[] FEATURES = {"exposed", "level", "edge", "sameLevelNbrs", "emptyNbrs", "higherNbrs",
             "lowerNbrs", "smokersNear", "tilesLeft", "ownerMovesNext"};
 
-    private record Sample(int tick, Hex hex, Species species, int owner, double[] features, double loss) {
+    private record Sample(int tick, HexCoord hex, Species species, int owner, double[] features, double loss) {
     }
 
-    public static double[] features(VentlifeGameState state, Hex hex, Species species, Map<Hex, Integer> exposed,
+    public static double[] features(VentlifeGameState state, HexCoord hex, Species species, Map<HexCoord, Integer> exposed,
                                     int tilesLeft) {
         double[] f = new double[FEATURES.length];
         Integer bits = exposed.get(hex);
@@ -43,7 +44,7 @@ public class CoverageData {
         int same = 0, empty = 0, higher = 0, lower = 0, smokers = 0;
         HexCell own = state.getCell(hex);
         if (own.terrain() == Terrain.BLACK_SMOKER) smokers++;
-        for (Hex nb : hex.neighbours()) {
+        for (HexCoord nb : hex.neighbours()) {
             HexCell c = state.getCell(nb);
             if (c == null) {
                 empty++;
@@ -86,7 +87,7 @@ public class CoverageData {
                 List<Sample> samples = new ArrayList<>();
                 // the tick and the covered positions of each tile placed, in order
                 List<int[]> tileTicks = new ArrayList<>();
-                List<List<Hex>> tileHexes = new ArrayList<>();
+                List<List<HexCoord>> tileHexes = new ArrayList<>();
                 while (state.isNotTerminal()) {
                     int p = state.getCurrentPlayer();
                     boolean tileDecision = state.getGamePhase() == VentlifeGameState.Phase.PLACE_TILE
@@ -94,8 +95,8 @@ public class CoverageData {
                     if (tileDecision) {
                         int tilesLeft = state.getDrawDeck().getSize();
                         for (int q = 0; q < 4; q++) tilesLeft += state.getHand(q).getSize();
-                        Map<Hex, Integer> exposed = VentlifeScorer.exposedPositions(state);
-                        for (Map.Entry<Hex, Creature> e : state.getCreatures().entrySet()) {
+                        Map<HexCoord, Integer> exposed = VentlifeScorer.exposedPositions(state);
+                        for (Map.Entry<HexCoord, Creature> e : state.getCreatures().entrySet()) {
                             Creature c = e.getValue();
                             double[] f = features(state, e.getKey(), c.species(), exposed, tilesLeft);
                             f[9] = c.owner() == p ? 1 : 0;

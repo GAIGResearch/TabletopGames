@@ -2,6 +2,7 @@ package games.catan.actions.dev;
 
 import core.AbstractGameState;
 import core.components.Deck;
+import core.components.grid.HexCoord;
 import games.catan.CatanGameState;
 import games.catan.actions.robber.MoveRobberAndSteal;
 import games.catan.components.CatanCard;
@@ -10,8 +11,8 @@ import java.util.Optional;
 
 public class PlayKnightCard extends MoveRobberAndSteal {
 
-    public PlayKnightCard(int x, int y, int player, int targetPlayer) {
-        super(x, y, player, targetPlayer);
+    public PlayKnightCard(HexCoord hex, int player, int targetPlayer) {
+        super(hex, player, targetPlayer);
     }
 
     @Override

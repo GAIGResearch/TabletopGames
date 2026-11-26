@@ -7,7 +7,7 @@ import core.actions.AbstractAction;
 import games.GameType;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeUtils;
-import games.ventlife.components.Hex;
+import core.components.grid.HexCoord;
 import games.ventlife.components.HexCell;
 import games.ventlife.components.Terrain;
 import org.junit.Test;
@@ -20,13 +20,13 @@ import static org.junit.Assert.assertEquals;
 public class VentlifeExposureTest {
 
     // the definition, by way of VentlifeUtils.isPlateauPlacement
-    private static Map<Hex, Integer> reference(VentlifeGameState state) {
-        Map<Hex, Integer> retValue = new HashMap<>();
-        for (Map.Entry<Hex, HexCell> e : state.getField().entrySet()) {
+    private static Map<HexCoord, Integer> reference(VentlifeGameState state) {
+        Map<HexCoord, Integer> retValue = new HashMap<>();
+        for (Map.Entry<HexCoord, HexCell> e : state.getField().entrySet()) {
             if (e.getValue().terrain() != Terrain.BLACK_SMOKER) continue;
             for (int o = 0; o < 6; o++)
                 if (VentlifeUtils.isPlateauPlacement(state, e.getKey(), o)) {
-                    List<Hex> hexes = VentlifeUtils.tileHexes(e.getKey(), o);
+                    List<HexCoord> hexes = VentlifeUtils.tileHexes(e.getKey(), o);
                     retValue.merge(hexes.get(0), 2, (a, b) -> a | b);
                     retValue.merge(hexes.get(1), 1, (a, b) -> a | b);
                     retValue.merge(hexes.get(2), 1, (a, b) -> a | b);

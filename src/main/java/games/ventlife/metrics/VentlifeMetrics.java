@@ -13,7 +13,7 @@ import games.ventlife.actions.PlaceCreature;
 import games.ventlife.actions.PlaceTile;
 import games.ventlife.actions.StopPlacing;
 import games.ventlife.components.Creature;
-import games.ventlife.components.Hex;
+import core.components.grid.HexCoord;
 import games.ventlife.components.HexCell;
 import games.ventlife.components.Species;
 
@@ -116,7 +116,7 @@ public class VentlifeMetrics implements IMetricsCollection {
                 case PlaceTile t -> {
                     kind = state.getCell(t.smoker) == null ? "TILE_SEAFLOOR" : "TILE_PLATEAU";
                     level = state.getLevel(t.smoker) + 1;
-                    for (Hex h : VentlifeUtils.tileHexes(t.smoker, t.orientation)) {
+                    for (HexCoord h : VentlifeUtils.tileHexes(t.smoker, t.orientation)) {
                         Creature c = state.getCreature(h);
                         if (c == null || (h.equals(t.smoker) && c.species() == Species.TUBE_WORM))
                             continue;

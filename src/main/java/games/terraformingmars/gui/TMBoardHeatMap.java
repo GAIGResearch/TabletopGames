@@ -1,6 +1,5 @@
 package games.terraformingmars.gui;
 
-import core.components.GridBoard;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
@@ -35,7 +34,7 @@ public class TMBoardHeatMap extends ComponentView {
 
         width = 200;
         height = 200;
-        tileSize = Math.min(width/gs.getBoard().getWidth(), height/(gs.getBoard().getHeight()+2));
+        tileSize = Math.min(width/gs.getBoardSize(), height/(gs.getBoardSize()+2));
 
         background = ImageIO.GetInstance().getImage("data/terraformingmars/images/mars.png");
     }
@@ -43,18 +42,17 @@ public class TMBoardHeatMap extends ComponentView {
     @Override
     protected void paintComponent(Graphics g1) {
         Graphics2D g = (Graphics2D) g1;
-        GridBoard gridBoard = gs.getBoard();
-        int x = width/2 - gridBoard.getWidth() * tileSize/2;
+        int x = width/2 - gs.getBoardSize() * tileSize/2;
         int y = tileSize;
 
         // Board background
-        int width = gridBoard.getWidth() * tileSize;
-        int height = gridBoard.getHeight() * tileSize;
+        int width = gs.getBoardSize() * tileSize;
+        int height = gs.getBoardSize() * tileSize;
         drawImage(g, background, x, y, width, height);
 
         // Draw cells
-        for (int i = 0; i < gridBoard.getHeight(); i++) {
-            for (int j = 0; j < gridBoard.getWidth(); j++) {
+        for (int i = 0; i < gs.getBoardSize(); i++) {
+            for (int j = 0; j < gs.getBoardSize(); j++) {
                 int offsetX = tileSize/2;
                 if (i % 2 == 1) {
                     offsetX += tileSize/2;
@@ -62,7 +60,7 @@ public class TMBoardHeatMap extends ComponentView {
 
                 int xC = x + offsetX + j * tileSize;
                 int yC = y + i * tileSize;
-                drawCell(g, (TMMapTile) gridBoard.getElement(j, i), xC, yC);
+                drawCell(g, gs.getTile(j, i), xC, yC);
 
                 // Heatmap
                 String toSearch = "(" + j + "-" + i + ")";

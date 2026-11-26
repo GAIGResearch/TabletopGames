@@ -90,13 +90,17 @@ public class Unit extends Component {
         return this.canAttack;
     }
 
-    public void SetCanMove(boolean moveable) {
-        this.canMove = moveable;
+    /**
+     * A copy of this unit with the orders it may still carry out.
+     */
+    public Unit withOrders(boolean canMove, boolean canAttack) {
+        Unit retValue = (Unit) copy();
+        retValue.canMove = canMove;
+        retValue.canAttack = canAttack;
+        return retValue;
     }
 
-    public void SetCanAttack(boolean canAttack) {
-        this.canAttack = canAttack;
-    }
+
 
     @Override
     public Component copy() {

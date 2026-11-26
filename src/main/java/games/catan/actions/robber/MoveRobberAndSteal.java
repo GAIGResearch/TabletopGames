@@ -1,6 +1,7 @@
 package games.catan.actions.robber;
 
 import core.AbstractGameState;
+import core.components.grid.HexCoord;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
@@ -13,41 +14,37 @@ import static core.CoreConstants.DefaultGamePhase.Main;
 public class MoveRobberAndSteal extends MoveRobber {
     public final int targetPlayer;  // Player to steal from random resource
 
-    public MoveRobberAndSteal(int x, int y, int player, int targetPlayer){
-        super(x, y, player);
+    public MoveRobberAndSteal(HexCoord hex, int player, int targetPlayer){
+        super(hex, player);
         this.targetPlayer = targetPlayer;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
-        CatanTile robberTile = cgs.getRobber(cgs.getBoard());
+        CatanTile robberTile = cgs.getRobber();
         if(gs.getCoreGameParameters().verbose){
-            System.out.println("moving robber from " + robberTile.toString() + " to " + cgs.getBoard()[x][y].toString());
+            System.out.println("moving robber from " + robberTile.toString() + " to " + cgs.getTile(hex).toString());
         }
 
-        if (robberTile.removeRobber()){
-            cgs.getBoard()[x][y].placeRobber();
+        cgs.setRobber(hex);
 
-            Random random = gs.getRnd();
-            if (targetPlayer != -1) {
-                // We might not have anyone to steal from, that's ok
-                int nResTarget = cgs.getNResourcesInHand(targetPlayer);
-                if (nResTarget == 0) {
-                    cgs.setGamePhase(Main);
-                    return false;
-                }
-                int cardIndex = random.nextInt(nResTarget);
-                CatanParameters.Resource resource = cgs.pickResourceFromHand(targetPlayer, cardIndex);
-                cgs.getPlayerResources(player).get(resource).increment();
-                cgs.getPlayerResources(targetPlayer).get(resource).decrement();
+        Random random = gs.getRnd();
+        if (targetPlayer != -1) {
+            // We might not have anyone to steal from, that's ok
+            int nResTarget = cgs.getNResourcesInHand(targetPlayer);
+            if (nResTarget == 0) {
+                cgs.setGamePhase(Main);
+                return false;
             }
-
-            cgs.setGamePhase(Main);
-            return true;
-        } else {
-            throw new AssertionError("Cannot move robber from " + robberTile + " to " + cgs.getBoard()[x][y].toString());
+            int cardIndex = random.nextInt(nResTarget);
+            CatanParameters.Resource resource = cgs.pickResourceFromHand(targetPlayer, cardIndex);
+            cgs.getPlayerResources(player).get(resource).increment();
+            cgs.getPlayerResources(targetPlayer).get(resource).decrement();
         }
+
+        cgs.setGamePhase(Main);
+        return true;
     }
 
     @Override
@@ -71,7 +68,7 @@ public class MoveRobberAndSteal extends MoveRobber {
 
     @Override
     public String toString() {
-        return "p" + player + " moves robber to (" + x + ";" + y + "). Steals from p" + targetPlayer;
+        return "p" + player + " moves robber to " + hex + ". Steals from p" + targetPlayer;
     }
     @Override
     public String getString(AbstractGameState gameState) {

@@ -2,10 +2,10 @@ package games.chess.components;
 
 import java.util.Objects;
 
-import core.components.Token;
+import core.components.BoardNode;
 
 
-public class ChessPiece extends Token {
+public class ChessPiece extends BoardNode {
 
     public enum ChessPieceType {
         KING,

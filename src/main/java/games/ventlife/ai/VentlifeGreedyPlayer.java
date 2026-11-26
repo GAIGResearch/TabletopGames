@@ -6,7 +6,7 @@ import core.actions.AbstractAction;
 import games.ventlife.VentlifeForwardModel;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeUtils;
-import games.ventlife.components.Hex;
+import core.components.grid.HexCoord;
 import games.ventlife.components.HexCell;
 import games.ventlife.components.Terrain;
 import games.ventlife.components.VentTile;
@@ -246,15 +246,15 @@ public class VentlifeGreedyPlayer extends AbstractPlayer implements IAnyTimePlay
         if (s.getHand(player).getSize() == 0)
             return retValue;
         VentTile tile = s.getHand(player).peek();
-        List<Hex> frontier = new ArrayList<>();
-        Set<Hex> seen = new HashSet<>();
-        for (Map.Entry<Hex, HexCell> e : s.getField().entrySet()) {
-            Hex h = e.getKey();
+        List<HexCoord> frontier = new ArrayList<>();
+        Set<HexCoord> seen = new HashSet<>();
+        for (Map.Entry<HexCoord, HexCell> e : s.getField().entrySet()) {
+            HexCoord h = e.getKey();
             if (e.getValue().terrain() == Terrain.BLACK_SMOKER)
                 for (int o = 0; o < 6; o++)
                     if (VentlifeUtils.isPlateauPlacement(s, h, o))
                         retValue.add(new PlaceTile(tile, h, o));
-            for (Hex nb : h.neighbours())
+            for (HexCoord nb : h.neighbours())
                 if (s.getCell(nb) == null && seen.add(nb))
                     frontier.add(nb);
         }
@@ -262,11 +262,11 @@ public class VentlifeGreedyPlayer extends AbstractPlayer implements IAnyTimePlay
         Set<PlaceTile> seafloor = new HashSet<>();
         int wanted = getParameters().replySeafloorSample;
         for (int attempt = 0; attempt < 4 * wanted && seafloor.size() < wanted && !frontier.isEmpty(); attempt++) {
-            Hex f = frontier.get(rnd.nextInt(frontier.size()));
+            HexCoord f = frontier.get(rnd.nextInt(frontier.size()));
             int o = rnd.nextInt(6), at = rnd.nextInt(3);
             // f as the Smoker, the left terrain (direction o + 1 from the Smoker) or the right (direction o)
-            Hex smoker = at == 0 ? f : f.neighbour(((at == 1 ? o + 1 : o) + 3) % 6);
-            List<Hex> hexes = VentlifeUtils.tileHexes(smoker, o);
+            HexCoord smoker = at == 0 ? f : f.neighbour(((at == 1 ? o + 1 : o) + 3) % 6);
+            List<HexCoord> hexes = VentlifeUtils.tileHexes(smoker, o);
             if (s.getCell(hexes.get(0)) == null && s.getCell(hexes.get(1)) == null && s.getCell(hexes.get(2)) == null)
                 seafloor.add(new PlaceTile(tile, smoker, o));
         }

@@ -447,7 +447,7 @@ public class TMGUI extends AbstractGUIManager {
                         if (a instanceof PlaceTile) {
                             TMAction fullLegalAction = getFullLegalAction(a, legalActions);
 
-                            TMMapTile mt = (TMMapTile) gs.getComponentById(((PlaceTile) a).mapTileID);
+                            TMMapTile mt = gs.getMapTile(((PlaceTile) a).mapTileID);
                             if (mt != null && code.contains("grid")) {
                                 // a grid location, trim actions to place tile here
                                 int x = Integer.parseInt(code.split("-")[1]);

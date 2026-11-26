@@ -3,9 +3,12 @@ package games.battlelore.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
+import games.battlelore.BattleloreGameState;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class SkipTurnAction extends AbstractAction {
@@ -36,17 +39,14 @@ public class SkipTurnAction extends AbstractAction {
             return false;
         }
 
-        MapTile units = (MapTile) gameState.getComponentById(unitsID);
+        BattleloreGameState state = (BattleloreGameState) gameState;
+        MapTile units = state.getTile(unitsID);
         if (units != null) {
+            List<Unit> skipped = new ArrayList<>();
             for (Unit unit : units.GetUnits()) {
-                if (skipAttack) {
-                    unit.SetCanAttack(false);
-                }
-                if (skipMove) {
-                    unit.SetCanMove(false);
-                }
+                skipped.add(unit.withOrders(unit.CanMove() && !skipMove, unit.CanAttack() && !skipAttack));
             }
-            return true;
+            state.setTile(units.withUnits(skipped));
         }
         return true;
     }
@@ -77,7 +77,7 @@ public class SkipTurnAction extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        MapTile units = (MapTile) gameState.getComponentById(unitsID);
+        MapTile units = ((BattleloreGameState) gameState).getTile(unitsID);
         if (units == null) {
             return "";
         }

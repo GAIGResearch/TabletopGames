@@ -1,5 +1,6 @@
 package games.ventlife.ai;
 
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeParameters;
 import games.ventlife.VentlifeUtils;
@@ -17,7 +18,7 @@ public class VentlifeFastEval {
 
     private final VentlifeGameState state;
     private final VentlifeParameters params;
-    private final Map<Hex, Integer> exposed;
+    private final Map<HexCoord, Integer> exposed;
     private final double[] adjusted;
     private final double[] expWeight;
     private final double[] riskWeight;
@@ -78,7 +79,7 @@ public class VentlifeFastEval {
         return VentlifeHeuristic.value(player, adjusted, oppMaxWeight, oppMeanWeight);
     }
 
-    private boolean isExposed(Hex hex, Species species) {
+    private boolean isExposed(HexCoord hex, Species species) {
         Integer bits = exposed.get(hex);
         if (bits == null) return false;
         return species != Species.TUBE_WORM || (bits & 1) != 0;
@@ -88,9 +89,9 @@ public class VentlifeFastEval {
      * The heuristic value, for the placing player, after player places count creatures of the species on the hex
      * (which must be a legal placement).
      */
-    public double placementValue(int player, Species species, Hex hex, int count) {
+    public double placementValue(int player, Species species, HexCoord hex, int count) {
         double[] d = adjusted.clone();
-        Map<Hex, Creature> creatures = state.getCreatures();
+        Map<HexCoord, Creature> creatures = state.getCreatures();
         boolean hexExposed = isExposed(hex, species);
         if (riskWeight[player] != 0) {
             double loss = VentlifeScorer.lossIfCovered(state, hex, new Creature(species, player, count), moveFactor, crabValue);
@@ -100,11 +101,11 @@ public class VentlifeFastEval {
         switch (species) {
             case EELPOUT_FISH -> {
                 // the shoals next to the hex merge with the new Fish
-                Set<Hex> seen = new HashSet<>();
+                Set<HexCoord> seen = new HashSet<>();
                 int merged = 1;
                 double before = 0;
                 boolean anyNeighbour = false;
-                for (Hex nb : hex.neighbours()) {
+                for (HexCoord nb : hex.neighbours()) {
                     Creature f = creatures.get(nb);
                     if (f == null || f.species() != Species.EELPOUT_FISH || f.owner() != player) continue;
                     anyNeighbour = true;
@@ -125,7 +126,7 @@ public class VentlifeFastEval {
                     d[player] -= expWeight[player] * moveFactor * params.shoalPoints;
             }
             case YETI_CRAB -> {
-                Set<Hex> plateau = plateauOf(hex);
+                Set<HexCoord> plateau = plateauOf(hex);
                 if (plateau.size() >= 2) {
                     int[] crabs = VentlifeUtils.crabsOn(state, plateau);
                     int[] before = majorityScores(crabs, plateau.size());
@@ -148,11 +149,11 @@ public class VentlifeFastEval {
         }
         // Octopuses next to the hex score a species new to them
         if (species != Species.OCTOPUS && state.getSpeciesInPlay().contains(Species.OCTOPUS)) {
-            for (Hex nb : hex.neighbours()) {
+            for (HexCoord nb : hex.neighbours()) {
                 Creature o = creatures.get(nb);
                 if (o == null || o.species() != Species.OCTOPUS) continue;
                 boolean already = false;
-                for (Hex nn : nb.neighbours()) {
+                for (HexCoord nn : nb.neighbours()) {
                     Creature c = creatures.get(nn);
                     if (c != null && c.species() == species) {
                         already = true;
@@ -170,28 +171,28 @@ public class VentlifeFastEval {
         return VentlifeHeuristic.value(player, d, oppMaxWeight, oppMeanWeight);
     }
 
-    private double risk(Hex hex, Species species) {
+    private double risk(HexCoord hex, Species species) {
         return CoverageModel.probability(state, hex, species, exposed, tilesLeft, riskModel);
     }
 
-    private int ownFishNeighbours(Hex hex, int player) {
+    private int ownFishNeighbours(HexCoord hex, int player) {
         int retValue = 0;
-        for (Hex nb : hex.neighbours()) {
+        for (HexCoord nb : hex.neighbours()) {
             Creature f = state.getCreature(nb);
             if (f != null && f.species() == Species.EELPOUT_FISH && f.owner() == player) retValue++;
         }
         return retValue;
     }
 
-    private int shoal(Hex start, int player, Set<Hex> seen) {
+    private int shoal(HexCoord start, int player, Set<HexCoord> seen) {
         int size = 0;
-        ArrayDeque<Hex> open = new ArrayDeque<>();
+        ArrayDeque<HexCoord> open = new ArrayDeque<>();
         open.push(start);
         seen.add(start);
         while (!open.isEmpty()) {
-            Hex h = open.pop();
+            HexCoord h = open.pop();
             size++;
-            for (Hex nb : h.neighbours()) {
+            for (HexCoord nb : h.neighbours()) {
                 Creature f = state.getCreature(nb);
                 if (f != null && f.species() == Species.EELPOUT_FISH && f.owner() == player && seen.add(nb))
                     open.push(nb);
@@ -200,16 +201,16 @@ public class VentlifeFastEval {
         return size;
     }
 
-    private Set<Hex> plateauOf(Hex start) {
+    private Set<HexCoord> plateauOf(HexCoord start) {
         int level = state.getLevel(start);
-        Set<Hex> retValue = new HashSet<>();
+        Set<HexCoord> retValue = new HashSet<>();
         if (level < 2) return retValue;
-        ArrayDeque<Hex> open = new ArrayDeque<>();
+        ArrayDeque<HexCoord> open = new ArrayDeque<>();
         open.push(start);
         retValue.add(start);
         while (!open.isEmpty()) {
-            Hex h = open.pop();
-            for (Hex nb : h.neighbours())
+            HexCoord h = open.pop();
+            for (HexCoord nb : h.neighbours())
                 if (state.getLevel(nb) == level && retValue.add(nb))
                     open.push(nb);
         }

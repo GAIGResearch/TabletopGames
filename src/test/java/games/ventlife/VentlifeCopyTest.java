@@ -26,9 +26,9 @@ public class VentlifeCopyTest {
 
     /** Writes a field of one tile at ((0,0), 1) straight into the state (no rules involved), for the copy checks. */
     private void arrangeField() {
-        state.field.put(hex(0, 0), new HexCell(SMOKER, 1, 0));
-        state.field.put(hex(-1, 1), new HexCell(BASALT, 1, 0));
-        state.field.put(hex(0, 1), new HexCell(DIFFUSE, 1, 0));
+        state.field.set(hex(0, 0), new HexCell(SMOKER, 1, 0));
+        state.field.set(hex(-1, 1), new HexCell(BASALT, 1, 0));
+        state.field.set(hex(0, 1), new HexCell(DIFFUSE, 1, 0));
         state.tilesPlaced = 1;
     }
 
@@ -41,7 +41,7 @@ public class VentlifeCopyTest {
         assertEquals(state, copy);
         assertEquals(state.hashCode(), copy.hashCode());
 
-        copy.field.put(hex(1, 0), new HexCell(SMOKER, 1, 1));
+        copy.field.set(hex(1, 0), new HexCell(SMOKER, 1, 1));
         copy.getDrawDeck().draw();
         copy.setCreature(hex(0, 0), new Creature(WORM, 0, 2));
         copy.changeSupply(0, WORM, -1);

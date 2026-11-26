@@ -6,6 +6,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import games.stratego.StrategoGameState;
+import games.stratego.StrategoParams;
 import games.stratego.actions.Move;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -37,8 +38,9 @@ public class StrategoGUIManager extends AbstractGUIManager implements IScreenHig
         }
 
         // Set width/height of display
-        this.width = Math.max(defaultDisplayWidth, defaultItemSize * gameState.getGridBoard().getWidth());
-        this.height = defaultItemSize * gameState.getGridBoard().getHeight();
+        int gridSize = ((StrategoParams) gameState.getGameParameters()).gridSize;
+        this.width = Math.max(defaultDisplayWidth, defaultItemSize * gridSize);
+        this.height = defaultItemSize * gridSize;
 
         JPanel infoPanel = createGameStateInfoPanel("Stratego", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new IScreenHighlight[]{this},

@@ -31,8 +31,8 @@ public class ReserveTile extends TMAction implements TMExtendedSequence {
     @Override
     public boolean _execute(TMGameState gs) {
         if (mapTileID != -1) {
-            TMMapTile mt = (TMMapTile)gs.getComponentById(mapTileID);
-            mt.setReserved(player);
+            TMMapTile mt = gs.getMapTile(mapTileID);
+            gs.setMapTile(mt.withReserved(player));
             return true;
         }
         gs.setActionInProgress(this);
@@ -59,9 +59,9 @@ public class ReserveTile extends TMAction implements TMExtendedSequence {
         if (mapTileID == -1) {
             // Need to choose where to place it
             TMGameState gs = (TMGameState) state;
-            for (int i = 0; i < gs.getBoard().getHeight(); i++) {
-                for (int j = 0; j < gs.getBoard().getWidth(); j++) {
-                    TMMapTile mt = (TMMapTile) gs.getBoard().getElement(j, i);
+            for (int i = 0; i < gs.getBoardSize(); i++) {
+                for (int j = 0; j < gs.getBoardSize(); j++) {
+                    TMMapTile mt = gs.getTile(j, i);
                     // Check if we can place tile here
                     if (mt != null && mt.getTilePlaced() == null && (mt.getTileType() == mapType)) {
                         actions.add(new ReserveTile(player, mt.getComponentID(), true));

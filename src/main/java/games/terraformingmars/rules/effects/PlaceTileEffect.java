@@ -42,7 +42,7 @@ public class PlaceTileEffect extends Effect {
 
         HashSet<TMTypes.Resource> gained = new LinkedHashSet<>();
         if (action.mapTileID != -1 && action.onMars) {
-            TMMapTile mt = (TMMapTile) gameState.getComponentById(action.mapTileID);
+            TMMapTile mt = gameState.getMapTile(action.mapTileID);
             gained.addAll(Arrays.asList(mt.getResources()));
         }
         boolean resourceTypeCondition = resourceTypeGained == null;

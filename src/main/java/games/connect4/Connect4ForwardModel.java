@@ -20,7 +20,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
     protected void _setup(AbstractGameState firstState) {
         Connect4GameParameters c4gp = (Connect4GameParameters) firstState.getGameParameters();
         Connect4GameState state = (Connect4GameState) firstState;
-        state.gridBoard = new GridBoard(c4gp.width, c4gp.height, new BoardNode(Connect4Constants.emptyCell));
+        state.gridBoard = new GridBoard(c4gp.width, c4gp.height, "Connect4 Board");
         state.winnerCells = new LinkedList<>();
     }
 
@@ -31,13 +31,13 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         int player = c4gs.getCurrentPlayer();
 
         if (gameState.isNotTerminal())
-            for (int x = 0; x < c4gs.gridBoard.getWidth(); x++) {
-                int y = c4gs.gridBoard.getHeight() - 1; // this is bottom of column
+            for (int x = 0; x < c4gs.getWidth(); x++) {
+                int y = c4gs.getHeight() - 1; // this is bottom of column
                 boolean end = false;
                 while(!end)
                 {
                     boolean newCol = false;
-                    if (c4gs.gridBoard.getElement(x, y).getComponentName().equals(Connect4Constants.emptyCell)) {
+                    if (!c4gs.gridBoard.contains(x, y)) {
                         actions.add(new SetGridValueAction(c4gs.gridBoard.getComponentID(), x, y, Connect4Constants.playerMapping.get(player).getComponentID()));
                         newCol = true;
                     }
@@ -72,13 +72,13 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();;
 
         // Check columns
-        for (int x = 0; x < gridBoard.getWidth(); x++) {
+        for (int x = 0; x < gameState.getWidth(); x++) {
             int count = 0;
             String lastToken = null;
             winning.clear();
-            for (int y = gridBoard.getHeight() - 1; y >= 0; y--) {
+            for (int y = gameState.getHeight() - 1; y >= 0; y--) {
                 BoardNode c = gridBoard.getElement(x, y);
-                if (c.getComponentName().equals(Connect4Constants.emptyCell)) {
+                if (c == null) {
                     count = 0;
                     lastToken = null;
                     winning.clear();
@@ -103,13 +103,13 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         }
 
         // Check rows
-        for (int y = gridBoard.getHeight() - 1; y >= 0; y--) {
+        for (int y = gameState.getHeight() - 1; y >= 0; y--) {
             int count = 0;
             String lastToken = null;
             winning.clear();
-            for (int x = 0; x < gridBoard.getWidth(); x++) {
+            for (int x = 0; x < gameState.getWidth(); x++) {
                 BoardNode c = gridBoard.getElement(x, y);
-                if (c.getComponentName().equals(Connect4Constants.emptyCell)) {
+                if (c == null) {
                     count = 0;
                     lastToken = null;
                     winning.clear();
@@ -133,23 +133,23 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         }
 
         //Check main diagonals (from col 0)
-        for (int y = gridBoard.getHeight() - 1; y >= 0; y--) {
+        for (int y = gameState.getHeight() - 1; y >= 0; y--) {
             if (checkMainDiagonals(gameState, 0, y))
                 return true;
 
         }
 
         //Check main and inverse diagonals (from row 0)
-        for (int x = 1; x < gridBoard.getWidth(); x++) {
-            if (checkMainDiagonals(gameState, x, gridBoard.getHeight() - 1))
+        for (int x = 1; x < gameState.getWidth(); x++) {
+            if (checkMainDiagonals(gameState, x, gameState.getHeight() - 1))
                 return true;
-            if (checkInvDiagonals(gameState, x, gridBoard.getHeight() - 1))
+            if (checkInvDiagonals(gameState, x, gameState.getHeight() - 1))
                 return true;
         }
 
         //Check inv diagonals (from last column)
-        for (int y = gridBoard.getHeight() - 2; y >= 0; y--) { //height -1 is checked in previous loop
-            if (checkInvDiagonals(gameState, gridBoard.getWidth()-1, y))
+        for (int y = gameState.getHeight() - 2; y >= 0; y--) { //height -1 is checked in previous loop
+            if (checkInvDiagonals(gameState, gameState.getWidth()-1, y))
                 return true;
         }
 
@@ -171,10 +171,10 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         String lastToken = null;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
 
-        for (int x = xStart, y = yStart; x < gridBoard.getWidth() && y >=0; x++, y--) {
+        for (int x = xStart, y = yStart; x < gameState.getWidth() && y >=0; x++, y--) {
             BoardNode c = gridBoard.getElement(x, y);
 
-            if (c.getComponentName().equals(Connect4Constants.emptyCell)) {
+            if (c == null) {
                 count = 0;
                 lastToken = null;
                 winning.clear();
@@ -207,7 +207,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         for (int x = xStart, y = yStart; x >= 0 && y >= 0; x--, y--) {
             BoardNode c = gridBoard.getElement(x, y);
 
-            if (c.getComponentName().equals(Connect4Constants.emptyCell)) {
+            if (c == null) {
                 count = 0;
                 lastToken = null;
                 winning.clear();

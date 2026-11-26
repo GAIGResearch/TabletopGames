@@ -1,7 +1,6 @@
 package games.terraformingmars.gui;
 
 import core.components.Counter;
-import core.components.GridBoard;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -101,7 +100,7 @@ public class TMBoardView extends ComponentView implements IScreenHighlight {
             }
         }
 
-        Rectangle rect = drawGridBoard(g, (GridBoard) component, offsetX + (gs.getGlobalParameters().size()+1) * defaultItemSize + 10, defaultItemSize);
+        Rectangle rect = drawGridBoard(g, offsetX + (gs.getGlobalParameters().size()+1) * defaultItemSize + 10, defaultItemSize);
         if (rect.getHeight() + rect.getY() > height) {
             height = rect.getHeight() + rect.getY();
         }
@@ -143,17 +142,17 @@ public class TMBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    public Rectangle drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
+    public Rectangle drawGridBoard(Graphics2D g, int x, int y) {
         int offsetY = defaultItemSize/2;
 
         // Board background
-        int width = gridBoard.getWidth() * defaultItemSize;
-        int height = gridBoard.getHeight() * defaultItemSize;
+        int width = gs.getBoardSize() * defaultItemSize;
+        int height = gs.getBoardSize() * defaultItemSize;
         drawImage(g, background, x, y, width, height);
 
         // Draw cells
-        for (int i = 0; i < gridBoard.getHeight(); i++) {
-            for (int j = 0; j < gridBoard.getWidth(); j++) {
+        for (int i = 0; i < gs.getBoardSize(); i++) {
+            for (int j = 0; j < gs.getBoardSize(); j++) {
                 int offsetX = defaultItemSize/2;
                 if (i % 2 == 1) {
                     offsetX += defaultItemSize/2;
@@ -161,7 +160,7 @@ public class TMBoardView extends ComponentView implements IScreenHighlight {
 
                 int xC = x + offsetX + j * defaultItemSize;
                 int yC = y + offsetY + i * defaultItemSize;
-                drawCell(g, (TMMapTile) gridBoard.getElement(j, i), xC, yC);
+                drawCell(g, gs.getTile(j, i), xC, yC);
 
                 // Save rect where cell is drawn
                 rects.put(new Rectangle(xC - defaultItemSize/2, yC - defaultItemSize/2, defaultItemSize, defaultItemSize), "grid-" + j + "-" + i);

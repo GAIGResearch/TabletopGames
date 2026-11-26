@@ -1,8 +1,8 @@
 package games.ventlife;
 
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.ventlife.components.Creature;
-import games.ventlife.components.Hex;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,15 +64,15 @@ public class VentlifeOctopusTest {
     }
 
     /** Player 1's Octopuses on the given hexes (blocking lines), and player 0's Octopus on (0,1). */
-    private void octopusOn01With(Hex... blockers) {
+    private void octopusOn01With(HexCoord... blockers) {
         putCreature(state, hex(0, 1), OCTOPUS, 0, 1);
-        for (Hex h : blockers)
+        for (HexCoord h : blockers)
             putCreature(state, h, OCTOPUS, 1, 1);
     }
 
-    private Set<AbstractAction> retreats(Hex... to) {
+    private Set<AbstractAction> retreats(HexCoord... to) {
         Set<AbstractAction> retValue = new HashSet<>();
-        for (Hex h : to)
+        for (HexCoord h : to)
             retValue.add(displace(OCTOPUS, 0, hex(0, 1), h));
         return retValue;
     }

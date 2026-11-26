@@ -3,7 +3,6 @@ package games.battlelore.player;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.components.GridBoard;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.actions.AttackUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
@@ -30,16 +29,15 @@ public class RuleBasedPlayer extends AbstractPlayer
     @Override
     public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
         BattleloreGameState state = (BattleloreGameState) observation;
-        GridBoard board = state.getBoard();
         float playerUnitPower = 0.f;
         float enemyUnitPower = 0.f;
         int leftAreaPower = 0;
         int middleAreaPower = 0;
         int rightAreaPower = 0;
 
-        for (int x = 0; x < board.getWidth(); x++) {
-            for (int y = 0; y < board.getHeight(); y++) {
-                MapTile tile = (MapTile) board.getElement(x, y);
+        for (int x = 0; x < state.getWidth(); x++) {
+            for (int y = 0; y < state.getHeight(); y++) {
+                MapTile tile = state.getTile(x, y);
                 Unit.Faction playerFaction = observation.getCurrentPlayer() == Unit.Faction.Dakhan_Lords.ordinal()
                         ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 

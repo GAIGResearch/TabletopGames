@@ -39,7 +39,7 @@ public class TMPlayerView extends ComponentView {
         width = defaultItemSize * 2 * TMTypes.Resource.nPlayerBoardRes() + offsetX*2;
         height = defaultItemSize * 2 + offsetX*8 + defaultItemSize*5/3;
 
-        rects = new Rectangle[gs.getBoard().getWidth() * gs.getBoard().getHeight()];
+        rects = new Rectangle[gs.getBoardSize() * gs.getBoardSize()];
         highlight = new ArrayList<>();
 
         production = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/production.png");

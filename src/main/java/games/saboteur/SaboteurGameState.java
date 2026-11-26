@@ -5,11 +5,11 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.components.PartialObservableGridBoard;
+import core.components.grid.SparseGrid;
+import core.components.grid.SquareCoord;
 import games.GameType;
 import games.saboteur.components.*;
 import utilities.DeterminisationUtilities;
-import utilities.Vector2D;
 
 import java.util.*;
 
@@ -22,14 +22,14 @@ public class SaboteurGameState extends AbstractGameState {
     Deck<SaboteurCard> drawDeck;
     PartialObservableDeck<SaboteurCard> discardDeck;
     Deck<SaboteurCard> goalDeck;
-    PartialObservableGridBoard gridBoard;
+    SparseGrid<SquareCoord, PathCard> gridBoard;
     Deck<SaboteurCard> nuggetDeck;
 
     boolean[] minersWinByRound = new boolean[3]; // track if miners win each of the 3 rounds
 
-    Set<Vector2D> pathCardOptions;
-    Set<Vector2D> goalLocationsFound;
-    Vector2D startingSquare;
+    Set<SquareCoord> pathCardOptions;
+    Set<SquareCoord> goalLocationsFound;
+    SquareCoord startingSquare;
 
     int nOfMiners;
     int nOfSaboteurs;
@@ -74,16 +74,9 @@ public class SaboteurGameState extends AbstractGameState {
         }
         copy.goalDeck = goalDeck.copy();
 
-        copy.pathCardOptions = new HashSet<>();
-        for (Vector2D pathCardOption : pathCardOptions) {
-            copy.pathCardOptions.add(pathCardOption.copy());
-        }
-        copy.goalLocationsFound = new HashSet<>();
-        for (Vector2D goalLocationFound : goalLocationsFound) {
-            copy.goalLocationsFound.add(goalLocationFound.copy());
-        }
-
-        copy.startingSquare = startingSquare.copy();
+        copy.pathCardOptions = new HashSet<>(pathCardOptions);
+        copy.goalLocationsFound = new HashSet<>(goalLocationsFound);
+        copy.startingSquare = startingSquare;
         copy.nOfMiners = nOfMiners;
         copy.nOfSaboteurs = nOfSaboteurs;
 
@@ -94,17 +87,7 @@ public class SaboteurGameState extends AbstractGameState {
         copy.minersWinByRound = Arrays.copyOf(minersWinByRound, minersWinByRound.length);
 
         // Board
-        copy.gridBoard = gridBoard.emptyCopy();
-        for (int i = 0; i < gridBoard.getHeight(); i++) {
-            for (int j = 0; j < gridBoard.getWidth(); j++) {
-                PathCard c = (PathCard) gridBoard.getElement(j, i);
-                if (c == null) continue;
-                copy.gridBoard.setElement(j, i, c.copy());
-                for (int p = 0; p < nPlayers; p++) {
-                    copy.gridBoard.setElementVisibility(j, i, p, gridBoard.getElementVisibility(j, i, p));
-                }
-            }
-        }
+        copy.gridBoard = gridBoard.copy();
 
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
             // Player cards
@@ -173,26 +156,17 @@ public class SaboteurGameState extends AbstractGameState {
             }
 
             // Goals on board, shuffle those unseen by current player
-            for (int i = 0; i < gridBoard.getHeight(); i++) {
-                for (int j = 0; j < gridBoard.getWidth(); j++) {
-                    PathCard c = (PathCard) gridBoard.getElement(j, i);
-                    if (c == null || c.type != PathCard.PathCardType.Goal) continue;
-                    if (!copy.gridBoard.getElementVisibility(j, i, playerId)) {
-                        copy.goalDeck.add((SaboteurCard) copy.gridBoard.getElement(j, i));
-                    }
+            List<SquareCoord> hiddenGoals = new ArrayList<>();
+            List<PathCard> goals = new ArrayList<>();
+            for (SquareCoord pos : gridBoard.sortedPositions()) {
+                if (gridBoard.get(pos).type == PathCard.PathCardType.Goal && !gridBoard.isVisible(pos, playerId)) {
+                    hiddenGoals.add(pos);
+                    goals.add(copy.gridBoard.get(pos));
                 }
             }
-            if (copy.goalDeck.getSize() > 0) {
-                copy.goalDeck.shuffle(redeterminisationRnd);
-                for (int i = 0; i < gridBoard.getHeight(); i++) {
-                    for (int j = 0; j < gridBoard.getWidth(); j++) {
-                        PathCard c = (PathCard) gridBoard.getElement(j, i);
-                        if (c == null || c.type != PathCard.PathCardType.Goal) continue;
-                        if (!copy.gridBoard.getElementVisibility(j, i, playerId)) {
-                            copy.gridBoard.setElement(j, i, copy.goalDeck.pick(0));
-                        }
-                    }
-                }
+            Collections.shuffle(goals, redeterminisationRnd);
+            for (int i = 0; i < hiddenGoals.size(); i++) {
+                copy.gridBoard.set(hiddenGoals.get(i), goals.get(i));
             }
 
             // Shuffle role deck to hide info. Current player should have same role, and we keep any they know (if Saboteur has played Rockfall)
@@ -240,7 +214,7 @@ public class SaboteurGameState extends AbstractGameState {
         return playerNuggetDecks;
     }
 
-    public Set<Vector2D> getPathCardOptions() {
+    public Set<SquareCoord> getPathCardOptions() {
         return pathCardOptions;
     }
 
@@ -273,8 +247,16 @@ public class SaboteurGameState extends AbstractGameState {
         return false;
     }
 
-    public PartialObservableGridBoard getGridBoard() {
+    public SparseGrid<SquareCoord, PathCard> getGridBoard() {
         return gridBoard;
+    }
+
+    /**
+     * Whether the position is within SaboteurGameParameters.boardWidth and boardHeight.
+     */
+    public boolean isOnBoard(SquareCoord pos) {
+        SaboteurGameParameters params = (SaboteurGameParameters) gameParameters;
+        return pos.x() >= 0 && pos.y() >= 0 && pos.x() < params.boardWidth() && pos.y() < params.boardHeight();
     }
 
     @Override

@@ -2,10 +2,10 @@ package games.ventlife.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import core.interfaces.IExtendedSequence;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.VentlifeUtils;
-import games.ventlife.components.Hex;
 import games.ventlife.components.Species;
 
 import java.util.*;
@@ -20,14 +20,14 @@ public class CreatureStep implements IExtendedSequence {
     // whether a placement has been made this step
     private boolean placed;
     // the Volcano Snails placed this step, in order
-    private final List<Hex> snails;
+    private final List<HexCoord> snails;
     private boolean stopped;
 
     public CreatureStep(int player) {
         this(player, false, List.of(), false);
     }
 
-    private CreatureStep(int player, boolean placed, List<Hex> snails, boolean stopped) {
+    private CreatureStep(int player, boolean placed, List<HexCoord> snails, boolean stopped) {
         this.player = player;
         this.placed = placed;
         this.snails = new ArrayList<>(snails);
@@ -40,7 +40,7 @@ public class CreatureStep implements IExtendedSequence {
     public boolean hasPlacement(VentlifeGameState state) {
         for (Species s : state.getSpeciesInPlay())
             if (state.getSupply(player, s) > 0)
-                for (Hex h : state.getField().keySet())
+                for (HexCoord h : state.getField().keySet())
                     if (s.canPlace(state, player, h))
                         return true;
         return false;
@@ -51,13 +51,13 @@ public class CreatureStep implements IExtendedSequence {
      */
     private List<AbstractAction> firstPlacements(VentlifeGameState state) {
         List<AbstractAction> actions = new ArrayList<>();
-        List<Hex> hexes = new ArrayList<>(state.getField().keySet());
-        hexes.sort(VentlifeUtils.HEX_ORDER);
+        List<HexCoord> hexes = new ArrayList<>(state.getField().keySet());
+        hexes.sort(null);
         for (Species s : state.getSpeciesInPlay()) {
             int supply = state.getSupply(player, s);
             if (supply == 0)
                 continue;
-            for (Hex h : hexes)
+            for (HexCoord h : hexes)
                 if (s.canPlace(state, player, h)) {
                     int max = Math.min(supply, s.maxPlaced(state, h));
                     for (int n = 1; n <= max; n++)
@@ -70,10 +70,10 @@ public class CreatureStep implements IExtendedSequence {
     /**
      * The empty Basalt hexes next to a Snail placed this step.
      */
-    private List<Hex> moreSnailHexes(VentlifeGameState state) {
-        Set<Hex> retValue = new TreeSet<>(VentlifeUtils.HEX_ORDER);
-        for (Hex p : snails)
-            for (Hex n : p.neighbours())
+    private List<HexCoord> moreSnailHexes(VentlifeGameState state) {
+        Set<HexCoord> retValue = new TreeSet<>();
+        for (HexCoord p : snails)
+            for (HexCoord n : p.neighbours())
                 if (Species.VOLCANO_SNAIL.canPlace(state, player, n))
                     retValue.add(n);
         return new ArrayList<>(retValue);
@@ -85,7 +85,7 @@ public class CreatureStep implements IExtendedSequence {
         if (!placed)
             return firstPlacements(state);
         List<AbstractAction> actions = new ArrayList<>();
-        for (Hex h : moreSnailHexes(state))
+        for (HexCoord h : moreSnailHexes(state))
             actions.add(new PlaceCreature(Species.VOLCANO_SNAIL, h, 1));
         actions.add(new StopPlacing());
         return actions;

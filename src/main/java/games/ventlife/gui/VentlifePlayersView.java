@@ -1,9 +1,11 @@
 package games.ventlife.gui;
 
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.components.Species;
 import games.ventlife.components.Terrain;
 import games.ventlife.components.VentTile;
+import gui.HexLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -166,18 +168,12 @@ public class VentlifePlayersView extends JComponent {
      */
     private void drawTile(Graphics2D g, VentTile tile, int x, int y) {
         double s = 9;
-        double w = s * VentlifeFieldView.SQRT3;
-        double[][] centres = {{x + w / 2, y + s}, {x, y + 2.5 * s}, {x + w, y + 2.5 * s}};
+        double w = s * Math.sqrt(3);
+        HexLayout layout = new HexLayout(s, x + w / 2, y + s);
+        HexCoord[] hexes = {HexCoord.ORIGIN, HexCoord.ORIGIN.neighbour(HexCoord.SW), HexCoord.ORIGIN.neighbour(HexCoord.SE)};
         Terrain[] terrains = tile == null ? null : new Terrain[]{Terrain.BLACK_SMOKER, tile.left, tile.right};
         for (int i = 0; i < 3; i++) {
-            Path2D hex = new Path2D.Double();
-            for (int k = 0; k < 6; k++) {
-                double angle = Math.toRadians(60 * k - 30);
-                double px = centres[i][0] + s * Math.cos(angle), py = centres[i][1] + s * Math.sin(angle);
-                if (k == 0) hex.moveTo(px, py);
-                else hex.lineTo(px, py);
-            }
-            hex.closePath();
+            Path2D hex = layout.outline(hexes[i], s);
             g.setColor(terrains == null ? Color.gray : VentlifeFieldView.terrainColour(terrains[i]));
             g.fill(hex);
             g.setColor(Color.black);

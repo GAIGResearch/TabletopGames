@@ -1,7 +1,6 @@
 package games.stratego.actions;
 
 import core.AbstractGameState;
-import core.components.GridBoard;
 import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
 import games.stratego.components.Piece;
@@ -18,7 +17,7 @@ public class NormalMove extends Move{
     public final Vector2D displacement;
 
     // Independent
-    public Vector2D destinationCoordinate;
+    public final Vector2D destinationCoordinate;
 
     public NormalMove(Vector2D position, Vector2D displacement) {
         super(position);
@@ -40,23 +39,19 @@ public class NormalMove extends Move{
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        GridBoard board = ((StrategoGameState)gs).getGridBoard();
-        Piece movedPiece = getPiece((StrategoGameState) gs);
+        StrategoGameState sgs = (StrategoGameState) gs;
+        Piece movedPiece = getPiece(sgs);
+        Vector2D destination = to(sgs);
 
-        board.setElement(movedPiece.getPiecePosition().getX(), movedPiece.getPiecePosition().getY(), null);
-        if (destinationCoordinate == null) {
-            destinationCoordinate = position.add(displacement);
-        }
-
-        board.setElement(destinationCoordinate.getX(), destinationCoordinate.getY(), movedPiece);
-
+        sgs.setPiece(movedPiece.getPiecePosition(), null);
+        Piece moved = movedPiece.movedTo(destination);
         if (movedPiece.getPieceType() == Piece.PieceType.SCOUT &&
-                Distance.manhattan_distance(destinationCoordinate, movedPiece.getPiecePosition()) >
+                Distance.manhattan_distance(destination, movedPiece.getPiecePosition()) >
                         ((StrategoParams)gs.getGameParameters()).moveSpeed) {
             // Piece revealed itself to be scout
-            movedPiece.setPieceKnown(true);
+            moved = moved.revealed();
         }
-        movedPiece.setPiecePosition(destinationCoordinate);
+        sgs.setPiece(destination, moved);
 
         return true;
     }
@@ -87,7 +82,7 @@ public class NormalMove extends Move{
     public String getPOString(StrategoGameState gameState) {
         Piece movedPiece = getPiece(gameState);
         return "Move (" + movedPiece.getPiecePosition().toString() + " -> " +
-                destinationCoordinate.toString() + ")";
+                to(gameState).toString() + ")";
     }
 
     @Override

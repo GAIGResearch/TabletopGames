@@ -1,8 +1,8 @@
 package games.ventlife;
 
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.ventlife.actions.PlaceTile;
-import games.ventlife.components.Hex;
 import games.ventlife.components.HexCell;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +87,7 @@ public class VentlifeTilePlacementTest {
         // a second tile is not limited to the origin
         assertFalse(actions.contains(placeTile(state, hex(0, 0), 0)));
 
-        Set<Hex> covered = Set.of(hex(0, 0), hex(-1, 1), hex(0, 1));
+        Set<HexCoord> covered = Set.of(hex(0, 0), hex(-1, 1), hex(0, 1));
         assertEquals(new HashSet<AbstractAction>(seafloorPlacements(heldTile(state), covered)), actions);
     }
 
@@ -126,7 +126,7 @@ public class VentlifeTilePlacementTest {
         assertFalse(actions.contains(placeTile(state, hex(1, 0), 3)));
 
         // every other legal action is a seafloor placement
-        Set<Hex> covered = Set.of(hex(0, 0), hex(-1, 1), hex(0, 1), hex(1, 0), hex(1, 1), hex(2, 0));
+        Set<HexCoord> covered = Set.of(hex(0, 0), hex(-1, 1), hex(0, 1), hex(1, 0), hex(1, 1), hex(2, 0));
         Set<AbstractAction> expected = new HashSet<>(seafloorPlacements(heldTile(state), covered));
         expected.addAll(List.of(a, b, c));
         assertEquals(expected, actions);

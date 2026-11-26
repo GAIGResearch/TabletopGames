@@ -3,7 +3,8 @@ package games.terraformingmars;
 import core.components.BoardNode;
 import core.components.Counter;
 import core.components.Deck;
-import core.components.GridBoard;
+import core.components.grid.HexCoord;
+import core.components.grid.SparseGrid;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.*;
 import games.terraformingmars.rules.effects.Bonus;
@@ -12,7 +13,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Utils;
-import utilities.Vector2D;
 
 import java.awt.*;
 import java.io.FileReader;
@@ -24,14 +24,6 @@ import java.util.HashSet;
 import static games.terraformingmars.components.TMMapTile.parseMapTile;
 
 public class TMTypes {
-
-    // Odd r: (odd rows offset to the right)
-    public static Vector2D[][] neighbor_directions = new Vector2D[][] {{new Vector2D(1, 0), new Vector2D(0, -1),
-            new Vector2D(-1, -1), new Vector2D(-1, 0),
-            new Vector2D(-1, 1), new Vector2D(0, 1)},
-            {new Vector2D(1, 0), new Vector2D(1, -1),
-                    new Vector2D(0, -1), new Vector2D(-1, 0),
-                    new Vector2D(0, 1), new Vector2D(1, 1)}};
 
     // Enums
 
@@ -302,7 +294,7 @@ public class TMTypes {
 
         /* custom loading info from json */
 
-        public void loadBoard(GridBoard board, HashSet<TMMapTile> extraTiles, HashSet<Bonus> bonuses,
+        public void loadBoard(SparseGrid<HexCoord, TMMapTile> board, java.util.List<TMMapTile> extraTiles, HashSet<Bonus> bonuses,
                               HashSet<Milestone> milestones, HashSet<Award> awards, HashMap<GlobalParameter, games.terraformingmars.components.GlobalParameter> globalParameters) {
             JSONParser jsonParser = new JSONParser();
             try (FileReader reader = new FileReader(getBoardPath())) {
@@ -316,7 +308,7 @@ public class TMTypes {
                         JSONArray row = (JSONArray) g;
                         int x = 0;
                         for (Object o1 : row) {
-                            board.setElement(x, y, parseMapTile((String) o1, x, y));
+                            board.set(HexCoord.fromOffset(x, y, HexCoord.Offset.ODD_R), parseMapTile((String) o1, x, y));
                             x++;
                         }
                         y++;

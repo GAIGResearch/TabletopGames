@@ -2,9 +2,9 @@ package games.ventlife.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.components.Creature;
-import games.ventlife.components.Hex;
 
 import java.util.Objects;
 
@@ -14,10 +14,10 @@ import java.util.Objects;
 public class Displace extends AbstractAction {
 
     public final Creature creature;
-    public final Hex from;
-    public final Hex to;
+    public final HexCoord from;
+    public final HexCoord to;
 
-    public Displace(Creature creature, Hex from, Hex to) {
+    public Displace(Creature creature, HexCoord from, HexCoord to) {
         this.creature = creature;
         this.from = from;
         this.to = to;

@@ -2,9 +2,9 @@ package games.ventlife.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.grid.HexCoord;
 import games.ventlife.VentlifeGameState;
 import games.ventlife.components.Creature;
-import games.ventlife.components.Hex;
 import games.ventlife.components.Species;
 
 import java.util.Objects;
@@ -16,10 +16,10 @@ import java.util.Objects;
 public class PlaceCreature extends AbstractAction {
 
     public final Species species;
-    public final Hex hex;
+    public final HexCoord hex;
     public final int count;
 
-    public PlaceCreature(Species species, Hex hex, int count) {
+    public PlaceCreature(Species species, HexCoord hex, int count) {
         this.species = species;
         this.hex = hex;
         this.count = count;

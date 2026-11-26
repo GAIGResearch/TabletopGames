@@ -54,9 +54,9 @@ public class DeepMove extends AbstractAction implements IExtendedSequence {
 
     public Piece getPiece(StrategoGameState gs) {
         if (position == null) {
-            return (Piece) gs.getComponentById(pieceID);
+            return gs.getPiece(pieceID);
         } else {
-            return (Piece) gs.getGridBoard().getElement(position);
+            return gs.getPiece(position);
         }
     }
 

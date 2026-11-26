@@ -1,5 +1,6 @@
 package games.ventlife.features;
 
+import core.components.grid.HexCoord;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
@@ -43,7 +44,7 @@ public class VentlifeActionFeatures implements IActionFeatureVector {
         VentlifeGameState state = (VentlifeGameState) gs;
         Object[] retValue = {null, 0, false, null, 0, 0, 0, 0, 0, false};
 
-        Hex target = null;
+        HexCoord target = null;
         Species species = null;
         switch (action) {
             case DraftSpecies d -> retValue[0] = ActionType.DRAFT;
@@ -62,7 +63,7 @@ public class VentlifeActionFeatures implements IActionFeatureVector {
                 retValue[0] = state.getCell(t.smoker) == null ? ActionType.TILE_SEAFLOOR : ActionType.TILE_PLATEAU;
                 retValue[1] = state.getLevel(t.smoker) + 1;
                 int own = 0, opp = 0;
-                for (Hex h : VentlifeUtils.tileHexes(t.smoker, t.orientation)) {
+                for (HexCoord h : VentlifeUtils.tileHexes(t.smoker, t.orientation)) {
                     Creature c = state.getCreature(h);
                     // Tube Worms under the new Black Smoker climb onto it rather than being covered
                     if (c == null || (h.equals(t.smoker) && c.species() == Species.TUBE_WORM))
@@ -83,7 +84,7 @@ public class VentlifeActionFeatures implements IActionFeatureVector {
             retValue[2] = state.isEdge(target);
             retValue[3] = state.getCell(target).terrain();
             int own = 0, opp = 0, empty = 0;
-            for (Hex n : target.neighbours()) {
+            for (HexCoord n : target.neighbours()) {
                 Creature c = state.getCreature(n);
                 if (c == null) {
                     if (state.isEmptyHex(n))

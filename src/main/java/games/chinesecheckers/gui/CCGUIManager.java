@@ -26,7 +26,7 @@ public class CCGUIManager extends AbstractGUIManager {
         view = new CCGraphView(gameState.getStarBoard());
 
         this.width = 1000;
-        this.height = 450;
+        this.height = CCGraphView.HEIGHT;
 
         JPanel infoPanel = createGameStateInfoPanel("ChineseCheckers", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
@@ -68,5 +68,8 @@ public class CCGUIManager extends AbstractGUIManager {
      */
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+        // a new game makes a new board
+        view.updateComponent(((CCGameState) gameState).getStarBoard());
+        view.repaint();
     }
 }
