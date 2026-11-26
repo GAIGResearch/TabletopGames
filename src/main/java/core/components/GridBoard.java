@@ -308,7 +308,6 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     private void loadRow(JSONArray row, int y) {
         int x = 0;
         for (Object o : row) {
-            // TODO FIX THIS
             if (o instanceof String name)
                 setElement(x, y, new BoardNode(-1, name));
             else

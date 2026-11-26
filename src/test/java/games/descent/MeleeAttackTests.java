@@ -349,14 +349,12 @@ public class MeleeAttackTests {
         Monster attacker = state.getMonsters().get(1).get(0);
         Figure victim = state.getActingFigure();
 
-        Vector2D attackerPos = new Vector2D(4, 3);
-        Vector2D victimPos = new Vector2D(5, 4);
-        attacker.setPosition(attackerPos);
-        victim.setPosition(victimPos);
         ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
 
+        // positioned once the heroes have taken their turns, which move them
         advanceToMonsterAction(attacker);
-        assertEquals(state.getActingFigure(), attacker);
+        attacker.setPosition(new Vector2D(4, 3));
+        victim.setPosition(new Vector2D(5, 4));
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertFalse(actions.stream().noneMatch(a -> a instanceof TriggerAttributeTest));
 
@@ -414,21 +412,33 @@ public class MeleeAttackTests {
         }
     }
 
+    /**
+     * Takes the first action until the HowlTest at the top of the action stack is resolved
+     */
+    private void resolveHowlTest() {
+        // Howl moves on to the next hero as soon as the test starts, but the test can still be interrupted, for
+        // example by a reroll that the hero's equipment allows
+        int loopCount = 0;
+        do {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+            loopCount++;
+            if (loopCount > 100) {
+                fail("Looped too many times waiting for the Howl test to resolve");
+            }
+        } while (state.currentActionInProgress() instanceof HowlTest);
+    }
+
     @Test
     public void howlWithTwoVictims() {
         Monster attacker = state.getMonsters().get(1).get(0);
         Figure victim1 = state.getHeroes().get(0);
         Figure victim2 = state.getHeroes().get(1);
 
-        Vector2D attackerPos = new Vector2D(4, 3);
-        Vector2D victim1Pos = new Vector2D(5, 4);
-        Vector2D victim2Pos = new Vector2D(4, 4);
-        attacker.setPosition(attackerPos);
-        victim1.setPosition(victim1Pos);
-        victim2.setPosition(victim2Pos);
-
+        // positioned once the heroes have taken their turns, which move them
         advanceToMonsterAction(attacker);
-        assertEquals(state.getActingFigure(), attacker);
+        attacker.setPosition(new Vector2D(4, 3));
+        victim1.setPosition(new Vector2D(5, 4));
+        victim2.setPosition(new Vector2D(4, 4));
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertTrue(actions.stream().anyMatch(a -> a instanceof TriggerAttributeTest));
         TriggerAttributeTest howl = (TriggerAttributeTest) actions.stream().filter(a -> a instanceof TriggerAttributeTest).findFirst().orElseThrow();
@@ -442,18 +452,14 @@ public class MeleeAttackTests {
         actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());
         assertTrue(actions.get(0) instanceof HowlTest);
-        do {
-            fm.next(state, actions.get(0));
-            actions = fm.computeAvailableActions(state);
-        } while (howl.currentTarget() == victim1.getComponentID());
+        resolveHowlTest();
+        actions = fm.computeAvailableActions(state);
         assertEquals(victim2.getOwnerId(), state.getCurrentPlayer());
         assertEquals(victim2.getComponentID(), howl.currentTarget());
         assertEquals(1, actions.size());
         assertTrue(actions.get(0) instanceof HowlTest);
-        do {
-            fm.next(state, actions.get(0));
-            actions = fm.computeAvailableActions(state);
-        } while (howl.currentTarget() == victim2.getComponentID());
+        resolveHowlTest();
+        actions = fm.computeAvailableActions(state);
         assertFalse(state.isActionInProgress());
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(attacker, state.getActingFigure());

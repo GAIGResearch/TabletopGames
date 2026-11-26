@@ -8,9 +8,6 @@ import core.components.GridBoard;
 
 import java.util.Objects;
 
-/**
- * Puts a BoardNode at (x, y) on a GridBoard.
- */
 public class SetGridValueAction extends AbstractAction implements IPrintable {
 
     private final int gridBoard;
