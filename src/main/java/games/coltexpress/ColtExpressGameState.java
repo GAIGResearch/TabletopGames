@@ -217,14 +217,15 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
             // Round cards are hidden for subsequent rounds, randomize those
             // We exclude any visible RoundCard
+            ColtExpressParameters params = (ColtExpressParameters) getGameParameters();
             List<RoundCard> exclusionList = copy.rounds.getVisibleComponents(playerId).stream()
                     .filter(Objects::nonNull).collect(toList());
             for (int i = 0; i < rounds.getSize(); i++) {
                 if (!rounds.isVisibleTo(i, playerId)) {
                     if (i == rounds.getSize() - 1) { // last card, so use an End Round Card
-                        copy.rounds.setComponent(i, randomEndRoundCard((ColtExpressParameters) getGameParameters(), null));
+                        copy.rounds.setComponent(i, randomEndRoundCard(params, redeterminisationRnd));
                     } else {
-                        copy.rounds.setComponent(i, getRandomRoundCard((ColtExpressParameters) getGameParameters(), i, exclusionList));
+                        copy.rounds.setComponent(i, getRandomRoundCard(params, exclusionList, redeterminisationRnd));
                         exclusionList.add(copy.rounds.get(i));
                     }
                 }
@@ -517,12 +518,12 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return null;
     }
 
-    private RoundCard getRandomRoundCard(ColtExpressParameters cep, int i, List<RoundCard> exclusionList) {
+    private RoundCard getRandomRoundCard(ColtExpressParameters cep, List<RoundCard> exclusionList, Random rng) {
         List<String> namesToExclude = exclusionList.stream().map(RoundCard::getComponentName).collect(toList());
         List<ColtExpressTypes.RegularRoundCard> availableTypes = Arrays.stream(cep.roundCards)
                 .filter(rc -> !namesToExclude.contains(rc.name())).collect(toList());
         int nRoundCards = availableTypes.size();
-        int choice = rnd.nextInt(nRoundCards);
+        int choice = rng.nextInt(nRoundCards);
         return getRoundCard(availableTypes.get(choice), getNPlayers());
     }
 
