@@ -113,7 +113,7 @@ public class MonopolyDealGameState extends AbstractGameState {
             }
         }
         if(playerId != -1 && getCoreGameParameters().partialObservable) {
-            retValue.drawPile.shuffle(rnd);
+            retValue.drawPile.shuffle(redeterminisationRnd);
             // Redrawing hidden cards into hands
             for (int p = 0; p < getNPlayers(); p++) {
                 if (p != playerId) {
